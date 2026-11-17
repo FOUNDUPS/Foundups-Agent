@@ -39,7 +39,8 @@ The gate accepts `agent_db.db.get_connection`; it does not create a second memor
 database. The continuity tests execute the unchanged DatabaseManager wrapper
 against temporary SQLite databases; the actual PC binding is not verified.
 Only `reddog_public_budget_v1`, `reddog_public_session_v1`, and the content-free
-`reddog_lick_open_v1` challenge/profile binding are owned.
+`reddog_lick_open_v1` challenge/profile binding, plus
+`reddog_public_host_lease_v1` process leases are owned.
 No conversation text, raw address, media, private memory, or raw session bearer
 is stored. SQLite is the supported accounting backend for this slice; other
 backends must fail closed until independently implemented and verified.
@@ -85,9 +86,42 @@ object replacement and session rotation. Daily counters are retained until
 cleanup after the following UTC day; they are not conversation memory.
 
 A timed-out or cancelled provider keeps its busy slot until it actually finishes.
-An uncooperative provider cannot create unlimited replacement calls. Orphaned
-reservations after a process crash intentionally fail closed; the next slice
-must prove host-owned recovery rather than clearing them optimistically.
+An uncooperative provider keeps its reservation during the admitted host lease.
+After a process crash, only the trusted recovery path below may reclaim an
+owned reservation. Guest status never clears it.
+
+### Public-host lease and recovery contract
+
+`PublicSessionGate(connection_factory, policy=None, host_owner=None)` accepts a
+fresh random 64-hex owner for each host process. `register_host(now=...)` admits
+it once; `renew_host(now=...)` extends only a still-live 60-second lease.
+Both return the lease expiry. Only SHA-256 owner hashes persist, including
+expired tombstones that prevent reuse. Migration adds nullable `busy_owner` to
+the existing session table and preserves Lick, nonce, revision and budgets.
+Deployment must serialize initial schema migration before starting host workers.
+
+Configured gates require a live lease for encounter, Lick/challenge, status,
+turn, completion and withdrawal; expired owners cannot deliver responses.
+`finish_turn` matches the exact reservation and its owner, including legacy
+ownerless reservations. HTTP binding rejects an ownerless gate.
+
+`reclaim_orphaned_turns(now=...)` requires a configured live replacement host
+and returns the number of reclaimed reservations. It clears only `busy` and
+`busy_owner` whose recorded owner has a known expired lease. Live owners,
+legacy ownerless reservations and missing lease records remain fail closed.
+Recovery never replays inference, refunds counters, resets nonce/revision,
+renews session expiry, or invalidates a completed Lick challenge.
+
+**Activation precondition:** lease expiry fences database operations; it does
+not prove process death or upstream provider termination. The future resident
+supervisor must fence the old worker and its provider work before calling
+recovery. Startup/heartbeat/shutdown integration and that termination proof
+remain unimplemented; this source slice does not mount the router.
+
+The Python/AgentDB boundary is the current public-session reference contract.
+A future edge/D1 implementation must prove parity for nonce, revision, quota,
+concurrency, Lick and recovery rather than become a second session authority.
+PR #1648 remains a separate reconciliation concern, not part of this repair.
 
 ### Guest status and lost-response recovery
 
@@ -152,7 +186,7 @@ explicit budget; a public knowledge answer cannot select it.
 ## Host and client activation gates
 
 The existing host must explicitly supply `PublicSurfaceBinding`: persistent
-AgentDB accounting, a reviewed public-only responder, a deployment-owned secret
+lease-backed AgentDB accounting, a reviewed public-only responder, a deployment-owned secret
 for pseudonymous peer accounting, and a trustworthy clock. Without that binding,
 the router returns 503 and never falls back to private OpenClaw or a browser key.
 No such binding or network listener is installed by these files.
@@ -175,12 +209,17 @@ contracts before design. Classification: one bounded implementation layer, no
 live worker dispatch. WSP_15 planning scores C=4, I=5, D=4, Impact=5: 18/P0;
 this planning assessment is **not** an authenticated allocation receipt.
 
-This environment had no checkout or resident owner. The WSP_00 and Holo owner
+The initial 2026-09-08 environment had no checkout or resident owner. The WSP_00 and Holo owner
 commands failed with missing script files; Git clone also failed at DNS, and
 HoloIndex connector discovery returned no service. This is an environment
 availability limitation, not evidence of a Holo source defect. Exact-commit
 GitHub retrieval was the fallback. No Holo freshness, bootstrap success, RSI
 promotion, full-repository test pass, or PC working-tree state is asserted.
+
+The 2026-10-06 source reconciliation ran in an isolated PC worktree and passed
+WSP00; its Holo owner query returned an authority-root/head mismatch. See the
+[current audit](../../../docs/audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md)
+for exact-base source/CI and owned-lane evidence. This is not a live Holo proof.
 
 Retain this retrieval regression case for the remote owner:
 

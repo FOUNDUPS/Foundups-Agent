@@ -2,7 +2,7 @@
 
 Status: `NON_BIOMETRIC_POC_IMPLEMENTED_NOT_DEPLOYED`; continuous presence, mutual verification, and live-media binding are `SPECIFIED_NOT_IMPLEMENTED`
 
-Evaluated expansion: 2026-09-13 (Asia/Tokyo). See the
+Evaluated expansion: 2026-09-13 (Asia/Tokyo); reconciled 2026-11-17. See the
 [continuous Lick audit](../../../docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md)
 for code evidence, corrections to the Gemini proposal, and unresolved risks.
 
@@ -92,9 +92,11 @@ result affects access, signing, wallet control, publishing, or work authority.
 ## Core records (broader design, not the current wire contract)
 
 The examples below describe proposed fields. The implemented `*.v1` payloads
-are owned by `reddog_public_policy.py`; they use a different, bounded shape.
-Do not send these examples to the existing public endpoints or silently extend
-their strict input schemas. Any future transport needs an explicit version.
+are owned by `reddog_public_policy.py`; they currently return
+`identity_verified: false`, `human_presence_proven: false`, `signed: false`,
+and `authority_granted: "none"`. Do not send these examples to the existing public
+endpoints or silently extend their strict input schemas. Any future transport
+needs an explicit version.
 
 ### `EncounterProfile`
 
@@ -220,10 +222,12 @@ acceptance, enrollment, recipient-scoped proofs, Liberty routing, publishing
 and optional model-membership capabilities. Membership may enable an evaluated
 model or service; it never increases verification assurance or action authority.
 
-The first AutoPost code slice in PR 12 only prevents stale provisional capture
+The first AutoPost code slice in PR 12 prevents stale provisional capture
 references: conservative local expiry, background/offline invalidation,
-late-response cancellation and capture-time revalidation. It remains unmerged,
-undeployed and non-biometric. Video references identify the completion encounter,
+late-response cancellation and capture-time revalidation. PR 12 merged on
+2026-10-18 at `3c0fc19d40e225ed7f826541a33c38293f9fe664` (reconciled
+2026-11-17), while remaining undeployed, non-biometric, and without real-phone
+or live-host acceptance. Video references identify the completion encounter,
 not continuous verification across the recording. Track/participant recognition,
 passkey enrollment, server-side authentication, peer proofs and received-media
 verification remain follow-on gates. Physical-phone model completion and
@@ -232,7 +236,7 @@ approved provider delivery require actual device evidence.
 A future peer policy may allow unverified communication, require account
 authentication, or require separately evaluated live-human evidence. Each must
 name the evidence accepted and show missing/expired evidence without silent
-downgrade. Passkey user verification may use a PIN or a biometric; do not infer
+downgrade. Passkey holder verification may use a PIN or a biometric; do not infer
 that a particular face was checked. Lost-device recovery must revoke affected
 sessions and credential/delegation bindings, and require fresh evidence before
 restoring continuity. AutoPost controls its own protected surfaces, not arbitrary

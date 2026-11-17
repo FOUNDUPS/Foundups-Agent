@@ -521,11 +521,10 @@ def _is_relative_to(path: Path, parent: Path) -> bool:
     root = Path(
         os.path.normcase(str(_without_windows_extended_prefix(parent)))
     )
-    try:
-        candidate.relative_to(root)
-        return True
-    except ValueError:
-        return False
+    return candidate.is_relative_to(root) if os.name == "nt" else (
+        candidate.anchor == root.anchor
+        and candidate.parts[:len(root.parts)] == root.parts
+    )
 
 
 def _without_windows_extended_prefix(path: Path) -> Path:

@@ -1,5 +1,21 @@
 # AI Gateway Module Roadmap
 
+## YouTube consumer integration (2026-11-01)
+
+- Shared assessment/writer/review routing and exact source receipts are wired.
+- Free Gemma/Nemotron task candidates feed the existing evaluation/catalog owner.
+- Shadow Nemotron proposal, held-out benchmark, signed promotion and runtime
+  binding remain separate production gates; no candidate is auto-promoted.
+- Actual model quality, trusted production bindings and live daemon/public
+  behavior remain unverified by the offline consumer qualification.
+
+## Scientific repair verifier isolation (2026-11-16)
+
+- [x] Pure allowlist `VerifierContextFirewall.project_evidence_packet`,
+  immutable `VerifierEvidencePacket` SHA-256 digesting, `ModelIndependencePolicy`
+  anti-self-grading enforcement, and `IndependentVerifierReceipt` audit records
+  (Issue #1522; 5 offline contract tests in `test_independent_repair_verifier.py`).
+
 ## Current Status: [OK] MVP Complete
 - Basic fallback functionality implemented
 - Multi-provider support (OpenAI, Anthropic, Grok, Gemini)
@@ -7,6 +23,19 @@
 - Usage monitoring and statistics
 
 ## Dynamic RedDog Model Evidence
+
+### Historical local-worker evidence — 2026-10-08
+
+PR2111 source `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` recorded a panel
+probe with no prior-output forwarding, one rejected Qwen audit (0/1 accepted;
+3/4 facts correct;24.438s; unknown tokens) and catalog discovery368/99.
+The proposed metered single/layered/routed comparison was never executed.
+Its planning selection is superseded by the root October13 checkpoint; this
+archive does not reopen inference, routed admission or model promotion.
+See [historical evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08).
+
+- [x] Strict positive integer use-time clock;55 connected offline tests pass.
+  This does not satisfy the production trust-configuration item below.
 
 - [x] Exact OpenRouter Kimi K3 request-truth boundary: explicit/env/default
   resolution, 4,096 floor, 131,072 cap, mandatory maximum reasoning, no
@@ -153,3 +182,32 @@
 - **Week 2**: Performance prediction models
 - **Week 3**: Enterprise monitoring features
 - **Week 4**: Multi-step reasoning capabilities
+
+## Audio timing evaluation: offline layer
+
+- Local source-snapshot prototype: pure timing diagnostics, identity binding,
+  existing-harness verifier and shared attempt-count guard; validation receipt
+  remains separate from repository integration and production qualification.
+- Observed privately on 2026-11-15: two operator-authorized byte-input STT calls,
+  Qwen first then Parakeet, with the same excerpt and configured account cap
+  checked. Both returned genuine top-level word timestamps; the cumulative
+  two-request allowance is exhausted. The direct adapter is not shipped here.
+- Next transport layer: reuse endpoint-specific budget/admission/evidence owners
+  and preserve actual model/provider/generation ID, latency, timing provenance
+  and usage.cost where observable. Generic harness candidate sorting does not
+  guarantee Qwen-first order. Count guards never substitute for spend authority.
+- Independently evaluate singing/reference/audio alignment. No automatic model
+  promotion, RSI improvement or lip-sync readiness follows from this layer.
+
+Local qualification: 27 synthetic unittest cases passed after one independently reviewed test-oracle classification correction; both attempts are retained. No live model result or production acceptance follows.
+
+The separate live smoke observations are recorded in README.md and private
+receipts. Zero-duration words (Qwen 21, Parakeet 1) prevent inferring subtitle
+usability from structural validity. Qualified performed-word and timing
+references remain missing. No additional live comparisons are admitted here.
+
+Follow-on sequence: document community/ESM namespace boundaries under the
+existing video_comments and banter_engine owners, reconcile the semantic rubric,
+then independently review held-out synthetic comment cases before scoring.
+Unresolved labels stay unscored. Optional authored lyrics support text research,
+not independent timing truth or a requirement for manual production input.

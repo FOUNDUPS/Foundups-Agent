@@ -4,8 +4,17 @@
 
 ### main_menu.py
 - `run_main_menu()` - Entry point for interactive CLI
+- `_run_connect_wre()` - Reports CHECKED/PARTIAL and shared readiness state.
+  UNKNOWN evidence and checker errors never become READY; returning true means
+  READY/DEGRADED with a successful preflight, not a protected worker connection.
+  Root `main.run_connect_wre()` uses the same policy; its separate
+  `admission_allowed` field preserves the headless cold-start boundary.
 
 ### utilities.py
+- `console_input(prompt: str = "") -> str` - Main-menu input with temporary
+  calling-thread filters on existing stdout/stderr logging handlers. File sinks
+  and preexisting filters are preserved; EOF/KeyboardInterrupt propagate after
+  cleanup. This is a logging boundary, not capture of native or arbitrary output.
 - `env_truthy(name: str, default: str = "false") -> bool`
 - `env_flag(name: str, default_on: bool = True) -> bool`
 - `maybe_clear_screen() -> None`

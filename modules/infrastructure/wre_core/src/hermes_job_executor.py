@@ -2334,9 +2334,7 @@ No implementation exists. No production code was generated.
             return None
 
 
-# ---------------------------------------------------------------------------
 # Module-Level Convenience Functions
-# ---------------------------------------------------------------------------
 
 _executor_singleton: Optional[HermesJobExecutor] = None
 
@@ -2357,10 +2355,11 @@ def get_executor(
     return _executor_singleton
 
 
-def execute_foundup_job(job: "FoundUpJob") -> HermesDelegationResult:
-    """
-    Convenience function to execute FoundUpJob via Hermes.
-
-    Uses default singleton executor with dry_run=True.
-    """
-    return get_executor().execute(job)
+def execute_foundup_job(
+    job: "FoundUpJob", *, force_dry_run: bool = False
+) -> HermesDelegationResult:
+    """Use an isolated dry executor when forced; otherwise retain the singleton."""
+    if type(force_dry_run) is not bool:
+        raise TypeError("force_dry_run must be a boolean")
+    executor = HermesJobExecutor(dry_run=True) if force_dry_run else get_executor()
+    return executor.execute(job)

@@ -387,9 +387,9 @@ class ArchitectDeterminationReceipt:
     no_holoindex_reindex_performed: bool = True
 
     def to_dict(self) -> dict[str, Any]:
-        data = asdict(self)
-        data["queue_candidate"] = self.queue_candidate.to_dict() if self.queue_candidate else None
-        return data
+        return dict(asdict(self),
+                    proposal_admission=self.proposal_admission.to_dict() if self.proposal_admission else None,
+                    queue_candidate=self.queue_candidate.to_dict() if self.queue_candidate else None)
 
 
 @dataclass(frozen=True)

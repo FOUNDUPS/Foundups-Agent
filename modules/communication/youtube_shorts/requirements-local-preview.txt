@@ -1,0 +1,4 @@
+# Optional local Little Shrew authoring only; FFmpeg + system Cairo also required.
+CairoSVG==2.9.1
+Pillow>=10.0.0
+numpy>=1.26.0

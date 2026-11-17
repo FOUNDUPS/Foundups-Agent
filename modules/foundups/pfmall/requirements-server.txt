@@ -1,0 +1,6 @@
+# Optional real HTTP serving profile; no umbrella environment migration.
+# Minimal Uvicorn only: no dotenv, reload, WebSocket or native protocol extras.
+-r requirements.txt
+uvicorn==0.54.0
+h11==0.16.0
+click==8.5.0

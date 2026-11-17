@@ -95,6 +95,7 @@ class Improvement:
     applied: bool = False
     applied_at: Optional[str] = None
     rollback_available: bool = True
+    tokens_saved: Optional[int] = None
     metrics: Dict[str, Any] = field(default_factory=dict)
     
     def to_dict(self) -> Dict:

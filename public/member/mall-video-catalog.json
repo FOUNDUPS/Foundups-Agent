@@ -5358,7 +5358,8 @@
         "thumbnail_url": "https://i.ytimg.com/vi/pP804fq9ttE/hqdefault.jpg",
         "embed_url": "https://www.youtube.com/embed/pP804fq9ttE",
         "source_url": "https://www.youtube.com/watch?v=pP804fq9ttE",
-        "timestamp": "2026-04-13T10:27:22.774539Z"
+        "timestamp": "2026-04-13T10:27:22Z",
+        "duration_seconds": 0
       },
       {
         "video_id": "ZJqB_jeaPCQ",
@@ -5366,7 +5367,8 @@
         "thumbnail_url": "https://i.ytimg.com/vi/ZJqB_jeaPCQ/hqdefault.jpg",
         "embed_url": "https://www.youtube.com/embed/ZJqB_jeaPCQ",
         "source_url": "https://www.youtube.com/watch?v=ZJqB_jeaPCQ",
-        "timestamp": "2026-04-13T10:27:22.774539Z"
+        "timestamp": "2026-04-13T10:27:22Z",
+        "duration_seconds": 0
       }
     ],
     "creator_id": "012",
@@ -5374,7 +5376,8 @@
     "topic_family": "life",
     "related_lanes": [
       "undaodu",
-      "linkedin_012"
+      "linkedin_012",
+      "hpc"
     ],
     "display_order": 1,
     "tagline": "Expat life and FFCPLN activism from Fukui, Japan",
@@ -11258,7 +11261,7 @@
     "source_type": "external_app",
     "source_id": "FOUNDUPS/autopost",
     "source_handle": "autopost",
-    "external_url": "https://autopost.foundups.com",
+    "external_url": "https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/",
     "category": "media",
     "tags": [
       "012-lane",
@@ -11336,6 +11339,7 @@
     "source_type": "internal_app",
     "category": "marketplace",
     "tags": [
+      "012-lane",
       "marketplace",
       "peer-to-peer",
       "selling",
@@ -11358,7 +11362,10 @@
     "token_symbol": "JUNK",
     "poster_url": "/media/posters/gotjunk.jpg",
     "video_count": 0,
-    "videos": []
+    "videos": [],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "external_url": "https://gotjunk-56566376153.us-west1.run.app/"
   },
   {
     "foundup_id": "holoindex_prod_01",
@@ -11389,9 +11396,9 @@
     ],
     "tagline": "System Knowledge Retrieval",
     "description": "Enterprise-grade artifact and memory retrieval system for the p.fMALL shell.",
-    "tier": "INFRA",
+    "tier": "F3_INFRA",
     "lifecycle_stage": "incubating",
-    "launch_readiness": "discoverable_only",
+    "launch_readiness": "conditional",
     "routing_prefix": "/f/holoindex_prod_01",
     "data_namespace": "idb_holoindex_prod_01",
     "token_symbol": "HOLO",
@@ -11399,6 +11406,85 @@
     "video_count": 0,
     "videos": [],
     "entry_url": "",
-    "entry_copy": "HoloIndex is discoverable but remains in explicit stub mode until the backend relay clears."
+    "entry_copy": "HoloIndex connective retrieval surface is bound in conditional mode while live backend relay conditions clear."
+  },
+  {
+    "foundup_id": "esingularity_001",
+    "title": "eSingularity.ai",
+    "name": "eSingularity.ai",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "entity": "eSingularity",
+    "source_type": "external_app",
+    "source_id": "modules/foundups/esingularity",
+    "source_handle": "esingularity",
+    "external_url": "https://esingularity.ai/",
+    "category": "community",
+    "tags": [
+      "012-lane",
+      "ai-infrastructure",
+      "community",
+      "esingularity",
+      "fukui",
+      "onsen",
+      "yumori"
+    ],
+    "topic_family": "startup",
+    "geo": "Fukui, Japan",
+    "status": "active",
+    "display_order": 14,
+    "related_lanes": [
+      "eduit",
+      "linkedin_esingularity",
+      "move2japan"
+    ],
+    "tagline": "温泉を守る。福井のAIの未来をつくる。",
+    "description": "Regional AI infrastructure FoundUp for Fukui: AI Koban, three-site feasibility, Japan Hyperscaler Report research, and the YUMORI public-asset/community-reuse program.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "proto",
+    "launch_readiness": "ready",
+    "routing_prefix": "/f/esingularity_001",
+    "data_namespace": "idb_esingularity_001",
+    "poster_url": "/media/posters/esingularity.jpg",
+    "video_count": 0,
+    "videos": []
+  },
+  {
+    "foundup_id": "hpc",
+    "title": "Hasan Piker Coalition",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "entity": "Hasan Piker Coalition",
+    "source_type": "derived",
+    "source_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+    "source_handle": "@MOVE2JAPAN",
+    "parent_channels": [
+      "move2japan"
+    ],
+    "derivation_method": "manual_curation",
+    "category": "media",
+    "tags": [
+      "012-lane",
+      "political-media",
+      "schumerout"
+    ],
+    "topic_family": "media",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 101,
+    "related_lanes": [
+      "move2japan"
+    ],
+    "tagline": "Independent political commentary and satire",
+    "description": "A curated political-media FoundUp starting with the SchumerOUT collection of Move2Japan Shorts.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "poster_url": "https://i.ytimg.com/vi/iJuguXpbRR4/oardefault.jpg",
+    "video_count": 0,
+    "videos": [],
+    "public_poc_url": "https://hpc.foundups.com/"
   }
 ]

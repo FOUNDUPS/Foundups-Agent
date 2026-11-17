@@ -47,10 +47,10 @@ export default function FuturePage() {
         <section className="growth section" aria-labelledby="growth-title">
           <p className="eyebrow"><span /> START SMALL · GROW WITH DEMAND</p>
           <h2 id="growth-title">小さく始める。<br /><em>必要な分だけ育てる。</em></h2>
-          <p className="growth-lead">最初から巨大施設を約束しません。まず約1 MWを検討単位として、需要、工学、経済性、熱利用を確かめます。実際の利用が成長を正当化するときだけ、次の段階を検討します。</p>
+          <p className="growth-lead">最初から容量を決めて建てません。顧客・地域の実需要、売上条件、設備仕様、電力・通信・建物条件から必要な計算資源と施設負荷を逆算します。実際の利用が成長を正当化するときだけ、次の段階を検討します。</p>
           <details className="growth-details">
             <summary>詳しく見る <span>段階的な検証</span></summary>
-            <ol><li><span>01</span><strong>需要を確認</strong><p>学生、FoundUps、研究、地域プロジェクトが何を使うかを具体化します。</p></li><li><span>02</span><strong>工学を確認</strong><p>電力、通信、冷却、安全、別棟配置、回収熱の温度と距離を調べます。</p></li><li><span>03</span><strong>経済性を確認</strong><p>設備費、運営費、利用契約、熱利用の価値を実測・見積もりで比べます。</p></li><li><span>04</span><strong>約1 MWから</strong><p>契約・許認可済み容量ではなく、最初の検証規模です。</p></li><li><span>NEXT</span><strong>利用が育った時だけ</strong><p>電力、許認可、資金、土地、需要、地域合意がそろってから拡張を判断します。</p></li></ol>
+            <ol><li><span>01</span><strong>需要を確認</strong><p>学生、FoundUps、研究、地域プロジェクトが何を使うかを具体化します。</p></li><li><span>02</span><strong>工学を確認</strong><p>電力、通信、冷却、安全、別棟配置、回収熱の温度と距離を調べます。</p></li><li><span>03</span><strong>経済性を確認</strong><p>設備費、運営費、利用契約、熱利用の価値を実測・見積もりで比べます。</p></li><li><span>04</span><strong>必要量だけ導入</strong><p>契約需要から必要な計算資源と受電量を算出し、成立する最小規模から導入します。</p></li><li><span>NEXT</span><strong>利用が育った時だけ</strong><p>電力、許認可、資金、土地、需要、地域合意がそろってから拡張を判断します。</p></li></ol>
             <p className="growth-caveat">容量、時期、費用、熱利用、収益は未確定です。調査と関係者合意なしに建設を約束しません。</p>
           </details>
         </section>

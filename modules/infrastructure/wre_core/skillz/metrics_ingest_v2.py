@@ -207,7 +207,7 @@ class MetricsIngestorV2:
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_performance_timestamp ON performance_metrics(timestamp)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_promotion_skill ON promotion_events(skill_id)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_rollback_skill ON rollback_events(skill_id)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_approval_skill ON human_approvals(skill_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_approval_skill ON ai_0102_approvals(skill_id)")
 
         self.conn.commit()
         logger.info(f"[METRICS-DB-V2] Schema ensured: {self.sqlite_path}")

@@ -97,7 +97,10 @@ proposal ceiling without the existing authenticated authority path.
   and [media identity module](https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/modules/identity/foundupsAuthorIdentity.ts).
 - Open [host recovery #1641](https://github.com/FOUNDUPS/Foundups-Agent/pull/1641)
   and [runtime reconciliation #1680](https://github.com/FOUNDUPS/Foundups-Agent/pull/1680):
-  read as pending work, not runtime evidence. Recheck before implementing.
+  read as pending work at the 2026-09-13 baseline, not runtime evidence.
+  **2026-11-17 reconciliation:** both #1641 and #1680 were closed unmerged on
+  2026-10-06 (see [host-recovery reconciliation](REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md));
+  the dated 2026-09-13 findings above remain preserved as historical baseline evidence.
 
 ## Threat model and practical tests
 
@@ -149,7 +152,7 @@ Read on 2026-09-13 JST; these are design anchors, not a conformance certificatio
   defenses, and session lifecycle. Design inference: test the capture path
   separately from key possession and do not promote risk hints to authenticators.
 - [W3C WebAuthn Level 3](https://www.w3.org/TR/webauthn-3/)
-  distinguishes user presence from user verification and scopes credentials to
+  distinguishes participant presence from participant verification and scopes credentials to
   relying parties. Design inference: a passkey ceremony does not prove who
   appears in a stream or provide arbitrary continuous media signing.
 - [C2PA 2.4, Live Video](https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html)

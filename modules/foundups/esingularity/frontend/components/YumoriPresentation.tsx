@@ -54,11 +54,14 @@ export default function YumoriPresentation() {
   }, []);
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const requested = Number(url.searchParams.get('slide'));
-    if (Number.isInteger(requested) && requested >= 1 && requested <= slides.length) setActive(requested - 1);
-    if (url.searchParams.get('vision') === '1') setFullscreen(true);
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setPlaying(false);
+    const frame = window.requestAnimationFrame(() => {
+      const url = new URL(window.location.href);
+      const requested = Number(url.searchParams.get('slide'));
+      if (Number.isInteger(requested) && requested >= 1 && requested <= slides.length) setActive(requested - 1);
+      if (url.searchParams.get('vision') === '1') setFullscreen(true);
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) setPlaying(false);
+    });
+    return () => window.cancelAnimationFrame(frame);
   }, [slides.length]);
 
   useEffect(() => {

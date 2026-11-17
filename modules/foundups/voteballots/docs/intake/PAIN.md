@@ -1,7 +1,7 @@
 # Vote/Ballots - Pain Definition
 
 ## Primary Pain Point
-A voter must currently reconstruct civic truth across fragmented systems: candidate records, campaign-finance filings, attack-ad sponsors, public statements, election administration, registration status, and platform-driven political content. The information exists in pieces, but the user has no single evidence-first interface that shows what is verified, what is inferred, what remains unknown, and what action requires authenticated participation.
+A voter must currently reconstruct civic truth across fragmented systems: candidate records, campaign-finance filings, attack-ad sponsors, public statements and their factual accuracy, election administration, registration status, and platform-driven political content. The information exists in pieces, but the user has no single evidence-first interface that shows what is verified, what is inferred, what remains unknown, and what action requires authenticated participation.
 
 ## Pain Areas
 
@@ -23,6 +23,23 @@ There is a large gap between ordinary opinion polling and certified public-elect
 ### 6. Duplicate infrastructure risk
 The ecosystem already contains Vote funding logic, pfMALL routes, AutoPost capture research, GotJunk map/geolocation, Liberty Alert mesh/alert primitives, and blockchain/governance work. Building new Vote-specific versions without retrieval/audit would create duplicated infrastructure and violate the reuse-first FoundUps model.
 
+### 7. Claims travel faster than their evidence
+A listener needs to move from a specific political statement to the relevant primary evidence without losing the quote, date, denominator, jurisdiction, or context. A verdict alone does not explain whether the cited study was applicable, the funding was disclosed, the sources were independent, or the assessment can be corrected.
+
+The proposed Bullshit Meter also addresses the verifier's own failure modes: selective corpus choice, opaque scoring, repeated copies of one source, confident interpretation of uncertain transcripts, and confusion between an unsupported claim and a false claim. The product need is an inspectable evidence and correction path, not automatic certainty.
+
+## Obstacles to Implementing the Solution
+The adoption pain above remains. The Outcome -> Solution -> Pain framing also requires the barriers between the proposed solution and its outcome:
+
+- **Data and access**: live FEC integration is unfinished; transcripts, datasets and methodology documents need source-specific access, versions and licensing decisions.
+- **Verification quality**: transcript ambiguity, temporal/context mismatch, incomplete funding trails, correlated sources and uncalibrated scores must be handled before reliable public assessments.
+- **Reuse and integration**: storage, transcript/ASR, search, extension/media and review/correction owners require current-code discovery. Candidate skill names do not establish a working executor.
+- **Product readiness**: public Vote activation, manifest/registry label reconciliation and verification of the current pfMALL gate remain open dependencies.
+- **Evaluation and operation**: the ten-speech corpus, independent review, score coverage/calibration, corrections and separate ASR/research latency measurements have not been completed.
+- **MVP definition**: audience, minimum supported release, acceptance criteria and operating ownership remain unspecified.
+
+These are implementation constraints, not new user-research findings. See [Solution stages](SOLUTION.md) and [the feature evaluation plan](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md).
+
 ## Pain Severity
 - Frequency: recurring during election cycles; continuous for political-media discovery and funding transparency
 - Impact: high when evidence, eligibility status, or access conditions are unclear
@@ -30,11 +47,15 @@ The ecosystem already contains Vote funding logic, pfMALL routes, AutoPost captu
 
 ## Target User
 - Public visitor seeking fast candidate/funding truth
+- Listener checking factual claims in political speeches, debates, ads, or public posts
 - Voter seeking deeper evidence and official-source status assurance
 - Authenticated participant testing non-binding preference signaling
 - Later FoundUp SmartDAO participant using shared governance-verification primitives
 
 ## Pain Evidence
+### 2026-10-30 feature intake evidence
+012 supplied the [Political Claim Verification and Scoring Engine specification](CLAIM_VERIFICATION_SOURCE_20261030.md) and requested integration into Vote's Outcome, Solution, Pain, and roadmap. This is a product requirement and hypothesis, not evidence from completed user research or a ten-speech evaluation. The [integrated design](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) records methodology sources and the necessary scoring qualifications.
+
 ### Repository evidence
 - Vote PoC funding/evidence chain: implementation-complete 6/6 slices, but not publicly launched.
 - FoundUp registry lists `voteballots`, while public Mall catalog/portfolio projection do not currently list it.

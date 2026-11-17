@@ -9,6 +9,75 @@ Tests follow the 8-layer architecture — each layer tested independently before
 | `test_schemas.py` | 0 | Enum values, dataclass serialization round-trips, deterministic IDs |
 | Integration tests | 0-7 | Run via manual scripts (pytest has eth_typing conflict on Windows) |
 
+## Focused event-store regressions — 2026-09-22
+
+The nine `test_event_store_*` functions in `test_dae_observer.py` use disposable
+SQLite/JSONL storage and a fail-fast wrapper around a real Lock. They cover collision
+recovery, retry budgets0–4, unrelated SQLite/unique errors, duplicate no-op, lock
+release and preserved write order. Partial-write/parity failure remains an expected
+limitation, not a repaired contract. No daemon or live service is started by these cases.
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -B -m pytest modules/infrastructure/dae_daemon/tests/test_dae_observer.py -k test_event_store_ -q -o addopts= -p no:cacheprovider
+```
+
+Result:9passed,3deselected, two plugin-configuration warnings. Existing observer
+tests are deliberately outside this bounded run. Candidate production-lock process
+replay is not claimed; broader witness review was blocked by automatic screening.
+Full crash recovery, concurrent writers and registry acknowledgment need separate qualification.
+
+## Persistence characterization — 2026-09-22
+
+Seven additional cases in the same test file cover six boundaries: append failure, partial-write
+reopen/retry, post-commit error, conflicting dedupe input, false-positive count
+parity, and returned/raised storage failure with inert emergency spies. Run these
+with the nine retry regressions using the exact selection recorded in TestModLog.
+Result:16passed,3deselected locally and independently (overlapping cases).
+
+These are current-behavior characterizations, not acceptance of the defects as a
+future contract. Keep fault inputs fixed when proposing a repair, independently
+review its stronger oracle, and retain the historical result. No daemon is started,
+no real kill action occurs, and WRE/FAM comparisons are static only.
+
+## Broker import-streak regressions — 2026-09-22
+
+Select `-k test_import_streak_` in `test_dae_launch_broker.py` for the bounded
+regressions: 13 passed locally and independently (the same cases), after
+9 failed/4 passed on unchanged source. That revision retained the three lifecycle
+tests unchanged and deselected them because they start real daemon threads.
+
+Fixtures use inert registry/handles and finite callables. They cover thresholds,
+per-DAE recovery, re-enable, downstream exceptions, admission and final bookkeeping.
+Use disabled plugin autoload, Python `-I -B -m pytest`, `-o addopts=`,
+`-p no:cacheprovider` and a fresh external `--basetemp`. This proves the bounded
+state transition, not live restart safety, durable monitoring or retained RSI.
+
+## Broker stop regressions — 2026-09-22
+
+In `test_dae_launch_broker.py`, select `-k "test_import_streak_ or test_stop_ack_"`.
+The unchanged import cases and new inert stop cases total51; the same cases pass
+locally and independently after baseline25failed/26passed. Three
+threaded lifecycle cases remain deselected. The existing threaded stop assertion
+now accepts a successful pending request or observed completion; that legacy case
+was not executed in this bounded qualification.
+
+Use disabled plugin autoload, `python -I -B -m pytest`, `-o addopts=`,
+`-p no:cacheprovider`, and a fresh external `--basetemp` per run. Fixed acceptance
+covers handle ownership, hook identity, pending/completed/error paths and callback
+replacement. No live service, provider or production database is used.
+
+## Observer runtime lookup regressions — 2026-09-22
+
+Extend `test_dae_observer.py`; select `-k test_observer_runtime_` for eight
+fixed cases. Baseline4fail/4pass; repaired and independent8pass on identical frozen cases;19 original cases unchanged and not selected.
+The absent-owner case records attempted creation even when the existing observer
+swallows exceptions. Other cases cover status/error projection, lock release,
+current singleton replacement and compatibility of the explicit creating getter.
+Use the reviewed runner referenced by the canonical backlog: disabled plugin
+autoload, isolated Python (`-I -B`), fresh external temp, no pytest cache.
+These ordinary unit tests do not establish OS confinement or live runtime readiness.
+
 ## Running Tests
 
 ```bash

@@ -178,14 +178,23 @@ class LMStudioBackend(LocalLLMBackend):
         request_timeout: float = 30.0,
         expected_instance_id: str | None = None,
         api_token: str | None = None,
+        max_retries: int | None = None,
+        pre_dispatch_check=None,
     ):
         self.model_id = model_id
         self.base_url = base_url or self.DEFAULT_BASE_URL
         self.request_timeout = max(1.0, min(float(request_timeout), 600.0))
         self.expected_instance_id = expected_instance_id
         self.api_token = api_token
+        if max_retries is not None and (type(max_retries) is not int or not 0 <= max_retries <= 2):
+            raise ValueError('invalid_lm_studio_retry_count')
+        if pre_dispatch_check is not None and not callable(pre_dispatch_check):
+            raise ValueError('invalid_lm_studio_dispatch_check')
+        self.max_retries = max_retries
+        self.pre_dispatch_check = pre_dispatch_check
         self._client = None
         self._initialized = False
+        self.last_initialization_status = "not_initialized"
 
     @property
     def backend_name(self) -> str:
@@ -201,6 +210,7 @@ class LMStudioBackend(LocalLLMBackend):
         if self._initialized:
             return True
 
+        self.last_initialization_status = "initialization_failed"
         try:
             state = inspect_lm_studio_model(
                 self.model_id,
@@ -208,6 +218,7 @@ class LMStudioBackend(LocalLLMBackend):
                 api_token=self.api_token,
                 timeout=min(self.request_timeout, 10.0),
             )
+            self.last_initialization_status = state.state.value
             if state.state is not LMStudioResidencyState.RESIDENT:
                 logger.warning(
                     "[LM-STUDIO] Exact model '%s' is not resident (%s)",
@@ -218,6 +229,7 @@ class LMStudioBackend(LocalLLMBackend):
             instance_ids = tuple(item.instance_id for item in state.loaded_instances)
             expected = self.expected_instance_id
             if len(instance_ids) != 1 or (expected is not None and instance_ids[0] != expected):
+                self.last_initialization_status = "resident_ambiguous_or_changed"
                 logger.warning("[LM-STUDIO] Exact model residency is ambiguous or changed")
                 return False
             self.expected_instance_id = instance_ids[0]
@@ -229,18 +241,22 @@ class LMStudioBackend(LocalLLMBackend):
                 base_url=f"{root}/v1",
                 api_key=self.api_token or "not-needed",
                 timeout=self.request_timeout,
+                **({'max_retries': self.max_retries} if self.max_retries is not None else {}),
             )
             logger.info("[LM-STUDIO] Exact model '%s' resident and verified", self.model_id)
             self._initialized = True
             return True
 
         except ImportError:
+            self.last_initialization_status = "sdk_unavailable"
             logger.warning("[LM-STUDIO] openai package not installed")
             return False
         except LMStudioAuthenticationError:
+            self.last_initialization_status = "authentication_required"
             raise
         except Exception as e:
-            logger.debug(f"[LM-STUDIO] Not available: {e}")
+            self.last_initialization_status = "initialization_failed"
+            logger.debug("[LM-STUDIO] Not available: %s", type(e).__name__)
             return False
 
     def create_completion(self, prompt: str, max_tokens: int = 512, temperature: float = 0.2, **kwargs) -> Dict:
@@ -248,6 +264,8 @@ class LMStudioBackend(LocalLLMBackend):
             return {"choices": [{"text": ""}]}
         try:
             self._require_exact_instance_unchanged()
+            if self.pre_dispatch_check is not None:
+                self.pre_dispatch_check()
             response = self._client.completions.create(
                 model=self.inference_model_id,
                 prompt=prompt,
@@ -259,7 +277,7 @@ class LMStudioBackend(LocalLLMBackend):
         except LMStudioAuthenticationError:
             raise
         except Exception as e:
-            logger.error(f"[LM-STUDIO] Completion failed: {e}")
+            logger.error("[LM-STUDIO] Completion failed: %s", type(e).__name__)
             return {"choices": [{"text": ""}]}
 
     def create_chat_completion(
@@ -278,6 +296,10 @@ class LMStudioBackend(LocalLLMBackend):
                 for name in self.ALLOWED_CHAT_CONTROLS
                 if name in kwargs
             }
+            if "reasoning_effort" in kwargs:
+                if kwargs["reasoning_effort"] != "none":
+                    raise ValueError("invalid_local_reasoning_effort")
+                controls["reasoning_effort"] = "none"
             if "enable_thinking" in kwargs:
                 if type(kwargs["enable_thinking"]) is not bool:
                     raise ValueError("invalid_enable_thinking")
@@ -286,6 +308,8 @@ class LMStudioBackend(LocalLLMBackend):
                         "enable_thinking": kwargs["enable_thinking"],
                     }
                 }
+            if self.pre_dispatch_check is not None:
+                self.pre_dispatch_check()
             response = self._client.chat.completions.create(
                 model=self.inference_model_id,
                 messages=messages,
@@ -299,7 +323,7 @@ class LMStudioBackend(LocalLLMBackend):
         except LMStudioAuthenticationError:
             raise
         except Exception as e:
-            logger.error(f"[LM-STUDIO] Chat completion failed: {e}")
+            logger.error("[LM-STUDIO] Chat completion failed: %s", type(e).__name__)
             return {"choices": [{"message": {"content": ""}}]}
 
     def create_native_chat(
@@ -308,15 +332,15 @@ class LMStudioBackend(LocalLLMBackend):
         input_text: str,
         system_prompt: str,
         max_output_tokens: int,
-        reasoning: str = "off",
+        reasoning: str | None = "off",
         temperature: float = 1.0,
         top_p: float = 0.95,
         max_response_bytes: int = 262_144,
     ) -> Dict:
-        """Call LM Studio's native chat route with explicit reasoning control."""
+        """Call native chat; explicit None omits unsupported reasoning control."""
         if not self._initialized:
             return {"output": []}
-        if reasoning not in {"off", "low", "medium", "high", "on"}:
+        if reasoning is not None and reasoning not in {"off", "low", "medium", "high", "on"}:
             raise ValueError("invalid_lm_studio_reasoning_control")
         if not 1 <= int(max_output_tokens) <= 1_000_000:
             raise ValueError("invalid_lm_studio_max_output_tokens")
@@ -336,6 +360,8 @@ class LMStudioBackend(LocalLLMBackend):
         )
         try:
             self._require_exact_instance_unchanged()
+            if self.pre_dispatch_check is not None:
+                self.pre_dispatch_check()
             response = _read_lm_studio_native_chat(
                 request,
                 timeout=self.request_timeout,
@@ -347,7 +373,7 @@ class LMStudioBackend(LocalLLMBackend):
         except LMStudioAuthenticationError:
             raise
         except Exception as exc:
-            logger.error(f"[LM-STUDIO] Native chat failed: {exc}")
+            logger.error("[LM-STUDIO] Native chat failed: %s", type(exc).__name__)
             return {"output": []}
 
     def _require_exact_instance_unchanged(self) -> None:
@@ -409,7 +435,7 @@ def _lm_studio_native_chat_payload(
     model_id: str,
     input_text: str,
     system_prompt: str,
-    reasoning: str,
+    reasoning: str | None,
     temperature: float,
     top_p: float,
     max_output_tokens: int,
@@ -419,7 +445,7 @@ def _lm_studio_native_chat_payload(
             "model": model_id,
             "input": str(input_text),
             "system_prompt": str(system_prompt),
-            "reasoning": reasoning,
+            **({"reasoning": reasoning} if reasoning is not None else {}),
             "temperature": float(temperature),
             "top_p": float(top_p),
             "max_output_tokens": int(max_output_tokens),

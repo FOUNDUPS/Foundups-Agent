@@ -24,6 +24,27 @@ import pytest
 RESOLVER = "modules.infrastructure.shared_utilities.local_llm_resolver"
 
 
+@pytest.fixture
+def native_inventory(monkeypatch):
+    """Mock actual native inspection and the SDK, not the removed preprobe."""
+    import sys
+    from types import ModuleType
+    from modules.infrastructure.shared_utilities import local_llm_backends
+    from modules.infrastructure.shared_utilities.lm_studio_native_transport import (
+        LMStudioModelState, LMStudioLoadedInstance, LMStudioResidencyState,
+    )
+    state = {"resident": False}
+    def inspect_native(key, **_kwargs):
+        status = LMStudioResidencyState.RESIDENT if state["resident"] else LMStudioResidencyState.SERVER_UNREACHABLE
+        instances = (LMStudioLoadedInstance("test-instance", {}),) if state["resident"] else ()
+        return LMStudioModelState(key, status, instances)
+    sdk = ModuleType("openai")
+    sdk.OpenAI = MagicMock()
+    monkeypatch.setitem(sys.modules, "openai", sdk)
+    monkeypatch.setattr(local_llm_backends, "inspect_lm_studio_model", inspect_native)
+    return state
+
+
 # ---------------------------------------------------------------------------
 # (1)/(3) Probe-only availability classification - named states
 # ---------------------------------------------------------------------------
@@ -88,19 +109,20 @@ class TestFallbackMessageClarity:
         assert "dependency launcher" in msg
         assert "model_path" in msg
 
-    def test_resolver_logs_clear_fallback_when_lm_studio_absent(self, caplog):
+    def test_resolver_logs_clear_fallback_when_lm_studio_absent(self, caplog, tmp_path, native_inventory):
         from modules.infrastructure.shared_utilities.local_llm_resolver import (
             resolve_qwen_backend,
         )
 
-        with patch(f"{RESOLVER}.is_lm_studio_available", return_value=False):
-            with patch(f"{RESOLVER}.LlamaCppBackend") as mock_cls:
-                mock_backend = MagicMock()
-                mock_backend.initialize.return_value = True
-                mock_backend.backend_name = "llama_cpp"
-                mock_cls.return_value = mock_backend
-                with caplog.at_level(logging.INFO):
-                    backend = resolve_qwen_backend(model_path=Path("E:/models/qwen.gguf"))
+        path = tmp_path / "qwen.gguf"
+        path.write_bytes(b"offline-placeholder")
+        with patch(f"{RESOLVER}.LlamaCppBackend") as mock_cls:
+            mock_backend = MagicMock()
+            mock_backend.initialize.return_value = True
+            mock_backend.backend_name = "llama_cpp"
+            mock_cls.return_value = mock_backend
+            with caplog.at_level(logging.INFO):
+                backend = resolve_qwen_backend(model_path=path)
 
         assert backend is mock_backend
         assert any("llama.cpp" in r.getMessage() for r in caplog.records), (
@@ -181,33 +203,29 @@ class TestRequiredPathNamedError:
 # (3) Happy path preserved (no model behavior change)
 # ---------------------------------------------------------------------------
 class TestHappyPathPreserved:
-    def test_resolve_qwen_uses_lm_studio_when_available(self):
+    def test_resolve_qwen_uses_lm_studio_when_available(self, native_inventory):
         from modules.infrastructure.shared_utilities.local_llm_resolver import (
             resolve_qwen_backend,
         )
 
-        with patch(f"{RESOLVER}.is_lm_studio_available", return_value=True):
-            with patch(f"{RESOLVER}.LMStudioBackend") as mock_cls:
-                mock_backend = MagicMock()
-                mock_backend.initialize.return_value = True
-                mock_backend.backend_name = "lm_studio"
-                mock_cls.return_value = mock_backend
-                backend = resolve_qwen_backend(model_path=Path("E:/models/qwen.gguf"))
+        native_inventory["resident"] = True
+        backend = resolve_qwen_backend()
 
         assert backend.backend_name == "lm_studio"
 
-    def test_resolve_gemma_falls_back_to_llama_cpp_when_lm_studio_absent(self):
+    def test_resolve_gemma_falls_back_to_llama_cpp_when_lm_studio_absent(self, tmp_path, native_inventory):
         from modules.infrastructure.shared_utilities.local_llm_resolver import (
             resolve_gemma_backend,
         )
 
-        with patch(f"{RESOLVER}.is_lm_studio_available", return_value=False):
-            with patch(f"{RESOLVER}.LlamaCppBackend") as mock_cls:
-                mock_backend = MagicMock()
-                mock_backend.initialize.return_value = True
-                mock_backend.backend_name = "llama_cpp"
-                mock_cls.return_value = mock_backend
-                backend = resolve_gemma_backend(model_path=Path("E:/models/gemma.gguf"))
+        path = tmp_path / "gemma.gguf"
+        path.write_bytes(b"offline-placeholder")
+        with patch(f"{RESOLVER}.LlamaCppBackend") as mock_cls:
+            mock_backend = MagicMock()
+            mock_backend.initialize.return_value = True
+            mock_backend.backend_name = "llama_cpp"
+            mock_cls.return_value = mock_backend
+            backend = resolve_gemma_backend(model_path=path)
 
         assert backend.backend_name == "llama_cpp"
 
@@ -216,14 +234,13 @@ class TestHappyPathPreserved:
 # (4)/(5) Resolver is probe-only - never launches LM Studio / no subprocess
 # ---------------------------------------------------------------------------
 class TestResolverProbesOnly:
-    def test_resolve_never_calls_subprocess(self):
+    def test_resolve_never_calls_subprocess(self, native_inventory):
         from modules.infrastructure.shared_utilities.local_llm_resolver import (
             resolve_qwen_backend,
         )
 
-        with patch(f"{RESOLVER}.is_lm_studio_available", return_value=False):
-            with patch("subprocess.Popen") as mock_popen:
-                backend = resolve_qwen_backend(model_path=None)
+        with patch("subprocess.Popen") as mock_popen:
+            backend = resolve_qwen_backend(model_path=None)
 
         assert backend is None
         mock_popen.assert_not_called()
