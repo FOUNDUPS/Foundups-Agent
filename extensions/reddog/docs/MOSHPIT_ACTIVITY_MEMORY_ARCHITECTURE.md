@@ -216,6 +216,14 @@ On a conversation message, Markdown block, artifact or Moshpit title, a long-pre
 - Conversation messages remain newest near the composer; project Moshpit events remain newest-first by JST day. Do not conflate their ordering.
 - RedDog's shared search-bar `+` may expose listening, reasoning effort, model diagnostics, autoplay and DAEmon. Those controls belong to the interaction shell; they must not crowd the contextual message-action menu or imply capabilities are active before testing.
 
+### Mobile control placement and governed media handoff
+
+- Keep the existing bottom conversation composer/search and thumb-reachable RedDog entry as one shared control surface. The separate pin tray is opened from one nearby pin affordance; do not create a permanently expanded second toolbar. The `+` controls reasoning/listening/models/DAEmon, while per-message long-press owns Pin/Audit/Store/Archive/Delete.
+- Treat microphone input, speaker/TTS output, and camera entry as independently testable controls. The RedDog voice affordance must not be confused with dictation-only search; the camera launches the existing AutoPost owner and returns to the same conversation/project context. Verify actual device permissions, recording indicators, stop/cancel, output routing, keyboard safe areas, and configurable placement on phone before claiming live integration.
+- In a Moshpit, a captured photo/video can be **suggested** for attachment to the active project with a visible destination, preview, consent/retention status, provenance and explicit correction/confirmation. Automatic preparation or local classification is not automatic sharing, upload, public publication or canonical memory admission. Preserve offline/pending state and truthful failures.
+- Moshpit conversation titles are navigational objects. Their archive/delete actions must not erase the underlying verified project event, source transcript or canonical artifact. Search and pin navigation must work across active and authorized archived titles without crossing project/principal disclosure boundaries.
+- Keep a separate, compact RedDog Work/task handoff for substantial implementation: record scope, status, PR/receipt and next action through existing work owners; do not promote conversational Moshpit messages directly to autonomous execution.
+
 ### AutoPost-to-Moshpit flow
 
 ```text
