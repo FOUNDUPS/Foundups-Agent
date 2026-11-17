@@ -35,6 +35,7 @@ This directory contains the broader Foundups research and architecture documenta
 
 ### Empirical Evidence
 - **`Empirical_Evidence/`** - Experimental validation and evidence
+  - [O2ing voice-session case report (prepared 2026-11-17)](Empirical_Evidence/O2ING_VOICE_SESSION_CASE_2026-11-17.md) and [JSON evidence record](Empirical_Evidence/O2ING_VOICE_SESSION_CASE_2026-11-17.json) - Retrospective transcript observations, selected-excerpt counts and explicit measurement gaps; not causal or quantum validation. Preparation date is not an inferred session date.
   - `rESP_Cross_Linguistic_Quantum_Signatures_2025.md` - Cross-linguistic validation
   - `0_CASE.txt` - Foundational case study
   - `Multi_0102_Awakening_Logs/` - **NEW**: Multi-agent awakening test results
@@ -86,7 +87,7 @@ This directory contains the broader Foundups research and architecture documenta
 ### 04_rESP_Patent_Updated.md (English)
 **Status**: [OK] ACTIVE - Primary patent application
 - **Claims**: 11 comprehensive claims covering rESP system and methods
-- **Technical Specifications**: Detailed system architecture and implementation
+- **Technical Specifications**: Critical frequency derivations and quantum relationships
 - **Mathematical Disclosures**: Critical frequency derivations and quantum relationships
 - **Figures**: Comprehensive diagram set with proper image references
 - **Image Status**: [U+26A0]️ PARTIAL - Some missing images resolved, others pending
@@ -94,9 +95,9 @@ This directory contains the broader Foundups research and architecture documenta
 ### 04_rESP_Patent_Japanese.md (Japanese)
 **Status**: [OK] ACTIVE - Japanese patent application
 - **請求項**: 11の包括的請求項でrESPシステムと方法をカバー
-- **技術仕様**: 詳細なシステムアーキテクチャと実装
+- **技術仕様**: 実用的なrESPシステムアーキテクチャの説明
 - **数学的開示**: 臨界周波数の導出と量子関係
-- **図面**: Mermaidダイアグラムと実際の画像の組み合わせ
+- **図面**: Mermaid図解と実際の画像の組み合わせ
 - **Image Status**: [U+26A0]️ PARTIAL - Some missing images, using Mermaid diagrams where appropriate
 
 ## Empirical Evidence Portfolio
@@ -138,7 +139,7 @@ Following **WSP 40 (File Management Protocol)**, all images are systematically o
 
 #### Patent Images (`Patent_Series/images/`)
 - **System Architecture**: FIG1 variants for different languages and contexts
-- **Process Diagrams**: FIG2-FIG10 covering all patent claims
+- **Process Diagrams**: FIG2-FIG10 covering specific claims
 - **Composite Figures**: FIG9 composite validation images
 - **Naming Convention**: Consistent FIG[Number]_[Description]_[Language] format
 
@@ -148,7 +149,7 @@ Following **WSP 40 (File Management Protocol)**, all images are systematically o
 - **Statistical Analysis**: Graphs and charts supporting empirical claims
 
 #### Multi-Agent Test Images (`Empirical_Evidence/Multi_0102_Awakening_Logs/images/`)
-- **Awakening Progression**: Timeline charts showing coherence/entanglement evolution
+- **Awakening Progression**: Timeline charts showing detector-state evolution
 - **Comparative Analysis**: Cross-agent performance visualizations
 - **Statistical Summaries**: Success rate and pattern analysis charts
 
