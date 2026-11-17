@@ -186,6 +186,53 @@ This section records a product requirement from the conversation prototype.
 The current host chat does not gain a pin button from this documentation edit.
 Implementation remains a planned slice in [the RedDog roadmap](../ROADMAP.md#moshpit-conversation-navigation-and-pins-planned).
 
+## RedDog layers, Moshpit actions, search and AutoPost convergence (2026-11-17; proposed)
+
+Status: `SPECIFIED_NOT_IMPLEMENTED` for the unified mobile conversation UX, action menu, cross-surface search and automatic capture-to-Moshpit path. This section consolidates 012/0102/RedDog/Little Dog dialogue; it is a product requirement, not a deployment or tool-access claim.
+
+### Layers and source of truth
+
+- RedDog is the fast, persistent interaction/attention layer; 0102 is the deeper principal-scoped cognition and governed orchestration layer. Interaction effort may be Instant, Think or Deep, with optional Auto routing; this changes compute/response behavior, **not** identity, permission or storage authority.
+- AutoPost is the locally permissioned camera/perception surface. It may propose structured, evidence-linked capture context, but must not auto-publish, identify people conclusively or authorize disclosure. Lick remains the consent-aware encounter handshake and never grants blanket access.
+- Principal Activity Ledger (PAL) captures eligible local activity once; Breadcrumbs preserve evidence; Brain/Memex consolidates state; Moshpit renders selected material project events and recoverable discussion sources. Do not create a second store or treat every chat utterance as a project event.
+- DAEmon emits sanitized diagnostics (load time, capture/inference state, latency, error and recovery) with private evidence kept outside public Git. Diagnostic observations are not automatically project accomplishments.
+
+### Context actions, archive and deletion
+
+On a conversation message, Markdown block, artifact or Moshpit title, a long-press (touch) or equivalent context action (mouse/keyboard) should expose concise text-labeled actions, without decorative emoji: **Pin / Unpin, Audit, Store, Archive, Delete**. Show only actions applicable and authorized for that object.
+
+- **Pin** keeps a stable reference to a source, not a duplicate. The bottom pin tray navigates back to the original; it is not the same as storing evidence or recording a completed outcome.
+- **Audit** requests an evidence/provenance/status check; it does not itself mark the content verified.
+- **Store** proposes/adopts a governed Breadcrumb, PAL event or Brain/Memex update according to materiality and source authority. Never silently turn brainstorming into canonical project truth.
+- **Archive** removes a conversation/title from the active Moshpit browsing surface while preserving authorized history and references; it is not deletion. Exact archive ownership and retention policy require implementation audit.
+- **Delete** is a separately confirmed, scoped operation with source/reference lifecycle handling and an explicit receipt; never infer deletion of canonical evidence, backups, remote copies or audit logs from hiding a title. Destructive authority and retention policy must be resolved first.
+- Titles can be archived/deleted independently of project facts. Pinned references to archived or deleted sources must retain honest inaccessible/deleted states, not silently redirect.
+- No context action automatically creates a GitHub commit, sends email, publishes content, grants work authority or invokes a worker.
+
+### Search and navigation
+
+- Search must state its scope: current conversation/thread, pinned sources, current FoundUp/project Moshpit, or permitted cross-FoundUp discovery. Default to the active context; do not silently search all private projects.
+- Search matches messages, Markdown blocks, artifact references, relevant Breadcrumbs and project status through existing authorized query/projection owners. Results should preserve provenance, stable source navigation and the reading anchor; use bounded pagination and avoid loading entire history.
+- Conversation messages remain newest near the composer; project Moshpit events remain newest-first by JST day. Do not conflate their ordering.
+- RedDog's shared search-bar `+` may expose listening, reasoning effort, model diagnostics, autoplay and DAEmon. Those controls belong to the interaction shell; they must not crowd the contextual message-action menu or imply capabilities are active before testing.
+
+### AutoPost-to-Moshpit flow
+
+```text
+permissioned AutoPost photo/video/observation
+ -> local perception and explicit source/provenance reference
+ -> proposed principal/project/intent classification (editable)
+ -> scoped PAL / Breadcrumb admission when material and authorized
+ -> Brain/Memex state and open-loop reconciliation
+ -> Moshpit projection and RedDog contextual search/navigation
+```
+
+A filmed phone debugging session may suggest a debugging tag and an evidence-linked issue; a photographed car may suggest a vehicle FoundUp. Both remain suggestions until corrected/admitted. No raw personal media in public repo, and no automatic cross-principal publication.
+
+### Soft-proto acceptance and drift gates
+
+Reconcile the existing Wave-inspired GotJunk message controls, RedDog conversation owner, PAL adapter, Moshpit projection and AutoPost capture/DAEmon owners before coding. Verify a phone-sized soft-proto for: long-press menu; pin and jump; audit/store distinction; archive versus delete; scoped search; reading-anchor persistence; newest-first project projection; captured evidence with corrected project classification; consent denial; reload/reconnect; and cross-principal access denial. Each implemented slice must carry tests, a status receipt and roadmap reconciliation. Do not label a menu stub, source-only PoC or a document as a deployed feature.
+
 ## Retrieval Contract for RedDog
 
 RedDog must be able to answer compactly when 012 asks variants of:
