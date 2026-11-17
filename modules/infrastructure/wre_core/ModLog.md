@@ -1,3 +1,206 @@
+## 2026-11-16 — Scientific repair canary (Issue #1522), fail-closed `measurement_evidence`, and `branch_dispositions` parity
+
+- **Scientific Self-Healing (`src/repair_operation_contract.py`, `src/repair_baseline_verifier.py`, `src/scientific_repair_canary_orchestrator.py`)**: Integrated Issue #1522 `ScientificRepairOperation` state machine with `state_history` audit trail, hardened `attempt_failure_reproduction()` to execute via `shlex.split` + `shell=False`, and wired `ScientificRepairCanaryOrchestrator` with `ModelIndependencePolicy` and `VerifierContextFirewall.project_evidence_packet` plus `PatternMemory.store_outcome` (`SkillOutcome`) while keeping protected 19/P0 custody gates (`promote_variation`, `RedDogDirector.advance_to_execution`, `RedDogVerifiedPatternMemorySink`) untouched. Added composition audit at `WSP_knowledge/docs/audits/self_healing/SELF_HEALING_COMPOSITION_AUDIT.md`.
+- **Fail-Closed Measured Benefit (`recursive_improvement/src/core.py`, `recursive_improvement/src/learning.py`)**: Added `Improvement.tokens_saved` and extended `RecursiveLearningEngine.apply_improvement(..., measurement_evidence=None)` to validate receipt-backed non-self-authored (`evaluator_id != worker_id`), `work_order_id`-matched, non-regressive (`candidate_tokens <= baseline_tokens`), and optional SHA-256 `before_state_digest` / `after_state_digest` measurement evidence fail-closed before target mutation (and rollback on post-applicator `after_digest` mismatch) with `blocked_measurement_rejected`. Extended `rollback_improvement()` to subtract measured `tokens_saved` from `total_tokens_saved` (clamped `>= 0`).
+- **Branch Dispositions Parity (`tests/test_git_lifecycle.py`)**: Verified PR #2390 `branch_dispositions` superset in `src/git_lifecycle.py` and added explicit `COMPLETE` merged PR (`BRANCH_MERGED_PR_RETAINED` / `assess_retirement_diff_against_main`) coverage. WSP 10, 22, 48, 49, 50, 97, and 110.
+
+## 2026-11-15 — Verified RSI improvement application & rollback in RecursiveLearningEngine
+
+- **RecursiveLearningEngine (`recursive_improvement/src/learning.py`)**: Initialized `_rollback_handlers` safely for both `__init__` and `__new__` callers via `_get_rollback_handlers()`; extended `apply_improvement()` with fail-closed `blocked_unimplemented` legacy behavior when no evidence/applicator is provided, strict independent verifier (`AUTONOMOUS_SLICE_VERIFIER_ACCEPT`, `verifier_id != worker_id`, 40-hex `head_sha`), outcome ratchet (`OUTCOME_RATCHET_RECORDED`), held-out gate (`HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT`, `pattern_memory_admission_allowed is True`), and distinct-digest reversible `target_applicator` validation (`blocked_verification_rejected` on failure), plus `rollback_improvement()` with SHA-256 restored-state verification without fabricating token savings.
+- **Tests (`recursive_improvement/tests/test_learning.py`)**: Added fail-closed unauthenticated and self-verified/rejected-gate regression tests plus a bounded end-to-end RSI cycle through `RedDogDirector`, `admit_runtime_skill("auto_test_registry_audit")`, `verify_autonomous_slice_runtime`, `ratchet_verified_outcome`, `evaluate_held_out_recursive_improvement_regression_gate`, `RedDogVerifiedPatternMemorySink`, queue-authorized admission invoke, `apply_improvement`, and `rollback_improvement`.
+
+## 2026-11-15 — PC Git inventory stashes, backlog summary, and worktree summary
+
+- **Git lifecycle inventory (`src/git_lifecycle_inventory.py`)**: Added `_read_stashes()` (SHA-only `refs/stash` + `rev-list --walk-reflogs refs/stash`, privacy-bounded with no stash messages or filenames), included stashes in `_observe()` pre/post `ls-remote` stability checks (`pc_state_changed_during_observation`), added local `github_main` `cat-file -t` presence check (`github_main_present_on_pc`), `pc_backlog_summary`, `worktree_summary`, `section="stashes"` pagination with `stash_count`, and strict `verify_git_inventory_receipt()` validation while preserving `_SCHEMA`, `_MAX_RECEIPT`, `_PAGE_SIZE`, `branches` row shape, and `branch_comparison` keys.
+- **Tests (`tests/test_git_lifecycle_inventory.py`)**: Added coverage for stash pagination and privacy non-leakage, malformed/oversized stash reflogs, concurrent stash mutation blocking, `github_main_present_on_pc` True/False backlog and worktree summaries, and tampered stash/summary verification rejection.
+
+## 2026-11-15 — Fix MetricsIngestorV2 ai_0102_approvals index schema mismatch
+
+- **metrics_ingest_v2 (`skillz/metrics_ingest_v2.py`)**: Aligned `idx_approval_skill` creation index target from obsolete `human_approvals(skill_id)` to existing table `ai_0102_approvals(skill_id)` so fresh SQLite databases initialize cleanly alongside `WRESkillsRegistryV2`.
+- **Verification**: Added `tests/test_metrics_ingest_v2_schema.py` covering fresh schema initialization and `check_rollback_triggers()` healthy/degraded/exception paths.
+
+## 2026-11-15 — Parent-version-bound pattern recall and evolution lineage
+
+- **PatternMemory (`src/pattern_memory.py`)**: Added `_parent_version_filter` and optional `parent_version: Optional[str] = None` to `recall_successful_patterns()` and `recall_failure_patterns()`, filtering in SQL before `LIMIT` on `json_valid(output_result)=1` and `$._skill_binding.schema_version = 'wre_skill_execution_binding.v1'` + `$._skill_binding.loaded_skill_sha256` (fail-closed `[]` on blank/non-string inputs).
+- **WREMasterOrchestrator (`wre_master_orchestrator/src/wre_master_orchestrator.py`)**: Wired `loaded_skill_digest(skill_content)` into `evolve_skill()` pattern recall (`recall_failure_patterns`, `recall_successful_patterns`) and `store_variation(..., parent_version=...)` so foreign revisions cannot pollute candidate generation.
+- **Docs (`INTERFACE.md`)**: Documented `parent_version` recall filtering and `evolve_skill()` lineage binding.
+
+## 2026-11-15 — Hardened read-only GitHub branch dispositions
+
+Add and harden read-only `branch_dispositions` accounting in
+`reconcile_git_lifecycle()`: enforce exact `sha == head_sha` matching for both
+open and closed/merged PRs (`BRANCH_OPEN_PR_HEAD_MOVED` when moved), separate
+protected non-`main` branches into `PROTECTED_BRANCH`, require strict same-repo
+case-insensitive `head_repository` matching, preserve full sorted `pr_numbers`
+history per ref, emit `BRANCH_PR_OBSERVATION_INCOMPLETE` instead of
+`BRANCH_UNTRACKED` when PR observation is partial, and separate
+`BRANCH_PR_HEAD_MISMATCH` from never-PR'd `BRANCH_UNTRACKED`. WSP 10, 22, 50,
+84, 97 and 110.
+
+## 2026-11-12 — Security-scan caller lifecycle obligations
+
+The existing security_scan skill now points build/launch callers to WSP 71
+Section 5.6 and WSP 91 Section 3.0. Scanner evidence does not itself authorize
+execution; missing required coverage blocks the affected action. Heartbeats,
+expiry, ownership and cleanup belong to existing runtime owners. Prototype and
+manual-trigger metadata remain unchanged; no provider or service was started.
+WSP 22/71/91/95/97. Validation covers protocol mirrors and agent projection;
+runtime lifecycle enforcement remains separately qualified work.
+
+## 2026-11-12 — Read-only PC and GitHub inventory
+
+Reuse the Git lifecycle repository and selected PC binding for a bounded
+Git read with a request-bound digest. Preserve worktree paths and changed
+filenames locally. The MCP adapter can call the reader without writing the
+lifecycle ledger or modifying either repository. WSP 21, 50, 84 and 97.
+
+## 2026-11-11 — GitHub and PC lifecycle reconciliation
+
+Connect WRE and Codex startup to one persisted Git lifecycle pass. Inventory
+GitHub with pagination, verify the current main checks and fast-forward the
+selected clean PC main worktree. Carry prior PR obligations until the GitHub
+merge and PC proofs agree. Retire unchecked promotion from the legacy sentinel.
+WSP 10, 15, 22, 34, 50, 97 and 110.
+
+## Readiness evidence and cold-start distinction — 2026-11-06
+
+Replace global-count qualification and fabricated zero rates with per-metric
+coverage, nullable missing measurements and explicit database-lifetime scope.
+Retain actual zeros and sampled critical alerts alongside unrelated unknowns.
+Dashboard inspection opens existing storage read-only and reports missing
+storage without creating it. Share policy across startup, both Connect WRE
+owners and DAE actions; preserve cold-start admission without calling it READY.
+Noninteractive root startup now uses the existing strict DAE action default.
+
+WSP15 ordering: readiness/menu C3/I4/D5/Impact4=16/P0; protected native composition
+retains its existing 19/P0 dependency gates before R15 (14/P1). No worker grant,
+model probe, live training or RSI transfer is inferred. Independent review
+rejected an initial UNKNOWN-blocking proposal because it would deadlock cold
+start; the reviewed preservation rule supersedes that proposal. WSP5/11/15/22/48/50/97.
+
+## Recover portable brain-source documentation — 2026-10-31
+
+Correct the continuity README to the existing extractor's `Path.home()` default.
+Link a sanitized September storage projection while retaining private junction
+details only in original custody. No extractor run, new brain ingestion, storage
+move or current host-junction verification occurred. Historical storage/test logs
+remain dated archive records; no pattern-memory admission is claimed. WSP 22/50/60/97.
+
+## Held-out receipt identity handoff — 2026-10-30
+
+The real held-out gate hashed v2 evidence fields but omitted them from its
+receipt, causing Memex reconstruction to reject accepted producer output.
+Serialize those fields without changing the existing ID seed; preserve exact
+historical wire shapes. Connected producer/consumer and malformed/downgrade
+controls cover the repair. No activation or native RSI is claimed. WSP11/22/48/97.
+
+## Current-main bounded-audit registry integration - 2026-10-29
+
+Integrate verified main `34b05f48` without changing accepted YouTube production
+or its CI helper. The existing generator/check projects 1,789 test files, 260
+quarantined, adding the two incoming modular-audit owners. This supersedes the
+local 1,787-file pre-merge projection below; all previous descriptors remain.
+No classifier, quarantine or test-selection policy is relaxed. WSP 5/22/50/97.
+
+## Startup and scheduled-inventory registry projection - 2026-10-29
+
+WSP 5/15/22/50/97. Regenerate the existing canonical registry after the two new
+test owners defer module-time fixture construction into test bodies. All case
+and assertion inventories remain intact; both programs now classify as unit and
+collectable without classifier changes or an execution allowlist. Projection:
+1,787 files, 260 quarantined; write/check pass. The focused CI adapter rechecks
+current source with this same AST owner and requires parity with the descriptor
+before either parent admission or child test execution. Quarantined programs
+remain visible and are rejected even if an obsolete JSON descriptor says unit.
+
+## 2026-10-29 — Keep scaffolds and manual programs out of automated evidence
+
+The existing AST classifier recognizes explicit `WRE_TEST_MODE` assignments
+(including annotations): scaffold/manual values remain excluded; unknown or
+nonliteral declarations are invalid and excluded. Existing external-effect
+detection still runs and its reasons cannot be hidden by a mode declaration.
+No production test subject is imported during classification.
+
+Canonical regeneration: 1779 -> 1781 files, still 260 quarantined. Fifty-two
+syntax-broken test-named scaffolds become explicitly unimplemented; the repaired
+Gemini probe remains manual. Two bounded regression owners are added. Every
+previous path and collectable flag is preserved; no old test is promoted.
+The 40 registry tests plus 11 generator/import controls pass. Reconciliation
+with concurrent #2206 preserves its Algorand test: 1782 total / 260 quarantined,
+all 1780 main paths and collectable flags unchanged; all 51 cases pass again.
+WSP5/6/22/50/62/97.
+
+## 2026-10-29 — Regenerate registry after F1 encoding repair
+
+The first PR2257 hosted test gate detected a stale registry: removing BOMs
+makes 15 files statically parseable under the existing classifier. Canonical
+regeneration preserves all 1779 paths and changes only those 15 classifications;
+260 remain quarantined. No discovery/classification rule or test skip was added.
+The 28 registry tests and canonical --check pass; 85 affected dummy-STT,
+in-memory permission and schema tests pass. Twelve optional rESP import smoke
+files remain outside executed acceptance. WSP 22/50/84/97.
+
+## 2026-10-29 — Reconcile the YouTube registry with current main
+
+Combined main `68562f2c8ca4749e360e76758183319d54988879` with the accepted
+YouTube repair `6c655690a7a6ef1f761ed3632be78bd59ffea48a`. Retained both
+conflicting ModLog entries and regenerated the registry through its existing
+owner: 1,779 files / 275 quarantined, including the incoming Hornet Hunter test.
+No classification rule, YouTube runtime source, backend manifest, digest pin or
+security ledger changed. Repository integration and live verification remain
+separate gates. WSP 10/22/50/84/97.
+
+## 2026-10-29 — Register the YouTube reply repair tests
+
+Regenerated the canonical Git-tracked registry with its existing generator after
+the reply inspection, semantic assessment and durable submission tests were
+tracked. The registry is current at 1,778 files / 275 quarantined; no classifier,
+quarantine rule, collection or authority contract changed. The existing registry
+and differential-runtime selection passes 50 cases on Windows. The YouTube CI
+owner separately runs the bounded offline repair selections; registry presence
+does not establish live model or YouTube delivery. WSP 5/6/22/50/97.
+
+## 2026-10-29 — Reconcile risk-verification handoff with landed implementation
+
+Retain PR #2248's original execution packet and dispatch reference; resolve the
+roadmap overlap by preserving PR #2250's newer implementation/status table.
+The handoff now links that landed slice and names the remaining native outcome,
+promotion/rollback and measured-benefit gates. No runtime or authority changes.
+Validation: all relative Markdown file targets in the handoff and changed
+roadmap link resolve; diff whitespace check passed. Hosted checks remain a
+separate merge gate. WSP 10/22/48/50/84/97.
+
+## 2026-10-28 — Preserve risk-based verification through execution and completion
+
+Reused the existing differential policy, scope resolver, evidence producer and
+slice verifier. Complete preflight now rejects invalid checks before execution;
+declared/bound policies cannot disappear at final verification. Independent
+review found and reproduced four additional stale/protected/release/audit
+escalation gaps; the existing required-suite function now governs preflight too.
+Ordinary absent/empty-policy compatibility and local-only authority rejection
+are preserved. CI gains a separate bounded connected-regression job.
+
+Baseline 44 independent failures, then four escalation failures; corrected
+connected selection 384 pass, with overlapping independent 93-pass review.
+No hosted/merge/native-execution claim is implied by local counts. Details and
+exact commands: [TestModLog](tests/TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+Research and next gates are reconciled into existing roadmap/hybrid owners.
+WSP00/5/6/11/15/22/48/50/62/84/95/97; WSP15 15/P1.
+No paid provider call, worker grant, memory learning or production promotion.
+
+Hosted secret scan required 38 exact reviewed-metadata rebindings after the
+manifest byte identity changed. Independent review confirmed all 38 matched
+unchanged, previously reviewed public source hashes. Historical identities stay;
+no scanner rule or coverage change. See TestModLog for failed-run provenance.
+
+## 2026-10-26 — Reproject the PFMall serving test process capability
+
+Allocation6b5d7902f follows actual CI stale-registry rejection. Unchanged generation
+and independent review agree on one existing test row: capabilities[] ->[process].
+All1773 paths/273 quarantines and every other field remain unchanged. Generator
+write/check and50 cases in the two existing registry/differential owners pass.
+No classifier, test, collection, shard, schema or execution-authority change.
+
 ## 2026-10-22 — Re-review unchanged generated hash metadata
 
 PR #2175 secret scan reported 38 existing manifest metadata findings after the
@@ -5661,3 +5864,12 @@ Phase 3 completes the autonomous execution chain:
 - Grounded by current Holo evidence at exact base
   `7269deb66f638cc6bbb8239aecf0c8b5ae6b8d22` and documented under WSP 15,
   WSP 50, WSP 62, and WSP 97 before resuming RedDog Phase 2C.
+## 2026-11-14 - CI documentation pilot reuses verification owners
+
+The existing CI scope pilot gains trusted-base selection and a proposal-only
+Skill documentation schema. WRE impact planning, registry projection,
+differential execution and exact-main evidence remain unchanged. Python and
+protected/systemic changes retain full verification; no model may supply
+dependency-completeness or downgrade authority. The CI README records activation
+holds and exact reference timing. No runtime admission or RSI transfer is claimed.
+WSP 6/15/22/50/71/95/97/110.

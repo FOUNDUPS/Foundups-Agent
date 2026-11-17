@@ -1,4 +1,4 @@
-"""Bounded LOW grant issuer composed from existing authority owners.
+"""Bounded grant issuer composed from existing authority owners.
 
 Installed dependencies are inputs, never inferred from role-key possession.
 The composition authenticates deployment before listening and permission again
@@ -50,6 +50,7 @@ class GrantAuthorityServiceDependencies:
     credential_binding: SystemdCredentialBinding
     replay_store: DurableSignerSecretGrantNonceStore
     revocation_oracle: RootAuthorizedSignerGrantRevocationOracle
+    consensus_nonce_authority: Any = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,6 +76,16 @@ def _policy_scope(policy):
             or tuple(policy.get("allowed_authority_tiers", ())) != ("LOW",)
             or tuple(policy.get("consensus_required_tiers", ())) != ()):
         raise ValueError("grant_service_low_handshake_scope_required")
+
+
+def _service_policy_scope(policy):
+    from .reddog_signer_owner_e0_policy_contract import POLICY_SCHEMA_V11
+    from .reddog_signer_owner_e0_policy_v7 import require_grant_service_installed_work_bindings
+    if policy.get('schema_version') == POLICY_SCHEMA_V11:
+        require_grant_service_installed_work_bindings(policy)
+        return 'HIGH'
+    _policy_scope(policy)
+    return 'LOW'
 
 
 def _profile_binding(dependencies, owner):
@@ -106,8 +117,8 @@ def _profile_binding(dependencies, owner):
 
 
 def _verify_installed_runtime(repo, owner_path, policy):
-    from .reddog_signer_owner_e0_policy_contract import POLICY_SCHEMA_V10
-    if policy.get("schema_version") != POLICY_SCHEMA_V10:
+    from .reddog_signer_owner_e0_policy_contract import POLICY_SCHEMA_V10, POLICY_SCHEMA_V11
+    if policy.get("schema_version") not in {POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
         return
     from .reddog_grant_authority_service_manifest_verifier import verify_current_grant_service_artifacts
     from .reddog_grant_authority_installed_runtime_guard import verify_installed_grant_runtime
@@ -119,7 +130,7 @@ def _verify_installed_runtime(repo, owner_path, policy):
 
 def _current_inputs(repo, owner_path, dependencies):
     policy = dependencies.owner_policy
-    _policy_scope(policy)
+    _service_policy_scope(policy)
     owner = _load_owner_config(owner_path, repo=repo)
     if owner["config_id"] != policy["owner_config_id"]:
         raise ValueError("grant_service_owner_changed")
@@ -195,7 +206,7 @@ class _CurrentLowGrantBackend:
 
 def serve_grant_authority_once(*, repo_root, owner_config_path, dependencies=None,
                                timeout_s=5.0, ready_callback=None):
-    """Serve at most one LOW grant request after authentic installed admission.
+    """Serve at most one policy-selected grant request after installed admission.
 
     The caller supplies installed dependency objects. The installed startup
     composition loads these through the fixed protected dependency loader.
@@ -220,8 +231,7 @@ def serve_grant_authority_once(*, repo_root, owner_config_path, dependencies=Non
             expected_signer_gid=service["authority_service_gid"])
         if isolation.accepted is not True:
             raise ValueError("grant_service_process_isolation_required")
-        backend = _CurrentLowGrantBackend(repo, owner_path, dependencies)
-        backend.authorize(lambda: _current_inputs(repo, owner_path, dependencies))
+        backend = _prepare_backend(repo, owner_path, dependencies)
     except Exception:
         return GrantAuthorityServiceResult(accepted=False, rejection_reasons=(REJECT,))
     result = serve_reddog_isolated_signer_socket_bounded(
@@ -230,6 +240,21 @@ def serve_grant_authority_once(*, repo_root, owner_config_path, dependencies=Non
         timeout_s=timeout_s, ready_callback=ready_callback)
     return GrantAuthorityServiceResult(result.accepted, result.rejection_reasons,
         result.requests_handled, result.response_digests, result.socket_removed)
+
+
+def _prepare_backend(repo, path, dependencies):
+    if _service_policy_scope(dependencies.owner_policy) == 'LOW':
+        backend = _CurrentLowGrantBackend(repo, path, dependencies)
+        backend.authorize(lambda: _current_inputs(repo, path, dependencies))
+        return backend
+    from .reddog_grant_authority_high_service import _CurrentHighGrantBackend, _high_models, _high_authority
+    backend = _CurrentHighGrantBackend(repo, path, dependencies)
+    def check(scope):
+        _current_inputs(repo, path, dependencies)
+        models = _high_models(repo, path, dependencies.owner_policy)
+        _high_authority(repo, path, dependencies, scope, models)
+    backend.authorize(check)
+    return backend
 
 
 def serve_installed_grant_authority_once(*, repo_root, owner_config_path,
@@ -252,7 +277,7 @@ def main(argv=None):
     """Fixed bounded issuer startup; input paths confer no execution authority."""
     import argparse
     import json
-    parser = argparse.ArgumentParser(description="Run one admitted LOW grant request.")
+    parser = argparse.ArgumentParser(description="Run one admitted policy-bound grant request.")
     parser.add_argument("--repo-root", required=True)
     parser.add_argument("--owner-authority-config", required=True)
     parser.add_argument("--expected-owner-config-id", required=True)

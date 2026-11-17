@@ -439,6 +439,11 @@ def _manifest_profile(
 ) -> tuple[str, tuple[str, ...]]:
     if runtime_profile is None:
         return SCHEMA_VERSION, REQUIRED_RUNTIME_ARTIFACTS
+    from .reddog_runtime_artifact_manifest_contract import (
+        RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE, REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS,
+    )
+    if runtime_profile == RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE:
+        return SCHEMA_VERSION_V2, REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS
     if runtime_profile == RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE:
         return SCHEMA_VERSION_V2, REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS
     if (

@@ -3,6 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
+  <script src="/member/js/mall-video-projection.js"></script>
+  <script>
+    if (window.mallVideoProjection?.hostScope(window.location)) window.location.replace('/member/');
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <title>FoundUPS — Where Will You Aim Your Compute?</title>
   <meta name="description"
@@ -1423,6 +1427,7 @@
       </a>
     </div>
     <div class="nav-right">
+      <a href="/f/" class="btn-ghost" aria-label="FX — FoundUps Exchange" style="padding:5px 10px;font-size:0.7rem;">FX</a>
       <a href="#how" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">How</a>
       <a href="#roc" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">ROC</a>
       <a href="/litepaper.html" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">Litepaper</a>

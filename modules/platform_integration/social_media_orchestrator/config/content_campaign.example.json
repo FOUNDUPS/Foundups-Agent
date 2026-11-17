@@ -1,0 +1,58 @@
+{
+  "schema_version": "social_content_brief.v1",
+  "campaign_id": "alpha_launch",
+  "brand": {
+    "foundup_id": "alpha",
+    "canonical_brand": "Alpha",
+    "default_locale": "en",
+    "rules": [
+      "Use plain language."
+    ],
+    "authority_boundary": "BRANDING_ONLY_NO_EXECUTION_AUTHORITY"
+  },
+  "audience": "Developers",
+  "objective": "Read the release notes",
+  "cta": {
+    "label": "Read more",
+    "url": "https://example.org/alpha"
+  },
+  "platforms": [
+    "x",
+    "linkedin"
+  ],
+  "start_at": "2026-10-28T09:00:00+09:00",
+  "interval_hours": 24,
+  "max_items": 7,
+  "sources": [
+    {
+      "source_id": "release",
+      "foundup_id": "alpha",
+      "url": "https://example.org/alpha",
+      "excerpt": "Alpha now exports plain text."
+    },
+    {
+      "source_id": "guide",
+      "foundup_id": "alpha",
+      "url": "https://example.org/guide",
+      "excerpt": "The guide explains the export settings."
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "guide",
+      "title": "Export guide",
+      "source_ids": [
+        "guide"
+      ],
+      "priority": 2
+    },
+    {
+      "topic_id": "release",
+      "title": "Export release",
+      "source_ids": [
+        "release"
+      ],
+      "priority": 5
+    }
+  ]
+}

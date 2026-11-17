@@ -215,13 +215,19 @@ def test_readonly_trusted_approval_still_requires_signature_scope_and_freshness(
             repo_root=enrolled.harness.repo_root, expected_approval_digest=pin, manifest=manifest)
 
 
-def test_runtime_profile_cannot_be_selected_using_normal_work_context(enrolled):
+def test_work_context_produces_distinct_work_manifest_not_initial_enrollment(enrolled):
     spec = enrolled.value["manifest_spec"]
     result = produce_signed_runtime_artifact_manifest(manifest_directory=enrolled.harness.manifest_directory,
         nonce=spec["nonce"], issued_at=NOW, expires_at=NOW + 120, context=enrolled.harness.context,
         runtime_profile=contract.RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE)
-    assert not result.accepted
-    assert not list(enrolled.harness.manifest_directory.glob("*.json"))
+    assert result.accepted
+    manifest = json.loads(Path(result.output_path).read_text())
+    assert manifest["schema_version"] == contract.SCHEMA_VERSION_V2
+    assert "publication_receipt_id" in manifest and "enrollment_approval_digest" not in manifest
+    with pytest.raises(ValueError):
+        authority.verify_initial_runtime_manifest_approval(approval_path=enrolled.path,
+            repo_root=enrolled.harness.repo_root,
+            expected_approval_digest=contract.raw_digest(enrolled.path.read_bytes()), manifest=manifest)
 
 
 def test_same_initial_nonce_cannot_advance_to_foreign_existing_generation(enrolled):

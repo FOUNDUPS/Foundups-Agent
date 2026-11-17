@@ -76,6 +76,32 @@ def test_tokenomics_genesis_example_matches_btc_reserve_constant() -> None:
     architecture_sats = int(architecture_match.group(1).replace(",", ""))
     assert architecture_sats * genesis_value == 100_000_000
 
+    # A source map must not promote an incompatible forecast unit to chain policy.
+    matrix = _load_source_of_truth_matrix(root)
+    units = next(item for item in matrix["economic_invariants"]
+                 if item["id"] == "ups_sat_accounting_unit")
+    assert units["status"] == "CONFLICTING"
+    assert units["decision_class"] == "D"
+    assert units["chain_activation"] == "BLOCKED"
+    observations = units["observations"]
+    assert observations["btc_reserve_genesis"]["ups_per_btc"] == genesis_value
+    assert observations["btc_reserve_genesis"]["satoshis_per_ups"] == architecture_sats
+    assert observations["projection_accounting"]["satoshis_per_ups"] != architecture_sats
+
+
+def test_governing_economic_protocol_mirrors_match() -> None:
+    """Economic contract changes must not leave the knowledge mirror stale."""
+    root = _repo_root()
+    for name in (
+        "WSP_26_FoundUPS_DAE_Tokenization.md",
+        "WSP_27_pArtifact_DAE_Architecture.md",
+        "WSP_29_CABR_Engine.md",
+        "WSP_100_DAE_SmartDAO_Escalation_Protocol.md",
+    ):
+        framework = (root / "WSP_framework/src" / name).read_text(encoding="utf-8")
+        knowledge = (root / "WSP_knowledge/src" / name).read_text(encoding="utf-8")
+        assert framework == knowledge, f"Stale governing mirror: {name}"
+
 
 def test_source_of_truth_matrix_paths_exist() -> None:
     """All declared references in the source-of-truth matrix must exist."""

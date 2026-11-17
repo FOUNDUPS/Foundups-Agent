@@ -26,12 +26,19 @@ The regression boundary protects two independent concerns:
 
 | Test surface | Contract protected |
 | --- | --- |
-| `test_domain_routing.mjs` | YUMORI.me/www root internally selects `/yumori`; eSingularity.ai is excluded and keeps the filesystem homepage |
+| `test_domain_routing.mjs` | YUMORI.me/www root and `/partners` internally select `/yumori` and `/yumori/partners`; eSingularity.ai is excluded and keeps the filesystem homepage |
 | `test_yumori_national_landing.py` | The YUMORI page remains the join-first WHY/WHAT/HOW movement funnel with five committee actions, the 1,000-person target, and complete Japanese → English/Portuguese selector coverage |
 
 Passing only one side is insufficient: correct routing to the wrong page is still a production failure, and correct page content without hostname routing is not deployed behavior.
 
-`test_domain_routing.mjs` imports the actual `frontend/next.config.ts` with Node's built-in type stripping. It checks the before-files ordering, exact YUMORI.me/www host restriction, root-only internal destination, exclusion of eSingularity.ai/YUMORI.info/other hosts, and absence of broad path or query overrides. No npm dependency is needed for these configuration tests.
+`test_domain_routing.mjs` imports the actual `frontend/next.config.ts` with Node's built-in type stripping. It checks the before-files ordering, exact YUMORI.me/www host restriction, explicit root/partner internal destinations, exclusion of eSingularity.ai/YUMORI.info/other hosts, and absence of broad path or query overrides. No npm dependency is needed for these configuration tests.
+
+The organization-inquiry edition also needs rendered checks of the movement CTA
+and `/yumori/partners` on both shared-host contexts, selected-language copy,
+phone/tablet/desktop layout, the retained homepage ticker, and an editable
+Japanese `mailto:` draft. Opening the draft is not sending it. Local browser
+checks or a passing configuration suite do not certify a live deployment or
+received inquiry.
 
 ```powershell
 node --experimental-strip-types --test modules/foundups/esingularity/tests/test_domain_routing.mjs

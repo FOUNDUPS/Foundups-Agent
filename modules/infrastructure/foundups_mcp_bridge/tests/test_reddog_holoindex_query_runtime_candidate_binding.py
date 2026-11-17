@@ -482,7 +482,7 @@ def test_candidate_requirements_are_exact_and_disjoint_from_launcher() -> None:
         if row and not row.startswith("#")
     ]
     assert launcher == [
-        "fastmcp==3.2.0", "mcp==1.30.0", "pydantic==2.12.3", "uvicorn==0.38.0",
+        "fastmcp==3.4.11", "mcp==1.30.0", "pydantic==2.12.3", "uvicorn==0.38.0",
     ]
     assert candidate == ["packaging==26.0"]
     launcher_names = {row.partition("==")[0].casefold() for row in launcher}

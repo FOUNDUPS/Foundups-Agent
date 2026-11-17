@@ -20,7 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
     POLICY_SCHEMA_V6,
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     constant_time_compare,
@@ -82,6 +82,7 @@ def bind_grant_authority_service_manifest(
             POLICY_SCHEMA_V8,
             POLICY_SCHEMA_V9,
             POLICY_SCHEMA_V10,
+            POLICY_SCHEMA_V11,
         }:
             raise RuntimeArtifactManifestError(
                 "grant_authority_service_binding_invalid"
@@ -89,7 +90,7 @@ def bind_grant_authority_service_manifest(
         grant_root = grant_authority_owner_runtime_root(
             owner_config_path, repo, str(policy["owner_config_id"])
         )
-        extra = {"owner_config_path": owner_config_path} if policy["schema_version"] == POLICY_SCHEMA_V10 else {}
+        extra = {"owner_config_path": owner_config_path} if policy["schema_version"] in {POLICY_SCHEMA_V10, POLICY_SCHEMA_V11} else {}
         verified = verify_current_grant_service_artifacts(
             repo_root=repo, grant_root=grant_root, policy=policy, **extra)
         return _binding(policy, verified)
@@ -149,7 +150,7 @@ def _binding(
 
 
 def _binding_type(policy, verified):
-    if policy["schema_version"] == POLICY_SCHEMA_V10:
+    if policy["schema_version"] in {POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
         descriptor = verified["installed_runtime_descriptor_digest"]
         if descriptor != policy["grant_authority_installed_runtime_descriptor_digest"]:
             raise RuntimeArtifactManifestError("grant_installed_descriptor_binding_mismatch")

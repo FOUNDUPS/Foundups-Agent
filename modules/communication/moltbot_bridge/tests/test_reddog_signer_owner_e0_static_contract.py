@@ -29,6 +29,8 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
 )
 
 
+SLICE_MODULES += ("reddog_signer_owner_e0_current_scope.py",)
+
 class _AuthorityResolver:
     def __init__(self, values: dict[tuple[str, str], str]) -> None:
         self._values = values
@@ -565,6 +567,6 @@ def test_v9_partial_projection_is_not_full_authority_and_cannot_downgrade():
     changed = dict(value, schema_version=pc.POLICY_SCHEMA_V8)
     assert not Ed25519SignatureVerifier().verify(value["grant_authority_public_key"], pc.canonical_signer_owner_e0_policy_input(changed), value["signature"])
     assert pc.POLICY_SCHEMA == pc.POLICY_SCHEMA_V6
-    for schema in ("reddog-signer-owner-e0-policy.v11", None, True, 9):
+    for schema in ("reddog-signer-owner-e0-policy.v12", None, True, 9):
         with pytest.raises(ValueError):
             pc.canonical_signer_owner_e0_policy_input(dict(value, schema_version=schema))

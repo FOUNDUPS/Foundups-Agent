@@ -166,7 +166,7 @@ def create_current_generation_manifest_launch_selection_boundary(
         owner_config_id=owner.owner_config_id,
         generation_public_key=owner.generation_public_key,
     )
-    return _Boundary(state.select, state.consume, state.current_selection_lease)
+    return _Boundary(state.select, state.consume, state.current_selection_lease, state.recheck_current_locked)
 
 
 def _require_owner_authority(
@@ -250,6 +250,14 @@ class _SelectionState:
                 )
             yield MappingProxyType(dict(current))
 
+    def recheck_current_locked(self, expected):
+        """Private read-only recheck; the authenticated caller still owns the fence."""
+        _require_selection_fresh(expected)
+        current = self._current_values_locked(selected_at=int(expected["selection_issued_at"]))
+        if dict(current) != dict(expected):
+            raise RuntimeArtifactManifestError("manifest_launch_selection_stale")
+        return current
+
     def _current_values(self, *, selected_at: int) -> Mapping[str, Any]:
         with reddog_runtime_artifact_generation_lock(
             self.runtime, repo_root=self.repo, allow_sealed=True
@@ -288,14 +296,15 @@ class _SelectionState:
 
 
 class _Boundary:
-    __slots__ = ("_select", "_consume", "_current_selection_lease")
+    __slots__ = ("_select", "_consume", "_current_selection_lease", "_recheck")
 
     def __init__(
-        self, select: Any, consume: Any, current_selection_lease: Any
+        self, select: Any, consume: Any, current_selection_lease: Any, recheck=None
     ) -> None:
         self._select = select
         self._consume = consume
         self._current_selection_lease = current_selection_lease
+        self._recheck = recheck
 
     def select(
         self, manifest: Mapping[str, Any], *, now_epoch: int
@@ -307,6 +316,11 @@ class _Boundary:
 
     def _lease_current(self, value: object) -> Any:
         return self._current_selection_lease(value)
+
+    def _recheck_current_locked(self, selected):
+        if self._recheck is None:
+            raise RuntimeArtifactManifestError("manifest_launch_recheck_unavailable")
+        return self._recheck(selected)
 
 
 def _read_manifest(

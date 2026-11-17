@@ -1,6 +1,56 @@
 # FoundUps Domain - ModLog
 
+## 2026-11-14 - SoftProto live co-design preview direction
+
+- Preserved 012's conversational design plus desktop/tablet/mobile/full-browser preview intent in [the existing SoftProto architecture](docs/SOFTPROTO_LIVE_CODESIGN_PREVIEW_EXTENSION.md).
+- Reused shared command/guardrail owners, WSP 102 design and WSP 95 skill boundaries; WSP 00 unchanged.
+- Documentation only. No editor runtime, deployment, live swarm or RSI completion claimed.
+
+
+### 2026-10-30 — Persistent repository-first FoundUp intake rule
+
+**2026-10-31 blockchain alignment:** domain entry points now link WSP26's
+simulator-first change contract and current reconciliation. Discovery, repository
+claims, pitch creation and FX interfaces remain subordinate to validated economic
+and authority contracts. GitHub source publication is separate from deployment;
+no economic policy is silently selected. WSP22/26/50/83/97.
+
+- At 012's explicit request, recorded the future-work retrieval rule in `docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md` and linked it from the domain README.
+- Retrieve current WSP 109 and applicable Skillz before new/existing FoundUp work; preserve Outcome -> Solution -> Pain, staged Solution and implementation barriers within Pain.
+- Distinguish current instructions/candidate skills from admitted or executed skills, and document unavailable HoloIndex/runtime checks honestly.
+- Vote's claim-verification packet now follows the clarified framing, keeps MVP scope unspecified, and records observed manifest/registry draft parameters.
+- Documentation only; no runtime, skill bundle, registry, public launch or ChatGPT account-memory mutation. References: WSP 22/30/50/62/95/97/108/109.
+
+### 2026-10-25 — PR1792 reusable brand schema candidate
+
+Add the original optional brand-context schema and registry path field while
+preserving current public-discovery and portfolio contracts. Existing registry
+tests add synthetic context/authority-boundary and optional-field compatibility
+checks. Combined backend/schema selection: author repaired 74 pass, zero skips.
+No production registry, protected payload, website or skill bytes change.
+Original eSingularity/YUMORI activation assertions are retained as pending
+original-PR owner acceptance, not replaced by a claim of synthetic deployment.
+WSP00/15/22/50/97. Independent repaired-core review is accepted in
+`refresh/pr1792-independent-core-review-20261025.json`; final CI/package/
+generated and hosted qualification remain pending. No activation is implied.
+
 ## Chronological Change Log
+
+### 2026-10-23 - Private AutoPost item capture inside the shared Mall
+
+- Added the [shared item handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) for
+  Shop clothing and GetK-style evidence. AutoPost stays the external camera and
+  original-media owner; item grouping and authenticated private attachment are
+  explicitly specified pending implementation. Public Shop remains undecided.
+- Updated the domain/module roadmaps, interfaces, canonical index, instance and
+  static-media contracts, registry evidence, navigation and bounded doc manifest.
+  Marked obsolete capture findings historical; preserved registry identities,
+  routes and unrelated Live/Lick/GetK work.
+- Repaired the existing member catalog request matcher and extended its current
+  VM harness. Detailed execution evidence lives in the member TestModLog and PR.
+  No new camera, identity/blob store, marketplace or private upload API was added.
+- WSP 22/50/83/84/97: exact-source reuse and independent review; runtime/bootstrap
+  and Holo limits remain recorded in the handoff. PRs own checks and main readback.
 
 ### 2026-10-18 - AutoPost as the mobile Live product vehicle
 

@@ -34,7 +34,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
     lease_validated_owner_e0_current_admission,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_root_protected_use_oracle import (
     RootAuthorizedSignerGrantRevocationOracle,
@@ -57,6 +57,17 @@ def authorize_current_grant_authority_wsp71_use(
     action: Callable[[], _T],
 ) -> _T:
     """Execute one operation while E0 and revocation authority remain current."""
+    return _authorize_permission_use(owner_config_path=owner_config_path, repo_root=repo_root,
+        owner_policy=owner_policy, now_epoch=now_epoch, revocation_oracle=revocation_oracle,
+        action=action, scoped=False)
+
+
+def _authorize_current_grant_authority_scoped_use(**inputs):
+    return _authorize_permission_use(**inputs, scoped=True)
+
+
+def _authorize_permission_use(*, owner_config_path, repo_root, owner_policy, now_epoch,
+                              revocation_oracle, action, scoped):
 
     if not callable(action):
         raise RuntimeArtifactManifestError("grant_permission_action_invalid")
@@ -65,15 +76,18 @@ def authorize_current_grant_authority_wsp71_use(
     with lease_validated_owner_e0_current_admission(**inputs) as admission:
         before, receipt = _permission_state(admission, repo, owner_config_path, revocation_oracle, now_epoch)
 
+    from .reddog_signer_owner_e0_current_selection import _lease_validated_owner_e0_current_scope, _scope_admission
+    lease = _lease_validated_owner_e0_current_scope if scoped else lease_validated_owner_e0_current_admission
     def guarded_action():
         # Root LOAD happens outside this lease; caller effects remain fenced.
-        with lease_validated_owner_e0_current_admission(**inputs) as current:
+        with lease(**inputs) as held:
+            current = _scope_admission(held, owner_config_path=owner_config_path, repo_root=repo)[1] if scoped else held
             checked_at = _current_permission_epoch(receipt, now_epoch)
             after, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, checked_at)
             if before != after:
                 raise RuntimeArtifactManifestError("grant_permission_authority_changed")
             used_at = _current_permission_epoch(receipt, checked_at)
-            result = action()
+            result = action(held) if scoped else action()
             final_at = _current_permission_epoch(receipt, used_at)
             final, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, final_at)
             if before != final:
@@ -100,12 +114,12 @@ def _current_permission_epoch(receipt, not_before):
 def _permission_state(admission, repo, owner_path, oracle, now_epoch):
     from .reddog_signer_independent_secret_grant_verification import _owner_authority_snapshot
     policy = admission.policy
-    if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10}:
+    if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
         raise RuntimeArtifactManifestError("grant_permission_e0_schema_invalid")
-    if policy["schema_version"] == POLICY_SCHEMA_V10:
+    if policy["schema_version"] in {POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
         _require_oracle(admission, oracle)
     root = grant_authority_owner_runtime_root(owner_path, repo, str(policy["owner_config_id"]))
-    extra = {"owner_config_path": owner_path} if policy["schema_version"] == POLICY_SCHEMA_V10 else {}
+    extra = {"owner_config_path": owner_path} if policy["schema_version"] in {POLICY_SCHEMA_V10, POLICY_SCHEMA_V11} else {}
     verified = verify_current_grant_service_artifacts(repo_root=repo, grant_root=root, policy=policy, **extra)
     receipt, snapshot_digest = _load_receipt(repo, root)
     _require_receipt(receipt, policy, verified, snapshot_digest, now_epoch)

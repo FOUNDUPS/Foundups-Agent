@@ -1,7 +1,7 @@
 ---
 name: yumori_funding_ppp_intelligence
 description: Verify live grant, subsidy, GX, PPP/PFI and public-asset reuse opportunities for YUMORI.me and synchronize City-facing evidence
-version: 0.1
+version: 0.2
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -16,6 +16,9 @@ evals:
   - canonical_registry_updated_before_drive
   - no_unawarded_funding_booked
   - city_facing_claims_preserve_eligibility_boundary
+  - closed_rounds_retained_for_next_cycle
+  - internal_review_dates_not_official_deadlines
+  - round_state_separate_from_project_status
 ---
 
 # YUMORI.me Funding / PPP Intelligence
@@ -30,9 +33,9 @@ Run this workflow when any of the following occurs:
 
 - a grant, subsidy, GX, data-center, energy-efficiency, heat-reuse, regional-infrastructure, PPP/PFI or public-asset reuse program opens, closes or materially changes;
 - 012 asks what public funding/support could apply to YUMORI.me;
-- a City/Prefecture/council communication will mention grants, subsidy, PPP/PFI or public funding;
 - document 03, document 05 or the financial model is being updated on funding;
-- a ministry, implementing body, Fukui City or Fukui Prefecture gives an eligibility answer.
+- a ministry, implementing body, Fukui City or Fukui Prefecture gives an eligibility answer;
+- an internal review/preparation date is due or 012 asks to retain opportunities for a future fiscal year.
 
 ## Authority order
 
@@ -44,6 +47,8 @@ Run this workflow when any of the following occurs:
 6. Moshpit / Email Log: operational receipts, not grant-status authority.
 
 If sources conflict, re-verify the primary source and update the repository registry first.
+
+The registry's date-history companion is [GRANT_ROUND_HISTORY.md](../../docs/GRANT_ROUND_HISTORY.md). It preserves past rounds and internal preparation dates; it does not supersede the registry's eligibility/funding status. The existing FIN workbook's `Grant Calendar` is its readable working projection, not another independent registry.
 
 ## Status contract
 
@@ -58,6 +63,8 @@ Use only these meanings:
 - `CLOSED`: no longer open.
 
 A maximum cap is never expected funding. Only `AWARDED` may be treated as committed subsidy revenue.
+
+Keep round state and project status in separate fields. A closed round can retain an unresolved project eligibility inquiry. Closure alone proves neither non-submission nor rejection, and it must not erase prior inquiry/application receipts.
 
 ## Workflow
 
@@ -117,6 +124,23 @@ Update Drive **05** only with the PPP implementation consequence:
 
 Do not maintain two independent detailed grant registries in 03 and 05. 03 is the readable evidence surface; 05 consumes it for transaction mechanics.
 
+Also reconcile the existing FIN `Grants & Subsidies` summary and `Grant Calendar` against the registry/date history. Read back edited cells and preserve the AWARDED-only financing formulas. A repo update alone is not evidence that Drive was synchronized; report partial completion explicitly if a surface cannot be updated.
+
+### 3A. Retain rounds and prepare for the next cycle
+
+Read `GRANT_ROUND_HISTORY.md` before adding or rolling a calendar year.
+
+- Keep one immutable historical identity per program ID + budget fiscal year + round/track. Append a new officially announced round; never replace the old year's dates merely to keep the table looking current.
+- Retain closed calls, extensions, prior official terms/source links, unresolved eligibility questions, actual project outcome evidence and the next preparation action. Correct factual errors with a dated correction note.
+- Separate official opening/publication, inquiry, pre-consultation, qualification, application and decision dates. Use JST. A missing cutoff time stays unknown; distinguish receipt from postmark deadlines.
+- Keep `next_internal_review` and `prepare_by` separate from official dates. Label future official calls `UNANNOUNCED / NOT VERIFIED` until a current primary source establishes them. Never add one year to a prior deadline and present it as official, or assume a supplementary-budget program will recur.
+- Start preparation before historically early rounds, not only the last observed autumn call. Establish applicant/operator, property rights, ownership, baseline, cost segregation, City sponsorship where required, forms and financing lead time before a new deadline.
+- Record who owns the next action: 0102 owns research, registry/calendar maintenance and preparation; City, operator or human legal/financial decisions remain with the authorized party.
+- A calendar entry is not a scheduled automation. Do not claim reminders or background checks were activated without a scheduling-tool receipt. Reuse an existing authorized watch rather than creating a duplicate.
+- A scheduled grant-change watch still notifies only material official changes under its task instructions. An internal review becoming due, a repeated no-change check, or an estimated anniversary is not by itself a newly opened program.
+
+Regression checks: closed F-01 retains its inquiry; F-08 preserves February/June/September rounds; F-09 consultation precedes proposal and excludes Sukatto in the current list; P-01 qualification is not a subsidy deadline; F-11 requires receipt, not postmark; FY2027 dates remain unannounced until official evidence; no cap becomes committed funding.
+
 ### 4. City education packet
 
 When a live program materially changes the reuse case, prepare a concise Japanese City Funding Notice:
@@ -162,3 +186,9 @@ When unsure where a grant fact belongs, put the full verified program fact in th
 ## Retained F-08 form evidence
 
 Before retrieving MLIT study forms again, read [official-form provenance and verification](../../docs/official/mlit_ppp_study_20261005/README.md). Reverify current source/version and preserve the unresolved Form 2-4 boundary. Use the grant registry for program status; file readability is not eligibility or application evidence.
+
+## Change log
+
+### 2026-10-26 — v0.2 retained-cycle tracking
+
+Added retained round history, separate round/project statuses, explicit future-date uncertainty, internal preparation ownership, spreadsheet readback and no-duplicate-watch rules in response to 012's request to preserve missed/closed opportunities for next-year preparation. No grant eligibility, application, award or runtime automation is promoted by this skill update.

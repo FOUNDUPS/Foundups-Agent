@@ -1,5 +1,17 @@
 # Digital Twin Module - Modification Log
 
+## 2026-11-05 — Add ready-only video retrieval and cooperative cancellation
+
+WSP11/22/50/84/97. Extend the existing query/getter chain with keyword-only
+`allow_cold_init=True` and `cancel_event=None`; legacy callers retain default
+initialization and private collaborator signatures. The bounded YouTube consumer
+opts out of cold video work, reusing only existing index/model state. Canceled
+probe outcomes do not start a subsequent constructor or poison the cold cache.
+No new warming process or eventual-readiness claim. The focused cross-owner
+test selection lives in video_comments/tests/test_reply_memory_readiness.py:
+23 new controls plus prior quality37 pass offline; no real corpus/model/index
+is initialized. Historical cold RAG predates the private manifest work.
+
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
 ## 2026-10-18 - Bounded AntifaFM station reply drafts

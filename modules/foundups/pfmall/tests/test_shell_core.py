@@ -805,7 +805,7 @@ class TestRealManifestDiscovery:
     the Phase 1 manifest cohort from actual repo paths.
     """
 
-    REPO_ROOT = Path("O:/Foundups-Agent")
+    REPO_ROOT = Path(__file__).resolve().parents[4]
     SEARCH_PATHS = [
         REPO_ROOT / "modules" / "foundups",
         REPO_ROOT / "modules" / "gamification",
@@ -854,7 +854,7 @@ class TestRealManifestDiscovery:
         assert m.token_symbol == "JUNK"
         assert m.is_invite_only is True
         assert m.launch_readiness == "conditional"
-        assert m.entry_url == "frontend/index.html"
+        assert m.entry_url == "https://gotjunk-56566376153.us-west1.run.app/"
         assert m.icon_url == "frontend/public/icon-192.svg"
 
     def test_magadoom_manifest(self, shell):

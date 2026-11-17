@@ -13,6 +13,11 @@ These are continuing acceptance gates, not completed features that may later be 
 
 ## Phase 1 — Monorepo incubation (current)
 
+- [x] Implement an exploratory organization-partner invitation and manually sent
+  inquiry template, with a host-restricted `/partners` alias and existing
+  Japanese/English/Portuguese language support. This is repository source only.
+- [ ] Verify this partner-inquiry edition after an authorized production
+  deployment; keep actual inquiry receipt and partner commitments separate.
 - [x] Preserve the live Japanese-first campaign PWA.
 - [x] Move canonical source under `modules/foundups/esingularity/frontend`.
 - [x] Add FoundUp identity, manifest, registry, tests, and module documentation.

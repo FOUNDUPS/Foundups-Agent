@@ -1,169 +1,42 @@
-# system_health_monitor Interface Specification
+# System health tools interface
 
-**WSP 11 Compliance:** In Progress
-**Last Updated:** 2025-09-25
-**Version:** 0.1.0
+## Root validator
 
-## [OVERVIEW] Module Overview
+`WSP85Validator(project_root=".")` resolves a path; construction does not create
+directories. `scan_root_directory()` returns a dictionary with `prohibited_files`,
+`prohibited_dirs` and `unknown_files`, each a list of path strings. It enumerates
+immediate children and uses filesystem type checks; symbolic-link type checks may
+follow their targets, but the validator does not recursively enumerate them.
+Absent or inaccessible roots are errors, not clean results. Ordering follows the
+filesystem and is not a stable API guarantee.
 
-**Domain:** infrastructure
-**Purpose:** [Brief description of module functionality]
+Root temporary names and handoff prompt names are checked before the generic
+hidden-file exemption. Recognized foundational Git/configuration/instruction
+files are allowed. A directory whose name begins with an ASCII drive letter and
+the Windows private-use colon substitution is reported for ownership review.
+That report grants no authority to delete or relocate its contents.
 
-## [API] Public API
+`get_correct_placement(filename)` returns advisory text. `validate_and_report()`
+prints findings and returns whether all three categories are empty.
+`suggest_fixes(violations)` returns strings for a subset of findings; it does not
+execute them, shell-quote arbitrary names or establish move safety. The CLI's
+`main()` checks the current working directory and returns 0 or 1. There is no
+automatic cleanup, provider call, credential read or persistence in this owner.
 
-### Primary Classes
+## Separate analyzer and scaffold
 
-#### SystemHealthMonitor
-```python
-class SystemHealthMonitor:
-    """Main class for [module functionality]"""
+`SystemHealthAnalyzer(memory_dir="memory/system_health")` creates that directory.
+`analyze_message(message, timestamp=None)` updates bounded message history and
+issue/error state, returning newly detected issues; an explicit zero timestamp
+falls back to current time. `track_operation(operation, duration_ms)` records
+timings. `analyze_pattern(pattern_type, pattern_data)` returns heuristic advice
+or None. `get_health_report()` returns a dictionary of score, counts, timings,
+critical issue data and recommendations; samples are not a redaction boundary.
+`integrate_with_self_improvement(engine)` calls `engine.observe_system_issue`
+for stored high/critical issues and returns the report; delegated effects depend
+on that engine. These APIs are source-reviewed, not exercised by the root tests.
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
-        """Initialize SystemHealthMonitor
-
-        Args:
-            config: Optional configuration dictionary
-        """
-
-    def process(self, [parameters]) -> [ReturnType]:
-        """[Method description]
-
-        Args:
-            [parameters]: [Parameter description]
-
-        Returns:
-            [ReturnType]: [Return value description]
-
-        Raises:
-            [ExceptionType]: [When exception is raised]
-        """
-```
-
-### Utility Functions
-
-#### utility_system_health_monitor
-```python
-def utility_system_health_monitor([parameters]) -> [ReturnType]:
-    """[Function description]
-
-    Args:
-        [parameters]: [Parameter description]
-
-    Returns:
-        [ReturnType]: [Return value description]
-    """
-```
-
-## [CONFIG] Configuration
-
-### Required Configuration
-```python
-# Example configuration
-config = {
-    "setting1": "value1",
-    "setting2": 42
-}
-```
-
-### Optional Configuration
-```python
-# Optional settings with defaults
-optional_config = {
-    "timeout": 30,  # Default: 30 seconds
-    "retries": 3    # Default: 3 attempts
-}
-```
-
-## [USAGE] Usage Examples
-
-### Basic Usage
-```python
-from modules.infrastructure.system_health_monitor import SystemHealthMonitor
-
-# Initialize
-instance = SystemHealthMonitor(config)
-
-# Use main functionality
-result = instance.process([example_parameters])
-print(f"Result: {result}")
-```
-
-### Advanced Usage
-```python
-# With custom configuration
-custom_config = {
-    "special_setting": "custom_value"
-}
-advanced_instance = SystemHealthMonitor(custom_config)
-
-# Use utility function
-processed = utility_system_health_monitor([input_data])
-```
-
-## [DEPENDENCIES] Dependencies
-
-### Internal Dependencies
-- modules.[domain].[dependency_module] - [Reason for dependency]
-
-### External Dependencies
-- [package_name]>=x.y.z - [Purpose of dependency]
-
-## [TESTING] Testing
-
-### Running Tests
-```bash
-cd modules/infrastructure/system_health_monitor
-python -m pytest tests/
-```
-
-### Test Coverage
-- **Current:** 0% (implementation needed)
-- **Target:** >=90%
-
-## [PERFORMANCE] Performance Characteristics
-
-### Expected Performance
-- **Latency:** [expected latency]
-- **Throughput:** [expected throughput]
-- **Resource Usage:** [memory/CPU expectations]
-
-## [ERRORS] Error Handling
-
-### Common Errors
-- **[ErrorType1]:** [Description and resolution]
-- **[ErrorType2]:** [Description and resolution]
-
-### Exception Hierarchy
-```python
-class [ModuleName]Error(Exception):
-    """Base exception for [module_name]"""
-    pass
-
-class [SpecificError]([ModuleName]Error):
-    """Specific error type"""
-    pass
-```
-
-## [HISTORY] Version History
-
-### 0.1.0 (2025-09-25)
-- Initial interface specification
-- Basic API structure defined
-- Placeholder implementation created
-
-## [NOTES] Development Notes
-
-### Current Status
-- [x] WSP 49 structure compliance
-- [x] Interface specification defined
-- [ ] Functional implementation (TODO)
-- [ ] Comprehensive testing (TODO)
-
-### Future Enhancements
-- [Enhancement 1]
-- [Enhancement 2]
-- [Integration with other modules]
-
----
-
-**WSP 11 Interface Compliance:** Structure Complete, Implementation Pending
+`SystemHealthMonitor(config=None).process()` and
+`utility_system_health_monitor()` return placeholder strings. Their presence
+does not implement the old generated interface template's proposed service.
+See [source](src/system_health_monitor.py) and [tests](tests/README.md).

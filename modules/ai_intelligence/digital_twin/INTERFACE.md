@@ -1,5 +1,21 @@
 # Digital Twin - Public Interface
 
+## VoiceMemory optional retrieval (2026-11-05)
+
+```python
+VoiceMemory.query(text, k=5, *, allow_cold_init=True, cancel_event=None)
+```
+
+Defaults preserve existing cold initialization and no-new-keyword calls to the
+private lookup/search collaborators. `allow_cold_init=False` reuses the existing
+`_video_index` cache without probing or constructing a cold index; an uninitialized
+embedding model also yields no video context. Ready-only skips do not poison
+the `None`/`False` cache sentinels. Local corpus retrieval is unchanged.
+An optional event with `is_set()` stops later phases and discards canceled
+results. It cannot interrupt an active native operation. An unsupported
+ready-only collaborator is not authority to retry a cold query. No background
+warmup, second cache, model router or publication authority is introduced.
+
 **WSP Compliance**: WSP 11 (Interface Protocol), WSP 00 (Zen State Attainment)
 
 ---

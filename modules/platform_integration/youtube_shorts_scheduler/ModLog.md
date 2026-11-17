@@ -1,5 +1,284 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-16 - Live-aware audience timing correction
+
+Latest 012 correction: avoid releases during active livestreams, use named U.S.
+audience timezones with date-specific DST/Studio conversion, vary minute offsets,
+and yield shared Studio controls while 012 edits. Updated the existing remote
+runbook only; source-day selection, evidence holds and independent saved-state
+readback remain required. Future no-live guarantees require qualified runtime
+checks; this documentation does not deploy them. WSP 22/50/84/97. Validation:
+diff/contract checks and independent document review; no video effects.
+
+## 2026-11-16 - Conversational scheduling policy reconciliation
+
+Extended the existing skill routing contract and remote runbook, rather than
+adding a publisher or duplicate skill. Latest explicit cadence and overnight
+instructions override earlier batch directions without silently changing channel
+configuration. Added live inventory reconciliation, mixed-stream topic evidence,
+verified Studio Ask availability, alternating priority-topic slots, distinct
+evidence/approval holds and independent persisted readback. Private clip receipts
+remain outside source control. Documentation only; no video effects, runtime
+activation, native allocator changes or model training from this update.
+WSP 22/50/84/95/97. Validation is scoped to document diff and contract/link checks;
+no application test or deployment pass is claimed.
+
+## 2026-11-15 - Stop the manual visual harness after unverified outcomes
+
+The existing Layer 3 `--wre-tars` caller now returns its summary immediately after
+an unverified visibility or Schedule step, so later UI edits cannot continue from
+that failure. Prompts describe visual localization targets; exact date/time values
+use explicit read-only DOM checks with the existing selectors. The CLI converts
+absent, empty, failed or inconsistent summaries to exit 1. Three offline cases
+exercise failure stops, matching/mismatched/missing readback and exit status. No live browser,
+model, saved schedule, publication, deployment or activation is implied. WSP22/50/97.
+
+Hosted bounded CI exposed an eager DOM-owner import that pulled the full scheduler
+and unavailable `pytz` into collection. Defer that constructor to the manual path;
+do not add runtime dependencies to the offline suite. A fourth same-file test uses
+the native import guard to reject the scheduler parent, `pytz` and model imports,
+while loading the actual harness. Four focused tests pass locally; live behavior
+and corrected hosted acceptance remain separate checks.
+
+## 2026-11-10 — Native inventory diagnosis without scheduling effects
+
+The direct Unlisted route reached the existing collector but returned incomplete
+inventory before selection. Add reason codes and content-free page observations
+to that collector, retaining every qualification check. The Agent CLI can inspect
+an already accepted pending recorded request under the same runtime lease and
+source/access/gate checks. The launcher returns before claim, reservation or Save;
+verification handoff also leaves the request untouched. No inbox refresh, new
+command, unknown-record recovery or continuation is introduced. WSP11/22/50/77/84/97.
+
+Final sealed offline qualification passed 283 calendar cases and 102 inventory
+cases, retaining all earlier selections with zero denied effects. Independent
+source review accepted the read-only effect boundary. Native inspection confirmed a pagination timeout: the qualified snapshot saw
+Studio's `#navigate-after` control while the legacy labelled-button wait failed.
+Reuse that observed native element through the existing DOM owner, bind it to
+the collector's exact page witness, click once and await changed rows. A changed
+channel, route, filter, search or row set blocks the click. No retry fallback is used.
+Native inspection reached this adapted control but did not observe changed rows
+before its bounded wait expired. Full inventory and scheduling remain unqualified;
+no selection claim, reservation or Save occurred. The request deadline subsequently
+expired and is preserved. Further execution requires qualified request recovery;
+this slice neither renews it nor clears prior uncertain records.
+
+## 2026-11-10 — Native Unlisted navigation after first live observation
+
+The native recorded-stream request reached its verified parent/channel, then the
+legacy ContentPageScheduler Unlisted sidebar selector timed out before selection
+or Save. Reuse the existing filtered Shorts URL helper for frozen-request discovery
+and selected navigation. A row timeout still permits strict explicit-empty
+readback; URL parameters alone never qualify the inventory. Preserve native
+channel, applied-chip, title and complete-pagination checks, late STOP checks and
+verification handoff. The frozen selected path no longer enters the model fallback.
+No unknown record or request reservation is cleared. WSP10/22/50/77/84/97.
+
+Sealed calendar qualification: 233 passed, retaining all 215 prior cases and
+adding 18 URL/readback/handoff/selection controls, with zero denied effects.
+Independent source review accepted; repaired native behavior awaits execution.
+
+## 2026-11-10 — Native first-test dispatch for an ended stream
+
+Extend the existing Agent CLI with exact-request consumption and the shared DAE
+runtime lease. Recorded parent identity and observed title must match before
+complete Unlisted Shorts discovery. Preserve the full frozen selection but permit
+only its first member with unchanged title/description. Recheck this bound at the
+existing scheduling effect guard; no fallback member, ordinary rotation or title
+variation follows. Missing metadata blocks the first test. Save/readback and
+remaining-batch continuation remain unqualified. WSP10/11/22/50/77/84/97.
+
+Validation: the sealed calendar selection passes 215 cases, with all 154 previous
+names retained and zero denied effects. First-test guards reject parent targets,
+later batch members, changed titles, metadata rewriting and competing runtime
+ownership. Live scheduling remains unqualified until independent saved-slot proof.
+
+## 2026-11-10 — Frozen stream title batch through the existing DAE
+
+Extend the private command queue and owned scheduler path with exact-title
+Unlisted Shorts discovery on the frozen confirmed stream channel. Require complete
+calendar inventory even for selected batches, bind the supplied access-verified
+browser without reconnect, and recheck expiry, cancellation, configured gates and
+detail identity/title before editing. Audit committed picker values and observed
+timezone before reserving a slot and entering the existing Save claim/callback.
+Reservations and submission attempts are separate; neither populates verified
+scheduled results. Preserve verification handoffs through fallback catchers.
+The legacy single-channel live shortcut refuses instead of bypassing this owner.
+
+The request branch yields its DAE browser after claimed work; the supervisor
+retains the held state. Ordinary general manual-takeover, full saved-state
+reconciliation, native WRE invocation and live Studio qualification remain separate.
+No channel identifiers or private instructions are added to source. WSP11/22/50/77/84/97.
+
+## 2026-11-10 — Exact calendar slots and durable unknown reservations
+
+Keep exact occupied slots from complete channel inventory and allocate against
+the combined observed and pending calendar. Preserve ET-to-channel date rollover,
+minimum spacing across midnight and the channel-local daily cap. Ambiguous
+observed times block the calendar. Allocation skips unrepresentable DST slots.
+
+Live reservations require persisted state and a fresh qualified calendar bound
+to the account timezone; Save separately observes the native picker. Duplicate or malformed state fails closed. A same-task nested
+operation reuses the channel lock, and another task or process must acquire it
+independently. Atomic saves retain unknown reservations across reloads and empty
+or failed inventory. State is scoped to the installed checkout's tracker folder.
+Qualified offline controls cover 34 calendar and persistence cases. WSP22/50/84/97.
+
+## 2026-11-10 — Audit before scheduling; explicit audience configuration
+
+Extend existing detail Save guards with title/description completeness, observed
+audience and future date/time/timezone checks. Missing metadata consumes only
+matched eligible existing analysis; absent evidence blocks. Content-row scheduling
+enters the detail owner; unauditable inline writes refuse before claims/clicks.
+Keep manual-field protection, private directives and uncertain-save records.
+
+012's configuration correction removes channel-name audience defaults. Exact-ID
+Yes/No lists come from the runtime environment; explicit registry booleans survive
+normalization. Malformed, duplicate, conflicting or absent policy cannot select
+an audience or save. No configured ID enables a new channel's operational roles.
+Offline controls and installed/live qualification are separate. WSP11/22/50/84/97.
+
+## 2026-11-10 — Guard direct launch attachments during verification
+
+Install the shared Selenium verification handoff on both launch attachment
+paths before extra-tab cleanup or navigation. Detected challenges yield for
+at least30 seconds and until clear; no verification completion or pending-effect
+replay. Existing unknown-save claims are untouched. This is a narrow verification
+slice, not completion of the separate60-second manual draft/date-time takeover
+requirement below. Source installation and live qualification remain separate.
+WSP11/22/50/84/97.
+
+## 2026-11-07 — Record manual takeover and YUMORI metadata requirements
+
+WSP00/22/50/77/97. Source review at `fa7d487f3` found that detail/CPS workflow
+failures can dismiss dialogs and continue rows; launch audit/origin restoration
+and outer cycles lack a propagated manual-yield state. Existing unknown-save
+claims and the no-CPS-retry-after-started-cycle guard remain authoritative.
+Record the required 60-second same-action recheck, no-navigation takeover and
+evidence-identified Foundups YUMORI song metadata in the existing roadmap.
+Both changes are SPECIFIED_NOT_IMPLEMENTED at this checkpoint. No source,
+browser, tracker, unknown-save record or test result changed in this docs slice.
+
+## 2026-11-05 — Reuse the native schedule control for dialog readiness
+
+WSP11/22/50/62/84/97. The post-click readiness fallback omitted the existing
+`SCHEDULE_RADIO_XPATH` (`PUBLISH_FROM_PRIVATE`) that the next scheduling step
+already uses. Reuse that exact selector and require a displayed, non-stale
+control, retaining the named-dialog and legacy readiness paths. Button lookup,
+clicks, timeout bounds and all private-policy/Save/readback guards are unchanged.
+
+Six synthetic controls first reproduced the missing native variant (one failed,
+65 passed); the same four-file consumer selection then passed66 with no errors,
+skips or denied effects. No browser/model/provider/public action occurred.
+This proves a recognizer mismatch, not the cause of the attached live failures:
+an unanswered Audience requirement or overlay must not be automatically answered
+or dismissed. Installed UI readiness and saved schedules remain separate gates.
+
+## 2026-11-01 — Fresh private directives at existing Save owners
+
+WSP11/22/50/62/84/97. Reused the existing 012 queue, automation gate and DOM/CPS
+owners. Added a stateless consumer helper and per-edit original/proposed/staged
+snapshots. Scheduler/manual enhancement now use authoritative detail originals;
+actual Save rechecks and restores preserve only for our known draft. Native
+channel/video binding, public gates and per-cycle cap guard the final buttons.
+Legacy inline reschedule delegates the same guarded CPS owner; unassociated
+popup targets fail closed. No private research context enters public metadata.
+
+Queue-owned claims block uncertain same-video retry across cycles/restarts.
+Metadata-only applied feedback requires clean same-tab fresh-document reload and
+exact readback; scheduling claims cannot settle from metadata-only proof.
+Existing caller gates and preserve-metadata remain authoritative. Tests use fake
+DOM/providers and private queue paths; no browser/model/service/public action was
+performed. Live selector/readback qualification is separate.
+
+## 2026-10-29 — Qualified calendar reads and canonical receiving-account rotation
+
+WSP11/22/50/62/84/97. Existing DOM/CPS/auditor/tracker owners now share one
+bounded scheduled-inventory reader; a small sibling holds parsing/pagination to
+avoid extending the DOM monolith. Reused the Skillz chip-bar filter and existing
+shadow traversal pattern. Require native+URL channel binding, actual scheduled
+chip, first/later/final pagination proof and explicit scheduled date/time from
+visibility or schedule-labeled modern Date cells/tooltips. Both established
+native channel locations are supported; conflicting IDs are refused.
+Upload dates, parse failure and failed filters cannot become clean zero.
+Retain observed rows/coverage; partial/unknown cannot purge/reset tracker state,
+produce automatic calendar repair input, or establish a zero cache.
+Repair consumers reject forged-complete/unbound slot lists. Independent review
+also caught numeric video IDs and invalid expected channels; exact string
+identity checks and negative controls now protect collector and sinks.
+
+S1 actual-source bounded selection:102 passed, zero failures/errors/skips
+(86 inventory/consumer,9 existing visibility,7 post-audit breadcrumb). Process,
+network/SQLite effects were denied and writes confined to private external
+fixtures. Synthetic useful positive/qualified-empty inputs pass; installed DOM
+selectors remain unqualified, including unlabeled Date-column-only slots.
+Final sink review also rejected non-list sync inputs before any in-memory reset;
+None/tuple controls preserve both tracker dictionaries and file bytes.
+Legacy visibility readers retain chip-type scoping after shadow traversal, so
+Title/search values containing Unlisted/Scheduled cannot grant filter authority.
+
+Rotation freezes receiving ID and verifies first/later access via native ID,
+Studio path and known permission. Scheduler/config/tracker/alternate receipts/
+cache bind to that ID; failed/unknown access bypasses writers. Permission
+fallback is deferred to its canonical once-per-ID visit. Unbound/incomplete zero
+caches no longer suppress channels. S1 and S2 are separately reviewed local
+layers, with synthetic offline inputs; no live schedule/content modification or
+full main.py qualification is claimed.
+
+Retrieval: owner Holo query returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`,
+`freshness=UNKNOWN`, `index_gap_detected=true`; no semantic hits accepted or
+reindex performed. Direct current owner docs and saved daemon-log diagnosis
+supplied the missing artifacts. Deduplicated to existing filter/extraction/
+account/history owners; historical live claims remain dated and are not new QA.
+
+## 2026-10-26 — Compose existing scheduling skills and recover remote runbook
+
+Connect audit, coverage, selected-batch evidence, metadata, allocation, save,
+independent readback and feedback through skillz/README.md; link the existing
+skills without a new publisher. Recover the dual-surface, push authentication,
+and bounded today's-upload runbook work from PR2203. Low-view recovery remains
+an explicitly proposed review handoff, not an automatic republishing feature.
+
+WSP 50/84: source-bound lexical owner lookup at a490cadb5, workspace-head bundle,
+UNKNOWN semantic freshness/index gap; direct owner reads resolved noisy retrieval.
+WSP 00 bootstrap was attempted but blocked by unavailable torch in this environment;
+no full awakening or live worker compliance is claimed. WSP 22/95/97: preserve
+prototype status, distinguish instruction linkage, tests, live saves and deployment.
+Validation: local Markdown link checks and independent workflow forward review.
+## 2026-10-25 — Explicit Move2Japan cadence
+
+The existing slot owner supplies eight exact two-hour ET slots (08:00–22:00)
+for Move2Japan only. Tracker allocation/coverage, configuration, priority deficit,
+reschedule planning and apply guards resolve the same channel cap. Other channels
+retain three/day; explicit smaller caller limits remain effective. No daemon,
+live publication, model training or runtime-closure member was added.
+
+WSP22/50/84/97: lexical retrieval was source-bound but freshness UNKNOWN with
+index gap; required memory README absent. Bootstrap torch unavailable; cached
+tracker compliance is not a fresh awakening witness. Existing timezone conversion
+returns wall-clock only; non-ET date rollover still requires separate qualification.
+
+
+## 2026-10-25 — Evidence-gated metadata and verified scheduling feedback
+
+Replace unconditional channel/music templates in the scheduling metadata path
+with matched existing analyzer evidence. Preserve metadata for missing, stub,
+failed or mismatched artifacts; retain schedule-only and title/description opt-outs.
+Use conservative content extracts and bounded M2M provenance, not fabricated
+music themes or performance confidence. The legacy enhancement skill now shares
+this gate and its old string-only wrappers preserve their inputs.
+
+The existing DBA records reported success separately and grants positive outcome
+scores only for independent channel/video/date/time/timezone-matched readback.
+Audience-performance metrics remain unmeasured; no model training or automatic
+policy promotion is asserted. Updated both enhancement and scheduling-priority
+skill instructions, without invoking live analysis or publication.
+
+Validation: focused metadata/provenance/learning cases plus selected-batch and
+index-decoupling regressions. See tests/TestModLog.md. WSP 22/50/84/97; source-bound
+lexical retrieval retained UNKNOWN semantic freshness. Both existing analyzer
+schemas and scheduler write sinks were inspected before editing.
+
 ## 2026-10-22 — PR1860 current-main scheduling reconciliation
 
 WSP 00/6/10/11/15/22/50/84/97. C4/I4/D4/Impact4=16/P0.
@@ -2821,3 +3100,20 @@ Recorded coverage limits, conflicting request wording, modeled/verified boundari
 and the existing ASR path's forced-English behavior. Linked it from the audit
 skill and corrected the initial overbroad factual-content restriction.
 Documentation only; no new publisher, runtime repair, outreach or YouTube write.
+
+Move2Japan cadence is not qualified for live reschedule apply: that legacy adapter
+skips it with `cadence_live_unqualified` until independent timezone and occupied-slot
+receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
+whose local date differs from its ET date (including Asia/Tokyo). This prevents
+clock-only conversion from silently publishing on the wrong calendar date.
+# 2026-11-10 — Scheduling pre-save completeness audit
+
+012 observed missing Audience answers, date-only music titles and empty bodies.
+Extended existing detail/save and index owners: repair incomplete metadata only
+from matched existing evidence, verify configured audience, and refuse incomplete
+or changed drafts and invalid schedule intent before Save. Content-page entry
+uses detail inspection; unqualified inline Save is held. Added the module-local
+audit skill and private AntifaFM candidate review without publishing or model calls.
+Offline tests cover actual guard/selection owners and durable unknown behavior;
+live installation, browser selectors, UI-TARS audience diagnosis and independent
+schedule readback remain separate qualification. WSP 10/22/50/84/95/97.

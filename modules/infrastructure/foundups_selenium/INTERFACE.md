@@ -8,6 +8,38 @@
 
 ## Public API
 
+### YouTube human verification handoff
+
+`src.youtube_verification.install_youtube_verification_guard(driver, port)`
+wraps an already attached Selenium driver once, retaining its identity. It does
+not connect, launch a browser or complete authentication. Cooperating drivers on
+the same loopback debug port serialize effects using the existing runtime lock.
+
+Before an effect, a bounded passive target inventory detects official Google
+sign-in/challenge pages; a read-only Studio dialog probe recognizes English or
+Japanese verification headings, including open shadow roots. Ordinary comment
+text is not a verification signal. A detected challenge creates a shared hold
+for **at least 30 seconds**, extended while it remains present or unobservable.
+Navigation, refresh, close, typing, clicks, scripts, CDP and screenshots wait.
+Passive Selenium lookups remain available; global STOP exits without clearing
+the hold. No authentication text, URLs, screenshots or credentials are stored.
+
+The control record is `%USERPROFILE%/.foundups-agent/browser-verification/<port>.json`
+(home-directory equivalent elsewhere), containing monotonic start time and a
+hashed Selenium target handle. A clear observation on that same target after
+the minimum interval removes the hold and raises `VerificationHandoff`; the
+interrupted effect is **cancelled**, not replayed. An effect already dispatched
+retains its original exception and uncertain outcome. Existing owners must
+revalidate their page/action before another attempt and retain unknown writes.
+
+Malformed control state, lost original target or unavailable observations do
+not authorize effects. A lost target/stale record needs explicit owner recovery;
+never automatically discard it or clear another STOP. Coverage is limited to
+participating Selenium drivers and observable page/dialog signals. It does not
+cover native OS prompts, closed shadow roots or other browser clients, and does
+not implement the scheduler's separate 60-second draft/manual-takeover contract.
+Offline qualification is separate from installation and live popup acceptance.
+
 ### Main Class: FoundUpsDriver
 
 ```python
@@ -293,3 +325,44 @@ pytest modules/infrastructure/foundups_selenium/tests/
 
 **Last Updated**: 2025-10-16
 **Token Budget**: ~10K tokens used for initial implementation
+## WRE visual verification evidence
+
+`WREVisualTestRunner.step(name, action, verify_prompt, wait_after_action=2.0,
+max_retries=2, dom_verify=None) -> bool` executes the action **once**. The existing
+`max_retries` argument now limits read-only observations, never action replay.
+An action exception or explicit `False` result stops the step with uncertain
+outcome; inspect it before any separately authorized action. Callers must stop
+dependent steps when the returned value is false.
+
+With `dom_verify`, only that explicit read-only callback's literal `True` passes,
+and the evidence method is `dom`. Without it, UI-TARS receives the actual driver
+and performs **visual target localization** (`visual_localization`). Its current
+bridge locates a described element; coordinate detection does not prove arbitrary
+field values, publication, media playback or task completion. Use target
+descriptions for localization and explicit assertions for values. `use_uitars=False`
+does not supply a DOM assertion. Missing/disabled vision returns `unavailable`;
+exceptions return `error`, never an assumed pass. The synchronous vision path
+refuses an already running event loop without constructing an unused coroutine.
+
+Step summaries and existing PatternMemory output retain method, status
+(`passed`, `failed`, `unavailable`, `error`), requested assertion, UTC observation/
+attempt time, URL scheme/host/path (query, fragment and userinfo omitted), available
+browser/OS environment and error. Missing provenance is null/absent, not invented.
+The compatibility `failed` count includes every unsuccessful step; inspect status
+to distinguish a negative assertion from missing evidence. Screenshot capture must
+produce a file. The runner's saved screenshot supports the step record; the bridge
+captures its own model input, so these are not guaranteed to be the same frame.
+Memory storage does not admit a skill, prove learning or authorize production.
+
+Before reporting visibility unavailable, inspect the current host's available
+browser/vision tools and authorized delegation under existing routing/admission.
+Return URL, time, environment, observed assertions, blocked attempts and remaining
+unknowns. DOM checks, rendered observations and worker reports are distinct evidence.
+Retain authentication, permission, human-verification and anti-bot gates.
+
+Static audit at base `e62e9eb`: the tracked runner consumer is the manual Shorts
+`test_layer3_schedule.py --wre-tars` harness. No direct runner/vision import was
+found in the scoped `moltbot_bridge/src` or `extensions/reddog` search. The existing
+`browser_actions/src/action_router.py` owns DOM/vision routing; the managed
+`foundups-wsp` workspace skill supplies guidance, not an execution router.
+This correction does not establish installed Red Dog wiring or live vision use.

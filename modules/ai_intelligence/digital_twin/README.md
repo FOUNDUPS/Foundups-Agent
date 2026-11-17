@@ -1,5 +1,18 @@
 # Digital Twin Module
 
+## Ready-only optional video memory (2026-11-05)
+
+`VoiceMemory.query(text, k=5, *, allow_cold_init=True, cancel_event=None)` keeps
+the legacy default. A latency-bounded caller can pass `allow_cold_init=False`
+to reuse only the existing process-local video index and loaded embedding model.
+No cold probe/index/model is created and a cold `None` cache stays `None`.
+The YouTube reply owner uses this mode and continues without optional memory
+when cold. It does not arrange warmup or guarantee eventual video-RAG readiness.
+Cancellation is checked between stages; active native work remains owned until
+it returns. Ordinary local corpus behavior and explicit index-building APIs
+remain. `get_stats()` is not a readiness probe: its legacy path can initialize
+the video index.
+
 ## Product boundary
 
 RedDog is the lightweight, low-latency interaction, exchange, and attention

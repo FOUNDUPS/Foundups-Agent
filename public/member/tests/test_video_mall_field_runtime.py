@@ -1145,10 +1145,10 @@ class TestLaneAutoplay:
         click_handler = js[idx:handler_end]
         assert "enterFoundUp(index)" not in click_handler
 
-    def test_keyboard_enter_opens_fullscreen(self):
-        """Keyboard Enter opens fullscreen (not enterFoundUp)."""
+    def test_keyboard_enter_respects_the_active_projection(self):
+        """Enter uses the shared inline path in the ordinary and scoped video Mall."""
         js = _read("js/mall-tile-field.js")
-        # Find the keydown handler
         idx = js.index("e.key === 'Enter'")
-        section = js[idx:idx+200]
-        assert "openFullscreenFromTile(index)" in section
+        section = js[idx:js.index("});", idx)]
+        assert "if (fixedVideoField || memberPlayer) togglePlay(index);" in section
+        assert "else openFullscreenFromTile(index);" in section

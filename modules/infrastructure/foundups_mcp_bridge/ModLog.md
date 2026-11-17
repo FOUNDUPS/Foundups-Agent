@@ -1,5 +1,68 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-11-15: Harden Windows chained-venv resolution in _mcp_runtime_python
+
+WSP 22/50/97. Updated `_mcp_runtime_python()` in `scripts/launch.py` to retain
+the outer Windows environment's `Lib/site-packages` directory while walking
+chained `pyvenv.cfg` files (`base.parent.parent / "pyvenv.cfg"` or
+`base.parent / "pyvenv.cfg"`) with a resolved-path `visited` cycle guard and
+`Path(fields["home"]) / base.name` cycle fallback until reaching the true
+non-venv runtime executable (returning `(candidate, None)` cleanly on invalid
+or cyclic chains). Extended
+`test_windows_venv_runtime_uses_base_interpreter_and_preserves_pid` in
+`tests/test_mcp_launcher_http.py` to cover 2-level chained venvs and cycle
+handling while preserving the 60-case MCP compatibility test count.
+
+## 2026-11-15: Widen PC Git inventory tool section to stashes
+
+WSP 21/50/97. Widened `get_git_inventory` `section` parameter annotation in
+`src/mcp_server.py` from `Literal["summary", "branches", "worktrees"]` to
+`Literal["summary", "branches", "worktrees", "stashes"]` and added a `"stashes"`
+schema assertion inside `test_git_oauth_exact_discovery_and_single_tool` in
+`tests/test_git_inventory_oauth.py` (preserving the 60-case MCP compatibility count).
+
+## 2026-11-12: Read-only PC Git inventory
+
+WSP 21/50/84/97. Add an opt-in authenticated HTTP tool using the WRE Git
+lifecycle reader. Readiness checks the selected tool set and verifies a fresh
+Git receipt for the inventory profile. The default Holo and stdio profiles
+retain their existing tool sets. The Git-only OAuth profile uses the existing
+draft bridge's bounded introspection verifier with a fixed `git:read` scope.
+
+## 2026-11-11: Isolated private draft sender
+
+WSP 00/10/22/50/71/96/97. Keep draft effects out of the existing Holo MCP
+allowlist. The new service bounds OAuth caller, mailbox, sender, revision,
+scope, approval window, MIME bytes and provider routes. A durable reservation
+and encrypted snapshot precede the only allowed update. Exact readback or
+a hold determines the result; provider CAS is unavailable. No credentials,
+case material, or activation are shipped.
+
+## 2026-11-01 — Snapshot admission qualified within local scope
+
+WSP11/15/22/48/50/62/84/97. Existing snapshot publication uses the shared
+[Holo API](../../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01) and captured metrics before paging. [TestModLog](../../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) retains
+failed attempts, explicit corrections and final local/safe-scratch evidence.
+Protected publication/new-source PC/Holo and controller release remain pending.
+
+## 2026-10-26: Coordinated FastMCP 3.4.11 security candidate
+
+Update the HTTP launcher's exact dependency contract, requirement, and query
+candidate disjointness regression together from FastMCP 3.2.0 to 3.4.11. The
+upstream release fixes authorization after component transforms and denied
+resource-template fallback (GHSA-7xgj-8392-5q4r); the 3.4.11 follow-on
+requires certifi >=2026.10.19 after the eMudhra trust incident. MCP 1.30.0,
+Pydantic 2.12.3 and Uvicorn 0.38.0 stay pinned. PR2190's requirement-only candidate failed four
+of the existing 49 Windows criteria because the declared version and launcher
+contract disagreed; this repair preserves exact equality instead of relaxing it.
+
+Disposable Linux Python 3.12.14 validation: 28 passed, 19 Windows-only skipped,
+two Windows HTTP lifecycle cases deselected; pip check and the actual candidate
+capability probe passed. All 49 criteria without skips in hosted Windows CI
+remain required. No installed environment, runtime manifest, frozen LOW service,
+authentication, remote tool allowlist, process ownership or cleanup policy is
+changed. This source candidate is not a live runtime upgrade or activation.
+
 ## 2026-10-19: Coordinated MCP 1.30.0 security upgrade
 
 Upgraded the MCP dependency, launcher exact-version gate, and isolated query

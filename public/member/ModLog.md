@@ -1,5 +1,134 @@
 # Member Area Module Change Log
 
+## 2026-11-16 · Build v19 catalog truth, HPC tile routing, and activeVideo continuity
+
+- **Catalog Truth & Schema Normalization (`mall-video-catalog.json`)**:
+  - Added `esingularity_001` (`source_type: "external_app"`, `external_url: "https://esingularity.ai/"`, `category: "community"`, `tier: "F0_DAE"`, `lifecycle_stage: "proto"`, `launch_readiness: "ready"`, `creator_id: "012"`, `"012-lane"` tag, `video_count: 0`, `videos: []`).
+  - Reconciled `holoindex_prod_01` (`tier: "F3_INFRA"`, `launch_readiness: "conditional"`, `category: "infrastructure"`), `gotjunk_001` (`creator_id: "012"`, `creator_display: "UnDaoDu (012)"`, `"012-lane"` tag, `external_url: "https://gotjunk-56566376153.us-west1.run.app/"` without `entry_url` per Cloud Run `X-Frame-Options: SAMEORIGIN` guardrail), and `autopost` (`external_url: "https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/"`).
+  - Normalized every video entry to integer `duration_seconds >= 0` and `YYYY-MM-DDTHH:MM:SSZ` timestamps.
+- **Non-Video CTA Parity & Themes (`index.html`, `foundup.html`, `css/mall-tile-field.css`, `js/mall-tile-field.js`)**: Added `'internal_app'` (`Open App`) to `OVERLAY_SOURCE_TYPE_CTA` / `OVERLAY_NON_VIDEO_TYPES` in `index.html` and `SOURCE_TYPE_CTA` / `NON_VIDEO_SOURCE_TYPES` in `foundup.html`; added `.mall-tile.theme-esingularity_001` and `'infrastructure': 'cat-infrastructure'` theme mapping.
+- **HPC Tile Routing & Scoped Desktop Playback (`js/mall-tile-field.js`, `js/mall-video-player.js`)**: Clicking or activating the `hpc` tile in ordinary `/member/` saves Mall state via `mallStateRestore.save()` and navigates to `/member/?foundup=hpc` (`mallVideoProjection.memberPath('hpc')`) instead of dead-ending on a zero-video lane. `openDesktopVideo` inherits active `query`/`tag` scope into `queueQuery` and selects the first matching video; `mallVideoPlayer` exposes `getCurrentVideoId()` and reads `memberQueueDock.input` during inline `returnScroll` mode.
+- **Ordinary Mall `activeVideo` Continuity (`js/mall-state-restore.js`, `js/mall-tile-field.js`)**: Persisted and restored optional `activeVideo: { foundupId, videoId, queueQuery }` (`autoplay: false` on reload) in `pfmall_mall_state_v1` (`localStorage`) strictly for ordinary `/member/`, keeping HPC's tab-local `pfmall_video_scope_hpc_v1` (`sessionStorage`) isolated.
+- **Shell Generation & Media Placeholders (`member-sw.js`, `js/mall-video-projection.js`, `media/**`)**: Advanced `mallBuild` to `'v19'` and `CACHE_NAME` to `'pfmall-member-v19'`; tracked `.gitkeep` markers for `public/media/thumbs/` and `public/member/media/{posters,thumbs}/`. WSP 22, 49, 50, 97, and 104 apply.
+
+## 2026-11-15 · Build v18 discovery pills, internal_app action routing, and concierge alignment
+
+- **Discovery Filter Pills (`js/mall-tile-field.js`, `css/mall-tile-field.css`)**: Added dynamic `Videos`, `Apps`, and `HPC` (`/member/?foundup=hpc`) discovery pills inside `#mallProjection` without modifying `public/member/index.html`, backed by `filterBySourceGroup('videos' | 'apps')`, `localStorage` `fieldScope` persistence via `mall-state-restore.js`, and compact <=380px chip layout rules preserving 44px touch height with zero horizontal overflow.
+- **`internal_app` Source Action (`js/mall-planes.js`, `js/mall-tile-field.js`)**: Added `internal_app` (`Open App`) to `NON_VIDEO_SOURCE_TYPES`, `SOURCE_TYPE_CTA`, and `sourceTypeActions` with `routing_prefix` / `entry_url` / `external_url` resolution so internal app FoundUps such as GotJunk render an honest primary `Open App` CTA in quick-view.
+- **Inline Queue Continuity (`js/mall-video-player.js`, `js/mall-tile-field.js`)**: Preserved docked `queueQuery` across inline/desktop handoff, read docked search input in `getQueueQuery()`, and allowed `ended` auto-advance in desktop member inline slots (`returnScroll`).
+- **Red Dog Concierge Categories (`js/account-concierge.js`)**: Added live catalog categories (`media`, `ai-education`, `ai-research`, `thought-leadership`) and wired `setCategory()` to `filterByCategory()` while preserving legacy sort-projection compatibility.
+- **Shell Generation (`member-sw.js`, `js/mall-video-projection.js`)**: Advanced cache/build identifier from `pfmall-member-v17` / `v17` to `pfmall-member-v18` / `v18`.
+
+## 2026-11-14 · Visible Mall build
+
+The scoped video header and shared options show the loaded build. Build
+v17 refreshes the shell cache with the same generation. The hosted v7
+comparison put the first Short below its row. The v16 preview placed the
+player at the start of the original row, in line with the current contract.
+
+## 2026-11-14 · Shared search dock and transcript editing
+
+The scoped grid, invited grid and expanded player use the same plus menu,
+editable search and foreground dictation controls. The far-right action
+shows the square Stop during capture. A longer transcript opens above the
+controls and stays available to edit. The queue and provider keep their
+positions while the dock grows. Cache v16 refreshes the shared assets.
+
+## 2026-11-14 · Phone WikiTube viewer and dictation
+
+Ordinary member phone cards use the existing selected-card player. The
+expanded viewer reserves space for a persistent search dock and horizontal
+queue on phone and desktop. The plus button accepts tap and upward swipe.
+The mic or Red Dog hold starts foreground local search dictation where
+available, and the square finishes it. Worker v15 refreshes the shell.
+WSP 22 and 97 apply.
+
+## 2026-11-14 · WikiTube controls and member entry
+
+Added the shared member search dock and reuse of local dictation. The full
+player filters its existing queue. Desktop posters request muted playback
+in the selected slot and keep a separate full-view action. The Play hostname
+uses the same invited shell. Worker v14 refreshes the member assets.
+
+## 2026-11-13 · Invited desktop poster grid
+
+Fresh wide fine-pointer entry uses the existing grid. Click and keyboard
+selection open the shared full player for video posters and quick view for
+other cards. Escape closes the player before collapsing the field. The
+member worker installs these assets in v13. WSP 22, 97 and 104 apply.
+
+## 2026-11-13 · Public HPC and invited member routes
+
+Guest video entry resolves on the dedicated host. The FoundUps HPC query
+selects the same view after member admission and survives the existing
+sign-in redirect. Cache v12 installs versioned routing assets together.
+WSP 22, 97 and 104 apply.
+
+## 2026-11-12 · Phone video replaces the selected tile
+
+The shared player takes the selected tile's original row and hides its
+thumbnail until close. The existing iframe survives expansion and responsive
+transitions. Cache v11 refreshes the field and player assets. YouTube 101 and
+150 report an embed refusal. WSP 22, 97 and 104 apply.
+
+## 2026-11-11 · In-context playback recovery candidate
+
+Reuse the shared player for scoped inline playback and immersive expansion,
+with one iframe, local provider diagnostics, vertical batching, safe-area
+navigation and stable video return. The candidate cache is v7: installation
+reloads the public shell assets at their existing URLs and omits credentials.
+The scoped projection moves the existing controls in the DOM; the member HTML
+and its reviewed authentication metadata are byte-for-byte unchanged. See the
+[incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md) and
+[test log](tests/TestModLog.md) for the live v6 baseline and independent gates.
+
+## 2026-11-11 · HPC public video projection
+
+Use the existing grid and immersive player for the SchumerOUT collection.
+The exact dedicated hostname or explicit public query selects the field.
+The scoped route uses a tab-local scroll key for Vote contact return.
+Member entry, geographic product state and the global catalog retain their
+own routes and state. Service worker v6 distinguishes the public catalog
+cache key and declares the changed versioned assets.
+
+## 2026-10-25 — FX1 public directory discovery
+
+Expose the existing `/f/` public directory through a normal homepage FX link.
+Reuse its renderer and readiness state, adding optional declared-ticker search
+alongside name, summary and canonical ID. Directory copy distinguishes declared
+symbols from deployment/trading evidence; no registry or economic action changes.
+
+Extend the existing route VM to retain and invoke actual input/change listeners,
+then cover matching, nullable/non-string symbols, readiness/clear/empty behavior,
+escaped ticker markup and the existing error/Mall-return path. Add the missing
+tests README before authoring and preserve the existing fixture/route checks.
+The two complete route/gateway test files passed 300 cases with two inherited
+pytest configuration warnings; see `tests/TestModLog.md` for commands and limits.
+WSP 15/22/50/84/97: parent allocation 15/P1; degraded Holo retrieval was replaced
+with current contract/source/test reads. Local source verification is not a
+deployment, browser, token, liquidity or trading claim.
+
+## 2026-10-23 — Preserve intent-bearing terms in bounded Mall queries
+
+Repair the existing local catalog matcher for “I'm looking for clothing” and
+equivalent explicit request prefixes. Normalize straight/curly apostrophe input,
+make clothes/clothing/apparel aliases reciprocal, and keep red/dog as item terms
+unless they form the recognized leading Red Dog address. Negation, budgets and
+size words stay literal; this does not implement semantic intent or commerce
+filters. Grouped product discovery continues to refuse global catalog queries.
+
+Advance the existing member service-worker shell cache from v4 to v5 so
+previously installed clients refresh the precached matcher on worker update.
+Keep poster/property cache generations unchanged. Align the existing product
+state/service-worker harness with the new shell generation and v4 retirement.
+
+Extend the existing actual-field VM harness rather than create another search
+owner or test fixture. The new request regression fails on the unchanged source
+and passes after the repair; dispatcher and concierge harnesses also pass.
+See `tests/TestModLog.md` for exact commands and limits. WSP 22/50/84/97:
+current-source retrieval, shared-owner reuse, bounded change and recorded proof.
+No catalog, private capture, publication, microphone, backend or payment change.
+
 ## 2026-10-21 — Repair security test fixtures
 
 Strengthen existing hostile HTML assertions for mixed tag case and remove

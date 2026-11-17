@@ -2,7 +2,7 @@
 import json
 import math
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 
 from . import reddog_signer_system_service_manifest_selection_loader as loader
@@ -70,16 +70,23 @@ class _CurrentNonceOwner:
         return binding, config, min(expiry, deadline)
 
     @contextmanager
-    def lease(self):
-        with lease_validated_owner_e0_current_admission(
-            owner_config_path=self.path, repo_root=self.repo, policy=self.policy,
-        ) as selected:
+    def lease(self, *, _scope=None):
+        from .reddog_signer_owner_e0_current_selection import _scope_admission
+        if _scope is None:
+            lease = lease_validated_owner_e0_current_admission(
+                owner_config_path=self.path, repo_root=self.repo, policy=self.policy)
+        else:
+            selected = _scope_admission(_scope, owner_config_path=self.path, repo_root=self.repo)[1]
+            lease = nullcontext(selected)
+        with lease as selected:
             before = self.current(selected)
             yield before
             after = self.current(selected)
             if before != after:
                 raise ValueError("consensus_nonce_current_scope_changed")
-        # Successful lease exit is required before exposing any operation result.
+        if _scope is not None:
+            _scope_admission(_scope, owner_config_path=self.path, repo_root=self.repo)
+        # Successful public lease exit or live-scope recheck gates this operation.
         self.current(selected)
 
     def cleanup_custody(self, config):

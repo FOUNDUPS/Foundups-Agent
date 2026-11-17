@@ -1,9 +1,39 @@
 # foundups_mcp_bridge Tests
 
+## PC Git inventory
+
+The HTTP compatibility suite covers the opt-in tool set, required bearer
+authentication, propagation into the owned child and a request-bound readiness
+receipt. WRE's `test_git_lifecycle_inventory.py` covers Git reads against real
+temporary worktrees, with the GitHub response supplied as a fixture.
+`test_git_inventory_oauth.py` exercises exact audience discovery, the scoped
+single-tool profile, and denial of mismatched caller or token claims.
+
+## Private draft sender
+
+The focused `test_draft_*.py` suites use the separate requirements and synthetic
+data. They cover strict token and tool admission, fixed Gmail routes, MIME
+and attachment preservation, stale or ambiguous state, durable reservation,
+readback and reconciliation, and a real loopback MCP process with clean
+shutdown. No Google, ChatGPT or tunnel service is called.
+
+## Stored-settings snapshot controls — 2026-11-01
+
+The existing snapshot owner tests inert getters, complete baseline preflight,
+no early pages and preserved publication under the [Holo API](../../../../holo_index/INTERFACE.md#stored-chroma-settings-admission--2026-11-01).
+[TestModLog](../../../../holo_index/tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) owns exact phases, corrections and unqualified native cases.
+Local/scratch-native and package passes do not certify an active store, complete
+dependency closure or permission to run maintenance.
+
 ## MCP runtime compatibility
 
-The `mcp-runtime-compatibility` Windows CI job selects the existing launcher,
-HTTP server and query-candidate-binding suites. It installs the module's exact
+The `mcp-runtime-compatibility` Windows CI job selects the 60-case launcher,
+HTTP server, Git inventory OAuth, and query-candidate-binding suites
+(`test_mcp_launcher_http.py`, `test_mcp_server_sse.py`,
+`test_git_inventory_oauth.py`, and
+`test_reddog_holoindex_query_runtime_candidate_binding.py`), including 2-level
+chained `pyvenv.cfg` base-interpreter resolution and cyclic chain fallback in
+`_mcp_runtime_python` (PR #2402). It installs the module's exact
 quartet in a disposable venv, supplies private HOME/TEMP, and requires every
 selected case to pass without skips. The existing directory-alias helper can
 use a junction when Windows symlink privilege is unavailable; that tests the

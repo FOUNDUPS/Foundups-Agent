@@ -1,3 +1,24 @@
+## Ready-only video retrieval — 2026-11-05
+
+The focused source-bound controls live in
+`modules/communication/video_comments/tests/test_reply_memory_readiness.py`.
+Synthetic model/collection collaborators test unloaded-model refusal before
+count, model-readiness races, cancellation between count/encode/query/results
+and legacy default channel/embedding behavior. Together with VoiceMemory and
+the reply caller they retain useful cold and warm generation controls.
+No actual Chroma storage, embedding model, indexing or maintenance is invoked.
+Existing health/metadata tests need their own qualified private paths and
+collaborators; a dummy Chroma client alone does not prevent constructor writes.
+
+## Stored-settings qualification — 2026-11-01
+
+Existing durability/core/storage/probe and bridge snapshot owners cover the
+[API contract](../INTERFACE.md#stored-chroma-settings-admission--2026-11-01); [TestModLog](TestModLog.md#stored-settings-local-qualification--2026-11-01) owns exact phases and corrections.
+The existing CI job's same-five-owner/eight-native-exclusion selection targets the
+158 repository cases; actual hosted qualification remains pending. Preserve
+superseding oracles, exact namespace provenance and the two unrun native cases;
+scratch-native/package passes do not qualify the active store or release a controller.
+
 ## Native proposal caller contracts — 2026-09-30
 
 The existing WRE test owner `modules/infrastructure/wre_core/tests/test_wre_execution_truth.py` adds33 parameterized cases. The local

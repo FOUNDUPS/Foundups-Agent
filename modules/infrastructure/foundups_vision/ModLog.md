@@ -1,5 +1,45 @@
 # FoundUps Vision - ModLog
 
+## 2026-11-01 — Model-specific UI-TARS1.5 decode and snapshot verification
+
+WSP50/84/97: prior Storytime real-pixel inference returned plain `start_box`,
+but the bridge accepted only legacy tagged1000-grid coordinates. ByteDance's
+1.5 model guide and the installed LMStudio model metadata bind this local model
+to absolute Qwen-resized pixels. Add explicit opt-in1.5 profile and submitted28px
+grid; preserve default legacy profile and reject unknown profile/model, multiple
+actions, malformed/executable values and out-of-bounds points. One normalized
+mapping now drives both diagnostics and CSS/DPR coordinates; the old path guessed
+pixels above1000 then incorrectly remapped through1000 anyway. Actuator APIs and
+browser policies are unchanged.
+
+Pure tests froze exact-size, malformed and legacy behavior; a numerical boundary
+case exposed one-cell floating-point downscale and was repaired without changing
+its expected output. A first real-snapshot verify caught a leftover debug-log
+variable after mapping replacement; retain its red receipt and add full mocked
+snapshot/DPR verify coverage. The real390x844 Storytime snapshot now proposes
+(178,710), inside observed Play bounds, via a392x840 submitted image. This is only
+a local model proposal; actual authorized CUA button input and playback remain
+independent acceptance. No model download, desktop actuation, model training or
+worker admission is claimed. Holo lexical retrieval retained UNKNOWN freshness
+and index gap; direct module docs/test inventory/source bound this change.
+Independent root review also found existing action results ignored `{ok:false}`
+from the browser sentinel. Propagate exact positive acknowledgement to success,
+otherwise retain failure/error with0confidence and `action_failed` telemetry.
+Mark verify/find/diagnose as `proposal_only`, not an executed press. Extend the
+existing snapshot/DPR regression to both profiles and failed/successful mock
+actuator returns:34isolated tests pass. Actual Storytime behavior still requires
+the separate CUA action and full-outcome review; no actuator API is redesigned.
+Further independent held-outs blocked new1.5 geometry: missing viewport silently
+used DPR1 and unknown frame origin could remain actionable. Require finite
+positive observed viewport, consistent PNG/CSS scale within one physical pixel
+per axis and strict `window.top===window` proof before inference/input. Restrict
+new1.5 to top-level contexts; leave legacy iframe/fallback semantics unchanged.
+Use observed CSS width and height separately after validating geometry. Expanded
+offline contract suite now49passes/13historical deselected. Actual captured PNGs
+were390x843, CSSviewport390x844; retain those distinct values and original hashes,
+not a relabelled390x844 image. New one-pixel/fractional-DPR cases protect that
+boundary. No model reload or additional actual browser action was needed.
+
 **Module:** infrastructure/foundups_vision
 **WSP Reference:** WSP 22 (ModLog Protocol)
 

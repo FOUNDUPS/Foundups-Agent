@@ -1,3 +1,124 @@
+## Scientific repair operation, baseline verifier & canary orchestrator — 2026-11-16
+
+`src/repair_operation_contract.py` defines `ScientificRepairOperation`,
+`RepairOperationState` (`OBSERVED`, `REPRODUCING`, `NON_REPRODUCIBLE`,
+`REPRODUCED`, `BASELINED`, `RESEARCHING`, `HYPOTHESIS_DEFINED`,
+`ADMISSION_PENDING`, `ADMITTED`, `SANDBOX_PREPARING`, `EXPERIMENTING`,
+`DETERMINISTIC_VERIFY`, `INDEPENDENT_VERIFY`, `FUSION_REVIEW`, `ACCEPTED`,
+`REVERTED`, `ABANDONED`, `ESCALATED`, `LEARNED`), `VALID_STATE_TRANSITIONS`,
+`BaselineReceipt` (`verify_integrity()`), `ResearchQuarantineArtifact`,
+`CounterexampleReceipt`, and `ExperimentBudget`:
+
+- `ScientificRepairOperation.transition_to(new_state, reason="")` enforces
+  `VALID_STATE_TRANSITIONS` fail-closed (raising `ValueError` on illegal jumps)
+  and appends every visited state to `state_history` (serialized in `to_dict()`).
+- `record_counterexample(...)` appends structured objections and increments
+  `consumed_iterations` against `budget_exhausted()`.
+
+`src/repair_baseline_verifier.py` exposes
+`attempt_failure_reproduction(*, repo_root, failure_id, reproduction_command, failing_invariant, relevant_tests=(), timeout_seconds=60.0, authority_declaration="TIER_1_INTERNAL_MODULE") -> tuple[bool, BaselineReceipt | None, NonReproducibleClassification | None, str]`,
+parsing string commands via `shlex.split` and executing with `shell=False`.
+Exit code `0` (`ALREADY_RESOLVED`) or missing `failing_invariant` (`OBSERVER_DEFECT`)
+returns `reproduced=False` without sealing a `BaselineReceipt`.
+
+`src/scientific_repair_canary_orchestrator.py` exposes
+`ScientificRepairCanaryOrchestrator(repo_root, *, builder_model="qwen-coder-7b", verifier_model="gemma-270m", scaffold="openclaw", pattern_memory=None)`
+and `run_autonomous_repair_cycle(...) -> tuple[ScientificRepairOperation, CanaryExecutionReceipt]`,
+composing reproduction -> baseline -> quarantined research -> hypothesis ->
+`ExperimentBudget` admission -> sandbox patch -> deterministic verification ->
+`ModelIndependencePolicy.evaluate_independence` ->
+`VerifierContextFirewall.project_evidence_packet` -> `IndependentVerifierReceipt` ->
+`PatternMemory.store_outcome` (`SkillOutcome`), while leaving protected 19/P0
+custody gates (`promote_variation`, `RedDogDirector.advance_to_execution`,
+`RedDogVerifiedPatternMemorySink`) untouched.
+
+## Fail-closed `measurement_evidence` in `RecursiveLearningEngine` — 2026-11-16
+
+`recursive_improvement/src/learning.py` extends
+`RecursiveLearningEngine.apply_improvement(improvement, *, verification_evidence=None, target_applicator=None, measurement_evidence=None) -> bool`
+and `rollback_improvement(improvement) -> bool`:
+
+- Omitted `measurement_evidence` preserves `improvement.tokens_saved = None` and
+  `improvement.metrics["token_reduction_measured"] = False`.
+- Provided `measurement_evidence` validates fail-closed **before** calling
+  `target_applicator` (requiring a `Mapping` with non-empty
+  `measurement_receipt_id`, non-self-authored `evaluator_id != worker_id`,
+  matching `work_order_id`, non-negative non-bool integer `baseline_tokens` and
+  `candidate_tokens` with `candidate_tokens <= baseline_tokens`, and optional
+  `before_state_digest` / `after_state_digest` SHA-256 verification, plus
+  post-applicator `after_digest` verification with automatic `rollback_fn()` on
+  mismatch). Any failure records `application_status = "blocked_measurement_rejected"`
+  and returns `False` without retaining target mutation.
+- Valid measured apply records `improvement.tokens_saved = baseline_tokens - candidate_tokens`,
+  `token_reduction_measured = True`, receipt/evaluator/token/latency metadata,
+  and increments `engine.metrics["total_tokens_saved"]`.
+- `rollback_improvement()` subtracts measured `improvement.tokens_saved` from
+  `engine.metrics["total_tokens_saved"]` (clamped `>= 0`), records
+  `rolled_back_tokens_saved`, and resets `tokens_saved = None` and
+  `token_reduction_measured = False`.
+
+## Readiness evidence and admission — 2026-11-06
+
+`PatternMemory(db_path=None, *, read_only=False)` retains writable defaults.
+Read-only callers open an existing SQLite database without schema migration or
+false-positive seeding. Dashboard-owned readers close their connections;
+injected memory retains its caller-owned lifecycle. Missing default storage is
+reported as `storage_state=not_created`, without creating directories or files.
+
+`get_telemetry_dashboard()` returns `None` for unmeasured rates and averages,
+preserving measured zero. `metric_evidence` carries each threshold's sample count
+and recorded times; `telemetry_scope=database_lifetime` prevents an inference of
+current-run qualification. Retrieval excludes unscored rows from its denominator
+and reports observation dates and distinct skill count. Counter times are last
+updates, not sample-window dates. Variation completion time is not recorded.
+
+`check_dashboard_health()` evaluates one snapshot and adds `status` and
+`unknown_metrics`. `healthy` requires known evidence and no alerts. A missing or
+undersampled metric cannot suppress a different metric's sampled critical.
+`WRE_DASHBOARD_UNKNOWN_MODE=0` permits evaluation of smaller measured samples;
+it never manufactures evidence for a missing denominator.
+
+`dae_preflight.dashboard_readiness(health, *, in_watch, interactive_menu=False)`
+is shared by both Connect WRE owners and startup/action checks. UNKNOWN retains
+the existing cold-start admission policy after security, but is not PASS/READY.
+Checker errors are UNKNOWN and refused under enforcement. Known criticals block
+when enforcement applies. Explicit environment overrides remain authoritative.
+Interactive menu startup defaults advisory; actions default AUTO enforcement.
+This intentionally aligns noninteractive root startup with DAE action defaults,
+even without `OPENCLAW_24X7`. Security checks and their strict-runtime defaults
+are unchanged. Diagnostics do not grant protected worker admission or prove RSI.
+Headless startup additionally requires an enabled check with READY or legitimate
+coverage-only UNKNOWN. Disabled checks, DEGRADED warnings (including mixed
+unknown/warning), and malformed/failed checker results are not admitted. The
+disabled and mixed-warning cases intentionally tighten the older root command's
+inconsistent behavior; ordinary DAE cold-start admission remains separate.
+
+## Risk-verification preflight contract — 2026-10-28
+
+`wre_test_differential_runtime.validate_test_impact_policy_binding(request)`
+returns `(differential_requested, rejection_reasons)` without executing commands
+or authenticating authority. It reuses the existing v1 policy schema, scope
+resolver and `required_test_suite_kind` policy function.
+
+Absence and the resident adapter's empty mapping retain ordinary-check
+compatibility. Explicit null/nonmapping policies reject. When a work order is
+bound, its policy cannot be omitted, introduced or substituted downstream.
+Stale dependency, protected authority, release and periodic-audit signals require
+a full-scope plan. An incompatible plan rejects; the verifier never rewrites
+the admitted policy to make it pass.
+
+`execute_independent_test_evidence` validates the entire bounded check list
+before any command: allowed argv, policy, scope, exactly one differential
+pytest request and matching selection. Invalid plans produce no check records
+or command/differential calls. Runtime check failures still prevent differential
+execution. The final slice verifier separately rejects missing, empty or
+malformed differential evidence when the policy requires it.
+
+No schema version changes. One-use capability, exact-source binding,
+self-verification, security/held-out closure and local-only authority rejection
+remain in force. Neither this helper nor serialization grants execution,
+merge or retention authority.
+
 ## Skill-feedback source binding — 2026-10-22
 
 For non-telemetry dispatched outcomes, the coordinator owns `_skill_binding`
@@ -160,66 +281,67 @@ return `Error: Qwen chat response generation failed` and log only exception type
 Text remains `success=False`, `_effect_evidence=False`: admission, execution,
 acceptance and retention remain separate existing gates. No automatic activation.
 
-## Merge sentinel prerequisite contract — 2026-09-27
+## Git lifecycle reconciliation
 
-`run_main_merge_sentinel(repo_root, force=False)` keeps its dictionary interface.
-`passed` means startup may continue; it is not merge verification. Failed branch
-resolution, empty/detached branch, unavailable/empty/unrecognizable worktree
-inventory, failed/dirty status and failed fetch all return `merged=False`.
-For these failures, `passed` is false only when
-`GIT_MAIN_MERGE_SENTINEL_ENFORCED` is enabled. Dirty status includes untracked
-files even when Git configuration normally hides them.
+`reconcile_git_lifecycle(repo_root, synchronize_pc=False, tracked_prs=())`
+returns paginated inventory coverage, current GitHub main and required-check
+evidence, PR dispositions, branch dispositions and PC synchronization state. It stores the latest
+receipt in `foundups-git-lifecycle.json` under the shared Git directory. The
+existing runtime lock serializes callers on that Git directory. Partial source
+coverage and tracked obligations remain explicit.
 
-Fixed new error values: `named_branch_required`, `worktree_discovery_failed`,
-`working_tree_status_failed`, `working_tree_dirty`, `fetch_failed`.
-The existing branch-resolution and other-main-worktree errors are preserved.
-Default-disabled and already-main calls retain their early skip behavior.
-The private worktree helper uses `None` for unavailable discovery, distinct
-from a readable inventory with no competing main checkout.
+The Git config `foundups.lifecyclePCWorktree` selects an absolute checkout
+belonging to the same Git directory and using the same origin. Without a
+selection the current primary checkout may serve when it is on main.
+`synchronize_pc=True` enables a clean, checked main worktree to fast-forward.
+Git rechecks the target, local branch, ancestry and working-tree status before
+and after updating. Dirty, diverged and unverified work retains its own lane.
 
-The post-merge cleanup check also explicitly includes untracked files and runs
-before local branch-force, checkout or explicit branch deletion. New errors
-`cleanup_working_tree_dirty` and `cleanup_status_failed` return immediately,
-with `passed = not ENFORCED`. The compatibility field `merged=True` means only
-that a remote command reported success; it does not mean verified main, complete
-cleanup or rollback. The helper neither auto-stashes/pops work nor supplies
-`--delete-branch` to GitHub CLI. After successful synchronization and checkout,
-`GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1` (also its unset default) now returns
-`cleanup_deletion_unqualified`, appends a blocked-deletion action and sets
-`passed = not ENFORCED`. The helper issues no branch-deletion commands, retains
-prior actions and keeps `merged=True` as remote-command success only. Explicit
-`DELETE_BRANCH=0` leaves the successful no-delete path unchanged. `force=True`
-bypasses enablement only, never this gate. This does not prove a remote branch
-still exists after independent server-side deletion.
+For a known merged PR, completion requires successful required checks on its
+merge SHA and current main, merge ancestry in main and a clean PC checkout
+at the verified current SHA. Closed unmerged and unreadable PRs retain a
+follow-up disposition. Repository merge authority and branch retirement
+remain separate from this receipt.
 
-After the initial cleanup status guard, fetch explicitly from origin
-`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
-and capture one full 40/64-character hexadecimal object ID. Read status again
-after the fetch/resolution, then update local main using the captured ID.
-Fetch, resolution, status or branch-update failure stops before checkout and
-explicit deletion; there is no cached-target fallback.
-If checkout itself fails, `cleanup_checkout_failed` is returned with the failure
-message in actions and `passed = not ENFORCED`. The earlier local-main update
-is retained; no rollback or later deletion is attempted. `merged=True` still
-means only prior remote-command success. The existing startup error display
-consumes this structured field without a caller change.
+`branch_dispositions` classifies observed GitHub branches read-only against the
+current PR inventory and persisted completed PRs using strict same-repository
+case-insensitive `head_repository` matching and exact `sha == head_sha` tip
+matching. Each item exposes `{ref, sha, protected, pr_number, pr_numbers, stage,
+next_action}` where `pr_numbers` preserves all sorted known same-repository PR
+numbers for `ref`. Stages are `MAIN_BRANCH` (`main` only),
+`PROTECTED_BRANCH` (protected non-`main` refs without an active open PR),
+`BRANCH_OPEN_PR` (open PR at exact `sha`), `BRANCH_OPEN_PR_HEAD_MOVED` (open PR
+on `ref` whose `head_sha != sha`), `BRANCH_MERGED_PR_RETAINED`,
+`BRANCH_CLOSED_PR_UNMERGED`, `BRANCH_PR_OBSERVATION_INCOMPLETE` (when PR
+coverage is incomplete or partial), `BRANCH_PR_HEAD_MISMATCH` (complete PR
+observation with prior same-repo PR history on `ref` at another SHA) and
+`BRANCH_UNTRACKED` (complete PR observation with zero same-repo PRs on `ref`).
+Every retained branch still requires full-diff assessment before retirement.
 
-New synchronization errors are `cleanup_fetch_failed`,
-`cleanup_commit_resolution_failed` and `cleanup_main_update_failed`.
-Late status failures reuse `cleanup_working_tree_dirty`/`cleanup_status_failed`.
-All preserve `merged=True` as prior remote-command success only and
-`passed = not ENFORCED`; no rollback is implied. Commit peeling, not the string
-shape alone, checks commit type. Local branch-force uses the captured ID.
+`run_main_merge_sentinel(repo_root, force=False)` keeps the legacy result
+shape. Enablement and enforcement apply to observation coverage. The legacy
+`merged` field is false because promotion is handled by its own authority.
 
-These are snapshots, not an atomic worktree/ref lock. Ref movement before
-commit capture and worktree/ref changes after the final status remain races.
-The fetch updates the remote-tracking ref even if a later check blocks local
-main. Freshness does not prove intended content, checks or merge authority.
-Direct/backup pushes, unchecked PR merging, main readback and server-side
-auto-delete remain open. Automatic branch retirement is blocked pending a
-qualified combined containment/expected-ref/worktree-ownership contract.
-Default-off remains required; this does not certify WSP 97 terminal convergence
-or authorize native RSI.
+`get_git_inventory(repo_root, request_id, *, section=None, offset=0,
+runner=run_command)` emits read-only `foundups_git_inventory.v1` receipts capped
+at `262144` bytes (`_MAX_RECEIPT`) with `20`-row pages (`_PAGE_SIZE`). Valid
+`section` values are `None`, `"summary"`, `"branches"`, `"worktrees"`, and
+`"stashes"` (`offset=0` is required when `section` is `None` or `"summary"`).
+Local observation captures branches, worktrees, and SHA-only `refs/stash`
+reflog entries (`[{"sha": ...}]` via `rev-list --walk-reflogs refs/stash`, never
+stash messages, subjects, or filenames) before and after GitHub `ls-remote`,
+blocking with `"pc_state_changed_during_observation"` if any local branch,
+worktree, status, or stash changes during observation. After stability checks, it
+probes local `github_main` commit presence via `git cat-file -t` (without
+failing when absent) to emit `github_main_present_on_pc`, `pc_backlog_summary`
+(`local_head_count`, `attached_worktree_branch_count`,
+`merged_into_github_main_count`, `unmerged_unattached_head_count`,
+`stash_count`), `worktree_summary` (`total`, `attached`, `detached`, `bare`,
+`locked`, `prunable`), and paged `stash_count`.
+`verify_git_inventory_receipt(result, request_id, *, now=None)` enforces
+request ID, age (`-5` to `120` seconds), canonical `sha256`, SHA-only
+`stashes`, `github_main_present_on_pc`, `pc_backlog_summary`, and
+`worktree_summary`.
 
 # WRE Core Interface
 
@@ -316,6 +438,10 @@ and exact `verification_digest`. Test counts must be positive integers and the
 failure count must be the integer zero; malformed values cannot imply a pass. Its v2 identity binds
 the full input evidence. Old minimal hand-written fixtures must supply the
 fields already produced by the real recorder; missing fields fail closed.
+Current receipts serialize `identity_version=2` and `evidence_digest`, the exact
+fields already used in their gate ID. Memex reconstructs that ID without changing
+it. Historical unversioned receipts preserve their exact serialized shape and
+legacy ID; partial, malformed, unsupported or downgraded identities reject.
 
 The existing bridge `invoke_reddog_wre_queue_authorized_pattern_memory_admission(...)`
 also isolates sink input and rejects empty/non-string acknowledgments through
@@ -754,6 +880,16 @@ fidelity alone does not classify an execution as failed. Skill filtering,
 ascending fidelity/descending timestamp ordering and the result limit remain
 unchanged; high-fidelity failures require a correspondingly higher cutoff.
 
+Both `recall_successful_patterns()` and `recall_failure_patterns()` accept an
+optional `parent_version: Optional[str] = None`. When supplied, recall filters
+outcomes in SQL (before `LIMIT`) to rows whose `output_result` JSON contains a
+valid `$._skill_binding` record (`schema_version =
+"wre_skill_execution_binding.v1"` and `loaded_skill_sha256 == parent_version`);
+non-string or blank `parent_version` values fail closed to `[]`.
+`WREMasterOrchestrator.evolve_skill()` binds variation recall and
+`store_variation(..., parent_version=...)` to `loaded_skill_digest(skill_content)`
+so unrelated historical skill versions do not pollute candidate evolution.
+
 `stage_variation_candidate(variation_id)` sets a non-production
 `candidate_ready` state. `promote_variation()` is a fail-closed compatibility
 method until the independent signed promoter is implemented.
@@ -799,8 +935,8 @@ location resolver only; it is not production admission.
 
 `PatternMemory` retains these callable groups:
 
-- outcomes: `store_outcome()`, `recall_successful_patterns()`,
-  `recall_failure_patterns()`, `get_skill_metrics()`;
+- outcomes: `store_outcome()`, `recall_successful_patterns(..., parent_version=None)`,
+  `recall_failure_patterns(..., parent_version=None)`, `get_skill_metrics()`;
 - false-positive records: `record_false_positive()`, `is_false_positive()`,
   `get_false_positive_reason()`;
 - evolution and continuity: `store_variation()`, `record_learning_event()`,
@@ -952,6 +1088,14 @@ or runtime admission. The [roadmap](ROADMAP.md#consumer-dry-run-isolation-qualif
 records the baseline witness, repair and verification limits.
 
 ## Test differential and independent verification
+
+Test source may declare `WRE_TEST_MODE = "scaffold"` or `"manual"` (ordinary or
+annotated assignment). Both remain noncollectable in the canonical registry;
+scaffolds carry `unimplemented_test_scaffold`, manual programs carry
+`manual_test_program`. Other/nonliteral declarations carry `invalid_test_mode`.
+These declarations cannot hide external-effect reasons or grant execution.
+They do not authorize importing arbitrary test modules. Generated scaffolds
+are SPECIFIED_NOT_IMPLEMENTED and never count as behavioral coverage.
 
 `load_canonical_test_registry()`, `collect_registered_test_shards()`,
 `make_test_impact_plan()`, `make_test_run_snapshot()`, and

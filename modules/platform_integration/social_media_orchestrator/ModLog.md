@@ -1,3 +1,187 @@
+## 2026-11-16 — Repair generated backend publication-helper binding
+
+Hosted CI exposed the omitted generated import-closure/hash refresh. The existing
+generator now binds the one added helper, updated planner checksum and both
+digest pins; the exact count boundary advances1487→1488, rejecting1489. Existing
+332KiB manifest,2MiB file and32MiB total caps stay fixed. Eight Python manifest/
+index tests and existing Node compatibility/preflight/async/package checks pass;
+independent packaging review passes. Original hosted failure retained; new-head
+hosted qualification remains required. See tests/TestModLog for measured evidence.
+
+## 2026-11-16 — Publication receipt reconciliation in existing SOCIAL content route
+
+WSP11/22/50/84/97/99; module concatenation gate. Existing content ingress gains
+explicit dry-run reconciliation of supplied source approval, archive/build,
+exact live issue, channel approval/delivery and unresolved work. No new daemon,
+store, registry promotion, model/provider call or execution grant. Pub DAE is a
+coordination role; output memory remains proposed/not written. Contract and
+existing fixture are extended together; source-specific release issue2126 stays
+with the website owner. Local/hosted validation is recorded in tests/TestModLog;
+no provider or memory acceptance is claimed.
+
+## 2026-11-15: Assess index-to-Drive, Substack cadence and Play FoundUps handoffs
+
+Continue the same PR2394 instruction owner after 012's requested integration;
+do not duplicate the campaign operator or touch the preserved PC staged lane.
+Source audit at main43f0eb918cdf928be64667fda582f93cf9ab58c6 found full saved
+Gemini provenance but lossy helper/DB projections, no verified automatic Drive
+exporter, and no qualified Substack scheduler. Reuse the private issue brief,
+native Doc revision/readback, source-linked derivatives and existing platform
+owners. Keep summaries retrieval-only; no verbatim/training/publication inference.
+
+Record two-or-three posts/day as a cap, not a target. Conservative proposals
+use at most two until an explicit applicable publication policy is resolved;
+live account/timezone/queued/published/in-flight inspection is still unavailable.
+Web, email, Notes and imports retain separate authority/receipts. No live queue
+reconciliation or cap enforcement is claimed by this instruction.
+
+Link existing Mall public-registry/video projector, schema and delivery owners.
+Review public-safe values; never expose private Drive/raw manifests or assets
+through /member/media or catalogs. The inspected video scopes are HPC-only.
+No producer/exporter/provider/catalog/runtime code, data or service changed.
+Current review is source/instruction evidence only; earlier head83283353 checks
+do not validate this continuation. Require fresh exact-head hosted checks and
+independent review. Draft-to-ready remains blocked by the recorded approval
+review; this scope update is not approval for that transition or a merge.
+WSP00/11/15/22/50/95/97/99/110; same bounded documentation concern.
+
+## 2026-11-15 JST: Recover reusable social/newsletter instruction and source handoffs
+
+Reconcile the four preserved staged files from the isolated
+docs/social-community-newsletter-20261114 lane (base 0be2ae582020eab66b3aa8a1ab2deef802bebfeb)
+against main 28c1bf1f38f4dab3d24918227d68e40604688f9a. The original three tracked
+file blobs still match main; the staged reference is absent there. Preserve the
+PC checkout/index and original patch. Continue as one instruction-only concern,
+not a replacement orchestrator, skill, queue, database or provider executor.
+
+Retain campaign-operator v0.4.0/prototype and the recovered Reddit/Substack
+workflow. Link existing newsletter/ROC, issue-brief, research and video-index
+owners; reuse foundup_id and existing editorial/delivery vocabulary. Develop one
+manuscript collaboratively, then track audience-specific, source-revision-bound
+derivatives with separate approvals and receipts across qualified channels. Private
+manuscripts/source bindings stay outside public Git and social_content_brief.v1.
+Keep facts/commentary/fiction, summaries/transcripts, approval and delivery proof
+distinct. Require independent destination readback and original-action
+reconciliation across message retries. No new publication or production grant.
+
+The recovered lane reports WSP00/strict-tracker completion and a lexical Holo
+bundle with UNKNOWN freshness/index gap at its historical base. This connector
+continuation did not re-execute bootstrap, Holo or Python tests: no execution
+environment is available. Source retrieval, instruction/link validation and
+independent review are recorded separately from hosted exact-head/main checks.
+No platform posts, subscriber imports, account changes or runtime launches.
+WSP 00/11/15/22/50/95/97/99/110; WSP15 C2/I4/D4/Impact4=14/P1 planning estimate,
+not a signed runtime allocation. No runtime or existing test contracts changed.
+
+## Recover pitch instruction interface navigation — 2026-10-31
+
+Restore the preserved interface entry using main's existing v0.1.3 pitch owner
+and canonical FX/media contracts. It remains a local instruction skill without
+a callable executor, WRE admission, resident trigger or publication grant.
+Earlier pitch plans/log additions are retained as dated archive projections;
+no old skill version or campaign-placeholder description replaces main.
+No campaign, provider, asset upload or social posting occurred. WSP 11/22/50/84/97.
+
+## 2026-10-29: Reconcile existing editorial-package PR #2238
+
+WSP 11/22/50/71/84/97. Preserve the original compiler/strict content route while
+integrating main45aa97ba, including the newer preflight and Ollama owners. This
+is bounded compilation of caller-supplied, unverified sources, with proposed
+dates only; it grants no publication authority or live operation.
+
+The actual integrated package imports pass the original ten compiler methods
+and thirteen current adapter methods: 23 methods / 72 subtests. Production
+leaf replacements: none. Central DAE registration is isolated; Windows asyncio
+setup alone permits loopback fixture creation (16 events). Application imports
+and execution have a denied network/process/private-file/storage-write guard;
+zero denied-effect attempts occurred. These are local offline contracts, not a
+live campaign, installed runtime or independent human/agent review. Preserve
+the repaired, quarantined legacy content scaffold and every original compiler
+assertion; only its introductory replacement claim is corrected. Historical
+October 27 totals and verifier claims below remain dated source records.
+
+## 2026-10-27: Soro comparison and source-backed editorial packages
+
+- WSP00/15/22/50/62/84/97; baseline84f069bd, source-bound lexical fallback with UNKNOWN freshness. V2 bootstrap lacked torch; documented tracker fallback opened the gate without a detector witness.
+- Extend ContentOrchestrator and existing strict SOCIAL campaign dispatcher with scoped editorial brief→source-preserving drafts/proposed dates. Reject cross-FoundUp sources, malformed/oversized JSON, duplicate keys and execution overrides. Package revision is not authority; no host/model/provider/store/scheduler effects.
+- Existing content scaffold had invalid import/empty assertions; replace with substantive coverage. Independent review found canonical ID/locale and Unicode defects; repaired, with raw/provider length distinctions explicit.
+- Connected offline campaign selection:107 tests +131 subtests passed; new compiler coverage99.54% (not whole-module coverage). First coverage attempt failed before collection because pytest-cov was absent; installed test dependency then reran successfully. No production dependency changed.
+- Soro audit records concrete remaining owners/acceptance gates and newly confirmed denied-social fallback defect; repair is a separate concern. No live cadence/publishing/CMS/learning claim.
+
+## 2026-10-27: Session audit and effect-free petition intake
+
+- Groundwork PR2236 merged at main50cd2ff after22 successful exact-head checks.
+  Audit distinguishes prepared/private campaign copy, unsaved platform entry,
+  failed handoff, source discovery and missing unattended execution.
+- WSP00/11/15/22/50/62/84/97; bounded16/P1 (C3/I4/D4/Impact5) continuation:
+  reuse SOCIAL adapter/controller, add petition preview/plan and direct
+  conversational entry. All provider slots remain disabled and all links
+  unverified. No account, model, provider, persistence, grant or daemon effect.
+- Change.org public-link adoption is preferred; Action Network stays optional.
+  Local browser design reuses FoundUpsDriver/profile persistence; the inspected
+  ActionRouter has no distinct Playwright execution branch. Hosted handoff root
+  cause and any relationship to vulnerability defenses remain unestablished.
+- Add public-link and no-effect boundary tests, preserve research-provider
+  mapping, extend the existing CI campaign selection and regenerate the tracked
+  test registry, Codex discovery and workspace skill hash. Campaign/petition/
+  drafter/projection/manifest selection:121PASS plus76 subtests. Wrapper structural,
+  projection, registry and diff checks PASS; workspace hash readback10 files PASS
+  without signature verification. Backend closure now binds the one new leaf:
+  1,472 members; expected digest/pin refreshed. CRLF335,909 bytes exceeded the
+  prior328KiB cap by37 bytes, so the bounded cap becomes329KiB;2MiB/member and
+  32MiB total remain. Initial Node RED was a count-oracle mismatch before validator
+  entry, and independent Python/preflight RED identified the real CRLF-size bound.
+  Fresh contract qualification follows the explicit1472-accept/1473-reject oracle.
+- Repaired packaging qualification:8 independent generator/index cases PASS and
+  all3 focused Node contract/preflight/async commands PASS. Relative instruction
+  links resolve. These scopes are separate from the121-test campaign selection;
+  no live account, local browser or installed native execution was exercised.
+- Hosted scan identified38 source-integrity metadata rows in the regenerated
+  manifest and a synthetic basic-auth negative URL fixture. Remove the unused
+  fixture password while retaining user-info rejection. For every metadata row,
+  verify the exact path/digest line, rehash staged source and verify its prior
+  whole-file/rule/line review, then add38 exact new fingerprints and public
+  metadata-only evidence. Scanner rules and credential boundaries are unchanged;
+  hosted rerun is required. No real service credential was found in this change.
+- V2 missing torch; documented fallback/check PASS with detector witness ABSENT.
+  Lexical source bundle UNKNOWN/index-gap/workspace-overlay; direct current
+  owner evidence grounds the change. A fresh clone recovered a stale worktree
+  pointer; unrelated untracked artifacts were left untouched. No semantic,
+  installed-host or live-campaign acceptance is claimed.
+
+## 2026-10-27: Reusable supervised petition instruction
+
+- Extend the existing campaign owner; add `launch-petition` discovery, a
+  source/authentication/consent/publication playbook. Campaign copy and evidence
+  remain private. No separate campaign runtime or sender.
+- Groundwork: main0328c124; existing AntifaFM pilot and pitch instruction.
+  Open target: supervised petition procedure. Chosen slice: instructions and
+  campaign preparation; platform effects and resident execution remain pending.
+- WSP00 V2 failed for missing torch; documented tracker fallback/check passed,
+  detector witness ABSENT. Source-bound lexical retrieval returned UNKNOWN
+  freshness/index gap; direct current-owner reads resolved instruction paths.
+  Historical archive/phone hits were noise; no semantic acceptance is claimed.
+- Preserve observed handoff/auth failures without inventing a cause. No
+  credentials, private registration details or supporter records are retained.
+  Projection/manifest selection:24PASS; wardrobe hash verification10 files PASS
+  (signature verification not performed); both discovery wrappers structurally
+  validate; generated projection and diff checks PASS. No new tests or live
+  platform effects. Hosted publication and installed-host qualification remain
+  separate from this local evidence.
+
+## 2026-10-26: Publish the existing FoundUp pitch instruction
+
+- WSP00/6/15/22/50/62/84/97;12/P2. Publish the local prototype as module-owned
+  Skillz0.1.3, canonical Claude discovery and its generated Codex mirror.
+  Preserve Outcome/Solution/Pain, nested delivery stages, evidence, deck QA and
+  truthful media status; correct superseded campaign and missing-plan references.
+- Existing projection owner: baseline and post-publication17PASS/1 Windows
+  real-symlink capability SKIP; both wrappers structurally validate. No new tests,
+  executor, registry entry, provider call, paid generation or publication grant.
+- Generator changed two existing output line endings only; exact pre-run bytes
+  were restored. Scope remains seven instruction/docs paths. Allocation, current
+  media research and remaining gates: [FX plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+
 ## 2026-10-18: Contextual AntifaFM promotion pilot
 
 - WSP00/5/11/15/22/50/62/84/97; source-bound lexical social/comment retrieval,

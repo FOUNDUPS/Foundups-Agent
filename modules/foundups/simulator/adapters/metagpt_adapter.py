@@ -217,16 +217,12 @@ class SwarmFoundUp:
         if owner_id not in self.human_participants:
             raise ValueError(f"Owner {owner_id} not registered")
 
-        # Create agent wallet
+        # Prepare the allocation before publishing the agent registration.
         wallet = AgentExecutionWallet(agent_id=agent_id, allocator_id=owner_id)
+        owner = self.human_participants[owner_id]
+        owner.allocate_to_agent(initial_budget, wallet)
         self.agent_wallets[agent_id] = wallet
         self.agent_specializations[agent_id] = specialization
-
-        # Human allocates UPS to agent
-        owner = self.human_participants[owner_id]
-        if owner.ups_balance >= initial_budget:
-            owner.ups_balance -= initial_budget
-            wallet.receive_allocation(initial_budget)
 
         # NOTE: Agents do NOT participate in pools - only HUMANS do!
         # The agent earns F_i for the human owner.

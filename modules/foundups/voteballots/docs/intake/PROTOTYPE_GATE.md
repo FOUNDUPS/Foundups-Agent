@@ -11,7 +11,7 @@
 - [ ] WSP 97 truth boundary tests pass for all public claims.
 
 ## Prototype Scope Expansion
-Prototype work is staged. Do not merge the following into one feature blob.
+Prototype work is staged. Do not merge the following into one feature blob. Bounded internal CV1 research may occur alongside public PoC preparation; public/member claim-engine activation still requires the POC -> Prototype criteria above.
 
 ### Prototype Slice A - Candidate Record + Neutral Scorecard
 - voting/legislative history where applicable
@@ -19,6 +19,18 @@ Prototype work is staged. Do not merge the following into one feature blob.
 - neutral evidence-backed dimensions such as funding exposure, influence/capture risk, governance record, communication risk, constituent/issue alignment selected by the user, and evidence strength
 - radar/spider visualization as a summary only; every axis drills into receipts and confidence
 - no automated candidate ranking or instruction on how to vote
+
+### Slice A Extension - Political Claim Verification / Bullshit Meter
+All stages are planned, not implemented. The [canonical feature specification](../POLITICAL_CLAIM_VERIFICATION_AND_SCORING_ENGINE.md) preserves the original proposal and defines its evidence/scoring qualifications.
+
+| Stage | Scope | Gate |
+|---|---|---|
+| CV1 | Ten-speech asynchronous claim verification; internal CLI/review dashboard; primary-source evidence JSON | Corpus provenance, independent assessment, extraction/citation/verdict evaluation, explicit abstention and score coverage |
+| CV2 | Statistical methodology and funding/incentive graph; contradiction/recurrence records | Method-aware audits, source independence, sourced conflicts, no automatic intent findings, evaluated weighting |
+| CV3 | Existing-extension caption/video evidence overlay | Accurate source/timestamp alignment, caption revision handling, minimal permissions, stale-cache/correction behavior |
+| CV4 | Streaming ASR, cached research, parallel retrieval and live meter | Separately measured transcription/retrieval/review latency, speaker attribution, provisional/final states, abstention and public-release review |
+
+Before any 300-850 score/color bands are published, approve the formula, weights, decay, deduplication, minimum coverage, calibration, and correction policy. Unknown evidence is unscored; financial conflicts and recurrence are separately evidenced. A score is not a recommendation or a proven measure of intent. The requested sub-500-ms ASR/cache target is not an end-to-end verification claim.
 
 ### Prototype Slice B - Discovery
 - channel/voice/content discovery inside pfMALL
@@ -71,6 +83,8 @@ Once parallel-ballot and support-signal primitives are verified, extract/reuse t
 - [ ] Recovery/revocation model defined for credentials without revealing ballot choice
 - [ ] Registration assurance source authority validated
 - [ ] Shared-component ownership decided before extraction
+- [ ] Claim-engine publication has a reviewed corpus/rubric, explicit uncertainty and coverage, accessible evidence cards, independent high-impact review, and a working challenge/correction path.
+- [ ] No unvalidated automatic funding/recurrence penalty or unsupported intent accusation is introduced.
 - [ ] No targeted-persuasion regression
 - [ ] No official-election claim without separate certification/legal authority
 
@@ -82,3 +96,7 @@ Once parallel-ballot and support-signal primitives are verified, extract/reuse t
 5. `registration status election adapter privacy identity official source`
 6. `GotJunk map Liberty Alert MeshNetwork AlertBroadcaster resilience`
 7. `FEC political compliance disclaimers coordination public communication`
+
+8. `voteballots political claim verification transcript extraction primary sources methodology evidence graph`
+9. `audio_provider video_indexer youtube transcript ASR captions offsets provenance`
+10. `browser extension video timeline overlay claim cache correction source freshness`

@@ -4,11 +4,10 @@
 
 ## Quick Start
 
-```bash
-# Search vocabulary via HoloIndex
-python holo_index.py --search "what is F_i"
-python holo_index.py --search "012 vs 0102"
-```
+Use the current owner-query instructions in [CLAUDE.md](../../CLAUDE.md)
+with a vocabulary query such as `what is F_i` or `012 vs 0102`. Accept
+generation-bound results only when CURRENT/no-gap; a failed query does
+not authorize reindexing from the query path.
 
 ## Vocabulary Categories
 
@@ -25,8 +24,8 @@ python holo_index.py --search "012 vs 0102"
 - [ ] Read [IDENTITY.md](IDENTITY.md) - understand 012/0102/0201 state model
 - [ ] Read [ECONOMICS.md](ECONOMICS.md) - understand F_i/UPS token flow
 - [ ] Read [TECHNICAL.md](TECHNICAL.md) - understand WSP/WRE architecture
-- [ ] Run `python holo_index.py --search "CABR"` to verify HoloIndex works
-- [ ] Review [SUPERADMIN_ONBOARDING.md](../../SUPERADMIN_ONBOARDING.md) for env setup
+- [ ] Query `CABR` through the current [owner-query instructions](../../CLAUDE.md) and inspect freshness
+- [ ] Read current [operating instructions](../../CLAUDE.md); the [onboarding runbook](../SUPERADMIN_ONBOARDING.md) is historical
 
 ## HoloIndex Integration
 

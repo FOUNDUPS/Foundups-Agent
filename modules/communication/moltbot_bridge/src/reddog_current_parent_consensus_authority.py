@@ -68,13 +68,30 @@ class CurrentParentConsensusAuthority:
             consensus_proof=frozen)
 
     def reserve(self, proof, *, signing_request_digest, now, grant_expires_at, nonce_authority):
+        return self._reserve(proof, signing_request_digest=signing_request_digest, now=now,
+            grant_expires_at=grant_expires_at, nonce_authority=nonce_authority)
+
+    def _verify_scoped(self, proof, scope):
+        if scope is None:
+            return self.verify(proof)
+        from .reddog_signer_owner_e0_current_selection import _scope_admission
+        owner, current = _scope_admission(scope, owner_config_path=self.owner_config_path, repo_root=self.repo_root)
+        frozen = snapshot_parent_consensus_proof(proof)[0]
+        models = snapshot_model_artifacts(self.model_artifacts)
+        checked = self._verify_leased(owner, Path(self.repo_root).resolve(), current.selection, frozen, models)
+        _scope_admission(scope, owner_config_path=self.owner_config_path, repo_root=self.repo_root)
+        if frozen != snapshot_parent_consensus_proof(proof)[0] or models != snapshot_model_artifacts(self.model_artifacts):
+            return None
+        return checked
+
+    def _reserve(self, proof, *, signing_request_digest, now, grant_expires_at, nonce_authority, _scope=None):
         from .reddog_elevated_authority_consensus_signer_verification import _rehydrate_signing_request, _grant_request_matches
         try:
             if type(proof) is not dict or proof.get("schema_version") != SCHEMA:
                 return None
             target = _rehydrate_signing_request(proof["target_signing_request"])
             frozen = {key: value for key, value in proof.items() if key != "target_signing_request"}
-            checked = self.verify(frozen)
+            checked = self._verify_scoped(frozen, _scope)
             if checked is None or not _grant_request_matches(target, proof, signing_request_digest):
                 return None
             _, receipt, _, _, _, expires = checked
@@ -85,7 +102,7 @@ class CurrentParentConsensusAuthority:
             nonce = canonical_json_digest({"consensus_context": receipt.context.to_dict(), "target": signing_request_digest})
             return reserve_elevated_consensus_nonce(nonce_authority, nonce, expires_at=expires,
                 subject="elevated-consensus:" + receipt.receipt_id,
-                validity_check=lambda: self.verify(frozen) is not None)
+                validity_check=lambda: self._verify_scoped(frozen, _scope) is not None, _scope=_scope)
         except Exception:
             return None
 

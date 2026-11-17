@@ -1,3 +1,714 @@
+## Native OpenClaw Vote qualification — 2026-11-01
+
+Source `d65a7257f10ab25d604cb965a69f89cf25da01ad`; WSP00/15/48/50/97/99.
+Continue the existing provider-qualification prerequisite **15/P1
+(C3/I4/D4/Impact4)** under protected native19/P0. This is supervised resident
+runtime qualification, not signed WRE author admission. R15 remains the first
+admitted improvement target. No new scheduler, router or memory owner was added.
+
+**Observed execution:** isolated OpenClaw2026.10.9/Node24.22.2 executed three
+local `qwen3.5-4b` author jobs through LM Studio and two OpenRouter
+`qwen/qwen3-coder` author jobs plus one separate-context advisory review.
+These are actual native CLI/model runs, not Codex subagents or simulated workers.
+Installed gateway2026.7.1-2 and its production profile remain unchanged; the
+candidate runtime is not promoted. The historical Hermes checkpoint below had
+zero model calls; this later checkpoint must not rewrite that history.
+
+The task was the existing Vote `_validate_request` cycle-year check: allow None
+or an exact integer1900–2100, reject bool/other types without conversion, preserve
+query/state/office behavior and existing error text. The Git-blob (LF) source SHA256 was
+`27fd06b5c5143cf125bb1c30d54a9906c108bfc4832542d173ff54053ddfd79f`.
+The author received only the bounded function/specification. The existing WSP99
+encoder/decoder and artifact-map validator were reused. No repository write or
+hidden-test mount was available to the author.
+
+| Invocation | Observed result | Reported input/output tokens |
+| --- | --- | --- |
+| Local1 | Non-JSON output; seven assistant turns and six attempted tool calls | 25,136 / 2,794 |
+| Local2 | Tool discovery disabled; one turn, still invalid output format | 2,319 / 1,296 |
+| Local3 | Canonical M2M; JSON/Python parse, frozen AST scope gate rejects; two turns including an output-limit retry | 4,719 / 2,444 |
+| OpenRouter author | One turn; original25 checks pass, supplemental exact-type check fails | 2,229 / 339 |
+| OpenRouter repair | One turn; identical candidate bytes, same rejection | 2,638 / 339 |
+| OpenRouter reviewer | One turn; advisory rejection without a concrete counterexample, misses the exact-type defect; review not accepted | 2,512 / 162 |
+
+The frozen25-case checker SHA256 is
+`0ced70b3e9a08f82c033ff9d216ddc756fd0959c21241ca84917fc05be496c38`.
+Baseline16 pass/9 fail; paid candidate25 pass/0 fail. Source review then exposed
+an omitted case: an `int` subclass with value2024 is accepted despite the original
+exact-int requirement. A separate no-network process reproduced that failure.
+The original25 cases were not altered or relabeled as sufficient. Both decoded paid author
+UTF-8 payloads (LF) have SHA256
+`29a4f5829b33b4674d01455a7ffd9124b5c082eb3493a03bb26efc241d4e98a0`.
+**Zero of five author jobs produced an accepted improvement.** The paid repair
+was not silently corrected by the coordinator. Vote production source is unchanged.
+
+The author container used the pinned existing image
+`sha256:c42aca9d0efd20283ccd61e798d6ec557acf1c0238e017c5b39184a030d891c2`,
+UID1000, read-only root/input/runtime mounts, dropped capabilities, NoNewPrivs,
+96 PIDs,2GiB,two CPUs and temporary writable storage. It had bridge networking:
+this is filesystem/process confinement, **not OS-enforced egress isolation**.
+The paid container received only the selected provider key by environment name;
+inspection receipts omit Config.Env. No repository, Docker socket or verification
+suite was mounted. Separate deterministic verification ran with network disabled,
+read-only candidate/checker mounts,32 PIDs,256MiB,one CPU and a15-second limit.
+This is separate execution feedback, not independently controlled signing or
+promotion authority. The model reviewer was the same family and had no authority.
+
+**Budget and request accounting:**012 superseded local-only with permission to
+spend; the coordinator imposed $0.10 total and three paid invocations. The complete
+reservation was $0.076152 using16,384 context/1,800 output and provider price caps.
+The configured OpenRouter route allowed only Venice, disabled fallback and
+required parameters/data-collection denial. Native output reported provider-billed
+costs $0.00128865 + $0.00143180 + $0.00112220 = **$0.00384265**. This is provider
+usage reported by OpenClaw, not an independently reconciled invoice. Paid outputs
+report one assistant turn each; no retry appeared. Catalog/endpoint discovery was
+unauthenticated read-only. Local electricity/hardware and coordinator compute cost
+were not measured. Accepted-result cost is undefined with zero accepted artifacts;
+there is no demonstrated savings claim or model promotion.
+
+**Reusable findings, not retained RSI:** tool denial alone left discovery overhead
+in the first candidate run; disabling toolSearch/codeMode removed that observed
+loop in the next invocation. OpenClaw provider retries live in session
+`.openclaw/settings.json`, under `retry.provider.maxRetries`, not openclaw.json.
+With maxRetries0, actual native CLI probes against a fake provider made exactly
+one HTTP request for both503 and output-limit responses. The latter still exited0,
+so CLI success is not artifact acceptance. The generic test URL did not forward
+OpenRouter provider controls. Exact-URL interception failed at the DNS guard;
+production request fields were source/doc-reviewed, not packet-capture verified.
+No guard was weakened. See [retry settings](https://docs.openclaw.ai/concepts/retry)
+and [provider routing](https://openrouter.ai/docs/guides/routing/provider-selection).
+
+**Audit corrections:** initial manifest call_limit1 described a native invocation,
+not an enforced model-request cap; it did not prevent seven local turns. Apparent
+backslash escaping in displayed output initially caused an incorrect syntax
+assessment. Actual JSON decoding/AST parsing corrected it before a repair call:
+local3 fails the AST scope gate; paid source fails exact-type behavior. Raw outputs
+and the corrected checkpoint are preserved. Never inspect serialized display text
+as a substitute for executing the existing artifact decoder and verifier.
+A receipt check also caught Windows CRLF materialization: compare decoded payloads
+and pinned Git blobs for the hashes above; do not equate host-file byte hashes.
+The second local staging file has CRLF; both returned source payloads are identical.
+
+Private replay inputs, rejected artifacts, frozen and supplemental checkers,
+container states, config hashes and accounting remain under
+`O:/AgentData/RSI/scratch/openclaw-vote-native-20261101/` (`checkpoint.json`).
+No application code, provider route, skill, version pin or runtime authority was
+promoted. No autonomous next-task selection, retained benefit, G1/G2 or RSI is
+claimed. Separate native source review proved inadequate for acceptance; the
+coordinator and deterministic counterexample prevented a false positive.
+
+**Next eligible action:** preserve the exact-int counterexample in the next
+qualification suite; reject this task/model/prompt combination until a materially
+different qualified route or instruction treatment succeeds. Do not repeat the
+unchanged repair or expand to a FoundUp build. Continue the existing protected
+requester/lease-consumption composition and authenticate the current task, model,
+verifier and budget inputs. Runtime execution now has evidence; accepted worker
+improvement and the protected production admission chain remain distinct gaps.
+
+## Native Hermes API qualification — 2026-11-01
+
+Source baseline `430f9ef90ad126b76f3d90e03d1086d2e2237267`. WSP00/15/48/50/97.
+This **15/P1 (C3/I4/D4/Impact4)** provider-qualification prerequisite advances
+the existing native19/P0 dependency. Vote remains the micro fixture; R15 remains
+the first admitted improvement target. StoryTime and other active lanes are separate.
+
+The installed candidate matches upstream Hermes0.22.5 release
+`bf0203a794a07aac3ff764972ab9087baa4e4f4e`. Real authenticated HTTP calls to its
+existing handlers exposed a defect hidden by the earlier mocked API tests:
+`GET /v1/skills` returns500 because `APIServerAdapter._handle_skills` passes
+`include_editorial=True` to `find_all_skills`, which accepts only `skip_disabled`.
+The release source and current upstream source independently contain that mismatch;
+there is no verified upstream fix in this checkpoint. The official release remains
+[v0.22.5](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.5).
+
+A coordinator-authored **candidate overlay**, not an installed runtime promotion,
+removes only that unsupported keyword. It preserves the real discovery function,
+sorting, disabled-skill filtering, authentication and error handling. With an empty
+temporary home it returns200 and an empty list; with one harmless skill fixture it
+returns200 and that actual skill. It does not replace failed discovery with `[]`.
+The original candidate checkout remains clean and unchanged. The one-line patch,
+source hashes, native responses and replay commands are retained privately under
+`O:/AgentData/RSI/scratch/hermes-api-qualification/20261101-1806/`.
+
+Three disposable containers executed the baseline, repaired-empty and repaired-skill
+cases using the existing pinned `openclaw-sandbox:bookworm-slim` image. Actual
+Hermes handlers and discovery ran, but no full gateway, model, delegated worker or
+author ticket ran. Kernel/process observations: UID1000, zero effective capabilities,
+NoNewPrivs1, loopback-only interface. Docker enforced read-only root/input mounts,
+no external network,64 PIDs,768MiB,two CPUs; only the owned result directory was
+host-writable, with96MiB temporary home storage. Each HTTP listener closed and each
+container was automatically removed. No Docker socket or production credentials
+were mounted. **34 deterministic assertions passed, zero failed** across these
+three runs; this is not34 author jobs or an independent actor's outcome acceptance.
+
+Subsequent independent source/evidence review approved the exact one-line patch
+and documentation, rehashed the original/overlay, reran34 assertions and confirmed
+container absence. `independent-source-evidence-review.json` is in the same private
+evidence directory. This is source/evidence review, not native independent outcome
+verification. Failure cleanup between container creation and startup is unqualified;
+the checker imported the main checkout, whose confinement bytes matched this lane.
+
+Qualification failures are retained: the first host probe used an invalid aiohttp
+cleanup property; the corrected probe explicitly checked closed session/refused
+listener. The WSL `docker` name resolved to a legacy Windows executable and could
+not bind Linux source paths. Explicit `/usr/bin/docker -H unix:///var/run/docker.sock`
+fixed this invocation without changing shared contexts or symlinks. UID65534 could
+not traverse the candidate's private Python directories; the non-root owning UID1000
+ran with the same read-only mounts/capability/network limits. No host permissions
+were broadened. These harness corrections do not qualify general host recovery.
+
+Existing FoundUps gates remain unchanged: admitted API version0.20.4; the candidate
+reports0.22.5 and degraded health for unconfigured model/gateway. Real responses
+remain rejected with `FAIL_HERMES_RUNTIME_IDENTITY`. The existing tool-surface gate
+accepts the empty delegation-only profile and rejects the visible skill fixture.
+Browser control was disabled in the test profile; its advertised expanded API still
+needs full qualification. HTTP200 is not service health or execution authority.
+
+No matching native system service/running container was observed in the inspected
+Ubuntu24.04 service scope. This process had no authenticated-principal, authorized-
+FoundUp, resident-root or work-state bindings. An OpenRouter key was present, but no
+numeric campaign reservation was established, so **zero paid calls** were made.
+These observations do not prove authority artifacts are absent elsewhere.
+
+**Next eligible action:** qualify the reviewed candidate with the configured full
+gateway/model, API/tool/skill surface and existing
+provider event/cleanup contract before promoting a version. In parallel sequencing,
+finish the protected requester/lease-consumption connection below and resolve genuine
+current work/model/verifier/budget inputs. Do not weaken the version pin, fabricate
+authority, or count this component repair as G1/G2, activation, retention or RSI.
+
+## Vote aggregate-to-display trial — 2026-11-01
+
+Base `4c96d6b17429226248c3a82de5544262e773c41e`; owned lane
+`fix/rsi-vote-aggregate-trial-20261101`. Apply existing Vote follow-up11/P2
+(C2/I3/D3/Impact3); native19/P0 and R15 remain blocked by protected composition
+and authentic inputs. This eligible local proposal trial is not native dispatch.
+Holo's corrected voteballots bundle supplies current-workspace paths, but semantic
+freshness is UNKNOWN/index-gap true. Initial wrong module_hint returned unrelated
+hits; direct module docs and source resolved that retrieval error. No reindex.
+
+Independent tests were frozen before each repair. One existing WRE native-chat
+Qwen2.5-Coder7B Q4_K_M attempt used the previously qualified0.3.20 runtime/template,
+CPU4/context2048/output512,180s child deadline and no model tools. It returned the
+supplied block unchanged inside markdown fences: reject for both format and no
+repair. No model patch was materialized or normalized into acceptance. Runtime
+37.33s; SDK usage595 input/72 output tokens. One call, no retry, paid calls0;
+full coordinator/energy cost UNKNOWN. Different tasks and prompts prevent a
+comparative efficiency or learning claim against the prior source-item attempt.
+
+| Evidence scope | Before | After | Attribution |
+| --- | --- | --- | --- |
+| Frozen29 aggregate scorer cases |25 pass/4 fail|29 pass|Coordinator shared-policy repair|
+| Frozen47 answer/shell cases, added after review found the consumer gap |3 pass/44 fail|47 pass|Coordinator display/metadata repair|
+| Full module after two legacy fixture corrections |4 fixture failures/394 pass|398 pass|Independent final replay1.71s; overlapping scope|
+
+The existing source policy now handles both funding-source and aggregate inputs.
+It caps unsupported VERIFIED totals, preserves weaker labels/references and uses
+`aggregate_from_summary` instead of invented FEC provenance. Independent review
+caught the old display consumer reusing overall confidence after scorer tests had
+passed. Quick-answer now uses the unique typed total claim or UNKNOWN; answer and
+shell metadata cannot exceed that label or existing overall confidence. The two
+older positive-total fixtures now include explicit claims for their stated cases;
+the new acceptance assertions were not relaxed. Original frozen files/hashes and
+failed comparisons remain retained outside Git under the existing local micro
+evidence directory's `aggregate/` child. TestModLog records exact hash bindings.
+
+Worker acceptance0/1, rejected proposals1/1, native acceptances0. The independent
+reviewer ran tests and reviewed source; it did not independently instrument the
+model's reported usage. No OS-held-out isolation, native OpenClaw/Hermes execution,
+promotion, learned retention or G1–G5 completion. Private services/accounts and
+other product lanes were untouched. The documented local proposal route is useful
+for rejection evidence but has not earned autonomous repair qualification.
+
+Next system action remains exact-candidate provider/confinement qualification and
+protected admitted requester/consumer composition, followed by R15. Do not keep
+repeating this model configuration or expand FoundUp scope to avoid those gates.
+
+## Micro verification and protected native composition — 2026-11-01
+
+**Source:** main `43b3b66cce8a01f28fb08577a9db84f731e50455`; dedicated
+`fix/rsi-micro-verification-20261101` lane. WSP00/15/48/50/97. Recovery, StoryTime,
+blockchain/PF Mall, YUMORI and AutoPost lanes remain separate. This is a bounded
+RSI ownership/fixture/runtime audit, not a line-by-line audit of every module.
+Holo rejected authority `21ac8928` versus query `43b3b66c`; lexical fallback
+retains UNKNOWN freshness/index-gap labels and source-bound workspace evidence.
+No authority reset or reindex occurred. Exact module docs/tests were read;
+optional missing bridge artifacts do not become semantic evidence.
+
+### Close prior publication and repair planning drift
+
+[PR2276](https://github.com/FOUNDUPS/Foundups-Agent/pull/2276) is merged at
+`c9ac9059ed29073e885159747144071a3d310aff`, tree
+`52e12a57cff3ccaf971ca88492b9760f870683ab`. Exact-main
+[CI41004992711](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/41004992711)
+and CodeQL succeeded. Resident composition: 847 passed / one platform skip;
+provider selection: 135 passed. These distinct scopes still use controlled
+collaborators. Older "close publication" and October5 "current selection"
+instructions are historical. Drift arose because append-only checkpoints left
+an earlier actionable pointer current; root/WRE/backlog now point here.
+
+### Native connection: custody is the missing boundary
+
+The **19/P0 (C4/I5/D5/Impact5)** umbrella remains selected. Existing bridge owners:
+
+- `reddog_grant_authority_high_service.py` already constructs protected parent
+  and effect consensus. `reddog_main_resident_queue_runtime_dependency_bundle.py`
+  and `main.py` do not compose peer-grant, parent-consensus and lease-issuer inputs.
+- `reddog_authoritative_use_lease.py` requires an exact durable replay store;
+  `reddog_signer_secret_grant_durable_nonce_store.py` constructs that store with
+  an integrity secret. Ordinary-main construction would violate custody.
+- `reddog_signer_initial_handshake_grant_backend.py` admits the bounded initial
+  LOW handshake only. `reddog_signer_owner_e0_policy_v7.py` binds noninitial
+  HIGH grants to `worktree_create`; it does not authorize a new LOW peer handshake.
+- `reddog_signer_resolve_per_sign_backend.py` rejects requests without a supplied grant.
+  Public proof alone is not an in-process lease capability. Preserve the
+  post-valve issuance/revalidation ordering in `reddog_resident_queue_execution_valve_handler.py`.
+
+Independent source review rejected the initial "just wire a factory" hypothesis.
+**Next native slice:** compose authenticated request/transport and lease consumption
+inside existing protected target/requester owners, or place the effect consumer in
+an admitted protected process. First identify the exact owner/interface; do not
+create a second scheduler or move secrets into main. Acceptance requires an actual
+valid authorized effect and terminal cleanup, plus expired/revoked/replayed/cancelled
+refusal. Current owner/E0, exact work/runtime/model, distinct verifier and budget
+inputs must also be established. Do not fabricate them or broaden LOW authority.
+
+### Eligible micro qualification and retained failed attempt
+
+Native admission is blocked; a supervised proposal-only local trial remains
+eligible. WSP15 priority does not measure correctness. The existing Vote funding-
+source scorer kept VERIFIED_FACT for an indirect reference. Its older missing-
+reference test and legacy rubric stub did not cover that production branch.
+
+A separate reviewer froze 20 production/consumer cases before model inference.
+The existing WRE `execute_local_skill_inference` native-chat adapter ran one
+Qwen2.5-Coder7B Q4_K_M proposal (llama-cpp-python0.3.20, CPU four threads,
+context2048, output cap512, 180s child deadline). No tools or filesystem writes
+were delegated to the model. Worker input contained the function and invariants,
+not tests; those tests remained accessible on the same PC, so this is not OS
+held-out isolation. One call, no retry, 73.75s, SDK usage874 input +84 output tokens.
+Paid provider calls0; coordinator cost, hardware energy and total compute cost
+unknown. No savings or cost-per-accepted-result comparison is justified.
+
+| Variant under the same frozen 20 cases | Passed | Failed | Disposition |
+|---|---:|---:|---|
+| Unchanged production baseline | 16 | 4 | Indirect verified facts escape to consumer |
+| Qwen proposal in disposable copy | 13 | 7 | REJECT: leaves original defect and downgrades three valid direct types |
+| Coordinator repair | 20 | 0 | Bounded source-item repair independently reviewed |
+
+The fenced `old_string/new_string` envelope also violated requested plain `old/new`.
+Diagnostic normalization did not authorize materialization. Its exact old text
+matched the direct branch; a comment prevented matching the intended indirect one.
+Keep this failure in the existing backlog observation. Worker acceptance0/1;
+defective candidate rejected1/1; independent native outcome acceptances0.
+The coordinator's repair must not count as worker success. Full Vote replay322
+passed, including two historical rubric/adversarial stub suites; the production
+oracle and downstream consumers were also exercised directly. A later test
+strengthening asserts the previously declared exact HIGH cap and explanatory
+factor; it does not alter the recorded frozen comparison. See Vote TestModLog.
+
+A candidate lesson is to anchor edits to branch context and check positive
+controls as well as the failing case. This has not yet improved a later worker
+invocation and is not accepted RSI learning. The independently discovered aggregate
+`total_raised` provenance gap remains a separately scored Vote follow-up; do not
+claim all claim types are fixed. No public Vote activation or external data calls.
+
+### Micro → system → FoundUp → concurrent workers
+
+| Candidate | WSP15 C/I/D/Impact | Priority | Eligibility / next action |
+|---|---|---|---|
+| Protected native requester/consumer composition | 4/5/5/5 =19 | P0 | Missing protected interface and current authentic inputs; first G1+G2 proof |
+| Existing R15 test-registry workflow | 3/4/4/3 =14 | P1 | Keep fixed correctness, later-use control and rollback; depends on admitted author/verifier |
+| Vote source-item verification micro | 2/4/3/4 =13 | P1 | Selected local qualification; rejected worker, independently reviewed coordinator repair |
+| StoryTime/EDUIT tile validation | 2/3/3/4 =12 | P2 | Reserve active product lane; review records alone do not prove independent education/visual quality |
+| Trade synthetic normalization/bar fixtures | 2/3/3/3 =11 | P2 | Existing no-network/no-wallet simulation owner; never use profitability as this oracle |
+| AmIBot/detect_ai locked-verdict scoring | 2/2/2/3 =9 | P3 | Planning package has13 non-dispatchable orders; no chat/matching runtime established |
+
+One admitted worker and an independently controlled verifier precede parallelism.
+Then prove activation/rollback and a later controlled benefit; only then test two
+disjoint tickets, collisions, cancellation and recovery. Keep tickets as the
+scope/authority/accounting unit; bounded teams can execute inside them. A new
+FoundUp or swarm framework is not required to prove the smallest loop.
+
+### PC, upstream and cloud decision
+
+Observed PC: i5-10400 (6 cores/12 threads),79.9GiB RAM, RTX2060/6GiB. Earlier LM
+Studio Gemma occupied about3.46GB; do not evict shared models. Serial CPU inference
+plus deterministic tests is feasible (the trial above ran); concurrent model
+capacity is not benchmarked. Start with one author and separate verification.
+
+The earlier micro trial used Windows OpenClaw2026.5.2, WSL OpenClaw2026.7.1-2
+and Hermes0.20.4. It did not upgrade them or use Ollama. Its unavailable Ollama
+server and Docker engine observations are superseded by the host repair below.
+
+#### Host repair and isolated upgrade qualification — 2026-11-01
+
+012 authorized local startup, repair and stable-version updates. This host
+maintenance does not supply native work-order, model, evaluator or promotion
+authority. Release observations are dated, not an automatic update policy.
+
+| Runtime | Observed result | Remaining boundary |
+| --- | --- | --- |
+| [Ollama0.40.13](https://github.com/ollama/ollama/releases/tag/v0.40.13) | Latest stable; normal app starts server11434; two bounded CPU inference checks returned `OK`, including after restart | Health checks, not worker-quality or RSI evidence |
+| [WSL3.0.3](https://github.com/microsoft/WSL/releases/tag/3.0.3) | Latest stable; kernel6.18.54.1; Ubuntu-24.04 reaches Docker Engine29.9.2 | WSL alone is not a worker sandbox |
+| [Docker Desktop4.97.0](https://docs.docker.com/desktop/release-notes/#4970) | Upgraded from4.76.0; official checksum and publisher signature checked; Linux engine responds from Windows and Ubuntu-24.04 | Existing sandbox image is the August21 build, not a newly qualified/latest image |
+| [llmster0.0.27-1](https://lmstudio.ai/install.ps1) | Upgraded from0.0.21-2 while no models/clients were active; API1234 responds; direct hidden launch avoids observed detached-launch console windows | Observe later startup; do not claim automatic recovery or model-quality qualification |
+| [OpenClaw2026.10.9](https://github.com/openclaw/openclaw/releases/tag/v2026.10.9) | Isolated CLI starts with checksum-verified Node24.22.2; sandbox command is available | Existing routed installation unchanged; matched Gateway/profile and actual governed adapter execution remain unqualified |
+| [Hermes0.22.5](https://github.com/NousResearch/hermes-agent/releases/tag/v0.22.5) | Isolated source `bf0203a794a07aac3ff764972ab9087baa4e4f4e`, PM-managed Python3.14.9; API version import and13 selected upstream API tests pass | FoundUps health gate still requires0.20.4 and rejects0.22.5; do not loosen the pin without adapter/confinement qualification |
+
+Ollama's profile-directory junction caused Windows untrusted-mount-point errors.
+Preserve the original junction as a recovery reference; use a normal profile
+configuration directory with byte-identical existing identity files. Model data
+and the existing external `OLLAMA_MODELS` setting remain in place. No replacement
+identity was generated. Its app, rather than a temporary `serve` process, now owns
+the server.
+
+Docker4.76 failed while initializing its stale inference socket. The verified
+update restored startup without a factory reset. Correct the existing WSL
+integration list to include the actual `Ubuntu-24.04` distribution; the prior
+`Ubuntu` entry did not make Docker available there. Account sign-in was confirmed
+separately and does not confer WRE execution authority.
+
+One disposable container per caller (Windows, then WSL) used the existing image
+`sha256:c42aca9d0efd20283ccd61e798d6ec557acf1c0238e017c5b39184a030d891c2`.
+Both checks verified UID65534, loopback-only networking, zero effective
+capabilities, `NoNewPrivs=1`, rejected writes under `/tmp`, and automatic removal.
+Launch limits were read-only root, no network, no host mounts,32 PIDs,128MiB and
+one CPU. The two pre-existing stopped containers remained. This is a host
+sandbox smoke test, not OpenClaw/Hermes dispatch, independent outcome acceptance
+or a general isolation/security certification.
+
+The old llmster updater stalled. Its owned process was stopped; the official,
+checksum/signature-verified bootstrap installed the candidate. Detached CLI
+startup then exposed Node/LM Link console windows. Stopping that owned daemon
+removed the windows; direct `Start-Process -WindowStyle Hidden` of the installed
+daemon (using its existing launch record) restored the API without the detached
+CLI wake-up. Do not close unrelated terminals or change global terminal settings.
+
+Hermes qualification first rejected an undeclared `api` extra and an incorrect
+test interpreter/missing optional dependencies. Preserve those failures. The
+corrected upstream PM environment used `web,messaging`, its separate test Python,
+and `scripts/run_tests.sh tests/gateway/test_api_server.py -k 'health or capabilities or auth or toolsets or skills' -q`
+with file retries disabled:13 passed,0 failed. No provider job or credentials
+were used. Candidate installs are retained under the host's
+`~/.local/share/foundups/runtime-candidates/20261101`; local maintenance logs and
+recovery state are in `C:/tmp/rsi-runtime-repair-20261101/`, outside Git.
+
+Independent read-only review at11:23 JST confirmed both Docker callers, current
+Ollama/LM Studio responses, the13-test log, and zero WindowsTerminal/OpenConsole
+processes after direct hidden launch. It did not replay the earlier repairs or
+authenticate their historical measurements. Source/evidence review is separate
+from independent acceptance of a worker-produced improvement.
+
+Next: qualify the existing provider adapters against these exact candidate
+versions and the intended sandbox image before changing routed deployments.
+Keep the protected installed runtime, signed admission and R15/G1-G4 gates intact.
+No paid model calls, independent retained improvement or native author success
+are established by this maintenance.
+
+[Grok Bot](https://x.ai/bot) documents persistent cloud computing and parallel bots,
+but its bots share a user's machine; this is not proof of one server per bot or
+of FoundUps cost/quality. Adopt durable ticket state and restartability, not a new
+hosting layer. [OpenClaw sandboxing](https://docs.openclaw.ai/gateway/sandboxing)
+and [Hermes security](https://hermes-agent.nousresearch.com/docs/user-guide/security)
+provide relevant isolation options; neither a worktree nor separate prompt proves
+process/filesystem/network/credential confinement. Qualify the actual adapter.
+[Karpathy AutoResearch](https://github.com/karpathy/autoresearch) supplies a fixed-
+evaluator, bounded-experiment pattern. Existing WRE AutoResearch/evaluator owners
+already cover configuration experiments; live commit/promotion remains unproved.
+
+Cloud becomes justified by measured queue latency, required uptime, stronger
+per-tenant isolation or capacity beyond this PC. First record local accepted
+throughput, retries, false acceptance, verification cost and recovery. No cloud
+purchase, 24/7 service or thousand-worker scaling claim is warranted by this run.
+
+## Resident assurance connection — 2026-10-30
+
+WSP97 source reconciliation at `7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e`:
+Challenge/Build/Verify/Accept/Improve maps to existing R06/R14, R07–R08/R18,
+R09–R10/R19, R11–R13 and R15/R17/R23 owners. Do not create replacement queues,
+state machines, evaluation stores or roadmaps. Native G1+G2 precedes parallelism.
+
+The eligible **14/P1 (C2/I4/D4/Impact4)** slice connects main's resident startup
+to AgentDB's existing independent-assurance store. The signed OpenClaw binding
+already did this. The socket integration test injected the absent dependency,
+masking main's omission; it now requires the production binding and checks the
+durable reservation at completion. AgentDB initialization belongs only in enabled
+runtime composition; it is not a read-only readiness probe or new authority.
+
+Local Windows caller regression: baseline **2 failed / 2 passed / 1 skipped**;
+repair **4 passed / 1 skipped**. Connected admission, reservation, recovery and
+verifier-finalization suites: **62 passed / 1 skipped** (overlaps those four).
+The AF_UNIX composition requires Linux and is explicitly selected in hosted CI.
+Its signer, workers, model, authority and execution collaborators remain fixtures;
+passing it cannot establish native OpenClaw/Hermes operation or G1+G2 closure.
+
+Follow-on integration exposed a real receipt seam: the held-out producer hashed
+v2 identity/evidence fields but omitted them from serialization. Preserve its
+existing ID seed and the exact historical wire shape while carrying current
+fields through Memex reconstruction. The inherited socket fixture also falsely
+assumed G3 activation readiness. Its revised contract uses the real sink,
+requires completed verification/assurance and proves activation refusal with
+no outcome signing or retained-memory write. R11-B's accepted-memory transaction
+remains unimplemented; this checkpoint does not manufacture that capability.
+
+After exact-source review and publication, next remains the **19/P0** native
+admission umbrella: authenticated peer-grant, parent-consensus and external
+lease-issuer caller composition plus current owner/work/model/budget inputs.
+Keep the existing selection/replay/generation refusals and post-valve issuance
+ordering. G3 activation/rollback, G4 later controlled benefit and G5 bounded
+continuation still require operational evidence. No paid model calls, new
+credentials, runtime grants, live deployments or compute-saving claim in this slice.
+The October25 scoped input observations below remain historical, not a new host scan.
+
+## Risk-based verification integration handoff — 2026-10-28
+
+See [WRE verification ownership, evidence boundaries and Prometheus M2M execution packet](WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md). Existing test-impact projection and differential execution are separate from authenticated worker completion and RSI promotion. This cross-reference does not activate a new worker or claim end-to-end integration.
+
+## Current owner input handoff — 2026-10-25
+
+[#2181 closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181#issuecomment-6357450863)
+verified merge `cfa632775f2b13034320d45559cdc77d46e3ead6`, tree
+`228b4f0091a40f7f6363d9abf48c0a1844aa68ed`, and successful exact-main
+[CI39899710212](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/39899710212) /
+[CodeQL39899710236](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/39899710236).
+Hosted startup passed 1,003 cases / one Windows-only skip across 47 selectors;
+independent local process controls are separate; earlier failures remain historical.
+
+Today's guarded [artifact validator](../../modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py)
+exited zero with `accepted=false` and seven `artifact_missing_or_symlink` rejections.
+Empty queue ID meant diagnosis only; eighth-file `authority_profile_source.json`
+absence was separate known-path metadata, not a validator result/global absence proof.
+Role directories and legacy/public metadata do not prove usable keys or HIGH authority.
+The receipt retains parsed result/stdout hash, not raw stdout. No denied-attempt
+counter exists: zero attempted effects and OS confinement are not proved.
+
+**Input gate:** existing enrollment/installation identifies or assembles authentic
+protected owner/E0 selection and custody, handing off its protected path and public
+IDs, source/runtime/generation/expiry bindings, scoped work/order/source, distinct
+author/reviewer model selections, budget and verifier reservation. Parent models
+require v13. Retain the [bridge interface](../../modules/communication/moltbot_bridge/INTERFACE.md).
+**Separate caller connection gate:** even otherwise valid artifacts retain three
+missing authenticated-selection/replay/generation reasons, blocking the current
+[canary](../../modules/communication/moltbot_bridge/src/reddog_resident_live_canary.py).
+The existing [serial bootstrap](../../modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py) and main callsite need verified peer-grant,
+parent consensus and external lease-issuer wiring; HIGH service composition alone does not
+connect the author loop. Preserve refusals and the [post-valve issuer/revalidation order](../../modules/communication/moltbot_bridge/src/reddog_resident_queue_execution_valve_handler.py):
+resolver `lease=None` is intentional before the final accepted valve. Connect and
+exercise existing owners, without a new orchestrator or fabricated authority.
+Keep #2178 memory/scheduler ownership protected; this lane reconciles it read-only.
+
+Compatible pinned `174955143d` may be selected if source/descriptor/root bindings,
+current generation/lease, signatures, expiry, revocation, scope and installed inventory
+pass the existing [verifier](../../modules/communication/moltbot_bridge/src/reddog_grant_authority_service_manifest_verifier.py) / [runtime guard](../../modules/communication/moltbot_bridge/src/reddog_grant_authority_installed_runtime_guard.py).
+Unrelated merges alone do not require reinstalling. Preserve frozen LOW `294195cdb`.
+The [dependency loader](../../modules/communication/moltbot_bridge/src/reddog_grant_authority_runtime_dependencies.py) is not effect-free; the full canary is not qualified offline.
+No invocation is authorized here. Native admission/evaluation, activation/rollback
+and retained improvement remain unproved. Umbrella **19/P0 (C4/I5/D5/Impact5)**;
+this reconciliation **13/P1 (C2/I4/D4/Impact3)**; [packets](../roadmaps/rsi_swarm_backlog.json) remain planning.
+Evidence in existing `pr-reconciliation-20261021/refresh/`:
+`pr2181-merged-main-closure-20261023.json`, `rsi-independent-spawn-main-acceptance-20261023.json`,
+`rsi-post2181-native-input-gate-20261025.json` (proposal, pinned-runtime and source-seam reviews),
+`rsi-resident-artifact-diagnostic-20261025.json` (executed result and receipt review).
+This is internal Codex documentation, not OpenClaw/Hermes execution.
+
+## Installed HIGH source integration — 2026-10-23
+
+**Historical checkpoint:** the current handoff above supersedes pending
+publication and installation-next-step wording below; preserve its evidence.
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+Historical #2181 repaired binding: 1,467 members, canonical digest
+`92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`,
+331,870 LF / 334,877 CRLF bytes under the measured 328 KiB ceiling.
+The boundary accepts 1,467 members and rejects 1,468; 2 MiB per-file and
+32 MiB total limits are unchanged. Manifest and consumer checks pass.
+
+Historical `beb46b3` / `4a401410b` binding before the CI repair: the closure has
+1,466 members, adding 13 to main with no removals. Pretty JSON measures LF
+331,626 / CRLF 334,631 bytes. The smallest qualified whole-KiB ceiling is 327 KiB
+(334,848 bytes; 217 above CRLF); main's 324 KiB contract cannot contain it.
+Candidate digest: `88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16`.
+The paired boundary accepts 1,466 members and rejects 1,467. Per-file 2 MiB,
+total 32 MiB, exact digest/path/hash checks and authority gates remain unchanged.
+Eight Python manifest cases and three Node commands passed, including LF/CRLF,
+exact-byte/+1 and member/+1 controls. This is not installed-runtime qualification.
+
+Historical `beb46b3` frozen-source qualification: clock/custody/structure128pass/2skip and
+core/LOW/installed compatibility272pass/4skip; together400pass/6skip across406
+cases in18 distinct suites. All22 bound hashes remain stable. The six Windows
+skips cover symlink/Unix descriptor and actual POSIX process-fence conditions;
+Linux acceptance remains required. No installed/native execution follows.
+
+
+The service entrypoint was already included as a generator root in the preserved
+candidate. Reconcile its live-lease and installed HIGH implementation with newer
+main's nonce/startup protections; do not recreate that solved entrypoint work.
+Use the existing installed-work/HIGH, live-lease, LOW/startup and parent/model
+regressions, then verify generated closure and consumer boundaries against the
+actual combined source. Linux process controls remain separate from Windows
+skips. Local binding checks and independent source acceptance pass; hosted gates remain required.
+
+PR1478's exact-head20 checks, merged-tree readback and exact-main CI39889900717/
+CodeQL39889900055 passed. This source integration still requires its own publication gates.
+Known-path missing-file and expired-draft observations below retain their original
+dates; authentic current policy/manifest, model/parent/effect, custody, budget and
+reviewer inputs must be established through their existing owners.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## Installed HIGH source closure candidate — 2026-10-22
+
+WSP00/5/6/10/15/22/50/97. Existing 19/P0 prerequisite; integrate the already
+implemented service and live lease before another native author attempt. Owned
+base `482238effcc2cb948928f94972ab6673125cde98`; all 17 unfinished paths were
+preserved externally before editing. Service code matches the historical frozen
+153-pass/1-skip fixture evidence. The entrypoint was already a generator root.
+
+The remaining source-closure defect was stale consumer/index bindings: 1,462
+required members, canonical digest
+`759ee0caf65899b1baddc4329b085246e2fe4fcad53c2d273a29f257eaf833bb`,
+pretty LF 330,756 / CRLF 333,753 bytes. Independent AST traversal justifies all
+11 additions. Consumer/test count is now 1,462 and byte limit 326 KiB (333,824);
+exact digest, member+1 and byte+1 rejection remain required. Independent manifest8
+and three JS commands pass; registry1,745/270 is current. Fresh connected service
+suite passes153/1 Windows skip in128.67s on final byte-bound production source. The first
+run's Windows261-character fixture failure is retained and independently diagnosed;
+shorter external basetemp resolves that harness boundary. Counts overlap.
+Independent review, XML and source bindings are in existing external
+`pr-reconciliation-20261021/refresh/rsi-installed-high-*20261022*` evidence.
+Historical checks below retain their exact sources and limits.
+
+Publication remains blocked by intermittent GitHub connectivity. A successful
+read observed main `87aa241b2c27649a3b23177236fafd610cb77b9e`, but its object
+could not be fetched. Fifty open PR heads match the preceding audit; their
+classification is not revalidated against that unfetched main. PR1759 and1638
+have reviewed local candidates; unrelated or protected PRs are not prerequisites.
+
+Next: verify this coherent source/index and independent review, then reconcile
+fresh main and complete gated publication. Afterwards qualify the actual installed
+service and supply current authenticated task/model/principal/budget/verifier
+inputs through existing owners. G1–G5 remain unproved. Source tests neither mint
+admission nor demonstrate a native author, activation/rollback, later retained
+benefit or autonomous continuation.
+
+## Live authenticated generation scope — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97; current selection 19/P0.
+Source base 5820daf8; nine existing production owners and eight test/support files.
+Integration base 6dd48a5a inherits the independently reviewed legacy-owner
+tuple repair, complete v13 signed-model regression and 324 KiB byte contract.
+All 17 live source/test canonical Git-LF blobs remain exact. The 390/9,
+Linux 2/0 and independent 16 counts below retain source base 5820 evidence;
+Combined-source checks now pass: both generators, 36 binding tests with no
+skips/failures/errors in 96.046s, and all three Node commands. Inventory
+remains 1,451, registry 1,742/270; only the inherited runtime-binding repair
+changes a member hash relative to the prior live manifest. Current digest:
+`fd0969d46a01870d8bfaeaf5f78299be2f66467d32a11035f19936f92921b318`. Rebase binding receipt:
+`high-live-lease-author-review/nonce-base-integration/bindings/review.json`,
+SHA256 `1870bb658dbb15e13959deee41ecca63caae6414a551003169918b873c0d7ed4`. No core runtime suite was rerun.
+The bounded same-inode red proves nested public leasing blocks while the outer
+fence is held and succeeds after release. The private live-scope connection reuses
+the existing permission and manifest-selection owners without nested locking.
+
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+Connected Windows validation: 390 passed, 9 platform skips, zero failures/errors
+across 25 suites in 389.797s. Separate Linux process controls: 2 passed without
+skips in 29.394s, using the actual same-inode generation lock and signed files
+with synthetic admission/installation seams. Independent core review: 16 unique
+held-outs passed. Counts overlap and are not additive. Original fixture failures
+and the bounded nested-lock red control remain in external evidence.
+
+Final production bytes equal the connected tested freeze. Only the Linux test
+gained a bounded watchdog before its two passing final controls. The independent
+core review binds those production bytes; no independent publication or hosted
+CI acceptance is claimed here. Evidence paths are relative to existing
+`native-installation-inputs/current-time-independent-review/`:
+
+| Receipt | SHA256 | Scope |
+| --- | --- | --- |
+| `high-live-lease-author-review/source-freeze-final.json` | `f5853a3d39461c1ee4ac5859883580765693dbfeccccc4422887a1e51e1cf20e` | Exact 17-file final freeze |
+| `high-live-lease-author-review/author-review-final.json` | `3d7e49d5c139aa9720d463f6636e06f57c463ed73989ba8bbb3d48bf7356aa76` | Commands, preserved failures and truth limits |
+| `high-live-lease-author-review/connected-review.json` | `e057d20e8e3dcec3511bf3aae383781bc1a5d76d57736221dd7b943400ebbdf2` | 25 suites, 390 passed and 9 platform skips |
+| `high-live-lease-author-review/process-final.json` | `04935721e4a43dae2965453bdb9be8d1b7dd6ebf66930af110336cdef5e9f2ea` | Two actual Linux lock/process controls; synthetic admission |
+| `high-live-lease-author-review/nested-lock-red.json` | `3c110e3e56b7a4577774b65588fc3918cee6dc87e911d799eb44016f588e2f57` | Bounded same-inode nested-lock red and released control |
+| `high-live-lease-independent-review/independent-core-review.json` | `9f465821601dcf58689d16c89b15ff851281d576a44486c5ccc8ec8399824bbe` | 16 unique independent core held-outs |
+
+Before rebase, generated closure contained 1,451 files, adding the nonce authority
+and current-owner modules through existing imports. This is source closure,
+not installed qualification. Registry 1,742/270 adds exactly five suites and
+35 shard-only moves; existing classifications/quarantines remain unchanged.
+The original binding checks passed 36 manifest/registry tests without skips in
+80.266s, including staged-index binding. Node contract/preflight/async
+each exit 0. Exact inventory bounds and cap+1 checks follow this inventory;
+structural ceilings are unchanged. All 17 frozen source/test hashes remain exact.
+The serialized-manifest byte contract explicitly evolves from 320 to 324 KiB
+(+4,096 bytes/1.25%): pretty LF 327,910 and CRLF 330,885 fit 331,776,
+leaving 891 bytes above CRLF. The original 35-pass/1-failure receipt is
+retained; formatting stays indent=2. Actual LF/CRLF, exact-max acceptance
+and max+1 rejection are tested; independent 4 MiB readers are unchanged.
+This is a post-read, pre-parse accepted-input bound, not a preallocation
+memory guarantee.
+Binding receipt: `high-live-lease-author-review/publication-bindings/review.json`,
+SHA256 `e6ab727aa667a1dc134b6748feeff87f2799ff1a9566209f27f928bb5cd81d29`.
+
+Next 19/P0 (C4/I5/D5/Impact5): connect protected non-initial installed policy/source
+admission, authenticated author/reviewer model-artifact loading and the existing
+HIGH issuer factory path. This core does not select or install HIGH service.
+Genuine work/model/reviewer/budget inputs, native qualification and author
+admission remain required. Frozen runtime 294195cdb is unchanged; native author
+tickets 0, paid model calls 0, no retained RSI gain.
+
+The following nonce and parent checkpoints are historical source-bound evidence.
+
 ## Windows manifest byte contract — 2026-10-20
 
 Actual readManifest independently accepts the current 1,449-member LF

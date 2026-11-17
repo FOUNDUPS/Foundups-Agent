@@ -1,0 +1,37 @@
+{
+  "doc_index_version": "1.0",
+  "collection": "modules/foundups/pfmall",
+  "generated_at": "2026-10-23T09:02:04Z",
+  "documents": [
+    {
+      "path": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
+      "doc_type": "architecture",
+      "module_hint": "pfmall",
+      "wsp_refs": [
+        "WSP 22",
+        "WSP 50",
+        "WSP 83",
+        "WSP 84",
+        "WSP 97"
+      ],
+      "hash_sha256": "601941205ce252bb71742518ce76a94de732b118bd41b3e5e77843de2572b6cd",
+      "size_bytes": 12466,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "modules/foundups/pfmall/README.md",
+          "modules/foundups/pfmall/INTERFACE.md",
+          "modules/foundups/pfmall/ROADMAP.md",
+          "modules/foundups/pfmall/ModLog.md",
+          "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+          "modules/foundups/README.md",
+          "NAVIGATION.py"
+        ],
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ]
+      }
+    }
+  ]
+}

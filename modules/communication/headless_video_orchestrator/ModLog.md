@@ -18,3 +18,7 @@
 ### Next
 - Wire Video Lab menu to call orchestrator and emit unlisted-ready assets.
 - Add scheduler handoff for RavingANTIFA channel.
+
+## 2026-10-26 — Us_Story_Time destination
+
+Registered the operator-selected Story Time channel in the existing publisher with FoundUps OAuth-set 10 reuse and an optional override and required channel-ID pinning. Added an unlisted, made-for-kids preschool review helper and documented headless/Kids ownership. No live account, upload or worker activation claimed. WSP 97 source/evidence notes are in Shorts KIDS_LOCAL_PRODUCTION.md.

@@ -1,5 +1,56 @@
 # [U+1F300] Acoustic Lab - Local Development Installation Guide
 
+## Owned-child timeout repair checkpoint (2026-10-25)
+
+This source candidate leaves the installed dependency graph and 30-second
+FFmpeg processing deadline unchanged. Timeout handling now kills the owned
+child and gives drain/reaping a separate five-second bound; failed settlement
+is explicit. Temporary-file cleanup cannot replace the primary timeout error.
+No process-tree or service cleanup is introduced.
+
+Author Windows qualification passes the existing 18 guarded application/Web3
+cases and a separate one-child case using a tiny exact-source Python fixture.
+That fixture proves owned kill/drain/closed pipes/reaping before adapter return;
+it does not run FFmpeg, X downloads, accounts, RPC or models. Independent review
+and a separate one-child positive pass; missing-kill/missing-drain controls fail
+as intended and require rescue. Fresh hosted Linux/native Gunicorn is pending.
+The earlier failed null-device guard attempt is preserved. The corrected gate
+permits only the constructor-owned DEVNULL open and rejects unrelated writes.
+
+See TestModLog for exact raw evidence and the existing Windows adaptations.
+Python API guards are not OS confinement. Prior dependency checkpoints below
+are historical; their pending statements describe their original observation,
+not the current timeout-repair acceptance state. Four broader failures remain
+historical and were not rerun in this repair.
+
+## Flask 3.1.3 compatibility checkpoint (2026-10-25)
+
+The candidate changes only `Flask==3.0.0` to `Flask==3.1.3`; the other 13
+current direct pins remain unchanged, including Werkzeug 3.1.9. The complete
+requirements resolve to 76 binary packages. A hash-locked install and `pip check`
+pass in the reused Windows CPython 3.12.10 environment. Its 84 distributions
+include pip and seven retained packages outside that graph; this is not a fresh
+installation. The fresh resolution also advances unpinned multidict 7.1.0 to
+7.2.1 and certifi 2026.10.19 to 2026.10.23, so the run does not isolate Flask
+from those dependency changes or establish a performance comparison.
+
+Exactly 18 existing guarded X/multipart/Web3 cases pass after the multipart
+limit assertion is read from a real request instance. Flask 3.1 exposes that
+limit as a property; the default remains 500000 bytes. No application limit,
+configuration or response behavior was changed. The earlier 17/18 run is
+preserved as rejected evidence. Independent review and a separate 18-case replay
+pass; an altered-limit control fails as intended. Fresh hosted Linux Python
+3.11/3.12 adapter plus six native Gunicorn checks remain pending for this candidate. The Web3 preparation below is a historical checkpoint; its later
+baseline hosted acceptance does not qualify this new Flask graph.
+
+The existing Windows harness clears application environment values, denies
+network/process/SQLite/private configuration effects and confines observed
+writes to owned output. Processor-name and yt-dlp console initialization are
+suppressed; an absent runtime ZIP search entry is omitted. These Python checks
+are not an OS sandbox, production deployment or native AI acceptance. See
+[the test log](./tests/TestModLog.md) for exact evidence and retained limitations.
+
+
 **WSP Compliance**: WSP 49 (Module Structure), WSP 71 (Secrets Management)
 **Educational Platform**: Teaching Acoustic Triangulation & Audio Analysis
 
@@ -49,6 +100,36 @@ pip install -r requirements.txt
 - **Web3.py** - Ethereum integration
 - **Pillow** - Image processing
 - **Requests** - HTTP client for IP geofencing
+
+### Web3 compatibility (historical 2026-10-23 preparation)
+
+The pair is `web3==7.15.0` with `eth-account==0.13.6`, the minimum
+eth-account version declared by that Web3 release. Web3 7 uses
+`ExtraDataToPOAMiddleware` at layer zero instead of `geth_poa_middleware`.
+All other direct pins are retained. Public wheel metadata and middleware source
+have been inspected. Full requirements resolve to 76 binary packages, and
+hash-locked installation plus `pip check` pass in the reused Windows Python
+3.12.10 environment. Seven preexisting orphan distributions remain; an in-place
+install does not prove a fresh environment. Author and independent runs each
+pass the same 18 guarded cases. Independent fault controls reject incorrect
+middleware, an attempted hidden effect and incomplete test inventory. See
+[TestModLog](./tests/TestModLog.md) for Windows adaptations and retained failed
+attempts. Fresh hosted Python 3.11/3.12 acceptance is a separate remaining gate.
+
+The existing logger still returns `simulated_...` identifiers: `_real_logging`
+delegates to simulation even after a successful connection. `verify_log` returns
+educational simulation metadata, not an authenticated chain receipt. The
+existing-file tests use real Web3 and an in-memory provider under an outer effect
+guard; no RPC, key creation, signing, transaction submission or deployment is
+required. Do not use the operational examples below as qualification evidence.
+
+### yt-dlp qualification (2026-10-23)
+
+The manifest pins bare `yt-dlp==2026.7.4`, without `[default]` or other extras. This follows the [upstream security release](https://github.com/yt-dlp/yt-dlp/releases/tag/2026.07.04); every other direct pin remains unchanged. Fresh full baseline/candidate installs and `pip check` passed on Windows AMD64 CPython 3.12.10. The target's fresh dependency graph omits brotli, mutagen and pycryptodomex; an in-place requirements install does not uninstall old packages. Pillow 13, Librosa 0.10.2 and the absence of a setuptools runtime requirement are retained.
+
+Requests remains 2.31.0 for existing application consumers. The new yt-dlp rejects that version for its Requests backend and uses Urllib; a prepared HTTPS request and gzip/deflate decoding passed offline checks. HTTPS proxies and Requests-style persistent connections are not qualified by this fallback. Brotli is absent and `br` is not advertised; Brotli-only responses are not qualified. The adapter does not configure metadata/thumbnail postprocessors that need mutagen. Existing pycryptodome 3.24.1 supplies `Crypto.Cipher.AES`; a known-answer CBC check and AES-128 HLS manifest acceptance passed, without an end-to-end HLS transfer/decryption claim. Do not add bundle extras without separately resolving their dependency requirements.
+
+All nine focused local checks and seven added adapter cases pass in both environments. The extended existing suite has 18 passes and the same four prior failures; no skips or weakened assertions. Real installed downloader constructors are exercised, while extraction, download and FFmpeg are controlled test boundaries. No live X download, native FFmpeg process, successful audio-upload/RPC, installed-service or deployment acceptance is claimed. The separate timeout-child diagnostic fails in both versions: temporary-file removal does not terminate/reap a timed-out FFmpeg child. This remains an unresolved repair obligation. Linux/Python 3.11 execution and exact-head CI are separate gates. See [ModLog](./ModLog.md) and [test inventory/results](./tests/TestModLog.md) for evidence and retained failures. Later live-test examples in this guide are operational instructions, not evidence that those effects were exercised here.
 
 ### Dependency qualification (2026-10-21)
 

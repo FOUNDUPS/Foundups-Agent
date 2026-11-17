@@ -1889,10 +1889,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.parent_consensus_join_20261020.nonce_custody",
-    "base_commit": "51f9edcec322288635a39b7c99540cf05d5d8007",
-    "selected_action": "Connect protected consensus nonce custody and the existing single-lease HIGH issuer path",
-    "status": "NONCE_COMPONENT_VALIDATED_HIGH_COMPOSITION_PENDING",
+    "observation_path": "docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01",
+    "base_commit": "43b3b66cce8a01f28fb08577a9db84f731e50455",
+    "selected_action": "Compose the existing protected native requester and lease consumer, then admit the R15 test-registry work procedure",
+    "status": "PROTECTED_COMPOSITION_AND_CURRENT_AUTHENTIC_INPUTS_REQUIRED",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
@@ -1902,9 +1902,179 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close nonce source checkpoint, then connect one live authenticated lease through existing parent/effect/nonce/factory owners; prove no nested generation lock. Installed HIGH policy/service and genuine work/model/reviewer/budget inputs remain required; preserve LOW."
+    "next_action": "PR2276 is merged and exact-main verified. Do not construct integrity-secret-bearing replay stores in ordinary main or broaden initial LOW scope. Resolve authenticated protected request/transport and lease consumption through existing owners, establish current scoped work/model/verifier/budget inputs, and prove valid execution plus refusal and cleanup. The local Vote trial does not close native G1-G5."
   },
   "current_observation": {
+    "micro_verification_20261101": {
+      "source_base": "43b3b66cce8a01f28fb08577a9db84f731e50455",
+      "status": "LOCAL_WORKER_REJECTED_COORDINATOR_REPAIR_INDEPENDENTLY_REVIEWED",
+      "prior_selection": {
+        "observation_path": "docs/operations/RSI_SWARM_DISPATCH.md#resident-assurance-connection--2026-10-30",
+        "base_commit": "7d6a292bcb28e5cbadd1dffdac1a795d3da7e31e",
+        "selected_action": "Close existing main-to-AgentDB assurance connection, then authenticate the resident native-worker caller",
+        "status": "LOCAL_CONTRACT_REPAIR_NATIVE_ADMISSION_UNPROVED",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4,
+          "total": 14,
+          "priority": "P1"
+        },
+        "dispatchable": false,
+        "next_action": "Verify source review, Linux composition and publication for this connection; then resume the19/P0 authenticated owner/peer-grant/parent-consensus/external-lease-issuer integration. PR2181 publication is already closed. No signing keys or grants are supplied by this planning record."
+      },
+      "prior_publication": {
+        "pr": 2276,
+        "merge": "c9ac9059ed29073e885159747144071a3d310aff",
+        "tree": "52e12a57cff3ccaf971ca88492b9760f870683ab",
+        "main_ci_run": 41004992711,
+        "main_ci_and_codeql": "success"
+      },
+      "eligible_micro_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 4,
+        "total": 13,
+        "priority": "P1"
+      },
+      "fixture": "modules/foundups/voteballots/tests/test_confidence_scoring_integration.py",
+      "worker": {
+        "source_head": "43b3b66cce8a01f28fb08577a9db84f731e50455",
+        "model": "qwen2.5-coder-7b-instruct-q4_k_m",
+        "model_sha256": "509287f78cb4d4cf6b3843734733b914b2c158e43e22a7f4bf5e963800894d3c",
+        "runtime": "llama-cpp-python0.3.20",
+        "adapter": "WRE local_skill_inference native_chat",
+        "elapsed_s": 73.75,
+        "usage": [
+          {
+            "prompt_tokens": 874,
+            "completion_tokens": 84,
+            "total_tokens": 958
+          }
+        ],
+        "usage_basis": "instrumented unchanged SDK response, not independent billing",
+        "paid_calls": 0,
+        "native_hermes_openclaw": false,
+        "os_sandboxed": false,
+        "proposal_only": true,
+        "result": {
+          "success": false,
+          "output": "",
+          "proposal": "```json\n{\n  \"old_string\": \"if source.confidence == ConfidenceLevel.VERIFIED_FACT:\\n                return ConfidenceLabel.VERIFIED_FACT, factors\",\n  \"new_string\": \"if source.confidence == ConfidenceLevel.VERIFIED_FACT:\\n                factors.append(\\\"downgraded_from_verified_due_to_missing_source\\\")\\n                return ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE, factors\"\n}\n```",
+          "steps_completed": 0,
+          "failed_at_step": 1,
+          "error": "Local model output is an unverified proposal, not effect evidence",
+          "error_code": "unverified_model_proposal",
+          "_effect_evidence": false
+        }
+      },
+      "input_sha256": "f2600860e0f97e9d0bbdb580d6e8a7fc154622784085a4eb36ef0cb302586669",
+      "input_hash_encoding": "UTF8 with LF-normalized newlines",
+      "input_raw_sha256": "1c9fca39e6de5cbbfd979f3d5eaaad731ec0683402522d9cffe43df49a6173a4",
+      "evidence_kind": "unsigned_local_observation",
+      "frozen_test_sha256": "898327ec40945318140abdea6ad547609ec325d4c6de42733dc1b7353e43a3f6",
+      "final_test_sha256": "1f3a6cc94bf1100eacfc6a2a4a237738df45e2facbaebccb51d1d214ed8f22f5",
+      "baseline_raw_source_sha256": "abce30857ed5f11e818d350476a72ed0f65a7dc03eeab8c1beafffa0708b47a4",
+      "coordinator_source_sha256": "32b35d5804e0f2d42c511e0071b1db9dde293e2eecf00b4b86b91d29762d8b40",
+      "coordinator_source_lf_sha256": "f87a375dcc155229dfcde2fc5893b2d83f619cdc85ec4c5d259acd8a10c9eecf",
+      "final_test_lf_sha256": "59276bdc80d02bef09e7425cf8efab34864a56fefc928eddc5c06ee1701bf500",
+      "comparison": [
+        {
+          "variant": "baseline",
+          "exit_code": 1,
+          "tests": 20,
+          "failures": 4,
+          "errors": 0,
+          "skipped": 0,
+          "failed_cases": [
+            "test_non_direct_reference_cannot_preserve_verified_fact[news_report]",
+            "test_non_direct_reference_cannot_preserve_verified_fact[third_party_report]",
+            "test_non_direct_reference_cannot_preserve_verified_fact[]",
+            "test_verified_facts_consumer_excludes_non_direct_reference"
+          ],
+          "source_sha256": "1ddc132894fe919ab287018a2e039cc807aa8447aadfb413deda8ca778486e34"
+        },
+        {
+          "variant": "worker_candidate",
+          "exit_code": 1,
+          "tests": 20,
+          "failures": 7,
+          "errors": 0,
+          "skipped": 0,
+          "failed_cases": [
+            "test_non_direct_reference_cannot_preserve_verified_fact[news_report]",
+            "test_non_direct_reference_cannot_preserve_verified_fact[third_party_report]",
+            "test_non_direct_reference_cannot_preserve_verified_fact[]",
+            "test_verified_facts_consumer_excludes_non_direct_reference",
+            "test_approved_direct_reference_remains_verified_in_consumer[fec_filing]",
+            "test_approved_direct_reference_remains_verified_in_consumer[state_filing]",
+            "test_approved_direct_reference_remains_verified_in_consumer[court_record]"
+          ],
+          "source_sha256": "569384c2a5bb369db815c41ecea74c7b555eb5191c98c7e99ca019dead62de8b"
+        }
+      ],
+      "comparison_hash_note": "Disposable source copies are UTF8/LF; raw Windows checkout hashes differ. Original frozen test copies are byte-preserved.",
+      "coordinator_repair": "Only indirect funding-source VERIFIED_FACT branch changes to HIGH_CONFIDENCE_INFERENCE with explicit indirect-source factor; two docstrings corrected. Not attributed to worker.",
+      "independent_review": {
+        "source_review": "rejected wrong-branch model edit; accepted bounded coordinator repair",
+        "full_module": {
+          "passed": 322,
+          "failed": 0,
+          "skipped": 0,
+          "seconds": 1.77
+        },
+        "extra_synthetic_probes": {
+          "passed": 21
+        },
+        "strengthened_targeted": {
+          "passed": 20,
+          "seconds": 0.6
+        },
+        "overlap": "Do not add counts. Module includes two legacy stub/rubric suites; production consumer oracle separately executed.",
+        "independence_limit": "Separate Codex reviewers and test execution; tests withheld from model input but not OS-read-isolated."
+      },
+      "accepted_worker_results": {
+        "numerator": 0,
+        "denominator": 1
+      },
+      "defective_candidates_rejected": {
+        "numerator": 1,
+        "denominator": 1
+      },
+      "coordinator_interventions": {
+        "repair": 1,
+        "diagnostic_envelope_normalization": 1
+      },
+      "full_cost": null,
+      "cost_per_accepted_worker_result": null,
+      "cost_limit": "No paid worker provider calls; coordinator tokens/cost and local energy unknown. No comparative savings claim.",
+      "learning_candidate": "Anchor source edits to branch context and preserve positive controls; not retained as accepted RSI learning until independent later-use benefit.",
+      "aggregate_followup": {
+        "wsp15": {
+          "complexity": 2,
+          "importance": 3,
+          "deferability": 3,
+          "impact": 3,
+          "total": 11,
+          "priority": "P2"
+        },
+        "owner": "modules/foundups/voteballots/ROADMAP.md",
+        "state": "Coordinator repair closes aggregate eligibility and its quick-answer/shell consumer; local worker no-op rejected. Original29 scorer and later47 consumer oracles are frozen separately; full398 pass. No native admission or learned retention.",
+        "evidence": "docs/operations/RSI_SWARM_DISPATCH.md#vote-aggregate-to-display-trial--2026-11-01",
+        "worker_attempts": 1,
+        "worker_accepted": 0,
+        "coordinator_repairs": 2,
+        "paid_worker_calls": 0,
+        "retained_learning_demonstrated": false
+      },
+      "native_author_ticket": false,
+      "os_sandbox_qualified": false,
+      "activation_or_retention": false,
+      "g1_g5_closed": false,
+      "next": "Source-item trial published in PR2282. Close aggregate/display publication separately; qualify candidate provider confinement and protected native requester/consumer owners. Preserve existing R15 target; do not retry unchanged failed local routes."
+    },
     "parent_consensus_join_20261020": {
       "source_base": "5862eea0ef49d950674a6509c3dd2a20771a6be2",
       "current_main": "824d0f71dade7dabc25afa1b778f8e3eb099a1e1",
@@ -1980,6 +2150,221 @@
         "native_author_tickets": 0,
         "paid_model_calls": 0,
         "retained_gain": false
+      },
+      "live_lease": {
+        "source_base": "5820daf8d4ac08376c7fc5671c17292482bf4913",
+        "status": "CORE_VALIDATED_NOT_INSTALLED",
+        "production_owners": 9,
+        "frozen_files": 17,
+        "connected": "390 passed,9 platform skips,0 failures/errors;25 suites;389.797s",
+        "linux_process": "2 passed,0 skips/failures/errors;29.394s;real same-inode lock, synthetic admission",
+        "independent": "16 unique held-outs passed; actual crypto/model tamper; synthetic owner/installation seams",
+        "final_delta": "Test-only 30s watchdog after connected run; native two cases rerun; production unchanged",
+        "receipts": {
+          "high-live-lease-author-review/source-freeze-final.json": "f5853a3d39461c1ee4ac5859883580765693dbfeccccc4422887a1e51e1cf20e",
+          "high-live-lease-author-review/author-review-final.json": "3d7e49d5c139aa9720d463f6636e06f57c463ed73989ba8bbb3d48bf7356aa76",
+          "high-live-lease-author-review/connected-review.json": "e057d20e8e3dcec3511bf3aae383781bc1a5d76d57736221dd7b943400ebbdf2",
+          "high-live-lease-author-review/process-final.json": "04935721e4a43dae2965453bdb9be8d1b7dd6ebf66930af110336cdef5e9f2ea",
+          "high-live-lease-author-review/nested-lock-red.json": "3c110e3e56b7a4577774b65588fc3918cee6dc87e911d799eb44016f588e2f57",
+          "high-live-lease-independent-review/independent-core-review.json": "9f465821601dcf58689d16c89b15ff851281d576a44486c5ccc8ec8399824bbe"
+        },
+        "limits": "Public self-leasing and LOW unchanged; failed exit withholds results but cannot undo callback effects or durable nonce consumption. Installed HIGH source/policy/model-data loading remains unconnected.",
+        "installed_high": false,
+        "native_author_tickets": 0,
+        "paid_model_calls": 0,
+        "retained_gain": false,
+        "generated_binding": {
+          "runtime_files": 1451,
+          "manifest_digest": "4461d7a0a5e576e025baa746872c24db8dadd9c32f8220b9f24f6ad2cdc2e5a4",
+          "registry_total": 1742,
+          "quarantined": 270,
+          "shard_only_moves": 35,
+          "binding_tests": 36,
+          "skipped": 0,
+          "failures": 0,
+          "errors": 0,
+          "node_checks": 3,
+          "receipt_sha256": "e6ab727aa667a1dc134b6748feeff87f2799ff1a9566209f27f928bb5cd81d29",
+          "serialized_manifest_max_bytes": 331776,
+          "pretty_lf_bytes": 327910,
+          "pretty_crlf_bytes": 330885,
+          "installed_qualification": false
+        },
+        "integration": {
+          "base_commit": "6dd48a5aa0267118cd1d600eb3708937837ce098",
+          "canonical_core_17_unchanged": true,
+          "inherited": "Reviewed legacy owner tuple repair, complete v13 signed-model test and 324 KiB reader contract.",
+          "binding_validation": {
+            "tests": 36,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "seconds": 96.046,
+            "generator_checks": 2,
+            "node_checks": 3,
+            "runtime_files": 1451,
+            "registry_total": 1742,
+            "quarantined": 270,
+            "manifest_digest": "fd0969d46a01870d8bfaeaf5f78299be2f66467d32a11035f19936f92921b318",
+            "receipt_sha256": "1870bb658dbb15e13959deee41ecca63caae6414a551003169918b873c0d7ed4",
+            "inherited_runtime_member": "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py"
+          },
+          "core_counts": "Historical tested source base5820; no broad rerun claimed."
+        }
+      },
+      "installed_high_source_reconciliation_20261023": {
+        "base": "99dc200869d49ab911134a11768c0d9a05472cb2",
+        "preserved_branch": "0088b9a3b5de0de2b1a3995058ebe4fba351a73c",
+        "state": "INDEPENDENT_LOCAL_VALIDATION_PASSED_HOSTED_CLOSURE_PENDING",
+        "historical_source": "live_lease and installed HIGH checkpoints preserved; not merged-source validation",
+        "scope": "Existing live generation lease, non-initial installed work metadata and HIGH service composition; preserve main startup current-time admission and LOW restrictions",
+        "validation": "Local source/binding and independent offline review passed; hosted Linux checks and publication pending; no native admission or provider calls.",
+        "native_rsi_complete": false,
+        "local_validation": {
+          "source_cases": 406,
+          "passed": 400,
+          "platform_skips": 6,
+          "failed": 0,
+          "errors": 0,
+          "manifest_passed": 8,
+          "node_commands_passed": 3,
+          "source_bound_files": 22
+        },
+        "binding": {
+          "members": 1466,
+          "added": 13,
+          "removed": 0,
+          "lf_bytes": 331626,
+          "crlf_bytes": 334631,
+          "byte_cap": 334848,
+          "digest": "88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16"
+        },
+        "independent_offline_review": {
+          "heldout_passed": 12,
+          "source_hashes_stable": 22,
+          "effects": "controlled fixtures; no native admission or provider calls",
+          "negative_controls": "exact historical startup-clock implementation and early proof-guard bypass rejected"
+        },
+        "historical_validation_source": "beb46b3e6384ef547dff29462a99f96262e03d4b; superseded for current source acceptance by ci_followup",
+        "ci_followup": {
+          "pr": 2181,
+          "parent_head": "4a401410b8314e707e698ac841531c83fd3757d4",
+          "status": "LOCAL_REPAIR_REVIEW_PASSED_FRESH_HOSTED_GATES_REQUIRED",
+          "observed_failure": {
+            "run": 39892207131,
+            "job": 120214348733,
+            "failed": 2,
+            "passed": 1467,
+            "skipped": 3,
+            "linux_startup_step": "SKIPPED; no POSIX process evidence from this run"
+          },
+          "repair": "Extract one private lease owner under unchanged 200/50 caps; reject non-string policy schemas with contract errors; update unknown-version sentinel and preserve v10 LOW/v11 HIGH shape boundaries.",
+          "source_freeze_sha256": "590fd1de820cade51dff1d28bbde05536a64037ab99b667c52cf1cbd8f302625",
+          "targeted_passed": 180,
+          "independent_passed": 21,
+          "independent_source_bindings": 26,
+          "manifest_tests_passed": 8,
+          "node_commands_passed": 3,
+          "counts_are_separate_overlapping_scopes": "Targeted and connected selections are disjoint by testcase ID; independent/manifest/Node are separate scopes and not added.",
+          "binding": {
+            "count": 1467,
+            "lf_bytes": 331870,
+            "crlf_bytes": 334877,
+            "minimum_KiB": 328,
+            "digest": "92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57",
+            "unchanged_per_file_bytes": 2097152,
+            "unchanged_total_bytes": 33554432
+          },
+          "retention_lesson": "The earlier focused selection missed an adjacent module-size and schema-version contract. Preserve full connected CI selection; do not redefine the oracle to accept the candidate. This is supervised repair evidence, not verified autonomous learning.",
+          "native_author_tickets": 0,
+          "native_rsi_complete": false,
+          "dispatchable": false,
+          "next_action": "Complete exact-head hosted acceptance; merge/read back main; then qualify isolated installed execution with authentic admission inputs through existing owners.",
+          "connected_passed": 230,
+          "connected_platform_skips": 4,
+          "targeted_and_connected_distinct_cases": 414,
+          "targeted_and_connected_passed": 410,
+          "targeted_and_connected_suite_count": 15
+        },
+        "posix_spawn_followup": {
+          "pr": 2181,
+          "parent_head": "174955143d96dc8a0d646bd4ba881462f0714815",
+          "status": "LOCAL_LINUX_REPAIR_REVIEW_PASSED_FRESH_HOSTED_GATES_REQUIRED",
+          "failed_hosted_runs": [
+            39895297867,
+            39895366193
+          ],
+          "per_run_startup_result": {
+            "passed": 1001,
+            "failed": 2,
+            "skipped": 1,
+            "posix_lock_behavior_verified": false
+          },
+          "cause": "Spawn could not import pytest importlib-assigned tests.test_reddog_live_lease_process; failure preceded lock observation.",
+          "scope": "Existing process test and composition test support only; retain spawn, actual POSIX same-inode oracle, timing and cleanup.",
+          "installed_qualification": {
+            "source": "174955143d96dc8a0d646bd4ba881462f0714815",
+            "receipt": "rsi-qualification-independent-result-174955143d.json",
+            "profiles": [
+              "deny",
+              "unix"
+            ],
+            "independently_rehashed_files": 2701,
+            "source_files": 1264,
+            "runtime_files": 1437,
+            "required_source_members": 22,
+            "import_only_modules": 18,
+            "absent_owner_entrypoints": 4,
+            "both_owned_units_absent": true,
+            "credentials_used": false,
+            "native_admission": false,
+            "first_incomplete_export": "Preserved rejected; eight required members missing; corrected explicit-root export independently verified."
+          },
+          "authentic_next_gate": "Existing protected owner-config and signed E0 policy/current-generation selection, with exact candidate/runtime/model/work/principal/verifier/budget bindings; presence and validity not yet established.",
+          "native_author_tickets": 0,
+          "native_rsi_complete": false,
+          "dispatchable": false,
+          "authentic_admission_inventory": {
+            "receipt": "rsi-authentic-owner-known-path-inventory-174955143d.json",
+            "coverage": "Existing named host, candidate174955 and retained294 owner locations; known isolated enrollment/public receipt locations. No environment or credential values inspected.",
+            "result": "No authentic candidate owner/current-generation policy bundle found in the inspected coverage. Existing v1 writer component owners and store qualification receipts do not satisfy supported v9-v13 runtime owner contracts.",
+            "historical_limits": "Earlier component-only fixture manifest explicitly had generation_activated=false and native_worker_admitted=false; historical public assembly was incomplete/uninstalled.",
+            "unknown": "Owner/configuration locations outside the enumerated coverage are not certified absent.",
+            "next": "Use existing protected isolated enrollment/publication owner to assemble or identify current owner/E0 policy and signed selection bound to accepted source/runtime; do not mint authority or replace the loader."
+          },
+          "local_linux": {
+            "receipt": "rsi-spawn-linux-step31-20261023.json",
+            "selector_count": 47,
+            "passed": 1003,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 1,
+            "skip_reason": "Windows extended-length path regression",
+            "both_real_posix_cases_passed": true,
+            "source_bindings_stable": 48,
+            "elapsed_test_seconds": 414.212,
+            "unchanged_outer_limit_seconds": 600,
+            "difference_from_hosted": "WSL Python3.12.3/pytest9.0.3/cryptography41.0.7; documented --confcutdir=. prevents DrvFS ancestor collection; selectors/importlib/spawn/oracles unchanged."
+          },
+          "independent_linux": {
+            "receipt": "rsi-independent-spawn-review-20261023.json",
+            "passed": 4,
+            "failed": 0,
+            "skipped": 0,
+            "source_bindings_stable": 28,
+            "negative_controls": "Removing native lock is detected as held=false when true is expected on the same inode in both parent/effect routes; child cleanup and lease/nonce release preserved.",
+            "limits": "Original positives overlap the full selection; counts are not added. Controlled fixtures do not establish native author admission."
+          },
+          "runtime_preservation": {
+            "receipt": "rsi-spawn-runtime-preservation-20261023.json",
+            "qualified_source_members_unchanged": 1264,
+            "backend_manifest_unchanged": true,
+            "test_paths_in_installed_export": false,
+            "qualification_source_remains": "174955143d96dc8a0d646bd4ba881462f0714815"
+          },
+          "retention_lesson": "Windows skips did not test POSIX spawn importability. Use canonical importable child targets, actual-platform positive and negative witnesses, bounded collection roots and the full connected selector set. This is retained supervised repair evidence, not measured autonomous learning.",
+          "next_action": "Pass fresh exact-head hosted gates, squash merge and verify exact-main source/checks; then establish the authentic current-generation owner/policy inputs through existing enrollment owners. No signing keys or grants are supplied by this planning record."
+        }
       }
     },
     "parent_consent_20261019": {
@@ -18114,7 +18499,7 @@
           "total": 13,
           "priority": "P1",
           "state": "selected",
-          "reason": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+          "reason": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
         },
         {
           "task": "Independent held-out and later-use benefit",
@@ -18152,7 +18537,7 @@
         "total": 13,
         "priority": "P1"
       },
-      "next_rationale": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_rationale": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
       "next_planning": {
         "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
         "wsp15": {
@@ -18163,7 +18548,7 @@
           "total": 13,
           "priority": "P1"
         },
-        "rationale": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "rationale": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
         "prerequisites": [
           "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
           "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
@@ -18189,7 +18574,7 @@
         },
         "acceptance": {
           "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
-          "route": "Trusted constructor values demonstrably reach real helper\u7aca\u8a95dapter\u7aca\u5f3engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "route": "Trusted constructor values demonstrably reach real helper竊誕dapter竊弾ngine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
           "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
           "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
           "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",

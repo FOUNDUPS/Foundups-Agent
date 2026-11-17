@@ -22,6 +22,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from .content_generator import validated_video_evidence
+
 logger = logging.getLogger(__name__)
 
 
@@ -588,6 +590,11 @@ def build_index_metadata_context(
         # Artifact missing -> caller skips enhancement (does NOT index now).
         return None
 
+    evidence = validated_video_evidence(idx, video_id)
+    if evidence is None:
+        logger.info("[INDEX-WEAVE] Metadata evidence missing or mismatched for %s", video_id)
+        return None
+
     new_title = original_title
     if inform_title:
         try:
@@ -596,30 +603,41 @@ def build_index_metadata_context(
             new_title = generate_clickbait_title_from_index(
                 original_title=original_title,
                 index_json=idx,
+                video_id=video_id,
             )
         except Exception as exc:
             logger.debug("[INDEX-WEAVE] Index-informed title skipped: %s", exc)
             new_title = original_title
 
+    if not enhance_description:
+        return MetadataContext(new_title=new_title, new_description=base_description, used_index=True)
+
     enhanced_base = base_description
+    head, marker, tail = enhanced_base.rpartition("\n\nM2M_CONTEXT\n")
+    if marker:
+        try:
+            old = json.loads(tail)
+            if isinstance(old, dict) and old.get("video_id") == video_id and "modality" in old:
+                enhanced_base = head
+        except (ValueError, TypeError):
+            pass
     if enhance_description:
-        context = build_human_description_context(idx)
+        context = f"Video context ({evidence['modality']}):\n" + evidence["text"][:1000]
         enhanced_base = inject_context_into_description(
-            base_description=base_description,
+            base_description=enhanced_base,
             context_block=context,
         )
 
-    tags = build_topic_hashtags(idx, max_tags=5)
-    block = build_digital_twin_index_block(
-        channel_key=channel_key,
-        video_id=video_id,
-        index_json=idx,
+    # Publish only provenance for the inspected summary, not unrelated template
+    # topics or title-derived key points. Summary evidence is not a transcript.
+    block = "M2M_CONTEXT\n" + json.dumps(
+        {key: value for key, value in evidence.items() if key != "text"},
+        ensure_ascii=False, separators=(",", ":"),
     )
-    new_description = weave_description(
-        base_description=enhanced_base,
-        index_block=block,
-        extra_hashtags=tags,
-    )
+    new_description = f"{enhanced_base.rstrip()}\n\n{block}".strip()
+    if len(new_description) > 5000 or len(new_title) > 100:
+        logger.info("[INDEX-WEAVE] Metadata exceeds platform limits for %s", video_id)
+        return None
 
     return MetadataContext(
         new_title=new_title,

@@ -18,6 +18,9 @@ class ProtectedConsensusNonceAuthority:
         raise TypeError("consensus_nonce_authority_construction_forbidden")
 
     def reserve(self, nonce, *, expires_at, subject):
+        return self._reserve(nonce, expires_at=expires_at, subject=subject)
+
+    def _reserve(self, nonce, *, expires_at, subject, _scope=None):
         if (type(nonce) is not str or not is_sha256(nonce) or type(expires_at) is not int or type(subject) is not str
                 or not any(subject.startswith(prefix) and is_sha256(subject[len(prefix):])
                            for prefix in ("elevated-consensus:", "effect-consensus:"))):
@@ -28,7 +31,7 @@ class ProtectedConsensusNonceAuthority:
             token = None
             handle = uuid.uuid4().hex
             try:
-                with self._owner.lease() as (_, _, deadline):
+                with self._owner.lease(_scope=_scope) as (_, _, deadline):
                     if not self._owner.now() < expires_at <= deadline:
                         raise ValueError("consensus_nonce_expiry_invalid")
                     self._store.validate_existing_state()
@@ -48,12 +51,15 @@ class ProtectedConsensusNonceAuthority:
                 raise
 
     def commit(self, reservation):
+        return self._commit(reservation)
+
+    def _commit(self, reservation, *, _scope=None):
         with self._lock:
             token = self._token(reservation)
             if reservation in self._cleanup_only:
                 raise ValueError("consensus_nonce_cleanup_only")
             try:
-                with self._owner.lease():
+                with self._owner.lease(_scope=_scope):
                     self._store.validate_existing_state()
                     self._store.commit(token)
                 self._owned.pop(reservation)

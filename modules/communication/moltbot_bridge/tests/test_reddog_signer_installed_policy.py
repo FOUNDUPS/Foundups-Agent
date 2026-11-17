@@ -81,7 +81,7 @@ def test_installed_policy_does_not_downgrade_into_archive_schema():
     for schema in (pc.POLICY_SCHEMA_V7, pc.POLICY_SCHEMA_V8, pc.POLICY_SCHEMA_V9):
         with pytest.raises(ValueError, match="malformed"):
             pc.validated_signer_owner_e0_policy(dict(value, schema_version=schema), now_epoch=1100)
-    for schema in (None, True, [], "reddog-signer-owner-e0-policy.v11"):
+    for schema in (None, True, [], "reddog-signer-owner-e0-policy.v12"):
         with pytest.raises(ValueError):
             pc.canonical_signer_owner_e0_policy_input(dict(value, schema_version=schema))
 
@@ -149,3 +149,27 @@ def test_installed_bundle_to_policy_hash_order_has_no_future_dependency():
     assert checked["config_digest"] != value["config_digest"]
     assert checked["run_packet"]["config_digest"] == value["grant_authority_config_digest"]
     assert pc.signer_owner_e0_authority_binding_digest(value) == stable
+
+
+@pytest.mark.parametrize("schema", [None, True, 7, 1.0, [], {}, b"v10"])
+def test_policy_schema_rejects_non_strings_with_contract_errors(schema):
+    value = dict(_installed(), schema_version=schema)
+    with pytest.raises(ValueError, match="signer_owner_e0_policy_schema_invalid"):
+        pc.canonical_signer_owner_e0_policy_input(value)
+    with pytest.raises(ValueError, match="signer_owner_e0_policy_malformed"):
+        pc.validated_signer_owner_e0_policy(value, now_epoch=1100)
+
+
+def test_supported_work_schema_has_distinct_domain_and_cannot_relabel_initial_scope():
+    initial = _installed()
+    value = dict(initial, schema_version=pc.POLICY_SCHEMA_V11)
+    value["policy_id"] = pc.signer_owner_e0_policy_id(value)
+    assert pc.canonical_signer_owner_e0_policy_input(value).startswith(pc.POLICY_SCHEMA_V11 + ".")
+    assert pc.canonical_signer_owner_e0_policy_input(value) != pc.canonical_signer_owner_e0_policy_input(initial)
+    with pytest.raises(ValueError, match="installed_work_scope_invalid"):
+        pc.validated_signer_owner_e0_policy(value, now_epoch=1100)
+    value.update(generation=2, allowed_operations=["worktree_create"],
+                 allowed_authority_tiers=["HIGH"], consensus_required_tiers=["HIGH"])
+    value["policy_id"] = pc.signer_owner_e0_policy_id(value)
+    assert pc.validated_signer_owner_e0_policy(value, now_epoch=1100) == value
+    assert pc.validated_signer_owner_e0_policy(initial, now_epoch=1100) == initial

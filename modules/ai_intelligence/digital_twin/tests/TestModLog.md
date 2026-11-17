@@ -1,5 +1,13 @@
 # Digital Twin Tests - TestModLog
 
+## 2026-11-05 — Cross-owner ready-only regression controls
+
+Focused source-bound RED23: 18 failures/5 passes; GREEN23 + quality37: 60 passes,
+zero errors/skips/denied effects. The earlier RED22 is preserved separately.
+Coverage includes warm/cold useful generation, cache sentinels, constructor and
+embedding-loader spies, cancellation and unchanged default cold query behavior.
+No legacy ML build suite, Chroma process or actual corpus/model was run.
+
 **WSP Compliance**: WSP 34 (Test Documentation), WSP 22 (ModLog Updates)
 
 ## Purpose

@@ -6,6 +6,17 @@
 at `3950d45cfdf0edbaf0c80f3c4b28d5dd0db0f550`.
 This file records a narrow source-level change, **not a live shared marketplace**.
 
+## Current continuation note — 2026-10-23
+
+The original slice below is historical source context. PRs #2117 and #2118
+are merged; the optional approval reader exists in source, while configured
+production ownership, reviewer and release gates remain unresolved in #2120.
+Member UI now has bounded local catalog queries and grouped domain adapters;
+that is still not an authenticated private item service or a public-provider
+connection. For AutoPost clothing photos, use
+[AUTOPOST_ITEM_CAPTURE_HANDOFF.md](AUTOPOST_ITEM_CAPTURE_HANDOFF.md): private
+drafts must not enter this public-only route or static media catalogs.
+
 ## Verified service/data ownership (working vs target)
 
 | Concern | Verified source | Current state | Owner/decision |
@@ -17,7 +28,7 @@ This file records a narrow source-level change, **not a live shared marketplace*
 | GotJunk remote items/media | `frontend/services/firestoreSync.ts`, `frontend/services/firebaseConfig.ts` | `gotjunk_items`, `gotjunk_blobs`, base64 and Firebase Storage URLs; legacy project `gen-lang-client-0061781628` | Legacy adapter only; shared publication, upload and media provider **not selected** |
 | GotJunk authorization | `modules/foundups/gotjunk/firestore.rules` | Item and blob **reads are currently public in source rules**; server-side writes use UID checks | Raw legacy reads are **not safe** to index as approved public listings. Production rule deployment not proven |
 | Mall discovery | `modules/foundups/pfmall/shell_core.py`, `api.py`, `http_api.py` | Working **FoundUp tile/catalog/route** reads; unauthenticated HTTP. New read-only listing projection in this PR | Mall owns discovery/search read model and bounded projections |
-| Member search | `public/member/INTERFACE.md`, `public/member/js/mall-tile-field.js` | Creator filtering, **not a vetted item search service** | New item search is not connected to member UI |
+| Member search | `public/member/INTERFACE.md`, `public/member/js/mall-tile-field.js` | Bounded local metadata filtering and grouped domain adapters, **not a vetted private item search service** | Public listing provider and private draft service are not connected to member UI |
 | Browser search stub | `public/member/js/shell-bridge-interceptor.js` | Stub results possible when backend unregistered | Not an item-search authority; never claim stub success |
 | GetK | PR [#802](https://github.com/FOUNDUPS/Foundups-Agent/pull/802), head `de63ab95aab0ca11247cf2620cb4bc559bbce16c`, `modules/foundups/getk/src/getk_contracts.py` | Unmerged declarative marketplace packets; no working Mall/backend/media service | Future consumer, **not** a current provider |
 | Shop/GetK resale consumer | GitHub code/PR/branch searches on 2026-10-12 | No Shop implementation branch, module or named PR located in this repo search | External/unpublished Shop work **unverified**; do not assume contracts |

@@ -260,7 +260,7 @@ class FiOrderBook:
         trades = self._match_buy_order(order)
 
         # If not fully filled, add to book
-        if order.remaining > 0:
+        if order.remaining > 0 and order.status != OrderStatus.CANCELLED:
             heapq.heappush(self.buy_orders, order)
 
         logger.info(
@@ -311,7 +311,7 @@ class FiOrderBook:
         trades = self._match_sell_order(order)
 
         # If not fully filled, add to book
-        if order.remaining > 0:
+        if order.remaining > 0 and order.status != OrderStatus.CANCELLED:
             heapq.heappush(self.sell_orders, order)
 
         logger.info(
@@ -331,6 +331,12 @@ class FiOrderBook:
             # Check if prices cross (buyer willing to pay >= seller asking)
             if buy_order.price < best_sell.price:
                 break  # No match possible
+
+            if buy_order.human_id == best_sell.human_id:
+                buy_order.status = OrderStatus.CANCELLED
+                buy_order.rejection_reason = "self_trade_prevention"
+                self.rejected_buy_orders += 1
+                return trades
 
             # Execute trade at seller's price
             trade = self._execute_trade(buy_order, best_sell)
@@ -360,6 +366,12 @@ class FiOrderBook:
             if best_buy.price < sell_order.price:
                 break  # No match possible
 
+            if sell_order.human_id == best_buy.human_id:
+                sell_order.status = OrderStatus.CANCELLED
+                sell_order.rejection_reason = "self_trade_prevention"
+                self.rejected_sell_orders += 1
+                return trades
+
             # Execute trade at seller's price (sell_order.price)
             trade = self._execute_trade(best_buy, sell_order)
             trades.append(trade)
@@ -379,6 +391,8 @@ class FiOrderBook:
 
     def _execute_trade(self, buy_order: Order, sell_order: Order) -> Trade:
         """Execute a trade between buy and sell orders."""
+        if buy_order.human_id == sell_order.human_id:
+            raise ValueError("self-trade is not allowed")
         self._trade_counter += 1
 
         # Trade quantity is minimum of both remaining

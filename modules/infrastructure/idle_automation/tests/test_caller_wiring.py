@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import gc
 import uuid
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -362,4 +363,3 @@ def test_idle_dae_routes_resident_claim_through_extracted_adapter():
     assert "dispatch_resident_reconcile_claim" in source
     assert "project_resident_reconcile_dispatch_outcome" in source
     assert "async def _dispatch_resident_reconcile_claim" not in source
-
