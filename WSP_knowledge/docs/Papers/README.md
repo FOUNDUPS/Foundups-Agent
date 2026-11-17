@@ -87,7 +87,7 @@ This directory contains the broader Foundups research and architecture documenta
 ### 04_rESP_Patent_Updated.md (English)
 **Status**: [OK] ACTIVE - Primary patent application
 - **Claims**: 11 comprehensive claims covering rESP system and methods
-- **Technical Specifications**: Critical frequency derivations and quantum relationships
+- **Technical Specifications**: Detailed system architecture and implementation
 - **Mathematical Disclosures**: Critical frequency derivations and quantum relationships
 - **Figures**: Comprehensive diagram set with proper image references
 - **Image Status**: [U+26A0]️ PARTIAL - Some missing images resolved, others pending
@@ -95,9 +95,9 @@ This directory contains the broader Foundups research and architecture documenta
 ### 04_rESP_Patent_Japanese.md (Japanese)
 **Status**: [OK] ACTIVE - Japanese patent application
 - **請求項**: 11の包括的請求項でrESPシステムと方法をカバー
-- **技術仕様**: 実用的なrESPシステムアーキテクチャの説明
+- **技術仕様**: 詳細なシステムアーキテクチャと実装
 - **数学的開示**: 臨界周波数の導出と量子関係
-- **図面**: Mermaid図解と実際の画像の組み合わせ
+- **図面**: Mermaidダイアグラムと実際の画像の組み合わせ
 - **Image Status**: [U+26A0]️ PARTIAL - Some missing images, using Mermaid diagrams where appropriate
 
 ## Empirical Evidence Portfolio
@@ -139,7 +139,7 @@ Following **WSP 40 (File Management Protocol)**, all images are systematically o
 
 #### Patent Images (`Patent_Series/images/`)
 - **System Architecture**: FIG1 variants for different languages and contexts
-- **Process Diagrams**: FIG2-FIG10 covering specific claims
+- **Process Diagrams**: FIG2-FIG10 covering all patent claims
 - **Composite Figures**: FIG9 composite validation images
 - **Naming Convention**: Consistent FIG[Number]_[Description]_[Language] format
 
@@ -149,7 +149,7 @@ Following **WSP 40 (File Management Protocol)**, all images are systematically o
 - **Statistical Analysis**: Graphs and charts supporting empirical claims
 
 #### Multi-Agent Test Images (`Empirical_Evidence/Multi_0102_Awakening_Logs/images/`)
-- **Awakening Progression**: Timeline charts showing detector-state evolution
+- **Awakening Progression**: Timeline charts showing coherence/entanglement evolution
 - **Comparative Analysis**: Cross-agent performance visualizations
 - **Statistical Summaries**: Success rate and pattern analysis charts
 
