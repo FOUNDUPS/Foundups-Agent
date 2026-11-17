@@ -951,3 +951,44 @@ print(f"Total calls: {stats['total_calls']}")
 print(f"Success rate: {1 - stats['failure_rate']:.1%}")
 print(f"Provider usage: {stats['provider_usage']}")
 ```
+
+## Offline audio timing contracts
+
+- `inspect_word_timestamps(payload, duration_seconds=...) -> TimingReport` checks
+  a bounded top-level word list in supplied order, exact finite numeric times,
+  nonnegative bounds and independently monotonic starts/ends. Adjacent overlaps
+  and uncovered intervals are diagnostics. Zero-length intervals may be valid;
+  no alignment, instrumental classification or subtitle usability is inferred.
+- `TimingCase` binds task/audio/preprocessing/agent configuration and duration.
+  `TimingObservation` binds immutable response bytes and candidate topology.
+  Identities are caller assertions, not authenticated provider evidence.
+  `output_digest` hashes response bytes only; `lookup_key` is the tuple
+  `(case_digest, candidate_topology_digest, output_digest)`.
+- `build_timing_verifier(cases, observations)` implements the existing injected
+  BenchmarkVerifier seam. Invalid responses or mismatches are REJECT; valid
+  structure is SKIPPED with evidence_correct=False and unmeasured accuracy.
+  Register multiple observations as `{item.lookup_key: item for item in samples}`
+  so identical outputs from different cases/candidates remain separate. Legacy
+  output-digest keys are supported, but entries overwritten before registration
+  cannot be recovered. Wrong keys raise `observation_lookup_invalid`; duplicate
+  full identities (including legacy/compound aliases) raise
+  `observation_lookup_duplicate`. Runtime lookup always uses all three identities.
+- `SharedAttemptBudget(max_attempts=2).claim(model_id=..., purpose=...)` enforces
+  one shared in-memory count cap. Failure/uncertainty consumes a claim. It has no
+  refund/reset, transport, spend authority or durable cross-process enforcement.
+
+No reference lyrics are accepted by this layer. Raw audio/reference/response
+persistence stays with existing private runtime artifact/evidence owners.
+
+Acceptance is frozen at `audio_word_timing_structure.v1`: finite valid timing
+shape remains an unaccepted SKIPPED quality result. This contract does not
+measure whether a zero-duration word can be displayed, whether words match the
+performance, or whether a provider used an acoustic aligner. Separate audio-only
+transcription and audio-plus-reference alignment tracks require independent
+scorers. Candidate timestamps cannot serve as their own timing reference.
+
+The 2026-11-15 private smoke run replayed two genuine cached responses through
+this same harness seam without additional inference. Both remained SKIPPED;
+no champion/challenger selection or production binding changed. The shipped
+count guard is deliberately in-memory; the live transaction retained separate
+exclusive attempt markers and actual cost receipts outside the repository.
