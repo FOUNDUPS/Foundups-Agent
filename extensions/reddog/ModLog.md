@@ -1,3 +1,17 @@
+## 2026-11-17 - Specify Moshpit pins and conversation navigation
+
+- Added a planned message/Markdown/artifact pin contract to the existing Moshpit
+  architecture, with a thumb-reachable bottom pin tray and jump to original source.
+- Distinguished conversation history (older above, latest near composer) from the
+  existing newest-first project activity/audit view; specified reading-anchor
+  preservation, bounded history resolution and source lifecycle/access states.
+- Linked the requirement from the existing roadmap and discovery indexes, and
+  identified GotJunk's Wave-inspired message components as reuse candidates.
+- Documentation only: pin UI, durable integration, runtime tests and physical-phone
+  acceptance remain outstanding. No current host-chat capability is claimed.
+
+WSP references: WSP_00, WSP_15, WSP_22, WSP_50, WSP_97.
+
 ## 2026-11-16 — Publication reconciliation dependency binding repair
 
 The first PR2414 hosted Python job correctly rejected a stale generated backend

@@ -1,5 +1,17 @@
 # AI Gateway TestModLog
 
+## 2026-11-16 - Audio observation identity collision regressions
+
+Freeze five added offline cases before the adapter fix: identical bytes across
+candidates and cases in both registration orders, per-case duration bounds,
+duplicate legacy/compound aliases and different output bytes for one identity.
+Extend malformed-key controls to changed case, topology, output and tuple length.
+Original27 plus5 gives32 test methods. The unchanged adapter produced5 subtest
+errors and1 assertion failure; the outer red-run summary had incorrectly expected
+3 errors, so its nonzero result and raw log are retained. No regression was relaxed.
+The repaired adapter passes all32 methods with zero errors, failures or skips through the existing bounded runner. No provider calls.
+WSP11/22/50/97.
+
 ## 2026-11-16 — Independent repair verifier firewall & policy controls
 
 Added `test_independent_repair_verifier.py` (5 passed) verifying
@@ -425,3 +437,47 @@ Supporting compatibility coverage:
 The counts above include the WSP62 AST regression added in this repair. The
 artifact-store file is also run independently as the five-case atomic failure
 matrix.
+
+## 2026-11-15: local offline audio timing fixture qualification
+
+Source: partial snapshot of 45267ddabb1e714aca6cfe6233f5a2daf5b836ca,
+verified against 32 Git blob IDs; standalone owned Temp source, no shared checkout
+or Git metadata edits. Canonical awakening and strict tracker passed in that
+snapshot before fixtures. Existing qualified bounded runner used hidden windows,
+minimal environment, real CPython -I -S -B, a 20-second test deadline, bounded
+output and exact source/executable inventory checks before and after.
+
+Exact suite: modules.ai_intelligence.ai_gateway.tests.test_model_audio_timing_benchmark,
+standard-library unittest. Attempt 1: 27 run, 26 passing / one failing subtest,
+zero errors/skips. A well-formed deeply nested root array parsed successfully on
+this runtime and was correctly rejected as word_timestamps_invalid; the test had
+incorrectly required a parser error. Independent review approved a test-only
+classification correction with the rejection boundary unchanged.
+
+Attempt 2: 27 passed, zero failures/errors/skips; supervised 0.281 seconds.
+Candidate and test bytes remained stable, with no added importable artifacts.
+Exact invocation, source hashes, both logs and receipts remain in the retained
+private audio-benchmark evidence package; its attempt-2 entry point is
+run_offline_fixtures_attempt2.py. No network/provider/credential operations are
+present in the reviewed test path. This is source review plus bounded execution,
+not an OS network/filesystem sandbox or complete repository security acceptance.
+
+Inference requests: 0. Inference spend: $0. Model accuracy, real word alignment,
+provider timing provenance, live STT admission and production RSI remain unknown.
+
+### Subsequent bounded smoke and genuine-response replay
+
+The earlier zero-inference fixture receipt above remains historical. Subsequent
+operator-authorized live execution completed exactly two HTTP 200 transcription
+requests, with reported costs $0.00024975 and $0.0012500025. Eight mocked
+transaction/ledger tests had passed before either paid call. No further calls
+followed the exhausted two-request allowance.
+
+Offline response replay: return code 0, supervised 0.437 seconds, stable bound
+source/inventory, no network or credentials in the reviewed child path. Genuine
+word lists contained 222/217 entries, 21/1 zero durations and no adjacent
+overlaps; both were structurally valid and unaccepted SKIPPED in the real
+harness. Existing broadcaster SRT export preserved 222/217 diagnostic cues and
+all original timing within 1.1 ms of millisecond representation. Raw response
+hashes, source excerpt/hash/offset, actual request IDs and artifacts remain
+private. Alignment accuracy, WER and usable subtitles were not established.

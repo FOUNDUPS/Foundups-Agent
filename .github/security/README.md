@@ -9,7 +9,9 @@ literal is approved. The new entire-manifest Git-byte SHA256 is
 `1edde361ddea9165c8b31b39d0e3a672bac55324fd7f2ceb57faf0abde4df80f`.
 
 Independent per-finding review approved only39 exact whole-file/rule/line
-bindings, preserving all4579 prior entries/order and other fields (4618 total).
+bindings, preserving all4579 prior entries/order and other fields (4618 total);
+composed onto main (preserving PR #2403's 4,580th bridge-ModLog binding), the
+union preserves all 4,580 main entries plus these 39 bindings (4,619 total).
 See [per-finding evidence](reviewed-jhr-manifest-evidence.json). Scanner rules,
 exclusions, fingerprint formula and complete-tree/introduced-history coverage
 remain unchanged; scanner errors remain blocking. Fresh hosted scans required.
@@ -54,6 +56,20 @@ Appending this 1 renewed binding alongside the 39 manifest bindings preserves
 all 4,500 earlier entries (`4,540` total). Scanner rules, exclusions,
 fingerprint formula, and scan coverage stay the same. Fresh full-tree and
 introduced-history checks remain required.
+
+## Visual verification guidance documentation review - 2026-11-15
+
+PR #2403 head `441009c9c` failed security job132951848778 on one
+`generic-api-key` Markdown-prose finding in the existing bridge ModLog.
+Author and independent verifier confirmed the flagged line is identical to
+base `e62e9eb` line4029 and already has an exact prior approved binding.
+The new log entry now follows the unchanged base bytes, retaining that line's
+location. Its changed whole-file digest still requires one renewed binding.
+Append exactly that independently recomputed current-file/rule/line record;
+preserve all 4,500 earlier records (4,501 total), rules, fingerprint formula,
+scan coverage and failure handling. No credential or unknown finding is approved.
+The failed run is retained; fresh final-tree and introduced-history checks remain
+required. The scoped source test suite does not substitute for those scans.
 
 ## WRE/RSI bounded improvement and rollback backend manifest review — 2026-11-15
 

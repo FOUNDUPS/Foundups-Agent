@@ -1,3 +1,16 @@
+## Offline visual-harness caller controls
+
+The four `test_visual_harness_*` cases in `test_layer3_schedule.py` use a fake
+runner, synthetic readback and a native import guard for the scheduler parent,
+`pytz` and model packages. The production DOM constructor loads only on manual
+use, so collection does not require the full scheduler's dependencies. Run them with
+`python -m pytest modules/platform_integration/youtube_shorts_scheduler/tests/test_layer3_schedule.py -k visual_harness --import-mode=importlib`.
+They never attach Chrome or call UI-TARS. The separate manual `--wre-tars` path
+stops after any failed verification and exits nonzero for an absent, empty, failed
+or inconsistent summary. Its date/time value assertion is DOM evidence;
+the earlier visual checks only localize described targets. These checks do not
+prove a saved or published schedule.
+
 ## 2026-11-10 — Native request inventory inspection
 
 The sealed calendar suite retains all 233 previous cases and adds 50 controls.
