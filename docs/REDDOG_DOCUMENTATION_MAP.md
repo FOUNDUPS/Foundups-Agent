@@ -21,7 +21,8 @@ not mean RedDog has 376 canonical specifications.
 | Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
 | Browser outcome verification evidence | [Selenium verification contract](../modules/infrastructure/foundups_selenium/INTERFACE.md#wre-visual-verification-evidence), `modules/communication/moltbot_bridge/workspace/skills/foundups-wsp/SKILL.md` | Existing runner and operator guidance; source presence does not prove live RedDog wiring or a visual PASS |
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
-| Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric PoC implemented; broader confidence ladder specified; not deployed |
+| Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric request-continuity PoC implemented, not deployed; continuous human presence, mutual verification, and media provenance specified, not implemented |
+| Continuous Lick / Gemini evaluation | `docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md` | Source-grounded audit; separates presence, continuity, media, affect, semantic state, and authority; no anti-deepfake deployment claim |
 | Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |
 | Public host and AutoPost/site integration work order | `extensions/reddog/docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` | Remaining implementation/activation gates; never completion evidence |
 | Host-recovery salvage and stranded PR closure | [2026-10-06 reconciliation](audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md) | Exact-base audit, owned scope and validation; not resident activation |

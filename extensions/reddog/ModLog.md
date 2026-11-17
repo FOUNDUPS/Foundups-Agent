@@ -1,3 +1,39 @@
+## 2026-11-17 — Reconcile PR #1689 continuous Lick audit and AutoPost lens continuation
+
+- Integrated the PR #1689 continuous/mutual Lick evaluation audit, updated
+  `REDDOG_LICK_CONNECTION_HANDSHAKE.md`, `ROADMAP.md`, `ARCHITECTURE.md`,
+  `HOLOINDEX.md`, and `docs/REDDOG_DOCUMENTATION_MAP.md` onto current `main`
+  while preserving all Moshpit (#2419/#1642), PIN/ordering, Muzzle, AutoPost,
+  DAEmon, and `Current PAL reconciliation — PR1638` contracts.
+- Reconciled dated 2026-09-13 external references against current verified repo
+  state: `FOUNDUPS/autopost#12` merged on 2026-10-18 (`3c0fc19d40e225ed7f826541a33c38293f9fe664`,
+  preserving that repository merge is not production deployment or physical-phone
+  acceptance), and `#1641`/`#1680` were closed unmerged on 2026-10-06
+  (`REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md`) while keeping the 2026-09-13
+  audit intact as historical baseline evidence.
+- Preserved `reddog_public_policy.py` wire truth (`identity_verified: false`,
+  `human_presence_proven: false`, `signed: false`, `authority_granted: "none"`)
+  and `reddog.*.proposed` separation; documentation acceptance grants no
+  biometrics, live consent certification, capture permission, memory write, or
+  worker activation.
+- Retained the 2026-09-13 AutoPost lens and continuous Lick audit notes below
+  for historical trace with current-status qualification.
+
+WSP references: WSP_00, WSP_22, WSP_44, WSP_50, WSP_73, WSP_87, WSP_97.
+
+## 2026-09-13 (PR #1689 baseline, reconciled 2026-11-17) - AutoPost lens continuation & Continuous Lick audit
+
+- Extended the existing Lick contract with deliberate enrollment, renewal,
+  scoped sharing, peer requirements, recovery and membership boundaries; linked
+  `FOUNDUPS/autopost#12` (subsequently merged 2026-10-18 at `3c0fc19d40e225ed7f826541a33c38293f9fe664`;
+  undeployed and pending real-phone proof).
+- Audited the Gemini proposal and 012's continuous/mutual Lick use case against
+  baseline `08d005635f25aeae2606473c960fd803bd784157`, `reddog_public_policy.py`,
+  AutoPost's author/media signer (`4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147`),
+  WSP 44, WSP 73, and primary technical references; renamed illustrative schema
+  examples to `*.proposed` so they do not collide with live `*.v1` contracts,
+  and kept affect cues / semantic states advisory and non-authoritative.
+
 ## 2026-11-17 — Reconcile PR #1642 Moshpit principal-significance gate and 0102-delegated attribution
 
 - Reconciled PR #1642 unique Moshpit specification deltas into the canonical
