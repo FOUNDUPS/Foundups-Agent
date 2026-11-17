@@ -440,6 +440,27 @@ IDE extension POC
   -> governed public FoundUps launch flow
 ```
 
+## Moshpit conversation navigation and pins (planned)
+
+Status: `SPECIFIED_NOT_IMPLEMENTED`. Canonical requirement:
+[Moshpit conversation navigation and pins](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#conversation-navigation-and-pins-specified-not-implemented).
+
+- Reuse existing conversation/Breadcrumb/Brain-Memex ownership and inspect the
+  Google Wave-inspired GotJunk message components before implementing persistence
+  or a new UI. No separate Moshpit memory store.
+- Add contextual pin/unpin for messages, Markdown blocks and artifacts; a single
+  bottom/thumb-accessible pin icon opens a scoped tray and jumps to original
+  sources. Pins retain source identity/revision and current access checks.
+- Show conversation history oldest-above/latest-near-bottom, preserve the reading
+  anchor while paging or receiving live replies, and retain a return-to-latest
+  action. The newest-first project activity/audit view remains separate.
+- Select the smallest implementation slice using WSP_15 after owner/dependency
+  reconciliation. Verify pin persistence/isolation, source lifecycle, pagination,
+  focus and scroll behavior in isolated soft-proto; desktop and physical-phone
+  acceptance are outstanding. A documented requirement is not runtime readiness.
+
+This is part of the existing Moshpit/RedDog roadmap, not a parallel Wave project.
+
 ## WSP_15 Priorities
 
 | Work Item | Complexity | Importance | Deferability | Impact | MPS | Priority | Notes |
