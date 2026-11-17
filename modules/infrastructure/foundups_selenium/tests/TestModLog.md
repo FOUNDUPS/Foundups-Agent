@@ -1,5 +1,49 @@
 ## TestModLog - FoundUps Selenium
 
+### 2026-11-15 — Visual runner test reuse decision
+
+The existing inventory below covers driver/Gemini helpers, telemetry, human
+behavior, shadow lookup and the human-only verification hold. None exercises
+`WREVisualTestRunner`, its PatternMemory result or observation/action boundary.
+A separate offline runner contract suite is justified; use fake driver, bridge
+and memory only. The browser `test_edge_*` harnesses are not offline tests.
+No historical pass count below is evidence for this new contract.
+
+Fresh validation: 25 runner cases passed; the adjacent pre-CLI-final selection
+passed 118 (runner, two then-current caller controls, driver, shadow lookup,
+human-only verification hold and attachment). After the CLI correction, the
+71-case focused selection passed, including all 25 runner/three caller controls
+plus registry/import-safety cases. Counts overlap. Existing CI contract tests
+passed 40; canonical registry and Codex projection checks passed. Strict managed
+workspace skill manifest and existing safety scanner passed (10 skill files).
+Independent review passed 25 runner/three caller cases, a real active-event-loop
+held-out and exact CLI-entrypoint exit controls. Both unavailable-vision cases
+fail specifically on `True is False` against exact base e62e9eb.
+
+Windows sandbox attempts stalled while asyncio created its internal socket pair;
+owned test sessions were interrupted and a 10-second diagnostic reproduced the
+runtime block before any mocked inference. Bounded unsandboxed offline reruns
+passed without replacing asyncio or inventing a vision receipt. CI Bash contract
+tests initially failed with Windows process-initialization exit 3221225794 in
+the sandbox; the unchanged bounded rerun outside it passed 40. One inherited
+`datetime.utcnow` warning occurred in the 118 selection. These are source tests,
+not live browser/model, deployed site, installed Red Dog or production RSI proof.
+
+First-head hosted CI then exposed the manual caller's eager scheduler import
+(`pytz` absent in the bounded CI environment). Defer the actual DOM constructor
+import and add a fourth native import-guard control, without adding dependencies.
+The final local runner/caller/security selection passes 81 of 82; its one
+unchanged deployment-shell test selects unavailable Windows WSL Bash through an
+intentionally empty child environment. Initial cp932 read failures disappear
+under UTF-8. This host limitation remains explicit; hosted Linux security-gate
+regressions had passed before the separate tree scan's reviewed-prose binding
+failure. No test or scanner gate is disabled. Fresh corrected-head CI is required.
+
+Independent source review confirms the bridge ModLog finding is unchanged,
+previously approved Markdown prose. Append one exact whole-file/rule/line binding
+through the existing security ledger; all 4,500 old records and scanning rules
+are retained. Full-tree/history scanner acceptance remains a hosted check.
+
 ### 2026-11-10 — Match attachment doubles to the CDP owner
 
 The actual Chrome/Edge attachment fixture now supplies a Selenium-style command

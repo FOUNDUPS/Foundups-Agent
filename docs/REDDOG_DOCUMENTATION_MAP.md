@@ -19,6 +19,7 @@ not mean RedDog has 376 canonical specifications.
 | Hybrid tickets, bounded teams and active-012 feedback into 3V | [Hybrid architecture decision](architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md), [R24](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md), [R25](roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) | Cross-domain implementation plan; not live federation or voting authority |
 | Current extension/runtime truth | `extensions/reddog/README.md` | Current product/runtime status |
 | Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
+| Browser outcome verification evidence | [Selenium verification contract](../modules/infrastructure/foundups_selenium/INTERFACE.md#wre-visual-verification-evidence), `modules/communication/moltbot_bridge/workspace/skills/foundups-wsp/SKILL.md` | Existing runner and operator guidance; source presence does not prove live RedDog wiring or a visual PASS |
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
 | Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric PoC implemented; broader confidence ladder specified; not deployed |
 | Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |

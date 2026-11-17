@@ -6,6 +6,12 @@ This is a **wrapper** around official Selenium (not a fork), providing FoundUps-
 
 ## Features
 
+The existing WRE visual runner now fails closed when vision is unavailable or
+errors, supports explicitly labeled DOM assertions, and retries observations
+without replaying actions. Read the [verification evidence contract](INTERFACE.md#wre-visual-verification-evidence)
+before interpreting a pass or attaching it to another workflow. Offline tests
+do not establish installed Red Dog integration or live browser qualification.
+
 YouTube attachment owners install a human verification handoff: a detected
 “Verify it's you” prompt yields browser effects for at least 30 seconds so 012
 can finish verification, and longer while the prompt remains. It never answers
