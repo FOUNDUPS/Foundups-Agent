@@ -1,3 +1,24 @@
+## 2026-11-18 — Reconcile PR #2178 resident memory reuse onto main
+
+- Reconciled the 2026-10-23 resident memory reuse and FoundUp Memex configuration
+  tests (`test_reddog_resident_architect_client.py`) onto current `main` while
+  preserving all existing tests and historical entries below.
+- Updated `test_reddog_signer_system_service_wsp71_resolver_supply.py::test_executable_gate_accepts_root_owned_linux_binary`
+  to resolve `Path("/usr/bin/env").resolve()` so the positive root-owned executable control handles Ubuntu 26.04's `/usr/bin/env` coreutils symlink without weakening symlink rejection in `reddog_signer_system_service_wsp71_resolver_supply.py`.
+
+## 2026-10-23 — Resident memory reuse and FoundUp Memex configuration
+
+- Reused `test_reddog_resident_architect_client.py` to cover the resident infrastructure
+  added for scheduled FoundUp reconciliation. The real `esingularity_001` registry entry,
+  manifest and module ROADMAP now produce the existing `OperationalMemexSnapshotSupplyConfig`
+  shape without a second memory store.
+- Added direct regression for the Breadcrumb runtime query's keyword-only `limit` contract;
+  this protects parity with the pre-extraction `main.py` behavior.
+- Existing main-bootstrap memory-context tests remain the wrapper-parity coverage after
+  Brain/Breadcrumb/workspace-note readers moved into the reusable RedDog owner module.
+- These are source/memory binding tests only: no principal Memex fabrication, provider
+  mutation, model execution, shell, repository mutation or retained RSI benefit is claimed.
+
 ## 2026-11-10 — Deterministic signer activation convergence
 
 Replay the CI interleaving from #2333 by pausing the first publisher after it

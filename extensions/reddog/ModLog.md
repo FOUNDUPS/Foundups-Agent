@@ -1,3 +1,25 @@
+## 2026-11-18 — Reconcile PR #1792 FoundUp brand context integration and manifest refresh
+
+- Integrated `PR #1792` onto current `main` (`#2189` core + `#2178` closure): bound `esingularity_001.brand_context_path`, updated eSingularity/YUMORI Skillz + WRE `skills_registry_v2.json` descriptions (preserving all `39` registered entries), and refreshed the `1,494`-member RedDog backend manifest (`cb7f5970b56ed261b92e4df2775ab30961da80187b351833f356f5ad7bb55aa4`) plus digest/security pins.
+
+## 2026-11-18 — Reconcile PR #2178 scheduled resident reconciliation backend closure
+
+- Composed PR #2178 (`f1fb9763b`, default-off `AUTO_REDDOG_RESIDENT_RECONCILE=false`)
+  onto `main` (`20a7044c0`) and regenerated the deterministic RedDog backend
+  manifest (`026c309159d37feb55d4666288c52316c31c06ec1f9ee3a866e67dc86bf31068`).
+- Runtime closure advances from 1,488 to 1,494 members (`reddog_resident_foundup_memex_config.py`,
+  `reddog_resident_memory_context.py`, `reddog_scheduled_resident_reconcile.py`,
+  `resident_reconcile_schedule_adapter.py`, plus transitive `extract_brain_artifacts.py`
+  and `utils/markdown_sanitizer.py`), with 0 removals; `assertRuntimeFileCountBoundary`
+  accepts 1,494 and rejects 1,495.
+- Manifest ceiling advances cleanly one step from `332 * 1024` to `334 * 1024`
+  (342,016 bytes; measured `338,010` LF / `341,071` CRLF bytes), while unchanged
+  `2 MiB` member and `32 MiB` aggregate caps remain preserved.
+- Documentation/closure reconciliation only: live scheduling stays default-off and
+  no model activation or external side-effect authority is granted.
+
+WSP references: WSP_00, WSP_11, WSP_22, WSP_50, WSP_62, WSP_84, WSP_97.
+
 ## 2026-11-17 — Reconcile PR #1689 continuous Lick audit and AutoPost lens continuation
 
 - Integrated the PR #1689 continuous/mutual Lick evaluation audit, updated

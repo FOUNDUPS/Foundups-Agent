@@ -63,6 +63,24 @@ class TestScheduleParser:
                 f"run openrouter catalog refresh {cadence}"
             ) is None
 
+    def test_resident_reconcile_is_daily_only_and_semantically_deduped(self):
+        """Resident FoundUp reconcile has one durable daily cadence."""
+        assert ScheduleParser.parse(
+            "run resident reconcile daily"
+        ) == ("resident_reconcile", "daily")
+        assert ScheduleParser.parse(
+            "run resident foundup reconcile daily"
+        ) == ("resident_reconcile", "daily")
+        for cadence in ("nightly", "morning", "evening"):
+            assert ScheduleParser.parse(
+                f"run resident reconcile {cadence}"
+            ) is None
+        assert ScheduleParser.generate_id(
+            "run resident reconcile daily"
+        ) == ScheduleParser.generate_id(
+            "run resident foundup reconcile daily"
+        )
+
     @pytest.mark.parametrize(
         "phrase",
         [

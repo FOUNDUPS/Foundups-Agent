@@ -698,7 +698,8 @@
       "portfolio_ready": true,
       "portfolio_evidence_docs": [
         "modules/foundups/esingularity/frontend/audit/AUDIT.md"
-      ]
+      ],
+      "brand_context_path": "modules/foundups/esingularity/brand_context.json"
     },
     {
       "foundup_id": "shield",

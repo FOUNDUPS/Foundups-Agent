@@ -1,3 +1,7 @@
+## 2026-11-18 — Reconcile PR #1792 eSingularity / YUMORI.me brand context
+
+- Reconciled `PR #1792` onto current `main`: added `brand_context.json` (`eSingularity.ai` parent identity, `YUMORI.me` movement/preparatory-committee child brand), bound `esingularity_001.brand_context_path` in `foundup_registry.json`, and updated eSingularity/YUMORI Skillz + contracts (`test_esingularity_brand_context_is_single_skill_brand_authority`) while preserving all `#2189`, `#2340`, `#2413`/`#2414`, and live-ticker work.
+
 ## 2026-11-16 — Recover JHR release blocker and harden existing publication handoff
 
 Reconciled the relevant YUMORI history, existing issue2126 and read-only Sites

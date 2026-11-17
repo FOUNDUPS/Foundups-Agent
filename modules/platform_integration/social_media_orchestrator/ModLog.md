@@ -1,3 +1,15 @@
+## 2026-11-18 - Bounded reusable editorial review
+
+WSP 00/10/15/22/50/84/97. Extend existing content owner with exact-revision
+four-lens review, three-round refinement, unchanged/oscillating-candidate rejection
+and an existing AI Gateway benchmark-task projection. Preserve SOCIAL prepare/
+reconcile and provider/admission owners. Add generic discovery wrapper and extend
+the existing prototype campaign skill. No new registry, model client or scheduler.
+Independent review found and repaired rubric-binding and circular benchmark-target
+defects before acceptance; golden expectations are now separate supplied fixtures.
+Local tests are recorded in TestModLog. Live providers, publication, performance
+collection and transferable RSI remain unverified. See docs/EDITORIAL_REVIEW.md.
+
 ## 2026-11-16 — Repair generated backend publication-helper binding
 
 Hosted CI exposed the omitted generated import-closure/hash refresh. The existing
