@@ -86,3 +86,56 @@ whole-Mall discovery keep their existing stages.
 ## 2026-11-11 reconciliation receipt
 
 PR #2358 is reused for this documentation/skill correction; no new branch or UI implementation is created by this revision. Repository reads are GitHub connector evidence against main `f0d08839e78c0aa2cca592ef20773fc5826f9040`; native WSP bootstrap, HoloIndex, WRE admission, PC state and physical-device playback were not executed in this connector session. Documentation review is not runtime verification. Exact-head checks, authorized merge, main read-back, deployment and PC synchronization must be reported separately.
+
+## H2 — Dream Team and Press Wire (2026-11-17)
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.** Documentation
+reconciliation is the current slice. H1 playback/device gates remain open;
+this campaign must reuse shared Mall owners and avoid a second frontend.
+
+1. Resolve the named master workbook and reconcile its claimed four tabs with
+   the existing sources in README. Preserve source rows, aliases and unknowns;
+   never claim 34 audited organizations from the current 33-row source.
+2. Verify existing banner assets/live rendering and both requested/referral
+   domain spellings. Coordinate with #2411 and #2376 before overlapping edits.
+3. Add the four top selectors to the current shell. Use the nine fictional
+   cards in INTERFACE, reviewed portrait assets and source-attributed clips.
+   No-result, Back, keyboard, phone/desktop and one-player behavior must pass.
+4. Adapt the existing press owner to an HPC Press Wire view. Preserve the raw
+   draft separately from publication copy; fact-check factual bridges and label
+   satire/nonendorsement. No live-voting or published-release claim before
+   actual route/content verification.
+5. Only then consider shared preferences and admitted DAE workflows. This
+   documentation request sends no email, chat message or comment.
+
+### Requested worker dispatch (planning, not runtime evidence)
+
+| Lane | Requested label in brief | Responsibility | Required receipt |
+| --- | --- | --- | --- |
+| Campaign/editorial | Astra 6.1 Sol | Deadpan satire, D.U.P. dictionary, hypothetical coalition math and bikini/bathtub narrative | Reviewed copy, factual-source separation, no invented endorsement or whip count |
+| UI | Astra 6.1 Terra | Existing-shell selector, portraits/cards and attributed clip filtering | Exact source/head, scoped tests, phone/desktop evidence and live release state |
+| Outreach/data | Astra 6 Lunar | Existing workbook reconciliation and proposed UI-TARS/DAE integration | Exact workbook identity/counts, recipient/sender preflight and separately admitted runtime |
+
+These labels are copied from the brief, not available-model or running-worker
+claims. Bind actual model IDs through runtime evidence before dispatch; do not
+silently substitute tiers. No workers or DAEs were activated by this record.
+
+D.U.P. supplied expansions: “Democratic Uniparty Pawns” and “Donor-Owned
+Useless Politicians.” This is satirical vocabulary, distinct from the factual
+United Democracy Project (UDP). The complete claimed dictionary has not been
+located. A proposed 15–25-seat Nash Blocking Coalition is a scenario, not an
+observed bloc; model actual House voting rules and attendance before claiming
+a blocking threshold.
+
+### Reconciliation coverage and remaining blockers
+
+Owner: 0102, documentation reconciliation, 2026-11-17. Base
+`fc1324815c892ab02f003fe95917a77358001a59`. Bounded open-PR check found #2376
+(press), #2411 (Vote banners), #2405 (iPhone probe), and #2394 (social skills);
+preserve their distinct work. No native checkout, WSP bootstrap, semantic
+HoloIndex, WRE admission, PC state, deployment or physical-device execution
+was verified in this connector session. Retrieval was lexical GitHub/Drive;
+noise included unrelated Drive full-text matches, reduced using name filters.
+Missing master identity is the consolidation blocker. Documentation checks
+are not runtime or independent acceptance. Required PR checks/review and main
+readback remain separate closure gates. WSP15 planning: C2/I4/D4/Impact3 = 13/P1.
