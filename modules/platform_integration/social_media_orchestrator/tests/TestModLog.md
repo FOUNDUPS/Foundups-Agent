@@ -1,3 +1,28 @@
+## 2026-11-18 - Editorial revision contract tests
+
+Source baseline 20a7044c018fcd4a033226db644360cd9b216242; owned feature lane
+feature/editorial-review-cycle-20261118. Frozen acceptance: stale source/copy/
+asset/rubric review rejection, four required lenses, independent-ID check,
+bounded refinement, oscillation rejection, separate golden benchmark target,
+no effects or publication authority. Independent review repaired two findings.
+
+Vetted host Python with plugin/conftest isolation: editorial tests + existing
+compiler + tooling projection: 53 passed, 1 skipped, 122 subtests passed in
+1.65s. The skip is an existing unavailable-symlink projection case, not a pass.
+Python exit0 included a pyreadline3 console-destructor Windows warning after
+pytest completion; no test failure was hidden. Independent focused unittest:
+13 passed in 0.153s; git diff --check passed. Source SHA256
+3cecb41c3c0979cb7f7b1ccb9e1c8b03d0ed2611169da64acda3d593efaa611b;
+test SHA256 a029bf37a3bd9f8e4c0b03c68536262dfeb7bf54227f18dd721b995f64330117.
+
+The existing contextual-campaign CI job includes the new fixture. These are
+synthetic contract tests, not Gemini/OpenRouter calls, writing-quality benchmarks,
+provider posts, metrics or RSI transfer. Full hosted exact-head/main CI and secret
+scan are separate gates. No local gitleaks binary was available; do not claim full
+security certification. Manual scope review: stdlib validation/hash/copy only;
+no new dependencies, file/network/process effects or credential reads. The lazy
+benchmark import uses the existing pure task contract.
+
 ## 2026-11-16 — Exact generated-manifest security metadata re-review
 
 The replacement head's scanner reported39 manifest metadata rows after the
