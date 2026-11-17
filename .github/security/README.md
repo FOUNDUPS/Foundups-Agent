@@ -1,3 +1,25 @@
+## PR2178 main-reconciled manifest and ModLog metadata re-review — 2026-11-18
+
+PR2178 regenerated `scripts/reddog_backend_manifest.json` after four read-only
+resident/schedule runtime modules plus two transitive existing modules
+(`extract_brain_artifacts.py`, `utils/markdown_sanitizer.py`) entered the
+1,494-member closure (canonical payload SHA256
+`026c309159d37feb55d4666288c52316c31c06ec1f9ee3a866e67dc86bf31068`, entire
+LF file SHA256 `0e9f81f00542fe2dab413d94bc04245cb18759a91214994017c5859044e4b6dd`).
+The 39 unchanged flagged public source-path/SHA256 rows (`37` `generic-api-key`
+and `2` `discord-api-token` matches) plus the unchanged `generic-api-key`
+prose line `4029` in `modules/communication/moltbot_bridge/ModLog.md` (LF SHA256
+`4c11f7b775cb10b2ec937e46c041db1945c77ea8e5e87e34c5c91fa9d9883010`, binding
+`224283b5d03b355c2d0260dead97bdf83c4ed12936fec08f24747dbdf1b9d9b5`) were
+recomputed and appended while preserving all 4,619 prior entries (`4,659` total).
+No Gitleaks rule, exclusion, fingerprint formula, or failure gate changed.
+
+## Generated RedDog manifest metadata re-review — 2026-10-23 (historical PR2178 baseline)
+
+Original PR2178 baseline recorded 38 manifest metadata matches (`b5041a21...`)
+and line `3667` in `modules/communication/moltbot_bridge/ModLog.md` (`d54f91cb...`);
+both sets are superseded on current main by the 4,659-entry binding above.
+
 ## JHR reconciliation helper source metadata review — 2026-11-16
 
 PR2414's regenerated backend manifest adds exactly one publication reconciler
