@@ -1,8 +1,71 @@
 # shared_utilities Interface Specification
 
+### YouTube audience registry field (2026-11-10)
+
+`youtube_channel_registry` preserves `shorts.made_for_kids` in normalization,
+save and load. A literal boolean is explicit policy; None is unconfigured.
+Malformed input remains visible to the scheduling consumer for refusal, rather
+than being dropped or coerced. No channel identity or operational role is inferred.
+
+### Code/triage native key selection and backend initialization (2026-11-05)
+
+`local_model_selection.resolve_role_native_key('code' | 'triage') -> str | None`
+owns the exact native identity for the legacy Qwen/Gemma consumers. Explicit
+`LOCAL_MODEL_CODE_NATIVE_KEY` / `LOCAL_MODEL_TRIAGE_NATIVE_KEY` wins. Without
+role PATH/DIR/HOLO alias overrides, the existing declared native defaults remain
+`qwen-coder-7b` and `gemma-270m`. A custom role path without its scoped native key
+returns None: a file basename is not an installed-key mapping. Relocating only
+`LOCAL_MODEL_ROOT` retains the declared default. Blank/malformed explicit keys
+raise `ValueError`. General's `LM_STUDIO_NATIVE_MODEL_KEY`, General default and
+signed AI Gateway routes are independent and unchanged.
+
+`resolve_qwen_backend` / `resolve_gemma_backend` retain their public arguments,
+with additive keyword `native_model_key`: omission uses the role owner; None
+skips native lookup; a string selects that exact key. One actual backend
+initialization replaces the generic reachability preprobe. Its
+`last_initialization_status` is content-free: native state values, or
+`not_initialized`, `resident_ambiguous_or_changed`, `sdk_unavailable`,
+`authentication_required`, `initialization_failed`. Nonresident/SDK failure is
+never reported as server unreachable. Authentication still propagates through
+the resolver; inference, instance checks and retries retain their contracts.
+Direct `resolve_qwen_backend(model_path=custom)` remains native-role-first with
+that explicit file as fallback; use `native_model_key=None` for file-only intent.
+
+Singleton factories capture role file/native key once and make one resolver
+attempt. They retain existing cache and explicit `force_reinit` behavior; settings
+changes do not hot-swap a cached engine. An existing explicit GGUF fallback can
+still initialize llama.cpp during an operational factory/resolver call. Missing
+files are not sent to that loader. Startup/preflight callers must inspect status
+without invoking these operational factories. No native load/unload, server
+start/stop, download or arbitrary resident substitution is introduced.
+
+### Shared language-role and LM Studio dispatch controls
+
+`local_model_selection.is_general_language_model(model_id)` is the common
+conservative role guard used by YouTube and AI Gateway; it rejects visual,
+coder, audio, embedding, tiny triage and xAI model identifiers.
+
+`LMStudioBackend(..., max_retries=None, pre_dispatch_check=None)` preserves the
+SDK default when retry count is absent; explicit values are integers in [0,2].
+The optional trusted callback runs after the exact native-instance precheck and
+before completion/chat/native dispatch. YouTube passes zero retries plus its
+deadline/cancel guard. It cannot preempt an already in-flight request. Optional
+chat `reasoning_effort='none'` is validated and forwarded without altering other
+callers. No server/model startup, fallback or credential-file loading is added.
+
+### `lm_studio_node_lock_identity(base_url: str) -> str`
+
+Additive export from `lm_studio_model_lifecycle.py` for existing explicit server
+startup. Returns the existing `lm-studio-node:<digest>` identity computed from
+the canonical `loopback:<port>` node identity with the same JSON/SHA256 protocol.
+Loopback aliases share the same lock. It does not acquire a lock or grant model,
+server, or dispatch authority. Existing managed transactions use this helper;
+lock scope digests, journals, normalization, leases and cleanup remain unchanged.
+
+
 **WSP 11 Compliance:** Complete
-**Last Updated:** 2026-08-22
-**Version:** 0.5.0
+**Last Updated:** 2026-10-11
+**Version:** 0.5.1
 
 ## [OVERVIEW] Module Overview
 
@@ -59,6 +122,13 @@ LMStudioBackend.create_native_chat(
     max_response_bytes=...,
 )
 ```
+
+`reasoning` defaults to `"off"` as before. Explicit `None` omits this optional
+wire field for a caller-selected model that does not support reasoning controls.
+Omission means the server's model default, not a guarantee that reasoning is
+disabled. Callers must inspect capabilities and record the selected control;
+there is no automatic retry, capability substitution or provider fallback.
+See [the native API contract](https://lmstudio.ai/docs/developer/rest/chat).
 
 Native inventory exposes `SERVER_UNREACHABLE`, `NOT_INSTALLED`,
 `INSTALLED_NOT_RESIDENT`, and `RESIDENT`; OpenAI-compatible `/v1/models` is not

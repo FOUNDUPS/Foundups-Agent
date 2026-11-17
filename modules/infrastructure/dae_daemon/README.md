@@ -2,6 +2,37 @@
 
 Central monitoring and control daemon for all Domain Autonomous Ecosystems (DAEs).
 
+## Broker failure-count repair — 2026-09-22
+
+Repeated caught import errors now reach the existing detach threshold instead
+of resetting before every callable invocation. See the
+[streak contract](INTERFACE.md#broker-import-failure-streak) for reset, reporting
+and manual re-enable semantics. 13 fixed inert cases pass locally and independently;
+no daemon thread, service or provider is started by this qualification.
+
+WSP62: the oversized launch method is split inside the existing file; the
+inherited class shrinks and every new/touched function stays at most50lines.
+Remaining broker class-size debt belongs to dae_daemon maintainers: qualify
+launch/stop/heartbeat separation before future class growth. This is no exemption
+or new scheduler. Exact dimensions/publication are in the canonical RSI backlog.
+
+## Broker stop acknowledgment — 2026-09-22
+
+Stop requests now distinguish `stopping` from observed `stopped`; callers must
+not interpret hook return as worker exit. See the [contract](INTERFACE.md#broker-stop-acknowledgment).
+The active handle owns its captured stop hook, and replacement callbacks cannot
+publish later old-owner completion. 51 fixed inert cases pass locally and independently.
+This extends the existing broker and preserves the separate Holo exit poll.
+The inherited class does not grow; every new/touched function stays within50lines.
+Live termination, universal race safety and runtime upgrade admission remain open.
+
+## Observer lookup repair — 2026-09-22
+
+Status lookup now uses the existing broker, returning empty runtime data if
+absent, without creating its heartbeat thread. See the [lookup contract](INTERFACE.md#observer-runtime-lookup).
+Eight frozen cases pass locally and independently. Default observer construction
+and adapter acquisition remain separate effects; this is not whole-command isolation.
+
 ## Architecture
 
 ```
@@ -85,11 +116,17 @@ tail = observer.tail_events(dae_id="openclaw", limit=8)
 snapshot = observer.get_live_status("pqn_research", limit=8)
 ```
 
+Persistence qualification: the [current contract](INTERFACE.md#persistence-result-boundaries)
+separates SQLite record evidence, JSONL attempt history and registry acceptance.
+Sixteen focused cases characterize these boundaries; they do not prove atomic
+durability or a live RSI system. Runtime methods remain unchanged in this slice.
+
 Runtime supervision intent:
 - `tail <dae>` -> recent DAEmon event stream for that DAE
 - `status <dae> live` -> registry state + runtime status + recent event tail
 - `watch <dae> since <sequence>` -> cursor-based incremental follow from a known event id
-- The event store remains the source of truth; the observer is read-only
+- The event store is the intended lifecycle ledger. Sequence-collision retries now use one lock acquisition, with nine focused regression tests; JSONL partial writes/parity and registry persistence acknowledgment remain open. Observer runtime lookup no longer creates a broker; default observer construction and runtime-adapter acquisition are not proved effect-free.
+- Follow the [current RSI/WRE supervision contract](../../../docs/DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22). Registry disable is not confirmed worker stop; heartbeat is not task progress. No runtime repair or execution authority is implied by this map.
 - Example supervisory surfaces:
   - `status openclaw live`
   - `status openclaw supervisor live`

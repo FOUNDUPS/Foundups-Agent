@@ -1,0 +1,141 @@
+{
+  "schema": "foundups.local.final-independent-evidence-review.v1",
+  "date": "2026-10-31",
+  "reviewer": "/root/blockchain_architecture",
+  "role": "0102/verifier",
+  "origin": "internal_handoff",
+  "verdict": "ACCEPTED_BOUNDED_LOCAL_EVIDENCE_PACKAGE; DEPLOYMENT_AND_REAL_CHAIN_HELD",
+  "receipt": {
+    "path": "C:\\Users\\user\\.codex\\worktrees\\foundups-repo-observation\\Foundups-Agent\\docs\\architecture\\receipts\\FOUNDUPS_BLOCKCHAIN_RECONCILIATION_20261031.json",
+    "sha256": "243673c09bada3e7d279093b09731696aba1467a164a94103ae8ff14fe41bd2c",
+    "bytes": 461671
+  },
+  "observed_utc": "2026-10-31T01:26:29.489901+00:00",
+  "local_paths_current_hashes_checked": 31,
+  "runtime": {
+    "members": 1477,
+    "ordered_membership_main_equal": true,
+    "all1477_current_LF_bindings_checked": true,
+    "changed4": [
+      "modules/foundups/agent_market/src/models.py",
+      "modules/foundups/agent_market/src/orchestrator.py",
+      "modules/foundups/simulator/economics/cabr_flow_router.py",
+      "modules/foundups/simulator/economics/circuit_breaker.py"
+    ],
+    "other_fields_caps_preserved": true,
+    "digest": "56c72c629300b55834f9e40156c12d1f00bdf37947a902867cfb203d133e4426",
+    "two_pins_literal_only": true,
+    "facade_not_resident": true
+  },
+  "imported_donor_source_test_files": [
+    {
+      "path": "modules/foundups/agent_market/src/models.py",
+      "donor_GitLF_equal": true,
+      "raw_sha256": "4d11dc2d29abd055a8225848bc92a7be7d3b0ccdab302506f50ee4c37945d4ad",
+      "GitLF_sha256": "02e6c65cd1b915358c4afce3e5c598a363f6c4b16c9158118eca8875b8efac91"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/orchestrator.py",
+      "donor_GitLF_equal": true,
+      "raw_sha256": "f9d0e5d8bb02877a723ce19d2aee59052ae58d5b7cf8e0f81ef64d9774733392",
+      "GitLF_sha256": "f1ee36a19cf575b6fa2cac631afc5730623f53684a2d6c38477a99e063f41c68"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/testnet_transfer_intents.py",
+      "donor_GitLF_equal": true,
+      "raw_sha256": "f77851813d7042c708097142cde93938f0850e2701a3c8099469c5e5a078a68b",
+      "GitLF_sha256": "3ea3049b9709d6c504cac1b24aaf28fd1624a1631d699931f2fdbb335d035a4b"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_schemas.py",
+      "donor_GitLF_equal": true,
+      "raw_sha256": "84889e64a2e945cfd5be7361a98a1b6a58748057a478e018e77750852fdd1e26",
+      "GitLF_sha256": "bcb9aba42086261e47adbe98403ed10212bec6fb4b53a83d965e60a56cefd6eb"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_orchestrator.py",
+      "donor_GitLF_equal": true,
+      "raw_sha256": "414dc979a1c4c6e0ade0e7764ab16af744464276e257fdba049a8e848d3a0f8d",
+      "GitLF_sha256": "8efd7c7311338014e41c37f8bb7eac18f36a93b9b3ea72b264f96a6cae45b667"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_testnet_transfer_intents.py",
+      "donor_GitLF_equal": true,
+      "raw_sha256": "89049b3de24eb8c80f8047f8f28b4302c0a791794847600c1c53871d965d8988",
+      "GitLF_sha256": "2a86c259df7be51581cefa6f94e8e6d028f6d6ee1ba7c3ce3ee2da1f6ef19849"
+    }
+  ],
+  "actual_counts": {
+    "FAM": 485,
+    "simulator_connected": 414,
+    "heldouts": 6,
+    "strictSDK": 52,
+    "manifest_cases": 8,
+    "Node_commands": 3,
+    "characterization_original_and_root": {
+      "passed": 1,
+      "failed": 6,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "run_summaries": {
+    "simulator_current_connected": {
+      "passed": 414
+    },
+    "simulator_desired_red": {
+      "passed": 12,
+      "failure": 67
+    },
+    "adversarial_parent_reproduction": {
+      "failure": 6,
+      "passed": 1
+    }
+  },
+  "deterministic_original_parent_trace_checks": [
+    {
+      "name": "A01.trace.json",
+      "sha256": "ae51fff5b314a680a2a39ea88c8fe159cdf8da65786cdd6b419fc3483207d559",
+      "original_and_parent_byte_equal": true
+    },
+    {
+      "name": "A02.trace.json",
+      "sha256": "8c36fe18d3fb6496c0d5d204c04ad62de25d2bc8decf7e0fc5babadbc7077591",
+      "original_and_parent_byte_equal": true
+    },
+    {
+      "name": "A07.trace.json",
+      "sha256": "7fad521b07a6060465272d38a0b691b5663028813db7dbe6e755cf82e78922d9",
+      "original_and_parent_byte_equal": true
+    },
+    {
+      "name": "A08.trace.json",
+      "sha256": "f6c6982ebc9c8ec4c9532ff5b47c22a5a89d3808e85628601bfe365d032ede3a",
+      "original_and_parent_byte_equal": true
+    },
+    {
+      "name": "A10.trace.json",
+      "sha256": "f8f342627720bf8ae6af5aff667d6ac76d8bb02c7a3988c801ef6da1d9742214",
+      "original_and_parent_byte_equal": true
+    },
+    {
+      "name": "A11.trace.json",
+      "sha256": "e6a651d092cc415ef1e961b02e8eb4c74b345fb06e563331bb52a6099219dbd1",
+      "original_and_parent_byte_equal": true
+    },
+    {
+      "name": "A12.trace.json",
+      "sha256": "9f50c21d8c74c2ff78102899dc306586b55beed6a9590433ad873a74d357c4ce",
+      "original_and_parent_byte_equal": true
+    }
+  ],
+  "limits": [
+    "No aggregate all-pass or security-clearance conclusion: scopes overlap and6desired adversarial assertions remain failed.",
+    "SDK52 native receipt is distinct from FAM/manifest/simulator JUnit; no fabricated SDKJUnit.",
+    "Exact local overlay/current file evidence only; dirty branch still based4050, not main/CI/deployment proof.",
+    "I authored FAM external qualification runner and ran the accepted FAM/SDK phases; root authored this package and simulator patches; other heldout/characterization records attributed inpackage.",
+    "No tests/imports/installs/scanner/provider/chain/Git/repository mutations in this final review. Only read/hash/XML/JSON/Gitobject metadata and external review file.",
+    "Root operational recovery/issuer/controller/asset/funding/signing/replay/finality limitations remain."
+  ],
+  "material_findings": []
+}

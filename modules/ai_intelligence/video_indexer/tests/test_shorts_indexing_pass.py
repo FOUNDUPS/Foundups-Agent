@@ -20,7 +20,10 @@ WSP 5 (coverage), WSP 50 (verify), WSP 84 (reuse existing mock patterns).
 """
 
 import json
+import sys
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -176,7 +179,8 @@ async def test_upload_pass_skips_shorts(monkeypatch, tmp_path):
 # 3 & 4. Per-channel content_types decide which passes run.
 # ---------------------------------------------------------------------------
 
-def test_resolve_passes_short_only_channel():
+def test_resolve_passes_short_only_channel(monkeypatch):
+    monkeypatch.setattr(studio_ask_indexer, "get_channel_by_id", lambda _: {"content_types": ["short"]})
     # foundups registry content_types == ["short"] -> shorts pass only.
     passes = studio_ask_indexer._resolve_index_passes("UCSNTUXjAgpd4sgWYP0xoJgw")
     assert passes == ["short"]
@@ -195,13 +199,23 @@ def test_resolve_passes_unknown_channel_defaults_both():
 
 
 @pytest.mark.asyncio
-async def test_cycle_runs_passes_per_content_types(monkeypatch, tmp_path):
+@pytest.mark.parametrize("legacy_key_present", [False, True])
+async def test_cycle_runs_passes_per_content_types(monkeypatch, tmp_path, legacy_key_present):
     """run_video_indexing_cycle: ["short"] chan -> shorts only; both -> both."""
     index_root = tmp_path / "video_index"
     monkeypatch.setattr(studio_ask_indexer, "INDEX_ROOT", index_root)
     monkeypatch.setenv("YT_VIDEO_INDEXING_ENABLED", "true")
-    # No STOP file, no Gemini analysis pass.
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    # A leftover provider key must not authorize unattended paid enrichment.
+    if legacy_key_present:
+        monkeypatch.setenv("GEMINI_API_KEY", "offline-test-sentinel")
+    else:
+        monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    analyzer = MagicMock(side_effect=AssertionError("Direct provider forbidden"))
+    persist = MagicMock()
+    monkeypatch.setitem(sys.modules,
+        "modules.ai_intelligence.video_indexer.src.gemini_video_analyzer",
+        SimpleNamespace(GeminiVideoAnalyzer=analyzer, save_analysis_result=persist,
+                        suggest_hashtags=MagicMock()))
     monkeypatch.setattr(studio_ask_indexer, "_stop_active", lambda: False)
     monkeypatch.setattr(studio_ask_indexer, "_consume_reindex_signal", lambda: False)
     monkeypatch.setattr(studio_ask_indexer, "_count_indexed_by_channel", lambda root: {})
@@ -224,6 +238,10 @@ async def test_cycle_runs_passes_per_content_types(monkeypatch, tmp_path):
 
     foundups = "UCSNTUXjAgpd4sgWYP0xoJgw"   # ["short"]
     move2japan = "UC-LSSlOZwpGIRIYihaz8zCw"  # ["short","upload"]
+    monkeypatch.setattr(
+        studio_ask_indexer, "get_channel_by_id",
+        lambda channel_id: {"content_types": ["short"] if channel_id == foundups else ["short", "upload"]},
+    )
 
     result = await studio_ask_indexer.run_video_indexing_cycle(
         driver=_FakeDriver(),
@@ -241,6 +259,10 @@ async def test_cycle_runs_passes_per_content_types(monkeypatch, tmp_path):
     # Merged per-channel summary keeps a per-pass breakdown.
     assert set(result["channels"][foundups]["passes"]) == {"short"}
     assert set(result["channels"][move2japan]["passes"]) == {"upload", "short"}
+    assert result["total_indexed"] == 3
+    assert result["gemini_analysis"] == {}
+    analyzer.assert_not_called()
+    persist.assert_not_called()
 
 
 @pytest.mark.asyncio

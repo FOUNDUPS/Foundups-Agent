@@ -524,12 +524,12 @@ def search_with_holoindex(query: str):
 
 
 def _create_ai_overseer_for_preflight(repo_root: Path) -> Any:
-    """Create AI Overseer with quieter logs during startup preflight."""
+    """Create deterministic preflight monitors without loading inference models."""
     _prev_level = logging.root.level
     try:
         logging.root.setLevel(logging.WARNING)
         from modules.ai_intelligence.ai_overseer.src.ai_overseer import AIIntelligenceOverseer
-        return AIIntelligenceOverseer(repo_root)
+        return AIIntelligenceOverseer(repo_root, initialize_models=False)
     finally:
         logging.root.setLevel(_prev_level)
 
@@ -909,8 +909,9 @@ def run_connect_wre(repo_root: Path) -> dict:
 
     Returns structured status:
         coded: YES (command is wired in CLI)
-        connection: CONNECTED | PARTIAL | DISCONNECTED
-        readiness: READY | INSUFFICIENT_DATA | DEGRADED | BLOCKED | DISABLED
+        connection: CHECKED | PARTIAL | DISCONNECTED (diagnostic, not runtime admission)
+        readiness: READY | UNKNOWN | DEGRADED | BLOCKED | DISABLED
+        admission_allowed: existing cold-start/critical policy; not a security receipt
         manual_enforced: bool
         auto_enforced_now: bool
         sample_coverage: int (executions vs min_samples)
@@ -920,6 +921,7 @@ def run_connect_wre(repo_root: Path) -> dict:
         "coded": "YES",
         "connection": "DISCONNECTED",
         "readiness": "DISABLED",
+        "admission_allowed": False,
         "manual_enforced": False,
         "auto_enforced_now": False,
         "sample_coverage": 0,
@@ -932,6 +934,7 @@ def run_connect_wre(repo_root: Path) -> dict:
             DashboardAlertMonitor,
             check_dashboard_health,
         )
+        from modules.infrastructure.wre_core.src.dae_preflight import dashboard_readiness
 
         monitor = DashboardAlertMonitor()
         health = check_dashboard_health() or {}
@@ -941,37 +944,31 @@ def run_connect_wre(repo_root: Path) -> dict:
         min_samples = int(health.get("min_samples", 25))
         in_watch = monitor.is_in_watch_period()
 
-        manual_enforced = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
-        auto_enforce = _wre_dashboard_auto_enforce_enabled()
-        auto_enforced_now = bool(auto_enforce and not in_watch and not insufficient_data)
+        policy = dashboard_readiness(health, in_watch=in_watch)
 
         alerts = health.get("alerts", []) if isinstance(health.get("alerts"), list) else []
         critical_count = sum(1 for a in alerts if a.get("severity") == "critical")
         warning_count = sum(1 for a in alerts if a.get("severity") == "warning")
         healthy = bool(health.get("healthy", True))
 
-        result["connection"] = "CONNECTED"
-        result["manual_enforced"] = manual_enforced
-        result["auto_enforced_now"] = auto_enforced_now
+        result["connection"] = "CHECKED"
+        result["manual_enforced"] = policy["manual_enforced"]
+        result["auto_enforced_now"] = policy["auto_enforced"]
+        result["admission_allowed"] = (policy["evidence_valid"] and policy["enabled"]
+                                       and policy["readiness"] in {"READY", "UNKNOWN"})
         result["sample_coverage"] = total_executions
         result["alert_counts"] = {"critical": critical_count, "warning": warning_count}
 
-        if insufficient_data:
-            result["readiness"] = "INSUFFICIENT_DATA"
-        elif critical_count > 0:
-            result["readiness"] = "BLOCKED" if (manual_enforced or auto_enforced_now) else "DEGRADED"
-        elif not healthy:
-            result["readiness"] = "DEGRADED"
-        else:
-            result["readiness"] = "READY"
+        result["readiness"] = policy["readiness"]
+        result["unknown_metrics"] = health.get("unknown_metrics", [])
 
     except ImportError:
         result["connection"] = "PARTIAL"
-        result["readiness"] = "DEGRADED"
+        result["readiness"] = "UNKNOWN"
     except Exception as exc:
         logger.error(f"[WRE] connect-wre check failed: {exc}")
         result["connection"] = "PARTIAL"
-        result["readiness"] = "DEGRADED"
+        result["readiness"] = "UNKNOWN"
 
     return result
 
@@ -979,18 +976,13 @@ def run_connect_wre(repo_root: Path) -> dict:
 def _wre_dashboard_auto_enforce_enabled(*, interactive_menu: bool = False) -> bool:
     """Default dashboard auto-enforcement to autonomous runtimes, not menu startup."""
 
-    explicit = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE")
-    if explicit is not None:
-        return explicit != "0"
-    if interactive_menu:
-        return False
-    return os.getenv("OPENCLAW_24X7", "0") != "0"
+    from modules.infrastructure.wre_core.src.dae_preflight import dashboard_auto_enforce_enabled
+    return dashboard_auto_enforce_enabled(interactive_menu=interactive_menu)
 
 
 def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = True) -> bool:
     """
-    Run WRE dashboard preflight at startup.
-
+    Run WRE dashboard preflight and advisory research display at startup.
     This mirrors DAE-level enforcement logic so `python main.py` has the same
     health gate semantics as individual DAE launchers.
 
@@ -998,7 +990,7 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
       WRE_DASHBOARD_PREFLIGHT=1             Enable startup warning checks
       WRE_DASHBOARD_PREFLIGHT_ENFORCED=0    Manual override to block startup
       WRE_DASHBOARD_AUTO_ENFORCE            Explicit override to auto-block on criticals
-      OPENCLAW_24X7=1                       Autonomous runtime defaults to enforced outside menu startup
+      Action startup defaults to enforced; interactive menu display defaults advisory.
     """
     enabled = os.getenv("WRE_DASHBOARD_PREFLIGHT", "1") != "0"
     if not enabled:
@@ -1012,22 +1004,25 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
         from modules.infrastructure.wre_core.src.dashboard_alerts import (
             DashboardAlertMonitor,
             check_dashboard_health,
+            print_research_report_summary,
         )
-
+        from modules.infrastructure.wre_core.src.dae_preflight import dashboard_readiness
+        print_research_report_summary()
         monitor = DashboardAlertMonitor()
         health = check_dashboard_health() or {}
         insufficient_data = bool(health.get("insufficient_data", False))
         total_executions = int(health.get("total_executions", 0))
         min_samples = int(health.get("min_samples", 25))
         in_watch = monitor.is_in_watch_period()
-        auto_enforced = bool(auto_enforce and not in_watch and not insufficient_data)
-        enforced = bool(manual_enforced or auto_enforced)
+        policy = dashboard_readiness(health, in_watch=in_watch, interactive_menu=interactive_menu)
+        auto_enforced = policy["auto_enforced"]
+        enforced = policy["enforced"]
 
-        if insufficient_data:
+        if insufficient_data and not health.get("alerts"):
             watch_label = "WATCH" if in_watch else "STABLE"
             print(
-                f"[WRE-DASHBOARD] preflight=WARN ({watch_label}, INSUFFICIENT_DATA) "
-                f"samples={total_executions}/{min_samples}"
+                f"[WRE-DASHBOARD] preflight=UNKNOWN ({watch_label}, INSUFFICIENT_DATA) "
+                f"per-metric minimum={min_samples}; historical executions={total_executions}"
             )
             # DJ2-A: Dispatch insufficient_data as warning tier (WSP 97 truth distinction)
             try:
@@ -1049,13 +1044,15 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
                 )
             except Exception as dispatch_exc:
                 logger.debug(f"[WRE-DASHBOARD] dispatch skipped: {dispatch_exc}")
-            return True
+            if not policy["allowed"]:
+                print("[WRE-DASHBOARD] Startup blocked: enforced readiness requires measured evidence")
+            return policy["allowed"]
 
         alerts = health.get("alerts", []) if isinstance(health.get("alerts"), list) else []
         critical_count = sum(1 for a in alerts if a.get("severity") == "critical")
         warning_count = sum(1 for a in alerts if a.get("severity") == "warning")
         healthy = bool(health.get("healthy", True))
-        status = "PASS" if healthy else "FAIL"
+        status = policy["status"]
         mode_label = "WATCH" if in_watch else ("STABLE, ENFORCED" if auto_enforced else "STABLE")
         print(
             f"[WRE-DASHBOARD] preflight={status} ({mode_label}) "
@@ -1063,7 +1060,7 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
             f"samples={total_executions}/{min_samples}"
         )
 
-        if critical_count > 0 and enforced:
+        if not policy["allowed"]:
             try:
                 from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
                     on_preflight_fail,
@@ -1094,7 +1091,7 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
         return True
     except Exception as exc:
         logger.error(f"[WRE-DASHBOARD] Startup preflight failed: {exc}")
-        if manual_enforced:
+        if manual_enforced or auto_enforce:
             print(f"[WRE-DASHBOARD] Preflight FAILED: {exc}")
             return False
         print(f"[WRE-DASHBOARD] Preflight warning: {exc}")
@@ -1187,61 +1184,25 @@ def run_wsp_framework_preflight(repo_root: Path, overseer: Any | None = None) ->
 
 
 def run_git_main_merge_sentinel_preflight(repo_root: Path) -> bool:
-    """
-    Run git main-merge sentinel at startup.
-
-    Optionally auto-merges feature branches to main to prevent drift.
-
-    Env:
-        GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
-        GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
-        GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Delete merged branch (default ON)
-    """
-    if os.getenv("GIT_MAIN_MERGE_SENTINEL", "0") != "1":
-        logger.info("[GIT-MERGE-SENTINEL] Startup preflight disabled")
-        return True
-
+    """Refresh GitHub lifecycle evidence on the WRE startup path."""
+    enforced = (
+        os.getenv("GIT_MAIN_MERGE_SENTINEL", "0") == "1"
+        and os.getenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "0") == "1"
+    )
     try:
-        from modules.infrastructure.wre_core.src.git_main_merge_sentinel import (
-            run_main_merge_sentinel,
+        from modules.infrastructure.wre_core.src.git_lifecycle import reconcile_git_lifecycle
+
+        receipt = reconcile_git_lifecycle(repo_root)
+        logger.info(
+            "[GIT-LIFECYCLE] coverage=%s pending_prs=%d pc=%s",
+            receipt["coverage"], len(receipt["pending_prs"]), receipt["pc"]["status"],
         )
-
-        result = run_main_merge_sentinel(repo_root)
-
-        # Build status line
-        status = "PASS" if result["passed"] else "FAIL"
-        merged = result.get("merged", False)
-        branch = result.get("branch") or "main"
-        actions_count = len(result.get("actions", []))
-
-        if result["error"]:
-            print(
-                f"[GIT-MERGE-SENTINEL] preflight={status} branch={branch} "
-                f"merged={merged} error={result['error']}"
-            )
-        else:
-            print(
-                f"[GIT-MERGE-SENTINEL] preflight={status} branch={branch} "
-                f"merged={merged} actions={actions_count}"
-            )
-
-        # Log actions for debugging
-        for action in result.get("actions", []):
-            logger.debug(f"[GIT-MERGE-SENTINEL] {action}")
-
-        return result["passed"]
-
-    except ImportError as exc:
-        logger.error(f"[GIT-MERGE-SENTINEL] Import failed: {exc}")
-        print(f"[GIT-MERGE-SENTINEL] preflight=WARN import_error")
-        return True  # Non-blocking import failure
-    except Exception as exc:
-        logger.error(f"[GIT-MERGE-SENTINEL] Startup preflight failed: {exc}")
-        if os.getenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "0") == "1":
-            print(f"[GIT-MERGE-SENTINEL] preflight=FAIL error={exc}")
-            return False
-        print(f"[GIT-MERGE-SENTINEL] preflight=WARN error={exc}")
-        return True
+        return not enforced or (
+            receipt["coverage"] == "complete" and receipt.get("main_checks", {}).get("verified") is True
+        )
+    except (ImportError, OSError, ValueError) as exc:
+        logger.warning("[GIT-LIFECYCLE] startup unavailable (%s)", type(exc).__name__)
+        return not enforced
 
 
 def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool:
@@ -3597,6 +3558,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
 
         trusted_authority_clock = lambda: int(time.time())
         now_epoch = trusted_authority_clock() if authority_state_path else None
+        # Share the configured AgentDB with signed worker dispatch. Reserving
+        # independent verification capacity is mandatory before author work.
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        assurance_reservation_store = AgentDB()
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
@@ -3690,6 +3656,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
             worker_dispatch_writer=worker_dispatch_writer,
+            assurance_reservation_store=assurance_reservation_store,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
             trusted_now_epoch=trusted_authority_clock,
@@ -4754,7 +4721,7 @@ def run_headless() -> int:
 
     # Fail-closed: check WRE readiness first
     wre_status = run_connect_wre(repo_root)
-    if wre_status["readiness"] not in ("READY", "INSUFFICIENT_DATA"):
+    if not wre_status.get("admission_allowed", wre_status["readiness"] in ("READY", "INSUFFICIENT_DATA")):
         print(
             f"[HEADLESS] FAIL-CLOSED: WRE not ready "
             f"(readiness={wre_status['readiness']}, "

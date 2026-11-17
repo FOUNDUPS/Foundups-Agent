@@ -40,6 +40,9 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_orchestration_plan import (
+    _snapshot,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -80,7 +83,7 @@ def _queue_wsp15_allocation_receipt() -> dict[str, object]:
     ).to_dict()
 
 
-def _snapshot() -> dict[str, object]:
+def _legacy_snapshot() -> dict[str, object]:
     allocation = _queue_wsp15_allocation_receipt()
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
@@ -154,6 +157,18 @@ def _seed_store_through(stage: str) -> InMemoryResidentQueueChainResultsStore:
     return store
 
 
+def test_legacy_snapshot_without_progressive_binding_is_rejected() -> None:
+    store = InMemoryResidentQueueChainResultsStore()
+    result = record_resident_queue_stage_result(
+        work_state_snapshot=_legacy_snapshot(), store=store,
+        stage_key="authority_request", stage_result=_accepted("authority_request"),
+        now_iso=NOW,
+    )
+    assert result.accepted is False
+    assert "FAIL_PROGRESSIVE_POLICY_STAGE" in result.rejection_reasons
+    assert store.load() == {}
+
+
 def test_record_current_stage_advances_plan_and_persists_result() -> None:
     store = InMemoryResidentQueueChainResultsStore()
 
@@ -176,6 +191,22 @@ def test_record_current_stage_advances_plan_and_persists_result() -> None:
     assert state["stage_results"]["authority_request"]["status"] == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
     assert state["no_bridge_invoked"] is True
     assert state["no_holoindex_reindex_performed"] is True
+    assert state["receipts"][-1]["recorded_at"] == NOW
+
+
+@pytest.mark.parametrize("now_iso", ["", "invalid", "2026-07-14T00:00:00", True])
+def test_invalid_recording_timestamp_rejects_without_commit(now_iso: object) -> None:
+    store = InMemoryResidentQueueChainResultsStore()
+    result = record_resident_queue_stage_result(
+        work_state_snapshot=_snapshot(), store=store,
+        stage_key="authority_request", stage_result=_accepted("authority_request"),
+        now_iso=now_iso,
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons
+    if now_iso == "2026-07-14T00:00:00":
+        assert "FAIL_RECORDING_TIMESTAMP_INVALID" in result.rejection_reasons
+    assert store.load() == {}
 
 
 def test_rejects_out_of_order_stage_without_commit() -> None:
@@ -196,18 +227,20 @@ def test_rejects_out_of_order_stage_without_commit() -> None:
 
 def test_rejects_duplicate_stage_without_overwrite() -> None:
     store = _seed_store_through("authority_request")
+    initial = store.load()
 
     result = record_resident_queue_stage_result(
         work_state_snapshot=_snapshot(),
         store=store,
         stage_key="authority_request",
         stage_result=_accepted("authority_request"),
-        now_iso=NOW,
+        now_iso="2026-07-14T00:00:01+00:00",
     )
 
     assert result.accepted is False
     assert FAIL_STAGE_ALREADY_RECORDED in result.rejection_reasons
     assert store.load()["stage_results"]["authority_request"]["status"] == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
+    assert store.load() == initial
 
 
 def test_rejected_stage_result_does_not_commit() -> None:
@@ -329,6 +362,7 @@ def test_atomic_json_store_writes_schema_for_bootstrap(tmp_path: Path) -> None:
     assert resident_queue_chain_snapshot_revision(data) == data["revision"]
     assert resident_queue_chain_snapshot_is_canonical(data) is True
     assert store.load() == data
+    assert data["receipts"][-1]["recorded_at"] == NOW
     assert data["stage_results"]["authority_request"]["status"] == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
     assert not list(path.parent.glob("*.tmp"))
 
@@ -384,13 +418,14 @@ def test_bootstrap_reads_chain_results_store_schema(tmp_path: Path) -> None:
 
 def test_multi_stage_recording_keeps_serial_order() -> None:
     store = _seed_store_through("executor_plan")
+    initial_receipts = store.load()["receipts"]
 
     result = record_resident_queue_stage_result(
         work_state_snapshot=_snapshot(),
         store=store,
         stage_key="execution_valve",
         stage_result=_accepted("execution_valve"),
-        now_iso=NOW,
+        now_iso="2026-07-14T00:00:01+00:00",
     )
 
     assert result.accepted is True
@@ -399,11 +434,20 @@ def test_multi_stage_recording_keeps_serial_order() -> None:
     assert result.next_plan is not None
     assert result.next_plan.next_action == NEXT_QUEUE_WORKTREE_CREATE_INVOKE
     assert result.next_plan.current_stage == "worktree_create"
+    state = store.load()
+    assert state["receipts"][:-1] == initial_receipts
+    assert state["receipts"][-1]["recorded_at"] == "2026-07-14T00:00:01+00:00"
+    assert all(receipt["recorded_at"] == NOW for receipt in initial_receipts)
 
 
 def test_atomic_store_cross_process_compare_and_swap_allows_one_commit(
     tmp_path: Path,
 ) -> None:
+    # Spawn must import the canonical package, not pytest's temporary module name.
+    from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_chain_results_store import (
+        _concurrent_commit as commit_in_child,
+    )
+
     path = tmp_path / "runtime" / "chain-results.json"
     jobs = [(str(path), "first"), (str(path), "second")]
 
@@ -411,7 +455,7 @@ def test_atomic_store_cross_process_compare_and_swap_allows_one_commit(
         max_workers=2,
         mp_context=multiprocessing.get_context("spawn"),
     ) as executor:
-        outcomes = list(executor.map(_concurrent_commit, jobs))
+        outcomes = list(executor.map(commit_in_child, jobs))
 
     assert sorted(outcomes) == ["committed", "revision_conflict"]
     stored = json.loads(path.read_text(encoding="utf-8"))

@@ -1,8 +1,39 @@
 # shared_utilities Test Suite
 
+## 2026-11-05 — Startup role selection
+
+`test_local_model_startup_selection.py` executes actual role selection, resolver,
+singleton and LM Studio initialization owners. Native inspection, SDK construction
+and explicit file initialization are synthetic collaborators. Its24 frozen cases
+recorded21 pre-fix assertion failures and then24 passes. Defaults, scoped keys,
+custom-path refusal, General isolation, missing-file/native-resident success,
+truthful nonresident/SDK status, one attempt/probe, auth propagation, cache and
+explicit file fallback are covered. No real models, services or credentials.
+
+The focused selection with `test_local_llm_backends.py`,
+`test_lm_studio_dependency_boundary.py` and `test_local_model_selection.py` passed75
+cases, zero failures/errors/skips/denied effects. Migrated resolver fixtures mock
+the actual native/SDK boundary instead of the removed generic preprobe, keeping
+their original preference/fallback/nonlaunch assertions and case names.
+
+The existing `.github/scripts/youtube_repair_offline.py --suite startup` owner
+adapter now passes176 exact cases with canonical registry admission, actual
+conftests and unchanged effect guards. It preserves the original94 names/digest
+and includes the combined75 selection plus root preflight/sentinel controls.
+Use a short private RUNNER_TEMP outside Git for Windows atomic-journal paths;
+the adapter creates its own nonce-bound minimal child and sanitized XML.
+
 Offline pytest coverage for shared model, runtime-artifact, registry, policy,
 validation, and environment utilities. Network/model/process effects must be
 mocked in unit tests.
+
+`test_local_llm_backends.py` verifies explicit native `reasoning=None` omits
+the unsupported wire field while `off` is preserved, including exact instance,
+bounded response and no-storage assertions. Run it with
+`test_lm_studio_model_lifecycle.py` and the AI Gateway
+`test_model_topology_proposal_lm_studio.py`:61passed locally on2026-10-11.
+These are offline contract tests; live calibration evidence is in the RSI
+dispatch runbook and must not be represented as accepted model work.
 
 `test_runtime_artifact_safety.py` covers confined streaming-digest success,
 strict expected-identity/bound types, same-size restored-mtime mutation,

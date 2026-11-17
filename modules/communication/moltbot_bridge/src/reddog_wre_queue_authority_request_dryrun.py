@@ -17,6 +17,10 @@ from dataclasses import asdict, dataclass
 from fnmatch import fnmatchcase
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
 
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_authority_profile_m2m,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     HIGH_AUTHORITY_OPERATIONS,
 )
@@ -43,6 +47,7 @@ QUEUE_AUTHORITY_REQUEST_DRYRUN_REJECT = "QUEUE_AUTHORITY_REQUEST_DRYRUN_REJECT"
 FAIL_QUEUE_CONSUMER_NOT_READY = "FAIL_QUEUE_CONSUMER_NOT_READY"
 FAIL_PROFILE_MISSING = "FAIL_PROFILE_MISSING"
 FAIL_PROFILE_NON_ASCII = "FAIL_PROFILE_NON_ASCII"
+FAIL_PROFILE_M2M_ENVELOPE = "FAIL_PROFILE_M2M_ENVELOPE"
 FAIL_REQUIRED_FIELD = "FAIL_REQUIRED_FIELD"
 FAIL_ALLOWED_PATH_SCOPE = "FAIL_ALLOWED_PATH_SCOPE"
 FAIL_DENIED_PATH_SCOPE = "FAIL_DENIED_PATH_SCOPE"
@@ -295,6 +300,10 @@ def plan_reddog_wre_queue_authority_request_dry_run(
     ):
         reasons.append(FAIL_QUEUE_CONSUMER_NOT_READY)
     profile = _mapping(authority_profile)
+    try:
+        profile = snapshot_authority_profile_m2m(profile)
+    except ValueError:
+        return _reject((*reasons, FAIL_PROFILE_M2M_ENVELOPE))
     if not profile:
         reasons.append(FAIL_PROFILE_MISSING)
     elif not _is_ascii_deep(profile):
@@ -439,6 +448,7 @@ __all__ = [
     "FAIL_HIGH_AUTHORITY_COSIGN",
     "FAIL_PROFILE_MISSING",
     "FAIL_PROFILE_NON_ASCII",
+    "FAIL_PROFILE_M2M_ENVELOPE",
     "FAIL_QUEUE_CONSUMER_NOT_READY",
     "FAIL_REQUIRED_FIELD",
     "FAIL_MODEL_RUNTIME_BINDING",

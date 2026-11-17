@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import secrets
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    DESCRIPTOR_SCHEMA_V2,
     validate_root_verified_outcome_descriptor,
     validate_root_verified_outcome_descriptor_identity,
+    validate_root_verified_outcome_descriptor_identity_public,
     validate_root_verified_outcome_descriptor_public,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_protocol import (
@@ -19,6 +21,16 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     STATUS_REJECT,
     canonical_signer_instance_input,
     request_from_bytes,
+    RECORD_COMMIT_SCHEMA,
+    RootAuthorityRecordCommitRequest,
+    RootAuthorityRecordCommitResponse,
+    record_commit_request_from_bytes,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
+    decode_message,
+)
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VerifiedOutcomeResponseBinding,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import (
     RootVerifiedOutcomeAuthorityState,
@@ -55,6 +67,17 @@ class RootAuthoritySnapshot:
 SnapshotSupplier = Callable[[], RootAuthoritySnapshot]
 
 
+def _initialization_descriptor(snapshot: RootAuthoritySnapshot, now_epoch: int):
+    """An empty v2 identity initializes state without granting outcome effects."""
+    validate_descriptor = validate_root_verified_outcome_descriptor_public
+    if (isinstance(snapshot.descriptor, Mapping)
+            and snapshot.descriptor.get("schema_version") == DESCRIPTOR_SCHEMA_V2
+            and type(snapshot.descriptor.get("grants")) is list
+            and snapshot.descriptor["grants"] == []):
+        validate_descriptor = validate_root_verified_outcome_descriptor_identity_public
+    return validate_descriptor(snapshot.descriptor, now_epoch=now_epoch)
+
+
 def initialize_root_authority_state(
     state: RootVerifiedOutcomeAuthorityState,
     snapshot: RootAuthoritySnapshot,
@@ -63,9 +86,7 @@ def initialize_root_authority_state(
 ) -> None:
     """Provision one root-owned generation and replay anchor explicitly."""
 
-    descriptor = validate_root_verified_outcome_descriptor_public(
-        snapshot.descriptor, now_epoch=now_epoch
-    )
+    descriptor = _initialization_descriptor(snapshot, now_epoch)
     _require_snapshot_identity(snapshot, descriptor, state=state)
     if (
         descriptor["replay_store_id"] != state.store_id
@@ -113,17 +134,20 @@ def handle_root_authority_request(
     """Handle one bounded request; malformed input receives no trusted receipt."""
 
     try:
-        request = request_from_bytes(raw)
+        request = (record_commit_request_from_bytes(raw)
+                   if decode_message(raw).get("schema_version") == RECORD_COMMIT_SCHEMA
+                   else request_from_bytes(raw))
         snapshot = validated_root_authority_snapshot(
             state, snapshot_supplier=snapshot_supplier, now_epoch=now_epoch
         )
         require_root_authority_peer(peer, snapshot)
         grant = _matching_grant(request, snapshot)
-        response = (
-            _commit(request, grant, snapshot, state)
-            if request.operation == OP_COMMIT
-            else _reserve(request, grant, snapshot, state)
-        )
+        if type(request) is RootAuthorityRecordCommitRequest:
+            response = _commit_record(request, snapshot, state, now_epoch)
+        else:
+            response = (_commit(request, grant, snapshot, state)
+                        if request.operation == OP_COMMIT
+                        else _reserve(request, grant, snapshot, state))
     except Exception:
         if "request" not in locals():
             return b'{"status":"REJECT"}\n'
@@ -270,11 +294,13 @@ def _commit(
             {**payload, "signature_digest": request.signature_digest}
         ),
     )
-    state.advance(
-        authorization_binding(request.authorization_id),
-        expected=expected,
-        next_value=committed,
-    )
+    binding = authorization_binding(request.authorization_id)
+    try:
+        state.advance(binding, expected=expected, next_value=committed)
+    except RuntimeError:
+        # Acknowledge only the exact durable terminal state; never reopen reserve.
+        if state.load(binding) != committed:
+            raise
     return _accept(request, snapshot, request.reservation_id, STATE_COMMITTED)
 
 
@@ -291,6 +317,27 @@ def _reservation_payload(
         "issued_at": request.issued_at,
         "reservation_id": reservation_id,
     }
+
+
+def _commit_record(
+    request: RootAuthorityRecordCommitRequest, snapshot: RootAuthoritySnapshot,
+    state: RootVerifiedOutcomeAuthorityState, now_epoch: int,
+) -> RootAuthorityRecordCommitResponse:
+    binding = VerifiedOutcomeResponseBinding(
+        descriptor_id=request.descriptor_id, owner_config_id=request.owner_config_id,
+        authorization_id=request.authorization_id, reservation_id=request.reservation_id,
+    )
+    digest = state.commit_pending_response(
+        request.response_record.encode("ascii"), expected_binding=binding,
+        expected_record_digest=request.record_digest, now_epoch=now_epoch,
+        expected_reservation=ProposalReplayHighWater(
+            1, state_revision(_reservation_payload(request, request.reservation_id)),
+        ),
+    )
+    return RootAuthorityRecordCommitResponse(
+        **asdict(_accept(request, snapshot, request.reservation_id, STATE_COMMITTED)),
+        record_digest=digest,
+    )
 
 
 def require_root_authority_peer(
@@ -334,7 +381,9 @@ def _accept(
 
 
 def _reject(request: RootAuthorityRequest, reason: str) -> RootAuthorityResponse:
-    return RootAuthorityResponse(
+    response_type = (RootAuthorityRecordCommitResponse
+                     if type(request) is RootAuthorityRecordCommitRequest else RootAuthorityResponse)
+    return response_type(
         status=STATUS_REJECT,
         request_id=request.request_id,
         descriptor_id=request.descriptor_id,

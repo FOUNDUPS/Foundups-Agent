@@ -59,6 +59,21 @@ def execute(task: Dict[str, Any]) -> Dict[str, Any]:
     dry_run = task.get("dry_run", True)
 
     # --- Validate action ---
+    error = _action_validation_error(action)
+    if error is not None:
+        return error
+
+    # --- Safety gate: enforce dry_run for write actions ---
+    if action not in READ_ONLY_ACTIONS and dry_run:
+        params["dry_run"] = "true"
+    elif not dry_run:
+        params["dry_run"] = "false"
+
+    return _execute_adapter(action, params, sender)
+
+
+def _action_validation_error(action: str) -> Optional[Dict[str, Any]]:
+    """Preserve the existing unsupported-action response contract."""
     if not action:
         return {
             "success": False,
@@ -75,14 +90,11 @@ def execute(task: Dict[str, Any]) -> Dict[str, Any]:
             "error": "unsupported_action",
             "supported": sorted(SUPPORTED_ACTIONS),
         }
+    return None
 
-    # --- Safety gate: enforce dry_run for write actions ---
-    if action not in READ_ONLY_ACTIONS and dry_run:
-        params.setdefault("dry_run", "true")
-    elif not dry_run:
-        params["dry_run"] = "false"
 
-    # --- Delegate to adapter ---
+def _execute_adapter(action: str, params: Dict[str, Any], sender: str) -> Dict[str, Any]:
+    """Keep timing, result projection and exception envelopes around dispatch."""
     t0 = time.monotonic()
     try:
         from modules.communication.moltbot_bridge.src.linkedin_social_adapter import (
@@ -93,26 +105,7 @@ def execute(task: Dict[str, Any]) -> Dict[str, Any]:
         result = _run_async(execute_linkedin_action(action, params))
 
         elapsed_ms = int((time.monotonic() - t0) * 1000)
-
-        success = bool(result.get("success", False)) if isinstance(result, dict) else False
-
-        logger.info(
-            "[WRE-SKILL] linkedin_engagement | action=%s success=%s elapsed=%dms sender=%s",
-            action,
-            success,
-            elapsed_ms,
-            sender,
-        )
-
-        return {
-            "success": success,
-            "skill": "linkedin_engagement",
-            "action": action,
-            "params": params,
-            "result": result,
-            "execution_time_ms": elapsed_ms,
-            "sender": sender,
-        }
+        return _adapter_result(action, params, sender, result, elapsed_ms)
 
     except ImportError as exc:
         logger.error("[WRE-SKILL] linkedin_engagement adapter import failed: %s", exc)
@@ -134,6 +127,27 @@ def execute(task: Dict[str, Any]) -> Dict[str, Any]:
             "detail": str(exc)[:500],
             "execution_time_ms": elapsed_ms,
         }
+
+
+def _adapter_result(action, params, sender, result, elapsed_ms) -> Dict[str, Any]:
+    """Project the adapter result without treating a preview as a posted receipt."""
+    success = bool(result.get("success", False)) if isinstance(result, dict) else False
+    logger.info(
+        "[WRE-SKILL] linkedin_engagement | action=%s success=%s elapsed=%dms sender=%s",
+        action,
+        success,
+        elapsed_ms,
+        sender,
+    )
+    return {
+        "success": success,
+        "skill": "linkedin_engagement",
+        "action": action,
+        "params": params,
+        "result": result,
+        "execution_time_ms": elapsed_ms,
+        "sender": sender,
+    }
 
 
 def _run_async(coro):

@@ -221,46 +221,20 @@ class DAELaunchBroker:
         }
 
     def stop_dae(self, dae_id: str, *, actor_id: str = "0102") -> Dict[str, Any]:
-        """Stop a running DAE when a stop hook exists."""
-        spec = self._specs.get(dae_id)
-        handle = self._handles.get(dae_id)
-        if spec is None or handle is None or not handle.is_alive:
-            return {
-                "success": False,
-                "dae_id": dae_id,
-                "error": "not_running",
-            }
-        if spec.stop_callable is None:
-            return {
-                "success": False,
-                "dae_id": dae_id,
-                "error": "stop_unsupported",
-            }
-
-        self._daemon.registry.set_state(dae_id, DAEState.STOPPING, "broker_stop_requested")
-        self._daemon.registry.report_event(
-            dae_id,
-            DAEEventType.ACTION_PERFORMED,
-            {
-                "action_type": "stop_requested",
-                "actor_id": actor_id,
-            },
-        )
-        try:
-            spec.stop_callable()
-            self._daemon.registry.set_state(dae_id, DAEState.STOPPED, "broker_stopped")
-            self._daemon.registry.report_event(
-                dae_id,
-                DAEEventType.ACTION_PERFORMED,
-                {
-                    "action_type": "stop_completed",
-                    "actor_id": actor_id,
-                },
-            )
-            return {"success": True, "dae_id": dae_id, "status": "stopped"}
-        except Exception as exc:
-            self._daemon.registry.set_state(dae_id, DAEState.CRASHED, f"stop_failed:{exc}")
-            return {"success": False, "dae_id": dae_id, "error": str(exc)}
+        """Request the captured worker's stop and report its observed completion."""
+        with self._lock:
+            handle = self._handles.get(dae_id)
+            if self._specs.get(dae_id) is None or handle is None:
+                return {"success": False, "dae_id": dae_id, "error": "not_running"}
+            alive = handle.is_alive
+            if self._handles.get(dae_id) is not handle:
+                return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+            if not alive:
+                return {"success": False, "dae_id": dae_id, "error": "not_running"}
+            stop_callable = handle.spec.stop_callable
+        if stop_callable is None:
+            return {"success": False, "dae_id": dae_id, "error": "stop_unsupported"}
+        return _request_owned_stop(self, dae_id, handle, stop_callable, actor_id)
 
     def get_runtime_status(self, dae_id: str) -> Dict[str, Any]:
         spec = self._specs.get(dae_id)
@@ -304,8 +278,6 @@ class DAELaunchBroker:
             reg.pid = os.getpid()
 
         self._daemon.registry.set_state(dae_id, DAEState.RUNNING, "broker_started")
-        # WSP 97: Clear import failure count on successful start (imports passed)
-        self._import_failures.pop(dae_id, None)
         self._daemon.registry.report_event(
             dae_id,
             DAEEventType.DAE_STARTED,
@@ -326,51 +298,13 @@ class DAELaunchBroker:
             )
             self._daemon.registry.set_state(dae_id, DAEState.STOPPED, "launch_completed")
         except Exception as exc:
-            handle.last_error = str(exc)
-            error_type = type(exc).__name__
-
-            # WSP 97: Circuit breaker for import-time failures (track at broker level)
-            is_import_error = isinstance(exc, (ImportError, ModuleNotFoundError))
-            import_failure_count = self._import_failures.get(dae_id, 0)
-            if is_import_error:
-                import_failure_count += 1
-                self._import_failures[dae_id] = import_failure_count
-
-            # Log verbosity: ERROR on first failure, DEBUG on subsequent (reduce noise)
-            if import_failure_count <= 1:
-                logger.exception("[DAE-BROKER] Launch failed for %s", dae_id)
-            else:
-                logger.debug(
-                    "[DAE-BROKER] Repeated %s for %s (%d/%d): %s",
-                    error_type, dae_id, import_failure_count,
-                    MAX_IMPORT_FAILURES, handle.last_error[:100]
-                )
-
-            self._daemon.registry.report_event(
-                dae_id,
-                DAEEventType.ACTION_PERFORMED,
-                {
-                    "action_type": "launch_failed",
-                    "actor_id": actor_id,
-                    "error": handle.last_error[:200],
-                    "import_failure_count": import_failure_count,
-                },
+            _record_launch_failure(
+                self._daemon.registry, self._import_failures, handle,
+                dae_id, actor_id, exc,
             )
-
-            # WSP 97: Detach after MAX_IMPORT_FAILURES to stop restart loop
-            if is_import_error and import_failure_count >= MAX_IMPORT_FAILURES:
-                logger.error(
-                    "[DAE-BROKER] Import failures exceeded for %s - DETACHED (install deps in venv)",
-                    dae_id
-                )
-                self._daemon.registry.set_state(
-                    dae_id, DAEState.DETACHED,
-                    f"import_failures_exceeded:{handle.last_error[:100]}"
-                )
-                # Also disable to prevent is_enabled() from allowing restarts
-                self._daemon.registry.disable(dae_id)
-            else:
-                self._daemon.registry.set_state(dae_id, DAEState.CRASHED, handle.last_error[:200])
+        else:
+            # Completion includes the existing summary, event and state callbacks.
+            self._import_failures.pop(dae_id, None)
         finally:
             handle.completed_at = time.time()
             self._daemon.registry.report_event(
@@ -404,6 +338,114 @@ class DAELaunchBroker:
             self._heartbeat_thread.join(timeout=3.0)
 
 
+def _stop_handle_is_current(broker: DAELaunchBroker, dae_id: str, handle: DAERuntimeHandle) -> bool:
+    with broker._lock:
+        return broker._handles.get(dae_id) is handle
+
+
+def _request_owned_stop(
+    broker: DAELaunchBroker, dae_id: str, handle: DAERuntimeHandle,
+    stop_callable: Callable[[], Any], actor_id: str,
+) -> Dict[str, Any]:
+    """Publish the request without holding the broker lock across callbacks."""
+    registry = broker._daemon.registry
+    if not _stop_handle_is_current(broker, dae_id, handle):
+        return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+    registry.set_state(dae_id, DAEState.STOPPING, "broker_stop_requested")
+    if not _stop_handle_is_current(broker, dae_id, handle):
+        return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+    registry.report_event(
+        dae_id, DAEEventType.ACTION_PERFORMED,
+        {"action_type": "stop_requested", "actor_id": actor_id},
+    )
+    if not _stop_handle_is_current(broker, dae_id, handle):
+        return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+    return _complete_owned_stop(broker, dae_id, handle, stop_callable, actor_id)
+
+
+def _complete_owned_stop(
+    broker: DAELaunchBroker, dae_id: str, handle: DAERuntimeHandle,
+    stop_callable: Callable[[], Any], actor_id: str,
+) -> Dict[str, Any]:
+    """Observe only this handle; retain the existing hook/reporting catch scope."""
+    registry = broker._daemon.registry
+    try:
+        stop_callable()
+        with broker._lock:
+            if broker._handles.get(dae_id) is not handle:
+                return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+            alive = handle.is_alive
+            if broker._handles.get(dae_id) is not handle:
+                return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        if alive:
+            return {"success": True, "dae_id": dae_id, "status": "stopping"}
+        registry.set_state(dae_id, DAEState.STOPPED, "broker_stopped")
+        if not _stop_handle_is_current(broker, dae_id, handle):
+            return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        registry.report_event(
+            dae_id, DAEEventType.ACTION_PERFORMED,
+            {"action_type": "stop_completed", "actor_id": actor_id},
+        )
+        if not _stop_handle_is_current(broker, dae_id, handle):
+            return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        return {"success": True, "dae_id": dae_id, "status": "stopped"}
+    except Exception as exc:
+        if not _stop_handle_is_current(broker, dae_id, handle):
+            return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        registry.set_state(dae_id, DAEState.CRASHED, f"stop_failed:{exc}")
+        if not _stop_handle_is_current(broker, dae_id, handle):
+            return {"success": False, "dae_id": dae_id, "error": "runtime_changed"}
+        return {"success": False, "dae_id": dae_id, "error": str(exc)}
+
+
+def _record_launch_failure(
+    registry: Any, failures: Dict[str, int], handle: DAERuntimeHandle,
+    dae_id: str, actor_id: str, exc: Exception,
+) -> None:
+    """Update the per-DAE exception streak and existing failure observations."""
+    handle.last_error = str(exc)
+    error_type = type(exc).__name__
+    is_import_error = isinstance(exc, (ImportError, ModuleNotFoundError))
+    if is_import_error:
+        import_failure_count = failures.get(dae_id, 0) + 1
+        failures[dae_id] = import_failure_count
+    else:
+        failures.pop(dae_id, None)
+        import_failure_count = 0
+
+    if import_failure_count <= 1:
+        logger.exception("[DAE-BROKER] Launch failed for %s", dae_id)
+    else:
+        logger.debug(
+            "[DAE-BROKER] Repeated %s for %s (%d/%d): %s",
+            error_type, dae_id, import_failure_count,
+            MAX_IMPORT_FAILURES, handle.last_error[:100]
+        )
+
+    registry.report_event(
+        dae_id,
+        DAEEventType.ACTION_PERFORMED,
+        {
+            "action_type": "launch_failed",
+            "actor_id": actor_id,
+            "error": handle.last_error[:200],
+            "import_failure_count": import_failure_count,
+        },
+    )
+    if is_import_error and import_failure_count >= MAX_IMPORT_FAILURES:
+        logger.error(
+            "[DAE-BROKER] Import failures exceeded for %s - DETACHED (install deps in venv)",
+            dae_id
+        )
+        registry.set_state(
+            dae_id, DAEState.DETACHED,
+            f"import_failures_exceeded:{handle.last_error[:100]}"
+        )
+        registry.disable(dae_id)
+    else:
+        registry.set_state(dae_id, DAEState.CRASHED, handle.last_error[:200])
+
+
 def _summarize_result(result: Any) -> str:
     if result is None:
         return "ok"
@@ -413,6 +455,12 @@ def _summarize_result(result: Any) -> str:
         if "message" in result:
             return str(result["message"])[:200]
     return str(result)[:200]
+
+
+def get_existing_dae_launch_broker() -> Optional[DAELaunchBroker]:
+    """Return the current broker without constructing runtime resources."""
+    with _broker_lock:
+        return _launch_broker
 
 
 def get_dae_launch_broker(daemon=None) -> DAELaunchBroker:

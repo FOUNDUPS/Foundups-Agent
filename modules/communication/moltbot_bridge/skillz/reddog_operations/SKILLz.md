@@ -1,7 +1,7 @@
 ---
 name: reddog_operations
 description: Provider-neutral operating discipline for bounded RedDog repository work.
-version: 1.1.0
+version: 1.1.1
 intent_type: DECISION
 promotion_state: production
 category: workflow
@@ -119,6 +119,66 @@ For a request to work on a named FoundUp:
 6. Execution still requires the normal signed work order, allowed paths,
    independent verifier, and promotion gates. The grounding receipt grants no
    shell, worktree, PR, merge, signer, or re-index authority.
+
+## Sender identity, delivery and routing preflight
+
+A message appearing in Gmail Sent, or the absence of a delivery-status failure, does **not** prove recipient receipt. The selected From identity is part of the exact outbound transaction and must be verified as carefully as To/CC/BCC. A configured Gmail account can send from a custom-domain alias by default: connection identity does not prove the outbound From address.
+
+1. Resolve the principal-approved sender for this exact case from private/live correspondence routing or the principal's current instruction. Do not hard-code a personal email address into public Skillz or infer a global default from a single case.
+2. **SUNVISTA / Edion / Sharp**: On 2026-10-16 the Edion manager reported that earlier custom-domain sender messages were not visible, while a live test reached the principal's direct Gmail account and the principal forwarded three messages using that Gmail sender. The principal directed Gmail (not the Foundups alias) for future SUNVISTA correspondence. Resolve the exact Gmail sender from the verified principal/private route and retain this case override until expressly changed.
+3. Before submission inspect the actual provider From and Reply-To identity in the transaction or draft. If the connector cannot select or confirm the required From identity, **HOLD sender-dependent delivery** and select another authorized sender-selectable interface. Do not silently substitute the old default alias.
+4. Mark suspected nonreceipt as RECEIPT_UNCONFIRMED, not a proven bounce, filtering issue, or domain-wide outage. Check recipient statements, actual replies, delivery-status notices including Trash, complete threads, and any authenticated delivery evidence. A negative observation at one recipient cannot be generalized to all recipients.
+5. Before any requested retransmission or receipt check, reconcile Sent coverage and latest inbound per scope. Exclude answered, denied, closed, superseded, and already-forwarded messages. Prefer one concise, individually addressed receipt check with original date/subject and a request to acknowledge the newly chosen sender. Do not automatically repeat full attachments, long links, CCs or BCCs; respect follow-up caps and routing consent.
+6. Post-send readback must verify the actual From, To/CC/BCC, thread and Sent status. Missing From evidence is UNVERIFIED, not silently accepted. VERIFIED_SENT must be kept distinct from RECIPIENT_CONFIRMED, which requires an acknowledgment or equivalent external receipt.
+
+This policy is not evidence that Gmail sender-selection tools or the #1779 sender boundary are deployed. Maintain the existing distinction between 012-directed Work and unattended Red Dog.
+
+## Canonical Email Draft Operations
+
+For consequential email drafting, review, revision, forwarding, or send
+handoff, treat version control as an operational safety boundary.
+
+1. Resolve the newest authoritative message body before editing. Priority is:
+   an exact user-supplied body explicitly declared current, then the current
+   provider-side draft, then the exact sent message/thread, then an explicitly
+   designated connected document. Conversation history and model memory are
+   context only; they are never authoritative message text when a current
+   artifact exists.
+2. Maintain one canonical provider-side draft. Apply later edits in place
+   rather than creating replacement drafts. Use a descriptive operational
+   subject as a retrieval key and reminder; clean the subject before send when
+   requested.
+3. Before review or send, retrieve the current provider-side draft again.
+   Verify `To`, `Cc`, `Bcc`, subject, exact body, reply/thread target, and all
+   attachment filenames.
+4. Search Sent before sending a draft that resembles a prior message. A draft
+   can remain after the message was already sent. If an exact or substantially
+   identical sent message exists, block duplicate send until the principal
+   confirms it is a follow-up.
+5. If a stale duplicate draft is confirmed, delete it when the connector
+   exposes safe delete authority. If delete is unavailable, record it as stale
+   and never use it as canonical.
+6. If the body claims an attachment is included but the provider draft has no
+   matching attachment, block send until reconciled.
+7. For replies and forwards, read the source message first so recipients,
+   quoted context, thread state, and claims remain grounded.
+8. Resolve recipient identity from connected evidence when names or titles are
+   ambiguous. Distinguish role-bearing names explicitly, and treat likely STT
+   artifacts as non-authoritative until reconciled.
+9. When the principal asks what an email says, translate or summarize the
+   exact current artifact. If the provider exposes only a snippet, state that
+   limitation and never reconstruct the unseen remainder from an older
+   version.
+10. If the principal supplies a newer exact body after review, promote that
+    body to canonical and update the saved draft in place before any send.
+
+Fail closed on ambiguous canonical bodies, unresolved recipient identity,
+missing claimed attachments, unresolved duplicate-send risk, unverified
+reply targets that materially change context, or material edits made after the
+principal's last approval.
+
+This discipline supplements connector authority; it never grants send, delete,
+or mutation authority by itself.
 
 ## Start Operations Boundary
 

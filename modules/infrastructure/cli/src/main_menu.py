@@ -19,6 +19,7 @@ from typing import Optional, Dict, Any
 import psutil
 
 from modules.infrastructure.cli.src.utilities import (
+    console_input as input,
     env_truthy,
     env_flag,
     maybe_clear_screen,
@@ -748,36 +749,26 @@ def _run_connect_wre(verbose: bool = False) -> bool:
         errors.append(f"dashboard alerts unavailable: {exc}")
         health = {}
 
-    enabled = os.getenv("WRE_DASHBOARD_PREFLIGHT", "1") != "0"
-    manual_enforced = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
-    auto_enforce = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE", "1") != "0"
+    try:
+        from modules.infrastructure.wre_core.src.dae_preflight import dashboard_readiness
+        policy = dashboard_readiness(health, in_watch=bool(in_watch))
+    except Exception as exc:
+        errors.append(f"readiness policy unavailable: {type(exc).__name__}")
+        policy = dict(enabled=None, manual_enforced=None, auto_enforce=None,
+                      auto_enforced=None, readiness="UNKNOWN")
+    enabled = policy["enabled"]
+    manual_enforced = policy["manual_enforced"]
+    auto_enforce = policy["auto_enforce"]
     insufficient_data = bool(health.get("insufficient_data", False))
     total_executions = int(health.get("total_executions", 0))
-    min_samples = int(health.get("min_samples", int(os.getenv("WRE_DASHBOARD_MIN_SAMPLES", "25"))))
+    min_samples = health.get("min_samples", "unknown")
     alerts = health.get("alerts", []) if isinstance(health.get("alerts", []), list) else []
     critical = sum(1 for alert in alerts if alert.get("severity") == "critical")
     warnings = sum(1 for alert in alerts if alert.get("severity") == "warning")
 
-    auto_enforced = bool(
-        auto_enforce
-        and in_watch is not None
-        and not in_watch
-        and not insufficient_data
-    )
-    effective_enforced = bool(manual_enforced or auto_enforced)
-
-    if not enabled:
-        readiness = "DISABLED"
-    elif insufficient_data:
-        readiness = "INSUFFICIENT_DATA"
-    elif critical > 0 and effective_enforced:
-        readiness = "BLOCKED"
-    elif critical > 0:
-        readiness = "DEGRADED"
-    else:
-        readiness = "READY"
-
-    connection_state = "CONNECTED" if preflight_ok and not errors else "PARTIAL"
+    auto_enforced = policy["auto_enforced"]
+    readiness = "UNKNOWN" if errors else "BLOCKED" if not preflight_ok else policy["readiness"]
+    connection_state = "CHECKED" if preflight_ok and not errors else "PARTIAL"
 
     print(f"[CONNECT-WRE] connection={connection_state} readiness={readiness}")
     print(
@@ -798,7 +789,7 @@ def _run_connect_wre(verbose: bool = False) -> bool:
     elif verbose:
         print("[CONNECT-WRE] no import/runtime issues detected.")
 
-    return readiness in {"READY", "INSUFFICIENT_DATA", "DEGRADED"} and preflight_ok
+    return readiness in {"READY", "DEGRADED"} and preflight_ok
 
 
 def _run_dae_dashboard(central_daemon) -> None:

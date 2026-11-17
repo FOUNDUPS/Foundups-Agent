@@ -1,4 +1,20 @@
 # TARS Account Swapper Skill
+
+## 2026-10-29 receiving-channel verification
+
+`swap_to(target, navigate_to_comments=True)` preserves comments as its default.
+Scheduling callers pass `False`; every recovery path honors that surface,
+including direct-URL recovery to Studio content. Success requires the exact
+native Studio channel ID and HTTPS Studio URL to agree, with an observed
+accessible Studio shell. Missing native identity, conflicting URLs, unknown
+permission observations and permission errors cannot certify access. Screenshots
+and account-picker clicks do not establish this result.
+
+The scheduler also freezes the canonical receiving ID for each rotation entry
+and passes it through the shared verifier. A later environment/registry change
+cannot retarget the existing scheduler or its tracker. Offline qualification
+does not establish a successful live account switch.
+
 **WSP Reference:** WSP 96 (WRE Skills Protocol)
 **Status:** ✅ PRODUCTION READY
 **Last Validated:** 2025-12-28

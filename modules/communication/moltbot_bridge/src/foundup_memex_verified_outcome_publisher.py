@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping, Protocol
 
@@ -17,12 +18,9 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_run
     build_outcome_evidence_envelope,
 )
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
-    VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
     VERIFIED_OUTCOME_SIGNER_ROLE,
     VERIFIED_OUTCOME_SIGNING_OPERATION,
-)
-from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation import (
-    canonical_signer_audit_attestation_input,
+    validate_verified_outcome_signing_response,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     IsolatedSignerClient,
@@ -78,6 +76,7 @@ class SignedVerifiedOutcomeEvidencePublisher:
         held_out_receipt: Mapping[str, Any],
     ) -> str:
         _validate_dependencies(self)
+        record = deepcopy(dict(record))
         if reddog_verified_pattern_memory_record_id(record) != record_id:
             raise ValueError("verified_outcome_publish_record_id_mismatch")
         verifier, held_out, evidence_digest = _rehydrate_evidence(
@@ -86,6 +85,13 @@ class SignedVerifiedOutcomeEvidencePublisher:
         now_epoch = self.trusted_now_epoch()
         if type(now_epoch) is not int:
             raise ValueError("verified_outcome_publish_clock_invalid")
+        existing = self.store.load_publication(record_id)
+        if existing is not None:
+            _validate_publication_retry(
+                self, existing, record_id, record, verifier, held_out,
+                evidence_digest, now_epoch,
+            )
+            return record_id
         payload, signing_input = _signing_payload(
             publisher=self,
             record_id=record_id,
@@ -110,7 +116,19 @@ class SignedVerifiedOutcomeEvidencePublisher:
             signer_key_fingerprint=response.key_fingerprint,
             key_epoch=self.key_epoch,
         )
-        return self.store.publish(envelope)
+        try:
+            return self.store.publish(envelope)
+        except (OSError, RuntimeError, ValueError):
+            # A lost acknowledgment or competing writer needs durable evidence,
+            # not another signing use. Signer failures remain outside this scope.
+            existing = self.store.load_publication(record_id)
+            if existing is None:
+                raise
+            _validate_publication_retry(
+                self, existing, record_id, record, verifier, held_out,
+                evidence_digest, now_epoch,
+            )
+            return record_id
 
     def activate(self, record_id: str) -> str:
         activated_id = self.store.activate(record_id)
@@ -124,6 +142,57 @@ class SignedVerifiedOutcomeEvidencePublisher:
         ):
             raise ValueError("verified_outcome_activation_reload_invalid")
         return activated_id
+
+
+def _validate_publication_retry(
+    publisher: SignedVerifiedOutcomeEvidencePublisher,
+    existing: Mapping[str, Any],
+    record_id: str,
+    record: Mapping[str, Any],
+    verifier: Mapping[str, Any],
+    held_out: Mapping[str, Any],
+    evidence_digest: str,
+    now_epoch: int,
+) -> None:
+    """Acknowledge exact durable evidence without signing again or renewing it.
+
+    This does not issue authority. Activation and fresh key/revocation/expiry
+    checks remain with their existing owners at use time.
+    """
+
+    receipt = existing["signed_receipts"][0]
+    issued_at = receipt.get("issued_at")
+    if type(issued_at) is not int or issued_at < 0 or issued_at > now_epoch:
+        raise ValueError("verified_outcome_evidence_conflict")
+    payload, signing_input = _signing_payload(
+        publisher=publisher,
+        record_id=record_id,
+        work_order_id=str(record.get("work_order_id") or ""),
+        evidence_digest=evidence_digest,
+        now_epoch=issued_at,
+    )
+    signature = receipt.get("signature")
+    expected = build_outcome_evidence_envelope(
+        record_id=record_id,
+        record=record,
+        verification_receipt=verifier,
+        held_out_receipt=held_out,
+        signed_receipt={**payload, "signature": signature},
+        issuer_principal_id=publisher.issuer_principal_id,
+        issuer_principal_provider=publisher.issuer_principal_provider,
+        reddog_id=publisher.reddog_id,
+        signer_key_fingerprint=public_key_fingerprint(publisher.signer_public_key),
+        key_epoch=publisher.key_epoch,
+    )
+    if (
+        expected["envelope_digest"] != existing["envelope_digest"]
+        or not isinstance(signature, str)
+        or not signature
+        or not publisher.signature_verifier.verify(
+            publisher.signer_public_key, signing_input, signature
+        )
+    ):
+        raise ValueError("verified_outcome_evidence_conflict")
 
 
 def _rehydrate_evidence(
@@ -220,36 +289,13 @@ def _validate_signer_response(
     response: Any,
     signing_input: str,
 ) -> None:
-    audit_input = canonical_signer_audit_attestation_input(
-        signing_input=signing_input,
-        signature=str(response.signature),
-        audit_mac=str(response.audit_mac),
+    valid = validate_verified_outcome_signing_response(
+        response,
+        signing_input,
         signer_public_key=publisher.signer_public_key,
         key_epoch=publisher.key_epoch,
         requester_principal_id=publisher.issuer_principal_id,
-        domain_prefix=VERIFIED_OUTCOME_AUDIT_ATTESTATION_PREFIX,
-    )
-    valid = bool(
-        response.accepted
-        and response.signer_public_key == publisher.signer_public_key
-        and response.key_fingerprint
-        == public_key_fingerprint(publisher.signer_public_key)
-        and response.key_epoch == publisher.key_epoch
-        and response.boundary_attested
-        and response.requester_identity_attested
-        and response.signer_loads_no_untrusted_code
-        and response.no_secret_material_returned
-        and response.signature
-        and response.audit_mac
-        and response.audit_attestation_signature
-        and publisher.signature_verifier.verify(
-            publisher.signer_public_key, signing_input, response.signature
-        )
-        and publisher.signature_verifier.verify(
-            publisher.signer_public_key,
-            audit_input,
-            response.audit_attestation_signature,
-        )
+        signature_verifier=publisher.signature_verifier,
     )
     if not valid:
         raise ValueError("verified_outcome_publish_signer_rejected")

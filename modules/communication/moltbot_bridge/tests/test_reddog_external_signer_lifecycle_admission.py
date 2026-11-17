@@ -292,7 +292,8 @@ def _boundary(tmp_path: Path, **changes):
         generation_reader_authority_boundary=reader_boundary,
         os_policy_authority=policy_boundary,
         os_policy_authority_boundary=policy_boundary,
-        requester_principal_id="github:mjtrout",
+        requester_principal_id=changes.get("requester_principal_id", "github:mjtrout"),
+        signer_profile_id=changes.get("signer_profile_id", "reddog-work-authority"),
         os_observer=observer,
         healthcheck_runner=healthcheck,
         trusted_clock=clocks.wall,
@@ -344,12 +345,18 @@ def test_exact_generation_os_and_handshake_issue_one_shot_capability(tmp_path) -
     assert receipt.generation == 1
     assert receipt.pid == 4242
     assert receipt.handshake_request_digest == _sha("b")
+    assert receipt.requester_principal_id == "github:mjtrout"
+    assert receipt.signer_profile_id == "reddog-work-authority"
     assert receipt.authority_granted is False
     assert receipt.valve_unlocked is False
     assert receipt.effect_capability_issued is False
     assert observer.calls == healthcheck.calls == 1
     with pytest.raises(ExternalSignerLifecycleAdmissionError):
         boundary.consume(capability)
+
+
+class _IdentityString(str):
+    pass
 
 
 def test_lifecycle_boundary_cannot_be_retargeted_after_construction(

@@ -1,117 +1,98 @@
-"""Tests for git main-merge sentinel startup safety."""
-
-from __future__ import annotations
+"""Tests for the legacy startup interface to Git lifecycle reconciliation."""
 
 from pathlib import Path
+import sys
+from types import ModuleType
+from unittest.mock import Mock
 
 import pytest
 
 from modules.infrastructure.wre_core.src import git_main_merge_sentinel as sentinel
 
 
-def test_sentinel_disabled_by_default_does_not_call_git(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.delenv("GIT_MAIN_MERGE_SENTINEL", raising=False)
-
-    def fail_git(*args, **kwargs):
-        raise AssertionError("git must not be called when sentinel is disabled by default")
-
-    monkeypatch.setattr(sentinel, "_git", fail_git)
-
-    result = sentinel.run_main_merge_sentinel(tmp_path)
-
-    assert result["passed"] is True
-    assert result["merged"] is False
-    assert result["actions"] == ["skip (disabled)"]
+_LIFECYCLE = "modules.infrastructure.wre_core.src.git_lifecycle"
 
 
-def test_enabled_sentinel_skips_on_main(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL", "1")
-    calls: list[list[str]] = []
-
-    def fake_git(args, repo_root, timeout=30):
-        calls.append(args)
-        assert args == ["rev-parse", "--abbrev-ref", "HEAD"]
-        return True, "main"
-
-    monkeypatch.setattr(sentinel, "_git", fake_git)
-
-    result = sentinel.run_main_merge_sentinel(tmp_path)
-
-    assert result["passed"] is True
-    assert result["merged"] is False
-    assert result["actions"] == ["skip (already on main)"]
-    assert calls == [["rev-parse", "--abbrev-ref", "HEAD"]]
+@pytest.fixture(autouse=True)
+def isolate_sentinel(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in ("GIT_MAIN_MERGE_SENTINEL", "GIT_MAIN_MERGE_SENTINEL_ENFORCED"):
+        monkeypatch.delenv(name, raising=False)
 
 
-def test_enabled_sentinel_blocks_when_main_checked_out_elsewhere(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL", "1")
-    feature = tmp_path / "feature"
-    main = tmp_path / "main"
-    feature.mkdir()
-    main.mkdir()
-    calls: list[list[str]] = []
-
-    worktree_output = "\n".join(
-        [
-            f"worktree {feature}",
-            "HEAD " + "a" * 40,
-            "branch refs/heads/feature/demo",
-            "",
-            f"worktree {main}",
-            "HEAD " + "b" * 40,
-            "branch refs/heads/main",
-            "",
-        ]
+@pytest.fixture
+def reconcile(monkeypatch: pytest.MonkeyPatch) -> Mock:
+    lifecycle = ModuleType(_LIFECYCLE)
+    lifecycle.reconcile_git_lifecycle = Mock(
+        return_value={"coverage": "complete", "reason": None},
     )
-
-    def fake_git(args, repo_root, timeout=30):
-        calls.append(args)
-        if args == ["rev-parse", "--abbrev-ref", "HEAD"]:
-            return True, "feature/demo"
-        if args == ["worktree", "list", "--porcelain"]:
-            return True, worktree_output
-        raise AssertionError(f"unexpected git call after worktree block: {args}")
-
-    monkeypatch.setattr(sentinel, "_git", fake_git)
-
-    result = sentinel.run_main_merge_sentinel(feature)
-
-    assert result["passed"] is True
-    assert result["merged"] is False
-    assert result["error"] == "main_checked_out_in_another_worktree"
-    assert result["main_worktree_paths"] == [str(main.resolve())]
-    assert result["actions"] == ["blocked: main checked out in another worktree"]
-    assert calls == [
-        ["rev-parse", "--abbrev-ref", "HEAD"],
-        ["worktree", "list", "--porcelain"],
-    ]
+    monkeypatch.setitem(sys.modules, _LIFECYCLE, lifecycle)
+    return lifecycle.reconcile_git_lifecycle
 
 
-def test_enforced_sentinel_fails_when_main_checked_out_elsewhere(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL", "1")
+def test_disabled_skips_without_loading_lifecycle(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    monkeypatch.setitem(sys.modules, _LIFECYCLE, None)
     monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "1")
-    feature = tmp_path / "feature"
-    main = tmp_path / "main"
-    feature.mkdir()
-    main.mkdir()
 
-    def fake_git(args, repo_root, timeout=30):
-        if args == ["rev-parse", "--abbrev-ref", "HEAD"]:
-            return True, "feature/demo"
-        if args == ["worktree", "list", "--porcelain"]:
-            return True, f"worktree {main}\nbranch refs/heads/main\n"
-        raise AssertionError(f"unexpected git call after worktree block: {args}")
+    assert sentinel.run_main_merge_sentinel(tmp_path) == {
+        "passed": True,
+        "merged": False,
+        "branch": None,
+        "actions": ["skip (disabled)"],
+        "error": None,
+    }
 
-    monkeypatch.setattr(sentinel, "_git", fake_git)
 
-    result = sentinel.run_main_merge_sentinel(feature)
+@pytest.mark.parametrize("force", [False, True], ids=["enabled", "forced"])
+def test_delegates_without_synchronizing_or_merging(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, reconcile: Mock, force: bool,
+):
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL", "0" if force else "1")
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "1")
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH", "1")
+
+    assert sentinel.run_main_merge_sentinel(tmp_path, force=force) == {
+        "passed": True,
+        "merged": False,
+        "branch": None,
+        "actions": ["checked git lifecycle (complete)"],
+        "error": None,
+    }
+    reconcile.assert_called_once_with(tmp_path, synchronize_pc=False)
+
+
+@pytest.mark.parametrize("enforced", [False, True], ids=["advisory", "enforced"])
+@pytest.mark.parametrize(
+    ("receipt", "reason"),
+    [
+        ({"coverage": "partial", "reason": "github_page_limit"}, "github_page_limit"),
+        ({"coverage": "unavailable"}, "git_lifecycle_coverage_unavailable"),
+        ({}, "git_lifecycle_coverage_unavailable"),
+    ],
+    ids=["partial", "unavailable", "missing_coverage"],
+)
+def test_coverage_failures_respect_enforcement(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, reconcile: Mock,
+    enforced: bool, receipt: dict, reason: str,
+):
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", str(int(enforced)))
+    reconcile.return_value = receipt
+
+    result = sentinel.run_main_merge_sentinel(tmp_path, force=True)
+
+    assert result["passed"] is (not enforced)
+    assert result["merged"] is False
+    assert result["error"] == reason
+    reconcile.assert_called_once_with(tmp_path, synchronize_pc=False)
+
+
+def test_reconciliation_exception_returns_stable_error(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, reconcile: Mock,
+):
+    monkeypatch.setenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "1")
+    reconcile.side_effect = RuntimeError("unfiltered provider response")
+
+    result = sentinel.run_main_merge_sentinel(tmp_path, force=True)
 
     assert result["passed"] is False
     assert result["merged"] is False
-    assert result["error"] == "main_checked_out_in_another_worktree"
+    assert result["error"] == "git_lifecycle_reconciliation_failed"

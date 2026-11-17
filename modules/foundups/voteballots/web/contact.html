@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102a3a">
+  <meta name="description" content="Find a public congressional office number and prepare a private call list from official directories.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="contact.css">
+  <title>Contact Congress · Vote</title>
+</head>
+<body class="contact-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Vote home"><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M8 15 20 32 37 8"/><circle cx="35" cy="33" r="4"/></svg><span>VOTE<small>A CIVIC FOUNDUP</small></span></a>
+    <nav class="header-nav" aria-label="Main navigation">
+      <a href="./#oversight">Oversight Blueprint</a><a href="evidence">Funding evidence</a><a href="contact" aria-current="page">Contact Congress</a><a href="coalition">Coalition</a>
+    </nav>
+    <button class="install-button" id="install-app" type="button" hidden>Install Vote <span aria-hidden="true">↓</span></button>
+  </header>
+  <main id="main" tabindex="-1">
+    <section class="contact-intro section-shell" aria-labelledby="contact-title">
+      <p class="eyebrow">PUBLIC OFFICE DIRECTORY</p>
+      <h1 id="contact-title">Contact Congress.</h1>
+      <p>Choose a state or territory and find an office in the official House and Senate directories. You can prepare a private list of offices and open your phone’s dialer for each call.</p>
+      <div class="contact-source-links">
+        <a href="https://www.house.gov/representatives">House directory</a>
+        <a href="https://www.senate.gov/senators/contact/">Senate directory</a>
+        <a href="tel:+12022243121">Capitol Switchboard · (202) 224-3121</a>
+      </div>
+    </section>
+    <section class="contact-content section-shell" aria-label="Office selection and call list">
+      <div class="contact-panel" aria-labelledby="directory-title">
+        <h2 id="directory-title">Find an office</h2>
+        <p id="contact-date" role="status">Loading public office snapshot.</p>
+        <noscript><p>Use the official directories above to look up phone numbers when JavaScript is unavailable.</p></noscript>
+        <p class="contact-helper" id="contact-state-help">Choose your state or another jurisdiction. This selection is a search filter. Use the official <a href="https://www.house.gov/representatives/find-your-representative">House district lookup</a> to confirm which office represents your address.</p>
+        <div class="contact-filters">
+          <div>
+            <label for="contact-state">State or territory</label>
+            <select id="contact-state" aria-describedby="contact-state-help" disabled><option value="">Choose a state or territory</option></select>
+          </div>
+          <div>
+            <label for="contact-chamber">Chamber</label>
+            <select id="contact-chamber" disabled><option value="">Both chambers</option><option>House</option><option>Senate</option></select>
+          </div>
+        </div>
+        <label for="contact-office">Public office</label>
+        <select id="contact-office" disabled><option value="">Choose a state first</option></select>
+        <p class="contact-helper" id="contact-coverage" role="status"></p>
+        <p id="contact-office-info" class="contact-office-info" hidden></p>
+        <button class="button button-ink" id="contact-add" type="button" disabled>Add to my list</button>
+        <details class="contact-roles">
+          <summary>Browse committees and leadership</summary>
+          <p>Find names on the official pages, then choose the state, chamber and office above. The numbers shown here are for Washington offices.</p>
+          <ul>
+            <li><a href="https://www.house.gov/committees">House committees</a> and <a href="https://www.house.gov/leadership">House leadership</a></li>
+            <li><a href="https://www.senate.gov/committees/">Senate committees</a> and <a href="https://www.senate.gov/senators/leadership.htm">Senate leadership</a></li>
+          </ul>
+        </details>
+      </div>
+      <div class="contact-panel contact-plan" aria-labelledby="plan-title">
+        <h2 id="plan-title">Your call list</h2>
+        <label for="contact-size">Maximum offices</label>
+        <select id="contact-size" disabled><option>1</option><option>3</option><option>5</option></select>
+        <p id="contact-queue-status" role="status">Choose each office yourself. The list starts empty.</p>
+        <ol id="contact-queue" class="contact-queue" hidden></ol>
+        <p id="contact-current" hidden></p>
+        <a class="button button-gold contact-call" id="contact-call" hidden></a>
+        <div class="contact-controls">
+          <button id="contact-prev" type="button" disabled>Previous office</button>
+          <button id="contact-next" type="button" disabled>Next office</button>
+          <button id="contact-remove" type="button" disabled>Remove current office</button>
+        </div>
+        <label for="contact-notes">Notes for yourself <span>(optional)</span></label>
+        <p class="contact-helper" id="contact-notes-help">Consider noting your question, a bill number or public source, and what response you are requesting. Avoid private information.</p>
+        <textarea id="contact-notes" aria-describedby="contact-notes-help" rows="3" maxlength="1000" autocomplete="off" disabled></textarea>
+        <button id="contact-clear" type="button" disabled>Clear list and notes</button>
+        <p class="contact-helper">Your choices and notes stay on this page. Reloading clears them. After using your dialer, return here and choose the next office yourself.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="contact-footer section-shell">
+    <p>Vote is an independent civic project. Check current information with the official offices before calling.</p>
+    <a href="./">Back to Vote</a>
+  </footer>
+  <script src="app.js" defer></script>
+  <script type="module" src="contact.js"></script>
+</body>
+</html>

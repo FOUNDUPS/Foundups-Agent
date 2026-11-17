@@ -34,6 +34,8 @@ class VerifiedElevatedConsensusSignerReservation:
 class _ReservationSeal:
     authority: ConsensusNonceAuthority
     token: str
+    validity_check: Any = None
+    scope: Any = None
 
 
 _LOCK = threading.Lock()
@@ -48,13 +50,24 @@ def reserve_elevated_consensus_nonce(
     *,
     expires_at: int,
     subject: str,
+    validity_check: Any = None,
+    _scope: Any = None,
 ) -> VerifiedElevatedConsensusSignerReservation | None:
-    token = authority.reserve(nonce, expires_at=expires_at, subject=subject)
+    if _scope is None:
+        token = authority.reserve(nonce, expires_at=expires_at, subject=subject)
+    else:
+        from .reddog_consensus_nonce_authority import ProtectedConsensusNonceAuthority
+        if type(authority) is not ProtectedConsensusNonceAuthority or validity_check is None:
+            raise ValueError("consensus_scoped_nonce_authority_invalid")
+        token = authority._reserve(nonce, expires_at=expires_at, subject=subject, _scope=_scope)
     if not token:
         return None
     reservation = object.__new__(VerifiedElevatedConsensusSignerReservation)
     with _LOCK:
-        _RESERVATIONS[reservation] = _ReservationSeal(authority, token)
+        _RESERVATIONS[reservation] = _ReservationSeal(authority, token, validity_check, _scope)
+    if not elevated_consensus_reservation_current(reservation):
+        rollback_elevated_consensus_nonce(reservation)
+        return None
     return reservation
 
 
@@ -63,10 +76,31 @@ def commit_elevated_consensus_nonce(reservation: Any) -> bool:
     if seal is None:
         return False
     try:
-        seal.authority.commit(seal.token)
+        if not _seal_current(seal):
+            _rollback_seal(seal)
+            return False
+        if seal.scope is None:
+            seal.authority.commit(seal.token)
+        else:
+            seal.authority._commit(seal.token, _scope=seal.scope)
         return True
     except Exception:
         _rollback_seal(seal)
+        return False
+
+
+def elevated_consensus_reservation_current(reservation: Any) -> bool:
+    if type(reservation) is not VerifiedElevatedConsensusSignerReservation:
+        return False
+    with _LOCK:
+        seal = _RESERVATIONS.get(reservation)
+    return seal is not None and _seal_current(seal)
+
+
+def _seal_current(seal):
+    try:
+        return seal.validity_check is None or seal.validity_check() is True
+    except Exception:
         return False
 
 

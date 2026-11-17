@@ -1,0 +1,767 @@
+{
+  "as_of": "2026-09-29",
+  "currency": "JPY",
+  "tax_basis": "Ex consumption tax; recoverable VAT and its timing bridge excluded; tax treatment requires adviser",
+  "evidence": "MODEL ONLY",
+  "hours_per_year": 8760,
+  "gpus_per_node": 8,
+  "node_max_kw": 10.2,
+  "idle_power_fraction": 0.35,
+  "availability": 0.95,
+  "expansion_capex_jpy": 0,
+  "expansion_scope": "Excluded from this bounded initial-three-site scope; expansion requires its own demand/cost tranche",
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://ai.sakura.ad.jp/gpu/koukaryoku-dok/",
+      "fact": "Published H100 1008 JPY/GPU-hour and 8-GPU 2988 JPY/node-hour, tax inclusive; ex-tax equivalents 916.36 and 339.55 per GPU-hour. Different beta/SLA offerings; not project demand or realized price."
+    },
+    {
+      "id": "S2",
+      "url": "https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html",
+      "fact": "8-GPU DGX H100/H200: maximum system input 10.2 kW; specification comparator only, not selected hardware or procurement cost."
+    },
+    {
+      "id": "S3",
+      "url": "https://www.rikuden.co.jp/jiyuka/ryokin2.html",
+      "fact": "High-voltage A published 1876 JPY/kW-month and 27.53 JPY/kWh including tax, excluding renewable levy; actual classification, fuel adjustments and connection unverified."
+    }
+  ],
+  "sites": [
+    {
+      "site_id": "Site 3",
+      "name": "Hanyu",
+      "priority": 1,
+      "design_peak_gpu_hours": 360000,
+      "design_utilization": 0.75,
+      "other_it_kw": 6,
+      "pue": 1.35,
+      "contingency": {
+        "low": 0.15,
+        "base": 0.25,
+        "high": 0.4
+      },
+      "costs": [
+        {
+          "category": "survey_engineering",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 3000000.0,
+            "base": 5000000.0,
+            "high": 8000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Initial surveys only; detailed design is separate"
+        },
+        {
+          "category": "building_retrofit",
+          "quantity": 400,
+          "unit": "m2 selected fit-out",
+          "unit_cost_jpy": {
+            "low": 50000,
+            "base": 80000,
+            "high": 130000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Assumed limited phase area; not measured school area; exclude structural, MEP and container"
+        },
+        {
+          "category": "electrical_receiving",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 8000000.0,
+            "base": 12000000.0,
+            "high": 20000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Internal incoming cables, metering and installation; exclude switchgear and utility work"
+        },
+        {
+          "category": "transformer_switchgear",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 12000000.0,
+            "base": 20000000.0,
+            "high": 35000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Receiving transformer/switchgear equipment only"
+        },
+        {
+          "category": "utility_contribution",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 10000000.0,
+            "base": 30000000.0,
+            "high": 80000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Unquoted utility allowance; actual scope and upper exposure unresolved"
+        },
+        {
+          "category": "modular_dc",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 10000000.0,
+            "base": 18000000.0,
+            "high": 30000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Shell, racks and fit-out only; exclude compute/cooling/UPS"
+        },
+        {
+          "category": "compute_hardware",
+          "quantity": "demand_nodes",
+          "unit": "8-GPU server",
+          "unit_cost_jpy": {
+            "low": 35000000,
+            "base": 45000000,
+            "high": 60000000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Procurement allowance; CPU/RAM/local storage included, fabric in fiber_network; NVIDIA source supports specs only"
+        },
+        {
+          "category": "cooling_cdu_heat_rejection",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 10000000.0,
+            "base": 18000000.0,
+            "high": 30000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Complete cooling scope; no additional turnkey cooling counted"
+        },
+        {
+          "category": "ups",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 5000000.0,
+            "base": 8000000.0,
+            "high": 14000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Short ride-through UPS, not multi-hour autonomy"
+        },
+        {
+          "category": "bess",
+          "quantity": 100,
+          "unit": "kWh allowance",
+          "unit_cost_jpy": {
+            "low": 40000,
+            "base": 60000,
+            "high": 90000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent battery allowance, no confirmed gym siting or grid revenue"
+        },
+        {
+          "category": "fiber_network",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 5000000.0,
+            "base": 10000000.0,
+            "high": 25000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Carrier installation and network/storage fabric; recurring charges in Opex"
+        },
+        {
+          "category": "fire_suppression",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 3000000.0,
+            "base": 5000000.0,
+            "high": 9000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Dedicated compute-phase fire detection/suppression"
+        },
+        {
+          "category": "security",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 2000000.0,
+            "base": 3000000.0,
+            "high": 5000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Access/CCTV fit-out, recurring service in Opex"
+        },
+        {
+          "category": "seismic_building",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 5000000.0,
+            "base": 15000000.0,
+            "high": 40000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Unsurveyed strengthening allowance; failure may invalidate phase"
+        },
+        {
+          "category": "mechanical",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 3000000.0,
+            "base": 5000000.0,
+            "high": 10000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Non-DC plumbing/ventilation only, excludes cooling"
+        },
+        {
+          "category": "design_permitting",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 6000000.0,
+            "base": 10000000.0,
+            "high": 16000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Detailed design and permits, excludes initial surveys"
+        },
+        {
+          "category": "education_community",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 0.0,
+            "base": 0.0,
+            "high": 0.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Excluded from minimum compute phase; future scope needs separate budget"
+        },
+        {
+          "category": "site_use_rights",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 2000000.0,
+            "base": 5000000.0,
+            "high": 15000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Lease/deposit/legal mobilization assumption, not a City price; annual rent in Opex"
+        }
+      ]
+    },
+    {
+      "site_id": "Site 2",
+      "name": "Shimousaka",
+      "priority": 2,
+      "design_peak_gpu_hours": 200000,
+      "design_utilization": 0.7,
+      "other_it_kw": 8,
+      "pue": 1.45,
+      "contingency": {
+        "low": 0.15,
+        "base": 0.25,
+        "high": 0.4
+      },
+      "costs": [
+        {
+          "category": "survey_engineering",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 4000000.0,
+            "base": 7000000.0,
+            "high": 12000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent Shimousaka survey"
+        },
+        {
+          "category": "building_retrofit",
+          "quantity": 800,
+          "unit": "m2 selected fit-out",
+          "unit_cost_jpy": {
+            "low": 60000,
+            "base": 100000,
+            "high": 160000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Assumed phase area, not measured campus area; excludes structural/MEP/container"
+        },
+        {
+          "category": "electrical_receiving",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 10000000.0,
+            "base": 18000000.0,
+            "high": 30000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent site cabling/install allowance"
+        },
+        {
+          "category": "transformer_switchgear",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 15000000.0,
+            "base": 25000000.0,
+            "high": 45000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent receiving equipment; no Hanyu grid inference"
+        },
+        {
+          "category": "utility_contribution",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 15000000.0,
+            "base": 45000000.0,
+            "high": 120000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent unquoted utility allowance; no known upper bound"
+        },
+        {
+          "category": "modular_dc",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 12000000.0,
+            "base": 22000000.0,
+            "high": 38000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Shell/racks only"
+        },
+        {
+          "category": "compute_hardware",
+          "quantity": "demand_nodes",
+          "unit": "8-GPU server",
+          "unit_cost_jpy": {
+            "low": 38000000,
+            "base": 48000000,
+            "high": 65000000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent later procurement allowance, excludes fabric/cooling"
+        },
+        {
+          "category": "cooling_cdu_heat_rejection",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 12000000.0,
+            "base": 22000000.0,
+            "high": 38000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Dedicated cooling scope"
+        },
+        {
+          "category": "ups",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 6000000.0,
+            "base": 10000000.0,
+            "high": 17000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Short ride-through only"
+        },
+        {
+          "category": "bess",
+          "quantity": 150,
+          "unit": "kWh allowance",
+          "unit_cost_jpy": {
+            "low": 45000,
+            "base": 65000,
+            "high": 100000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent storage scope; no grid-service revenue"
+        },
+        {
+          "category": "fiber_network",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 8000000.0,
+            "base": 18000000.0,
+            "high": 40000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Installation/fabric; no known carrier route"
+        },
+        {
+          "category": "fire_suppression",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 4000000.0,
+            "base": 8000000.0,
+            "high": 14000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent compute/campus scope"
+        },
+        {
+          "category": "security",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 3000000.0,
+            "base": 5000000.0,
+            "high": 8000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Access/CCTV"
+        },
+        {
+          "category": "seismic_building",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 10000000.0,
+            "base": 30000000.0,
+            "high": 80000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Unsurveyed independent strengthening allowance"
+        },
+        {
+          "category": "mechanical",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 6000000.0,
+            "base": 12000000.0,
+            "high": 24000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Non-DC building services; excludes cooling"
+        },
+        {
+          "category": "design_permitting",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 10000000.0,
+            "base": 18000000.0,
+            "high": 30000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Independent detailed design and permits"
+        },
+        {
+          "category": "education_community",
+          "quantity": 300,
+          "unit": "m2 limited fit-out",
+          "unit_cost_jpy": {
+            "low": 60000,
+            "base": 100000,
+            "high": 160000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Optional assumed education/incubation tranche; no full-campus renovation"
+        },
+        {
+          "category": "site_use_rights",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 3000000.0,
+            "base": 8000000.0,
+            "high": 20000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Lease/deposit/legal mobilization; annual rent separate"
+        }
+      ]
+    },
+    {
+      "site_id": "Site 1",
+      "name": "Sukatto",
+      "priority": 3,
+      "design_peak_gpu_hours": 0,
+      "design_utilization": 0.7,
+      "other_it_kw": 0,
+      "pue": 1,
+      "contingency": {
+        "low": 0.2,
+        "base": 0.3,
+        "high": 0.5
+      },
+      "costs": [
+        {
+          "category": "lawful_acquisition_lease_use",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 10000000.0,
+            "base": 30000000.0,
+            "high": 100000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Lease/deposit/legal mobilization scenario, not property valuation or City offer"
+        },
+        {
+          "category": "building_rehabilitation",
+          "quantity": 3000,
+          "unit": "m2 phased rehabilitation",
+          "unit_cost_jpy": {
+            "low": 60000,
+            "base": 100000,
+            "high": 180000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Selected-area scenario; envelope/structure/interiors only; not whole-building quote"
+        },
+        {
+          "category": "asbestos",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 15000000.0,
+            "base": 60000000.0,
+            "high": 180000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Unsurveyed treatment allowance; actual scope may exceed high case"
+        },
+        {
+          "category": "mep_renewal",
+          "quantity": 3000,
+          "unit": "m2 services renewal",
+          "unit_cost_jpy": {
+            "low": 50000,
+            "base": 90000,
+            "high": 150000
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Electrical/plumbing/general HVAC only; bath plant and thermal pilot separate"
+        },
+        {
+          "category": "onsen_restoration",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 150000000.0,
+            "base": 250000000.0,
+            "high": 450000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Bath plant, pools and onsen-specific works; water/access rights unverified"
+        },
+        {
+          "category": "thermal_loop_heat_reuse",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 20000000.0,
+            "base": 40000000.0,
+            "high": 80000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Local heat-exchange/heat-pump pilot allowance; no intersite pipe, no heat revenue"
+        },
+        {
+          "category": "public_community",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 20000000.0,
+            "base": 50000000.0,
+            "high": 100000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Furniture/community fit-out, excludes building and MEP works"
+        },
+        {
+          "category": "education_innovation",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 15000000.0,
+            "base": 40000000.0,
+            "high": 90000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Equipment and specialist fit-out only"
+        },
+        {
+          "category": "optional_compute",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 0.0,
+            "base": 0.0,
+            "high": 0.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Compute excluded until independent demand/power economics justify it"
+        },
+        {
+          "category": "design_permitting",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 30000000.0,
+            "base": 60000000.0,
+            "high": 100000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Detailed design/permits, separate from initial surveys"
+        },
+        {
+          "category": "survey_engineering",
+          "quantity": 1,
+          "unit": "allowance",
+          "unit_cost_jpy": {
+            "low": 8000000.0,
+            "base": 15000000.0,
+            "high": 30000000.0
+          },
+          "evidence": "MODEL ONLY",
+          "scope": "Initial structure/asbestos/MEP/thermal investigations"
+        }
+      ]
+    }
+  ],
+  "scenarios": {
+    "downside": {
+      "cost_case": "high",
+      "gpu_hours": [
+        40000,
+        60000,
+        80000,
+        100000,
+        120000
+      ],
+      "price_jpy_gpu_hour": 340,
+      "price_escalation": -0.05,
+      "energy_jpy_kwh": 30,
+      "energy_escalation": 0.02,
+      "demand_charge_jpy_kw_month": 1705.4545454545453,
+      "operations_y1_jpy": 45000000,
+      "operations_escalation": 0.02,
+      "variable_opex_share": 0.02,
+      "maintenance_share_capex": 0.02,
+      "tax_rate": 0.3,
+      "working_capital_share": 0.05,
+      "renewal_fraction_year5": 0.5,
+      "debt_share": 0.5,
+      "debt_rate": 0.08,
+      "debt_term_years": 5,
+      "reserve_share_capex": 0.01,
+      "investor_return_rate": 0.08,
+      "investor_repayment_years": 5,
+      "community_y1_jpy": 1000000,
+      "compute_life_years": 5,
+      "infrastructure_life_years": 15
+    },
+    "base": {
+      "cost_case": "base",
+      "gpu_hours": [
+        160000,
+        220000,
+        280000,
+        320000,
+        360000
+      ],
+      "price_jpy_gpu_hour": 550,
+      "price_escalation": -0.03,
+      "energy_jpy_kwh": 27,
+      "energy_escalation": 0.02,
+      "demand_charge_jpy_kw_month": 1705.4545454545453,
+      "operations_y1_jpy": 38000000,
+      "operations_escalation": 0.02,
+      "variable_opex_share": 0.02,
+      "maintenance_share_capex": 0.02,
+      "tax_rate": 0.3,
+      "working_capital_share": 0.05,
+      "renewal_fraction_year5": 0.5,
+      "debt_share": 0.5,
+      "debt_rate": 0.06,
+      "debt_term_years": 5,
+      "reserve_share_capex": 0.01,
+      "investor_return_rate": 0.06,
+      "investor_repayment_years": 5,
+      "community_y1_jpy": 1000000,
+      "compute_life_years": 5,
+      "infrastructure_life_years": 15
+    },
+    "upside": {
+      "cost_case": "low",
+      "gpu_hours": [
+        250000,
+        330000,
+        390000,
+        420000,
+        440000
+      ],
+      "price_jpy_gpu_hour": 800,
+      "price_escalation": 0,
+      "energy_jpy_kwh": 24,
+      "energy_escalation": 0.02,
+      "demand_charge_jpy_kw_month": 1705.4545454545453,
+      "operations_y1_jpy": 40000000,
+      "operations_escalation": 0.02,
+      "variable_opex_share": 0.02,
+      "maintenance_share_capex": 0.02,
+      "tax_rate": 0.3,
+      "working_capital_share": 0.05,
+      "renewal_fraction_year5": 0.5,
+      "debt_share": 0.5,
+      "debt_rate": 0.04,
+      "debt_term_years": 5,
+      "reserve_share_capex": 0.01,
+      "investor_return_rate": 0.05,
+      "investor_repayment_years": 5,
+      "community_y1_jpy": 1000000,
+      "compute_life_years": 5,
+      "infrastructure_life_years": 15
+    }
+  },
+  "later_site_cash": {
+    "Site 2": {
+      "gpu_hours": [
+        60000,
+        100000,
+        140000,
+        180000,
+        200000
+      ],
+      "price_jpy_gpu_hour": 500,
+      "price_escalation": -0.03,
+      "operations_y1_jpy": 32000000,
+      "operations_escalation": 0.02
+    },
+    "Site 1": {
+      "visits": [
+        40000,
+        55000,
+        65000,
+        75000,
+        80000
+      ],
+      "revenue_per_visit_jpy": 2000,
+      "variable_opex_share": 0.3,
+      "fixed_opex_y1_jpy": 70000000,
+      "operations_escalation": 0.02
+    }
+  }
+}

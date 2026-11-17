@@ -1,5 +1,19 @@
 # Linkedin Agent Module - Roadmap
 
+- Lane-specific research/verification and Docs collaboration instructions implemented. Next: live draft/Doc discovery and JHR evidence cycle; ROC Champion ownership seed is researched but not a completed article. Runtime indexing, capture and model training remain separately evidenced actions.
+
+
+- Editorial handoff and reusable issue/new-series templates: implemented in the existing newsletter router. Next operational work: inspect live drafts/editions, then develop the selected lane; [audit evidence and backlog](docs/audits/LINKEDIN_EDITORIAL_TREE_20260922.md).
+
+
+## 2026-09-22 activity routing status
+
+- Instruction-level master and activity children: implemented; see [routing](docs/LINKEDIN_ACTIVITY_ROUTING.md). Newsletter routing now has dedicated FoundUps, ROC and JHR child skills under one LinkedIn/newsletter master.
+- Existing moderation/news owners reused with researched message-first membership and reviewed Good/Bad/Ugly discussion.
+- Legacy runtime safety (connection policy/history, other direct action guards, simulated messaging, persistent deduplication) remains incomplete. The scoped wrapper/direct-like repair below does not authorize unattended live jobs.
+- RSI wrapper/direct-like dry-run repair passes54 fixed cases locally and independently; see [current contract](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-repair--2026-09-22). Engagement-session configuration preview now passes77 connected cases locally and independently; see [session contract](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-session-preview--2026-09-22). Next12/P2 is connection policy/history qualification; this is not all-route or live-account certification.
+- Historical daily news quotas and identity-like loops below are implementation history, not current operating authority.
+
 ## Overview
 This module operates within the **platform_integration** enterprise domain following WSP protocols for modular architecture, testing, and documentation compliance.
 

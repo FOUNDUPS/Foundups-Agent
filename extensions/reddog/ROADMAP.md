@@ -1,5 +1,26 @@
 # RedDog Roadmap
 
+## Current PAL reconciliation — PR1638
+
+WSP15: C4/I4/D3/Impact4 = 15/P1. The existing local activity-ledger proposal is
+integrated locally with main `4169b051` at source checkpoint `8a88810d7`.
+Fresh Node24.22.1 focused, fast-tier and package checks pass; independent review
+and hosted convergence remain pending. It is not a second memory store or an
+RSI completion claim. Scope: key initialization/recovery rejection, authenticated
+append, cooperating-process serialization, truthful write/context receipts,
+and the existing command/package closure. Canonical detail and measured results
+belong in [the existing integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
+
+Local source/behavior review is complete: 13 independent adversarial probes,
+18 fast-tier members and the actual package/archive path pass within their
+documented scopes. Remaining publication gates: fresh remote main/owner,
+exact-head hosted checks and squash/readback. Before installed promotion:
+VS Code/profile SecretStorage and filesystem qualification. Cross-root key sharing, automatic
+stale-lock recovery, anti-rollback anchoring and multi-device sync are not proved
+by the local candidate. Existing blockchain/PF Mall and native RSI lanes retain
+their ownership. Historical version/release claims below keep their original
+scope.
+
 ## Status
 
 Phase: RedDog 0.4.141 held builder-child identity rebind candidate.
@@ -418,6 +439,51 @@ IDE extension POC
   -> pfMALL RedDog surface
   -> governed public FoundUps launch flow
 ```
+
+## Moshpit conversation navigation and pins (planned)
+
+Status: `SPECIFIED_NOT_IMPLEMENTED`. Canonical requirement:
+[Moshpit conversation navigation and pins](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#conversation-navigation-and-pins-specified-not-implemented).
+
+- Reuse existing conversation/Breadcrumb/Brain-Memex ownership and inspect the
+  Google Wave-inspired GotJunk message components before implementing persistence
+  or a new UI. No separate Moshpit memory store.
+- Add contextual pin/unpin for messages, Markdown blocks and artifacts; a single
+  bottom/thumb-accessible pin icon opens a scoped tray and jumps to original
+  sources. Pins retain source identity/revision and current access checks.
+- Show conversation history oldest-above/latest-near-bottom, preserve the reading
+  anchor while paging or receiving live replies, and retain a return-to-latest
+  action. The newest-first project activity/audit view remains separate.
+- Select the smallest implementation slice using WSP_15 after owner/dependency
+  reconciliation. Verify pin persistence/isolation, source lifecycle, pagination,
+  focus and scroll behavior in isolated soft-proto; desktop and physical-phone
+  acceptance are outstanding. A documented requirement is not runtime readiness.
+- Reconcile project-Moshpit activity filtering through the canonical
+  [principal-significance inclusion gate](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#principal-significance-inclusion-gate-include--exclude--needs_resolution)
+  (`include` / `exclude` / `needs_resolution`), `0102-delegated` consequential-result
+  attribution, `EVIDENCED` truth class, and 14 acceptance cases while keeping
+  recoverable conversation history and pinned sources separate, preserving Contact
+  and read-only Memex emitter boundaries, and routing stale HoloIndex updates
+  strictly through the governed `WSP_00` / WRE / CI maintenance owner.
+
+This is part of the existing Moshpit/RedDog roadmap, not a parallel Wave project.
+
+### Next bounded slices: actions, search and AutoPost convergence (2026-11-17)
+
+Canonical contract: [Moshpit RedDog layers, actions, search and AutoPost convergence](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#reddog-layers-moshpit-actions-search-and-autopost-convergence-2026-11-17-proposed).
+
+- **Reconcile first:** inspect existing Wave message components (never route private captures/chats through `gotjunk_messages`/`gotjunk_blobs` public-read Firestore rules), RedDog thread/history owner, PAL, Breadcrumb/Brain-Memex projection, AutoPost capture/DAEmon and current PRs; classify actual runtime readiness before allocating a sprint.
+- **Ordered WSP_15 sprint dependency sequence:**
+  - **Sprint 1 — Moshpit Navigation** (`C2 + I5 + D5 + Imp5 = 17`, **P0**): conversation history navigation, stable reading anchor on incoming messages, bottom pin tray, idempotent pin/unpin, return-to-source, and explicit separation of generic conversation (oldest-above/latest-near-bottom), AutoPost white Moshpit (swipe-up over live camera, latest-at-top), and project Moshpit (newest-JST-day-first).
+  - **Sprint 2 — Contextual Actions** (`C2 + I5 + D4 + Imp5 = 16`, **P0**): text-labeled long-press menu (`Pin / Unpin`, `Audit`, `Store`, `Archive`, `Delete`), archive-not-delete, confirmed delete with `DeletionReceipt`, non-certifying `Audit`, truth-preserving `Store`, and zero external side effects.
+  - **Sprint 3 — Scoped Search** (`C3 + I4 + D4 + Imp4 = 15`, **P1**): active-context default (`conversation`, `pins`, `foundup_moshpit`), explicitly selected/authorized cross-FoundUp scope, provenance, source jump, and bounded pagination.
+  - **Sprint 4 — RedDog Controls & Muzzle** (`C3 + I4 + D4 + Imp4 = 15`, **P1**): shared `+` controls (`AI Models`, `Listening`, independent `Muzzle` output mute, `Reasoning: Instant [default] / Think / Deep / Auto [post-verification]`, `Autoplay`, `DAEmon`, left/right switchable RedDog placement); preserve open decisions on muzzled queueing and recording-mic linkage.
+  - **Sprint 5 — AutoPost Integration** (`C4 + I4 + D3 + Imp4 = 15`, **P1**): shared translucent dock below shutter with `+` and RedDog, sticky video recording toggle (stop never shoots a photo), local perception proposal + 012 review/correction, PAL/Breadcrumb/Brain-Memex admission into Moshpit; zero automatic public upload or identity assertion.
+  - **Sprint 6 — 0102 Continuity** (`C4 + I4 + D3 + Imp4 = 15`, **P1**): authenticated 0102 context retrieval, reconnect, open-loop recovery, bounded `Instant -> Think -> Deep` escalation, and separate Lick encounter-consent boundary.
+  - **Sprint 7 — DAEmon Verification** (`C3 + I3 + D3 + Imp3 = 12`, **P2**): model load duration, inference latency, media/network symptoms, failed actions, retries, recovery, and 012 corrections via existing DAEmon owners (no duplicate telemetry DB).
+  - **Sprint 8 — SoftProto capture evidence handoff** (`C4 + I5 + D4 + Imp5 = 18`, **P0 dependency for preview acceptance**): reuse the existing SoftProto preview and external AutoPost capture owners; require a real phone-openable exact-revision link, persistent or explicitly restored RedDog context, user-authorized on-demand screenshot then bounded ten-second recording, synchronized sanitized DAEmon event window, preview/consent/stop and correlation receipt into the existing feedback/task owner. No parallel recorder, logger or task queue; do not merge UI runtime without physical-phone tap/swipe acceptance. Continuous cross-app sharing remains deferred.
+- **Testing:** phone-sized soft-proto, desktop pointer/keyboard, and physical-device acceptance (when authorized), cross-principal denial, reconnect, revoked/deleted/superseded sources, permission denial, corrected classification and audit receipts. Use WSP_15, WSP_97 and soft-proto promotion gates.
+
 
 ## WSP_15 Priorities
 

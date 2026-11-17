@@ -7,6 +7,10 @@ import hashlib
 import json
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_bounded_worker_pilot_handler import (
     BOUNDED_WORKER_PILOT_STAGE_KEY,
     FAIL_ARTIFACT_CONTENTS_MISSING,
@@ -235,7 +239,7 @@ def _work_order_with_plan(bundle: dict) -> dict[str, object]:
     return work_order
 
 
-def _binding_stage_overrides() -> dict[str, object]:
+def _binding_stage_overrides(work_order=None) -> dict[str, object]:
     selection, runtime_binding = _artifact_model_lineage()
     verification = verified_runtime_binding_receipt(runtime_binding)
     assert verification is not None
@@ -254,6 +258,8 @@ def _binding_stage_overrides() -> dict[str, object]:
             ),
         }
     )
+    if work_order is not None:
+        work_authority["work_order_digest"] = canonical_full_work_order_digest(work_order)
     authority_digest = _mapping_digest(work_authority)
     return {
         "authority_runtime": {

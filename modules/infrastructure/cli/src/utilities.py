@@ -8,6 +8,9 @@ Contains: environment helpers, Holo controls menus, channel selection.
 import os
 import sys
 import json
+import builtins
+import logging
+import threading
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional
@@ -17,6 +20,46 @@ from modules.infrastructure.shared_utilities.local_model_selection import (
     resolve_model_selection,
 )
 from modules.infrastructure.shared_utilities.youtube_channel_registry import get_channels
+
+
+class _PromptConsoleFilter(logging.Filter):
+    """Keep background records in file sinks while a terminal prompt is active."""
+
+    def __init__(self):
+        super().__init__()
+        self.prompt_thread = threading.get_ident()
+
+    def filter(self, record):
+        return record.thread == self.prompt_thread
+
+
+def console_input(prompt: str = '') -> str:
+    """Read input without background logging overwriting the prompt.
+
+    This changes only existing stdout/stderr log handlers for the duration of
+    input. File/telemetry handlers and foreground logging retain every record;
+    native output and arbitrary print calls are outside this logging boundary.
+    """
+    gate = _PromptConsoleFilter()
+    handlers = set(logging.getLogger().handlers)
+    for candidate in tuple(logging.Logger.manager.loggerDict.values()):
+        if isinstance(candidate, logging.Logger):
+            handlers.update(candidate.handlers)
+    selected = [handler for handler in handlers
+                if isinstance(handler, logging.StreamHandler)
+                and not isinstance(handler, logging.FileHandler)
+                and getattr(handler, 'stream', None) in (sys.stdout, sys.stderr)]
+    try:
+        for handler in selected:
+            handler.acquire()
+            try:
+                handler.addFilter(gate)
+            finally:
+                handler.release()
+        return builtins.input(prompt)
+    finally:
+        for handler in selected:
+            handler.removeFilter(gate)
 
 
 def env_truthy(name: str, default: str = "false") -> bool:

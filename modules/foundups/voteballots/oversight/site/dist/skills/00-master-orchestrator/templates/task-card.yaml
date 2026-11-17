@@ -1,0 +1,22 @@
+task_id: task-card-contract
+question: Define one testable public-source research proposition before assignment.
+public_scope: true
+research_cutoff: 2026-11-05
+actor_role: public-researcher
+required_sources:
+  - issuer: Identify the official record custodian.
+    record_class: Identify the filing, opinion, registry record or public transaction.
+    pinpoint_needed: Identify the page, section, accession or transaction-level field.
+disconfirmation_test: Identify a specific alternative explanation and the record that could support it.
+identity_dependencies: []
+authority_dependencies: []
+assigned_skill_path: skills/00-master-orchestrator/sub-skills/task-decomposition/SKILL.md
+output_contract: schemas/evidentiary-packet.schema.json
+acceptance_criteria:
+  - Every material claim has a primary-source locator, pinpoint and access date.
+  - Facts, allegations, inferences, unknowns and material counterevidence remain distinguishable.
+  - No restricted or private financial material enters public outputs.
+stop_conditions:
+  - A decisive source is unavailable.
+  - Identity remains unresolved.
+  - Requested action exceeds documented authority.

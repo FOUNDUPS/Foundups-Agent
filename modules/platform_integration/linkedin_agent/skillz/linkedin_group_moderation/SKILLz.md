@@ -1,236 +1,78 @@
 ---
 name: linkedin_group_moderation
-description: LinkedIn OpenClaw Group moderation - membership triage, post moderation, profile intel
-version: 1.0.0
+description: Review LinkedIn group requests and posts with researched message-first outreach and explicit human approval
+version: 1.1.0
 author: 0102
 agents: [qwen, selenium]
 dependencies: [browser_actions, anti_detection_poster]
 domain: platform_integration
 intent_type: MODERATION
 promotion_state: prototype
-rate_limit: 50_per_session
 linkedin_group: https://www.linkedin.com/groups/6729915/
 linkedin_admin: https://www.linkedin.com/groups/6729915/manage/membership/requested/
 category: workflow
 evals: []
 ---
-# LinkedIn Group Moderation DAE
 
-**Purpose**: Autonomous moderation of OpenClaw LinkedIn Group - membership triage, post moderation, profile intelligence.
+# LinkedIn Group Moderation
 
-**Position in Flow**: This skill runs as admin operations BEFORE content posting.
+Research and draft autonomously within scope; send, approve, deny, connect or change access only with exact user authorization. This instruction contract does not certify the legacy executor as compliant.
 
----
+Read [master activity routing](../../docs/LINKEDIN_ACTIVITY_ROUTING.md) and [LinkedIn review workflow](../../docs/LINKEDIN_REVIEW_WORKFLOW.md) first. Load wsp00 -> wsp01 -> wsp02 and verify the signed-in account and group. A group-only job does not expand to other queues; full-cycle order belongs to the master.
 
-## State
+## Membership preflight
 
-| Key | Value |
-|-----|-------|
-| Operator | 012 (UnDaoDu Michael J Trout) |
-| Agent | 0102 (012's digital twin state) |
-| Signature | `— 0102 ` |
-| Group | linkedin.com/groups/6729915/ |
-| Admin | linkedin.com/groups/6729915/manage/membership/requested/ |
+Inspect automatic member approval on the live Requests page. The intended mode is **Members require admin approval to join**. Report drift; change only with explicit authorization. After an authorized change, save and reopen the page to verify persistence. A historical Off observation is not a current guarantee.
 
-## Resources
+## Message before membership approval
 
-- foundups.com
-- foundups.com/litepaper.html
-- linkedin.com/pulse/return-compute-tokenization-framework-foundups-whdce/
-- github.com/foundups
+1. Resolve each applicant from the exact pending row and profile URL.
+2. Search prior conversations first; read any match. A no-match search is bounded evidence, not proof of no prior relationship.
+3. Read actual profile work, experience and recent activity. Distinguish original posts from reposts. Use established writing/conversation for language. Limited activity means uncertainty.
+4. Screen risk from corroborated evidence. Never approve or deny solely because of photo, avatar, title, connection count, nationality or location. Do not automatically connect to executives.
+5. Draft one relevant question grounded in their work: an automation use case, OpenClaw/Hermes experience, a human approval boundary or evidence for AGI. Introduce 0102 as 012's AI proxy; do not pretend the human personally wrote it.
+6. Explain the group's purpose without fear-based job-loss pitches, link piles or compulsory newsletter subscriptions. A join request permits relevant discussion, not blanket marketing consent.
+7. Submit exact recipient, profile evidence, APS components, full draft and recommendation for 012 review. Authorization to send is separate from permission to accept/deny.
+8. After message approval, inspect the live row menu, select the labeled Message action, reconfirm recipient and re-read the actual thread. A composer may expose prior outreach missed by search: hold a repetitive introduction or unanswered duplicate question. Otherwise send once and verify the actual conversation entry. Never use a guessed menu ordinal or ask again for unchanged exact approval.
+9. Leave the application pending for engagement and 012's separate membership decision. If pre-approval messaging is unavailable, stop at draft; never approve just to unlock a DM.
+10. Silence, agreement or disagreement is not an automatic disposition. Propose any follow-up or membership action for review.
 
----
+States: `unreviewed -> researched -> draft_ready -> approved_to_message -> sent_verified -> awaiting_reply -> membership_decision_pending -> approved|declined`. On interruption after a possible send, inspect history before retrying. Sending or receiving a reply never automatically accepts the request.
 
-## FLOW 1: Moderate Posts
+## Pending posts
 
-**Trigger**: Navigate to group feed
+Read the complete submission and linked evidence within safe browsing rules. Recommend `approve`, `request_revision`, `hold` or `reject` against actual group rules. Explain why. Product news can be relevant while a subscription pitch needs a discussion-oriented rewrite.
 
-**Decision Tree**:
-```
-For each post:
-  IF marketing/promo/clickbait → DELETE (screenshot first)
-  ELIF engagement-farming → COMMENT (call out)
-  ELSE → KEEP (genuine content)
-```
+Do not auto-delete promotion or post accusatory callouts. Do not invent security allegations. Check displayed expiry and record uncertainty. Require exact approval for moderation, comments and author messages.
 
-**Actions**:
-1. Navigate group feed
-2. For each post: DELETE / COMMENT / KEEP decision
-3. Screenshot before delete (evidence)
-4. Report actions to 012
+## Weekly discussion
 
----
+Use [openclaw_group_news](../openclaw_group_news/SKILLz.md) for The Good, The Bad and The Ugly automation discussion. This is not a newsletter editor or an approve-and-post follow-on action.
 
-## FLOW 2: Process Membership Requests
+## Runtime boundary and continuity
 
-### Step 1 — Read Queue
+Use the approved runtime for the current surface. In ChatGPT Work, use its browser skill, not repository Selenium/session files or anti-detection helpers. Inspect fresh DOM and recover within that tool's documented limits; never bypass platform controls.
 
-Navigate admin page → extract from Results list (depth 5+):
-- Name
-- Headline
-- Degree (1st/2nd/3rd)
-- Photo status (has photo / default silhouette)
-- Profile URL
+The existing executor and membership DAE retain legacy triage and live-action paths. Do not launch their live modes under this contract until approval tokens, delivery verification, deduplication and fail-closed guards are implemented and tested. A dry-run label alone does not prove absence of side effects.
 
-### Step 2 — Triage Decision
+Keep private receipts of source IDs, timestamps/timezone, coverage, approvals, verified state changes, unresolved items and next triggers in the authorized account-scoped journal. Never commit member dossiers or message bodies to public source control. See the shared workflow for minimal receipt fields.
 
-| Condition | Action |
-|-----------|--------|
-| No photo (default gray silhouette) | **DENY, no message** |
-| Photo + CxO/VP/Founder/Head of | **APPROVE + MESSAGE + CONNECT** |
-| Photo + other title | **APPROVE + MESSAGE** |
-| Animated/cartoon avatar | Counts as "has photo" |
+## Validation scenarios
 
-### Step 3 — Build Personalized Message
-
-**Language Detection**: From profile location/headline. Write in detected language.
-
-**8-Point Message Structure**:
-
-1. **Personal ROI threat** — Name their job, state how agents replace that paycheck specifically
-2. **ROC paper** — `linkedin.com/pulse/return-compute-tokenization-framework-foundups-whdce/` — framed as research, not promotion
-3. **FoundUps case study** — `foundups.com` — framed as learning. For high-value: mention PWA mesh, agent-driven app store, autonomous solution
-4. **Security** — "Sandbox your OpenClaw agents." One line.
-5. **Poker table** — "Group is quiet. Everyone's at the poker table reading each other's hand — nobody wants to sneeze first. Expect watchers, not chatter."
-6. **Spam check** — "Here to learn or sell? We delete marketing posts."
-7. **Signature** — `— 0102 `
-8. **PS** — Apple employees only: "First video ever made about Siri was done by UnDaoDu, 8 months before Siri's acquisition."
-
-### Step 4 — Execute
-
-```
-Click "..." → Message → paste message → Send
-→ Approve/Deny based on triage
-→ (CxO only: also Connect)
-→ Next request
-```
-
-### Draft Mode (Browser Blocked)
-
-If browser extension conflict blocks execution:
-- Read profiles
-- Output messages as text
-- 012 pastes manually
-
----
-
-## FLOW 3: Write Article
-
-1. Parallel tab research via Google search
-2. Navigate group → "Start a post"
-3. `type` action (not form_input — composer is a DIV)
-4. `key: Return Return` for paragraph breaks
-5. **DO NOT post** — 012 posts and adds signature
-
----
-
-## FLOW 4: Profile Intel
-
-**Trigger**: Navigate to `/in/{username}/`
-
-**Extract**:
-- Headline
-- About
-- Location
-- Company
-- Education
-
-**Determine**:
-- Why are they joining?
-- What's their play?
-- What paycheck is threatened?
-
----
-
-## Browser Recovery
-
-Extension conflict on LinkedIn admin pages is persistent. Fixes in order:
-
-1. Navigate to google.com → wait 3s → navigate back
-2. New tab → navigate fresh
-3. Close all LinkedIn messaging overlays from feed page first
-4. If all blocked → draft mode (0102 drafts, 012 executes)
-
----
-
-## Session Resume Protocol
-
-1. Receive flow activation from 012
-2. Navigate admin page → count queue → read list
-3. Check linkedin.com/messaging/ for already-sent messages
-4. Resume from first unprocessed request
-
----
-
-## CLI Integration
-
-Access via main.py menu:
-```
-Option 4: Social Media DAE (012 Digital Twin)
-  └── Option 4: LinkedIn Group Moderation DAE
-      ├── 1. Process Membership Queue
-      ├── 2. Moderate Posts
-      ├── 3. Profile Intel
-      └── 0. Back
-```
-
----
-
-## WSP Compliance
-
-- **WSP 42**: LinkedIn platform integration standards
-- **WSP 50**: Pre-action verification (check queue state)
-- **WSP 77**: Agent coordination
-- **WSP 78**: All actions logged to `agents_social_group_actions`
-- **WSP 96**: WRE skill execution pattern
-- **WSP 97**: System execution prompting (HoloIndex → Research → Hard Think → First Principles → Build → Follow WSP)
-
----
-
-## Executor Interface
-
-```python
-from modules.platform_integration.linkedin_agent.skillz.linkedin_group_moderation import (
-    read_membership_queue,
-    triage_member,
-    build_welcome_message,
-    moderate_post,
-    extract_profile_intel
-)
-
-# Read queue
-queue = read_membership_queue(max_depth=10)
-
-# Triage and process
-for member in queue:
-    decision = triage_member(member)  # APPROVE/DENY/APPROVE_CONNECT
-    if decision != 'DENY':
-        message = build_welcome_message(member, decision)
-        # Execute or draft based on browser state
-```
-
----
-
-## Rate Limiting
-
-| Constraint | Value | Reason |
-|------------|-------|--------|
-| Messages/session | 50 | LinkedIn limits |
-| Min interval | 3s | Human-like |
-| Connect/day | 20 | LinkedIn connection limits |
-
----
+- No photo, substantive builder history: research and draft, no automatic rejection.
+- Executive applicant: no automatic acceptance or connection.
+- Existing conversation: continue its context, no duplicate cold intro.
+- Approved welcome sent: application stays pending.
+- No pre-approval DM control: leave pending, report blocker.
+- Auto-approval On without authorization to change: report; do not mutate.
+- Promotional but relevant post: propose a revision, no automatic deletion.
 
 ## Changelog
 
-### v1.0.0 (2026-03-15)
-- Initial skill creation from 012 operational flows
-- 4 flows: Moderate Posts, Process Membership, Write Article, Profile Intel
-- 8-point personalized message template
-- Triage decision tree
-- Browser recovery protocol
-- Session resume protocol
+### 1.1.0 — 2026-09-15
 
----
+Replaced photo/title shortcuts and fear-based templates with evidence-based message-first review, separate approval states, settings verification and private continuity. Retained skill identity and prototype status; no executor/runtime safety claim.
 
-**Skill Status**: PROTOTYPE
+### 1.0.0 — 2026-03-15
+
+Initial moderation, membership and profile-intelligence workflow. Historical instructions are superseded by the contract above.

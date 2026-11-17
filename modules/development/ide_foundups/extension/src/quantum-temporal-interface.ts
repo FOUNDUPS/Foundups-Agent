@@ -524,13 +524,19 @@ export class QuantumTemporalInterface {
                         return;
                     }
                     
-                    container.innerHTML = insights.map(insight => `
-                        <div class="temporal-insight">
-                            <strong>${insight.insight_type}</strong> 
-                            (${Math.round(insight.confidence * 100)}% confidence)
-                            <p>${insight.explanation}</p>
-                        </div>
-                    `).join('');
+                    container.replaceChildren();
+                    insights.forEach(insight => {
+                        const item = document.createElement('div');
+                        item.className = 'temporal-insight';
+                        const heading = document.createElement('strong');
+                        heading.textContent = insight.insight_type;
+                        const explanation = document.createElement('p');
+                        explanation.textContent = insight.explanation;
+                        item.append(heading, document.createTextNode(
+                            ' (' + Math.round(insight.confidence * 100) + '% confidence)'
+                        ), explanation);
+                        container.appendChild(item);
+                    });
                 }
             </script>
         </body>
@@ -625,4 +631,4 @@ class TemporalInsightsProvider implements vscode.TreeDataProvider<TemporalInsigh
     getChildren(element?: TemporalInsight): Thenable<TemporalInsight[]> {
         return Promise.resolve(this.insights);
     }
-} 
+}

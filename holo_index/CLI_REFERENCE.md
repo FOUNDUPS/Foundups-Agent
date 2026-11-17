@@ -7,6 +7,208 @@ Contract note:
 - Canonical interface contracts live in `holo_index/INTERFACE.md`.
 - Canonical machine schema lives in `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json`.
 
+## Source-bound owner queries
+
+Reviewed against source `773a29e701dea2ffbd261075bc53dc6a5a135f31` on 2026-09-13
+for [RSI packet R03](../ROADMAP.md#wave-0--recover-and-establish-current-truth).
+This procedure uses the existing owner bridge, authority selector and local
+bundle command. It adds no service, module, query schema or runtime behavior.
+The menu below remains a capability atlas; its search/refresh flags are not
+permission to bypass this query/maintenance boundary.
+
+### Select the source before querying
+
+1. Identify the task checkout, committed HEAD and dirty state. The one-shot
+   script binds its workspace to its own location, not the shell's CWD.
+2. Use that checkout's helper for its source. A configured authority must be a
+   distinct clean worktree in the same repository at the same HEAD. Invoking
+   the authority as its own configured workspace is rejected.
+3. A primary checkout found via `git --git-common-dir` is not necessarily
+   current main. For reference retrieval, explicitly choose a known clean
+   control checkout matching the published authority, record its SHA, and
+   verify current implementation files separately. Do not move/reset another
+   lane or authority to force the match.
+4. Leave owner-controlled route and runtime configuration to the existing
+   admission path. Its source, replica and runtime checks remain required.
+
+```powershell
+$taskQueryRoot = git rev-parse --show-toplevel
+git -C $taskQueryRoot rev-parse HEAD
+git -C $taskQueryRoot status --short
+$taskRuntimeRoot = Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Parent
+$taskPython = Join-Path $taskRuntimeRoot ".venv/Scripts/python.exe"
+if (-not (Test-Path -LiteralPath $taskPython -PathType Leaf)) { throw "Vetted Holo interpreter unavailable; use the documented local fallback." }
+$env:PYTHONDONTWRITEBYTECODE = "1"
+'{"query":"HoloIndex query authority entry","limit":5,"include_bundle":true,"module_hint":"holo_index"}' | & $taskPython -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
+```
+
+Inspect JSON even if the process exits zero. Semantic acceptance requires
+`ok=true`, `freshness=CURRENT`, `index_gap_detected=false`, the expected
+`workspace_repo_head_sha`/`authority_repo_head_sha`, and valid owner generation
+and receipt bindings. A successful query against an older reference does not
+certify a newer commit. `semantic_evidence_authority` describes scope only; it
+does not turn a failed result into acceptance.
+
+### Select the existing Windows dependency runtime
+
+The query has two roots: the helper's checkout selects **source**;
+`resolve_holoindex_runtime_root()` selects the same repository's primary
+checkout for **vetted dependencies**. The latter need not be current main.
+Do not run the primary checkout's helper merely to use its virtualenv.
+
+The command above uses that primary checkout's existing
+`.venv/Scripts/python.exe`. Before diagnosing a dependency failure, compare
+the running interpreter's base with `.venv/pyvenv.cfg`, and use the existing
+read-only guard from the task checkout:
+
+```powershell
+& $taskPython -B -c "from pathlib import Path; from holo_index.authority_worktree import resolve_holoindex_runtime_root; from modules.infrastructure.foundups_mcp_bridge.src.reddog_sealed_holo_runtime import trusted_holo_site_packages; import sys; roots=trusted_holo_site_packages(resolve_holoindex_runtime_root(Path.cwd())); print('trusted_dependency_root_available=' + str(bool(roots))); sys.exit(0 if roots else 2)"
+```
+
+The guard requires the checkout-local package path, compatible major/minor
+version, exact base executable and `include-system-site-packages=false`.
+File existence or a similar Python version alone is insufficient. If the
+guard rejects, retain local lexical/bundle context and route runtime repair
+to the existing owner. Do not add arbitrary `PYTHONPATH`, enable system
+packages, install a second environment or change a manifest to force success.
+Deployments requiring a sealed runtime must retain their existing admitted
+launcher/configuration; this local Windows recipe does not unseal them.
+Other platforms likewise use their admitted runtime rather than this Windows
+path. Runtime selection is not proof of exact dependency closure or current
+security patching; R04 remains separate.
+
+### Existing local fallback without MCP or semantic owner
+
+```powershell
+$taskQueryRoot = git rev-parse --show-toplevel
+$env:PYTHONDONTWRITEBYTECODE = "1"
+'{"query":"HoloIndex query authority entry","limit":5,"retrieval_mode":"lexical","include_bundle":true,"module_hint":"holo_index","must_include":["holo_index/README.md","holo_index/INTERFACE.md"]}' | python -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
+```
+
+Replace the hint and must-include paths with the existing task module. The
+accepted request fields are exactly `query`, `limit`, `retrieval_mode`,
+`include_bundle`, `module_hint`, `must_include`, and `bundle_only`.
+`bundle_module_hint` is not a JSON field; unknown fields reject before owner
+startup. `bundle_only=true` also selects the existing local-bundle path.
+
+Local success reports `source=holoindex_bundle`, `bundle_ok=true`, zero owner
+attempts, `freshness=UNKNOWN`, and `index_gap_detected=true`. Inspect
+`bundle_authority.evidence_authority`: clean local context is `workspace_head`;
+uncommitted context is `workspace_overlay`. Preserve this distinction in the
+ticket. A semantic failure may still include a usable local bundle; never
+replace the failed semantic `ok` flag with its `bundle_ok` flag.
+
+Missing README/INTERFACE hits require exact-path checks before creating files.
+The local path supports investigation; work requiring admitted semantic or
+runtime evidence must still wait for that evidence. MCP is a transport choice,
+not a replacement for the existing owner, source and generation checks.
+
+### Failures and maintenance ownership
+
+Preserve the error, selected source, binding metadata and retry counts without
+credentials. The existing [incident repair runtime](../modules/communication/moltbot_bridge/src/reddog_holoindex_incident_repair_runtime.py)
+routes authenticated incidents to WRE; the [post-merge controller](../modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py)
+owns bounded exact-main maintenance. A raw CLI error is not by itself an
+authenticated repair order. Reconcile the active owner and required admission
+before maintenance; query callers do not reindex, activate a route, edit an
+authority, or retry indefinitely. An index refresh must not be used to guess
+away a service-startup failure.
+
+For the observed startup exit, [the existing readiness loop](../modules/infrastructure/foundups_mcp_bridge/src/holo_query_owner_startup.py)
+reports that the owned process exited; it does not identify the child cause.
+The [existing supervisor](../modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_supervisor.py)
+discards child stdout/stderr. A generic exit alone does not establish its cause. The later bounded
+diagnostic below identified an interpreter/dependency mismatch for the
+recorded failure; preserve that evidence boundary when diagnosing other exits.
+
+### Qualification matrix and evidence scope
+
+| Case | Existing behavior and test | Remaining operational limit |
+|---|---|---|
+| Clean source and matching authority | `test_configured_clean_same_head_authority_is_selected`; `test_query_runs_against_selected_authority_root` | Contract fixtures pass; exact-main `bcc87782` has the positive operational checkpoint below. Requalify later source states. |
+| Divergent feature / stale authority | `test_different_head_authority_is_rejected`; `test_head_mismatch_failure_preserves_verified_authority_binding` | Rejection is correct; reference retrieval must not be relabeled as feature evidence. |
+| Dirty workspace | `test_dirty_workspace_can_use_clean_same_head_authority`; `test_semantic_owner_rejection_preserves_safe_workspace_bundle` | Committed semantic evidence excludes edits; bundle labels expose the overlay. |
+| Source changes during query | `test_authority_change_before_owner_rejects_without_query`; `test_authority_change_after_query_discards_result` | Injected state-change tests pass; no live concurrent-main qualification is claimed. |
+| No MCP / unavailable semantic owner | `test_lexical_bundle_never_starts_or_preflights_owner`; `test_bundle_only_overrides_semantic_without_owner` | Actual local bundle succeeded at the reviewed source; it is not semantic freshness. |
+| Owner exits during startup | Existing bounded bootstrap retry/cleanup tests | Earlier ambient-interpreter failure is diagnosed below; both the matched reference and later exact-main `bcc87782` now have positive retrieval evidence. |
+
+Test owners: [authority worktree](tests/test_holoindex_authority_worktree.py),
+[one-shot entry](../scripts/tests/test_reddog_holoindex_owner_query_once.py),
+and [repair/control root binding](../modules/communication/moltbot_bridge/tests/test_reddog_holoindex_owner_query_root_binding.py).
+The three existing suites passed **81 tests in 4.37s** using isolated temporary
+and database paths, disabled plugin autoload and an explicit async plugin.
+No test implementation or assertion changed.
+
+Earlier R03 observations: the canonical-primary helper at `0c81418f` rejected
+HEAD mismatch; a clean matched reference at `78b79c36` failed owner startup;
+the reviewed task source returned a clean local bundle with zero owner
+attempts. After these documentation edits, the same local query succeeded with
+`workspace_overlay`, preserving UNKNOWN freshness and zero owner attempts.
+Earlier CURRENT receipts retain only their original dated scope.
+R03 is partial: entry contracts, guidance, matched-reference retrieval and the
+later exact-main `bcc87782` checkpoint are validated. Broader operational matrix
+proof and requalification as sources advance remain open. R04 runtime closure
+and R05 retrieval quality remain separate gates.
+
+### Interpreter correction checkpoint — 2026-09-13
+
+Documentation source: `89bdd7a5f35225ea612e76c066b3d0948a945861`.
+Operational reference and selected authority both:
+`78b79c36c2d776e030cd0ee8aa23359a67f952ec`.
+
+| Observation | Result | Evidence limit |
+|---|---|---|
+| Ambient Python 3.12.2; repository venv configured for a different 3.12.10 base | Existing dependency guard returned no package roots. Two owned children exited 1 with `ModuleNotFoundError` for `numpy`. | Instrumented diagnostic only: existing 16 KiB bounded capture, allowlisted error categories, no retained raw output. Not a runtime acceptance receipt. |
+| Existing repository venv; 60-second diagnostic query | Dependency-root check passed; query returned `QUERY_TIMEOUT` after one owner attempt. | A reduced time budget is not proof of a broken index or completed query. |
+| Same venv and normal uninstrumented bridge; existing default 300-second budget | `ok=true`, `freshness=CURRENT`, `index_gap_detected=false`, `owner_attempts=1`, `no_reindex=true`. | Restores semantic retrieval only for the matched reference SHA above. |
+| Task helper at `89bdd7a5` with the same older authority | `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, zero owner attempts; local bundle succeeds with UNKNOWN freshness. | Current-main semantic publication remains open. The query correctly refuses to relabel old evidence. |
+
+No package installation, runtime source change, index rebuild, route change,
+authority move or active FoundUp experiment was needed. Normal owner cleanup
+completed; both reference and authority worktrees remained clean. The existing
+runtime-selection tests passed **2 tests / 16 deselected in 0.39s**, under the
+vetted interpreter, bytecode suppression and isolated temporary/cache paths.
+The earlier 81-test selection retains its original scope and was not rerun.
+
+Next: the existing governed exact-main owner must publish/qualify the selected
+current source, preserving concurrent work, before R03 closes. R04 exact
+runtime closure, R05 retrieval quality and R06–R15 admitted RSI remain open.
+The corrected invocation is reusable operational knowledge, not automatic
+PatternMemory promotion or measured retained RSI.
+
+### Exact-main maintenance checkpoint — 2026-09-13
+
+Latest named-source observation: after PR #1710, the existing controller
+completed `5326080d583625aebbc230242117fb7fcf0044a6`, stopped both owned
+runtimes and published generation
+`sha256:47b000ec3fd427354a674de8740e0867cbdecfe92028552f9e362f7f94669062`.
+The fixed six-case public benchmark returned CURRENT/no-gap throughout and
+passed the unchanged policy: Recall@8/MRR `1.0`, nDCG@8 `0.9939998`,
+p95 `4031ms`. Exact runtime closure remains false. The [complete run and
+verification receipts](../docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
+are dated evidence, not independent promotion authority or proof for future
+commits. The earlier checkpoint below retains its own source boundary.
+
+The existing post-merge controller completed at then-current main
+`bcc877829653997d7df638b7069258a061d04ee1`, using its admitted task
+`holoindex_postmerge_refresh:bcc877829653997d7df638b7069258a061d04ee1`.
+OpenClaw/WRE performed the existing maintenance transaction; the controller
+started the resident and supervisor and confirmed reverse-order shutdown of
+both. No Holo runtime source change or manual in-query rebuild was needed.
+
+- Generation: `sha256:681b03ead03d6945151779d92a81081922357ed167109a63647b08705e512501`.
+- Freshness receipt: `sha256:98145ad229a7c838d7eeca7b10c0ef907cc98ef0481c2be32cb7dbe44a142e8b`.
+- Fresh subsequent owner query: CURRENT, no index gap, one owner attempt,
+  matching workspace/authority HEADs, successful module bundle, no reindex.
+- `runtime_environment_exact_closure_verified=false`; R04 remains open.
+
+This replaces the older-reference limitation for the named source only. New
+main commits need new evidence. The broader R03 operational matrix and R05
+retrieval-quality promotion are not complete. Search still returned peripheral
+runtime/legacy material ahead of exact worker admission context; direct module
+contracts/tests supplied that context. Freshness is not a relevance score or
+an independently evaluated RSI improvement.
+
 ## Menu Snapshot (0102 Ops)
 ```
 ============================================================

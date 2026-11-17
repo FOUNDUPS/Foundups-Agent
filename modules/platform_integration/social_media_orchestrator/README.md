@@ -1,5 +1,40 @@
 # Social Media Orchestrator
 
+## Publication receipt reconciliation — 2026-11-16
+
+The existing SOCIAL content route accepts `action=reconcile dry_run=true` for
+bounded supplied-evidence stage reconciliation. It preserves open releases,
+binds source/archive/build/live/channel receipts and emits review plus proposed
+memory only. See the [contract](docs/CONTENT_CAMPAIGN.md#publication-reconciliation--2026-11-16).
+No publisher, scheduler, service or memory sink is activated by this extension.
+
+## Community/newsletter coordination — 2026-11-15 JST
+
+The existing [campaign skill](skillz/foundup_campaign_operator/SKILLz.md) includes
+a reusable [Reddit/Substack workflow](skillz/foundup_campaign_operator/references/community-newsletter-workflow.md).
+It reuses the current LinkedIn editorial/ROC and YouTube-index evidence owners.
+Develop one manuscript with 012, then track audience-specific derivatives and
+separate approval/delivery evidence for LinkedIn, X, YouTube, Reddit, Substack
+and other qualified channels. Identity, FoundUp, publication/community and
+authority are per-task inputs,
+not hardcoded personal values. This is instruction groundwork only: provider
+transports, native admission and live publishing remain unqualified. It creates
+no second scheduler or database and does not modify the WSP 97 protocol.
+
+The same instruction maps existing Gemini-index evidence to a private,
+revision-verified Drive edit, then separately reviewed social/Substack and Mall
+handoffs. Two-or-three daily posts is a cap, not a target; actual queue/timezone
+and provider state remain required. Private Drive assets never become public
+catalog inputs by default, and no Substack transport or automation is activated.
+
+## Source-backed editorial packages — 2026-10-27
+
+`content_orchestrator.prepare_campaign(brief)` and the existing SOCIAL campaign
+route now prepare FoundUp-scoped, source-preserving X/LinkedIn drafts and dated
+calendar proposals. No publication or scheduler effects are performed. See the
+[contract/example](docs/CONTENT_CAMPAIGN.md) and
+[Soro comparison and remaining build sequence](docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md).
+
 **Domain**: platform_integration  
 **Classification**: Social Media Orchestration Service  
 **WSP Compliance**: WSP 3, WSP 11, WSP 22, WSP 49
@@ -9,6 +44,41 @@
 Unified orchestration layer for social media platforms (X/Twitter and LinkedIn) that eliminates redundancy and provides a cohesive interface for cross-platform content management, OAuth coordination, and scheduling.
 
 **Digital Twin POC**: This is the execution layer for the 012 Digital Twin comment pipeline (LinkedIn-first), including comment scheduling and cross-platform routing.
+
+## AntifaFM contextual pilot
+
+The existing SOCIAL route accepts `social campaign antifafm ...` for account
+verification, context-aware listener drafts and verified own-account X updates.
+The default preview loads no model, credentials, provider or publication ledger;
+the outer CLI retains its existing audit behavior. The station drafter reuses
+Digital Twin's local model, with explicit draft/skip/review outcomes and no mock
+fallback. Replies are draft-only. The prototype starts no service or schedule.
+See [the host runbook](docs/ANTIFAFM_CAMPAIGN.md) and
+[the API contract](INTERFACE.md#antifafm-campaign-pilot).
+
+## Supervised petitions
+
+The existing [campaign owner](skillz/foundup_campaign_operator/SKILLz.md) includes
+a [petition workflow](skillz/foundup_campaign_operator/references/petition-workflow.md),
+discoverable as `launch-petition` through Claude/Codex and OpenClaw workspace skills.
+It covers evidence, human authentication, platform drafts, consent, email and
+distribution receipts. The [petition intake route](docs/PETITION_CAMPAIGN.md)
+returns effect-free preview/plans for an existing Change.org or Action Network
+public link. Conversation entry supports "RedDog, let's launch a petition ...".
+No petition account/publication executor or resident cadence is registered.
+Keep campaign-specific copy and personal-trauma evidence in the approved private
+campaign record. The [session audit](docs/audits/PETITION_SESSION_AUDIT_20261027.md)
+separates merged instruction groundwork, planning and unfinished live integration.
+
+## FoundUp pitch package
+
+The [pitch package instruction](skillz/foundup_pitch_package/SKILLz.md) turns
+existing Outcome, Solution and Pain evidence into narration and a matching deck.
+Solution retains PoC, Prototype and MVP stages. Canonical Claude discovery and its
+generated Codex mirror route to this owner. This local draft skill has no executor,
+resident trigger or provider grant; missing audio/video stays explicitly pending.
+The [FX delivery plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md)
+tracks its publication and the remaining automation dependencies.
 
 ## Rotation Flow (YouTube → Scheduling → LinkedIn)
 
@@ -37,6 +107,14 @@ This keeps the DAE rotation minimal and deterministic for POC validation.
 - **Heat Level Management**: Automatic rate limit tracking and cooling periods
 - **Pattern Learning**: Learns from successful posts and platform responses
 - **Digital Twin Routing**: Accepts Digital Twin drafts/decisions and routes to LinkedIn execution and scheduling
+
+## Scheduler persistence boundary
+
+The existing autonomous scheduler archives typed posting results to JSON and
+serializes the complete schedule before shared atomic publication. Save errors
+remain logged without caller acknowledgement; restart retry safety and external
+delivery are not established. See [the scheduling contract](INTERFACE.md#natural-language-scheduling-0102-mode)
+and [the fixed hosted acceptance](tests/README.md#caller-acknowledgement-and-reload-characterization--2026-09-28).
 
 ## Architecture
 
@@ -179,4 +257,3 @@ For detailed technical architecture documentation:
 - main.py now registers social_media as a broker-managed runtime with a real stop hook.
 - stop social media dae maps to stop_social_media_dae() instead of returning stop_unsupported.
 - The cadence wait is interruptible, so stop requests do not sit behind the full sleep interval.
-

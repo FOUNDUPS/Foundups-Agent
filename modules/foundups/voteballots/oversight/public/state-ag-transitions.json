@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "as_of": "2026-11-07",
+  "election_date": "2026-11-03",
+  "scope": "Selected open-seat and incumbent-change races in 13 states and two territories. Election-night leads, race calls and transition statements remain separate from certification and from the serving office. The current office links are the starting point for any authorized referral.",
+  "rows": [
+    {
+      "jurisdiction": "Alabama",
+      "name": "Katherine Robertson",
+      "status": "official_unofficial_lead",
+      "result_url": "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305",
+      "result_label": "Alabama Secretary of State unofficial statewide results",
+      "office_url": "https://www.alabamaag.gov/About/"
+    },
+    {
+      "jurisdiction": "Colorado",
+      "name": "Jena Griswold",
+      "status": "reported_projection",
+      "result_url": "https://www.cpr.org/2026/11/03/colorado-election-results-attorney-general-griswold-allen/",
+      "result_label": "Colorado Public Radio race report",
+      "office_url": "https://coag.gov/about-us/colorado-attorney-general/",
+      "election_authority_url": "https://results.enr.clarityelections.com/CO/127407/web.345435/"
+    },
+    {
+      "jurisdiction": "Georgia",
+      "name": "Tanya Miller",
+      "status": "reported_projection",
+      "result_url": "https://www.ajc.com/politics/georgia-election-results/",
+      "result_label": "Atlanta Journal-Constitution race report",
+      "office_url": "https://law.georgia.gov/biography-attorney-general",
+      "election_authority_url": "https://results.sos.ga.gov/results/public/Georgia/elections/11032026GeneralAndSpecialElection?fr=true"
+    },
+    {
+      "jurisdiction": "Guam",
+      "name": "Phillip Tydingco",
+      "status": "official_unofficial_lead",
+      "result_url": "https://gec.guam.gov/2026-general-election-unofficial-results/",
+      "result_label": "Guam Election Commission unofficial results CSV",
+      "office_url": "https://oagguam.org/"
+    },
+    {
+      "jurisdiction": "Iowa",
+      "name": "Nate Willems",
+      "status": "reported_projection",
+      "result_url": "https://www.radioiowa.com/2026/11/04/democrat-nate-willems-is-iowas-attorney-general-elect/",
+      "result_label": "Radio Iowa race report",
+      "office_url": "https://www.iowaattorneygeneral.gov/what-we-do/about-attorney-general-brenna-bird",
+      "election_authority_url": "https://electionresults.iowa.gov/IA/"
+    },
+    {
+      "jurisdiction": "Kansas",
+      "name": "Chris Mann",
+      "status": "official_unofficial_lead",
+      "result_url": "https://ent.sos.ks.gov/kssos_ent.html",
+      "result_label": "Kansas Secretary of State unofficial statewide results",
+      "office_url": "https://www.ag.ks.gov/about-us/attorney-general-kris-w-kobach"
+    },
+    {
+      "jurisdiction": "Michigan",
+      "name": "Eli Savit",
+      "status": "reported_projection",
+      "result_url": "https://interactives.apelections.org/election-results/customers/layouts/organization-layouts/published/57250/35757.html",
+      "result_label": "Associated Press race call",
+      "office_url": "https://www.michigan.gov/ag",
+      "election_authority_url": "https://mvic.sos.state.mi.us/votehistory/Index?electionDate=11-3-2026&type=C"
+    },
+    {
+      "jurisdiction": "Nevada",
+      "name": "Nicole Cannizzaro",
+      "status": "reported_projection",
+      "result_url": "https://thenevadaindependent.com/elections/2026/general/results/statewide",
+      "result_label": "Nevada Independent report of state returns",
+      "office_url": "https://ag.nv.gov/About/AG_Aaron_Ford/",
+      "election_authority_url": "https://results.nv.gov/"
+    },
+    {
+      "jurisdiction": "Northern Mariana Islands",
+      "name": "Runoff pending",
+      "status": "unresolved",
+      "result_url": "https://www.votecnmi.gov.mp/results/general-election-2026.php",
+      "result_label": "Commonwealth Election Commission general-election tally",
+      "office_url": "https://www.cnmioag.org/about-us/"
+    },
+    {
+      "jurisdiction": "Ohio",
+      "name": "John Kulewicz",
+      "status": "reported_projection",
+      "result_url": "https://www.ohioattorneygeneral.gov/Media/News-Releases/November-2026/Statement-From-AG-Wilson-on-Election-of-John-Kulew",
+      "result_label": "Ohio Attorney General transition statement, canvass pending",
+      "office_url": "https://www.ohioattorneygeneral.gov/",
+      "election_authority_url": "https://liveresults.ohiosos.gov/"
+    },
+    {
+      "jurisdiction": "Oklahoma",
+      "name": "Jon Echols",
+      "status": "reported_projection",
+      "result_url": "https://oklahomavoice.com/2026/11/03/echols-takes-oklahoma-attorney-generals-race/",
+      "result_label": "Oklahoma Voice race report",
+      "office_url": "https://oklahoma.gov/oag/about/bio.html",
+      "election_authority_url": "https://oklahoma.gov/elections/elections-results/election-results/2026-election-results/november-general-election.html"
+    },
+    {
+      "jurisdiction": "Rhode Island",
+      "name": "Kim Ahern",
+      "status": "reported_projection",
+      "result_url": "https://votes.decisiondeskhq.com/elections/2026-11-03/rhode-island",
+      "result_label": "Decision Desk HQ race call",
+      "office_url": "https://riag.ri.gov/about-our-office/attorney-general-peter-f-neronha",
+      "election_authority_url": "https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection"
+    },
+    {
+      "jurisdiction": "South Carolina",
+      "name": "David Stumbo",
+      "status": "official_unofficial_lead",
+      "result_url": "https://scvotes.gov/2026-general-election-results/",
+      "result_label": "South Carolina State Election Commission statewide results",
+      "office_url": "https://www.scag.gov/about-the-office/meet-the-attorney-general/"
+    },
+    {
+      "jurisdiction": "South Dakota",
+      "name": "Lance Russell",
+      "status": "official_unofficial_lead",
+      "result_url": "https://electionresults.sd.gov/resultsSW.aspx",
+      "result_label": "South Dakota Secretary of State unofficial statewide results",
+      "office_url": "https://atg.sd.gov/OurOffice/bio.aspx/"
+    },
+    {
+      "jurisdiction": "Texas",
+      "name": "Nathan Johnson",
+      "status": "official_unofficial_lead",
+      "result_url": "https://electionresults.sos.state.tx.us/results.html",
+      "result_label": "Texas Secretary of State election-night results",
+      "office_url": "https://www.texasattorneygeneral.gov/about-office?id=823"
+    }
+  ]
+}

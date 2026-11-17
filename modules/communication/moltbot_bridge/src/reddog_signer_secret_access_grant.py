@@ -8,10 +8,7 @@ from typing import Any, Callable, Mapping, Protocol, TypeVar
 from weakref import WeakKeyDictionary
 
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant_contract import (
-    ExpectedSignerSecretGrantBinding,
-    GRANT_PREFIX,
-    GRANT_SCHEMA,
-    MAX_GRANT_TTL_SECONDS,
+    ExpectedSignerSecretGrantBinding, GRANT_PREFIX, GRANT_SCHEMA, MAX_GRANT_TTL_SECONDS,
     REJECT_BINDING as REJECT_BINDING,
     REJECT_CAPABILITY,
     REJECT_DIGEST as REJECT_DIGEST,
@@ -20,9 +17,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant_
     REJECT_MALFORMED as REJECT_MALFORMED,
     REJECT_NONCE,
     REJECT_NON_ASCII as REJECT_NON_ASCII,
-    REJECT_REVOKED,
-    REJECT_SIGNATURE,
-    REJECT_TIME,
+    REJECT_REVOKED, REJECT_SIGNATURE, REJECT_TIME,
     SignerSecretAccessGrantRejected,
     canonical_signer_secret_access_grant_input,
     signer_secret_access_grant_id,
@@ -171,6 +166,12 @@ class SignerSecretAccessGrantBoundary:
             raise
         except Exception:
             raise SignerSecretAccessGrantRejected(REJECT_REVOKED) from None
+
+    def recheck_before_signing(self, grant: Mapping[str, Any]) -> None:
+        """Recheck inside protected use, without a nested root exchange."""
+        validated_signer_secret_grant(grant, self._now())
+        if type(self._revocation_oracle) is AtomicSignerSecretGrantRevocationOracle:
+            self._require_not_revoked(grant)
 
     def _now(self) -> int:
         try:

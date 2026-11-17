@@ -72,6 +72,8 @@ class ExternalSignerLifecycleAdmissionReceipt:
     socket_inode: int
     handshake_request_digest: str
     handshake_response_digest: str
+    requester_principal_id: str
+    signer_profile_id: str
     admitted_at_epoch: int
     admitted_monotonic_ns: int
     handshake_expires_at: int
@@ -97,19 +99,17 @@ class ExternalSignerLifecycleAdmissionBoundary(Protocol):
 
 def _build_boundary_registry():
     lock = threading.RLock()
-    records: WeakKeyDictionary[object, tuple[Any, Any]] = (
-        WeakKeyDictionary()
-    )
+    records: WeakKeyDictionary[object, tuple[Any, Any, bool]] = WeakKeyDictionary()
 
-    def issue(key: object, admit: Any, consume: Any) -> None:
+    def issue(key: object, admit: Any, consume: Any, default_dependencies: bool) -> None:
         with lock:
             if key in records:
                 raise ExternalSignerLifecycleAdmissionError(
                     "external_signer_lifecycle_boundary_already_issued"
                 )
-            records[key] = (admit, consume)
+            records[key] = (admit, consume, default_dependencies)
 
-    def lookup(key: object) -> tuple[Any, Any]:
+    def lookup(key: object) -> tuple[Any, Any, bool]:
         with lock:
             try:
                 return records[key]
@@ -125,29 +125,56 @@ _issue_boundary, _lookup_boundary = _build_boundary_registry()
 del _build_boundary_registry
 
 
-def _boundary_admit(lookup: Any):
+def _boundary_methods(lookup: Any):
     def admit(self: object, value: object) -> object:
-        call, _ = lookup(self)
-        return call(value)
+        return lookup(self)[0](value)
 
-    return admit
+    def consume(self: object, value: object) -> ExternalSignerLifecycleAdmissionReceipt:
+        return lookup(self)[1](value)
 
-
-def _boundary_consume(lookup: Any):
-    def consume(
-        self: object, value: object
-    ) -> ExternalSignerLifecycleAdmissionReceipt:
-        _, call = lookup(self)
-        return call(value)
-
-    return consume
+    return admit, consume
 
 
 class _Boundary:
     __slots__ = ("__weakref__",)
 
-    admit = _boundary_admit(_lookup_boundary)
-    consume = _boundary_consume(_lookup_boundary)
+    admit, consume = _boundary_methods(_lookup_boundary)
+
+
+def _build_verified_consumer(lookup: Any, boundary_type: type):
+    def consume(
+        boundary: object, capability: object, *,
+        requester_principal_id: str, signer_profile_id: str,
+        require_default_dependencies: bool = False,
+    ) -> ExternalSignerLifecycleAdmissionReceipt:
+        """Consume registered proof once, then correlate its exact identities."""
+        if type(require_default_dependencies) is not bool or type(boundary) is not boundary_type or not all(
+            type(v) is str and v.strip()
+            for v in (requester_principal_id, signer_profile_id)
+        ):
+            raise ExternalSignerLifecycleAdmissionError(
+                "external_signer_lifecycle_boundary_unverified"
+            )
+        _, registered_consume, default_dependencies = lookup(boundary)
+        if require_default_dependencies and not default_dependencies:
+            raise ExternalSignerLifecycleAdmissionError(
+                "external_signer_lifecycle_default_dependencies_required"
+            )
+        receipt = registered_consume(capability)
+        if (receipt.requester_principal_id, receipt.signer_profile_id) != (
+            requester_principal_id, signer_profile_id
+        ):
+            raise ExternalSignerLifecycleAdmissionError(
+                "external_signer_lifecycle_identity_mismatch"
+            )
+        return receipt
+
+    return consume
+
+
+consume_verified_external_signer_lifecycle_admission = _build_verified_consumer(
+    _lookup_boundary, _Boundary
+)
 
 
 def _create_external_signer_lifecycle_admission_boundary(
@@ -155,19 +182,13 @@ def _create_external_signer_lifecycle_admission_boundary(
     repo_root: Path | str,
     manifest_boundary: RuntimeArtifactManifestLaunchSelectionBoundary,
     generation_reader_authority: object,
-    generation_reader_authority_boundary: (
-        SignerRuntimeGenerationReaderAuthorityBoundary
-    ),
+    generation_reader_authority_boundary: SignerRuntimeGenerationReaderAuthorityBoundary,
     os_policy_authority: object,
     os_policy_authority_boundary: ExternalSignerOsPolicyAuthorityBoundary,
     requester_principal_id: str,
     signer_profile_id: str = "reddog-work-authority",
-    os_observer: Callable[..., ExternalSignerOsObservationReceipt] = (
-        _DEFAULT_OS_OBSERVER
-    ),
-    healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = (
-        _DEFAULT_HEALTHCHECK_RUNNER
-    ),
+    os_observer: Callable[..., ExternalSignerOsObservationReceipt] = _DEFAULT_OS_OBSERVER,
+    healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = _DEFAULT_HEALTHCHECK_RUNNER,
     trusted_clock: Callable[[], int] | None = None,
     trusted_monotonic_clock: Callable[[], int] | None = None,
     issue_boundary: Any,
@@ -213,24 +234,20 @@ def _create_external_signer_lifecycle_admission_boundary(
 
 
 def _build_lifecycle_factory(create: Any, issue: Any):
+    default_observer, default_healthcheck = _DEFAULT_OS_OBSERVER, _DEFAULT_HEALTHCHECK_RUNNER
+
     def factory(
         *,
         repo_root: Path | str,
         manifest_boundary: RuntimeArtifactManifestLaunchSelectionBoundary,
         generation_reader_authority: object,
-        generation_reader_authority_boundary: (
-            SignerRuntimeGenerationReaderAuthorityBoundary
-        ),
+        generation_reader_authority_boundary: SignerRuntimeGenerationReaderAuthorityBoundary,
         os_policy_authority: object,
         os_policy_authority_boundary: ExternalSignerOsPolicyAuthorityBoundary,
         requester_principal_id: str,
         signer_profile_id: str = "reddog-work-authority",
-        os_observer: Callable[..., ExternalSignerOsObservationReceipt] = (
-            _DEFAULT_OS_OBSERVER
-        ),
-        healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = (
-            _DEFAULT_HEALTHCHECK_RUNNER
-        ),
+        os_observer: Callable[..., ExternalSignerOsObservationReceipt] = default_observer,
+        healthcheck_runner: Callable[..., SignerServiceHealthcheckResult] = default_healthcheck,
         trusted_clock: Callable[[], int] | None = None,
         trusted_monotonic_clock: Callable[[], int] | None = None,
     ) -> ExternalSignerLifecycleAdmissionBoundary:
@@ -249,7 +266,11 @@ def _build_lifecycle_factory(create: Any, issue: Any):
             healthcheck_runner=healthcheck_runner,
             trusted_clock=trusted_clock,
             trusted_monotonic_clock=trusted_monotonic_clock,
-            issue_boundary=issue,
+            issue_boundary=lambda key, admit, consume: issue(
+                key, admit, consume,
+                os_observer is default_observer and healthcheck_runner is default_healthcheck
+                and trusted_clock is None and trusted_monotonic_clock is None,
+            ),
         )
 
     return factory
@@ -390,10 +411,14 @@ def _verified_admission_values(
         manifest_id=selected["manifest_id"],
         artifact_generation_digest=selected["artifact_generation_digest"],
     )
-    return _admission_values(
-        selected, packet, activation, observation, health,
+    if not _admission_bindings_valid(
+        selected, packet, observation, health,
         dependencies["requester"], dependencies["profile"], now_epoch,
-        dependencies["os_policy_authority_receipt_id"],
+    ):
+        raise ValueError("external_signer_handshake_rejected")
+    return _admission_payload(
+        selected, packet, activation, observation, health,
+        dependencies["os_policy_authority_receipt_id"], now_epoch,
         admitted_monotonic_ns,
     )
 
@@ -518,30 +543,6 @@ def _validate_observation_packet(
         raise ValueError("external_signer_process_observation_mismatch")
 
 
-def _admission_values(
-    selected: Mapping[str, Any],
-    packet: Mapping[str, Any],
-    activation: SignerRuntimeGenerationActivation,
-    observation: ExternalSignerOsObservationReceipt,
-    health: SignerServiceHealthcheckResult,
-    requester_principal_id: str,
-    signer_profile_id: str,
-    now_epoch: int,
-    os_policy_authority_receipt_id: str,
-    admitted_monotonic_ns: int,
-) -> Mapping[str, Any]:
-    valid = _admission_bindings_valid(
-        selected, packet, observation, health,
-        requester_principal_id, signer_profile_id, now_epoch,
-    )
-    if not valid:
-        raise ValueError("external_signer_handshake_rejected")
-    return _admission_payload(
-        selected, packet, activation, observation, health,
-        os_policy_authority_receipt_id, now_epoch, admitted_monotonic_ns,
-    )
-
-
 def _admission_bindings_valid(
     selected: Mapping[str, Any],
     packet: Mapping[str, Any],
@@ -566,6 +567,8 @@ def _admission_bindings_valid(
             health.config_path == selected["config_path"],
             health.config_digest == selected["config_digest"],
             health.socket_path == observation.socket_path,
+            all(type(v) is str and v.strip() for v in (requester_principal_id, signer_profile_id)),
+            type(health.requester_principal_id) is type(health.signer_profile_id) is str,
             health.requester_principal_id == requester_principal_id,
             health.signer_profile_id == signer_profile_id,
             is_sha256(health.request_digest),
@@ -603,6 +606,8 @@ def _admission_payload(
         "socket_inode": observation.socket_inode,
         "handshake_request_digest": str(health.request_digest),
         "handshake_response_digest": str(health.response_digest),
+        "requester_principal_id": health.requester_principal_id,
+        "signer_profile_id": health.signer_profile_id,
         "admitted_at_epoch": admitted_at_epoch,
         "admitted_monotonic_ns": admitted_monotonic_ns,
         "handshake_expires_at": health.peer_handshake_expires_at,
@@ -655,7 +660,7 @@ def _digest(value: Mapping[str, Any]) -> str:
 
 
 del _issue_boundary, _lookup_boundary
-del _boundary_admit, _boundary_consume
+del _boundary_methods, _build_verified_consumer
 del _build_lifecycle_factory
 del _create_external_signer_lifecycle_admission_boundary
 
@@ -665,4 +670,5 @@ __all__ = [
     "ExternalSignerLifecycleAdmissionError",
     "ExternalSignerLifecycleAdmissionReceipt",
     "create_external_signer_lifecycle_admission_boundary",
+    "consume_verified_external_signer_lifecycle_admission",
 ]
