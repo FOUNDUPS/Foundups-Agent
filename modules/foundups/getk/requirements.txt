@@ -1,0 +1,3 @@
+# GetK PoC contracts -- standard library only (dataclasses, typing).
+# No third-party runtime dependencies in Phase 1.
+# Tests use pytest (already a repo-level dev dependency).

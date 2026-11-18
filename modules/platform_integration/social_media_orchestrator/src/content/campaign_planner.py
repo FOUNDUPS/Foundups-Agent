@@ -85,15 +85,27 @@ async def execute_content_campaign(params):
     base = {"campaign": "content", "no_publication_performed": True,
             "publication_ready": False, "scope": "editorial_package_only"}
     try:
-        if (not isinstance(params, dict) or set(params) - {"action", "dry_run", "brief"}
+        if (not isinstance(params, dict)
                 or not all(isinstance(v, str) for v in params.values())):
             raise CampaignBriefError("content_parameter_invalid")
-        if params.get("action", "prepare") != "prepare" or params.get("dry_run", "true") != "true":
+        action = params.get("action", "prepare")
+        if action not in ("prepare", "reconcile") or params.get("dry_run", "true") != "true":
             raise CampaignBriefError("content_execution_not_supported")
-        raw = params.get("brief", "")
+        field = "packet" if action == "reconcile" else "brief"
+        if set(params) - {"action", "dry_run", field}:
+            raise CampaignBriefError("content_parameter_invalid")
+        if action == "reconcile" and params.get("dry_run") != "true":
+            raise CampaignBriefError("content_execution_not_supported")
+        raw = params.get(field, "")
         if not raw or len(raw) > 65536 or len(raw.encode("utf-8")) > 65536:
             raise CampaignBriefError("content_brief_size_invalid")
         brief = json.loads(raw, object_pairs_hook=_unique_object)
+        if action == "reconcile":
+            from .publication_reconciliation import reconcile_publication
+
+            report = reconcile_publication(brief)
+            return {**base, "scope": "publication_reconciliation_only", "success": True,
+                    "status": "reconciled", "reconciliation": report}
         from .content_orchestrator import prepare_campaign
 
         package = prepare_campaign(brief)

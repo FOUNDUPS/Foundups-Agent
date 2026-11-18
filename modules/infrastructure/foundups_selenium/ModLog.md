@@ -1,5 +1,22 @@
 # ModLog — FoundUps Selenium
 
+## 2026-11-15 — Fail-closed visual runner evidence
+
+Replace the assumed DOM pass with explicit unavailable/error evidence. Pass the
+actual driver to the existing UI-TARS bridge, identify its target-localization
+scope, and allow an explicit read-only DOM boolean assertion as a separate method.
+Execute each action once; retry only observations, retaining uncertain action
+errors for owner inspection. Preserve provenance in summaries and PatternMemory,
+including unsuccessful screenshot records; no outcome storage promotes a skill.
+An active event loop refuses before coroutine construction. Authentication and
+human-verification owners are unchanged.
+
+The sole tracked external caller is the manual Shorts L3 harness; it now stops
+dependent steps and uses DOM evidence for exact date/time values. Existing
+browser_actions routing remains the owner; no direct Red Dog runtime wiring or
+live vision is established. WSP11/22/48/50/60/84/97. See tests/TestModLog.md for
+fresh checks and environment limits, and the active slice ledger for ownership.
+
 ## 2026-11-10 — Human-only verification hold
 
 Hosted Windows exposed a pre-existing package import side effect: BrowserManager

@@ -1,3 +1,126 @@
+## 2026-11-18 — Reconcile PR #1792 FoundUp brand context integration and manifest refresh
+
+- Integrated `PR #1792` onto current `main` (`#2189` core + `#2178` closure): bound `esingularity_001.brand_context_path`, updated eSingularity/YUMORI Skillz + WRE `skills_registry_v2.json` descriptions (preserving all `39` registered entries), and refreshed the `1,494`-member RedDog backend manifest (`cb7f5970b56ed261b92e4df2775ab30961da80187b351833f356f5ad7bb55aa4`) plus digest/security pins.
+
+## 2026-11-18 — Reconcile PR #2178 scheduled resident reconciliation backend closure
+
+- Composed PR #2178 (`f1fb9763b`, default-off `AUTO_REDDOG_RESIDENT_RECONCILE=false`)
+  onto `main` (`20a7044c0`) and regenerated the deterministic RedDog backend
+  manifest (`026c309159d37feb55d4666288c52316c31c06ec1f9ee3a866e67dc86bf31068`).
+- Runtime closure advances from 1,488 to 1,494 members (`reddog_resident_foundup_memex_config.py`,
+  `reddog_resident_memory_context.py`, `reddog_scheduled_resident_reconcile.py`,
+  `resident_reconcile_schedule_adapter.py`, plus transitive `extract_brain_artifacts.py`
+  and `utils/markdown_sanitizer.py`), with 0 removals; `assertRuntimeFileCountBoundary`
+  accepts 1,494 and rejects 1,495.
+- Manifest ceiling advances cleanly one step from `332 * 1024` to `334 * 1024`
+  (342,016 bytes; measured `338,010` LF / `341,071` CRLF bytes), while unchanged
+  `2 MiB` member and `32 MiB` aggregate caps remain preserved.
+- Documentation/closure reconciliation only: live scheduling stays default-off and
+  no model activation or external side-effect authority is granted.
+
+WSP references: WSP_00, WSP_11, WSP_22, WSP_50, WSP_62, WSP_84, WSP_97.
+
+## 2026-11-17 — Reconcile PR #1689 continuous Lick audit and AutoPost lens continuation
+
+- Integrated the PR #1689 continuous/mutual Lick evaluation audit, updated
+  `REDDOG_LICK_CONNECTION_HANDSHAKE.md`, `ROADMAP.md`, `ARCHITECTURE.md`,
+  `HOLOINDEX.md`, and `docs/REDDOG_DOCUMENTATION_MAP.md` onto current `main`
+  while preserving all Moshpit (#2419/#1642), PIN/ordering, Muzzle, AutoPost,
+  DAEmon, and `Current PAL reconciliation — PR1638` contracts.
+- Reconciled dated 2026-09-13 external references against current verified repo
+  state: `FOUNDUPS/autopost#12` merged on 2026-10-18 (`3c0fc19d40e225ed7f826541a33c38293f9fe664`,
+  preserving that repository merge is not production deployment or physical-phone
+  acceptance), and `#1641`/`#1680` were closed unmerged on 2026-10-06
+  (`REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md`) while keeping the 2026-09-13
+  audit intact as historical baseline evidence.
+- Preserved `reddog_public_policy.py` wire truth (`identity_verified: false`,
+  `human_presence_proven: false`, `signed: false`, `authority_granted: "none"`)
+  and `reddog.*.proposed` separation; documentation acceptance grants no
+  biometrics, live consent certification, capture permission, memory write, or
+  worker activation.
+- Retained the 2026-09-13 AutoPost lens and continuous Lick audit notes below
+  for historical trace with current-status qualification.
+
+WSP references: WSP_00, WSP_22, WSP_44, WSP_50, WSP_73, WSP_87, WSP_97.
+
+## 2026-09-13 (PR #1689 baseline, reconciled 2026-11-17) - AutoPost lens continuation & Continuous Lick audit
+
+- Extended the existing Lick contract with deliberate enrollment, renewal,
+  scoped sharing, peer requirements, recovery and membership boundaries; linked
+  `FOUNDUPS/autopost#12` (subsequently merged 2026-10-18 at `3c0fc19d40e225ed7f826541a33c38293f9fe664`;
+  undeployed and pending real-phone proof).
+- Audited the Gemini proposal and 012's continuous/mutual Lick use case against
+  baseline `08d005635f25aeae2606473c960fd803bd784157`, `reddog_public_policy.py`,
+  AutoPost's author/media signer (`4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147`),
+  WSP 44, WSP 73, and primary technical references; renamed illustrative schema
+  examples to `*.proposed` so they do not collide with live `*.v1` contracts,
+  and kept affect cues / semantic states advisory and non-authoritative.
+
+## 2026-11-17 — Reconcile PR #1642 Moshpit principal-significance gate and 0102-delegated attribution
+
+- Reconciled PR #1642 unique Moshpit specification deltas into the canonical
+  `docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md`, `ROADMAP.md`, and `HOLOINDEX.md`
+  owners on top of `origin/main` while omitting the 3 obsolete underscored
+  `MOSH_PIT_*` paths banned by canonical naming rules and preserving all PR #2419
+  conversation/pin/ordering/Muzzle/AutoPost/DAEmon contracts.
+- Added the deterministic principal-significance inclusion gate (`include` /
+  `exclude` / `needs_resolution`) for project Moshpit activity events while keeping
+  recoverable conversation history and pinned sources explicitly separate.
+- Added `0102-delegated` consequential-result attribution, `EVIDENCED` truth
+  classification, candidate-event resolution fields, updated daily reconciliation
+  questions, and the 14 focused implementation acceptance test cases.
+- Explicitly preserved Contacts/native Docs and read-only Memex emitter
+  boundaries, corrected stale HoloIndex guidance to use only the governed
+  `WSP_00` / WRE / CI maintenance owner, and affirmed no memory write, outbound
+  send, or worker/runtime admission from documentation acceptance.
+
+WSP references: WSP_00, WSP_15, WSP_22, WSP_50, WSP_97.
+
+## 2026-11-17 - Specify Moshpit pins and conversation navigation
+
+- Added a planned message/Markdown/artifact pin contract to the existing Moshpit
+  architecture, with a thumb-reachable bottom pin tray and jump to original source.
+- Distinguished conversation history (older above, latest near composer) from the
+  existing newest-first project activity/audit view; specified reading-anchor
+  preservation, bounded history resolution and source lifecycle/access states.
+- Linked the requirement from the existing roadmap and discovery indexes, and
+  identified GotJunk's Wave-inspired message components as reuse candidates.
+- Documentation only: pin UI, durable integration, runtime tests and physical-phone
+  acceptance remain outstanding. No current host-chat capability is claimed.
+
+WSP references: WSP_00, WSP_15, WSP_22, WSP_50, WSP_97.
+
+## 2026-11-16 — Publication reconciliation dependency binding repair
+
+The first PR2414 hosted Python job correctly rejected a stale generated backend
+manifest and staged-index checksum after the new content helper/import. Refresh
+the existing generator output: exactly one added runtime member,
+`social_media_orchestrator/src/content/publication_reconciliation.py`, no removals,
+and only `campaign_planner.py` changes an existing source digest. Both canonical
+pins are `a511d3efb70cf88f1f15700db6128f4bd97487469d1879d729267abf6bca031b`.
+The exact count boundary accepts1488 and rejects1489; all existing assertions,
+schema/API/graph and byte caps remain enforced. Measured manifest336692 LF /
+339741 CRLF bytes fits332KiB (339968); runtime20567270 bytes / maxfile184403 fits
+32MiB / 2MiB. No installed activation or provider/memory claim.
+
+Local validation: all eight existing Python generator/index cases pass in102.51s;
+Node compatibility contract, preflight (including imported async/query owners),
+async, package-manifest and package-surface commands pass. The Windows sandbox
+denied preflight's temporary junction setup; the same unmodified fixture passes
+outside that boundary. Package surface remains70files/979415bytes under1MiB.
+Independent read-only packaging review recomputed the digest and exact added/
+changed membership and found no blocker. Hosted checks must qualify the new head;
+the original failed run is retained, with no unchanged rerun or check bypass.
+WSP11/22/50/84/97; no generator/validator algorithm or publication code changed.
+
+## 2026-11-16 — Reconcile Storytime and UI-TARS runtime checksums onto Wave 4 main
+
+Regenerate the 1,487-member backend manifest on top of `247e12ce6e` for the
+reconciled `foundups_vision/src/ui_tars_bridge.py` coordinate-profile leaf and
+refresh both canonical digest pins (`1465fd02b74ed36b45895de1a90e7a62b20b25730ca34f8ccfda179878ca0c42`).
+Runtime membership remains 1,487 and all existing manifest, member, and
+aggregate byte caps stay unchanged. WSP 11, 22, and 97.
+
 ## 2026-11-16 — Bind Wave 4 WRE/RSI and pfMALL runtime checksums
 
 Regenerate the backend manifest for the updated `pfmall/shell_core.py` and WRE
@@ -29,6 +152,15 @@ repair. Refresh both digest pins together; runtime membership remains 1485 and
 resource limits are unchanged. The first hosted run correctly rejected stale
 hashes. This update binds source packaging, not native worker admission or live
 training. WSP 5/11/22/50/97.
+
+## 2026-11-01 — Bind reviewed UI-TARS runtime bytes
+
+Regenerate the existing1481-member backend manifest after the UI-TARS leaf repair
+and refresh its existing compatibility/test digest pins. Canonical b18b3987...
+is independently predicted from the single normalized-leaf delta. Membership,
+API/schema, limits, bridge hashes and semantic assertions remain unchanged.
+This is repository binding maintenance, not an installed extension/backend update.
+All8 generator/index cases and3 existing Node compatibility/preflight/recovery owners pass.
 
 ## 2026-11-01 — Bind private YouTube operator directives
 

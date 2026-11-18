@@ -7,6 +7,16 @@
 
 ## Public API
 
+### Bounded editorial review (local prototype)
+
+`src/content/editorial_review.py:evaluate_editorial_cycle(brief, topic_id, rounds)`
+reuses the campaign compiler and binds supplied grounding, audience, writing and
+image reviews to exact revisions/rubric. Up to three rounds; no provider effects.
+`editorial_benchmark_task(..., golden=...)` projects a separately frozen expected
+digest into the existing AI Gateway benchmark task, not a benchmark result.
+See [contract and integration boundaries](docs/EDITORIAL_REVIEW.md). Existing
+SOCIAL routes, production skill admission and publication remain unchanged.
+
 ### Local pitch-package instruction entry (prototype)
 
 `skillz/foundup_pitch_package/SKILLz.md` produces a versioned brief, narration/storyboard
@@ -459,3 +469,14 @@ else:
 health = duplicate_mgr.get_platform_health()
 print(f"LinkedIn: {health['linkedin']}, X/Twitter: {health['x_twitter']}")
 ```
+
+## Effect-free publication reconciliation (2026-11-16)
+
+The existing `execute_content_campaign(params)` also accepts exactly
+`action=reconcile`, `dry_run=true`, `packet=<inline JSON>`. It returns success
+only for compilation: status `reconciled`, scope `publication_reconciliation_only`
+and `publication_reconciliation.v1`. It performs no research, authentication,
+provider call, memory/store write, scheduling or publication. Unknown keys,
+duplicate JSON keys, malformed/bounded data and authority/effect flags reject.
+The existing SOCIAL adapter dispatches this content action without a new route.
+See [input, state and remaining integration contracts](docs/CONTENT_CAMPAIGN.md#publication-reconciliation--2026-11-16).

@@ -29,6 +29,38 @@ def test_validate_copy_and_srt():
     assert "00:00:05,000 --> 00:00:15,000\nClap with me!" in engine.captions_srt(result["captions"])
 
 
+def test_explicit_storytime_duration_preserves_strict_legacy_default():
+    spec = episode()
+    spec["duration_seconds"] = 25
+    spec["clips"][0]["duration"] = 25
+    spec["captions"][-1]["end"] = 25
+    with pytest.raises(ValueError):
+        engine.validate_episode(spec)
+    assert engine.validate_episode(spec, duration_seconds=25) == spec
+    for duration in (True, 0, 61, float("nan"), 25.001):
+        with pytest.raises(ValueError):
+            engine.validate_episode(spec, duration_seconds=duration)
+
+
+def test_real_explicit_longer_game_replay_render(tmp_path):
+    if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
+        pytest.skip("FFmpeg unavailable")
+    subprocess.run(["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",
+                    "color=c=blue:s=160x90:r=30:d=25", "-c:v", "libx264", "-threads", "1",
+                    str(tmp_path / "clip.mp4")], check=True)
+    subprocess.run(["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",
+                    "sine=frequency=440:duration=25", str(tmp_path / "music.wav")], check=True)
+    spec = episode()
+    spec["duration_seconds"] = 25
+    spec["clips"][0]["duration"] = 25
+    spec["captions"][-1]["end"] = 25
+    output = tmp_path / "replay.mp4"
+    result = engine.render_episode(spec, output, base_dir=tmp_path, duration_seconds=25)
+    assert result["duration_seconds"] == 25
+    stream = next(s for s in engine._probe(output)["streams"] if s["codec_type"] == "video")
+    assert stream["nb_frames"] == "750"
+
+
 @pytest.mark.parametrize("field,value", [("duration_seconds", 14), ("duration_seconds", float("nan")),
                                          ("duration_seconds", True), ("preset", "high"),
                                          ("orientation", "square"), ("preset", []), ("schema_version", True),

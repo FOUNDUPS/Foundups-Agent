@@ -1,5 +1,37 @@
 # Social Media Orchestrator
 
+The [reusable editorial review cycle](docs/EDITORIAL_REVIEW.md) adds bounded
+source/audience/writing/image review and an existing-harness benchmark task
+projection. Discover it through `review-publishing`. This local prototype does
+not execute critics, schedule posts, publish or demonstrate transferable RSI.
+
+## Publication receipt reconciliation — 2026-11-16
+
+The existing SOCIAL content route accepts `action=reconcile dry_run=true` for
+bounded supplied-evidence stage reconciliation. It preserves open releases,
+binds source/archive/build/live/channel receipts and emits review plus proposed
+memory only. See the [contract](docs/CONTENT_CAMPAIGN.md#publication-reconciliation--2026-11-16).
+No publisher, scheduler, service or memory sink is activated by this extension.
+
+## Community/newsletter coordination — 2026-11-15 JST
+
+The existing [campaign skill](skillz/foundup_campaign_operator/SKILLz.md) includes
+a reusable [Reddit/Substack workflow](skillz/foundup_campaign_operator/references/community-newsletter-workflow.md).
+It reuses the current LinkedIn editorial/ROC and YouTube-index evidence owners.
+Develop one manuscript with 012, then track audience-specific derivatives and
+separate approval/delivery evidence for LinkedIn, X, YouTube, Reddit, Substack
+and other qualified channels. Identity, FoundUp, publication/community and
+authority are per-task inputs,
+not hardcoded personal values. This is instruction groundwork only: provider
+transports, native admission and live publishing remain unqualified. It creates
+no second scheduler or database and does not modify the WSP 97 protocol.
+
+The same instruction maps existing Gemini-index evidence to a private,
+revision-verified Drive edit, then separately reviewed social/Substack and Mall
+handoffs. Two-or-three daily posts is a cap, not a target; actual queue/timezone
+and provider state remain required. Private Drive assets never become public
+catalog inputs by default, and no Substack transport or automation is activated.
+
 ## Source-backed editorial packages — 2026-10-27
 
 `content_orchestrator.prepare_campaign(brief)` and the existing SOCIAL campaign
@@ -230,4 +262,3 @@ For detailed technical architecture documentation:
 - main.py now registers social_media as a broker-managed runtime with a real stop hook.
 - stop social media dae maps to stop_social_media_dae() instead of returning stop_unsupported.
 - The cadence wait is interruptible, so stop requests do not sit behind the full sleep interval.
-

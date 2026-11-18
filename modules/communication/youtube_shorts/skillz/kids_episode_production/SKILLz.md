@@ -1,6 +1,7 @@
 ---
 name: kids_episode_production
-version: 0.2.4
+description: Build and independently review Kids Episodes media and Storytime viewer/PWA changes through existing production and interactive-review owners.
+version: 0.2.12
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -15,7 +16,30 @@ Use FOUNDUPS/Foundups-Agent as the implementation authority. Read AGENTS.md, WSP
 
 Read `references/story-direction.md` before scripting or revising an educational event. Apply its ordered physics, continuity, education and art/readability audits to each preview. Use the fast creative loop and milestone integration rules; record unverified listening separately.
 
+## Outcome-bound educational cues
+
+Apply interactive review's outcome-semantics gate: SQUISH means a mammal was
+caught, never empty soil compression or an all-safe celebration. Test both the
+presence and absence branches through the actual engine replay and regenerate
+all baked media together. Do not force a vocabulary word into a successful
+ending simply because an older checklist asked for its presence.
+
+## Single-word visual profile
+
+Apply the interactive review's one-word/delivery gate. Preserve original scene
+labels behind the allowlisted profile; default to one centered outside word in
+both compact and fullscreen playback. Fit lettering to actual brown region;
+check progressively growing THUMPs in each size and retained time on expand/back.
+Native MP4 fallback retains baked words. Do not rerender
+unchanged media or introduce another engine/model service for presentation.
+Check final scaled font sizes, exact shared narration import URL, warm-origin
+revision delivery, actual full-story playback and the published revision.
+
 ## Viewer and game repair
+
+Current Storytime book: one Play runs all five cards, with only a large primary
+Play/Pause and large X. Apply the review skill's two-action/settled-handoff gate;
+do not reintroduce manual child card navigation from historical examples.
 
 Also apply the candidate [interactive experience review](../../../../foundups/eduit/skillz/interactive_experience_review/SKILLz.md)
 for audience, timing, points and interface changes. Game duration is independent
@@ -26,6 +50,27 @@ explicitly rerendered. This link does not activate a worker or prove transfer.
 For Storytime screenshot, layout, PWA, gesture or whiteboard feedback, read
 [viewer iteration](references/viewer-iteration.md) and the current EDUIT module
 docs before changing code. Apply its locked-invariant and evidence checks.
+For child-facing PWA builds, apply the interactive review's **PWA app presentation
+gate** before implementation and after rendering: app-sized menu choices,
+continuous fullscreen scene geometry, mapped hit targets and preserved state.
+Installation metadata alone does not satisfy the app-presentation contract.
+Apply **Task completion before component PASS** from that same review skill:
+For sound repairs also use its actual-replay sound-object gate: decode and check
+all chosen cues, inspect fitted sizes, exercise cancellation/reset, and listen
+independently when possible. Sample presence is not acoustic acceptance.
+press the child's intended words/picture and primary pictogram, observe the whole
+story and video handoff, and independently recheck after repair. UI-TARS inference
+must be followed by an actual authorized press and an observed result; retain
+model/coordinate failures separately. Child-facing navigation must not depend on
+reading. This candidate does not activate an autonomous production/test worker.
+For authorized Storytime DNS/hosting work, use EDUIT's existing
+[deployment runbook](../../../../foundups/eduit/DEPLOYMENT.md), including its
+GoDaddy/Gmail verification procedure. This is a scoped deployment step, not
+permission to collect unrelated sign-in codes or change account security.
+Apply its preschool visual acceptance to every affected page after each repair:
+inspect words, symbols and action labels at phone size, independently critique,
+repair and reinspect the published revision. A passing menu or code suite cannot
+certify the storybook or an installed shortcut behind a forwarding frame.
 
 ## Story-first production
 
