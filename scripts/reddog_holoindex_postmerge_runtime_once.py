@@ -39,7 +39,8 @@ def main() -> int:
         if type(query) is not str or type(timeout) not in (int, float):
             raise ValueError("query_and_timeout_required")
         result = run_holoindex_postmerge_runtime_once(
-            repo_root=REPO_ROOT, query=query, timeout_seconds=float(timeout)
+            repo_root=REPO_ROOT, query=query, timeout_seconds=float(timeout),
+            resume_incident_id=payload.get("resume_incident_id"),
         ).to_dict()
     except BaseException:
         result = {

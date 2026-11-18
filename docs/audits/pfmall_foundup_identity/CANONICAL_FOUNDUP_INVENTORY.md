@@ -7,6 +7,12 @@
 
 ---
 
+## 2026-10-06 superseding note — eSingularity.ai
+
+The April inventory below is preserved as a point-in-time audit. Its eSingularity row is superseded: the current canonical venture is `esingularity_001` in `modules/foundups/esingularity`, with public domain `esingularity.ai`. LinkedIn company ID `2199715` is the venture's canonical social/publishing page. The old `linkedin_esingularity` pfMALL key is a temporary compatibility/source alias, not a second FoundUp.
+
+---
+
 ## Classification Key
 
 | Classification | Meaning |

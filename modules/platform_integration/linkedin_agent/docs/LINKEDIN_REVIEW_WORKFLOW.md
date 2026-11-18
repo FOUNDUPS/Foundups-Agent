@@ -37,9 +37,10 @@ The 2026-09-15 user correction is authoritative for this workflow: research and 
 1. Existing `linkedin_engagement` entrypoint routes the review. Full runs triage connection requests before the inbox; narrow runs open only their selected queues.
 2. Inspect recent Focused AND Other messages and unread filters. Record coverage, timestamps and missing access. Prioritize replies and commitments; an older unread item is not necessarily urgent.
 3. Classify work as routine-draftable, human-decision-needed, waiting or no-action. Personal relationships, commitments, financial/legal questions and access changes deserve explicit human review. 0102 can research and draft; outbound execution remains separately authorized.
-4. Run [linkedin_group_moderation](../skillz/linkedin_group_moderation/SKILLz.md) for pending members and posts. Inspect automatic approval; researched DM, sent verification, reply review and membership decision are distinct states.
-5. Inspect a bounded relevant feed slice after queues. Treat feed assertions as research leads; verify before repeating. Recommend useful engagement, not automatic likes or pitches.
-6. When requested or due for consideration, run [openclaw_group_news](../skillz/openclaw_group_news/SKILLz.md) for the Good/Bad/Ugly automation discussion. Read prior group posts before drafting; no duplicate daily news bot.
+4. For consequential contacts involving investment, family-office or project-finance claims, government/institutional introductions, strategic partnerships or requests for non-public material, run [linkedin_contact_diligence](../skillz/linkedin_contact_diligence/SKILLz.md). Keep VERIFIED / CLAIMED / UNVERIFIED / CONFLICTING evidence separate; absence of a public footprint is not proof of fraud. Diligence informs disclosure and questions, never auto-accepts, auto-rejects or authorizes a send.
+5. Run [linkedin_group_moderation](../skillz/linkedin_group_moderation/SKILLz.md) for pending members and posts. Inspect automatic approval; researched DM, sent verification, reply review and membership decision are distinct states.
+6. Inspect a bounded relevant feed slice after queues. Treat feed assertions as research leads; verify before repeating. Recommend useful engagement, not automatic likes or pitches.
+7. When requested or due for consideration, run [openclaw_group_news](../skillz/openclaw_group_news/SKILLz.md) for the Good/Bad/Ugly automation discussion. Read prior group posts before drafting; no duplicate daily news bot.
 
 The portfolio orchestrator may prioritize urgent items or select a narrow job. This document does not place Gmail under LinkedIn, replace Social Media DAE, or enable cross-project data sharing. Every item must retain account, FoundUp/project, channel and target identity.
 
@@ -71,7 +72,7 @@ Use the existing authorized account-scoped journal or mosh-pit adapter after ver
 }
 ```
 
-Do not store passwords, cookies, tokens, private message bodies or applicant dossiers in public source control, reusable skills or training data. Reference private drafts rather than duplicating them. Historical verified state is not current state. On a possible send/post without confirmation, inspect before retrying.
+Do not store passwords, cookies, tokens, private message bodies or applicant/contact dossiers in public source control, reusable skills or training data. Professional diligence may retain only the minimum private decision receipt needed for continuity; raw search results and sensitive personal information do not belong in that receipt. Reference private drafts rather than duplicating them. Historical verified state is not current state. On a possible send/post without confirmation, inspect before retrying.
 
 ## Readiness boundary
 

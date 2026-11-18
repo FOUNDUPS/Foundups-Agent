@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from types import SimpleNamespace
 
 import pytest
@@ -58,7 +59,9 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
         encoding="utf-8",
     )
     captured: dict[str, object] = {}
-    dependency_bundle = SimpleNamespace(
+    issuer = object()
+    from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import RedDogMainResidentQueueRuntimeDependencyBundle
+    dependency_bundle = RedDogMainResidentQueueRuntimeDependencyBundle(
         accepted=True,
         rejection_reasons=(),
         status="READY",
@@ -110,12 +113,16 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
         now_iso=NOW,
         now_epoch=dependency_bundle.now_epoch,
         max_steps=1,
+        worktree_lease_issuer=issuer,
+        signer_peer_secret_access_grant_supplier=issuer,
     )
 
     assert result.accepted is True, result.rejection_reasons
+    assert captured["worktree_lease_issuer"] is issuer
     assert isinstance(captured["valve_environment"], GovernedExecutionValveEnvironment)
     resolver = captured["governed_use_time_authority_resolver"]
     assert isinstance(resolver, GovernedValveUseTimeAuthorityResolver)
+    assert resolver.signer_peer_secret_access_grant_supplier is issuer
     assert resolver.valve_environment_path == runtime / "execution_valve_env.json"
     assert resolver.permission_snapshots_path == runtime / "permission_snapshots.json"
 
@@ -241,6 +248,11 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
     tmp_path, monkeypatch,
 ) -> None:
     repo, runtime = _roots(tmp_path, canonical_artifacts=True)
+    valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
+    work_order_id = valve["work_order_id"]
+    work_orders_path = runtime / "work_orders.json"
+    work_orders_path.write_text(json.dumps({"work_orders": {
+        work_order_id: {"work_order_id": work_order_id}}}), encoding="utf-8")
     link = runtime / "valve-link.json"
     try:
         link.symlink_to(runtime / "execution_valve_env.json")
@@ -259,7 +271,7 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
         work_state_path=runtime / "authoritative_work_state.json",
         chain_results_path=runtime / "chain_results.json",
         authority_profile_path=runtime / "authority_profile.json",
-        work_order_materializer_mode="authority_profile",
+        work_orders_path=work_orders_path,
         valve_environment_path=link,
         runtime_allowed_root=runtime,
         requested_queue_item_id=QUEUE_ID,
@@ -271,8 +283,9 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
     assert result.rejection_reasons == ("malformed_valve_environment",)
 
 
+@pytest.mark.parametrize("fresh_now", [1_784_006_400, 1_784_006_405, True, None, 1_784_006_399])
 def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors(
-    tmp_path, monkeypatch,
+    tmp_path, monkeypatch, fresh_now,
 ) -> None:
     repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
@@ -342,7 +355,7 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         revocation_oracle=object(),
         now_epoch=1_784_006_400,
         required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
-        trusted_now_epoch=lambda: 1_784_006_400,
+        trusted_now_epoch=lambda: fresh_now,
     )
 
     result = resolver.resolve(
@@ -352,7 +365,13 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
     )
 
+    if type(fresh_now) is not int or fresh_now < resolver.now_epoch:
+        assert not calls
+        assert result.rejection_reasons == ("canonical_trusted_clock_invalid",)
+        assert result.signed_authority_reverified is False
+        return
     assert len(calls) == 1
+    assert calls[0]["now"] == fresh_now
     assert (
         calls[0]["verification_phase"]
         == WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING
@@ -380,3 +399,120 @@ def test_use_time_binding_rejects_base_ref_and_full_work_order_splices() -> None
 
     assert "canonical_signed_work_order_binding_mismatch:base_ref" in reasons
     assert "canonical_signed_work_order_binding_mismatch:work_order_digest" in reasons
+
+
+def _parent_bootstrap_artifacts(tmp_path):
+    """Use canonical fixture data without the canary helper's Git subprocesses."""
+    from .reddog_live_canary_artifact_test_support import write_live_canary_artifacts
+    repo, runtime = tmp_path / "bootstrap-repo", tmp_path / "bootstrap-runtime"
+    repo.mkdir(); runtime.mkdir()
+    write_live_canary_artifacts(repo=repo, runtime=runtime, queue_item_id=QUEUE_ID, now_iso=NOW)
+    environment = json.loads((runtime / "execution_valve_env.json").read_text("utf-8"))
+    work_id = environment["work_order_id"]
+    (runtime / "work_orders.json").write_text(
+        json.dumps({"work_orders": {work_id: {"work_order_id": work_id}}}), encoding="utf-8")
+    return runtime, environment
+
+
+def _capture_parent_bootstrap(monkeypatch, state, runtime, supplied):
+    """Real bootstrap/resolver; dependency loading and stage dispatch are seams."""
+    from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import RedDogMainResidentQueueRuntimeDependencyBundle
+    bundle = RedDogMainResidentQueueRuntimeDependencyBundle(
+        accepted=True, status="READY", requested=True, rejection_reasons=(), now_epoch=1000)
+    captured = {}
+    def registry(**kwargs):
+        captured.update(kwargs)
+        return SimpleNamespace(handlers={})
+    monkeypatch.setattr(bootstrap, "load_reddog_main_resident_queue_runtime_dependency_bundle", lambda **_: bundle)
+    monkeypatch.setattr(bootstrap, "build_reddog_resident_queue_stage_handler_registry", registry)
+    monkeypatch.setattr(bootstrap, "run_reddog_resident_queue_serial_loop", lambda **_: ResidentQueueSerialLoopResult(
+        accepted=True, status="RESIDENT_QUEUE_SERIAL_LOOP_LIMIT_REACHED", steps_run=0))
+    result = bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap(
+        repo_root=state.repo, runtime_allowed_root=runtime,
+        work_state_path=runtime / "authoritative_work_state.json",
+        authority_profile_path=runtime / "authority_profile.json",
+        chain_results_path=runtime / "chain_results.json",
+        work_orders_path=runtime / "work_orders.json",
+        valve_environment_path=runtime / "execution_valve_env.json",
+        requested_queue_item_id=QUEUE_ID, now_iso=NOW, now_epoch=1000,
+        trusted_now_epoch=lambda: state.now, max_steps=1, **supplied)
+    assert result.accepted is True, result.rejection_reasons
+    assert result.steps_run == 0
+    assert captured["worktree_lease_issuer"] is None
+    resolver = captured["governed_use_time_authority_resolver"]
+    assert type(resolver) is GovernedValveUseTimeAuthorityResolver
+    return resolver
+
+
+def _recorded_parent_chain(identity, authority):
+    """Canonical chain shape; prior signed-work acceptance is synthetic."""
+    store = InMemoryResidentQueueChainResultsStore()
+    store.commit({"schema_version": "reddog_resident_queue_chain_results.v1",
+        "queue_item_id": QUEUE_ID, "selected_slice": "synthetic-parent-consensus",
+        "receipts": [{"store_revision": None}], "stage_results": {
+            "authority_runtime": {"decision": "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT",
+                "authority_result": {"accepted": True, "identity": identity, "work_authority": authority,
+                    "receipt": {"receipt_id": "synthetic-prior-work", "status": "DELEGATED_AUTHORITY_ISSUED",
+                        "work_order_id": authority["work_order_id"], "generated_at": 1000,
+                        "identity_digest": _digest(identity), "work_authority_digest": _digest(authority)}}},
+            "authority_verification": {"decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT",
+                "verification_result": {"accepted": True, "work_order_id": authority["work_order_id"]}}}},
+        expected_revision=None)
+    return store.load()
+
+
+def _isolate_prior_parent_inputs(monkeypatch, environment, binding):
+    """Earlier artifact/queue/signed-work/generation checks are explicit seams.
+
+    resolve, _resolve_current, collection, parent/model signatures and lease
+    recognition remain real. This does not qualify the upstream input bundle.
+    """
+    from modules.communication.moltbot_bridge.src import reddog_execution_valve_use_time_authority as resolver_module
+    from modules.communication.moltbot_bridge.src import reddog_signer_current_generation_use_time_gate as gate
+    monkeypatch.setattr(resolver_module, "_read_runtime_artifacts", lambda _: (
+        {"valve_environment": environment, "authority_profile": {}}, []))
+    monkeypatch.setattr(GovernedValveUseTimeAuthorityResolver, "_resolve_expected", staticmethod(lambda *args: {}))
+    monkeypatch.setattr(GovernedValveUseTimeAuthorityResolver, "_validate_queue", lambda *args: {})
+    monkeypatch.setattr(GovernedValveUseTimeAuthorityResolver, "_reverify_and_bind", lambda *args, **kwargs: True)
+    monkeypatch.setattr(gate, "verify_signer_current_generation_runtime_binding", lambda **kwargs: binding)
+
+
+def _assert_no_parent_effect_admission(resolution, work):
+    from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import InMemoryWorktreeAdmissionRegistry
+    registry = InMemoryWorktreeAdmissionRegistry()
+    assert resolution.authoritative_use_lease is None
+    assert registry.issue(queue_item_id=QUEUE_ID, selected_slice="synthetic-parent-consensus",
+        work_order=work, executor_plan_result={}, valve_decision={},
+        signed_authority_reverified=resolution.signed_authority_reverified,
+        authoritative_use_lease=resolution.authoritative_use_lease) is False
+    assert registry._capabilities == {}
+
+
+@pytest.mark.parametrize("case", ["valid", "omitted", "none", "mapping", "callable", "expired", "work", "generation"])
+def test_bootstrap_parent_authority_reaches_real_use_time_verification(tmp_path, monkeypatch, case):
+    from .test_reddog_parent_consensus_use_time import fixture, REASONS
+    runtime, environment = _parent_bootstrap_artifacts(tmp_path)
+    state, parent, binding, identity, authority, work = fixture(monkeypatch, tmp_path / "parent")
+    supplied = {} if case == "omitted" else {"parent_consensus_authority": parent}
+    called = []
+    if case == "none": supplied["parent_consensus_authority"] = None
+    if case == "mapping": supplied["parent_consensus_authority"] = {"accepted": True}
+    if case == "callable": supplied["parent_consensus_authority"] = lambda *args: called.append(True)
+    resolver = _capture_parent_bootstrap(monkeypatch, state, runtime, supplied)
+    if case == "expired": state.now = 1020
+    if case == "work": work = {**work, "different_work": True}
+    if case == "generation": binding = replace(binding, generation=binding.generation + 1)
+    _isolate_prior_parent_inputs(monkeypatch, environment, binding)
+    result = resolver.resolve(chain_state=_recorded_parent_chain(identity, authority), work_order=work,
+        queue_item_id=QUEUE_ID, selected_slice="synthetic-parent-consensus")
+    reasons = set(result.rejection_reasons)
+    unresolved = {"canonical_memex_supply_signed_evidence_verifier_missing",
+                  "canonical_signer_client_peer_handshake_verifier_missing"}
+    if case == "valid":
+        assert reasons == unresolved
+        assert state.reads > 0
+    else:
+        assert set(REASONS) <= reasons
+        assert unresolved <= reasons
+    assert called == []
+    _assert_no_parent_effect_admission(result, work)

@@ -1,7 +1,10 @@
 {
   "manifest_version": "1.0.0",
   "foundup_id": "detect_ai",
+  "name": "AmIBot",
   "display_name": "AmIBot",
+  "version": "0.1.0",
+  "category": "games",
   "description": "Consented, blinded human-or-AI text-chat game and autonomous FoundUp production test fixture.",
   "tagline": "Can you detect AI?",
   "module_path": "modules/foundups/detect_ai",

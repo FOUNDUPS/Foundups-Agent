@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102a3a">
+  <meta name="description" content="A roadmap for congressional oversight when DOJ action is uncertain, with evidence review and lawful referrals to state authorities.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="icon" href="{{ASSET_BASE}}icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{{ASSET_BASE}}icons/icon-192.png">
+  <link rel="manifest" href="{{ASSET_BASE}}manifest.webmanifest">
+  <link rel="stylesheet" href="{{ASSET_BASE}}overview.css">
+  {{PAGE_ASSETS}}
+  <link rel="alternate" type="application/json" href="/accountability.json" title="Oversight source index">
+  <title>{{TITLE}} · Oversight Blueprint</title>
+</head>
+<body class="oversight-shell">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="masthead">
+    <a class="masthead-brand" href="{{ASSET_BASE}}#home"><img src="{{ASSET_BASE}}icons/icon.svg" alt="" width="35" height="35"><span>Oversight Blueprint</span></a>
+    <span class="masthead-note">Independent resource for staff and counsel</span>
+    <button type="button" id="install" hidden>Install app</button>
+  </header>
+  <div class="staff-layout">
+    <aside class="staff-sidebar">
+      <nav aria-label="Sections"><p class="kicker">ON THIS SITE</p>{{NAV_LINKS}}</nav>
+    </aside>
+    <main id="main" tabindex="-1">
+      {{CONTENT}}
+      <footer class="staff-footer">
+        <p>Independent accountability resource. Model materials are provided for review by authorized offices.</p>
+        <a href="/accountability.json">Source index</a>
+      </footer>
+    </main>
+  </div>
+  <details class="thumb-nav">
+    <summary><span class="thumb-label">Sections</span><span class="thumb-current">Accountability</span><span aria-hidden="true" class="thumb-chevron">⌃</span></summary>
+    <nav aria-label="Phone sections">{{NAV_LINKS}}</nav>
+  </details>
+  <script src="{{ASSET_BASE}}overview.js" data-worker="{{ASSET_BASE}}sw.js" defer></script>
+</body>
+</html>

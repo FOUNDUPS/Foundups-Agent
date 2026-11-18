@@ -79,6 +79,7 @@ class ArchitectFixPromotionProfileInputs:
     queue_item_id: str
     claim_id: str
     holoindex_evidence: Mapping[str, Any]
+    proposal_verification_inputs: Mapping[str, Any] | None = None
 
 
 def prepare_architect_fix_promotion_inputs(
@@ -170,6 +171,8 @@ def promoted_authority_profile(
     }
     binding = _operational_binding(inputs)
     profile.update(_profile_updates(inputs, binding))
+    if inputs.proposal_verification_inputs is not None:
+        profile["proposal_verification_inputs"] = inputs.proposal_verification_inputs
     if inputs.model_runtime_binding:
         profile.update(_runtime_binding_fields(
             inputs.model_runtime_binding_receipt,

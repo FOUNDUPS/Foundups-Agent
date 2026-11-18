@@ -1,0 +1,393 @@
+# Remote scheduling through Red Dog
+
+**2026-10-22 scope:** current interface and tests qualify bounded source behavior.
+The September source/Work observations below remain dated historical reports;
+they do not establish present host authentication, publication or discovery.
+Selected requests never run channel-wide tracker sync/autoheal; discovery is
+bounded to 100 pages per visibility pass and wrong edit identity fails closed.
+
+The existing route is `youtube_automation_adapter` -> scheduler CLI ->
+`YouTubeShortsScheduler.run_scheduling_cycle()` -> Studio DOM controls.
+One-shot execution does not require `python main.py`. An unattended remote
+request still needs an awake, reachable host and an authenticated browser.
+Move2Japan uses Chrome debug port 9222; extension access or a cloud Work
+browser does not prove that this local transport is available.
+
+## Reuse prior Work
+
+Read the [prior Work audit](PRIOR_WORK_AUDIT_2026-09-22.md) first. Work already
+created `publish_daily_clips` and reported 21 verified schedules. Its branch
+was not available locally or on GitHub during this audit. Retrieve it before
+extending discovery; no replacement publishing skill is registered here.
+
+The required default is every unlisted Short from the last 60 minutes within
+the current Japan day, with explicit time/day overrides. Freeze that window
+at request acceptance, exclude scheduled IDs and never select old backlog
+as a fallback. The Work prototype's source export and recent-window enhancement
+remain pending. Unqualified CLI preview/apply returns `clip_selection_required`.
+
+## Available commands
+
+Transport preflight (no browser launch, authentication or publication):
+
+```text
+youtube action scheduling channel=move2japan preflight=true
+```
+
+Equivalent standalone command:
+
+```powershell
+python -m modules.platform_integration.youtube_shorts_scheduler.cli --channel move2japan --preflight
+```
+
+Given a verified batch, substitute its real IDs for these examples:
+
+```text
+youtube action scheduling channel=move2japan video_ids=abcdefghijk,lmnopqrstuv dry_run=true preserve_metadata=true
+```
+
+The same selected-ID request with `dry_run=false` invokes existing scheduling.
+`max_videos=0` is the default and includes the entire selection; a positive
+limit is optional. Publication spacing is independent of batch size. The
+legacy slot allocator does not implement a custom deadline or Japanese
+exposure plan. `preserve_metadata=true` retains prepared factual metadata;
+the legacy templates are not transcript-grounded generation.
+
+## Implemented repair
+
+- Correct async constructor/method calls and registry-selected browser.
+- Transport-only readiness and JSON failure receipts through Red Dog.
+- Nonpersistent tracker preview, no preview autoheal, and shared-browser detach.
+- Selected-batch audits cannot auto-repair unrelated channel schedules.
+- Exact-ID selection across Studio pages, requested order per visibility,
+  stalled-page detection, and explicit unresolved IDs for partial batches.
+- No default clip-count cap and no unqualified remote backlog execution.
+- Batch Japanese/auto transcription reusing the existing STT, with reported
+  language and original chunk offsets retained by the audio analyzer.
+
+## Evidence boundary
+
+`preflight` success proves only transport. The actual local probe reported
+`browser_unavailable` for Move2Japan/9222; authentication and live scheduling
+were not established. No YouTube mutation occurred in this local task.
+
+Offline tests prove interface and selection behavior, not saved schedules.
+The existing scheduler receipt is not an independent readback. It explicitly
+returns `scheduling_verified=false`; non-preview responses say
+`verification_status=independent_readback_required`. `total_scheduled` is the
+legacy scheduler's reported count, not a verified final inventory. Before enabling
+unattended apply, retain Work's settled-Save check plus final video-ID-and-slot
+inventory verification and retries limited to missing/mismatched results.
+A natural-language acknowledgement is not a queued or completed job.
+
+Generated-metadata manifest application, the existing Work source export,
+recent-window integration, resident dispatch and live apply/readback validation
+remain outstanding. The generic DAE queue remains separate from this remote
+selected-batch command. Bulk indexing and RSI changes are outside this branch.
+
+For source context see [the historical remote audit](REMOTE_AUDIT_2026-09-21.md)
+and [the YUMORI source review](YUMORI_SOURCE_CONTEXT_2026-09-21.md).
+
+
+## Dual-surface scheduling practice — 2026-10-25
+
+This is an operator training procedure for the two existing implementations,
+not a new publisher, registered skill, model-training run or deployed agent.
+The current remote CLI still enters the detail-page orchestrator. A successful
+cloud-browser action does not qualify the local Chrome/9222 transport.
+
+| Intent | Existing owner | UI completion boundary |
+|---|---|---|
+| Schedule only; preserve title, description and related video | `src/content_page_scheduler.py` / `ContentPageScheduler.schedule_video_from_row` | Content-row visibility popup's **Schedule/Save**, followed by independent saved-state readback |
+| Edit authorized metadata and schedule | `src/scheduler.py` -> `src/dom_automation.py` | Visibility dialog **Done** stages changes; page **Save** persists them; read back saved state |
+| Change an existing schedule when explicitly requested | `ContentPageScheduler.reschedule_row_inline` | Popup save and exact-ID/date/time readback; never infer permission from a conflict alone |
+
+### Shared preparation
+
+1. Confirm the intended channel, content tab and visibility filter. Freeze an
+   explicit selected-ID batch. An inventory count is not a selection or proof
+   that all rows belong to one topic. Do not select private or already-scheduled
+   videos when the request is for unlisted videos only.
+2. Record each video's ID from its edit link, original title, visibility and
+   planned slot. Repeated titles are not identifiers. Refresh and reacquire rows
+   after writes; a stale row position can point at a different video.
+3. Check existing schedules and allocate collision-free slots in the requested
+   audience timezone. Read the actual Studio timezone; do not assume the host
+   timezone equals the channel timezone. Convert with an IANA timezone for the
+   release date, including daylight-saving transitions.
+4. Preserve metadata for schedule-only requests. A topic-specific hashtag such
+   as `#ActonDef` applies only to matching videos. Do not spread one description
+   across unrelated uploads. If metadata changes are requested, inspect each
+   video's content; a reused title or template is not transcript evidence.
+
+### Content table route
+
+1. Stay on **Channel content** and locate the selected ID's row.
+2. Open that row's visibility edit control. The observed Content UI exposes an
+   unnamed edit-triangle button in the visibility cell; it may appear only after
+   the cell is clicked/hovered. Clicking **Unlisted** alone can show a tooltip
+   without opening the editor. Inspect the settled row and click its actual edit
+   button. Scope actions to its inline popup, not a different row.
+3. Expand **Schedule** and set the date and time in the displayed timezone.
+   In the observed date control, the nested date button opens a second dialog;
+   fill that dialog's date textbox and press Enter to commit/close the picker.
+   Then fill the time textbox in **Select video privacy**. Reinspect both values
+   after the picker closes rather than relying on the typed string.
+4. Inspect the entered values, then use the popup's visible **Schedule/Save**
+   action. Unlike the detail route, do not search for a second page-level Save.
+5. Wait for the popup to settle and refresh the inventory if necessary. A video
+   disappearing from the Unlisted filter is insufficient proof: find the same
+   ID under scheduled content and verify date/time using its saved schedule
+   tooltip or reopened popup, together with the timezone observed in the editor.
+
+Source grounding: `ContentPageSelectors` scopes the popup to
+`ytcp-video-visibility-edit-popup`; `schedule_video_from_row` runs visibility,
+expand, date, time and popup-save steps. Its Boolean return proves that those
+steps returned success, not an independent server readback. Never promote this
+return value or a refreshed empty list to `scheduling_verified=true`.
+
+### Video detail route
+
+1. Open the selected row's edit link and verify the URL's video ID.
+2. Change only metadata authorized for this clip, if any.
+3. Click **Edit video visibility status**. In **Select video privacy**, expand
+   **Schedule** using **Click to expand** when it is collapsed.
+4. Set the date and time; inspect the displayed timezone and entered values.
+5. Click **Done**, then the page-level **Save**. A local **Scheduled** label
+   before Save is not sufficient evidence.
+6. Wait for saved state (for example, **Changes saved** and disabled Save), then
+   reopen visibility and read the exact persisted date, time and timezone.
+   Do not re-save a matching result merely to verify it.
+
+### Google verification at either surface
+
+Use phone push only for 012; never ask for, retrieve or enter a Google password,
+including through a secure credential form or a manual takeover instruction.
+Follow the active browser's authentication mechanism. At Studio **Verify it's
+you**, click **Next** once, allow the resulting challenge to settle, and inspect
+it for number matching. Immediately write the exact observed number in chat:
+**Google shows N. Press N on your phone, 012.** Never guess from phone choices,
+reuse an old number, or assume the first phone Yes completes verification.
+Wait for approval and the refreshed result before continuing. Do not resend
+while a challenge is pending. If the challenge cannot be read, state that
+limitation and offer supported manual takeover; stop automated interaction
+until 012 reports completion. A sent prompt is not authenticated access, and
+successful authentication is not a saved schedule.
+
+### Live practice receipts and remaining qualification
+
+The coordinating Work browser exercised both routes during an authorized
+scheduling task. Detail-page readback used disabled page Save, reopened matching
+schedule and **Changes saved**. Content-table readback used **Scheduled** in
+the same video's row and its saved date/time tooltip after the popup's final
+**Schedule** action. No outer Save was needed on the Content table.
+
+This documentation worker received those observations through the coordinating
+agent's handoff; it did not run a second browser verification. Private video IDs,
+account inventory and individual release slots are intentionally retained in the
+private task receipt rather than this repository. These observations establish
+bounded UI practice, not local transport qualification, video playback,
+transcription, backlog completion or a model-training run.
+
+For each future practice result retain `channel_id`, `video_id`, `surface`,
+`requested_slot`, `observed_slot`, `timezone`, metadata policy, saved-state
+signal and verification status. Missing/mismatched readback remains unresolved;
+retry only that ID after inspecting its current state. Compare both surfaces
+on distinct authorized videos to avoid duplicate scheduling. Store successful
+verified outcomes through the existing `schedule_dba.py` / WRE PatternMemory
+owner when that integration is actually exercised; documentation alone is not
+an ingested training event.
+
+
+## Acting on today's uploads during a live session
+
+Treat source selection and publication timing as separate clocks. Freeze the
+requested source day in `Asia/Tokyo` as a half-open interval from local midnight
+to the next midnight. Convert actual upload timestamps to that zone; a Studio
+date rendered in another timezone is not enough to classify a midnight boundary.
+Use the explicit "today" override rather than the default last-hour window.
+
+1. Confirm channel and scan the requested Shorts/Videos surface. Select only
+   unlisted IDs whose verified upload time falls in the frozen source day.
+   Do not substitute older backlog, private drafts or already-scheduled IDs.
+   Record pagination coverage and uncertain timestamps; unresolved rows stay out.
+2. Freeze each scan's ID list before edits. Check the live schedule and the
+   checkpoint by video ID. Skip IDs already saved to the intended slot; inspect
+   mismatches instead of rescheduling them automatically.
+3. Analyze each selected clip before changing title/body. Speech-heavy clips use
+   captions/STT; music, visual and mixed clips may use authenticated Studio Ask
+   plus visual evidence. Apply the existing enhancement skill's provenance gate.
+   If evidence is absent, retain metadata and report that limit. Never copy a
+   livestream title or the previous clip's description as content evidence.
+4. Choose distinct titles from supported angles: a different question answered,
+   example shown, event, location or quoted statement actually present in that
+   clip. Keep titles factual and within 100 characters, descriptions within
+   5,000, with relevant hashtags and M2M provenance. Rewording an unsupported
+   claim does not make it grounded. If clips truly contain the same material,
+   do not invent differences merely to force title variety.
+5. Allocate collision-free future publication slots in the requested U.S.
+   audience timezone, converting to Studio's observed timezone for each date.
+   Honor the requested cadence; daylight-saving changes affect conversion.
+   Source day does not require publication on that same calendar day.
+6. Use Content-table scheduling for metadata-preserving items and the detail
+   page for authorized metadata edits. Independently read back saved ID, title,
+   body and slot as applicable before counting completion.
+
+### Conversational cadence and topic mixing
+
+This is a bounded operator contract composed through the existing scheduling
+skills, not a new dispatcher or a persistent policy change.
+
+1. Reconcile the latest explicit request before allocating slots: channel,
+   source-day bounds, selected IDs, priority topic, spacing, timezone and whether
+   overnight publication is included. Preserve corrections in the private
+   checkpoint. Do not revive an earlier daytime-only window after an all-hours
+   correction, or expand a recent-two-day request into historical backlog.
+2. Inspect live scheduled inventory across the relevant Videos, Shorts and Live
+   surfaces before writes. Record filters, pagination and observation time.
+   Existing releases occupy slots; a stale tracker or an unlisted count is not
+   proof of an empty calendar. Preserve existing schedules unless moving them
+   was explicitly authorized. Reconcile again on resume or conflicting evidence.
+3. Classify exact clips from content, not inherited stream titles. One stream
+   can intentionally cover several subjects. A repeated title or mismatched
+   description is an inspection lead, not proof of a defect. Verify authenticated
+   Studio Ask/Gemini access and exact-ID content availability before relying on
+   it. Retain timestamped output and label model-generated summaries as semantic
+   evidence, not direct listening or verbatim transcripts. An inaccessible clip
+   remains unresolved even if neighboring clips were successfully analyzed.
+4. For an explicit priority-topic-every-two-hours request, allocate that topic
+   at two-hour intervals and eligible other topics in intervening hourly gaps,
+   including overnight only when requested. For example, priority at 12/14/16
+   and others at 13/15 is an allocation pattern, not a fixed timezone or daily
+   default. Fit around existing releases and record any resulting cadence gap.
+   Do not duplicate clips, invent inventory or use unrelated backlog to fill it.
+5. Keep source dates separate from release dates. Read Studio's actual timezone,
+   convert the full release date/time with DST-aware zones, and report the
+   bounded first/last slot and unfilled gaps. If the selected native allocator
+   cannot represent the request, do not silently fall back to its default:
+   use an already-authorized qualified operator surface or report the limitation.
+6. Schedule-only preserves metadata. Authorized enhancement requires matched
+   clip evidence through the existing enhancement owner, not a template rewrite.
+   Hold unsupported personal allegations or other consequential material for
+   specifically applicable approval; a broad scheduling request does not supply
+   approval for a new allegation. Keep evidence-missing and approval-held IDs
+   distinct and leave their state unchanged.
+7. Count completion only after settled Save and independent persisted readback
+   of exact channel/video/date/time/timezone, plus changed metadata when relevant.
+   The detail dialog's Done only stages a change. Reload/reopen without resaving
+   matching results. Persist the receipt in the existing private checkpoint;
+   if recording fails after Save, reconcile the record, never replay the batch.
+
+Report saved schedules separately from actual publication and delivery. A
+verified bounded batch does not establish a resident watcher, native worker
+qualification, PatternMemory ingestion or model training. The existing security,
+pre-save audit, account-verification and approval gates remain in force.
+
+### Bounded scanning and checkpoint contract
+
+A chat statement such as "while I am live" does not install an always-on worker.
+For an active-session scan, record start/end, source-day bounds, requested cadence
+and stop condition. Make a bounded scan, checkpoint, then rescan only at the
+agreed frequency while an actual runtime remains active. If no frequency was
+specified, use a single scan and report it; do not invent a background service.
+
+For a resident watch, establish the existing worker/service identity, installed
+revision, authenticated channel, reachable browser transport, scan interval,
+expiration/stream-end condition and durable checkpoint path before activation.
+Do not launch broad `main.py` merely to obtain this behavior: it also owns
+other actions. A stopped chat, detached browser or merged PR is not a worker
+heartbeat. Report pending items and the exact blocker if execution stops.
+
+Checkpoint each ID as discovered, evidence_ready, proposed, saved_verified or
+blocked, with source timestamp/zone, evidence provenance, metadata revision,
+requested/observed release slot, last observation and error. Keep private
+receipts off public repository history. Resume by reconciling live state and
+retry only missing/mismatched items; never replay all prior successful IDs.
+
+Current qualification: selected-ID scheduling and read-only preflight exist.
+The historical `publish_daily_clips` source and automatic today-window discovery
+remain unqualified here. These instructions define a bounded operator/handoff
+contract, not a newly deployed watcher or analytics-driven optimization loop.
+
+## 012 live-aware audience timing correction (2026-11-16)
+
+This correction overrides earlier all-hours/on-the-hour examples for subsequent
+requests. Source-day scope and publication-day scope remain separate.
+
+- Do not release Shorts while 012 is actively live on the target channel. Read
+  the channel's actual Live-now status before allocating slots and before any
+  authorized application. A currently active stream has no assumed end time.
+  Existing upcoming slots are conflicts to report, not permission to silently
+  move them. A future slot alone cannot guarantee that no stream will be live;
+  an unattended guarantee requires a qualified existing live-aware owner and
+  pre-release check. Do not claim that guard is deployed from these instructions.
+- Target the requested U.S. audience window, not the PC's clock. Record a named
+  audience timezone (for example America/New_York), release date and UTC instant;
+  convert to the actually displayed Studio timezone, commonly Asia/Tokyo.
+  Compute offsets for each release date, including DST and date rollover; never
+  reuse a fixed U.S./Japan offset. If audience analytics are unavailable, label
+  the selected window an operator assumption, not a measured optimum.
+- Use varied minute offsets and roughly the requested spacing rather than fixed
+  on-the-hour releases. This is editorial pacing, not evasion of platform checks.
+  Check existing releases first; preserve topic ordering, minimum spacing and
+  the explicit audience window. Do not add overnight coverage unless the latest
+  direction requests it. Latest explicit corrections supersede older cadence.
+- When 012 is editing or rescheduling in Studio, stop browser writes and yield
+  the shared tab, including any open unsaved dialog. Do not cancel, save, reload
+  or overwrite that work. Reconcile actual saved state after control is returned.
+- For schedule-only work, use the existing Content-table visibility popup route
+  above rather than opening each video detail page. Content evidence still must
+  exist; list titles alone do not qualify a clip or release held allegations.
+  Verify each saved ID/date/time/timezone independently. A visible control is
+  not evidence that its Save path has been tested in the current session.
+
+Evidence boundary: this update changes operating guidance only. No video,
+resident worker, schedule, account setting or runtime policy is changed by it.
+
+### Current bounded Move2Japan override (012, 2026-11-16)
+
+Latest voice correction supersedes the earlier 15:00-20:00 exclusion and the
+two-hour Hasan-first cadence for this recent-Shorts batch. New slots begin with
+the overnight window starting November 17, 2026 at 20:00 Asia/Tokyo and ending
+November 18 at 04:00. Do not infer authorization for additional nights from
+this bounded window. No scheduling outside that window. Use approximately one
+video every four hours with topic variety, not constant Hasan. Vary minutes only
+within the window and without overriding cadence, collisions or existing slots;
+do not force an extra release at the closing boundary.
+
+Leave November 16 and every existing scheduled item intact. Reconcile current
+operator edits and duplicate IDs before any writes. Record each full JST date,
+UTC instant and date-specific U.S. audience equivalent; overnight slots cross
+a calendar date. The known-live exclusion still applies: this window does not
+authorize release during a known active stream. Held content remains held until
+its applicable approval/evidence is resolved. This is a bounded batch override,
+not a channel-wide runtime policy or permission to move existing schedules.
+
+### Operator demonstration: alternating positions in an Unlisted list
+
+012 demonstrated the intended selection heuristic: alternate top/bottom candidates
+to obtain topic variety rather than exhaust one repeated-title group. Treat row
+position as a navigation aid, not topic evidence, lineage or expanded scope.
+Bind every action to the exact video ID, verified content and authorized source
+window; older bottom rows outside the accepted batch remain excluded.
+
+After a saved visibility change, an item may disappear from the Unlisted-filtered
+list. Reacquire remaining rows because positions change. Disappearance alone is
+not a schedule receipt: independently locate the same ID in scheduled content
+and read its persisted date, time and timezone. Noninteractive observation of
+an operator's list does not prove unseen clicks, saved times or actual topics.
+
+Observed UI qualification (2026-11-16 operator demonstration): newly Scheduled
+rows can remain visible temporarily under the Unlisted filter while the operator
+alternates top and bottom groups. Do not assume immediate disappearance or use
+an unchanged row position as identity. That observation verified visible status
+and date only, not an exact saved time or full playback/content audit.
+
+Current native implementation qualification (source audit 2026-11-16): the
+operator's demonstrated manual list-page workflow is not yet the native writer's
+qualified execution path. `ContentPageScheduler.schedule_video_from_row` routes
+to the detail owner for fresh metadata/Audience checks; `video_policy.submit_inline`
+fails closed with `presave_audit:detail_editor_required`. Do not remove that gate
+to implement the preference above. `schedule_all_visible` delegates frozen IDs
+to the existing calendar/claim owner. Native list-page continuation needs its
+own gate-preserving implementation and tests before live qualification.

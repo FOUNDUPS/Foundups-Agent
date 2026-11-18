@@ -37,8 +37,7 @@ tmp_upload_dir = "/var/cache/acoustic-lab/uploads"
 
 # Application
 pythonpath = "/var/www/acoustic-lab"
-wsgi_module = "modules.platform_integration.acoustic_lab.src.web_app"
-callable = "create_app"
+wsgi_app = "modules.platform_integration.acoustic_lab.src.web_app:create_app()"
 
 # Environment
 raw_env = [

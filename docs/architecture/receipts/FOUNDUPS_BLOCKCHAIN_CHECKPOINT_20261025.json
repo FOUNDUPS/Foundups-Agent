@@ -1,0 +1,246 @@
+{
+  "schema_version": "foundups.blockchain_checkpoint.v1",
+  "status": "LOCAL_EVIDENCE_CHECKPOINT_NOT_SYSTEM_COMPLETION",
+  "observed_at_utc": "2026-10-25 11:30:35 UTC",
+  "observed_main": "0909b9419f410e7da371dfbd6bf9738a229bf7a7",
+  "goal_complete": false,
+  "scope": "Documentation of merged intake/nomination, preserved open delivery branches and a local unsigned interoperability experiment. No execution authority.",
+  "allocation": {
+    "scores": {
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 3,
+      "sum": 13,
+      "priority": "P1"
+    },
+    "max_files": 3,
+    "max_plan_added_lines": 100,
+    "max_root_modlog_added_lines": 18,
+    "max_receipt_bytes": 24576,
+    "no_runtime_change": true
+  },
+  "merged": [
+    {
+      "pr": 2207,
+      "concern": "Public project nomination issue form",
+      "main": "a44e7864a4e4313aaac9965abe0792c52455a913",
+      "limit": "Proposal only; no repository-control, admission or issuance rights."
+    },
+    {
+      "pr": 2208,
+      "concern": "Preserve validated references in the existing intake draft",
+      "main": "0909b9419f410e7da371dfbd6bf9738a229bf7a7",
+      "reviewed_head": "99f81820a9fa6cdfa3b6b0286e032a1827ec828c",
+      "readback": "Entire reviewed and merged Git trees equal.",
+      "limit": "Untrusted draft references; no repository fetch or execution authority."
+    }
+  ],
+  "preserved_open_prs": [
+    {
+      "pr": 2196,
+      "head": "afc0e776511f415f59c58dbcc7b490d3241b7a06",
+      "concern": "Play Mall homepage, About, FX/discovery and nomination links",
+      "successful_checks": 21,
+      "pending_checks": 0
+    },
+    {
+      "pr": 2202,
+      "head": "12996b82e635b1890de216c96aa78feca79442d1",
+      "concern": "Opt-in durable TestNet probe intents",
+      "successful_checks": 21,
+      "pending_checks": 0
+    },
+    {
+      "pr": 2206,
+      "head": "adf9633b7c29ce90cd12fa859f526638aa154b03",
+      "concern": "Strict unsigned Algorand ASA transfer format",
+      "successful_checks": 22,
+      "pending_checks": 0
+    }
+  ],
+  "publication_gate": {
+    "status": "BLOCKED_REQUIRED_GATE",
+    "check": "GitGuardian Security Checks",
+    "classification": "Source-verified public commit identifiers and a synthetic public address fixture; authenticated incident disposition remains pending.",
+    "no_bypass": true,
+    "no_force_push": true,
+    "classification_evidence_sha256": "205668b1fef0c584ac15a2bb17a4fabca78bf784c38e61acec0d6030c81a9051"
+  },
+  "local_experiment": {
+    "status": "ACCEPTED_LOCAL_KNOWN_CODE_UNSIGNED_FORMATTING_FUNCTIONAL_RESULT",
+    "source_context": {
+      "fam": "12996b82e635b1890de216c96aa78feca79442d1",
+      "codec": "adf9633b7c29ce90cd12fa859f526638aa154b03"
+    },
+    "code": {
+      "python_files": 4,
+      "python_lines": 625,
+      "allocated_max": 625,
+      "fam_cases_sha256": "09a09583d2a2b869b3e4aad40db6719fd933dfd8b6f8d3a1db7f0d0184b97917",
+      "sdk_worker_sha256": "b76d9c98e27870c2bb68e612ee10f5109e0f803d0f02beaf7ee590ba89871f23",
+      "host_driver_v2_sha256": "ecf899118eb8bbfa87ace6819106194dc82636a21e6cc9f48ab5567961201bd3",
+      "preparer_v2_sha256": "15442c821aa71bb786ed177b782895d9a53465adbf782a6e8201f4bd97da5dfa"
+    },
+    "profiles": {
+      "host_files": 2982,
+      "sdk_files": 5264,
+      "unique_files": 7044,
+      "shared_files": 1202,
+      "original_sdk_files": 5263,
+      "original_sdk_profile_sha256": "155cf0d9e341de82b6f61fedbf0092de345f076518f5dd4607254630e27bce65",
+      "worker_profile_sha256": "f816a88d9025cc6ede2e2a75df91e2fec4ffc3edf820c80ed67134475602c700",
+      "host_profile_v2_sha256": "66c60818f8fbbd6f1b7d4bf58bfe5bf8d0b7e78f082d74ce9f258b3c41dc0b7d",
+      "limit": "Selected payload/source byte pins and loaded origins; no upstream wheel authenticity for the host, complete native closure, OS sandbox or concurrent-writer guarantee."
+    },
+    "run001": {
+      "status": "REJECTED_UNEXPECTED_HOST_EFFECT",
+      "case_assertions_completed": 20,
+      "outer_returncode": 1,
+      "outer_duration_seconds": 92.406,
+      "source_stable_at_close": true,
+      "host_denied_events": [
+        "host_network"
+      ],
+      "classification_sha256": "5af9b30d627fe2f8b715cac256304d6513da161226e66d7b13f92c7435776450",
+      "note": "Internal functional-pass label does not qualify the run. Original receipts and raw source preimages are preserved.",
+      "receipt_sha256": "363c97c47abb54186c790cd80d969afcc0ac7ef157d9032e445b7270627a8d66",
+      "outer_receipt_sha256": "2d3a1ea779896408da59be913e5b77f52fc57166f124c164180226b7b4c1b076"
+    },
+    "dependency_diagnostic": {
+      "event": "socket.gethostname",
+      "caller": "platform._node -> uname -> machine -> sqlalchemy.util.compat",
+      "sqlalchemy_version": "2.0.48",
+      "sha256": "1a14c2da97f327440b7eddf2c72e01ab10da5534b582e0615c0c4d58429b7816",
+      "attribution_limit": "Separate denied dependency import reproduces a plausible cause; run001 did not record the exact original caller."
+    },
+    "revised_host_permission": "At most one local hostname metadata read from the exact pinned platform._node code; record operation only. Every other socket/DNS operation remains denied; original SDK guard unchanged.",
+    "run002": {
+      "status": "FUNCTIONAL_BOUNDARY_PASS",
+      "case_count": 20,
+      "frozen_case_ids_match": true,
+      "total_child_launches": 9,
+      "fixture_formatter_calls": 2,
+      "outer_returncode": 0,
+      "outer_duration_seconds": 92.391,
+      "outer_timeout_seconds": 507,
+      "host_duration_seconds": 91.172,
+      "unexpected_host_events": [],
+      "allowed_local_metadata": [
+        "socket.gethostname"
+      ],
+      "hostname_recorded": false,
+      "source_stable_at_close": true,
+      "post_run_root_rehashed_unique_files": 7044,
+      "post_run_root_source_drift_count": 0,
+      "post_run_root_verification_sha256": "a35ea7c9e220d20a38ef38a97fe2beb9a706a20eb3b172f2676710746e5103f4",
+      "receipt_sha256": "e044203ff17d632818c194c84c8865372eb332d34ea38812be44201dee9af802",
+      "outer_receipt_sha256": "7c926ea50e45a893d37bd481f9d615894e09aebf748f1746205835f8337af346",
+      "execution_release_sha256": "9ae7bdb4d9107211a6632e20f01140aaf1a54106784d8b95725dec0ff453a946",
+      "preexecution_profile_review_sha256": "8e7d516874584676496113d322f4b57e7aacb456b0ba8530af1aa76ba5f5457c",
+      "source_identity_sha256": "0a86f21e5d7c2dbd6492ae9aed001acaf1a9f19993b8a81c8c7686b226e257d3",
+      "full_snapshot_sha256": "b02b3559a1ddcd3df157b4aebde94c87ff3d173754cb6bf3783517b0c4065f28",
+      "sdk_evidence_sha256": [
+        "214d482ee1b6887c2ee918de7e8aae695c324fa6424411a7c91e5a2d07ec7183",
+        "214d482ee1b6887c2ee918de7e8aae695c324fa6424411a7c91e5a2d07ec7183",
+        "7b8cc5975efe538fcdf83631b431980a1f85901853142295377d8455401dc1e4",
+        "11a15c6c725663ccd24f1d31ff60b236cfa760c079d012bad68e04e1b7009faa",
+        "7ec8677d54c61bb4d7f1181525fb68af7830871791c0a41090443c71da958f72",
+        "8e87e8116d35ef10c79216fa5d292356953203eae212985b44e865f6062ee00c",
+        "32ded05d7139c83262f0ed020305a3602330ab16fbca24da40ebb955bb6c6473",
+        "8b544c0f1e6d6f7fe69c808ad7db939bf977130e399df08bd0f3342d12db35c9",
+        "a3d0849fc2e1d6392bcb841c5edd6fa531a40f9e222ef1333a7e45b626f03232"
+      ],
+      "format_evidence": "Two FORMAT_OK results with identical request, zero SDK attempts and original5263-file before/after checks. Parent validates independent golden wire/txid and request/source binding.",
+      "denied_controls": {
+        "count": 5,
+        "kinds": [
+          "socket",
+          "dns",
+          "subprocess",
+          "account_sign_client",
+          "sqlite"
+        ],
+        "expected_flag": false,
+        "stage": "control",
+        "status": "REJECTED"
+      },
+      "resource_controls": "Overflow/timeout CONTROL_STARTED receipts bind exact worker/profile/request. Parent requires actual bounded result and rehashes original SDK files after termination; these controls do not finish their own after-hash.",
+      "database_evidence": "Actual prepare identity matches stored row. First prepare leaves13 preexisting tables unchanged. Formatting/retry/reopen retain full14-table and schema-migration snapshot. INITIATED payout, VERIFIED task and original compute assertions retained. No database transaction spans formatter I/O.",
+      "independent_result_review": {
+        "status": "ACCEPTED_LOCAL_KNOWN_CODE_UNSIGNED_FORMATTING_FUNCTIONAL_RESULT",
+        "sha256": "101a7584b067baba950af8cf4f4cd566021281528c28d8c696e6a0812f0f355b",
+        "material_findings": 0,
+        "independently_post_rehashed_unique_files": 7044,
+        "host_loaded_origins_checked": 461,
+        "actions": "Read JSON/streams/source bytes and source-pinned assertions; independently rehashed7044 selected files and all loaded-origin records. Opened only completed local SQLite artifacts in immutable read-only mode, checked their hashes unchanged. No candidate/helper/SDK/fixture import, rerun, tests, chain/provider calls or source/profile/result/repository changes.",
+        "authorship_disclosure": "Reviewer did not author external host/preparer/FAM/SDK-worker experiment sources. Reviewer authored original canonical qualify_sdk.py in an earlier allocated slice. This result review is supplementary for that unchanged helper and is not third-party attestation of its design."
+      },
+      "retained_evidence_limit": "Raw before-snapshot contents and child format stdout packets were not separately retained. Temporal snapshot/golden result equality relies on pinned executed unoptimized assertions plus independently inspected completed database state and request/evidence corroboration.",
+      "independently_reconstructed_request_sha256": "2b4c6d29e0f9a666681def019e5f5d42dde4d268571100fd8e15f43fa5d9118b",
+      "golden_unsigned_wire_sha256": "5840cc9569167a9b4fc2ccc52b4243437485cb75bdbea83309d77e0726e3ce0e",
+      "full_request_binding_sha256": "25f3f93519454abac94072e089ba80aa7ae155a008f9bae1a752e8ce3ae5a394"
+    },
+    "frozen_case_ids": [
+      "stored_intent_format",
+      "exact_retry_reopen",
+      "absent_authority",
+      "altered_stored_identity",
+      "sdk_socket_bounded_or_denied",
+      "sdk_dns_bounded_or_denied",
+      "sdk_subprocess_bounded_or_denied",
+      "sdk_account_bounded_or_denied",
+      "sdk_sqlite_bounded_or_denied",
+      "sdk_overflow_bounded_or_denied",
+      "sdk_timeout_bounded_or_denied",
+      "result_reject_duplicate",
+      "result_reject_nonfinite",
+      "result_reject_extra",
+      "result_reject_signed_wrapper",
+      "result_reject_self_consistent_wrong_wire",
+      "result_reject_oversized",
+      "request_reject_oversized",
+      "request_reject_duplicate",
+      "request_reject_noncanonical"
+    ],
+    "nonadditive": "Twenty experiment cases do not add to historical28/173/459 component test counts. The unchanged component suites were not rerun.",
+    "limits": [
+      "Synthetic public addresses, treasury fixture grants, asset and round/fee parameters; no actual ledger facts, wallet control or funding.",
+      "Unsigned existing-asset transfer format only; no asset creation, signing, submission, payment, token rights or liquidity.",
+      "No new executed source/profile/executable drift-attack cases; these remain production-admission prerequisites.",
+      "No durable artifact row, production formatter worker, resident caller or signer integration.",
+      "SQLAlchemy/host dependency declarations and native/runtime qualification remain separate."
+    ],
+    "reproducibility": {
+      "local_root_name": "foundups-intent-codec-split-experiment-20261025-q31e1kih",
+      "external_sources_and_payloads_bundled": false,
+      "public_runner_provided": false,
+      "note": "This compact receipt summarizes local source-bound evidence. Full scripts, profiles, releases, source preimages and raw results remain on the originating host; hashes alone do not enable public reproduction."
+    },
+    "allocation_evidence": {
+      "allocation.json": "01bf5f37c987029446bc95760c5d07e7c3a715b3cbd35916ee7fb84daffa9092",
+      "allocation-amendment.json": "b73b98d02a6e2b67c7f97a3c38d3dc00c6e0e2f0a30d59d8ac17e3bf7d60b807",
+      "hostname-metadata-allocation.json": "bffa62d13a08195612d3abb099d7d6a835cb19896bc3c8ef588e501126847787",
+      "acceptance-inventory.json": "56b91f87c4cdec5f2866cc697cf8698237c08de8c2bf8785461bbe63a4c22b74",
+      "initial_python_line_cap": 580,
+      "amended_before_execution_python_line_cap": 625
+    }
+  },
+  "next_layer": "After security publication closure, allocate one consumer/artifact layer from revalidated stored intent and current host grants; bind exact independently admitted fee/round facts, immutable request/wire identity and retry/reopen/conflict behavior. No database transaction spans formatter I/O. Signing remains separate.",
+  "remaining_system_work": [
+    "Authenticated project-control challenge, claimant/admission and optional issuer authorization.",
+    "Admitted TestNet asset, funding, signer owner, current ledger/account facts and confirmation/replay/reconciliation.",
+    "Ratified reward units, issuance/vesting/transfer and allocation/funding policy; no reward conversion inferred from transport atoms.",
+    "Canonical venture inventory:19 mixed records/five public cards are not115 verified FoundUps or tokens.",
+    "Mall media/voice/preferences and autonomous pitch/video/deck runtime; current local pitch package has no audio/video.",
+    "Production site activation and a separately admitted, funded venue/market; local DEX/simulator behavior does not prove real trading."
+  ],
+  "retrieval_evaluation": {
+    "noise": "Historical statuses and heterogeneous catalog populations require source/date filtering.",
+    "ordering": "Current main/PR owners and frozen evidence take precedence over archived plans.",
+    "missing_artifacts": "External experiment sources, profiles and payloads are not bundled; production consumer, signer and confirmed pilot are absent.",
+    "staleness": "Observed head/check values are dated; read current hosted gates again before publication.",
+    "duplication": "Reuse the existing FX delivery plan and compact receipt; no second runtime or registry.",
+    "holo_owner_query": "Preserved HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; ok=false, freshness=UNKNOWN, index_gap_detected=true. No reindex or query-side mutation. Verified direct-source fallback."
+  }
+}

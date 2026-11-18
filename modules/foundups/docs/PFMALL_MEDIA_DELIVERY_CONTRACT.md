@@ -1,7 +1,7 @@
 # p.fMALL Media Delivery Contract
 
-**Version**: 1.0.0
-**Date**: 2026-04-03
+**Version**: 1.0.1 (privacy clarification; delivery behavior unchanged)
+**Date**: 2026-10-23
 **Status**: Locked
 **Owner**: 0102
 **Test Suite**: `modules/foundups/pfmall/tests/test_video_mall_media_delivery.py` (50 tests)
@@ -52,6 +52,13 @@ public/member/media/
 ```
 
 **Usage**: Reserved for future member-specific media. Currently empty convention directories.
+
+**Privacy boundary (2026-10-23):** These are static Hosting paths with public
+cache conventions. The name `/member/media/` does not enforce per-principal
+asset access. Do not place private AutoPost clothing/item captures here or in
+the public catalogs. The [private item handoff](../pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md)
+requires a separately authenticated shared-media adapter and permitted read
+projection; that adapter is not implemented by this static delivery contract.
 
 ### 2.3 Naming Rules
 
@@ -264,6 +271,40 @@ When a poster fails to load:
 
 **Rule**: `embed_url` must be YouTube only.
 
+### 8.4 Desktop previews and bandwidth
+
+Use poster images for the dense browse view. Rendered cards set their poster
+URLs immediately. The tile observer records visibility and load state. The
+catalog at `4c1d1e7d` ships 15 lanes
+with 1,205 listed videos in a 500,578-byte Git blob. The eight-video HPC
+projection is 5,832 bytes. A full-lane expansion can still build hundreds
+of poster nodes. Measure catalog transfer, poster requests, DOM size and
+provider sessions separately before expanding the preview behavior.
+
+The legacy click preview mounted a 159.8 × 213.7 CSS px YouTube viewport
+at 1440 × 900 in the controlled desktop grid. It used the tile's clipped
+preview layer and requested `controls=0`. YouTube requires an embedded
+viewport of at least 200 × 200 CSS px and prohibits obscuring any part of
+the player. Scripted autoplay requires a visible player with more than half
+in view and a single automatically playing YouTube embed per page.
+[YouTube player requirements](https://developers.google.com/youtube/terms/required-minimum-functionality)
+
+Wide desktop poster selection mounts the shared player at the selected tile
+with a visible 200 × 200 CSS px or larger stage. The dedicated full-player
+action retains the native controls, branding and input access. Posters smaller
+than 120 × 70 CSS px open with manual Play. The desktop full-player rail sizes
+its playable thumbnails to the same minimum. The viewport and scroll clips
+limit autoplay. Each desktop surface uses one provider at a time.
+Crop the poster art to fit the tile. `modestbranding` has no
+effect and `rel=0` confines recommendations to the same channel.
+[YouTube player parameters](https://developers.google.com/youtube/player_parameters)
+
+A later hover preview can use a rights-cleared first-party clip through
+the existing native video path. Start one muted preview after deliberate
+hover. Stop it on exit, scroll out of view, tab hiding or full-player
+entry. Give keyboard and touch users an explicit play action. Measure
+preview requests and bytes alongside the poster-only baseline.
+
 ---
 
 ## 9. Test Coverage
@@ -307,4 +348,6 @@ This contract does NOT cover:
 
 ---
 
-*Locked by Worker A. 50 tests passing.*
+*Runtime conventions originally locked by Worker A; the 50-test result above
+is the historical acceptance record. The 2026-10-23 clarification adds no media
+runtime and does not claim a fresh execution of that suite.*

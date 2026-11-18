@@ -14,6 +14,12 @@ evals: []
 Read [research verification](references/research-verification.md) before research
 or editorial prioritization. Use Google Docs as the working manuscript when
 developing an issue; keep session learning separate from model training.
+Current mutable editorial manuscripts and master moshpits are organized under the
+Drive hierarchy `CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents/EDITORIAL — Newsletters & Articles`.
+Discover that hierarchy live by name; do not hard-code personal Drive IDs in Git.
+Do not admit historical eSingularity/Educational Singularity documents into a current YUMORI/AI Koban issue merely because the names overlap; treat them as historical sources until the current project authority deliberately cites/promotes them.
+Search for the existing lane manuscript/master before creating a new Doc, and update
+that artifact in place when the requested work is a revision.
 
 Read the [master routing contract](../../docs/LINKEDIN_ACTIVITY_ROUTING.md).
 Read the [editorial orchestration contract](references/editorial-workflow.md) for

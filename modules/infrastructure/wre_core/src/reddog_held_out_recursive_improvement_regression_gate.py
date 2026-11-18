@@ -84,9 +84,17 @@ class HeldOutRecursiveImprovementRegressionReceipt:
     no_pr_publish_performed: bool = True
     no_merge_performed: bool = True
     no_holoindex_reindex_performed: bool = True
+    identity_version: int = 1
+    evidence_digest: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        if (type(self.identity_version) is int and self.identity_version == 1
+                and type(self.evidence_digest) is str and self.evidence_digest == ""):
+            # Historical signed envelopes bind the exact pre-v2 wire shape.
+            payload.pop("identity_version")
+            payload.pop("evidence_digest")
+        return payload
 
 
 @dataclass(frozen=True)
@@ -393,6 +401,8 @@ def evaluate_held_out_recursive_improvement_regression_gate(
     }
     receipt = HeldOutRecursiveImprovementRegressionReceipt(
         gate_id="held_out_recursive_gate_" + _digest(seed).removeprefix("sha256:")[:16],
+        identity_version=seed["identity_version"],
+        evidence_digest=seed["evidence_digest"],
         work_order_id=work_order_id,
         slice_name=slice_name,
         improvement_job_id=improvement_job_id,

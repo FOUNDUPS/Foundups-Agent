@@ -1,5 +1,13 @@
 # WSP Module Violations Log
 
+## Moltbot interface historical size debt — 2026-10-15 (OPEN)
+
+- Owner: MoltbotBridge documentation maintainers / RSI coordinator; remediation in the existing module ROADMAP documentation-maintenance work.
+- Exact base: `57d5cd8e8c9db2179e2761ae59f74a2912b8d168`. README remains1306 lines; INTERFACE decreases3310 to3305 through verbatim active-contract moves into the existing key-provider contract, retaining navigation.
+- The unchanged legacy root-revocation hardening test still requires INTERFACE<=1511; its failure is inherited and is not claimed as a pass. Canonical WSP62 section3.1 attributes debt differentially; no threshold, exemption or authority gate is changed.
+- Runtime-materializer debt is reduced296 to197 by coherent startup composition extraction (new owner119), preserving API and behavior. All code/function caps in that gate now pass.
+- Remediation: continue focused interface navigation/consolidation under the existing module documentation owner before further nonhistorical documentation growth; preserve active contracts and historical receipts.
+
 ## Central event-store class review debt — 2026-09-22 (OPEN)
 
 - Owner: dae_daemon maintainers / R18-R23 coordinator. Base `9103ec35d50495fd37690e48e442025372fac6e5`.

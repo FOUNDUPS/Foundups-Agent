@@ -5,6 +5,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from modules.infrastructure.idle_automation.src.self_research_refresh import (
     SelfResearchRefresher,
     group_wsp_violations,
@@ -12,6 +14,88 @@ from modules.infrastructure.idle_automation.src.self_research_refresh import (
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_maintenance_handshake as handshake,
 )
+
+
+def _audit_refresher(tmp_path, monkeypatch):
+    root = tmp_path / "repo"
+    root.mkdir()
+    runtime = tmp_path / "audit-runtime"
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", str(runtime))
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_IMPROVEMENT_PROPOSALS", "0")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_TELEMETRY", "0")
+    return SelfResearchRefresher(repo_root=root), runtime
+
+
+@pytest.mark.parametrize("has_input", [False, True])
+def test_self_audit_zero_events_preserves_input_coverage(tmp_path, monkeypatch, has_input):
+    refresher, _ = _audit_refresher(tmp_path, monkeypatch)
+    if has_input:
+        logs = refresher.repo_root / "logs"
+        logs.mkdir()
+        (logs / "clean.log").write_text("normal startup\n", encoding="utf-8")
+    result = refresher.scan_self_audit()
+    status = result["scan_status"]
+    assert result["events_opened"] == 0
+    assert status["outcome"] == "completed"
+    assert status["coverage"] == ("bounded" if has_input else "no_inputs")
+    assert (status["last_success"] is not None) is has_input
+
+
+def test_self_audit_partial_discovery_stays_partial(tmp_path, monkeypatch):
+    refresher, _ = _audit_refresher(tmp_path, monkeypatch)
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "../outside.log")
+    result = refresher.scan_self_audit()
+    assert result["scan_status"]["outcome"] == "partial"
+    assert result["scan_status"]["coverage"] == "known_partial"
+    assert "discovery_excluded" in result["scan_status"]["error_codes"]
+    assert result["events_opened"] == result["scan_status"]["event_count"] == 0
+
+
+def test_self_audit_failure_preserves_unknown_count_and_historical_signatures(tmp_path, monkeypatch):
+    from modules.infrastructure.wre_core.src.daemon_self_audit_loop import DaemonSelfAuditLoop
+
+    refresher, runtime = _audit_refresher(tmp_path, monkeypatch)
+    runtime.mkdir()
+    (runtime / "daemon_self_audit_state.json").write_text(json.dumps({
+        "signature_stats": {"historical": {"count": 7, "recommended_fix": "inspect"}}
+    }), encoding="utf-8")
+
+    def fail(_self):
+        raise OSError("controlled read failure")
+
+    monkeypatch.setattr(DaemonSelfAuditLoop, "_scan_once_locked", fail)
+    result = refresher.scan_self_audit()
+    assert result["events_opened"] is None
+    assert result["scan_status"]["outcome"] == "failed"
+    assert result["scan_status"]["coverage"] == "unknown"
+    assert "scan_failed" in result["scan_status"]["error_codes"]
+    assert result["top_signatures"][0]["count"] == 7
+    assert result["history_status"] == "available"
+
+
+@pytest.mark.parametrize("history", [
+    ["invalid root"], {"signature_stats": {"broken": None}},
+    '{"signature_stats":{"broken":{"count":1e309}}}',
+])
+def test_self_audit_malformed_history_does_not_hide_scan_status(tmp_path, monkeypatch, history):
+    from modules.infrastructure.wre_core.src import daemon_self_audit_loop as owner
+
+    refresher, runtime = _audit_refresher(tmp_path, monkeypatch)
+    runtime.mkdir()
+    path = runtime / "daemon_self_audit_state.json"
+    path.write_text(history if isinstance(history, str) else json.dumps(history), encoding="utf-8")
+    status = {"outcome": "failed", "coverage": "unknown", "event_count": None,
+              "error_codes": ["scan_failed"]}
+    monkeypatch.setattr(owner, "DaemonSelfAuditLoop", lambda _root: SimpleNamespace(
+        state_path=path, scan_once_with_status=lambda: status, scan_once=lambda: 0))
+    result = refresher.scan_self_audit()
+    assert result["scan_status"] == status
+    assert result["events_opened"] is None
+    assert result["history_status"] == "unavailable"
+    assert result["signature_count"] is None
+    assert result["top_signatures"] == []
 
 
 def test_group_wsp_violations_aggregates_and_orders_by_severity():

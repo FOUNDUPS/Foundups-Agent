@@ -155,7 +155,7 @@ Advanced protocols for complex system behaviors and architectural concerns.
 | WSP 68 | Enterprise Build Scalability Protocol | Active | Enterprise build scalability management through fractal architecture principles and quantum-cognitive build coordination | WSP 66, WSP 67, WSP 62, WSP 63, WSP 65, WSP 3, WSP 1 | Enterprise scalability, fractal architecture, build coordination, quantum planning |
 | WSP 69 | Zen Coding Prediction Integration | Active | Integrates zen coding 'remember the code' principle into proactive modularization workflows through quantum temporal prediction | WSP 66, WSP 67, WSP 68, WSP 48, WSP 54, WSP 32 | Zen coding, quantum remembrance, temporal prediction, collective intelligence |
 | WSP 70 | System Status Reporting Protocol | Active | Formalizes system-level transformation tracking, integration requirements, and recursive system enhancement documentation | WSP 22, WSP 48, WSP 57, WSP 60, WSP 64 | System status tracking, recursive documentation, framework integration, system-level ModLog |
-| WSP 71 | Secrets Management Protocol | Active | Canonical secrets storage, retrieval, and management with agent permission integration plus mandatory skill supply-chain safety gates | WSP 54, WSP 4, WSP 50, WSP 64, WSP 95, WSP 96 | Secrets management, security, agent permissions, audit trails, skill scanner, fail-closed policy |
+| WSP 71 | Secrets Management Protocol | Active | Canonical secrets management, skill safety gates, and 0102-owned repository security review and remediation | WSP 54, WSP 4, WSP 50, WSP 64, WSP 95, WSP 96, WSP 97 | Secrets management, security, audit ownership, candidate triage, exact revision coverage, fail-closed policy |
 | WSP 72 | Block Independence Interactive Protocol | Active | Standardize block independence testing and interactive cube management for 0102 pArtifact operations | WSP 3, WSP 11, WSP 22, WSP 49, WSP 8, WSP 15, WSP 25, WSP 37, WSP 44 | Block independence, cube management, interactive testing, 0102 operations, autonomous assessment |
 | WSP 73 | 012 Digital Twin / RedDog Architecture Protocol | Active | Identity, memory, conversation, model-routing, and governed work boundaries between the lightweight RedDog interaction surface and the principal-scoped 0102 Digital Twin | WSP 00, WSP 15, WSP 27, WSP 46, WSP 60, WSP 77, WSP 80, WSP 97, WSP 98 | RedDog, Digital Twin, Principal Memex, FoundUp Memex, OpenClaw, WRE, Hermes, p.fMALL |
 | WSP 74 | Agentic Enhancement Protocol | Active | Strategic agentic instruction enhancement framework for optimal 0102 agent performance through Ultra_think processing | WSP 1, WSP 22, WSP 48, WSP 54, WSP 64 | Agentic enhancement, Ultra_think processing, proactive optimization, recursive performance |
@@ -194,6 +194,7 @@ Advanced protocols for complex system behaviors and architectural concerns.
 | WSP 107 | Intelligent Internet Orchestration Vision | Active | Protocol-level vision aligning optional II proof-of-benefit with CABR/UPS while preserving sovereignty; defines optional compute term, 0102 roles, and guardrails | WSP 26, WSP 27, WSP 29, WSP 32, WSP 58, WSP 73, WSP 80 | II integration framing, CABR optional compute, governance alignment |
 | WSP 108 | Documentation Compliance Guardian Protocol | Active | Ensures all agents maintain current, accurate documentation as part of operational workflow; defines pre-action verification, documentation update requirements, compliance guardian system, and violation consequences | WSP 22, WSP 32, WSP 49, WSP 83 | Documentation compliance, guardian system, pre-action verification, documentation currency |
 | WSP 109 | FoundUp Onboarding Intake Protocol | Draft | Converts raw 012 ideas into architect-ready FoundUp intake packets; defines OUTCOME/SOLUTION/PAIN/POC_SCOPE/PROTOTYPE_GATE/SKILLS_MAP/MANIFEST_DRAFT contracts; hands off to WRE for orchestration | WSP 95, WSP 97, WSP 104, WSP 106, WSP 108 | FoundUp intake, onboarding, WRE handoff, intake packet, RedDog |
+| WSP 110 | Branch Lifecycle Protocol | Draft | Proposes a boot-to-resume loop for owned branch and PR reconciliation, preservation, exact-head verification, and durable receipts | WSP 00, WSP 10, WSP 15, WSP 34, WSP 50, WSP 97 | Branch lifecycle, PR reconciliation, ownership, merge verification, continuity |
 
 ### PLATFORM INTEGRATION MODULES (Non-WSP Components)
 For platform/module catalogs, see `WSP_framework/src/MODULE_MASTER.md`.
@@ -261,10 +262,10 @@ See WSP 48 (Recursive Self-Improvement) and WSP 70 (System Status Reporting) for
 
 ## [U+1F4CA] WSP STATUS SUMMARY
 
- - **Total Numbered Slots Tracked**: 110 (WSP 00-109)
- - **Highest Assigned Number**: WSP 109
- - **Recently Added**: WSP 106 (API Gateway), WSP 107 (Intelligent Internet Vision), WSP 108 (Documentation Compliance Guardian), WSP 109 (FoundUp Onboarding Intake)
- - **Next Available Number**: WSP 110
+ - **Total Numbered Slots Tracked**: 111 (WSP 00-110)
+ - **Highest Assigned Number**: WSP 110
+ - **Recently Added**: WSP 106 (API Gateway), WSP 107 (Intelligent Internet Vision), WSP 108 (Documentation Compliance Guardian), WSP 109 (FoundUp Onboarding Intake), WSP 110 (Branch Lifecycle)
+ - **Next Available Number**: WSP 111
  - **Status Mix**: Active/deprecated/superseded/historical protocols are explicitly marked per-row in the catalog table above
  - **Layers**: Entry 00; Foundation 1-19; Operational 20-39; Advanced 40-59; Memory/Knowledge 60-99
 

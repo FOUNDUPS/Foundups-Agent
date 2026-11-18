@@ -1,13 +1,14 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // GotJunk item images
-    match /items/{deviceId}/{itemId} {
-      // Anyone can read images
+    // Existing device-ID URLs remain readable. New writes use Firebase UID.
+    match /items/{ownerUid}/{itemId} {
       allow read: if true;
-      // Anyone can upload (limit file size to 10MB)
-      allow write: if request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
+      allow create, update: if request.auth != null
+        && request.auth.uid == ownerUid
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|gif|avif)');
+      allow delete: if request.auth != null && request.auth.uid == ownerUid;
     }
   }
 }

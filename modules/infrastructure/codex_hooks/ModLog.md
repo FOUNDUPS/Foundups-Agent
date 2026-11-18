@@ -1,3 +1,9 @@
+## 2026-11-11 — Git lifecycle at session start
+
+After WSP 00 passes, refresh the WRE Git lifecycle receipt and reconcile the
+selected PC main worktree. Emit coverage and pending counts without GitHub
+payloads or PC file paths. WSP 10, 22, 97 and 110.
+
 # Codex Hooks ModLog
 
 ## 0.1.0 - Codex WSP lifecycle hooks Phase 1

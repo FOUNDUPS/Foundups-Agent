@@ -18,6 +18,21 @@ from modules.infrastructure.wre_core.wre_master_orchestrator.src.wre_master_orch
 from modules.infrastructure.wre_core.src.libido_monitor import LibidoSignal
 
 
+def _configure_effect_fixture(orchestrator, monkeypatch):
+    """Only the fixture effect is stubbed; unknown names still use real loading."""
+    load_skill = orchestrator.skills_loader.load_skill
+
+    def load(name, *args, **kwargs):
+        if name == "fixture_effect_skill":
+            return "# Inert generic effect fixture"
+        return load_skill(name, *args, **kwargs)
+
+    monkeypatch.setattr(orchestrator.skills_loader, "load_skill", load)
+    orchestrator.libido_monitor.set_thresholds(
+        "fixture_effect_skill", min_frequency=1, max_frequency=5, cooldown_seconds=0,
+    )
+
+
 class TestWREMasterOrchestrator:
     """Test suite for WRE Master Orchestrator"""
 
@@ -29,6 +44,7 @@ class TestWREMasterOrchestrator:
         monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
         monkeypatch.setenv("WRE_PATTERN_MEMORY_DB", str(tmp_path / "pattern_memory.db"))
         orchestrator = WREMasterOrchestrator()
+        _configure_effect_fixture(orchestrator, monkeypatch)
         monkeypatch.setattr(
             orchestrator,
             "_ensure_wre_skill_safety",
@@ -149,7 +165,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_first_execution_escalates(self, orchestrator):
         """Test first skill execution triggers ESCALATE signal"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
         input_context = {"files_changed": 14, "lines_added": 250}
 
@@ -170,7 +186,7 @@ class TestWREMasterOrchestrator:
             lambda skill_name, force=False: (False, "blocked by test", None),
         )
         result = orchestrator.execute_skill(
-            "auto_test_registry_audit",
+            "fixture_effect_skill",
             "qwen",
             {"files_changed": 1},
             force=True,
@@ -182,7 +198,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_throttle_behavior(self, orchestrator):
         """Test skill execution respects libido THROTTLE signal"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
         input_context = {"files_changed": 5}
 
@@ -198,7 +214,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_force_override(self, orchestrator):
         """Test force=True overrides libido throttle"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
         input_context = {"files_changed": 10}
 
@@ -214,7 +230,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_stores_outcome(self, orchestrator):
         """Test skill execution stores outcome in pattern memory"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
         input_context = {"files_changed": 14}
 
@@ -232,7 +248,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_records_libido_history(self, orchestrator):
         """Test skill execution records in libido monitor history"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
         input_context = {"files_changed": 8}
 
@@ -247,7 +263,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_calculates_execution_time(self, orchestrator):
         """Test execution time is measured and returned"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
         input_context = {"files_changed": 12}
 
@@ -260,7 +276,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_pattern_fidelity_recorded(self, orchestrator):
         """Test pattern fidelity is calculated and stored"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
         input_context = {"files_changed": 20}
 
@@ -273,7 +289,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_multiple_agents(self, orchestrator):
         """Test different agents can execute same skill"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         input_context = {"files_changed": 7}
 
         # Execute with qwen
@@ -291,7 +307,7 @@ class TestWREMasterOrchestrator:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_execute_skill_input_context_stored(self, orchestrator):
         """Test input context is stored in outcome record"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
         input_context = {"files_changed": 14, "lines_added": 250, "critical_files": ["main.py"]}
 
@@ -366,6 +382,7 @@ class TestWRESkillsIntegration:
         monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
         monkeypatch.setenv("WRE_PATTERN_MEMORY_DB", str(tmp_path / "pattern_memory.db"))
         orchestrator = WREMasterOrchestrator()
+        _configure_effect_fixture(orchestrator, monkeypatch)
         monkeypatch.setattr(
             orchestrator,
             "_ensure_wre_skill_safety",
@@ -387,7 +404,7 @@ class TestWRESkillsIntegration:
     @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
     def test_end_to_end_skill_execution_cycle(self, orchestrator):
         """Test complete cycle: execute → store → recall → analyze"""
-        skill_name = "auto_test_registry_audit"
+        skill_name = "fixture_effect_skill"
         agent = "qwen"
 
         # Step 1: Execute skill 3 times
@@ -430,6 +447,68 @@ class TestWRESkillsIntegration:
         assert metrics["execution_count"] == 0
         patterns = orchestrator.sqlite_memory.recall_successful_patterns(skill_name, min_fidelity=0.0, limit=20)
         assert patterns == []
+
+    @pytest.mark.skipif(not WRE_SKILLS_AVAILABLE, reason="WRE Skills infrastructure not available")
+    def test_evolve_skill_isolates_parent_version_patterns(self, orchestrator, monkeypatch):
+        """evolve_skill scopes both success and failure recall to loaded_skill_digest(skill_content)."""
+        from datetime import datetime
+        import json
+        from modules.infrastructure.wre_core.src.pattern_memory import SkillOutcome
+        from modules.infrastructure.wre_core.src.skill_execution_truth import (
+            bind_skill_execution_result,
+            loaded_skill_digest,
+        )
+
+        v_old = "# Skill old\n"
+        v_cur = "# Skill current\n"
+        fp = "c" * 64
+        orchestrator.sqlite_memory.store_outcome(SkillOutcome(
+            execution_id="old_hi_ok",
+            skill_name="fixture_effect_skill",
+            agent="qwen",
+            timestamp=datetime.now().isoformat(),
+            input_context=json.dumps({}),
+            output_result=json.dumps(bind_skill_execution_result(
+                {"output": "old ok"}, skill_content=v_old,
+                execution_id="old_hi_ok", admission_fingerprint=fp,
+            )),
+            success=True,
+            pattern_fidelity=0.99,
+            outcome_quality=0.99,
+            execution_time_ms=10,
+            step_count=1,
+        ))
+        orchestrator.sqlite_memory.store_outcome(SkillOutcome(
+            execution_id="cur_ok",
+            skill_name="fixture_effect_skill",
+            agent="qwen",
+            timestamp=datetime.now().isoformat(),
+            input_context=json.dumps({}),
+            output_result=json.dumps(bind_skill_execution_result(
+                {"output": "cur ok"}, skill_content=v_cur,
+                execution_id="cur_ok", admission_fingerprint=fp,
+            )),
+            success=True,
+            pattern_fidelity=0.92,
+            outcome_quality=0.92,
+            execution_time_ms=10,
+            step_count=1,
+        ))
+
+        seen = {}
+        monkeypatch.setattr(
+            orchestrator,
+            "_build_reflection_prompt",
+            lambda **kw: seen.update(kw) or "prompt",
+        )
+        monkeypatch.setattr(orchestrator, "_generate_variation_with_qwen", lambda *_: "# candidate")
+
+        assert orchestrator.evolve_skill(
+            "fixture_effect_skill", "qwen", v_cur, {"output": "err"}, {}, 0.50
+        ) is True
+        assert [r["execution_id"] for r in seen["success_patterns"]] == ["cur_ok"]
+        assert seen["failure_patterns"] == []
+        assert loaded_skill_digest(v_cur) != loaded_skill_digest(v_old)
 
 
 if __name__ == "__main__":

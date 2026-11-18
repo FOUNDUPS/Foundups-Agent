@@ -158,6 +158,25 @@ def test_research_display_invalid_reports_are_unknown(tmp_path, field, value):
     ("absolute_gain", 1.0),
     ("candidate_evaluations", 99),
     ("research_direction_judgment", "automated"),
+    ("verification_signal_independent", 0),
+    ("held_out_evaluation", 0.0),
+    ("production_rsi_eligible", 0),
+    ("absolute_gain", False),
+    ("relative_gain", False),
+    ("candidate_evaluations", False),
+    ("accepted_candidates", 0.0),
+    ("rejected_candidates", False),
+    ("invalid_candidates", False),
+    ("crashed_candidates", False),
+    ("no_proposal_attempts", False),
+    ("relative_gain", "0"),
+    ("relative_gain", float("nan")),
+    ("relative_gain", float("inf")),
+    ("independently_verified", True),
+    ("retained_improvements", 1),
+    ("resource_usage", {"tokens": 0}),
+    ("activation_rollback_verified", True),
+    ("successive_generation_gain", 1.0),
 ])
 def test_research_display_rejects_inconsistent_rsi_measurements(tmp_path, field, value):
     path, report = _research_report(tmp_path)
@@ -165,6 +184,56 @@ def test_research_display_rejects_inconsistent_rsi_measurements(tmp_path, field,
     _write_research(path, report)
     result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
     assert result["state"] == "unknown"
+
+
+@pytest.mark.parametrize("field", [
+    "relative_gain", "independently_verified", "retained_improvements",
+    "resource_usage", "activation_rollback_verified", "successive_generation_gain",
+])
+def test_research_display_requires_explicit_unknown_measurements(tmp_path, field):
+    path, report = _research_report(tmp_path)
+    report["baseline"]["fitness"] = report["optimized"]["fitness"] = 0
+    _sync_rsi_measurements(report)
+    del report["rsi_measurements"][field]
+    _write_research(path, report)
+    assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
+
+
+@pytest.mark.parametrize("baseline,best,expected", [
+    (0, 0.0, None), (0.0, 1, None), (-2, -1.0, 0.5),
+    (-2.0, 2, 2.0), (1, 2.0, 1.0), (1.0, 1, 0.0),
+])
+def test_research_display_numeric_gain_semantics(tmp_path, baseline, best, expected):
+    gain = best - baseline
+    path, report = _research_report(tmp_path, int(gain > 0))
+    report.update(baseline={"fitness": baseline}, optimized={"fitness": best}, improvement=gain)
+    if gain > 0:
+        report["history"] = [{"iteration": 1, "status": "accepted"}]
+        report["outcome_counts"]["accepted"] = 1
+    _sync_rsi_measurements(report)
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unverified_diagnostic"
+    assert result["rsi_relative_gain"] == expected
+    for field in ("baseline_fitness", "best_fitness", "absolute_gain", "relative_gain"):
+        if report["rsi_measurements"][field] in (0, 1):
+            malformed = json.loads(json.dumps(report))
+            malformed["rsi_measurements"][field] = bool(malformed["rsi_measurements"][field])
+            _write_research(path, malformed)
+            assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
+
+
+def test_research_display_rejects_overflowed_relative_gain(tmp_path):
+    path, report = _research_report(tmp_path, 1)
+    report.update(baseline={"fitness": 5e-324}, optimized={"fitness": 1.0}, improvement=1.0)
+    report["history"] = [{"iteration": 1, "status": "accepted"}]
+    report["outcome_counts"]["accepted"] = 1
+    _sync_rsi_measurements(report)
+    assert report["rsi_measurements"]["relative_gain"] == float("inf")
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unknown"
+    assert result["rsi_relative_gain"] is None
 
 
 @pytest.mark.parametrize("payload", ["{", "[]", "{\"status\":1,\"status\":2}",
@@ -259,7 +328,17 @@ def test_research_display_invalid_age_budget_is_unknown(tmp_path, age_limit):
 
 
 def test_main_dashboard_reads_actual_selected_report(tmp_path, monkeypatch, capsys):
-    import main
+    # Exercise current function bodies without main's unrelated import-time
+    # model, environment and service effects (same scope as the local runner).
+    import ast
+    import logging
+    main_path = Path(__file__).resolve().parents[4] / "main.py"
+    tree = ast.parse(main_path.read_text(encoding="utf-8"))
+    functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)
+                 and node.name in ("run_wre_dashboard_preflight", "_wre_dashboard_auto_enforce_enabled")]
+    assert len(functions) == 2
+    namespace = {"os": os, "Path": Path, "logger": logging.getLogger("research-preflight-test")}
+    exec(compile(ast.Module(body=functions, type_ignores=[]), str(main_path), "exec"), namespace)
     path, report = _research_report(tmp_path)
     _write_research(path, report)
     monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", str(path))
@@ -267,7 +346,7 @@ def test_main_dashboard_reads_actual_selected_report(tmp_path, monkeypatch, caps
     monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
     monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "1")
     monkeypatch.setattr(dashboard_alerts, "check_dashboard_health", lambda: {"healthy": True})
-    assert main.run_wre_dashboard_preflight(tmp_path) is True
+    assert namespace["run_wre_dashboard_preflight"](tmp_path) is True
     output = capsys.readouterr().out
     assert "[WRE-RESEARCH] unverified_diagnostic" in output
     assert "attempts=0" in output and "retained=unknown" in output

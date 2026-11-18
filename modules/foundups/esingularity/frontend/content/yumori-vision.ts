@@ -35,9 +35,9 @@ const source: VisionSource[] = [
     },
     title: { ja: '壊す前に、未来を比べる。', en: 'Before Demolition, Compare the Future.', pt: 'Antes de demolir, compare o futuro.' },
     summary: {
-      ja: '設立準備委員会の現在の要請は、9月25日の採決で解体準備事業を含む予算案について反対票を求めることです。再利用案の採否は別の正式手続で判断されます。',
-      en: 'The Preparatory Committee’s current request is a NO vote on the budget containing demolition preparation at the September 25 vote. Adoption of the reuse proposal is a separate formal decision.',
-      pt: 'O pedido atual do Comitê Preparatório é um voto NÃO ao orçamento que inclui a preparação da demolição na votação de 25 de setembro. A adoção da proposta de reutilização é uma decisão formal separada.',
+      ja: '9月25日の採決後、設立準備委員会は、不可逆な解体調達・工事へ進む前に、PPP/PFIの官民連携ルートで解体案と再利用案を比較検証することを求めています。',
+      en: 'After the September 25 vote, the Preparatory Committee is asking Fukui City to use a PPP/PFI public-private route to compare demolition and reuse before irreversible demolition procurement or work proceeds.',
+      pt: 'Após a votação de 25 de setembro, o Comitê Preparatório pede que a cidade de Fukui use uma via público-privada PPP/PFI para comparar demolição e reutilização antes de uma contratação ou obra de demolição irreversível.',
     },
     action: { ja: '現在の要請と根拠を見る', en: 'See the current request and evidence', pt: 'Ver o pedido atual e as evidências' },
     evidence: {
@@ -145,9 +145,9 @@ const source: VisionSource[] = [
     summary: { ja: '巨大集中型だけではなく、地域に役立つ小さなAIインフラを検証する福井プロトタイプです。', en: 'Fukui is a prototype for testing smaller, region-serving AI infrastructure alongside hyperscale systems.', pt: 'Fukui é um protótipo para testar infraestrutura de IA menor e voltada à região ao lado de sistemas hiperscale.' },
     action: { ja: '福井発の地域再生モデルを、一緒につくる', en: 'Build a regional regeneration model from Fukui', pt: 'Construa um modelo de regeneração regional a partir de Fukui' },
     evidence: {
-      ja: ['1→5→10→20+MWは段階的な構想レンジで、確定容量・契約・許認可ではありません。', '他地域への展開は各地の建物、安全、電力、通信、需要、土地、運営主体ごとに検証します。'],
-      en: ['1→5→10→20+MW is a staged vision range, not contracted or permitted capacity.', 'Replication elsewhere requires site-specific validation of buildings, safety, power, network, demand, land and operators.'],
-      pt: ['1→5→10→20+MW é uma faixa de visão por etapas, não capacidade contratada ou licenciada.', 'Replicação em outros locais exige validação específica de edifícios, segurança, energia, rede, demanda, terreno e operadores.'],
+      ja: ['容量はMWを先に固定せず、実需・売上条件・電力・通信・建物条件から逆算して段階導入します。', '他地域への展開は各地の建物、安全、電力、通信、需要、土地、運営主体ごとに検証します。'],
+      en: ['Capacity is not preset in MW; it is derived from real demand, revenue conditions, power, network and building constraints and then deployed in stages.', 'Replication elsewhere requires site-specific validation of buildings, safety, power, network, demand, land and operators.'],
+      pt: ['A capacidade não é predefinida em MW; ela é derivada da demanda real, condições de receita, energia, rede e edifícios e implantada por etapas.', 'Replicação em outros locais exige validação específica de edifícios, segurança, energia, rede, demanda, terreno e operadores.'],
     },
     link: { label: { ja: '福井の未来を見る', en: 'See Fukui’s future', pt: 'Ver o futuro de Fukui' }, href: '/future' },
   },

@@ -1,4 +1,4 @@
-﻿"""Persistent Foundup Registry Service for FoundUps Agent Market.
+"""Persistent Foundup Registry Service for FoundUps Agent Market.
 
 Implements FoundupRegistryService interface with SQLite persistence.
 Manages Foundup entity lifecycle and metadata.

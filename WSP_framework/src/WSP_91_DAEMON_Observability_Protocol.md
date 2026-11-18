@@ -47,6 +47,62 @@ A DAEMON is an autonomous background process that:
 
 ## 3. Observability Requirements (OpenTelemetry Alignment)
 
+### 3.0 Host launch, heartbeat and termination contract
+
+This contract applies to every FoundUps-controlled host process, including
+temporary previews, build/test helpers, scheduled jobs, native workers and
+resident DAEs. Continuous operation in Sections 1–2 means authorized service
+availability, never permission for an unowned process to run forever.
+
+Before launch, the responsible agent MUST establish:
+
+1. **Ownership:** task/run identity, accountable owner, exact source revision
+   and dirty-overlay/artifact digest when applicable, executable and arguments,
+   allowed filesystem/network/credential scope, and the existing supervisor.
+   Record process identity with creation time or an OS handle; PID alone is unsafe.
+2. **Heartbeat:** an observable status surface with last observation, expected
+   interval and stale threshold. Short foreground commands may use their
+   waiting supervisor's process polling and terminal receipt; background jobs
+   need a monitored heartbeat. A live PID or timer pulse is liveness, not proof
+   of useful progress. Report progress/stalls separately.
+3. **End condition:** a finite timeout for jobs and previews; for resident
+   services, an explicit renewable lease, authorized renewal owner and revocation
+   path. State who detects stale health or expired authority and who terminates
+   the owned process tree. A worker cannot extend its own authority by emitting
+   heartbeats. Owner/supervisor failure must not leave detached writable workers.
+4. **Control surface:** a discoverable status and stop mechanism through the
+   existing broker, OS service/task manager or private local IPC. An HTTP endpoint
+   is not mandatory. If used, bind privately and authenticate control operations;
+   never expose an unauthenticated remote shutdown or arbitrary-command endpoint.
+5. **Security:** complete the applicable [WSP 71 build and launch review](WSP_71_Secrets_Management_Protocol.md#56-build-and-host-launch-security-gate)
+   before executing the candidate. Missing required evidence blocks launch.
+
+Reuse `modules/infrastructure/dae_daemon` registration, heartbeat, launch and
+stop owners and existing worker lease/confinement owners. `instance_lock`
+prevents duplicate instances; its heartbeat alone does not enforce expiry or
+prove security admission. Do not create a parallel scheduler or health database.
+Existing adapters are extension points, not proof that every launcher meets
+this contract. A route missing a required control stays blocked for new launches
+until connected and qualified, or uses an already-qualified bounded supervisor.
+
+On Windows, launch noninteractive helpers without visible consoles; preserve
+exit codes and private redacted diagnostics. Scheduled jobs MUST specify timezone,
+allowed window, overlap policy, maximum duration and missed-run behavior. Do not
+replay missed jobs outside the authorized window or restart revoked jobs.
+
+Before accepting a new or changed launch path, exercise normal completion,
+stale/missing heartbeat, timeout/lease expiry, cancellation and supervisor loss.
+Verify owned descendants exit, ports close and only owned resources are released;
+test PID reuse and unrelated-process preservation. A stop request is not observed
+termination. Keep failed cleanup evidence and escalate the exact blocker.
+Security rejection must prevent candidate launch. Retain these results with the
+source-bound WSP 97 receipt, without credentials or raw private workloads.
+
+Temporary preview servers left running after a session are operational debt,
+not RSI learning. Preserve useful evidence separately; successful closure must
+not depend on retaining their processes. This protocol addition specifies the
+gate; it does not certify legacy launchers or installed runtime enforcement.
+
 ### 3.1 The Three Pillars
 
 All DAEMONs MUST implement:

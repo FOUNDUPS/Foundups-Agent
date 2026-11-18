@@ -403,6 +403,17 @@ independent verification, held-out evidence, resource receipts, activation
 rollback, or retained-generation evidence MUST remain explicit `None`/unknown
 rather than being inferred.
 
+The bundle is a **FoundUps-specific contract**, not an externally standardized
+RSI score. Numeric metrics MUST exclude Booleans and nonfinite values; counts
+MUST be integers and evidence flags MUST retain Boolean/null semantics.
+Derived-gain overflow MUST NOT be displayed as measured improvement. An
+undefined relative gain (including a zero baseline) remains explicit unknown;
+each producer documents direction, units and denominator. The current ROC
+diagnostic uses higher-is-better fitness and `(best - baseline) / abs(baseline)`.
+Serialization does not authenticate evidence. A formal verifier only establishes
+its stated property under its assumptions; human objective selection remains a
+separate direction-setting decision.
+
 #### 4.2.3 Current WRE AutoResearcher classification
 
 The current WRE AutoResearcher simulator is classified as
