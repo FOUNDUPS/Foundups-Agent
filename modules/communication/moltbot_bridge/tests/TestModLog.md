@@ -1,3 +1,24 @@
+## 2026-11-18 - Reconcile pre-build guidance onto refreshed main
+
+- Rebased the owned local slice onto `c8978bb8ba8772bb193cd07b494f8cb32a0ce52f`
+  without overlap or shared-checkout changes. At candidate `58500850772e17e0a4cb9d3c7f57f8afcd0d42be`,
+  the existing operations/control/role-loader and manifest/index selection
+  passed 58 in 91.83 seconds; canonical registry was current at 1,851 files,
+  260 quarantined. These counts are scoped observations, not system readiness.
+- The unchanged complete Node backend preflight passed on existing Ubuntu 24.04
+  WSL with Node 24.13.0, including the symlink fixtures refused by Windows.
+  Blocked-request recovery also exited 0 on the same source/runtime.
+- Additional skill/manifest/security suites exposed Windows locale, encoded
+  temporary-path and WSL-bash-alias failures. UTF-8 and a task-owned temp path
+  resolved the first two; the actual failing shell-security case passed from
+  existing Git Bash. Skill subprocess cases require repository-root CWD, so
+  final validation uses separate existing selections with their real contexts.
+  No test, fixture, assertion or platform skip was weakened.
+- Normal PR/merge progression is now authorized only within current ownership,
+  independent review and required gates. Earlier local-only, failed and missing
+  evidence remains historical above/below; it is not relabeled as publication,
+  hosted CI, deployment, automatic enforcement or retained RSI benefit.
+
 ## 2026-11-18 - Pre-build audit prompt and content-revision contract
 
 - Retrieved this inventory, tests/README, the existing operations Skillz tests

@@ -1,3 +1,30 @@
+## Pre-build workflow metadata re-review - 2026-11-18
+
+Reconciled source `58500850772e17e0a4cb9d3c7f57f8afcd0d42be` onto main
+`c8978bb8ba8772bb193cd07b494f8cb32a0ce52f`. The generated backend closure
+retains all 1,494 members and every unrelated source hash. Its canonical
+payload SHA256 is `916bbfb60bbb3c089457670fde29b117d29c4eaa999f29ac1480379c91e5d6b5`;
+entire LF manifest SHA256 is
+`c365653f16172d6bb503d2d206696571c5a4e04b58d11a574b7c1088a7343837`.
+
+The unchanged Gitleaks 8.30.1 gate observed 40 unreviewed current-tree findings,
+176 existing exact reviews, and zero introduced-history findings. Independent
+exact-Git review accepted only the 39 unchanged public source-path/SHA rows
+(37 generic-api-key, 2 discord-api-token) plus the unchanged approved bridge
+ModLog prose line shifted from 4035 to 4098 by the 63-line prefix. Every row
+retains its exact prior approval and matches independently rehashed source.
+The bridge ModLog LF SHA256 is
+`5ef0fe2a8ef2aaae7c88be08b509084eef86ead2d60ef9224fe0a9b92da3f338`.
+
+Append only those 40 independently reviewed fingerprints to the existing list,
+preserving all 4,699 prior entries and their order (4,739 total). No scanner
+rule, exclusion, fingerprint formula, failure gate or scan scope changes.
+The Windows archive initially converted files to CRLF and invalidated all 216
+fingerprints; a byte probe proved the difference. Local scans now explicitly
+select canonical Git archive bytes, matching Linux CI semantics. That is an
+archive-source correction, not an approval of those 216 mismatches. Fresh
+exact-head tree/history and separate GitGuardian checks remain required.
+
 ## PR1792 main-reconciled manifest and ModLog metadata re-review — 2026-11-18
 
 PR1792 regenerated `scripts/reddog_backend_manifest.json` after updating
