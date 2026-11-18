@@ -5,6 +5,8 @@ This folder holds isolated tests for the voice_command_ingestion module.
 - `test_voice_command_ingestion.py`: trigger default, English/Japanese/detection
   propagation to Whisper and factory, English-only model mismatch rejection.
 - `test_batch_transcriber.py`: timestamped segments and JSONL persistence.
+- `test_transcript_language.py`: reported language, Japanese batch selection,
+  chunk offsets and Unicode JSONL evidence.
 
 Run `python -m pytest modules/communication/voice_command_ingestion/tests -q`
 from the repository root. Model-boundary fixtures avoid downloading Whisper;

@@ -367,13 +367,33 @@ def generate_quick_answer(
 
     # Build answer lines
     all_lines: List[str] = []
+    answer_confidence = scored_summary.overall_confidence
 
     # Line 1: Total raised (if available)
     if scored_summary.total_raised > 0:
+        total_claims = [
+            claim for claim in scored_summary.summary_claims
+            if claim.claim_type == "total_raised"
+        ]
+        total_confidence = (
+            total_claims[0].confidence_label
+            if len(total_claims) == 1
+            and isinstance(total_claims[0].confidence_label, ConfidenceLabel)
+            else ConfidenceLabel.UNKNOWN
+        )
+        confidence_order = (
+            ConfidenceLabel.UNKNOWN,
+            ConfidenceLabel.LOW_CONFIDENCE_INFERENCE,
+            ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE,
+            ConfidenceLabel.VERIFIED_FACT,
+        )
+        answer_confidence = min(
+            answer_confidence, total_confidence, key=confidence_order.index
+        )
         total_line = format_total_line(
             scored_summary.total_raised,
             scored_summary.candidate_name,
-            scored_summary.overall_confidence,
+            total_confidence,
             format,
         )
         all_lines.append(total_line)
@@ -441,7 +461,7 @@ def generate_quick_answer(
 
     return QuickAnswer(
         lines=final_lines,
-        confidence_label=scored_summary.overall_confidence,
+        confidence_label=answer_confidence,
         requires_human_review=scored_summary.human_review_required,
         human_review_reasons=scored_summary.all_human_review_triggers,
         trail_terminated=trail_terminated,

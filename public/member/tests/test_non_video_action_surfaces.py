@@ -193,7 +193,7 @@ class TestVideoEntriesUnchanged:
 class TestCatalogNonVideoTruth:
     """Verify real catalog entries match entry page expectations."""
 
-    NON_VIDEO_TYPES = {"github_repo", "external_app", "internal_service"}
+    NON_VIDEO_TYPES = {"github_repo", "external_app", "internal_app", "internal_service"}
 
     def test_non_video_entries_have_external_url(self):
         """All non-video catalog entries have external_url."""

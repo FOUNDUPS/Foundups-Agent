@@ -19,10 +19,13 @@ This prevents Terra-style death spirals where panic → exits → more panic.
 from __future__ import annotations
 
 import logging
+import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
+
+from ._token_numeric import _require_numbers
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +109,9 @@ class CircuitBreaker:
     times_triggered: int = 0
     total_queued_exits: int = 0
 
+    # Local cadence only; never serialized authority or a funded reservation.
+    _last_queue_release: Optional[float] = field(default=None, init=False, repr=False, compare=False)
+
     def check_conditions(
         self,
         backing_ratio: float,
@@ -120,6 +126,8 @@ class CircuitBreaker:
         Returns:
             New breaker state
         """
+        _require_numbers(backing_ratio, current_btc_price,
+                         self.btc_price_24h_ago, self.daily_outflow)
         # Check BTC crash
         if self.btc_price_24h_ago > 0:
             btc_change = (current_btc_price - self.btc_price_24h_ago) / self.btc_price_24h_ago
@@ -129,16 +137,16 @@ class CircuitBreaker:
         # Check backing ratio (most important)
         if backing_ratio < self.config.backing_emergency:
             return self._transition_to(BreakerState.EMERGENCY, BreakerTrigger.BACKING_LOW)
-        elif backing_ratio < self.config.backing_restricted:
+        if backing_ratio < self.config.backing_restricted:
             return self._transition_to(BreakerState.RESTRICTED, BreakerTrigger.BACKING_LOW)
-        elif backing_ratio < self.config.backing_caution:
-            return self._transition_to(BreakerState.CAUTION, BreakerTrigger.BACKING_LOW)
 
-        # Check outflow
+        # Evaluate every restricted signal before any lower-severity caution.
         outflow_ratio = self.daily_outflow  # Already as ratio
         if outflow_ratio > self.config.outflow_restricted:
             return self._transition_to(BreakerState.RESTRICTED, BreakerTrigger.OUTFLOW_HIGH)
-        elif outflow_ratio > self.config.outflow_caution:
+        if backing_ratio < self.config.backing_caution:
+            return self._transition_to(BreakerState.CAUTION, BreakerTrigger.BACKING_LOW)
+        if outflow_ratio > self.config.outflow_caution:
             return self._transition_to(BreakerState.CAUTION, BreakerTrigger.OUTFLOW_HIGH)
 
         # Check if can recover to normal
@@ -151,6 +159,13 @@ class CircuitBreaker:
     def _transition_to(self, new_state: BreakerState, trigger: Optional[BreakerTrigger]) -> BreakerState:
         """Transition to a new state."""
         if new_state == self.state:
+            return self.state
+
+        # A milder current signal is not recovery authorization. Apply the
+        # existing cooldown/empty-queue rule to every severity downgrade.
+        severity = {BreakerState.NORMAL: 0, BreakerState.CAUTION: 1,
+                    BreakerState.RESTRICTED: 2, BreakerState.EMERGENCY: 3}
+        if severity[new_state] < severity[self.state] and not self._can_recover():
             return self.state
 
         old_state = self.state
@@ -233,7 +248,9 @@ class CircuitBreaker:
         return queued
 
     def process_queue(self) -> List[QueuedExit]:
-        """Process queued exits (call hourly).
+        """Release at most one FIFO batch per elapsed hour in this instance.
+
+        Trusted serialized host calls only; no catch-up or durable settlement.
 
         Returns:
             List of exits ready to process
@@ -241,10 +258,17 @@ class CircuitBreaker:
         if not self.exit_queue or self.exits_blocked():
             return []
 
+        now = time.monotonic()
+        if self._last_queue_release is not None and now - self._last_queue_release < 3600:
+            return []
+
         # Process 10% of queue per hour
         num_to_process = max(1, int(len(self.exit_queue) * self.config.queue_release_per_hour))
         ready = self.exit_queue[:num_to_process]
-        self.exit_queue = self.exit_queue[num_to_process:]
+        remaining = self.exit_queue[num_to_process:]
+        committed_at = time.monotonic()
+        self.exit_queue = remaining
+        self._last_queue_release = committed_at
 
         logger.info(
             f"[CircuitBreaker] Processing {len(ready)} queued exits "

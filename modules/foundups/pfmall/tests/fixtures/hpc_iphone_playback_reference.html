@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>HPC playback test</title>
+  <style>
+    body { max-width: 38rem; margin: auto; padding: 1rem; background: #100d19; color: #fff4dc; font: 1rem system-ui, sans-serif; }
+    h1 { font-size: 1.25rem; margin-bottom: 0.4rem; }
+    p { margin: 0.4rem 0; line-height: 1.4; }
+    #hpc-probe-embed { margin: 0.75rem 0; }
+    iframe { display: block; width: 100%; height: max(200px, min(280px, 58dvh)); border: 0; background: #000; }
+    .hpc-probe-row { display: grid; gap: 0.5rem; margin-top: 0.5rem; }
+    .hpc-probe-field { display: grid; gap: 0.25rem; font-size: 0.9rem; }
+    button, a, select { min-height: 44px; color: inherit; font: inherit; box-sizing: border-box; }
+    button, a { display: inline-grid; place-items: center; margin-top: 0.5rem; }
+    button, select { padding: 0 0.8rem; border: 1px solid #8c71ab; border-radius: 0.6rem; background: #34224a; }
+    select { width: 100%; }
+  </style>
+  <script defer src="./probe.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Official YouTube embed test</h1>
+    <p>Tap Play inside the video. All probe controls stay below the player frame. After it plays or shows an error, copy the playback result.</p>
+    <div id="hpc-probe-embed"></div>
+    <div id="hpc-probe-controls"></div>
+    <a id="hpc-probe-return" href="/member/?foundup=hpc">Return to the HPC grid</a>
+  </main>
+</body>
+</html>

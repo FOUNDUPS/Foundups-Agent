@@ -6,6 +6,253 @@
 
 ---
 
+## RSI and WRE supervision contract — 2026-09-22
+
+**Audit baseline:** `3c45509c0716cbac403d3309ea4d8a03ab13a2d2`; retry repair base `9103ec35d50495fd37690e48e442025372fac6e5`.
+**Status:** sequence-collision source repair locally validated; broader runtime qualification remains open.
+This section is the current supervision map linked by the [system roadmap](../ROADMAP.md).
+It extends R18 capacity and R23 sustained operations across R06–R19/R24;
+it creates no new scheduler, runtime schema, monitor module or executable authority.
+The older inventory below records 2025 architecture and proposals, not current
+runtime verification or permission for direct event-triggered effects.
+
+012 uses **Digital Autonomous Agent Monitor** for this cross-layer function.
+[WSP 91](../WSP_framework/src/WSP_91_DAEMON_Observability_Protocol.md) historically
+expands DAEMON as Domain Autonomous Entity MONitoring. Preserve that history and
+existing `dae_daemon` names; the requested function composes existing owners.
+
+### Existing owners and actual gaps
+
+Paths below are relative to the repository root. Source/test inventory is not a
+passing test claim. The initial map was documentation-only; the bounded retry checkpoint below adds disposable event-store tests without starting services.
+
+| Responsibility | Existing owner | Current boundary / required qualification |
+|---|---|---|
+| Lifecycle events, registry, snapshots | `modules/infrastructure/dae_daemon/src/{dae_daemon,dae_registry,dae_adapter,dae_observer}.py` | Reuse CentralDAEmon. State, heartbeat, event cursor and runtime view exist; they do not prove task progress, durable admission or accepted output. |
+| Durable event evidence | `modules/infrastructure/dae_daemon/src/event_store.py` | `write` still appends JSONL before SQLite. Disposable baseline reproduced its recursive lock deadlock; bounded retry now stays within one lock acquisition and nine fixed regressions pass. Failed attempts can still leave extra JSONL records. Atomicity, crash/reopen, cross-process ordering and durable caller acknowledgment remain unqualified; no observed production incident is claimed. |
+| Event acknowledgment | `modules/infrastructure/dae_daemon/src/dae_registry.py::_emit` | Ignores the store write result before notifying listeners. Qualify failed persistence, duplicate identity and listener acknowledgment before using notifications as durable evidence. |
+| Launch, stop and detach | `modules/infrastructure/dae_daemon/src/dae_launch_broker.py`, `killswitch.py` | `stop_dae` distinguishes a pending request from observed captured-worker exit and rejects ownership changes across callbacks; this is not process-wide termination or atomic registry publication. Registry `disable` changes a flag. Import-failure streak now survives consecutive caught errors and reaches threshold3; fixed inert tests qualify reset/re-enable semantics, not live recovery. No global restart/kill authority follows from a monitor alert. |
+| Observation effects | `modules/infrastructure/dae_daemon/src/dae_observer.py::_get_runtime_status` | Observer runtime lookup now reads the existing broker without creating its heartbeat. Default observer construction and adapter acquisition remain separate effects; whole read commands are not qualified as effect-free. Missing runtime data remains unknown. |
+| Admission, claims, leases, assurance | `modules/infrastructure/database/src/agent_db.py` and current OpenClaw supervisor | Existing signed-worker lease/heartbeat/recovery owners remain authoritative. CentralDAEmon does not grant work or override expiry/quarantine. Reserve independent verifier capacity. |
+| RSI self-audit and native supervisor | `modules/infrastructure/wre_core/src/daemon_self_audit_loop.py`; `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` | Bounded attempt outcome, coverage and success age are now distinct from event count; fixed local/independent tests do not establish live health or full coverage. A broker heartbeat for a live thread cannot prove useful progress. Preserve native valve reason codes and absent effect lease. |
+| Skill outcomes and bounded advice | WRE `pattern_memory.py`, `libido_monitor.py`, existing monitor/AI Overseer owners | Reuse outcome storage and existing sensors. Proposed variants, confidence and local logs are not independent acceptance, activation or retained improvement. No verified generic small-model supervisor pool is established here. |
+| Telemetry intake and pressure | `modules/ai_intelligence/ai_overseer/src/{mcp_integration,holo_telemetry_monitor,ai_overseer}.py` | Queue, file reads and dedupe set are unbounded; critical-module to WRE mapping remains TODO. Qualify overload, rotation, failed enqueue and replay before scaling. Existing code and diagnostic callers are not proof of a running production consumer. |
+| Worker execution and rewards | Current OpenClaw/Hermes contracts; FAM `task_pipeline.py` and persistent adapter | Correlate artifacts and verdicts with current authority. PR1852 locally qualifies atomic SQLite pending initiation; pending is not paid, authenticated role authority or native RSI proof. |
+
+The [daemon tests index](../modules/infrastructure/dae_daemon/tests/README.md)
+contains coverage targets that exceed the present test inventory. Launch broker,
+observer, adapter, schemas and runtime-emitter test files exist. The retry sprint
+extends the existing observer test file with nine store regressions; it creates no
+parallel test owner. Original observer tests were not run in this bounded slice.
+The candidate process-witness review was blocked by automatic screening, so only
+ordinary source review/unit replay is claimed for the repair. Broader proof remains open. The [WRE roadmap](../modules/infrastructure/wre_core/ROADMAP.md)
+records the narrower verified per-counter SQLite handle repair separately.
+
+### Persistence and acknowledgment qualification — 2026-09-22
+
+This is the observed contract at `e4075f3`, qualified by seven additional ordinary
+characterizations of six boundaries in the existing observer test owner. All sixteen
+selected cases pass locally and independently (the same cases, not thirty-two unique tests).
+No production method, schema, callback policy or persistence order changed.
+
+| Observation | What the current code establishes | What it does not establish |
+|---|---|---|
+| SQLite row/query/dedupe | Current query and duplicate-detection record authority. Reopening loads SQLite sequence state. | Reconstruction from JSONL, crash/power-loss durability or cross-process recovery. |
+| JSONL entry | An append attempt occurred before SQLite. Failed writes can leave entries or partial bytes. | A committed event or a safely replayable commit journal. No reconstruction loader was found in the scoped owners. |
+| `write` returns success | Both existing write calls returned normally. | Atomicity across files, independent verification or an fsync/power-loss guarantee. |
+| `write` returns false | Duplicate or caught error, according to its message. | Row absence: an exception after SQLite commit can return false despite a readable row. Exact and conflicting dedupe inputs are not distinguished. |
+| Registry boolean/listener | Local acceptance for a registered DAE; listeners still run on a returned storage failure. | Durable acknowledgment. A raised store exception exits `_emit` before listeners; notification is not universally failure-independent. |
+| `verify_parity` / WRE `event_store_verified` | Line-count agreement / SQLite integrity and sequence checks, respectively. | Content agreement, recovery completeness or a successfully persisted particular event. Equal counts can hide malformed or different JSONL. |
+
+The fixed fixtures cover append rejection, SQL failure plus reopen/retry, an error
+after commit, exact/conflicting duplicates, equal-count content mismatch, and
+returned-versus-raised storage failure with inert emergency callback spies. Existing
+nine retry regressions and three observer methods remain unchanged; those three
+observer methods are not executed in this bounded run. WRE/FAM comparisons remain
+static evidence, not new runtime tests.
+
+**Decision:** preserve the current public signatures and emergency listener path.
+Treat SQLite reads as current record evidence, JSONL as attempt history, and
+registry acceptance as volatile. Do not automatically replay JSONL or retry an
+external effect based only on a false return. A future repair must first declare
+its stronger acceptance contract using the same fault inputs; these legacy
+characterization assertions are not a requirement to retain defective behavior.
+Do not change evaluation criteria merely to report a successful repair.
+
+Keep result propagation, content integrity and transactional recovery as separate
+owner-scoped steps. Count-only parity must not be promoted into a durability gate;
+FAM's success-only listener policy must not be copied into central emergency
+handling. No new store, receipt schema, service or scheduler is introduced here.
+
+### Self-audit scan qualification — 2026-09-22
+
+PR1856 qualified 13 existing scanner/consumer cases at `183ca279`; it changed no
+production method. The repair based on merged `6ede800` preserves those fault
+inputs and extends acceptance to 71 fixed ordinary cases. Local and independent
+runs pass the same cases. Baseline results are retained separately: eight passed,
+ten failed and 32 fixture assertions failed because the additive API did not exist.
+Independent review then found contradictory status fields still accepted by the
+consumer: 18 added negative cases failed and three valid clock controls passed
+against the first repair. Their fixed acceptance is included in the final suite.
+
+The existing WRE scanner now reports a detached result for each attempt through
+`scan_once_with_status()`. Its original `scan_once() -> int` retains exception
+propagation. OpenClaw consumes the returned attempt, so a later scan cannot
+replace the result associated with its event count. `get_scan_status()` is a
+separate diagnostic snapshot. The [WRE interface](../modules/infrastructure/wre_core/INTERFACE.md#self-audit-scan-observations)
+is the field-level contract.
+
+| Observation | Contract | Limit |
+|---|---|---|
+| Outcome/count | Unattempted, running, completed, partial and failed are distinct. A raised scan has unknown count; a returned partial scan preserves observed findings. | Finding count is neither scan health nor proof of persisted effects. |
+| Coverage | Bounded selected inputs, no inputs, known partial or unknown. Stat/read errors and discovery exclusions remain visible. | Completion never asserts whole-repository coverage. |
+| Success age | Completed bounded-input scans need valid start/completion times to refresh success. A later valid sample can age prior success; invalid sampling makes age unknown without undoing qualified completion. | Process-local observations; no durable identity or freshness policy. |
+| Supervisor | Disabled, absent, failed and legacy unavailable results are distinguishable. Malformed additive results never cause a second scan. | Existing integer metrics and legacy callers remain supported; execution authority is unchanged. |
+
+The earlier qualification requested staleness handling under an explicit owner
+policy. No such TTL is established here: this repair supplies validated age and
+clock validity, without inventing healthy/fresh/stale verdicts. High-water clock
+validation includes failed attempts. Invalid start/completion readings prevent
+success replacement; invalid sampling only makes age unknown. Error codes are
+bounded and omit raw exceptions, paths and log content.
+
+Tests cover mixed three-findings/failed-input results and metrics, discovery
+exclusions, zero-input results, failures before/after inert effects, interruptions,
+backward-time recovery, detached snapshots and capture before scan-lock release.
+The finite lock-release hook tests ordering without a background worker. They
+use disposable files and inert effects; no service, full supervisor cycle,
+provider, default database, queue claim or payout is executed. They do not prove
+live scheduler behavior, global coverage or retained RSI improvement.
+
+The prior 30 unrelated test definitions remain exact. The 13 characterization
+cases move into a cohesive focused file; consumer assertions now require the
+agreed repaired behavior. No second monitor, scheduler or authority service is
+introduced. The supervisor remains within its existing 3419-line ceiling,
+expiring 2026-09-30. Exact WSP62 dimensions are in candidate validation.
+
+### A monitor is required beside every execution layer
+
+Before promoting a layer, bind its existing producer, consumer and control owner
+and independently test the following contract. These are acceptance requirements,
+not newly implemented fields or a blanket claim that all owners support them.
+
+1. **Identity and freshness:** correlate existing FoundUp, ticket/job, attempt,
+   parent/dependency, role, source/runtime/profile generation, lease and artifact
+   identifiers. Bind control request/acknowledgment and verifier/activation/rollback
+   receipts. Record event sequence, observation age and observation error explicitly.
+   Reuse existing identities; qualify missing mappings before extending a schema.
+2. **Progress:** report heartbeat age separately from last verified progress,
+   stage deadline and lease validity. A live thread may be stalled. Absent data,
+   stale data, failed scan and a successful scan with zero findings are distinct.
+3. **Control truth:** distinguish desired state, request accepted, effect observed,
+   effect confirmed and failure/unknown. Disable is not stop; a kill request is not
+   confirmed exit. Require bounded timeout and owner-specific confirmation, with
+   idempotency/replay handling. A process ID alone is not durable worker identity.
+4. **Evidence integrity:** distinguish inserted, exact duplicate, conflicting
+   duplicate and rejected/failed persistence. A listener notification is not a
+   storage receipt. Qualify collision, partial write, crash/reopen, retry, cursor
+   gaps, ordering and durability; never silently manufacture success after loss.
+   Preserve volatile emergency/killswitch notification under its existing authority
+   while labeling it separately from durable acknowledgment. Best-effort
+   `runtime_emitter.py` JSONL diagnostics are a different contract from the store.
+5. **Capacity and cost:** bound queued/admitted/running work, parent/child fanout,
+   retries, token/spend/time limits and verifier backlog separately. Unknown cost
+   stays unknown, not zero. Apply backpressure before exhausting verification or
+   audit storage; expose dropped/coalesced observations and lag.
+6. **Quality and learning:** preserve independent verdict, fixed test oracle,
+   rejected output, activation capability, rollback result and later retained-use
+   evidence. Completion, acceptance, promotion, retention and reward settlement
+   are separate facts. Monitor alerts must never change evaluation criteria.
+
+Deterministic checks run first: authorization/scope/lease, deadlines, replay,
+budget, persistence acknowledgment, test verdict and confirmed control outcomes.
+Optional small-model agents can classify ambiguous alerts, summarize redacted
+evidence and propose an existing WSP15 ticket. They cannot grant admission, change
+the evaluator, promote their repairs, issue payments or restart other workers.
+Use bounded shared capacity or sharding only after qualification, not one model
+process per worker. Predeclare accuracy, false alarms, latency and cost acceptance;
+fall back to deterministic unknown/hold when the model is absent or unreliable.
+
+The existing [Unicode monitor prototype](../.agents/skills/unicode_daemon_monitor_prototype/SKILL.md)
+is YouTube-specific and declares `evals: []`. Its restart and announcement examples
+are not an approved general RSI controller. Evaluate only relevant detection
+patterns in isolation; do not execute its live commands as part of this plan.
+WSP48 edge/Gemma proposal contracts likewise do not prove a deployed supervisor.
+
+### Authority, privacy and monitor failure
+
+Monitoring is an observation/control view over existing WRE/AgentDB and launch
+owners. It is not another queue for effects. Advisory proposals re-enter normal
+admission and independent verification. Each actual control needs current owner,
+scope, generation, budget, expiry and recovery policy; the monitor cannot sign its
+own authority. Keep requested control distinct from its eventual acknowledgment.
+
+Use allowlisted summaries, opaque correlation IDs, reason codes and evidence
+references. Do not copy secrets, raw private Gmail/LinkedIn correspondence or
+hidden model reasoning into telemetry. Preserve FoundUp/tenant isolation, bounded
+retention and access controls. Critical control/audit evidence cannot be silently
+sampled away; storage pressure must surface before new admission is authorized.
+
+The monitor itself needs a bounded, independent host/process/lease health check
+and alerts with delivery acknowledgment. Check scan freshness, store failures,
+queue lag and telemetry delivery separately from target health. Do not build an
+infinite chain of model watchers. A monitoring failure should inhibit new work
+under a qualified owner policy; running work follows its bounded lease and existing
+cancellation owner. It must not trigger blind global kills or service restarts.
+
+### Layered implementation and scale gates
+
+| Layer | Smallest next proof | Gate before advancing |
+|---|---|---|
+| 0: evidence foundation | Qualify the existing central event-store collision/partial-write/acknowledgment paths in disposable fixtures; confirm observation effects and missing-data semantics. | Reproducible baseline, fixed negative oracles, independent review; repair only the proven owner defect. No live services. |
+| 1: one component | Bind one existing ticket lifecycle to fresh progress, lease and control outcomes; test scan failure, stalled thread, stale heartbeat and lost acknowledgment. | Read/control scopes proven; confirmed stop/cancel/recovery; no authority invented by projection. |
+| 2: one admitted ticket | Existing WRE → OpenClaw/Hermes → independent verifier → authorized outcome/retention chain. | Native trust anchors and effect lease satisfied; complete correlated receipts and bounded failure/recovery. Simulation alone cannot pass native admission. |
+| 3: two, then ten workers | Isolated lanes, dependency/fanout limits, duplicate claims, stale owner, saturation and verifier reservation. | Measured queue/store/verifier throughput and cost, bounded retries, fault recovery and no ownership collisions. No automatic doubling. |
+| 4: one hundred, then one thousand | Qualify partitioned observation and bounded shared advisory capacity using existing scheduling owners. | Predeclared capacity/latency/error/spend limits and independent sustained-run evidence. Agent count is not demonstrated capacity. |
+
+Build the monitoring contract **alongside each layer, before its promotion**, not
+after the thousand-agent launch. Component fault qualification can proceed now;
+native execution remains blocked by its own authority/runtime prerequisites.
+Do not automatically execute RSI cycles from `main.py` or convert a startup report
+into admission. Follow the existing WRE launch/evaluation sequence.
+
+**Layer handoff checklist:** exact owner and source; scoped work order; fixed test
+oracle and negative cases; producer/consumer correlation; progress/freshness and
+control confirmation; authority/privacy boundary; rollback and monitor-failure
+behavior; independent result; next action in the existing roadmap/ModLog/backlog.
+No layer is operationally complete merely because its happy-path test passes.
+
+### Current WSP15 selection and WSP97 disposition
+
+PR1853–1859 reconcile architecture and repair/qualify event-store, scan,
+diagnostic and import-streak boundaries. Their exact receipts remain in Git;
+none proves whole-system runtime RSI.
+
+Current **12/P2** stop acknowledgment distinguishes accepted requests from
+observed worker exit, binding the captured handle and its stop hook. 51 fixed
+inert cases pass locally and independently. The [broker contract](../modules/infrastructure/dae_daemon/INTERFACE.md#broker-stop-acknowledgment)
+states callback-ownership and concurrency limits. Holo's independent exit poll
+is preserved. [Observer runtime lookup](../modules/infrastructure/dae_daemon/INTERFACE.md#observer-runtime-lookup) now avoids broker creation with eight fixed cases passing locally and independently; default observer and adapter construction remain separate gaps.
+
+LinkedIn/Gmail activity belongs in the existing R25 consented-feedback path;
+registered Skillz do not prove runtime ticket/retention integration. LinkedIn
+has separate ownership. Hermes/OpenClaw maintenance reuses dependency_launcher,
+its evidence supplier and existing canary/rollback owners: integrity-only
+metadata is not authenticated update admission or proof of current versions.
+Product identity and the separate open Memory Horizon proposal are recorded in
+the backlog; no alias, merge, runtime update or product activation is implied.
+
+Native18/P0 and FAM14/P1 remain admission-blocked; PostgreSQL13 lacks runtime
+qualification. Fresh selection follows source evidence and dependencies, not
+the old queue. Do not revive the historical unified event-queue proposal below.
+
+---
+
+## Historical architecture inventory and proposals — 2025-12-03
+
+The following material is preserved for lineage. Revalidate its owners, test
+claims and event-effect proposals against the current contract above before use.
+
 ## Overview
 
 This document maps all daemons in the Foundups-Agent ecosystem, their capabilities, and event-driven orchestration patterns.

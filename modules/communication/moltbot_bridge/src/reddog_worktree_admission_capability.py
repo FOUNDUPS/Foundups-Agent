@@ -43,15 +43,25 @@ def authoritative_worktree_lease_digest(
 ) -> str:
     return authoritative_use_effect_digest(
         "worktree_create",
-        {
-            "queue_item_id": queue_id,
-            "selected_slice": slice_id,
-            "work_order_id": str(work_order.get("work_order_id") or ""),
-            "work_order_digest": _digest(work_order),
-            "executor_plan_digest": _digest(executor_plan),
-            "valve_decision_digest": _digest(valve_decision),
-        },
+        authoritative_worktree_effect_payload(
+            queue_id, slice_id, work_order, executor_plan, valve_decision
+        ),
     )
+
+
+def authoritative_worktree_effect_payload(
+    queue_id: str, slice_id: str, work_order: Mapping[str, Any],
+    executor_plan: Mapping[str, Any], valve_decision: Mapping[str, Any],
+) -> dict[str, str]:
+    """Exact inert target shared by approval preparation and admission."""
+    return {
+        "queue_item_id": queue_id,
+        "selected_slice": slice_id,
+        "work_order_id": str(work_order.get("work_order_id") or ""),
+        "work_order_digest": _digest(work_order),
+        "executor_plan_digest": _digest(executor_plan),
+        "valve_decision_digest": _digest(valve_decision),
+    }
 
 
 @dataclass(frozen=True, slots=True)
@@ -155,6 +165,7 @@ class InMemoryWorktreeAdmissionRegistry:
 
 
 __all__ = [
+    "authoritative_worktree_effect_payload",
     "authoritative_worktree_lease_digest",
     "InMemoryWorktreeAdmissionRegistry",
     "WorktreeAdmissionCapability",

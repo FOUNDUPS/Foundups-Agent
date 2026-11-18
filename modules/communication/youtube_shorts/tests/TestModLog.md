@@ -1,5 +1,66 @@
 # YouTube Shorts TestModLog
 
+27 audit correction: compact844×390 was incorrectly assigned a56px tablet floor
+by the width-only harness. The frozen case is a landscape phone with48px floor.
+Corrected only device classification, retained red evidence, and reran unchanged
+geometry/fit/growth oracles. No product CSS adjustment was needed for this result.
+The review skill now requires freezing device identity across orientation.
+
+
+## 2026-11-02 — Compact/fullscreen word-space27
+
+89 Node tests initially pass. Presenter tests preserve default collapse semantics
+and add inline opt-in canonical geometry, same retained time through expand/back,
+both word modes, hidden cancellation, dispose and failed-data native fallback.
+Browser acceptance must now cover both compact and fullscreen at six sizes,
+root/inner and both modes, actual glyph bounds/fit/final floors and strict THUMP
+growth. Replace the older mandatory compact-native oracle only for opted-in
+ready presentation; failed native fallback remains mandatory. Preserve26media
+hashes and actual one-Play/all5/movie-end/game-paused regression.
+
+## 2026-11-02 — SQUISH needs an actual loss
+
+Replay3 is an all-safe demonstration and must have zero SQUISH events/frames;
+retain five full SNIFFs and three progressive THUMPs. Game-world regression
+covers no-input loss, mixed safe/lost, all-safe/outcome-unset, successful practice
+and no-loss practice. Loss cue remains bounded54–56s. Older cancellation test
+uses a loss cue fixture, not a fake victory cue.87 Node tests pass initially;
+independent media/controller/browser proof is recorded separately in
+`O:/Foundups-Agent/outputs/storytime-safe-sounds-20261102/`.
+
+## 2026-11-02 — Single-word25 validation
+
+86 Node tests pass, including invalid profile/caption fallback, retained-time
+redraw, final font floor with strict distance progression, and shared revision
+module graph. Independent director harness:852/852 word-layout assertions,
+both routes × six sizes × five cues × two placements;6/6 native fallback.
+Real single Play observed indices0–4 then movie ended25s, game clock0/score0/paused.
+Actual geometry and screenshots retained in
+`O:/Foundups-Agent/outputs/storytime-word-layout-20261102/` including red baselines.
+Desktop observation does not certify native iOS sound/touch or child comprehension.
+
+## 2026-11-01 — Storytime sound/voice lifecycle
+
+EDUIT Node80/80 includes no action-Foley duck, surviving the old sniff endpoint,
+caption size progression and actual controller resets. Independent decoded MP4
+samples verify5sniff primitives, increasingTHUMP RMS andSQUISH. Python Cairo
+media suite not run: this host lacks CairoSVG; the actual final producer instead
+completed with installed Sharp/Pillow/NumPy and existing FFmpeg. No installation
+or acoustic/native listening PASS is implied. See EDUIT TestModLog and receipts.
+
+## 2026-11-01 — Private directive upload consumers
+
+`test_operator_upload_policy.py` exercises actual uploader definitions with an
+inert `MediaFileUpload` collaborator and complete production orchestrator/DAE
+classes compiled inside fixtures. Positive accepted upload, actual channel scope,
+pause/STOP/unknown refusal, generation fingerprint races, retained descriptor
+hashing, durable unknown-asset retry refusal and restart cadence are covered.
+Provider/model/auth/browser/service effects remain denied. The legacy publisher
+test retains its assertions with valid synthetic channel/video identity literals.
+Its16 controls passed as part of the60-case fixed consumer selection. The15
+existing publisher-boundary cases also passed alongside the selected-batch147
+and metadata-evidence23. No skipped cases or captured JUnit streams.
+
 ## 2026-08-25 — AutoPost / Foundups Mall publisher boundary
 
 | Contract | Evidence |
@@ -13,3 +74,38 @@
 | Explicitly pinned dead OAuth sets do not silently rotate channels | `youtube_auth/tests/test_oauth_no_silent_fallback.py` |
 
 Focused repository gate: 9 passed. All services/files are fakes or temporary fixtures. No credentials were read, refreshed, logged or uploaded; no live YouTube write is claimed.
+
+## 2026-10-23 — OpenRouter storyboard boundary
+
+Added offline tests for reference-byte requests, output/provenance, denied admission, changed references, invalid IDs/directories, malformed responses, redacted transport errors, replay refusal, review failure, reviewed-frame handoff and post-review mutation. Included the suite in Kids Episodes CI. Fixtures are local images and fake transport/review/video callbacks; tests do not establish live quality or account access.
+
+Validation: 266 selected tests passed, including the existing renderer/editor/research, all Kids story contracts, OpenClaw route, registry loader/schema and CI security gate. The regenerated global test registry adds only this new test module.
+
+## 2026-10-25 — Local Little Shrew animation
+
+140 focused tests passed, including 3 new real authoring cases for six-character motion/joins, deterministic bounded audio and overwrite refusal, plus a real three-shot render with asset hashes, timed SRT and 450-frame output. Existing renderer, OpenRouter and Kids suites included. Independent final-frame inspection and technical audio decoding passed; no perceptual audio listening or publication approval claimed.
+
+## 2026-10-26 — Us_Story_Time publisher policy
+
+35 publisher/CI-security cases passed offline. Tests cover FoundUps set 10 reuse, optional explicit set override, invalid override refusal, missing environment pins/mismatched live identities, Story Time-only routing, unlisted made-for-kids metadata and explicit synthetic disclosure. Existing publisher regressions included. Fakes verify API arguments, not live OAuth or uploads. Added this existing suite to Kids CI and loaded only the publisher owner to avoid unrelated generation SDK imports.
+
+## 2026-10-26 — Little Shrew editorial revision 2
+
+012 requested removing the oversized sixth shrew. The rightmost of three equal-sized children now wakes after an early short tremor, wiggles and reaches the root by 5.5 seconds; parents and siblings stay asleep. Audio/captions retimed. Three five-second clips still total 15 seconds. Provenance labels this an editorial override of the original nine-beat source. Existing real render/audio tests passed; motion regression updated to inspect the smaller hero region and verifies five characters, equal child scales and sleeping family. No perceptual audio review or upload claimed for this revision.
+
+## 2026-10-25 — Review page integration
+
+Four existing game/scene tests and the review control regression pass. The
+control test verifies that silent scrubbing survives a mode switch and that
+refresh reloads media without autoplay. A build smoke with a mocked renderer
+verified all mounted review/scene/style/media paths; this does not review media
+quality or establish live hosting. JavaScript syntax and diff whitespace pass.
+
+## 2026-10-26 — Stomp-mode audio cue
+
+Extended test_little_shrew_preview.py with THUMP window, ordered foley captions,
+15-second sample count and bounded amplitude; non-stomp deterministic check retained.
+
+2026-10-26 spatial words: renderer contract rejects non-Boolean
+`captions_in_scene`; enabled mode retains validated SRT. Actual EDUIT renders
+verify scene-owned visible words without duplicate subtitle burn-in.

@@ -6,7 +6,7 @@ import sqlite3
 from contextlib import contextmanager
 from pathlib import Path
 from time import sleep
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     ProposalReplayHighWater,
@@ -31,6 +31,8 @@ class SqliteMonotonicAuthorityStore:
         repo_root: Path | str,
         store_id: str,
         durability_receipt_id: str,
+        require_existing: bool = False,
+        mutation_guard: Callable[[], None] | None = None,
     ) -> None:
         root = validate_runtime_root_path(allowed_root, repo_root=repo_root)
         target = validate_runtime_artifact_path(
@@ -47,13 +49,24 @@ class SqliteMonotonicAuthorityStore:
             or not is_sha256(durability_receipt_id)
         ):
             raise ValueError("monotonic_authority_identity_invalid")
-        root.mkdir(parents=True, exist_ok=True)
+        if type(require_existing) is not bool:
+            raise ValueError("monotonic_authority_existing_mode_invalid")
+        if mutation_guard is not None and not callable(mutation_guard):
+            raise ValueError("monotonic_authority_mutation_guard_invalid")
+        if not require_existing:
+            root.mkdir(parents=True, exist_ok=True)
         self._path = target
         self._repo_root = Path(repo_root).resolve()
         self._allowed_root = root
         self._store_id = store_id.strip()
         self._durability_receipt_id = durability_receipt_id
-        self._initialize()
+        self._require_existing = require_existing
+        self._mutation_guard = mutation_guard
+        if require_existing:
+            with self._connect():
+                pass
+        else:
+            self._initialize()
 
     @property
     def store_id(self) -> str:
@@ -118,21 +131,51 @@ class SqliteMonotonicAuthorityStore:
             raise ValueError("monotonic_authority_not_monotonic")
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
-            current = _read_current(connection, binding)
-            if current != expected:
+            try:
+                current = _read_current(connection, binding)
+                if current != expected:
+                    raise RuntimeError("monotonic_authority_conflict")
+                self._guard_mutation()
+                connection.execute(
+                    "INSERT INTO high_water(binding_digest, sequence, "
+                    "state_revision) VALUES (?, ?, ?) "
+                    "ON CONFLICT(binding_digest) DO UPDATE SET "
+                    "sequence=excluded.sequence, "
+                    "state_revision=excluded.state_revision",
+                    (binding, next_value.sequence, next_value.state_revision),
+                )
+                self._guard_mutation()
+                connection.commit()
+            except BaseException:
                 connection.rollback()
-                raise RuntimeError("monotonic_authority_conflict")
-            connection.execute(
-                "INSERT INTO high_water(binding_digest, sequence, "
-                "state_revision) VALUES (?, ?, ?) "
-                "ON CONFLICT(binding_digest) DO UPDATE SET "
-                "sequence=excluded.sequence, "
-                "state_revision=excluded.state_revision",
-                (binding, next_value.sequence, next_value.state_revision),
-            )
-            connection.commit()
+                raise
         if self.load(binding) != next_value:
             raise RuntimeError("monotonic_authority_commit_unverified")
+
+    def _guard_mutation(self) -> None:
+        if self._mutation_guard is not None:
+            self._mutation_guard()
+
+    def restore_missing_from_witness(
+        self,
+        binding_digest: str,
+        *,
+        witness: "SqliteMonotonicAuthorityReader",
+        expected: ProposalReplayHighWater,
+    ) -> None:
+        """Copy an exact witness checkpoint; the mirror owner must serialize use.
+
+        Existing unequal destination state is never replaced. An exception after
+        commit may leave the exact copied checkpoint; it is not an acknowledgment.
+        """
+        binding = _digest(binding_digest, "binding")
+        _validate_value(expected)
+        _require_restore_domains(self, witness)
+        if witness.load(binding) != expected:
+            raise RuntimeError("monotonic_authority_restore_witness_changed")
+        _restore_missing_checkpoint(self, binding, witness, expected)
+        if self.reader().load(binding) != expected or witness.load(binding) != expected:
+            raise RuntimeError("monotonic_authority_restore_unverified")
 
     @contextmanager
     def _connect(self) -> Iterator[sqlite3.Connection]:
@@ -141,7 +184,8 @@ class SqliteMonotonicAuthorityStore:
             allowed_root=self._allowed_root,
             repo_root=self._repo_root,
         )
-        connection = _open_configured_connection(target)
+        identity = (self._store_id, self._durability_receipt_id) if self._require_existing else None
+        connection = _open_configured_connection(target, existing_identity=identity)
         try:
             yield connection
         finally:
@@ -151,6 +195,7 @@ class SqliteMonotonicAuthorityStore:
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
             try:
+                self._guard_mutation()
                 connection.execute(
                     "CREATE TABLE IF NOT EXISTS metadata "
                     "(store_id TEXT PRIMARY KEY, "
@@ -166,6 +211,7 @@ class SqliteMonotonicAuthorityStore:
                     store_id=self._store_id,
                     durability_receipt_id=self._durability_receipt_id,
                 )
+                self._guard_mutation()
                 connection.commit()
             except Exception:
                 connection.rollback()
@@ -274,6 +320,52 @@ class SqliteMonotonicAuthorityReader:
             connection.close()
 
 
+def _require_restore_domains(
+    destination: SqliteMonotonicAuthorityStore,
+    witness: SqliteMonotonicAuthorityReader,
+) -> None:
+    if type(witness) is not SqliteMonotonicAuthorityReader:
+        raise ValueError("monotonic_authority_restore_witness_invalid")
+    first, second = destination.rollback_domain_root, witness.rollback_domain_root
+    if (
+        first.is_relative_to(second) or second.is_relative_to(first)
+        or destination._repo_root != witness._repo_root
+    ):
+        raise ValueError("monotonic_authority_restore_domain_invalid")
+
+
+def _restore_missing_checkpoint(
+    destination: SqliteMonotonicAuthorityStore,
+    binding: str,
+    witness: SqliteMonotonicAuthorityReader,
+    expected: ProposalReplayHighWater,
+) -> None:
+    with destination._connect() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            _require_reader_metadata(
+                connection, store_id=destination.store_id,
+                durability_receipt_id=destination.durability_receipt_id,
+            )
+            if witness.load(binding) != expected:
+                raise RuntimeError("monotonic_authority_restore_witness_changed")
+            current = _read_current(connection, binding)
+            if current is not None and current != expected:
+                raise RuntimeError("monotonic_authority_conflict")
+            if current is None:
+                destination._guard_mutation()
+                connection.execute(
+                    "INSERT INTO high_water(binding_digest, sequence, state_revision) "
+                    "VALUES (?, ?, ?)",
+                    (binding, expected.sequence, expected.state_revision),
+                )
+            destination._guard_mutation()
+            connection.commit()
+        except BaseException:
+            connection.rollback()
+            raise
+
+
 def _validate_reader_identity(reader: SqliteMonotonicAuthorityReader) -> None:
     if (
         not isinstance(reader.store_id, str)
@@ -299,14 +391,34 @@ def _require_reader_metadata(
         raise ValueError("monotonic_authority_identity_mismatch")
 
 
-def _open_configured_connection(target: Path) -> sqlite3.Connection:
+def _require_existing_schema(connection: sqlite3.Connection) -> None:
+    schemas = {
+        "metadata": [("store_id", "TEXT", 0, 1), ("durability_receipt_id", "TEXT", 1, 0)],
+        "high_water": [("binding_digest", "TEXT", 0, 1), ("sequence", "INTEGER", 1, 0),
+                       ("state_revision", "TEXT", 1, 0)],
+    }
+    for table, expected in schemas.items():
+        rows = connection.execute(f"PRAGMA table_info({table})").fetchall()
+        if ([(r[1], r[2], r[3], r[5]) for r in rows] != expected
+                or any(r[4] is not None for r in rows)):
+            raise ValueError("monotonic_authority_schema_mismatch")
+
+
+def _open_configured_connection(
+    target: Path, *, existing_identity: tuple[str, str] | None = None,
+) -> sqlite3.Connection:
     for attempt in range(5):
         connection = sqlite3.connect(
-            target,
+            f"{target.as_uri()}?mode=rw" if existing_identity is not None else target,
+            uri=existing_identity is not None,
             timeout=30.0,
             isolation_level=None,
         )
         try:
+            if existing_identity is not None:
+                _require_existing_schema(connection)
+                _require_reader_metadata(connection, store_id=existing_identity[0],
+                                         durability_receipt_id=existing_identity[1])
             connection.execute("PRAGMA busy_timeout=30000")
             connection.execute("PRAGMA journal_mode=WAL")
             connection.execute("PRAGMA synchronous=FULL")
@@ -316,6 +428,9 @@ def _open_configured_connection(target: Path) -> sqlite3.Connection:
             if "locked" not in str(exc).lower() or attempt == 4:
                 raise
             sleep(0.05 * (attempt + 1))
+        except BaseException:
+            connection.close()
+            raise
     raise RuntimeError("monotonic_authority_connection_unavailable")
 
 

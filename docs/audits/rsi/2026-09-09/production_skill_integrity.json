@@ -1,0 +1,25 @@
+[
+  {
+    "skill": "auto_test_registry_audit",
+    "path": "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md",
+    "manifest_passed": true,
+    "mismatched_files": [],
+    "missing_files": [],
+    "signature_verified": false
+  },
+  {
+    "skill": "reddog_operations",
+    "path": "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md",
+    "manifest_passed": false,
+    "mismatched_files": [
+      "SKILLz.md"
+    ],
+    "missing_files": [],
+    "signature_verified": false,
+    "checkout_matches_manifest": false,
+    "git_blob_matches_manifest": false,
+    "lf_normalized_matches_manifest": false,
+    "checkout_crlf_lines": 173,
+    "git_blob_crlf_lines": 0
+  }
+]

@@ -102,24 +102,28 @@ class TestServiceWorker:
     def test_catalog_is_network_first(self, sw_source: str):
         """Catalog must use network-first strategy (not cache-first)."""
         assert "mall-video-catalog.json" in sw_source
-        # Network-first: the catalog respondWith block calls fetch() first,
-        # then falls back to caches.match() in .catch()
         catalog_section_match = re.search(
-            r"indexOf\(CATALOG_URL\).*?return;", sw_source, re.DOTALL
+            r"url\.pathname\s*===\s*CATALOG_URL.*?return;", sw_source, re.DOTALL
         )
         assert catalog_section_match, "Catalog fetch section not found"
         section = catalog_section_match.group()
-        fetch_pos = section.find("fetch(event.request)")
-        cache_pos = section.find("caches.match(")
-        assert fetch_pos >= 0, "fetch() not found in catalog section"
-        assert cache_pos >= 0, "caches.match() not found in catalog section"
+        assert "networkFirst(" in section, "Catalog section must delegate to networkFirst()"
+        nf_match = re.search(
+            r"function networkFirst\(.*?\n\}", sw_source, re.DOTALL
+        )
+        assert nf_match, "networkFirst helper not found"
+        nf_body = nf_match.group()
+        fetch_pos = nf_body.find("fetch(")
+        cache_pos = nf_body.find("cache.match(")
+        assert fetch_pos >= 0, "fetch() not found in networkFirst()"
+        assert cache_pos >= 0, "cache.match() not found in networkFirst()"
         assert fetch_pos < cache_pos, "Catalog should be network-first (fetch before cache)"
 
     def test_shell_assets_reference_real_files(self, sw_source: str):
         """Each JS/CSS in SHELL_ASSETS should have a corresponding file on disk."""
         asset_matches = re.findall(r"'(/member/(?:js|css)/[^']+)'", sw_source)
         for asset_path in asset_matches:
-            rel = asset_path.lstrip("/")
+            rel = asset_path.partition("?")[0].lstrip("/")
             file_path = MEMBER_DIR.parent / rel
             assert file_path.exists(), f"Shell asset references missing file: {asset_path} -> {file_path}"
 
@@ -132,7 +136,7 @@ class TestServiceWorker:
     def test_poster_cache_is_separate(self, sw_source: str):
         """Posters must use a dedicated cache, not the shell cache."""
         poster_match = re.search(
-            r"indexOf\('/media/posters/'\).*?return;", sw_source, re.DOTALL
+            r"\\/media\\/posters\\/.*?return;", sw_source, re.DOTALL
         )
         assert poster_match, "Poster cache section not found"
         section = poster_match.group()
@@ -143,14 +147,22 @@ class TestServiceWorker:
     def test_catalog_offline_fallback(self, sw_source: str):
         """Catalog miss path must return an empty-array fallback with header."""
         catalog_match = re.search(
-            r"indexOf\(CATALOG_URL\).*?return;", sw_source, re.DOTALL
+            r"url\.pathname\s*===\s*CATALOG_URL.*?return;", sw_source, re.DOTALL
         )
         assert catalog_match, "Catalog section not found"
         section = catalog_match.group()
-        assert "X-Offline-Fallback" in section, (
+        assert "emptyVideoCatalog" in section, (
+            "Catalog section must pass emptyVideoCatalog fallback"
+        )
+        fallback_match = re.search(
+            r"function emptyVideoCatalog\(\).*?\n\}", sw_source, re.DOTALL
+        )
+        assert fallback_match, "emptyVideoCatalog helper not found"
+        fallback_body = fallback_match.group()
+        assert "X-Offline-Fallback" in fallback_body, (
             "Catalog offline fallback must set X-Offline-Fallback header"
         )
-        assert "'[]'" in section, (
+        assert "'[]'" in fallback_body, (
             "Catalog offline fallback must return empty JSON array"
         )
 

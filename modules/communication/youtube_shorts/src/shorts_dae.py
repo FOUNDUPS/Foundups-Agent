@@ -9,6 +9,7 @@ import time
 import threading
 from typing import List, Optional
 from .shorts_orchestrator import ShortsOrchestrator
+from .youtube_uploader import YouTubeUploadPolicyBlocked, YouTubeUploadOutcomeUnknown
 
 
 class ShortsDAE:
@@ -28,6 +29,7 @@ class ShortsDAE:
         # Topic queue for autonomous posting
         self.topic_queue: List[str] = []
         self.current_topic_index = 0
+        self._stop_event = threading.Event()
 
         print("[ShortsDAE] Initialized")
 
@@ -59,6 +61,7 @@ class ShortsDAE:
         self.topic_queue = topics
         self.current_topic_index = 0
         self.active = True
+        self._stop_event.clear()
 
         # Start background thread
         self.thread = threading.Thread(
@@ -85,37 +88,37 @@ class ShortsDAE:
         Runs in separate thread.
         """
 
-        interval_seconds = interval_hours * 3600
-
         print(f"[ShortsDAE] [BOT] Autonomous loop started")
-
+        last_upload = None
         while self.active:
             try:
-                # Get next topic (cycle through queue)
-                topic = self.topic_queue[self.current_topic_index]
-                self.current_topic_index = (self.current_topic_index + 1) % len(self.topic_queue)
-
-                print(f"\n[ShortsDAE] [U+1F3AC] Creating scheduled Short...")
-                print(f"  Topic: {topic}")
-
-                # Create and upload Short
-                youtube_url = self.orchestrator.create_and_upload(
-                    topic=topic,
-                    duration=duration,
-                    privacy=privacy
-                )
-
-                print(f"[ShortsDAE] [OK] Autonomous Short posted: {youtube_url}")
-
-                # Wait for next interval
-                if self.active:
-                    print(f"[ShortsDAE] ⏰ Next Short in {interval_hours} hours...")
-                    time.sleep(interval_seconds)
-
-            except Exception as e:
-                print(f"[ShortsDAE] [FAIL] Error in autonomous loop: {e}")
-                print(f"[ShortsDAE] ⏰ Retrying in 1 hour...")
-                time.sleep(3600)  # Wait 1 hour on error
+                policy = self.orchestrator.uploader.get_shorts_policy()
+                interval = policy.get("interval_minutes", interval_hours * 60) * 60
+                remaining = interval - (time.monotonic() - last_upload) if last_upload is not None else 0
+                recent = policy.get("last_upload_attempt_unix")
+                if isinstance(recent, (int, float)):
+                    remaining = max(remaining, interval - (time.time() - recent))
+                if remaining > 0:
+                    self._stop_event.wait(min(5, remaining))
+                    continue
+                topics = policy.get("topics", self.topic_queue)
+                if not topics:
+                    self._stop_event.wait(5)
+                    continue
+                topic = topics[self.current_topic_index % len(topics)]
+                self.orchestrator.create_and_upload(topic=topic, duration=duration, privacy=privacy,
+                                                    policy_fingerprint=policy["fingerprint"])
+                self.current_topic_index += 1
+                last_upload = time.monotonic()
+                print("[ShortsDAE] Upload accepted; independent readback pending")
+            except YouTubeUploadOutcomeUnknown:
+                self.active = False  # durable uploader claim survives restart
+                print("[ShortsDAE] Upload outcome unknown; automatic retry stopped")
+            except YouTubeUploadPolicyBlocked:
+                self._stop_event.wait(5)
+            except Exception:
+                print("[ShortsDAE] Generation failed; retry deferred")
+                self._stop_event.wait(3600)
 
         print(f"[ShortsDAE] [STOP] Autonomous loop stopped")
 
@@ -128,6 +131,7 @@ class ShortsDAE:
 
         print("[ShortsDAE] [STOP] Stopping autonomous mode...")
         self.active = False
+        self._stop_event.set()
 
         if self.thread:
             self.thread.join(timeout=5)

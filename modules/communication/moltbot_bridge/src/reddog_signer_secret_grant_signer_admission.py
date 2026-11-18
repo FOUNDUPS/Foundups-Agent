@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -64,10 +64,16 @@ def _reserve_elevated(
     authority = backend.elevated_consensus_signer_authority
     if type(authority) is not ElevatedConsensusSignerAuthority:
         return None
+    proof = request.elevated_consensus_proof
+    receipt = proof.get("consensus_receipt") if isinstance(proof, Mapping) else None
+    if (not isinstance(receipt, Mapping)
+            or receipt.get("receipt_id") != request.consensus_receipt_digest):
+        return None
     return authority.reserve(
-        request.elevated_consensus_proof,
+        proof,
         signing_request_digest=str(grant["signing_request_digest"]),
         now=now_epoch,
+        grant_expires_at=grant["expires_at"],
     )
 
 
@@ -78,7 +84,11 @@ def _rate_rejection(backend: Any, policy: Any, now_epoch: int) -> str:
         or type(rate.replay_store) is not DurableSignerSecretGrantNonceStore
     ):
         return REJECT_POLICY_MISSING
-    if (
+    if policy.issuer_rate_binding is not None:
+        from .reddog_signer_secret_grant_durable_rate_authority import protected_issuer_rate_binding_matches
+        if not protected_issuer_rate_binding_matches(policy.issuer_rate_binding, policy, rate.replay_store):
+            return REJECT_REQUEST_INVALID
+    elif (
         rate.replay_store_id != policy.replay_store_id
         or rate.durability_receipt_id
         != policy.replay_store_durability_receipt_id

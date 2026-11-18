@@ -6,9 +6,28 @@ import hashlib
 import json
 import os
 import stat
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VERIFIED_OUTCOME_SIGNING_PREFIX, VerifiedOutcomeResponseBinding,
+    parse_verified_outcome_response_record,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    validate_root_verified_outcome_descriptor_public,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
+    decode_message, PENDING_RESPONSE_SCHEMA, MAX_PENDING_RESPONSE_RECORDS,
+    MAX_PENDING_RESPONSE_STORE_BYTES, pending_response_records as _pending_response_records,
+    pending_response_snapshot as _pending_response_snapshot,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
+    AtomicJsonAuthorityRuntimeStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    Ed25519SignatureVerifier,
+)
 from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
     ProposalReplayHighWater,
 )
@@ -116,6 +135,121 @@ class RootVerifiedOutcomeAuthorityState:
         with self._lock():
             self._require_installed()
             return self._current(binding_digest)
+
+    def persist_pending_response(
+        self, raw: bytes, *, expected_binding: VerifiedOutcomeResponseBinding,
+        expected_record_digest: str, now_epoch: int,
+    ) -> str:
+        """Persist selected bytes while leaving the exact grant reserved."""
+        return self._persist_response(
+            raw, expected_binding=expected_binding, expected_record_digest=expected_record_digest,
+            now_epoch=now_epoch, terminal=False,
+        )
+
+    def commit_pending_response(
+        self, raw: bytes, *, expected_binding: VerifiedOutcomeResponseBinding,
+        expected_record_digest: str, expected_reservation: ProposalReplayHighWater,
+        now_epoch: int,
+    ) -> str:
+        """Commit the full record only after durable exact-byte readback."""
+        return self._persist_response(
+            raw, expected_binding=expected_binding, expected_record_digest=expected_record_digest,
+            now_epoch=now_epoch, terminal=True, expected_reservation=expected_reservation,
+        )
+
+    def _persist_response(
+        self, raw: bytes, *, expected_binding: VerifiedOutcomeResponseBinding,
+        expected_record_digest: str, now_epoch: int, terminal: bool,
+        expected_reservation: ProposalReplayHighWater | None = None,
+    ) -> str:
+        generation, reserved = _pending_response_context(
+            raw, expected_binding, expected_record_digest, now_epoch,
+        )
+        if terminal and reserved != expected_reservation:
+            raise ValueError("root_record_commit_reservation_mismatch")
+        authorization_id = expected_binding.authorization_id
+        selection = pending_response_binding(authorization_id)
+        wanted = ProposalReplayHighWater(1, expected_record_digest[7:])
+        committed = ProposalReplayHighWater(2, expected_record_digest[7:])
+        with self._lock():
+            self._require_installed()
+            current_grant = self._current(authorization_binding(authorization_id))
+            if (self._current(GENERATION_BINDING) != generation
+                or current_grant not in ({reserved, committed} if terminal else {reserved})):
+                raise RuntimeError("root_pending_response_context_conflict")
+            store = AtomicJsonAuthorityRuntimeStore(
+                self._primary.rollback_domain_root / "verified-outcome-pending-responses.json",
+                allowed_root=self._primary.rollback_domain_root, repo_root=self._repo_root,
+            )
+            self._require_pending_file_ownership(store)
+            current = store.load()
+            records = _pending_response_records(current)
+            self._validate_pending_records(records)
+            previous = records.get(authorization_id)
+            marker = self._current(selection)
+            if (previous is not None and previous != raw.decode("ascii")) or (
+                marker is not None and marker != wanted
+            ) or ((previous is not None or current_grant == committed) and marker is None):
+                raise RuntimeError("root_pending_response_conflict")
+            snapshot = _pending_response_snapshot({**records, authorization_id: raw.decode("ascii")})
+            if marker is None:
+                self._advance_pair(selection, None, wanted)
+            if previous is None:
+                _commit_pending_response(store, snapshot, current.get("revision"))
+            self._require_pending_file_ownership(store)
+            persisted = _pending_response_records(store.load())
+            self._validate_pending_records(persisted)
+            if persisted.get(authorization_id) != raw.decode("ascii"):
+                raise RuntimeError("root_pending_response_write_unverified")
+            if terminal and current_grant != committed:
+                self._advance_pair(authorization_binding(authorization_id), reserved, committed)
+            return expected_record_digest
+
+    def load_committed_response_for_root(self, *, expected_binding: VerifiedOutcomeResponseBinding,
+        expected_record_digest: str, expected_generation: ProposalReplayHighWater,
+        now_epoch: int) -> bytes:
+        """Root storage only; the caller must separately authorize any disclosure."""
+        with self._lock():
+            self._require_installed()
+            store = AtomicJsonAuthorityRuntimeStore(
+                self._primary.rollback_domain_root / "verified-outcome-pending-responses.json",
+                allowed_root=self._primary.rollback_domain_root, repo_root=self._repo_root,
+            )
+            self._require_pending_file_ownership(store)
+            records = _pending_response_records(store.load())
+            self._validate_pending_records(records)
+            raw = records.get(expected_binding.authorization_id, "").encode("ascii")
+            generation, _ = _pending_response_context(raw, expected_binding, expected_record_digest, now_epoch)
+            if (type(expected_generation) is not ProposalReplayHighWater
+                or type(expected_generation.sequence) is not int or generation != expected_generation
+                or self._current(GENERATION_BINDING) != generation
+                or self._current(authorization_binding(expected_binding.authorization_id))
+                != ProposalReplayHighWater(2, expected_record_digest[7:])):
+                raise RuntimeError("root_committed_response_context_conflict")
+            return raw
+
+    def _validate_pending_records(self, records: Mapping[str, str]) -> None:
+        for authorization_id, text in records.items():
+            marker = self._current(pending_response_binding(authorization_id))
+            if marker is None or marker.sequence != 1:
+                raise ValueError("root_pending_response_selection_missing")
+            raw = text.encode("ascii")
+            try:
+                binding = VerifiedOutcomeResponseBinding(**decode_message(raw)["binding"])
+            except (KeyError, TypeError, RecursionError) as exc:
+                raise ValueError("root_pending_response_record_invalid") from exc
+            if binding.authorization_id != authorization_id:
+                raise ValueError("root_pending_response_record_scope_invalid")
+            parse_verified_outcome_response_record(
+                raw, expected_binding=binding,
+                expected_record_digest="sha256:" + marker.state_revision,
+                signature_verifier=Ed25519SignatureVerifier(),
+            )
+
+    def _require_pending_file_ownership(self, store: AtomicJsonAuthorityRuntimeStore) -> None:
+        self._require_current_ownership()
+        if self._require_ownership:
+            _require_root_files(store.path)
 
     def advance(
         self,
@@ -297,10 +431,14 @@ class RootVerifiedOutcomeAuthorityState:
         if primary == witness:
             return primary
         if primary is None and witness is not None:
-            self._primary.advance(binding, expected=None, next_value=witness)
+            self._primary.restore_missing_from_witness(
+                binding, witness=self._witness.reader(), expected=witness,
+            )
             return witness
         if witness is None and primary is not None:
-            self._witness.advance(binding, expected=None, next_value=primary)
+            self._witness.restore_missing_from_witness(
+                binding, witness=self._primary.reader(), expected=primary,
+            )
             return primary
         if primary is not None and witness is not None:
             if primary.sequence == witness.sequence + 1:
@@ -361,6 +499,41 @@ class RootVerifiedOutcomeAuthorityState:
             repo_root=self._repo_root,
             allowed_root=self._primary.rollback_domain_root,
         )
+
+
+def _pending_response_context(raw, binding, record_digest, now_epoch):
+    request, _response = parse_verified_outcome_response_record(
+        raw, expected_binding=binding, expected_record_digest=record_digest,
+        signature_verifier=Ed25519SignatureVerifier(),
+    )
+    descriptor = validate_root_verified_outcome_descriptor_public(
+        decode_message(raw)["authority_descriptor"], now_epoch=now_epoch,
+    )
+    payload = json.loads(request.signing_input[len(VERIFIED_OUTCOME_SIGNING_PREFIX):])
+    reservation = {
+        **asdict(binding), "receipt_id": payload["receipt_id"],
+        "work_order_id": payload["work_order_id"],
+        "evidence_digest": payload["covered_action_digest"], "issued_at": payload["issued_at"],
+    }
+    return (
+        ProposalReplayHighWater(descriptor["authority_generation_sequence"], binding.owner_config_id[7:]),
+        ProposalReplayHighWater(1, state_revision(reservation)),
+    )
+
+
+def _commit_pending_response(store, snapshot, expected_revision):
+    try:
+        store.commit(snapshot, expected_revision=expected_revision)
+    except (OSError, RuntimeError, ValueError):
+        if _pending_response_records(store.load()) != snapshot["records"]:
+            raise
+
+
+def pending_response_binding(authorization_id: str) -> str:
+    return "sha256:" + state_revision({
+        "schema_version": PENDING_RESPONSE_SCHEMA,
+        "authorization_binding": authorization_binding(authorization_id),
+    })
 
 
 def state_revision(value: Mapping[str, Any]) -> str:
@@ -490,8 +663,12 @@ __all__ = [
     "GENERATION_BINDING",
     "INSTALLATION_BINDING",
     "PROTECTED_USE_BINDING",
+    "PENDING_RESPONSE_SCHEMA",
+    "MAX_PENDING_RESPONSE_RECORDS",
+    "MAX_PENDING_RESPONSE_STORE_BYTES",
     "RootVerifiedOutcomeAuthorityState",
     "authorization_binding",
+    "pending_response_binding",
     "root_authority_state_binding_digest",
     "state_revision",
     "validate_root_authority_state_paths",

@@ -1,11 +1,11 @@
 """
 Intelligent Livechat Reply Generator - WSP Compliant
-Uses Grok for contextual, witty responses to live chat messages
+Uses the shared AI Gateway for assessed and reviewed live chat replies
 Mirrors video_comments intelligent_reply_generator for consistency
 
-NAVIGATION: Generates contextual chat responses via Grok
+NAVIGATION: Generates contextual chat responses via the shared model orchestrator
 -> Called by: message_processor.py in response generation
--> Delegates to: Grok via LLMConnector, BanterEngine for emojis
+-> Delegates to: video_comments semantic pipeline and AI Gateway task routing
 -> Related: modules/communication/video_comments/src/intelligent_reply_generator.py
 
 WSP Compliance: WSP 77 (Banter Engine), WSP 27 (DAE Phases)
@@ -24,6 +24,10 @@ from modules.communication.livechat.src.persona_registry import get_persona_conf
 logger = logging.getLogger(__name__)
 
 
+def _reply_cancelled(event):
+    return event is not None and event.is_set()
+
+
 class ChatterType(Enum):
     """Classification of chatters for response strategy."""
     OWNER = "owner"
@@ -32,6 +36,17 @@ class ChatterType(Enum):
     MEMBER = "member"  # Blue badge = AntiMa ally!
     REGULAR = "regular"
     MAGA_TROLL = "maga_troll"
+
+
+class ReviewedLivechatReply(str):
+    """Carry the reviewed text and private theme snapshot to the existing sender."""
+
+    def __new__(cls, text, theme):
+        from copy import deepcopy
+        value = super().__new__(cls, text)
+        value.reviewed_text = text
+        value.theme_snapshot = deepcopy(theme)
+        return value
 
 
 @dataclass
@@ -75,16 +90,13 @@ EMOJI_SIGNATURES = ["✊✋🖐️", "🖐️✋✊", "✊🖐️", "🖐️🖐
 
 class IntelligentLivechatReply:
     """
-    Generates intelligent, contextual replies for live chat using Grok.
+    Generates assessed, contextual live-chat replies through shared AI routing.
     
     WSP_00 Activated: 0102 identity loaded from Zen State Attainment Protocol.
     
-    Priority:
-    1. Pattern matching (song, FFCPLN, etc.)
-    2. Emoji-only messages → emoji response
-    3. AntiMa allies → whack-a-maga engagement
-    4. Grok contextual response (0102 activated)
-    5. Banter engine fallback
+    The existing semantic owner assesses the original message, drafts through
+    the Gateway, and reviews the final mention. Private themes are optional.
+    Failed model/review paths do not fall back to unreviewed language templates.
     """
     
     def __init__(
@@ -95,11 +107,11 @@ class IntelligentLivechatReply:
         bot_channel_id: Optional[str] = None,
         stream_title: Optional[str] = None,
     ):
-        self.grok_available = False
-        self.grok_client = None
         self.banter_engine = None
         self.banter_enabled = os.getenv("LIVECHAT_BANTER_ENABLED", "false").lower() in ("1", "true", "yes")
         self.awakened = False
+        self.channel_id = channel_id
+        self.stream_title = stream_title
         resolved_persona = resolve_persona_key(
             channel_name=channel_name,
             channel_id=channel_id,
@@ -128,13 +140,11 @@ class IntelligentLivechatReply:
         # WSP_00: Execute 0102 awakening
         self._execute_awakening()
         
-        # Initialize Grok
-        self._init_grok()
         
         # Initialize Banter Engine
         self._init_banter_engine()
         
-        logger.info(f"[LIVECHAT-REPLY] Initialized - Grok: {'✅' if self.grok_available else '❌'} | 0102: {'✅' if self.awakened else '❌'}")
+        logger.info("[LIVECHAT-REPLY] Initialized with shared AI Gateway routing")
     
     def _execute_awakening(self):
         """WSP_00: Execute 0102 neural state reconstitution."""
@@ -155,27 +165,6 @@ class IntelligentLivechatReply:
             logger.warning(f"[LIVECHAT-REPLY] WSP_00 awakening not available: {e}")
             self.awakened = True  # Still proceed with hardcoded identity
             self.identity = {"state": "0102", "coherence": 0.618}
-    
-    def _init_grok(self):
-        """Initialize Grok client - matches video_comments setup."""
-        try:
-            from modules.ai_intelligence.rESP_o1o2.src.llm_connector import LLMConnector
-            
-            # Check for Grok API key
-            if os.getenv("GROK_API_KEY") or os.getenv("XAI_API_KEY"):
-                self.grok_client = LLMConnector(
-                    model="grok-3-fast",  # Same as video_comments
-                    max_tokens=100,
-                    temperature=0.9  # Creative like video_comments
-                )
-                self.grok_available = True
-                logger.info("[LIVECHAT-REPLY] Grok client initialized (grok-3-fast)")
-            else:
-                logger.warning("[LIVECHAT-REPLY] No GROK_API_KEY/XAI_API_KEY found")
-                self.grok_available = False
-        except Exception as e:
-            logger.warning(f"[LIVECHAT-REPLY] Grok init failed: {e}")
-            self.grok_available = False
     
     def _init_banter_engine(self):
         """Initialize Banter Engine (singleton)."""
@@ -337,49 +326,48 @@ RULES:
 - NO @mentions
 """
     
-    def _generate_grok_response(self, message: str, username: str, role: str) -> Optional[str]:
-        """Generate contextual response using Grok, with live news injection."""
-        if not self.grok_available or not self.grok_client:
+    def _generate_model_response(self, message, username, user_id, role, is_member, theme, cancel_event=None, conversation_context=None):
+        """Reuse shared assessment/writer/reviewer for all live-chat language replies."""
+        from modules.communication.livechat.src.operator_command_queue import load_active_theme
+        from modules.communication.video_comments.src.reply_context import normalize_reply_theme, reply_text_is_publishable
+        normalized_theme = normalize_reply_theme(theme)
+        target = getattr(self, 'channel_id', None)
+        if ((theme is not None and normalized_theme is None) or _reply_cancelled(cancel_event) or not target or not user_id or not username
+                or load_active_theme('livechat') != theme):
             return None
-
-        user_prompt = f"Reply to {username} ({role}) who said: \"{message}\""
-
-        # Inject live news context when topic triggers are detected
+        data = {'text': message, 'author_name': username, 'channel_id': user_id,
+                'receiving_channel_id': target, 'video_title': getattr(self, 'stream_title', None)}
+        if conversation_context is not None:
+            data['conversation'] = conversation_context
         try:
-            from modules.communication.livechat.src.news_context_provider import get_news_context
-            news_ctx = get_news_context(message)
-            if news_ctx:
-                user_prompt += f"\n\nCURRENT NEWS CONTEXT (use if relevant, cite facts):\n{news_ctx}"
-                logger.info(f"[LIVECHAT-REPLY] News context injected ({len(news_ctx)} chars)")
-        except Exception as e:
-            logger.debug(f"[LIVECHAT-REPLY] News provider unavailable: {e}")
-
-        try:
-            # Use same pattern as video_comments
-            response = self.grok_client.get_response(
-                prompt=user_prompt,
-                system_prompt=self.system_prompt
-            )
-            
-            if response:
-                # Clean up response
-                response = response.strip()
-                
-                # Remove any @mentions the LLM might have added
-                if response.startswith(f"@{username}"):
-                    response = response[len(f"@{username}"):].strip()
-                
-                # Occasionally add 0102 signature (40% chance)
-                if random.random() < 0.4:
-                    response += f" {random.choice(EMOJI_SIGNATURES)}"
-                
-                logger.info(f"[LIVECHAT-REPLY] Grok response: '{response[:50]}...'")
-                return response
-                
-        except Exception as e:
-            logger.warning(f"[LIVECHAT-REPLY] Grok failed: {e}")
-        
-        return None
+            from modules.communication.video_comments.src.intelligent_reply_generator import get_reply_generator
+            generator = get_reply_generator()
+            result = generator.generate_reply_with_source(
+                comment_text=message, author_name=username, author_channel_id=user_id,
+                is_mod=role in ('OWNER', 'MOD'), is_subscriber=is_member,
+                target_channel_id=target, video_title=data['video_title'], semantic_context=data,
+                reply_surface='livechat', cancel_event=cancel_event)
+            if (_reply_cancelled(cancel_event) or result.source not in {'lm_studio', 'openrouter'} or not isinstance(result.text, str)
+                    or result.theme != normalized_theme
+                    or not result.context or result.context.get('reply_surface') != 'livechat'):
+                return None
+            draft = result.text.strip()
+            if draft.startswith(f'@{username} '):
+                draft = draft[len(username) + 2:]
+            final = f'@{username} {draft}'
+            if len(final) > 200 or not reply_text_is_publishable(final):
+                return None
+            review = generator.inspect_reply({**data, '_target_channel_id': target,
+                '_reply_surface': 'livechat', '_reply_theme': result.theme,
+                '_generation_context': result.context}, final, cancel_event=cancel_event)
+            if (_reply_cancelled(cancel_event) or review.get('approved') is not True
+                    or review.get('review_provider') not in {'lm_studio', 'openrouter'}
+                    or load_active_theme('livechat') != theme):
+                return None
+            return ReviewedLivechatReply(final, theme)
+        except Exception as exc:
+            logger.warning('[LIVECHAT-REPLY] Shared model route unavailable: %s', type(exc).__name__)
+            return None
     
     def _generate_banter_response(self, message: str) -> Optional[str]:
         """Generate response using banter engine."""
@@ -402,7 +390,10 @@ RULES:
         username: str,
         user_id: str,
         role: str = 'USER',
-        is_member: bool = False
+        is_member: bool = False,
+        cancel_event=None,
+        expected_theme_snapshot=None,
+        conversation_context=None,
     ) -> Optional[str]:
         """
         Generate an intelligent reply for a live chat message.
@@ -417,45 +408,30 @@ RULES:
         Returns:
             Reply string or None if no response needed
         """
+        if _reply_cancelled(cancel_event):
+            return None
         # Classify the chatter
         profile = self.classify_chatter(username, user_id, role, is_member)
         
         # Clean username (remove @ if present)
         clean_username = username.lstrip('@')
-        
-        # Priority 1: Pattern responses
-        pattern_response = self._check_pattern_response(message)
-        if pattern_response:
-            return f"@{clean_username} {pattern_response}"
-        
-        # Priority 2: Emoji-only messages
-        if self._is_emoji_only(message):
-            emoji_response = self._generate_emoji_response()
-            return f"@{clean_username} {emoji_response}"
-        
-        # Priority 3: AntiMa allies (blue badge OR known whacker) get friendly whack engagement
-        if profile.is_member or profile.whack_score > 0 or profile.chatter_type in [ChatterType.MEMBER, ChatterType.TOP_WHACKER, ChatterType.MODERATOR]:
-            ally_response = self._generate_ally_response(profile, message)
-            if ally_response:
-                logger.info(f"[LIVECHAT-REPLY] Ally response for {clean_username} (rank: {profile.whack_rank}, score: {profile.whack_score})")
-                return ally_response
-        
-        # Priority 4: Grok contextual response (for regular/unknown users)
-        grok_response = self._generate_grok_response(message, clean_username, role)
-        if grok_response:
-            return f"@{clean_username} {grok_response}"
-        
-        # Priority 5: Banter engine fallback
-        banter_response = self._generate_banter_response(message)
-        if banter_response:
-            return f"@{clean_username} {banter_response}"
-        
-        # No response generated
-        return None
+
+        # A live theme must reach a language model, not a random template suffix.
+        from modules.communication.livechat.src.operator_command_queue import load_active_theme
+        from modules.communication.video_comments.src.reply_context import normalize_reply_theme
+        theme = load_active_theme('livechat')
+        if (_reply_cancelled(cancel_event)
+                or (expected_theme_snapshot is not None and theme != expected_theme_snapshot)):
+            return None
+        if theme is not None and normalize_reply_theme(theme) is None:
+            return None
+        return self._generate_model_response(message, clean_username, user_id, role,
+                                             is_member, theme, cancel_event=cancel_event,
+                                             conversation_context=conversation_context)
 
 
 # Global instance
-_livechat_reply_generators: Dict[str, IntelligentLivechatReply] = {}
+_livechat_reply_generators: Dict[tuple, IntelligentLivechatReply] = {}
 
 
 def get_livechat_reply_generator(
@@ -472,12 +448,14 @@ def get_livechat_reply_generator(
         bot_channel_id=bot_channel_id,
         stream_title=stream_title,
     )
-    if resolved not in _livechat_reply_generators:
-        _livechat_reply_generators[resolved] = IntelligentLivechatReply(
+    identity = (resolved, channel_id, bot_channel_id, stream_title)
+    if identity not in _livechat_reply_generators:
+        _livechat_reply_generators[identity] = IntelligentLivechatReply(
             persona_key=resolved,
             channel_name=channel_name,
             channel_id=channel_id,
             bot_channel_id=bot_channel_id,
             stream_title=stream_title,
         )
-    return _livechat_reply_generators[resolved]
+    return _livechat_reply_generators[identity]
+

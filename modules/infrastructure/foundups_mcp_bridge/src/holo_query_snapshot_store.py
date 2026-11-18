@@ -28,6 +28,10 @@ from holo_index.freshness_receipt import (
     paged_collection_snapshot,
 )
 
+from holo_index.vector_segment_durability import (
+    UnsafeCollectionSettingsError, validate_collection_raw_settings,
+)
+
 from .holo_query_snapshot_codec import (
     EncodedCollectionSnapshot,
     SnapshotLimits,
@@ -126,12 +130,7 @@ def _artifact_entry(path: Path, payload: bytes) -> dict[str, Any]:
 
 
 def _collection_metric(collection: Any) -> str:
-    configuration = getattr(collection, "configuration", None)
-    hnsw = configuration.get("hnsw") if isinstance(configuration, Mapping) else None
-    metric = hnsw.get("space") if isinstance(hnsw, Mapping) else None
-    if metric not in {"l2", "cosine", "ip"}:
-        _fail("METRIC_INVALID")
-    return str(metric)
+    return validate_collection_raw_settings(collection)
 
 
 def _embedding_identity(
@@ -186,7 +185,7 @@ def _nfc_snapshot_value(value: Any, *, depth: int = 0) -> Any:
 
 
 def _encode_collection(
-    holo: Any, entry: Any, *, limits: SnapshotLimits,
+    holo: Any, entry: Any, *, metric: str, limits: SnapshotLimits,
 ) -> EncodedCollectionSnapshot:
     collection = getattr(holo, COLLECTION_ATTRS[entry.name], None)
     if collection is None or entry.verification != "PASS" or entry.count <= 0:
@@ -211,7 +210,7 @@ def _encode_collection(
         collection_name=entry.name,
         rows=rows,
         embeddings=embeddings,
-        metric=_collection_metric(collection),
+        metric=metric,
         embedding_identity=_embedding_identity(entry, models_path=holo.models_path),
         collection_metadata=metadata if isinstance(metadata, dict) else {},
         limits=limits,
@@ -231,11 +230,19 @@ def _stage_snapshot_set(
         BASELINE_QUERY_COLLECTIONS
     ):
         _fail("BASELINE_INCOMPLETE")
+    metrics: dict[str, str] = {}
+    for name in sorted(BASELINE_QUERY_COLLECTIONS):
+        collection = getattr(holo, COLLECTION_ATTRS[name], None)
+        if collection is None:
+            _fail("COLLECTION_UNAVAILABLE")
+        metrics[name] = _collection_metric(collection)
     collections: dict[str, Any] = {}
     filenames: set[str] = {SET_MANIFEST}
     total_bytes = 0
     for name in sorted(BASELINE_QUERY_COLLECTIONS):
-        encoded = _encode_collection(holo, entries[name], limits=limits)
+        encoded = _encode_collection(
+            holo, entries[name], metric=metrics[name], limits=limits
+        )
         payloads = {
             "manifest": encoded.manifest,
             "rows": encoded.rows,
@@ -294,7 +301,7 @@ def publish_query_snapshot_set(
             os.replace(staging / filename, target / filename)
         os.replace(staging / SET_MANIFEST, target / SET_MANIFEST)
         return target
-    except QuerySnapshotStoreError:
+    except (QuerySnapshotStoreError, UnsafeCollectionSettingsError):
         raise
     except (OSError, TypeError, ValueError) as exc:
         raise QuerySnapshotStoreError(

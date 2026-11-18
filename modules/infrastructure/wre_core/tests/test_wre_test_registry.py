@@ -300,3 +300,53 @@ def test_new_registry_runtime_respects_wsp62_limits() -> None:
                 assert node.end_lineno - node.lineno + 1 <= 50, (
                     path, node.name, node.end_lineno - node.lineno + 1
                 )
+
+
+@pytest.mark.parametrize('mode,reason,suite', [
+    ('scaffold', 'unimplemented_test_scaffold', 'manual'),
+    ('manual', 'manual_test_program', 'manual'),
+    ('unit', 'invalid_test_mode', 'operational'),
+    (True, 'invalid_test_mode', 'operational'),
+    (None, 'invalid_test_mode', 'operational'),
+])
+def test_declared_modes_never_promote_automated_evidence(tmp_path, mode, reason, suite):
+    target = tmp_path / 'tests/test_pending.py'
+    target.parent.mkdir()
+    target.write_text(f'WRE_TEST_MODE = {mode!r}\ndef test_placeholder(): pass\n', encoding='utf-8')
+    result = classify_test_file(tmp_path, 'tests/test_pending.py')
+    assert result.collectable is False
+    assert result.suite_class == suite
+    assert reason in result.quarantine_reasons
+
+
+@pytest.mark.parametrize('mode', ['manual', 'scaffold', 'unit'])
+def test_explicit_mode_cannot_hide_external_effect(tmp_path, mode):
+    target = tmp_path / 'tests/test_effect.py'
+    target.parent.mkdir()
+    target.write_text(f'WRE_TEST_MODE = {mode!r}\nimport subprocess\nsubprocess.run(["never-executed"])\n', encoding='utf-8')
+    result = classify_test_file(tmp_path, 'tests/test_effect.py')
+    assert result.collectable is False
+    assert 'module_scope_external_effect' in result.quarantine_reasons
+
+
+def test_ordinary_safe_test_remains_collectable(tmp_path):
+    target = tmp_path / 'tests/test_normal.py'
+    target.parent.mkdir()
+    target.write_text('def test_arithmetic():\n    assert 2 + 2 == 4\n', encoding='utf-8')
+    result = classify_test_file(tmp_path, 'tests/test_normal.py')
+    assert result.collectable is True
+    assert result.quarantine_reasons == ()
+
+
+@pytest.mark.parametrize('declaration,reason', [
+    ('WRE_TEST_MODE: str = "scaffold"', 'unimplemented_test_scaffold'),
+    ('WRE_TEST_MODE: str = "manual"', 'manual_test_program'),
+    ('WRE_TEST_MODE: str', 'invalid_test_mode'),
+])
+def test_annotated_mode_cannot_bypass_exclusion(tmp_path, declaration, reason):
+    target = tmp_path / 'tests/test_annotated.py'
+    target.parent.mkdir()
+    target.write_text(declaration + '\ndef test_placeholder(): pass\n', encoding='utf-8')
+    result = classify_test_file(tmp_path, 'tests/test_annotated.py')
+    assert result.collectable is False
+    assert reason in result.quarantine_reasons

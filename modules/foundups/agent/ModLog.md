@@ -1,3 +1,10 @@
+## 2026-09-21: Qualify existing FoundUp build route and close preview-wiring drift
+
+- WSP00/15/22/50/97/99;15/P1 source/test-contract qualification after PR1833 and both main workflows passed. Existing WRE consumer targets the WRE executor; older agent build-to-extraction helper is a separate path.
+- Fresh executor defaults to dry-run; guard-admitted dry/disabled paths simulate, while unqualified build/extract can block first. Live delegation remains blocked. Controlled adapter mode does not call a live worker. Existing ContextBundle preview attachment is implemented; corrected stale interface/roadmap claims that it was still unwired.
+- Build/extract model requirements remain unspecified; consumer model admission applies only to validation. The mocked singleton test does not establish the documented consumer force-dry promise; qualify policy/instance isolation separately before source repair.
+- Exact owners, independent review and ranked follow-up are bound in the canonical RSI backlog and AmIBot package. No repository imports, product tests, queue drain, worker/model/service or deployment execution; no new modules, skills or runtime flags.
+
 # Agent Module ModLog
 
 ## 2026-07-23 - CREATE_FOUNDUP_REGISTRY_SCHEMA_REPAIR2

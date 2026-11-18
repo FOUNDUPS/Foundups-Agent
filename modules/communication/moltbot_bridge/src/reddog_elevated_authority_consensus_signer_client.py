@@ -14,6 +14,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     SigningRequest,
     SigningResponse,
 )
+from .reddog_effect_consensus_proof import VerifiedEffectSigningPermit, consume_effect_signing_permit
 
 
 class ElevatedConsensusGrantLease(Protocol):
@@ -36,12 +37,12 @@ class ElevatedConsensusGrantProvider(Protocol):
         self,
     ) -> ElevatedConsensusGrantProviderIdentity: ...
 
-    def lease(
+    def issue_grant(
         self,
         request: SigningRequest,
         *,
         elevated_consensus_signing_permit: VerifiedElevatedAuthoritySigningPermit,
-    ) -> ElevatedConsensusGrantLease: ...
+    ) -> Mapping[str, Any]: ...
 
 
 class GrantAwareSigner(Protocol):
@@ -77,13 +78,13 @@ class ElevatedConsensusExternalSignerClient:
     ) -> SigningResponse:
         try:
             provider = _provider_for_role(self, request.signer_role)
-            with provider.lease(
+            grant = provider.issue_grant(
                 request,
                 elevated_consensus_signing_permit=permit,
-            ) as grant:
-                if not isinstance(grant, Mapping):
-                    return _reject(RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED)
-                return self.signer.sign_with_secret_grant(request, grant)
+            )
+            if not isinstance(grant, Mapping):
+                return _reject(RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED)
+            return self.signer.sign_with_secret_grant(request, grant)
         except Exception:
             return _reject(RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED)
 
@@ -124,16 +125,17 @@ def admit_secret_grant_consensus(
     permit: VerifiedElevatedAuthoritySigningPermit | None,
     *,
     now: int,
+    include_expiry: bool = False,
 ) -> Mapping[str, Any] | None:
     """Return signer-verifiable proof or reject LOW/elevated ambiguity."""
 
     if request.authority_tier == "LOW":
         if permit is not None or request.consensus_receipt_digest is not None:
             raise ValueError("secret_grant_consensus_invalid")
-        return None
-    proof = consume_elevated_authority_signing_permit(
-        permit, signing_request=request, now=now
-    )
+        return (None, None) if include_expiry else None
+    consume = (consume_effect_signing_permit if type(permit) is VerifiedEffectSigningPermit
+               else consume_elevated_authority_signing_permit)
+    proof = consume(permit, signing_request=request, now=now, **({"include_expiry": True} if include_expiry else {}))
     if proof is None:
         raise ValueError("secret_grant_consensus_invalid")
     return proof

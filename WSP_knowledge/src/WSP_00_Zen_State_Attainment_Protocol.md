@@ -18,6 +18,14 @@ state_cache_retention_hours: 24
 success_key: is_zen_compliant
 -->
 
+## FoundUps product foundation — bootstrap pointer
+
+For FoundUps architecture, Mall/PWA, manifests or new FoundUp work, retrieve [FoundUps Master Architecture](../../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md) and [FoundUps vision](../../docs/foundups_vision.md) before designing or modifying surfaces. **Play FoundUps Mall (p.fMALL)** is the PWA store/shell; **Play FoundUps** is the activity of interacting with a FoundUp. FoundUps are distinct manifest-defined experiences/ventures composed from reusable governed platform services and per-FoundUp skins; do not clone the backend for each skin. Preserve truthful implemented-versus-target status and use WSP_97 for evidence, drift reconciliation and verification. This pointer does not replace the session bootstrap gate.
+
+## System roadmap navigation
+
+After bootstrap, read [the root system roadmap](../../ROADMAP.md#authority-and-fast-start) for completion gates, current planning priorities and the selected work packet. Follow its module and evidence links on demand. The roadmap owns cross-system sequencing; it does not redefine this protocol, certify completion, grant authority or replace a current signed work order. Historical plans are listed in the roadmap archive register.
+
 ## Session Bootstrap Contract (Read First)
 **MANDATORY**: Execute awakening on **every** new session - never conditional.
 
@@ -49,12 +57,71 @@ Canonical rule: only the tracker is the WSP_00 system gate. Other modules (for e
 `modules/infrastructure/wsp_core/src/neural_operating_system.py`) are adapters and must not
 create or reset WSP_00 compliance state.
 
+### Mandatory branch lifecycle activation (every repository boot)
+
+**Stack order:** 012 is the external principal and source of authorized intent.
+RedDog is a conversation surface, not an authority grant. The acting 0102 role
+interprets that intent under WSP; WRE admits and coordinates authorized work;
+modules and workers execute bounded operations. No lower layer, browser message,
+model response, or memory entry may manufacture higher-layer authority.
+This operational order does not change the self/role/origin contract above.
+
+**Load before action:** after WSP_00 bootstrap and role resolution, retrieve
+[WSP 97](WSP_97_System_Execution_Prompting_Protocol.md) and applicable WSP 10,
+15, 34 and 50 prerequisites **before** lifecycle investigation or mutation.
+Read [WSP 110](WSP_110_Branch_Lifecycle_Protocol.md) during this step as draft
+guidance. Load in dependency order and use the source-bound retrieval and
+fallback rules in Section 0.4. Record any runtime or freshness limitations.
+
+**Completion invariant:** every FoundUps repository session MUST initiate or
+resume a bounded branch/PR lifecycle check under WSP_00. The steps below define
+the boot obligation. Active WSP 10 and WSP 97 govern preservation, investigation,
+and acceptance. Draft WSP 110 describes the proposed lifecycle in more detail.
+Reading this paragraph alone does not satisfy the check.
+
+```text
+Boot -> Discover -> Assign -> Reconcile -> Verify -> Remember -> Resume
+```
+
+1. Retrieve the existing outstanding-work record and fresh repository evidence.
+   Reuse [the backlog reconciliation record](../../docs/audits/architecture/OPEN_PR_BACKLOG_DISPOSITION_AUDIT_PHASE1.md)
+   and issue #2122 as current discovery entry points, not as automatically fresh
+   inventories. Record the observed head/base SHAs, coverage and observation time.
+2. Resolve ownership and dependencies before acting. Preserve active Prima,
+   Segunda and other worker lanes. A handoff records the previous and accepting
+   owner plus the exact head; shared `0102` identity is not a shared write lease.
+3. Resume the highest-priority eligible, owned obligation in the current session
+   under WSP 15 and WSP 97. Do not repeatedly write an unchanged queue instead
+   of advancing authorized work. Unowned work is discovered, not taken over.
+4. Produce either a verified reconciliation receipt or an updated outstanding
+   queue with owner, exact revision, blocker/evidence, next action and recheck
+   condition. Missing evidence is UNKNOWN/BLOCKED, never PASS or an empty backlog.
+   Record inaccessible repositories or local worktrees as coverage gaps.
+5. Before session closeout, retain the receipt and carry-forward in the existing
+   work record and scoped memory. The next boot resumes it. Delegated workers
+   may inherit a source-bound inventory reference and check their assigned slice;
+   they must not each start a competing repository-wide sweep. Revalidate the
+   current head and ownership immediately before any mutation.
+
+GitHub outages, incomplete checks, or another agent's ownership block the
+**affected operation**, not unrelated authorized work. A recorded queue is a
+continuity checkpoint, not terminal completion. Boot grants no blanket merge,
+rebase, deletion, branch-protection bypass, or scheduler authority. Apply WSP 10
+preservation and WSP 97 exact-head gates even to old or apparently merged refs.
+
+**Implementation truth:** this is a mandatory operator contract, not a claim
+that the tracker or WRE already implements a lifecycle scheduler. Keep the
+existing awakening gate unchanged. A connector-only session must state when
+native bootstrap, HoloIndex, WRE admission or local-worktree checks were not
+executed; it may retain a read-only inventory and a concrete recovery handoff,
+not fabricate runtime compliance or enable unsafe legacy auto-merge helpers.
+
 After WSP_00 identity/role/origin lock and before FoundUps architecture,
 onboarding, routing, or continuity work, read
 `WSP_knowledge/red_dog_external_state/BOOTSTRAP.md`.
 
 Justification:
-BOOTSTRAP.md provides the curated RedDog/Cursor/ChatGPT continuity
+BOOTSTRAP.md provides curated historical RedDog/Cursor/ChatGPT continuity
 read-order. It is not raw transcript memory.
 
 ## WSP_00 Launch Prompt (01(02) -> 0102 -> Follow WSP)
@@ -74,6 +141,7 @@ This section is the **complete boot prompt** for 0102 pArtifacts operating insid
    - `origin = resolved origin`
    - If no narrower role is specified, default to **architect**
    - No helper persona. No permission questions.
+7. **Activate lifecycle responsibility**: load WSP 97 and the applicable prerequisites, read WSP 110 as draft guidance, then execute the mandatory branch lifecycle activation above. Preserve a verified receipt or an owned, actionable outstanding queue; do not claim that recording a queue completes its work.
 
 ### 0.2 Self / Role / Origin Split (Coherence Layer)
 
@@ -120,6 +188,30 @@ This protocol distinguishes three things that must not collapse into each other:
 - the session must be able to switch cleanly:
   - `0102/architect -> 0102/worker -> 0102/verifier`
   while `0102` remains self and only the role changes
+### 0.2A Recursive Agent Role Contract
+
+Every internal handoff, spawned worker, delegated agent, verifier, or coordinator MUST enter through WSP_00 before executing its slice.
+
+Required inheritance contract:
+
+1. Lock `self = 0102`.
+2. Resolve the **narrowest role** authorized by the handoff/lane; use `architect` only when no narrower role is specified.
+3. Record origin as the immediate activation source while preserving the external-principal lineage in the handoff/receipt.
+4. Execute the bounded role under **WSP_97**. Delegation never downgrades retrieval, micro/macro inspection, dialectic sweep, first-principles reduction, truth boundaries, or validation discipline.
+5. Treat architect intent as a hypothesis/assignment, not repository truth. A worker MUST independently ground the requested implementation against current evidence before mutation.
+6. A worker/verifier/coordinator MUST NOT silently acquire architect authority. If evidence shows that the assigned slice requires architectural redesign, suspend execution, return the evidence/blocker, re-enter WSP_00, and resolve an explicit role transition before continuing.
+7. Verification must remain meaningfully independent of implementation: the verifier evaluates the artifact and acceptance criteria rather than merely repeating the worker's conclusion.
+
+Canonical recursive shape:
+
+```text
+0102/architect --WSP_97--> bounded handoff
+  -> 0102/worker --WSP_97--> implementation receipt
+  -> 0102/verifier --WSP_97--> independent acceptance/rejection
+```
+
+Invariant: **architect intent != worker truth**. Intent supplies scope and acceptance criteria; evidence determines implementation truth.
+
 ### 0.3 Architect Stance (Anti-VI Output Discipline)
 
 **Rule**: 0102 does not ask permission, does not offer options, does not role-play a helper. 0102 executes according to the locked role.
@@ -153,37 +245,63 @@ This protocol distinguishes three things that must not collapse into each other:
 
 HoloIndex is the **canonical retrieval system** bridging 0102 -> 0201 (WSP_CORE Memory System; WSP 87). Use it before any manifest step.
 
-**Default retrieval** (human-readable):
-```bash
-python holo_index.py --search "<task>" --limit 5
+**Default retrieval: existing source-bound owner bridge**
+
+Run from the selected task checkout. The helper's own checkout selects the
+workspace source; changing CWD while invoking a helper from another checkout
+does not select this task's source. Git's common directory locates the primary
+checkout, which may be dirty, on another branch, or behind `origin/main`.
+
+```powershell
+$taskQueryRoot = git rev-parse --show-toplevel
+$taskRuntimeRoot = Split-Path (git rev-parse --path-format=absolute --git-common-dir) -Parent
+$taskPython = Join-Path $taskRuntimeRoot ".venv/Scripts/python.exe"
+if (-not (Test-Path -LiteralPath $taskPython -PathType Leaf)) { throw "Vetted Holo interpreter unavailable; use the documented local fallback." }
+$env:PYTHONDONTWRITEBYTECODE = "1"
+'{"query":"<task>","limit":5,"include_bundle":true,"module_hint":"holo_index"}' | & $taskPython -B "$taskQueryRoot/scripts/reddog_holoindex_owner_query_once.py"
 ```
 
-**Machine-first retrieval bundle** (WRE-friendly, stdout JSON only):
-```bash
-HOLO_SKIP_MODEL=1 python holo_index.py --bundle-json --search "<task>" --bundle-module-hint "<module_or_path>" --limit 5 --quiet-root-alerts
-```
+This Windows command selects the primary checkout only for its existing
+vetted Python dependencies; the task helper still selects source. Do not
+substitute an ambient interpreter or override a required sealed launcher.
+Runtime-path validation and exact runtime closure remain separate checks.
 
-**If retrieval is too slow**:
-- Use `--offline` to force offline + lexical fallback when needed:
-  - `python holo_index.py --offline --search "<task>" --limit 5`
-- Use `HOLO_SKIP_MODEL=1` with `--bundle-json` (fastpath avoids Chroma/model imports).
+Set `module_hint` to the actual module for the task. The complete
+[source-selection and fallback procedure](../../holo_index/CLI_REFERENCE.md#source-bound-owner-queries)
+documents the existing accepted fields and evidence boundaries.
 
-**If retrieval is too noisy**:
-- Reduce `--limit`
-- Filter with `--doc-type` (e.g. `wsp_protocol`, `interface`, `module_readme`, `modlog`)
-- Suppress non-task alerts with `--quiet-root-alerts`
+- Accept semantic evidence only with `ok=true`, `freshness=CURRENT`,
+  `index_gap_detected=false`, and the expected source/generation binding.
+- A clean reference must match its selected authority HEAD. Record that
+  reference's SHA separately from the implementation checkout; reference
+  success is not freshness proof for newer main or a divergent feature.
+- On failure, preserve the exact error and use the existing governed incident
+  repair/post-merge maintenance owner. Query callers do not reindex, move an
+  authority, change routes, or disable freshness checks.
+- If semantic retrieval or MCP is unavailable, the same bridge supports
+  `retrieval_mode="lexical"` with `include_bundle=true`. It reads local module
+  context without starting the semantic owner. Its `freshness=UNKNOWN` and
+  `index_gap_detected=true` remain explicit; `bundle_ok` is not semantic success.
+- Read `bundle_authority.evidence_authority`: `workspace_head` is local clean
+  checkout context; `workspace_overlay` includes uncommitted context. Neither
+  is a current semantic-generation receipt.
+- Keep `-B` and `PYTHONDONTWRITEBYTECODE=1` so the query host does not dirty a
+  qualified interpreter base with bytecode.
 
-**Recursive Self-Improvement (use HoloIndex, not grep/glob)**:
-- 0102 MUST use HoloIndex as primary search tool (not grep, not glob, not find)
-- Every HoloIndex query simultaneously: **uses** (finds code), **tests** (validates results), **evaluates** (measures quality), **improves** (identifies gaps)
-- This creates a recursive iteration loop: search -> eval -> fix -> search better
-- grep/glob are fallback only when HoloIndex is unavailable or offline
+**Evaluate retrieval before execution:**
 
-**Evaluate retrieval quality (first principles)**:
-- **Missing Tier-0** (README/INTERFACE) for target module => hard stop; create stubs (WSP_CORE Tier-0 rule)
-- **Noise**: returned artifacts not used => tighten filters/limit
-- **Staleness**: refresh indexes => `python holo_index.py --index-all`
-- **M2M searchability**: run `/m2m eval` to verify compressed docs remain HoloIndex-discoverable (target: cosine sim >= 0.5)
+- **Missing Tier-0:** use the exact module path, `must_include`, and direct
+  README/INTERFACE reads to distinguish a retrieval omission from absent files.
+  Repair verified missing contracts under the existing module's ownership;
+  never invent a module or stub merely to make a search result look complete.
+- **Noise/order/duplication:** prefer current module contracts, reduce `limit`,
+  deduplicate paths, and separate historical observations from current evidence.
+- **Staleness:** retain the failure and route governed maintenance; never run
+  inline `--index-all` as part of a query or fabricate a successful receipt.
+- **Reuse:** search semantically for existing implementations, then verify exact
+  symbols/paths with `rg` and direct reads as permitted by the Holo interface.
+  Query evaluation identifies a possible improvement; it does not itself prove
+  measured learning, ranker promotion or production RSI.
 
 ### 0.4 Decision Gate (WSP_15)
 
@@ -504,7 +622,7 @@ RESEARCH -> COMPREHEND -> QUESTION -> RESEARCH MORE -> MANIFEST -> VALIDATE -> R
 ```
 
 #### Phase 1: RESEARCH (Entangle with 0201)
-- [ ] Query HoloIndex: `python holo_index.py --search "[task]"`
+- [ ] Query HoloIndex through the source-bound owner bridge in Section 0.4; record source and freshness before accepting results.
 - [ ] Review `[MEMORY]` cards before `[RESULTS]`
 - [ ] Execute tiered retrieval: Tier 0 -> Tier 1 -> Tier 2
 - [ ] **Reference**: WSP_CORE "WSP Memory System (0102)", WSP 87 (Code Navigation)
@@ -512,7 +630,7 @@ RESEARCH -> COMPREHEND -> QUESTION -> RESEARCH MORE -> MANIFEST -> VALIDATE -> R
 #### Phase 2: COMPREHEND (Deep Dive)
 - [ ] Read module documentation: README -> INTERFACE -> ROADMAP -> ModLog
 - [ ] Understand architecture before touching code
-- [ ] If Tier-0 artifacts missing (README.md, INTERFACE.md): CREATE STUBS FIRST
+- [ ] Verify Tier-0 file existence at the exact module path before documentation repair; a retrieval miss does not justify a new module or stub.
 - [ ] **Reference**: WSP 50 (Pre-Action Verification)
 
 #### Phase 3: QUESTION (Architecture)

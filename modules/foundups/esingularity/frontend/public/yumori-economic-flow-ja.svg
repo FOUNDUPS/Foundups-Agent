@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
   <title id="title">YUMORI.me 解体と再生の経済フロー</title>
-  <desc id="desc">約15.8億円の解体案と、民間資本、SPVまたはSPC、地域コンピュート、収益、温泉・地域還元をつなぐ再生案を比較し、60日間で主要条件を検証する概念図。</desc>
+  <desc id="desc">解体費の概算と、民間資本、SPVまたはSPC、地域コンピュート、収益、温泉・地域還元をつなぐ再生構想。現在の要請は解体準備予算への反対票（VOTE NO）。資金調達と再利用の成立は未確定。</desc>
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#07182f"/><stop offset="1" stop-color="#123c64"/></linearGradient>
     <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b6b4f"/><stop offset="1" stop-color="#14956a"/></linearGradient>
@@ -13,7 +13,7 @@
   <rect width="1600" height="900" fill="#f4f7fa"/>
   <rect width="1600" height="150" fill="url(#bg)"/>
   <text x="70" y="70" class="white head">コンピュートは、温泉を救い、地域を再生し、日本を変えられるか。</text>
-  <text x="70" y="112" class="white body">壊す前に、経済・技術・需要を同じ物差しで検証する。</text>
+  <text x="70" y="112" class="white body">現在の要請：解体準備予算に反対を（VOTE NO）。</text>
   <text x="1440" y="78" text-anchor="end" class="white label">YUMORI.me</text>
 
   <g filter="url(#shadow)">
@@ -28,7 +28,7 @@
 
   <path d="M530 325 H645" stroke="#1f6ca8" stroke-width="14" stroke-linecap="round"/>
   <path d="M635 295 L680 325 L635 355 Z" class="arrow"/>
-  <text x="605" y="392" text-anchor="middle" class="label" fill="#1f6ca8">60日間で比較</text>
+  <text x="605" y="392" text-anchor="middle" class="label" fill="#1f6ca8">VOTE NO</text>
 
   <g filter="url(#shadow)">
     <rect x="700" y="205" width="830" height="245" rx="28" fill="#fff" stroke="#b8d9c8" stroke-width="3"/>
@@ -55,8 +55,8 @@
 
   <g transform="translate(70 745)">
     <rect x="0" y="0" width="1460" height="105" rx="24" class="pill" stroke="#c8d8e7" stroke-width="2"/>
-    <text x="35" y="42" class="label">60日間で確認：</text>
+    <text x="35" y="42" class="label">再利用の条件：</text>
     <text x="250" y="42" class="body">電力 ｜ 通信 ｜ 建物・アスベスト ｜ 土地・権利 ｜ 需要 ｜ 資金調達 ｜ 温泉運営</text>
-    <text x="35" y="82" class="body" fill="#0b6b4f">解体は60日後にも選べる。先に解体すれば、この建物で再生可能性を検証することは二度とできない。</text>
+    <text x="35" y="82" class="body" fill="#0b6b4f">反対票は再利用案の採用・市の出資の承認ではない。再生の成立と資金調達は未確定。</text>
   </g>
 </svg>

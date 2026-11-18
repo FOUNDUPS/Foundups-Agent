@@ -1,4 +1,38 @@
 # GitPushDAE Module Change Log
+
+## 2026-10-04 — Queue-only defaults and explicit social dispatch
+
+WSP00/10/15/22/48/50/84/97/99. Existing CLI/API now default to queue-only.
+An explicit mutually exclusive `--dispatch` selects the unchanged router path;
+`--enqueue-only` stays compatible, unsupported `--dispatch-direct` stays rejected.
+Shared hooks, imports, platform integrations and account configuration unchanged.
+
+A fixed 12-case matrix fails8 cases on original source, passes 12 on candidate;
+all 3 original unit functions remain AST-identical and pass (15 total locally).
+Two direct-local Qwen proposals used 940 tokens/77.031s and were rejected before
+execution. Coordinator implemented the repair; no native ticket admission or
+worker-authored success is claimed. No paid inference used for those two calls;
+coordinator/reviewer cost and hardware energy are unmeasured.
+
+Publication evidence is separate. Baseline a9d2b07a3; local receipts under
+`O:/Foundups-Agent/outputs/rsi-queue-default-20261004/`. Re-observe after closure.
+
+## 2026-09-28 — Bounded post-commit entrypoint qualification
+
+WSP00/15/22/49/50/62/84/97. Selected12/P2 using the existing runner/test owner.
+Six fixed controls cover restricted missing-root/default and enqueue-only,
+inert default and enqueue-only, inert dispatch failure, and unsupported direct
+flag. The fixture uses disposable Git, empty hooks, isolated Python and temporary
+spools. Original three pytest function bodies are unchanged; a direct source
+loader avoids importing the daemon package during the named fixture launch.
+
+The existing CI selects only `TestEntrypointEvidence`; the canonical registry
+adds the existing file's `process` capability. Documentation records actual CLI
+and return semantics. No production implementation or shared hook/config change.
+
+Candidate `5935983ef8` passed **6/6** fixed methods, zero failures/errors/skips, in 1.11s in [CI36424604965](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36424604965). All six original `HOOK_EVIDENCE` records, child-source/argv bindings and synthetic JSONL hashes/payloads were independently checked. All ten PR checks and CI/CodeQL passed.
+
+Exact final-head/main validation and owned closure remain receipt-bound. No production repair, ambient Windows reproduction, social delivery or retained RSI improvement is claimed. The original three pytest functions were preserved but not selected by this six-case command. Local application tests:0.
 - **Status**: Active
 - **Created**: 2025-10-12
 - **Purpose**: Autonomous git push daemon with WSP 91 observability

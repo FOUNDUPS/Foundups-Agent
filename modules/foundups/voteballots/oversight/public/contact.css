@@ -1,0 +1,114 @@
+.contact-page {
+  max-width: 58rem;
+}
+
+.contact-controls {
+  display: grid;
+  gap: .65rem;
+  align-items: start;
+  max-width: 32rem;
+  margin: 1.25rem 0 .9rem;
+}
+
+.contact-controls label,
+.contact-message label {
+  font-weight: 700;
+}
+
+.contact-controls select,
+.contact-controls button,
+.contact-message summary {
+  color: var(--navy);
+  font: inherit;
+}
+
+.contact-controls select {
+  min-height: 48px;
+  width: 100%;
+  padding: .55rem .65rem;
+  border: 1px solid #78909a;
+  border-radius: .25rem;
+  background: var(--cream);
+}
+
+.contact-controls select:focus-visible,
+.contact-message textarea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.contact-controls button {
+  margin-top: .25rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.contact-controls button:disabled {
+  cursor: progress;
+}
+
+.contact-note,
+.contact-controls p {
+  color: var(--muted);
+}
+
+.contact-controls p {
+  margin: .4rem 0 0;
+}
+
+.contact-offices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: .75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.contact-offices li,
+.contact-message {
+  padding: .9rem;
+  border: 1px solid var(--line);
+  background: var(--cream);
+}
+
+.contact-offices h2,
+.contact-fallback-title {
+  font-size: 1.35rem;
+}
+
+.contact-message {
+  margin: 1.4rem 0;
+}
+
+.contact-message summary {
+  min-height: 48px;
+  padding-block: .65rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.contact-message textarea {
+  display: block;
+  width: 100%;
+  padding: .65rem;
+  border: 1px solid #78909a;
+  border-radius: .25rem;
+  color: var(--ink);
+  background: #fff;
+  font: inherit;
+  resize: vertical;
+}
+
+.contact-fallback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.contact-fallback a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
