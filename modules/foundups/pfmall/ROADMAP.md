@@ -1,5 +1,38 @@
 # p.fMALL Roadmap
 
+## Single floating bottom dock — 012 clarification, 2026-11-18
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED by this documentation slice.**
+The current target is **main video -> video thumbnails/queue -> one floating
+bottom search dock**, not search between the player and thumbnails. The dock
+is anchored to the visible app viewport with safe-area/edge clearance; it is
+not another row inside the scrolling queue. HPC qualifies the shared behavior
+first in an isolated preview before promotion to other Mall consumers.
+
+Reuse the existing dock, state, search, player and option-sheet owners. In one
+floating item, retain left `+`, editable scoped search, and right microphone /
+Red Dog controls. Exactly one search surface may be visible and focusable in
+the active view. Transfer query and focus between browse/viewer without duplicate
+docks or a new media session. Keep typing, dictation and open-menu controls
+visible; input grows upward, and the dock clears the on-screen keyboard and
+returns to its safe-area position when the keyboard closes. Reconcile existing
+scroll visibility in its owner rather than adding a second controller.
+
+The queue must be scrollable clear of the dock, including its last item. Keep
+provider controls unobscured and modal dialogs above the dock. Test bottom
+anchoring during scroll, narrow/rotated layouts, keyboard and transcript growth,
+one-dock visibility, Back, query/selection and one-player continuity. Native
+resident speech is not admitted by a Red Dog button or its placement.
+
+The detailed contract is [HPC H1F](../hpc/ROADMAP.md#h1f--single-floating-bottom-dock--012-clarification-2026-11-18).
+This supersedes earlier above-rail placement in PFWD-1B and the November 14
+viewer reference. It does not revert the separately owned top-anchored phone
+player, alter other FoundUps' admission, create a separate HPC runtime, waive
+security checks, or claim a live deployment. Keep current runtime descriptions
+in INTERFACE distinct from this planned acceptance change; reconcile them with
+the actual implementation. Existing WSP 15 scoped-search planning remains 13/P1;
+implementation and verification cost must be revalidated in its owned slice.
+
 ## HPC return navigation and deferred shared dock — 012 direction 2026-11-16
 
 **Vote/Contact navigation source candidate in PR #2411; release/device acceptance open.** The separate player-layout and new-artwork requirements remain specified. Reconcile [HPC H1](../hpc/ROADMAP.md#2026-11-16--return-navigation-concise-hpc-identity-and-changed-phone-acceptance) and the [navigation matrix](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#47-hpc-vote-and-contact-congress-return-navigation--012-request-2026-11-16) before the next owner slice. Main source inspected: `72a3182c70974f0523be91d5ce4bd32808d824bc`; existing probe draft [#2405](https://github.com/FOUNDUPS/Foundups-Agent/pull/2405) remains a separate playback baseline, not implementation of this navigation.
@@ -213,11 +246,13 @@ priorities and active member-runtime PRs intact.
 ## Responsive HPC PoC — shared WikiTube theater and phone grid (2026-11-11; acceptance open)
 
 012's clarified PoC requires **one shared Mall with two responsive presentations**.
-Desktop uses the centered main video, search directly below it, and horizontal
-thumbnail strip beneath search. Phone uses the compact three-column video grid,
-fixed header and bottom thumb controls. This is not permission to build another
-HPC shell, change every FoundUp's layout, or call a density-only patch complete.
-The detailed contract and planning allocation are in [HPC H1](../hpc/ROADMAP.md#h1--responsive-wikitube-style-discovery-and-shared-thumb-dock-specified-012-request-2026-11-11).
+The current dock target is a centered desktop main video, a horizontal thumbnail
+queue beneath it, and one viewport-bottom floating search dock below the queue.
+Phone keeps its compact grid and one thumb-accessible floating dock. This is not
+permission to build another HPC shell, change every FoundUp's layout, or call a
+density-only patch complete. The detailed contract and planning allocation are in
+[HPC H1](../hpc/ROADMAP.md#h1--responsive-wikitube-style-discovery-and-shared-thumb-dock-specified-012-request-2026-11-11);
+H1F explicitly supersedes the former above-queue search order.
 
 ### Required planning gate
 
@@ -264,7 +299,7 @@ not reprioritization of unrelated system work.
 | --- | --- | --- |
 | PFWD-0 | Reconcile current owners, source history and acceptance | Roadmap/contract references, source SHAs, existing-test inventory and bounded recovery plan; documentation is not runtime success. |
 | PFWD-1A | PoC: desktop theater plus top-anchored phone player/grid | Correct desktop and revised phone composition, one-tap selection into one iframe/audio session, independently scrolling grid, advancing media time, WikiTube queue/transitions, close/back/original-ID return, resize/rotation and other-FoundUp regressions. |
-| PFWD-1B | PoC: scoped search and phone dock | Search between desktop main video and bottom tiles; phone thumb access, scoped install identity and optional local dictation. Verify loaded-catalog filtering, empty results, queue advancement, safe areas, keyboard and standalone launch. |
+| PFWD-1B | PoC: single floating bottom search dock | Main video, thumbnails, then one viewport-bottom dock; phone thumb access, scoped install identity and optional local dictation. Verify exactly one visible/focusable dock, bottom anchoring on scroll, keyboard/safe-area clearance, query retention, no results, queue advancement and standalone launch. |
 | PFWD-1C | PoC entry and membership | Dedicated public HPC host, invited FoundUps member access and scoped sign-in return. Verify each entry independently. |
 | PFWD-2 | Prototype: resident speech and agent controls | Red Dog hold-to-talk via authenticated resident ingress, admitted device-compatible selection, cancellation, permission denial and bounded action receipts. |
 | PFWD-3 | Prototype: AutoPost handoff | Existing capture owner, explicit permission, approved route/origin and return state; no copied camera stack. |
@@ -322,13 +357,14 @@ Release qualification requires a real invited session and a deployed asset match
 The [WikiTube archive](https://docs.google.com/document/d/1XzJDkZWsXbHHaDAsNT3zhFo-Nu3t579PE1niPQ9kEzw/edit)
 describes putting search by the queue, keeping a playing video, and starting
 the first result when idle. The [2010 mockups](https://drive.google.com/open?id=0B5a_mx1oJTbONDg3NWZhNDYtZWIwMy00MTQwLTk0M2YtZmNiYjYzN2M3ZWFl)
-show the main player and thumbnail rail. The 2026-11-14 request places the
-search dock above the rail and aligns it left in the immersive Mall player.
-This extends the invited Mall on `f0804bd35` and retains the HPC scope.
+show the main player and thumbnail rail. The 2026-11-14 request placed search
+above the rail; that placement is historical and is now superseded by the
+2026-11-18 single floating bottom dock below the thumbnails. Preserve the
+existing invited Mall scope and shared search/queue implementation.
 
 | Slice | WSP 15 | Owner and acceptance |
 | --- | --- | --- |
-| PoC dock | 14/P1 (C3, I4, D3, Impact4) | Use the existing catalog and queue matching. Check search without reloading active media, local dictation fallback, menu dismissal, Red Dog and AutoPost handoff, and no overlap with provider controls. |
+| PoC dock | 14/P1 (C3, I4, D3, Impact4) | Use the existing catalog and queue matching with the current single floating bottom-dock order. Check search without reloading active media, local dictation fallback, menu dismissal, Red Dog and AutoPost handoff, and no overlap with provider controls. |
 | PoC tile playback | 15/P1 (C4, I4, D3, Impact4) | Play in the selected desktop tile using the shared player. Keep the separate full-view action, one iframe, provider dimensions, and original-card return. Use fixture and real-provider evidence. |
 | Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site. Root opens the admitted Mall and the existing sign-in return remains available. Qualify DNS, TLS, signed-out and invited paths independently. |
 | PFWD-2/3 | Later stage | Device model selection needs an admitted runtime and measured device support. Plan mode and plugins need an authorized Red Dog contract. AutoPost keeps capture and private attachment ownership. |
@@ -347,20 +383,19 @@ remains available during domain qualification.
 
 #### Phone viewer and foreground input
 
-012's November 14 follow-up extends PFWD-1B from the desktop queue and
-phone browse dock to the phone's expanded viewer. The shared player keeps
-the video above a floating search and a horizontally scrollable queue.
-The dock stays available when a short screen requires scrolling the video
-area. Search changes the queue while the active clip continues. Outside
-the viewer, ordinary Mall video cards use the existing player at the
-selected card. The separate expand control keeps that player mounted.
-HPC keeps its three-column browse grid and registered catalog scope.
+012's November 14 follow-up extended PFWD-1B to the phone's expanded viewer.
+The current target order is video, horizontally scrollable queue, then the
+single floating bottom dock. Keep it anchored to the visible viewport rather
+than scrolling with the queue. Search changes the queue while the active clip
+continues. Outside the viewer, preserve the existing selected-card behavior
+and the separately owned top-anchored HPC player work. The expand control
+keeps the same player mounted. HPC retains its grid and registered scope.
 
 | Slice | WSP 15 | Decision and acceptance |
 | --- | --- | --- |
 | PFWD-1B phone viewer | 15/P1 (C4, I4, D3, Impact4) | Extend the shared player and tests from `510079b91`. Check one iframe, horizontal touch scrolling, query and keyboard behavior, tile return, the minimum provider viewport, and existing product routes. |
 | PFWD-1B foreground dictation | 13/P1 (C3, I4, D3, Impact3) | Reuse local browser dictation on the mic or a deliberate Red Dog hold. Release or the square finishes the current utterance. Cancel on navigation or loss of visibility. Keep the transcript editable in the current search. The plus button or an upward swipe on it opens options. |
-| PFWD-1B phone reference refinement | 13/P1 (C3, I4, D3, Impact3) | Use one search dock in scoped browse, invited browse and the expanded viewer. The plus opens an anchored menu. Longer text wraps above the controls. Stop takes the Red Dog position during foreground dictation. Check editable transcripts, touch and keyboard, dismissal, narrow and rotated layouts, and provider continuity. |
+| PFWD-1B phone reference refinement | 13/P1 (C3, I4, D3, Impact3) | One viewport-bottom floating dock in scoped browse, invited browse and the expanded viewer, below any video queue. Plus opens upward; longer text grows upward; Stop uses the existing Red Dog slot during dictation. Test one visible/focusable dock, query retention, keyboard/safe-area clearance, dismissal, scroll, rotation and provider continuity. |
 | PFWD-1B build identification | 12/P2 (C2, I4, D3, Impact3) | Show the loaded build beside the scoped topic and in the shared plus menu. Check the phone and desktop labels against the service worker generation during release testing. |
 | PFWD-2 resident speech and browser AI | Later stage | Admit the resident conversation transport and use AI Gateway capability results for model choice. Verify a phone's support and resource use before offering a download or an available model. A visible foreground recording session, Stop, and review before sharing are separate acceptance criteria. |
 

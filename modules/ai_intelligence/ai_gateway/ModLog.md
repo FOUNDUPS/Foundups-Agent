@@ -1,5 +1,17 @@
 # AI Gateway Module Change Log
 
+## 2026-11-16 - Preserve distinct audio observations with identical output bytes
+
+Independent review of PR2399 found response-digest-only lookup discarded case or
+candidate identity. Add `TimingObservation.lookup_key` and use full
+case/candidate/output keys internally; validate compound and legacy keys and reject
+duplicate full-identity aliases. Preserve response byte digests, existing task and
+contract checks, legacy unique-output callers and unmeasured SKIPPED quality.
+Five new synthetic tests cover candidate/case collisions, per-case duration bounds,
+duplicate aliases and different outputs for one identity. No provider transport,
+new dependency or inference request. All32 offline cases pass through the existing qualified bounded runner; zero additional inference. Exact execution receipts remain private.
+WSP11/22/50/77/97.
+
 ## 2026-11-16 — Independent repair verifier firewall and model-independence policy
 
 Integrated `src/independent_repair_verifier.py` and `tests/test_independent_repair_verifier.py`
@@ -644,3 +656,41 @@ prevented governed held-out comparison of Kimi K3 with RedDog's existing panel.
 - Cost optimization features (Phase 2)
 - Enterprise monitoring (Phase 3)
 - Multi-provider ensemble methods (Phase 4)
+
+## 2026-11-15: offline audio timing evaluation proposal
+
+The following paragraph records the initial offline checkpoint; subsequent live
+status is recorded separately below.
+
+Added the first local prototype layer in an owned partial source snapshot of
+45267dd. Reuses the AI Gateway model benchmark/verifier owner; leaves economics
+WRE auto-research and all production/provider runtime controls unchanged.
+Adds structural timing diagnostics, source/configuration binding and a shared
+in-memory attempt cap with synthetic unittest fixtures. Repository publication,
+live inference, measured singing alignment and production promotion are pending.
+WSP 3/10/22/50/71/91/97 apply. Existing RSI/WRE feedback remains the review owner.
+
+Local qualification: 27 synthetic unittest cases passed after one independently reviewed test-oracle classification correction; both attempts are retained. No live model result or production acceptance follows.
+
+### Separate live smoke evidence and integration boundary
+
+Two subsequent authorized OpenRouter transcription calls used one original
+75-second audio excerpt without reference lyrics. Qwen returned 222 timed words
+in 3.750 seconds for $0.00024975; Parakeet returned 217 in 3.485 seconds for
+$0.0012500025. Both timing lists passed structural validation, with 21 and 1
+zero-duration words respectively. The total two-attempt budget is exhausted.
+Offline replay through the existing harness remained SKIPPED/unaccepted.
+
+Actual output/hash/latency/cost/generation-ID evidence and diagnostic SRT are
+private. Performed lyrics, independent timing truth, instrumental-gap accuracy
+and model winner remain unmeasured. Separate read-only generation metadata
+resolved PrimeIntellect for both requests and Qwen's serving model
+qwen/qwen3-asr-0.6b-20260813. Gateway latency was 2018/2463 ms, model-only time
+unavailable. Metadata reported Parakeet cost $0.001250002, differing from
+transcription usage.cost by $0.0000000005; both remain separate and settlement
+is unmeasured. Source integration targets main 9816bd12 observed
+on 2026-11-15; AI Gateway and applicable bootstrap/gate
+source match the tested 45267dd base. No primary checkout, WRE dirty file,
+provider transport, production runtime or voting implementation is changed.
+The namespace/comment suite documentation is retained for follow-on review;
+it does not reset inference counts or create another evaluator/orchestrator.

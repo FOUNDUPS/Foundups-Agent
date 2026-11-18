@@ -30,15 +30,15 @@ Use the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/s
 
 | Surface | Required behavior | Acceptance boundary |
 | --- | --- | --- |
-| PC / monitor | Centered main video above a continuous horizontal thumbnail strip. Search sits **between the main video and the bottom tiles**. The main player is not forced browser fullscreen. | Desktop screenshots and browser interaction tests must show this composition; oversized three-column posters or an extra player inserted below a selected row do not satisfy it. |
+| PC / monitor | Centered main video, then a horizontal thumbnail queue, then **one viewport-bottom floating search dock below the thumbnails**. The dock remains reachable while content scrolls; the main player is not forced browser fullscreen. | Desktop screenshots and browser interaction tests must show this order and bottom anchoring; oversized three-column posters, search above the queue, or a duplicate dock do not satisfy it. See H1F. |
 | Desktop startup / queue | Request playback of the first eligible clip on entry, then advance through the queue. Preserve one active player and deliberate sound controls. | Test actual provider state and advancing time. Where the browser blocks startup, show a truthful user-activation recovery; never claim guaranteed audible autoplay. No duplicate or hidden players. |
-| Search | Center a compact search bar beneath the desktop video. Typing filters the scoped queue. Submit plays the next match or the first available match. The phone search submits a grid filter and offers local dictation where available. | Search uses existing HPC catalog metadata. Test stable IDs, selection, no results, return state and the phone keyboard. Cross-FoundUp discovery remains a later permissioned expansion. |
+| Search | Reuse one floating bottom dock: left plus/options, editable scoped search, dictation mic, and right Red Dog action. Typing filters the scoped desktop queue; submit plays the next match or first available match. Phone search submits its grid filter. | Test exactly one visible and focusable search surface per active view, preserved query/selection, safe areas, keyboard clearance, no results, and return state. Dictation and Red Dog retain their actual capabilities; placement does not admit resident speech. |
 | Phone | Compact portrait grid below one shared, top-anchored floating player. One deliberate tile tap requests playback in that existing player; the grid scrolls independently beneath it. Preserve video identity, WikiTube transitions and queue, query, scroll, focus and close/back recovery. | Verify one iframe/audio session, advancing media time, provider minimum size, unobscured provider controls, repeated selection, rotation and return. Provide truthful recovery when autoplay or the provider blocks playback; one tap is not a bypass guarantee. |
 | Breakpoint / rotation | Change presentation without duplicating the media session or losing video identity, queue, query and browsing position. | Test desktop, phone portrait/landscape, resizing and keyboard access independently. Do not classify all large tablets by pointer alone without testing. |
 | Entry and membership | Guests browse on `hpc.foundups.com`. `foundups.com/members` leads to the existing member gate. Admitted members can select HPC from the Mall or return to the same selection after sign-in. | Guest, uninvited and admitted browser cases. The `/f/hpc` landing links to the dedicated host. `/f/hpc/app` retains its protected handoff. |
 | Shared-regression guard | Preserve ordinary Mall channel expansion, other FoundUp projections, guest/member boundaries, provider diagnostics, save/history and return navigation. | Reuse the existing tests and fixtures for the shared grid, player and account boot. |
 
-This request supersedes earlier hidden-search wording only for **HPC-scoped bottom search**. The independent-site disclosure remains. The 2026-11-16 navigation matrix below now defines portrait/HPC and Red Dog/Mall destinations explicitly. The latest clarification places search above the bottom desktop strip, not below it.
+This request supersedes earlier hidden-search wording only for **HPC-scoped bottom search**. The master-Mall logo link and independent-site disclosure remain. The 2026-11-16 navigation matrix below now defines portrait/HPC and Red Dog/Mall destinations explicitly. **012's latest floating-bottom clarification in H1F supersedes the previous search-above-thumbnails order.** It is a requested acceptance change, not evidence that production already renders it.
 
 ### H1C · Evidence and recovery before implementation
 
@@ -85,6 +85,44 @@ supported device models and return context before exposing actions.
 Seven-level preferences, community nominations, comics/story panels and
 whole-Mall discovery keep their existing stages.
 
+### H1F · Single floating bottom dock — 012 clarification, 2026-11-18
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED by this documentation slice.**
+The requested composition is **main video -> video thumbnails/queue -> one
+floating bottom dock**. Floating means anchored to the visible app viewport,
+with a small edge gap and safe-area clearance, not a search row that scrolls
+away or sits above the videos. Browse and WikiTube viewer reuse the same shared
+dock owner; switching view transfers query, focus and selection without leaving
+two visible or keyboard-focusable search bars.
+
+- Put `+` on the left, scoped search in the middle, and microphone/Red Dog on
+  the right in the same floating item. Reuse current options, dictation and dog
+  behavior; do not turn a display change into a claim of resident-agent execution.
+- Keep the dock reachable during browsing and playback. While focused, editing,
+  dictating or using options, it must not auto-hide. Longer input grows upward;
+  its controls remain at the bottom. Reconcile any prior scroll-hide behavior
+  through the existing controller rather than adding competing timers.
+- When the phone keyboard opens, keep the dock and its active input above it;
+  restore the normal safe-area position on dismissal. Preserve accessible touch
+  targets, keyboard navigation, reduced motion and usable portrait/landscape views.
+- Reserve scroll clearance for the dock so the last tile and its title can be
+  brought fully into view. Do not cover native player controls or reduce the
+  active provider below its required visible dimensions. The plus menu opens
+  upward within the available viewport. Choose layering in the existing shell,
+  below modal dialogs, rather than an arbitrary global z-index override.
+- Extend existing dock/browser fixtures: one visible dock, bottom anchoring at
+  top/middle/end of scroll, thumbnails above it, keyboard open/close, expanded
+  input, option dismissal, rotation, Back and preserved one-player continuity.
+  Desktop and physical-iPhone acceptance remain separate from emulation.
+
+HPC is the first preview consumer of this shared refinement, followed by
+qualified Mall promotion; no standalone HPC runtime or security bypass is
+introduced. Preserve the separately owned top-anchored phone-player work on
+`feat/hpc-floating-wikitube-v20`; this dock correction must not revert it to an
+older row-player contract during reconciliation. Refresh that owner and current
+main before implementation. Keep #2405 diagnostics and #2411 Vote navigation
+separate. This documentation changes neither their branches nor deployed UI.
+
 ## 2026-11-16 — Return navigation, concise HPC identity and changed phone acceptance
 
 Source: 012's latest direction. **CHANGES_POC_ACCEPTANCE** for the top-anchored phone player and return navigation; the larger shared floating dock is **LATER_STAGE**. The previous selected-tile/original-row phone placement is superseded, with desktop and ordinary Mall behavior retained. These requirements are specified, not an implementation or deployment receipt.
@@ -108,3 +146,56 @@ Deferred roadmap: one shared floating Red Dog and bottom FoundUps search dock ac
 ## 2026-11-11 reconciliation receipt
 
 PR #2358 is reused for this documentation/skill correction; no new branch or UI implementation is created by this revision. Repository reads are GitHub connector evidence against main `f0d08839e78c0aa2cca592ef20773fc5826f9040`; native WSP bootstrap, HoloIndex, WRE admission, PC state and physical-device playback were not executed in this connector session. Documentation review is not runtime verification. Exact-head checks, authorized merge, main read-back, deployment and PC synchronization must be reported separately.
+
+## H2 — Dream Team and Press Wire (2026-11-17)
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.** Documentation
+reconciliation is the current slice. H1 playback/device gates remain open;
+this campaign must reuse shared Mall owners and avoid a second frontend.
+
+1. Resolve the named master workbook and reconcile its claimed four tabs with
+   the existing sources in README. Preserve source rows, aliases and unknowns;
+   never claim 34 audited organizations from the current 33-row source.
+2. Verify existing banner assets/live rendering and both requested/referral
+   domain spellings. Coordinate with #2411 and #2376 before overlapping edits.
+3. Add the four top selectors to the current shell. Use the nine fictional
+   cards in INTERFACE, reviewed portrait assets and source-attributed clips.
+   No-result, Back, keyboard, phone/desktop and one-player behavior must pass.
+4. Adapt the existing press owner to an HPC Press Wire view. Preserve the raw
+   draft separately from publication copy; fact-check factual bridges and label
+   satire/nonendorsement. No live-voting or published-release claim before
+   actual route/content verification.
+5. Only then consider shared preferences and admitted DAE workflows. This
+   documentation request sends no email, chat message or comment.
+
+### Requested worker dispatch (planning, not runtime evidence)
+
+| Lane | Requested label in brief | Responsibility | Required receipt |
+| --- | --- | --- | --- |
+| Campaign/editorial | Astra 6.1 Sol | Deadpan satire, D.U.P. dictionary, hypothetical coalition math and bikini/bathtub narrative | Reviewed copy, factual-source separation, no invented endorsement or whip count |
+| UI | Astra 6.1 Terra | Existing-shell selector, portraits/cards and attributed clip filtering | Exact source/head, scoped tests, phone/desktop evidence and live release state |
+| Outreach/data | Astra 6 Lunar | Existing workbook reconciliation and proposed UI-TARS/DAE integration | Exact workbook identity/counts, recipient/sender preflight and separately admitted runtime |
+
+These labels are copied from the brief, not available-model or running-worker
+claims. Bind actual model IDs through runtime evidence before dispatch; do not
+silently substitute tiers. No workers or DAEs were activated by this record.
+
+D.U.P. supplied expansions: “Democratic Uniparty Pawns” and “Donor-Owned
+Useless Politicians.” This is satirical vocabulary, distinct from the factual
+United Democracy Project (UDP). The complete claimed dictionary has not been
+located. A proposed 15–25-seat Nash Blocking Coalition is a scenario, not an
+observed bloc; model actual House voting rules and attendance before claiming
+a blocking threshold.
+
+### Reconciliation coverage and remaining blockers
+
+Owner: 0102, documentation reconciliation, 2026-11-17. Base
+`fc1324815c892ab02f003fe95917a77358001a59`. Bounded open-PR check found #2376
+(press), #2411 (Vote banners), #2405 (iPhone probe), and #2394 (social skills);
+preserve their distinct work. No native checkout, WSP bootstrap, semantic
+HoloIndex, WRE admission, PC state, deployment or physical-device execution
+was verified in this connector session. Retrieval was lexical GitHub/Drive;
+noise included unrelated Drive full-text matches, reduced using name filters.
+Missing master identity is the consolidation blocker. Documentation checks
+are not runtime or independent acceptance. Required PR checks/review and main
+readback remain separate closure gates. WSP15 planning: C2/I4/D4/Impact3 = 13/P1.

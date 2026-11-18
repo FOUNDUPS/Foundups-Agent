@@ -16,6 +16,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
 FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
 FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
+BRAND_CONTEXT_PATH = MODULE_ROOT / "brand_context.json"
+WEBSITE_SKILL_PATH = MODULE_ROOT / "skills" / "website-update" / "SKILL.md"
 CONTACT_LEDGER_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_contact_ledger" / "SKILLz.md"
 WORK_ORCHESTRATOR_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_work_orchestrator" / "SKILLz.md"
 REDDOG_CORRESPONDENCE_SKILL_PATH = REPOSITORY_ROOT / "modules" / "communication" / "moltbot_bridge" / "skillz" / "reddog_correspondence_state" / "SKILLz.md"
@@ -56,6 +58,29 @@ def test_no_token_is_invented_for_the_campaign() -> None:
 
 
 
+def test_esingularity_brand_context_is_single_skill_brand_authority() -> None:
+    registry = load_json(REGISTRY_PATH)
+    entry = next(item for item in registry["entities"] if item["foundup_id"] == "esingularity_001")
+    assert entry["brand_context_path"] == "modules/foundups/esingularity/brand_context.json"
+
+    brand = load_json(BRAND_CONTEXT_PATH)
+    assert brand["canonical_brand"] == "eSingularity.ai"
+    child = next(item for item in brand["child_foundups"] if item["foundup_id"] == "yumori_me")
+    assert child["canonical_brand"] == "YUMORI.me"
+    assert brand["authority_boundary"] == "BRANDING_ONLY_NO_EXECUTION_AUTHORITY"
+
+    for skill_path in (
+        MOSHPIT_SKILL_PATH,
+        FUKUI_PROCEDURE_SKILL_PATH,
+        FUNDING_PPP_SKILL_PATH,
+        WEBSITE_SKILL_PATH,
+    ):
+        skill_text = skill_path.read_text(encoding="utf-8")
+        assert "brand_context" in skill_text
+        assert "uppercase YUMORI and lowercase" not in skill_text
+        assert "Movement/site brand" not in skill_text
+
+
 def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     registry = load_json(WRE_SKILLS_REGISTRY_PATH)
     assert registry["total_skills"] == len(registry["skills"])
@@ -69,7 +94,7 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     skill = MOSHPIT_SKILL_PATH.read_text(encoding="utf-8")
     assert "name: yumori_moshpit" in skill
     assert "promotion_state: prototype" in skill
-    assert "YUMORI Moshpit" in skill
+    assert "YUMORI.me Moshpit" in skill
     assert "0102 Moshpit" in skill
     assert "reverse chronological within each day" in skill
     assert "https://docs.google.com/document/d/1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM/edit" in skill
@@ -256,6 +281,48 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
                 assert "Default sign-off is `0102`" not in projected
                 assert "0102 writes as proxy" not in projected
 
+
+
+def test_stt_artifacts_are_rejected_from_current_public_surfaces() -> None:
+    source_of_truth = (FRONTEND_ROOT / "audit" / "SOURCE_OF_TRUTH.md").read_text(encoding="utf-8")
+    assert "Speech-to-text normalization guard" in source_of_truth
+    for canonical in (
+        "旧すかっとランド九頭竜",
+        "Sukatto Land Kuzuryu",
+        "YUMORI.me",
+        "九頭竜川",
+        "Kuzuryu River",
+        "あわら温泉",
+        "Yukemuri Yokocho",
+        "旧下宇坂小学校",
+        "旧羽生小学校",
+    ):
+        assert canonical in source_of_truth
+
+    current_surfaces = "\n".join(
+        read(relative)
+        for relative in (
+            "app/page.tsx",
+            "app/future/page.tsx",
+            "components/LanguageSwitcher.tsx",
+            "content/yumori-vision.ts",
+        )
+    )
+    for artifact in (
+        "Scott Lando",
+        "Scottland",
+        "Kazuri",
+        "Kazury",
+        "Kazuru",
+        "Kuzuri",
+        "Kuzuru",
+        "Owarasa",
+        "cubicle restaurant",
+        "旧すかっとらんど九頭竜",
+        "旧スカットランド九頭竜",
+        "すかっとランド九頭龍",
+    ):
+        assert artifact not in current_surfaces
 
 
 def test_yumori_monthly_member_meeting_notice_is_public() -> None:

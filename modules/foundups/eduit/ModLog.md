@@ -1,5 +1,9 @@
 # EDUIT ModLog
 
+## 2026-11-18 — Reconcile PR #2102 EDuIT Discovery specification
+
+- Reconciled `PR #2102` (`eduit-discovery-foundation-20261008`) onto current `main`: added the 15 unique EDuIT Discovery specification, safety, data-contract, schema (`schemas/learning_event.schema.json` + `examples/learning_event.json`), contributor, and memory-boundary artifacts under `modules/foundups/eduit/`, preserved all `#2182` and Storytime implementation/manifest/registry baselines, integrated the canonical `Route Namespace` / `App Mount` / `AI Capability Hooks` / `DAEmon Outputs` / `Data / Telemetry Namespace` / `WSP References` sections into `README.md` (satisfying `test_foundup_readme_surface_contract[eduit]`), appended `docs/HISTORY.md` and `docs/FOUNDUP_INTEGRATION.md` to `foundup_registry.json` (`eduit.evidence_docs`), and appended the preserved `2026-10-08` historical specification records (`WSP 22`, `WSP 50`, `WSP 91`, `WSP 97`, `WSP 104`).
+
 ## 2026-11-02 — Clean picture and adaptive words in both player sizes
 
 WSP00/15/22/50/84/97;15/P1. Governed lexical retrieval retains UNKNOWN freshness
@@ -643,3 +647,34 @@ retained the original closed-but-visible failure and92 passing candidate checks.
 See docs/PHONE_FULLSCREEN_REPAIR.md for evidence, cache-refresh qualification
 and platform limits. No game, scene, renderer, movie or PWA lifecycle change.
 These are uncommitted local repairs; no GitHub/Sites push or deployment.
+
+## 2026-10-08 — brand styling clarification
+
+Use EDuIT for styled branding and EDuIT Discovery for the internal capability.
+Preserve EDUIT in historical quotations/source titles, and eduit in machine identifiers.
+No eDuit branding, new entity, route, token, domain, or historical-source rewrite.
+
+## 2026-10-08 — historical recovery and software-first specification
+
+Request: recover EDUIT/eSingularity/teaching-tablet work, retain historical application,
+choose a subordinate product/module name, and prepare the core FoundUp build documents.
+
+Added: source register/history, naming decision, requirements, architecture/interfaces,
+game and data contracts, evaluation/safeguards, DAE/RSI governance, onboarding map,
+roadmap, contributor rules, test inventory and memory boundary. Selected the working
+label EDuIT Discovery within `eduit`; preserved The Experience, GuiGame and Baby0 lineage.
+Prepared the declarative manifest/registry entry with SPECIFIED and NO_RUNTIME boundaries.
+
+Preserved: original Drive documents, historical media/social lane, unrelated registry
+entries and `esingularity_001`. No domain/catalog/deployment/token/outreach activation.
+
+Recovery: earlier oversized response windows were truncated, a GitHub response citation
+was rejected as a Files materialization reference, and one export lacked a visible
+completion result. The retried Malaysia text export succeeded. These observations do
+not establish the platform crash’s internal root cause. Small reads and durable local
+artifacts replace repeated unbounded source dumps.
+
+WSP references: 97 evidence/truth boundary; 91 observable outputs; 104 namespace; current
+FoundUp onboarding/template. Connector-only documentation execution: no WRE worker or
+repository-native bootstrap/HoloIndex runtime receipt is claimed. Full integration
+checks and runtime admission remain separate from document/package validation.

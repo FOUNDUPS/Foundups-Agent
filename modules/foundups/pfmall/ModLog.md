@@ -1,3 +1,8 @@
+## 2026-11-16 · Isolated HPC iPhone official YouTube baseline probe extension
+
+- Extended `tests/fixtures/hpc_iphone_playback_probe.js` and `tests/fixtures/hpc_iphone_playback_reference.html` (kept outside `public/` in git) with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts), allowlisted `?host=youtube|nocookie` (`https://www.youtube.com` vs `https://www.youtube-nocookie.com`), `Mall <-> official embed` selection retention, sanitized `deployment.json` + `SW controller` provenance receipt, and distinct `101/150` vs `LOGIN_REQUIRED` vs `autoplay-blocked` reporting, with all controls outside `#hpc-probe-embed`.
+- Added deterministic Node VM regression `tests/fixtures/hpc_iphone_playback_probe_vm.mjs` wired into `public/member/tests/test_mall_product_state.py`. WSP 22, 50, 97, 99, and 104 apply.
+
 ## 2026-11-16 — HPC return banners and changed phone acceptance (documentation candidate)
 
 - Record 012's entire top HPC banner on both existing Vote and Call Your Congressperson pages as one accessible return link to `https://hpc.foundups.com`; distinct existing Red Dog navigation identity returns to `https://play.foundups.com`.

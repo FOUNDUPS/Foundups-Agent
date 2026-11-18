@@ -1,3 +1,76 @@
+## 2026-11-18 — Reconcile PR #1906 STT normalization guard
+
+- Reconciled `PR #1906` onto current `main`: preserved both the canonical `Speech-to-text normalization guard` section and existing `STT / transcription protected vocabulary` in `frontend/audit/SOURCE_OF_TRUTH.md`, and integrated `test_stt_artifacts_are_rejected_from_current_public_surfaces` (extending STT corruption artifact rejection across `app/page.tsx`, `app/future/page.tsx`, `components/LanguageSwitcher.tsx`, and `content/yumori-vision.ts`) into `tests/test_contracts.py` (`WSP 22`, `WSP 50`, `WSP 97`).
+
+## 2026-11-18 — Reconcile PR #1792 eSingularity / YUMORI.me brand context
+
+- Reconciled `PR #1792` onto current `main`: added `brand_context.json` (`eSingularity.ai` parent identity, `YUMORI.me` movement/preparatory-committee child brand), bound `esingularity_001.brand_context_path` in `foundup_registry.json`, and updated eSingularity/YUMORI Skillz + contracts (`test_esingularity_brand_context_is_single_skill_brand_authority`) while preserving all `#2189`, `#2340`, `#2413`/`#2414`, and live-ticker work.
+
+## 2026-11-16 — Recover JHR release blocker and harden existing publication handoff
+
+Reconciled the relevant YUMORI history, existing issue2126 and read-only Sites
+metadata. Older records already separated merged code, blocked deployment and
+unverified #003 live readback; preserve that obligation and LinkedIn's existing
+edition. Added sanitized failure analysis/manifest open work; hardened JHR and
+website skills to read both ledgers, bind stage receipts, retain old blockers and
+require actual governed memory acknowledgements. The existing SOCIAL owner now
+provides a dry-run receipt reconciler. No manuscripts, frontend, deployment,
+mailbox, public post or running service changed. See JHR audit supplement and
+social content contract for evidence, limits and remaining owner work.
+
+## 2026-11-16 — JHR durable archive and Red Dog channel workflow
+
+- Index #001–004 in `jhr/manifest.json` with immutable existing source bindings,
+  platform-specific delivery evidence, languages, dates and explicit unknowns.
+  Keep #002 in its current reader owner and existing report manuscripts in place;
+  keep #004 as a draft pointer to the same native Doc. No editorial rewrite,
+  duplicated manuscript, new issue, public posting or website deployment.
+- Current website exposes #001/#002; public LinkedIn independently exposes
+  #001/#002/#003. Preserve the #003 historical website claim/current-source/live
+  discrepancy. #004 is DRAFTED v2 and unapproved in its source; both public
+  platforms were checked, while authenticated draft/schedule state is unverified.
+- Extend the existing canonical JHR skill and Codex projection for Red Dog modes,
+  website-first Japanese LinkedIn, separately approved English Substack and Reddit
+  research/discussion. Existing publisher, approval and uncertain-delivery gates
+  remain. This is instruction-level setup, not an installed autonomous publisher.
+- Read-only Gmail review corroborates historical #002 link sharing; no #004
+  publication receipt recovered. Keep private correspondence outside Git.
+- Validation and exact-head/main outcomes are recorded in the focused PR; the
+  dated `jhr/PUBLICATION_AUDIT_20261116.md` and manifest retain scope and gaps.
+  WSP00/10/15/22/34/50/84/97/99; WSP110 read as draft guidance.
+
+## 2026-11-15 — Partner qualification Skillz candidate
+
+- Extend the existing prototype `yumori_work_orchestrator` to distinguish
+  operators, demand customers and collaborators; qualify responsible-person
+  responses and concrete next exchanges rather than name/send counts.
+- Keep organizational survey interest separate from personal membership and
+  formal co-proposer/name-use consent. Reuse existing correspondence/Contacts/
+  Action Queue owners; preserve specific holds, follow-up counts and provider
+  receipts when diagnosing nonresponse or choosing a different action.
+- Compare demand-led existing-hosting/small-pilot options with school/onsen
+  reuse; retain unknown economics, data-control and funding inputs. Public-benefit
+  compute is a goal, not a funded service promise or blanket foreign-training claim.
+- Add partner-outcome baseline/alternative and regression-case requirements to
+  the existing independent review, promotion, rollback and later-cycle RSI gates.
+  This is a proposed prototype revision, not runtime activation or measured RSI.
+- Retrieval used GitHub at base `e2ac080f6cdbc6aa7d291f425c6feb0c878fdfdb`;
+  current module docs and related open PRs were inspected. No orchestrator overlap
+  was found in the bounded PR search; shared ModLog history is preserved.
+  A separate isolated branch avoids touching existing local worktrees.
+- Validation: existing resident-RSI source-contract function passed in isolation;
+  initial prefix/suffix check preserved the prior skill; final readback matches
+  the candidate. Independent source review found no authority weakening; its
+  campaign-wide-hold clarification and five frozen semantic review cases were
+  incorporated. Those cases are documented expectations, not executed tests.
+  Full checkout tests, WSP_00 runtime bootstrap, HoloIndex freshness and native
+  WRE evaluation were not run. Missing memory/README.md was recorded rather than
+  replaced. Exact-head hosted checks and independent review remain merge gates.
+- WSP 00/15/22/50/95/97: docs-candidate execution plane, no provider/runtime effects.
+  WSP15 C2/I4/D3/Impact4 = 13/P1. Smallest alternative was ledger-only guidance;
+  the existing skill is preferred for reusable retrieval, without another skill
+  framework, CRM or scheduler. No frontend, survey, FIN or recipient-state edit.
+
 ## 2026-11-15 — Align React 19.3.1 dependency cohort (PR #2351 resolution)
 
 - Dependabot PR #2351 (`53fb430ae893`) bumped only `react-server-dom-webpack` from `19.2.8` to `19.3.1` while leaving `react` and `react-dom` pinned at `19.2.8`, causing `Validate eSingularity` `npm ci` to fail with `ERESOLVE` (`react-server-dom-webpack@19.3.1` requires peer `react@"^19.3.1"` and `react-dom@"^19.3.1"`).

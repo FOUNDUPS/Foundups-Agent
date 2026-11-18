@@ -91,3 +91,7 @@ local evidence fields; it authenticates neither evidence nor independent actors.
 See [EDUIT RSI contract](../eduit/docs/TILE_PRODUCTION_RSI.md) for criteria,
 correction lineage, existing runtime owners and blocked integration gates.
 No executor, queue, scheduler, promotion or new FoundUp registration is installed.
+
+## Cross-cutting provenance experiment (proposed, 2026-11-16)
+
+Optional, nonblocking future research for original reviewed video outputs: [Shorts video provenance, adversarial RSI and reward PoC](../../communication/youtube_shorts/docs/VIDEO_PROVENANCE_RSI_REWARDS_POC.md). Do not change current episode review/publication priority, child-safety, licensing or identity authority; no collectible distribution to children is authorized. No implementation or live worker is implied.

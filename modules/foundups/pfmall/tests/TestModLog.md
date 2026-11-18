@@ -1,5 +1,9 @@
 # p.fMALL Test ModLog
 
+## 2026-11-16 — Isolated HPC iPhone playback probe VM and delivery gates
+
+- Added `tests/fixtures/hpc_iphone_playback_probe_vm.mjs` (`6 passed`) wired into `public/member/tests/test_mall_product_state.py` verifying `public/member/playback-probe/` non-presence in git, strict `?v=` / `?host=` allowlists, 4 diagnostic-only Shorts isolation, controls outside `#hpc-probe-embed`, bidirectional `Mall <-> official embed` selection retention, `SW controller` vs cache provenance, and `101/150` vs `LOGIN_REQUIRED` error classification.
+
 ## 2026-11-16 — Manifest boot, catalog truth gate, and PWA hardening test reconciliation
 
 - Repaired `REPO_ROOT` resolution (`parents[4]`) and `gotjunk_001` `entry_url` expectation in `test_shell_core.py`, verifying `PfmallShell().boot()` loads all 12 manifests with zero invalid-manifest warnings.
