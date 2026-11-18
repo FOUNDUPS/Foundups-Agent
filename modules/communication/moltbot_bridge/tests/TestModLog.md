@@ -1,3 +1,22 @@
+## 2026-11-18 - Pre-build audit prompt and content-revision contract
+
+- Retrieved this inventory, tests/README, the existing operations Skillz tests
+  and adjacent Start Operations controls before extending the same test file.
+- Extended the existing prompt test to require full canonical Skillz content
+  propagation. Independent read-only forward testing covered five synthetic
+  scenarios: overlapping work/newer failing candidates, stale memory/unavailable
+  owners, disabled Antigravity intake, proposal/review/swarm boundaries, and a
+  direct authorized correction without mandatory Carbon or swarm use. This
+  evaluates written decisions, not live UI or automatic enforcement.
+- Added actual receipt-matching coverage: a persisted old content receipt is
+  rejected against freshly loaded changed Skillz content with the same registry
+  entry. Retained post-copy tampering and authority-refusal cases unchanged.
+- Baseline operations/control selection: 39 passed. Final operations/control,
+  WRE role-loader and manifest/index selection: 58 passed in 94.20 seconds on
+  Windows/Python 3.12 (50 operations/control/role cases plus 8 manifest cases).
+  This is prompt-contract/receipt validation, not automatic audit compliance,
+  admitted worker execution, deployment or independent RSI transfer.
+
 ## 2026-11-18 — Reconcile PR #2178 resident memory reuse onto main
 
 - Reconciled the 2026-10-23 resident memory reuse and FoundUp Memex configuration

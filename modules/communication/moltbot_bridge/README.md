@@ -880,6 +880,13 @@ A missing, retired, model-pinned, role-drifted, or otherwise unhealthy Skillz
 fails closed before a model or resident client is invoked. The read-only
 Start Operations authority boundary is unchanged.
 
+The existing [Operations Skillz pre-build audit](skillz/reddog_operations/SKILLz.md#pre-build-audit-and-decision)
+also guides work-order preparation and building. Record current ownership,
+overlap/preservation, exact source/time, candidate invariant/test comparison,
+unavailable evidence, authorization and next action in the existing work record.
+The workspace `foundups-wsp` skill points to this same owner. Prompt/receipt
+binding does not automatically enforce that audit or admit execution.
+
 Governed read-only audit and backend-architect FoundUps Fusion calls now use
 `reddog_provider_call_evidence.v1`. The content-free receipt binds task/work
 lineage, the validated runtime-model binding, requested identity, a

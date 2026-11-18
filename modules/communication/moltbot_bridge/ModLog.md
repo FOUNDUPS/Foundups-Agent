@@ -1,3 +1,66 @@
+## 2026-11-18 - Audit existing work before work orders and builds
+
+- Decision: EXTEND the existing `foundups-wsp` entry and `reddog_operations`
+  Skillz. Existing WSP 3/50/84/97 and WSP 110 draft handoff guidance already own
+  reuse, preservation and lifecycle discipline; no new skill, queue, dispatcher,
+  memory store or authority was needed. The reusable planning note now records
+  REUSE/EXTEND/RECONCILE/CREATE/BLOCKED with source/time, owner/session/holds,
+  overlap/preservation, alternatives/invariants/tests and authorized next action.
+- Discovery source: initially current GitHub main and isolated base
+  `70e991b3ae9d669663cb05e514df7de598c69fe0`, observed 2026-11-18 07:59 UTC.
+  Bounded open-PR and local workflow-branch searches found no dedicated competing
+  pre-build owner. Shared checkout `45267ddabb1e714aca6cfe6233f5a2daf5b836ca`
+  has unrelated WRE lifecycle edits; preserve that lane and all other worktrees.
+  HPC and its active owner are outside this slice and were not modified.
+  Main was rechecked at 2026-11-18 08:09 UTC and had advanced one commit to
+  `c8978bb8ba8772bb193cd07b494f8cb32a0ce52f`. The complete compare changed only
+  GotJunk frontend `package.json`/`package-lock.json` (Vite); no slice overlap.
+  Tests below remain bound to the isolated `70e991b3` base plus this overlay,
+  not relabeled as results for the newer main. Refresh/reconcile before promotion.
+- Known coverage: local skill inventory, supplied task/hold history, current
+  main, worktree/branch inventory, related PR search, module contracts and closest
+  tests. No current cross-host owner/queue/lease census was available. The local
+  Codex memories directory supplied no files; history is not a current queue.
+  Source-bound Holo lexical bundle succeeded with zero owner attempts and
+  `workspace_head`; semantic freshness remains UNKNOWN/index gap true. Direct
+  reads supplemented capped bundle excerpts; no reindex or authority change.
+- Compared reusing only the workspace entry with extending its authenticated
+  canonical Skillz. The latter supplies the existing model-prompt path and
+  use-time content/registry receipts; the former stays a thin pointer. Neither
+  is proof of automatic audit enforcement, native dispatch or deployment.
+- Local owner is this delegated 0102 implementer on isolated branch
+  `codex/prebuild-evidence-gate-20261118`; no other lane's write lease was taken.
+  Added conditional Antigravity handoff guidance to the existing workspace
+  owner: preserve the requested model, verify target/composer/readiness and
+  delivery, stop disabled intake, and independently review requested Carbon
+  proposals before canonical admitted swarm handoff. Existing WSP 00/97/99 and
+  dispatch owners remain authoritative. No Antigravity UI or external handoff
+  was attempted; the active publishing worker's UI was left untouched.
+- Memory discovery reused WSP 60, its FoundUp Memex addendum and the Second
+  Brain architecture map. Actual snapshot/source-supply and Start Operations
+  prompt consumers exist; ticket and PR lifecycle owners remain separate.
+  Build swarm adapters explicitly simulate/scaffold execution. PatternMemory's
+  verified sink still reports activation unready and rejects direct admission;
+  staged outcomes outside recall do not qualify RSI.
+- Separate bounded architecture reconciliation is warranted: the Memex addendum
+  lists automatic resident supply as deferred, while newer resident source-supply
+  adapters/tests exist. Reconcile those existing owners with exact runtime
+  evidence later; this slice creates no new memory WSP or runtime integration.
+- Validation: native WSP_00 awakening and strict tracker check passed locally;
+  baseline operations/control tests passed 39; final operations/control,
+  WRE role-loader and manifest/index selection passed 58 in 94.20 seconds.
+  The tests validate full prompt propagation and content-revision refusal;
+  five independent synthetic scenarios validate written workflow decisions.
+  JavaScript backend contract and blocked-request recovery commands passed.
+  Broader backend preflight exceeded the first 45-second supervisor limit;
+  its 120-second rerun reached the existing symlink fixture and failed with
+  Windows `EPERM` at `test_backend_compatibility_preflight.js:172`. That broader
+  check remains UNVERIFIED in this environment; no assertion was weakened.
+  Publication, CI/main convergence, production and
+  retained RSI benefit remain unverified. Authorization is local preparation
+  only; next promotion requires exact-head review/security/CI under current
+  ownership and separately authorized publication.
+
 ## 2026-11-05 — Lightweight supervisor advisory analysis
 
 The background supervisor was acquiring a second native model owner while main

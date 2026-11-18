@@ -1896,7 +1896,7 @@
     "modules/communication/moltbot_bridge/scripts/__init__.py": "cf0070ebf3ff4adec4aa50e163305fb43604abbefc2aa389bbd0f417ee1cac77",
     "modules/communication/moltbot_bridge/scripts/launch.py": "44db426ac276ba9424f729d6ba60d422ea6eec4f6ebf31cf64b5df38aaf158b9",
     "modules/communication/moltbot_bridge/scripts/run_task.py": "8c479f4efda65de0fd99c1c3550f7b05963da8e6e302752c70a1efd16cc092e5",
-    "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md": "3b3057c4e24d91207b9f455456cdd786013e6ca38a8a04c85797d044da21e579",
+    "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md": "b4f1e4a594db8e19ee9b0fac96c4f17b38beec22e1db7fb4211e5f11654225e4",
     "modules/communication/moltbot_bridge/src/__init__.py": "c0df4fe7c7aaee8d342b8ab92ef211d5cc08ec4a7c0524a1ad88e1267ed70700",
     "modules/communication/moltbot_bridge/src/auto_moderator_bridge.py": "a262c5cc260f0989dde862ce3750add0671e719f6624c600f6890846cfdd502a",
     "modules/communication/moltbot_bridge/src/continuity_context.py": "15ce1bba22fe92f9acfaa42613e255746a46f8fcec9bc0b0ce83919fcd7dcc8b",

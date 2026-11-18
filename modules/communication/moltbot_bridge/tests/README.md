@@ -1,3 +1,15 @@
+## Operations pre-build prompt and receipt contract
+
+`test_reddog_operations_skill.py` checks that the full canonical Skillz content
+reaches the bound prompt. Its changed-content case checks that
+a persisted previous receipt fails against the freshly loaded Skillz receipt;
+it does not prove automatic current-head retrieval or model compliance.
+Keep `test_reddog_start_operations_control.py` for submit/resume, missing policy,
+dirty-tree and authority refusal, and the WRE role-loader tests for policy
+hygiene. These offline cases use synthetic state and do not dispatch workers.
+Run with bytecode/plugins disabled, `--noconftest --import-mode=importlib`, an
+empty pytest config and `-p no:cacheprovider` as for the other bounded suites.
+
 ## Supervisor model-free startup
 
 `test_supervisor_model_startup.py` executes actual startup/plan methods with

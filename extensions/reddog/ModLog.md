@@ -1,3 +1,10 @@
+## 2026-11-18 - Bind operations pre-build guidance
+
+Refreshed the existing backend compatibility digest for the canonical
+`reddog_operations` Skillz content update. The 1,494-member backend closure and
+all other source digests are preserved. This binds local source instructions;
+it does not establish installed-runtime admission, dispatch or deployment.
+
 ## 2026-11-18 — Reconcile PR #1792 FoundUp brand context integration and manifest refresh
 
 - Integrated `PR #1792` onto current `main` (`#2189` core + `#2178` closure): bound `esingularity_001.brand_context_path`, updated eSingularity/YUMORI Skillz + WRE `skills_registry_v2.json` descriptions (preserving all `39` registered entries), and refreshed the `1,494`-member RedDog backend manifest (`cb7f5970b56ed261b92e4df2775ab30961da80187b351833f356f5ad7bb55aa4`) plus digest/security pins.
