@@ -20,9 +20,9 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
+    "@vitejs/plugin-react": "^5.2.0",
     "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "vite": "^8.1.5"
   },
   "overrides": {
     "@grpc/grpc-js": "1.13.6"
