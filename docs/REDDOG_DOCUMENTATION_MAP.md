@@ -19,13 +19,15 @@ not mean RedDog has 376 canonical specifications.
 | Hybrid tickets, bounded teams and active-012 feedback into 3V | [Hybrid architecture decision](architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md), [R24](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md), [R25](roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) | Cross-domain implementation plan; not live federation or voting authority |
 | Current extension/runtime truth | `extensions/reddog/README.md` | Current product/runtime status |
 | Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
+| Browser outcome verification evidence | [Selenium verification contract](../modules/infrastructure/foundups_selenium/INTERFACE.md#wre-visual-verification-evidence), `modules/communication/moltbot_bridge/workspace/skills/foundups-wsp/SKILL.md` | Existing runner and operator guidance; source presence does not prove live RedDog wiring or a visual PASS |
 | Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
-| Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric PoC implemented; broader confidence ladder specified; not deployed |
+| Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric request-continuity PoC implemented, not deployed; continuous human presence, mutual verification, and media provenance specified, not implemented |
+| Continuous Lick / Gemini evaluation | `docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md` | Source-grounded audit; separates presence, continuity, media, affect, semantic state, and authority; no anti-deepfake deployment claim |
 | Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |
 | Public host and AutoPost/site integration work order | `extensions/reddog/docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` | Remaining implementation/activation gates; never completion evidence |
 | Host-recovery salvage and stranded PR closure | [2026-10-06 reconciliation](audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md) | Exact-base audit, owned scope and validation; not resident activation |
 | Contact/relationship memory | `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md` | Architecture vision; specified, not implemented |
-| Moshpit activity projection | `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |
+| Moshpit activity and conversation projection | `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing projection inputs; unified renderer unmounted; pins, long-press actions, scoped search, Muzzle/controls and AutoPost handoff specified only |
 | Memex projection emitter | `extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` | Product contract; specified, not implemented |
 | Memex emitter implementation work order | `extensions/reddog/docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` | Work order; never completion evidence |
 | FoundUps/second-brain architecture | `docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md` | Architecture decision context |

@@ -1,5 +1,46 @@
 # HPC ModLog
 
+## 2026-11-18 · One viewport-bottom floating search dock
+
+012 clarified that the search, plus, microphone and Red Dog belong together
+in one floating item at the visible viewport bottom, below the thumbnails.
+Update H1B/H1F and shared p.fMALL PFWD-1B rather than keeping contradictory
+search-above-queue instructions. Specify one visible/focusable dock, retained
+query/selection, scroll clearance, upward input/menu growth, keyboard and
+safe-area handling, provider-control clearance, and separate phone/PC tests.
+HPC qualifies the shared refinement first; no duplicate runtime is proposed.
+
+This is documentation-only CHANGES_POC_ACCEPTANCE, not implemented UI or a
+playback fix. Preserve the top-anchored native player owner, #2405 diagnostic
+work, #2411 Vote navigation and H2 campaign scope. The owned documentation
+slice starts at main `20a7044c018fcd4a033226db644360cd9b216242`; the native
+`feat/hpc-floating-wikitube-v20` head was read as
+`75c838b6eab19807487ee02c4b2f9367e580547e` and was not modified. No source,
+security rule, test expectation, hosting configuration or service worker changes.
+
+WSP 15/22/50/97: source-bound connector retrieval and diff/readback review.
+Native bootstrap, semantic HoloIndex, WRE admission, independent runtime tests,
+physical-device behavior, deployment and PC synchronization were not executed
+in this documentation session. Qualify exact-head checks/review and main
+readback separately; do not infer deployed completion from this record.
+
+## 2026-11-17 · Dream Team campaign source reconciliation
+
+012 supplied nine fictional basketball draft cards, press-wire satire, D.U.P.
+vocabulary and a three-lane worker plan. Extend existing README, INTERFACE,
+ROADMAP and intake SKILLS_MAP; no competing files or runtime implementation.
+Link the actual current Progressive Media sheet, older 18-entry workbook and
+existing outreach workflow. Current sheet has 33 populated rows including one
+explicit Zeteo alias; the named four-tab master and 34-outlet claim remain
+unverified. Preserve all nine card IDs and distinguish requested design,
+fictional casting, planned dispatch and published/admitted behavior.
+
+Scope is documentation only; WSP 15/22/50/97. Existing #2376/#2411/#2405/#2394
+lanes remain untouched. No native bootstrap/HoloIndex/WRE, local tests, live
+site check, sender change, external outreach or deployment is claimed. Check
+exact PR head and main separately. Missing workbook identity remains an
+explicit blocker; existing content and historical acceptance gates survive.
+
 ## 2026-11-13 · Public host and invited member entry
 
 012 confirmed the guest entrance at `hpc.foundups.com`. The registry sends

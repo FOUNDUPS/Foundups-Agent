@@ -1,3 +1,61 @@
+## 2026-11-18 — Reconcile PR #1792 registered brand-context fixture copy and YUMORI.me grounding check
+
+- Updated `test_foundup_work_grounding.js::writeFixture()` so existing `entity.brand_context_path`
+  files are copied into the temporary fixture repository, and added the real `YUMORI.me -> esingularity_001`
+  child-brand grounding assertion alongside synthetic `alpha_brand/harbor_me` controls without modifying
+  production resolver code.
+
+## 2026-11-16 — Exact generated-manifest security metadata re-review
+
+The replacement head's scanner reported39 manifest metadata rows after the
+whole-file digest changed. Each row matches prior reviewed bytes and actual
+immutable source SHA256; independent review approved only39 exact new bindings,
+preserving4579 entries/order (4618 total). No scanner policy, exclusions, raw
+credentials or fingerprint algorithm changed. Public per-row proof is in
+`.github/security/reviewed-jhr-manifest-evidence.json`; fresh tree/history/hosted
+checks remain required. Original failed security result retained.
+
+## 2026-11-16 — Publication reconciliation dependency binding repair
+
+The first PR2414 hosted Python job correctly rejected a stale generated backend
+manifest and staged-index checksum after the new content helper/import. Refresh
+the existing generator output: exactly one added runtime member,
+`social_media_orchestrator/src/content/publication_reconciliation.py`, no removals,
+and only `campaign_planner.py` changes an existing source digest. Both canonical
+pins are `a511d3efb70cf88f1f15700db6128f4bd97487469d1879d729267abf6bca031b`.
+The exact count boundary accepts1488 and rejects1489; all existing assertions,
+schema/API/graph and byte caps remain enforced. Measured manifest336692 LF /
+339741 CRLF bytes fits332KiB (339968); runtime20567270 bytes / maxfile184403 fits
+32MiB / 2MiB. No installed activation or provider/memory claim.
+
+Local validation: all eight existing Python generator/index cases pass in102.51s;
+Node compatibility contract, preflight (including imported async/query owners),
+async, package-manifest and package-surface commands pass. The Windows sandbox
+denied preflight's temporary junction setup; the same unmodified fixture passes
+outside that boundary. Package surface remains70files/979415bytes under1MiB.
+Independent read-only packaging review recomputed the digest and exact added/
+changed membership and found no blocker. Hosted checks must qualify the new head;
+the original failed run is retained, with no unchanged rerun or check bypass.
+WSP11/22/50/84/97; no generator/validator algorithm or publication code changed.
+
+## 2026-11-16: Reconciled UI-TARS coordinate-profile packaging bindings
+
+Regenerated the 1,487-member backend manifest on top of `247e12ce6e` after
+reconciling `foundups_vision/src/ui_tars_bridge.py` (`PR #2256`), refreshing both
+canonical digest pins (`1465fd02b74ed36b45895de1a90e7a62b20b25730ca34f8ccfda179878ca0c42`)
+while retaining all existing byte and member caps. Verified all eight Python
+manifest and staged-index self-consistency tests alongside Node compatibility
+checks. WSP 5/11/22/50/97.
+
+## 2026-11-16: Wave 4 WRE/RSI and pfMALL packaging bindings
+
+Regenerated the 1,487-member backend manifest after updating `pfmall/shell_core.py`
+and WRE recursive improvement (`core.py`, `learning.py`), refreshing both canonical
+digest pins (`568e8b402a77316b0b1952d26d7d8080f749d14dbe06fb2a8ee28a17cdc96d6e`)
+while retaining all existing byte and member caps. All eight Python manifest and
+staged-index self-consistency tests pass locally alongside Node compatibility checks.
+Hosted CI and resulting-main verification remain separate gates. WSP 5/11/22/50/97.
+
 ## 2026-11-06: WRE readiness packaging bindings
 
 The first hosted run rejected stale WRE source hashes in two independent
@@ -11,6 +69,14 @@ package-manifest, package-surface, compatibility-contract and preflight commands
 pass, including their imported async/query contracts. Independent source review
 recomputed the canonical digest and source hashes; it did not execute tests.
 Hosted checks must qualify the new commit separately. WSP 5/11/22/50/97.
+
+## 2026-11-01 — UI-TARS leaf manifest consistency
+
+Keep1481 members and all existing caps/semantic contracts. Refresh the existing
+backend compatibility digest after canonical regeneration of the reviewed UI-TARS
+source hash. Run generator/index cases after staging and existing Node backend
+compatibility, preflight and blocked-recovery contracts. No installed activation.
+Local result:8/8 generator/index cases and all3 existing Node owners pass.
 
 ## 2026-10-30: Held-out receipt runtime integrity binding
 

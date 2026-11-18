@@ -2571,6 +2571,12 @@ Final-head/main checks and owned closure remain bound to the canonical backlog p
 - Current-main validation: 524 passes/five filesystem failures/one platform skip; all 64 serial cases pass/one skip using a short external temp root. Eight manifest tests, 15 fast groups and registry 1651/269 pass. The 1400-member closure retains every member; four runtime hashes and existing digest pins change. Original test/review failures, stale digest assertion and a packaging write/test overlap are preserved in the existing backlog observation.
 - Next 18/P0: qualify the receipt-to-seed provenance/consistency contract before forwarding. AmIBot registration remains in draft PR1751 (detect_ai); protected eSingularity CI still fails. No live build, public route, provider/runtime update or retained-improvement claim.
 
+## 2026-09-19: FoundUp branding becomes grounded identity data
+
+- Updated RedDog Operations so named-FoundUp work loads optional registry `brand_context_path` before Skillz selection.
+- Child brand inheritance is explicitly identity-only and cannot widen token, routing, credential, finance, safe-mutation, or governance authority.
+- The existing registered-FoundUp target verifier now fails closed on stale, forged, schema-invalid, wrong-parent, or invented-child brand context. WSP 00/15/22/50/95/97.
+
 ## 2026-09-18: Fail closed on sent-only recipient evidence
 
 - Hardened the existing RedDog recipient preflight rather than creating a YUMORI-specific duplicate. Route evidence now carries an explicit verification bit; current but unverified address history returns `UNVERIFIED_ROUTE` and blocks the whole transaction.
@@ -13467,3 +13473,30 @@ openclaw onboard
 - Reused the existing raw determination read, typed plan snapshot and candidate-lineage validator. Omitted input selects the declared plan; explicit None/empty retains lower-supplier semantics. Freeze legacy absence too before later receipt callbacks; wrappers remain rejected and execution scope is never inferred. WSP00/15/22/50/62/84/97/99.
 - Nonplain ancestors reject before methods/copy. Independent review first exposed copy coercion; two red regressions precede the repair. Final638 connected tests pass; independent43 overlapping tests and69 boundary cases/191assertions qualify exact source. Existing legacy bytes remain unchanged.
 - Source220→215, public function111 unchanged; tests383 and interface1592. No new module, skill, main.py read or effect authority. Existing manifest membership/pins remain unchanged;8 packaging tests,15 fast groups and registry1651/269 pass. Exact artifacts and PR closure: root backlog current_observation.
+
+## 2026-10-23 — Scheduled read-only resident FoundUp reconciliation
+
+WSP00/15/22/50/60/62/77/84/97. Reused the existing resident client, AgentDB cycle,
+model-binding loader, transport-neutral grounding and operational FoundUp Memex owner.
+Brain/Breadcrumb/workspace-note readers are extracted from `main.py` into a reusable
+read-only owner; `main.py` delegates to it without changing the public bootstrap surface.
+The new generic schedule adapter requires authenticated principal identity, exactly one
+authorized FoundUp, explicit work focus, current model bindings, Brain and Breadcrumbs,
+and the registered FoundUp manifest/ROADMAP-backed Memex config. Principal Memex stays
+separate. Success requires every resident no-effect flag; no Gmail/LinkedIn mutation,
+shell, repository write, Holo reindex, Hermes execution, worktree, PR or merge is
+introduced. YUMORI is configuration-only at deployment; no FoundUp-specific branch exists
+in the infrastructure code.
+
+## 2026-11-15 - Browser outcome verification guidance
+
+Extend the existing managed `foundups-wsp` workspace skill: discover available
+browser/vision access and authorized read-only delegation before declaring a
+visibility gap; retain URL/time/environment/assertion evidence and distinguish
+DOM checks, captured images and observed visual results. Missing or unrun checks
+remain UNVERIFIED. Preserve browser ownership, auth/permission gates and uncertain
+UI effects; verification failure grants no replay authority. Refresh only this
+skill's hash through the existing manifest owner, retaining all other entries.
+This is repository guidance, not proof of installed use, live vision wiring or
+production RSI. WSP22/50/71/95/97; offline manifest integrity is checked separately
+from scanner, CI and runtime acceptance.

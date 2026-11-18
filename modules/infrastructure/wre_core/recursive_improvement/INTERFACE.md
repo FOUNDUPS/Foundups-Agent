@@ -22,24 +22,66 @@ confidence/source fields do not prove execution, outcome quality, or promotion.
 Creates and persists before/after proposal text linked to the supplied pattern
 and solution. It does not apply, evaluate, activate, or roll back that text.
 
-### `apply_improvement(improvement) -> bool`
+### `apply_improvement(improvement, *, verification_evidence=None, target_applicator=None, measurement_evidence=None) -> bool`
 
-Compatibility boundary. Current behavior is fail closed:
+Verification-gated application contract:
 
-- returns `False`;
-- keeps `improvement.applied == False`;
-- keeps `applied_at == None`;
-- sets `improvement.metrics["application_status"]` to
-  `blocked_unimplemented`;
-- does not update solution effectiveness or token savings.
+- **Legacy zero-evidence call (`verification_evidence=None`, `target_applicator=None`, `measurement_evidence=None`)**:
+  returns `False`, keeps `improvement.applied == False` and `applied_at == None`,
+  sets `improvement.tokens_saved = None`, `improvement.metrics["token_reduction_measured"] = False`,
+  and `improvement.metrics["application_status"] = "blocked_unimplemented"`.
+- **Verification gate (`verification_evidence` + `target_applicator`)**:
+  requires non-self-authored `AUTONOMOUS_SLICE_VERIFIER_ACCEPT`, linked
+  `OUTCOME_RATCHET_RECORDED`, and `HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT`
+  (`pattern_memory_admission_allowed is True`) plus a reversible `target_applicator(before_state, after_state) -> (applied_state, rollback_fn)`
+  producing a non-identical state digest. Invalid verification or no-op state returns
+  `False` with `application_status = "blocked_verification_rejected"`.
+- **Optional Measured Benefit gate (`measurement_evidence`)**:
+  - When `measurement_evidence is None`: `improvement.tokens_saved = None` and
+    `improvement.metrics["token_reduction_measured"] = False`.
+  - When `measurement_evidence` is supplied: validated fail-closed **before**
+    calling `target_applicator` (non-empty `measurement_receipt_id`, non-empty
+    `evaluator_id` distinct from `verification_result.receipt.worker_id`, exact
+    `work_order_id` match, non-negative non-bool `int` `baseline_tokens` and
+    `candidate_tokens` with `candidate_tokens <= baseline_tokens`, and optional
+    `before_state_digest` / `after_state_digest` in `sha256:<64-hex>` or `<64-hex>`).
+    Post-applicator `after_digest` is also verified against `after_state_digest`
+    (invoking `rollback_fn()` on divergence). Any invalid, self-authored,
+    regressive, or mismatched measurement sets `application_status = "blocked_measurement_rejected"`
+    and returns `False` without retaining target mutation.
+  - On valid measured apply: records `improvement.tokens_saved = baseline_tokens - candidate_tokens`,
+    `improvement.metrics["token_reduction_measured"] = True`,
+    `measurement_receipt_id`, `evaluator_id`, `baseline_tokens`, `candidate_tokens`
+    (plus optional non-negative `baseline_latency_ms`, `candidate_latency_ms`,
+    `latency_ms_saved`), and increments `self.metrics["total_tokens_saved"]`.
+
+### `rollback_improvement(improvement) -> bool`
+
+Executes the registered `rollback_fn()`, verifies the restored SHA-256 digest matches
+`before_state`, marks `improvement.applied = False`, `rollback_available = False`,
+and `improvement.metrics["application_status"] = "rolled_back"`. If
+`improvement.metrics.get("token_reduction_measured") is True` and
+`isinstance(improvement.tokens_saved, int)`, subtracts `improvement.tokens_saved`
+from `self.metrics["total_tokens_saved"]` (clamped `>= 0`), records
+`improvement.metrics["rolled_back_tokens_saved"]`, resets `improvement.tokens_saved = None`,
+and sets `improvement.metrics["token_reduction_measured"] = False`.
 
 ### `get_metrics() -> dict`
 
-Returns observed pattern/solution/proposal counters. Token fields remain:
+Returns observed pattern/solution/proposal counters plus verified application and
+measured aggregate counters:
 
 ```python
-{"tokens_saved": None, "token_reduction_measured": False}
+{
+    "tokens_saved": None,
+    "total_tokens_saved": 0,
+    "token_reduction_measured": False,
+}
 ```
+
+Engine-level `tokens_saved` and `token_reduction_measured` remain compatibility
+proposal sentinels (`None` / `False`), while receipt-backed measured savings
+accumulate in `total_tokens_saved` and per-improvement `Improvement.tokens_saved`.
 
 ### `shutdown() -> bool`
 
@@ -75,6 +117,7 @@ effect, evaluator, promoter, Git, worker, provider, or Holo authority.
   effectiveness defaulting to zero, and a legacy unverified `token_savings`
   field.
 - `Improvement`: proposal linkage, target, before/after text, application flag,
+  rollback availability, optional receipt-backed `tokens_saved` (`Optional[int]`),
   and metadata.
 
 ## Convenience functions

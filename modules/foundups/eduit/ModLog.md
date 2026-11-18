@@ -1,5 +1,334 @@
 # EDUIT ModLog
 
+## 2026-11-18 — Reconcile PR #2102 EDuIT Discovery specification
+
+- Reconciled `PR #2102` (`eduit-discovery-foundation-20261008`) onto current `main`: added the 15 unique EDuIT Discovery specification, safety, data-contract, schema (`schemas/learning_event.schema.json` + `examples/learning_event.json`), contributor, and memory-boundary artifacts under `modules/foundups/eduit/`, preserved all `#2182` and Storytime implementation/manifest/registry baselines, integrated the canonical `Route Namespace` / `App Mount` / `AI Capability Hooks` / `DAEmon Outputs` / `Data / Telemetry Namespace` / `WSP References` sections into `README.md` (satisfying `test_foundup_readme_surface_contract[eduit]`), appended `docs/HISTORY.md` and `docs/FOUNDUP_INTEGRATION.md` to `foundup_registry.json` (`eduit.evidence_docs`), and appended the preserved `2026-10-08` historical specification records (`WSP 22`, `WSP 50`, `WSP 91`, `WSP 97`, `WSP 104`).
+
+## 2026-11-02 — Clean picture and adaptive words in both player sizes
+
+WSP00/15/22/50/84/97;15/P1. Governed lexical retrieval retains UNKNOWN freshness
+and index gap; noisy older review hits were resolved against direct presenter,
+CSS, narration, docs and tests. The gap was compact/native-only playback: outside
+words previously applied only fullscreen. Existing presenter now accepts opt-in
+inline:true; director loads its verified recorded frames in either size. Same
+movie transport, canonical compact geometry and expanded leg/scene owner.
+
+Outside picture defaults to one separate word centered in the brown region;
+On picture remains selectable for comparison. Actual caption bounds determine
+fitting up to240px;48/56px floors and strict THUMP growth remain. Existing short
+landscape sidebar stays bounded. Native/hash failure preserves baked film labels
+and hides extra words. No26media, engine, sound or SQUISH-semantics change.
+89 Node tests initially pass, including inline lifecycle, no transport writes,
+hidden/dispose cancellation and native fallback. Independent browser/public
+acceptance is recorded separately under outputs/storytime-word-space-20261102.
+
+## 2026-11-02 — Outcome-bound SQUISH, successful replay3
+
+WSP00/15/22/50/84/97;15/P1. Holo lexical freshness UNKNOWN/index gap retained;
+search was noisy and direct engine/world/replay/audio owners resolved scope.
+012 clarifies that SQUISH means a caught mammal, not empty soil compression.
+The prior victory-squish was incorrect. Rescued branch now keeps its THUMP then
+no SQUISH; normal54–56s cue requires an engine `lost` actor. Defensive all-safe,
+practice and successful demo are silent for SQUISH. No engine timing/scoring,
+rescue input, physics or original loss Foley primitive changes.
+
+Use existing renderer/FFmpeg/Sharp pipeline for replay3's25s MP4, event-derived
+audio, captions,750frame sidecar and matching provenance. Current UI/game import
+revision keys and worker20 carry the change to warm clients.87 Node tests pass. Independent engine/controller checks cover8527 frames across
+loss/mixed/rescued/practice cases; only54 false cue frames differ from25, with
+identical actions/final state. Rebuilt MP4 SHA is
+`ac386b8750474ee40d73eeb36e7125abb8c2afe89c0b56de2cc15b5ec3d11d0f`;
+original loss Foley remains byte-identical. Publication receipts record media review.
+
+## 2026-11-02 — Single-word presentation, retained scene option
+
+WSP00/15/22/50/84/97;15/P1. Lexical retrieval freshness UNKNOWN/index gap retained;
+direct owner/docs/tests resolve scope. Baseline24 showed two SNIFF channels and
+a separate word ~88px below its intended center.25 defaults to one outside word,
+centered between canonical picture bounds and controls. Original scene labels
+remain selectable in grown-up controls; invalid/missing presentation data retains
+native film labels and hides the extra HTML word. No film/engine/audio rerender.
+
+Independent frozen852/852 browser assertions cover both routes/six sizes/five
+cues/two placements; fallback6/6. Review found absolute grid-area positioning
+and final far-THUMP43px failures; reset inherited grid placement and apply a
+scoped48px/56px final floor while retaining far<near<contact. Short landscape
+keeps its established sidebar and compact floor. Real one-Play observation saw
+all five cards then natural25s movie completion, game clock/score0/paused.
+Old-origin execution retained43px despite current disk code; revision-key the
+critical UI graph and share one exact narration URL.86 Node tests pass.
+See docs/SINGLE_WORD_PRESENTATION.md for evidence and limits.
+
+## 2026-11-02 — Two story actions and a settled movie handoff
+
+WSP00/15/22/50/84/97;15/P1. Holo lexical UNKNOWN freshness/index gap retained;
+direct owner/docs/tests/skill reads resolve scope.012's2/5 screenshot cannot
+establish its pause cause. Independent23 baseline measured five controls, one
+Play running all five cards, then a movie stopping at.899s. Measured client widths
+390→375 and visual390.39999→375.200012, unchanged390×844 layout/offsets, match
+the viewport pause rule. Narrow measured scrollbar exception fixes the handoff;
+existing offset/rotation oracles stay. Exact case added to viewport unit.
+
+Only bigPlay/Pause and bigX remain; no arrows/Skip/Watch/manual swipe or key turns.
+Open focuses Play. Same scheduler, words, game,23movie/SFX and renderer generation.
+Independent actual candidate observed1→2→3→4→5 then movie beyond3.69s, with two
+88px targets/glyph64. Existing harness covers real elapsed all-page/root/inner
+six-size layout and handoff. Checks use owned browser DOM locators; native keys,
+coordinates/downloads remain held while old Save As closure is unknown. See
+[contract/evidence](docs/SIMPLE_STORY_PLAYBACK.md).
+
+## 2026-11-01 — Complete SNIFF, progressive THUMP, restored SQUISH
+
+WSP00/15/22/50/84/97;15/P1. Holo lexical freshness UNKNOWN/index gap retained;
+direct owner reads resolve noisy search. Independent baseline found0.4s sniffs
+cutting voice/ducking Foley80%, flatTHUMP gain/font size and missing rescued
+SQUISH. Existing replay/game-world/scene/narration/audio owners repaired; engine
+scores and rescue inputs untouched. Independent actual-controller execution
+caught a new retry sound leak; reset now clears old offset and primes silently.
+Generation-addressed renderer avoids stale instance reuse when scene changes.
+Optional installed Sharp rasterizes the same SVG through existing producer;
+no dependencies installed or new pipeline. Final build
+build/storytime-sound-23-verified passes source/asset/sample checks; earlier
+build/storytime-sound-23 is STALE after shake correction and must not publish.
+80Node tests pass. See [contract/evidence/limits](docs/SOUND_CUE_REPAIR.md).
+
+## 2026-11-01 — Connect the fullscreen movie leg to the visible top
+
+WSP00/15/22/50/84/97; bounded presentation repair. Holo lexical bundle has UNKNOWN
+freshness/index gap, noisy unrelated video hits; direct existing module/scene/
+replay/skill reads resolve ownership. Optional memory/requirements artifacts are
+absent; no authority reindex or new dependencies. Exact replay and media binding
+need deterministic source review, so0102 implements with independent architecture
+and code/output review rather than delegate unverified timing to model inference.
+
+012 screenshot preschool-20 identifies video, not the already-expanded game:
+video still used a separate static strip above a16:9 native film. Candidate22
+uses unchanged scene/replay owners,750 recorded worlds and actual media time.
+Expanded picture has one whole descending/lifting leg; native video remains
+sole transport/audio clock. No game/feedback/score/learning state change.
+Generate bounded sidecars only after all10 original film source hashes and
+actual movie hash match; normalized world projection equals every original SVG.
+Runtime rejects invalid cast/text/numbers, wrong frame/movie/fetched-source
+hashes and retains usable native movie. Worker bumps to v16, caches only new UI
+module; large replay/movie are not precached. Build CLI fake-media fixture mocks
+the new presentation-export subprocess explicitly, retaining its production
+fail-closed provenance gate. Initial full suite exposed that fixture gap.
+
+Real browser/native animation review is held while the reported Save As closure
+is unknown. Static five-stage rendering and transport mocks are distinct from
+that evidence. Current scene/rig/learning sources are unchanged; fetched-source
+hash verification is not a general proof of already-executed module identity.
+
+## 2026-11-01 — Verification side effect and runtime binding follow-up
+
+Live21's independent asset check incorrectly used downloadMedia on a hidden CSS
+link.012 reported native Save As for director.css. Stop that route and all further
+keyboard tests; no file exists at the shown training_data/youtube/director.css
+path, and no save was confirmed. Both native inventories expose only minimized
+unrelated Chrome parents, not a uniquely targetable owned dialog; do not restore
+or send blanket Escape. Ask012 for closed-state before remaining keyboard tests.
+Review candidate0.3.4 now separates artifact inspection from the player lane,
+retains unsupported live byte-hash limits and requires resolving unexpected
+owned native dialogs. Existing live word→five pages→movie evidence predates this
+side effect and remains separately bound; no changed PWA payload is implied.
+
+CIc5 then caught the transitive UI-TARS source hash in the RedDog runtime manifest.
+Use the existing generator and documented digest-pin maintenance; preserve
+membership, caps and semantic tests. No backend/extension activation is allowed.
+Independent one-leaf binding review passes; all8 generator/index cases and3
+existing Node compatibility/preflight/recovery owners pass locally after staging.
+
+## 2026-11-01 — One child action plays the complete book
+
+WSP00/15/22/50/84/97,15/P1(C3/I4/D4/Impact4). Retrieval retained UNKNOWN Holo
+freshness/index gap; direct module/test/skill owners established the actual
+interaction.012's correction exposed a task-coverage gap: old primary Play ran
+all five pages, but words/picture had no start handler and pointerdown paused
+playback. Prior font/target and scheduler checks did not test that intended press.
+
+Existing surface click now starts the whole story from0; incidental taps keep
+it running. Only explicit Pause or deliberate navigation stops it. Pause/Play
+resumes the retained page; manual navigation/title restart means all five.
+Guard drag, pointercancel, multitouch and pointerleave after pointerup. Visible
+buttons use familiar glyphs with retained accessible names; hint ▶, not Next.
+No game physics, media, story text, learning clock or new renderer/backend.
+
+Independent UI-TARS1.5 model proposal bound a fresh390x844 CSS viewport
+(390x843 captured PNG pixels, recorded separately) to CSS
+(196,403); actual CUA coordinate press on the words completed5/5 and reached a
+running movie. Separate direct event observer captured all five states, one
+video_play/playing and unchanged game time. A first paused0 handoff snapshot is
+retained as inconclusive; repeated direct runs do not establish its suspected
+viewport cause, so no speculative viewport change was made. Existing elapsed-
+time harness now covers both routes and synthetic gesture edge cases.
+
+Reuse the existing vision bridge: opt-in exact1.5 resized-pixel coordinate
+profile, strict decoding, consistent DPR mapping and explicit failed-action
+results. Root independently reviewed and reran49 isolated owner tests; no Python
+browser actuator used. The model loaded solely for this test was unloaded; the
+preexisting LMStudio server stays running. Node63/63 pass. No paid/model-download
+or new test backend required. Skills review0.3.3/production0.2.7 retain a bounded
+task→action→observed outcome→critique→repair→independent recheck procedure.
+No WRE admission, actual-child comprehension or native iOS acceptance claimed.
+An independent parser review rejected unknown/inconsistent CSS geometry and a
+silent frame-offset fallback. Repair before acceptance: the new1.5 pilot requires
+verified top-level context and finite consistent PNG/CSS geometry, allowing
+recorded pixel rounding; legacy behavior is preserved. Five external held-out
+categories pass with zero provider/input effects for rejected cases. Missing
+geometry cannot produce a false successful action. Retain these red controls
+and the separate final source/test binding rather than hiding the failed probe.
+Evidence: outputs/storytime-playback-20261101, including red baselines and model
+proposal vs actual input vs outcome. tap-story-21/cachev15 identifies the repair.
+
+## 2026-11-01 — Preserve adjacent video layout during book repair
+
+Final diff review found the old book CSS block also contained a phone-portrait
+video decorative-strip height cap. Restore the identical100px cap in its own
+media rule, preserving adjacent video layout. Existing game-specific hidden
+strip rule remains authoritative; no physics, art or book geometry change.
+Preschool-20/cachev14 identifies this scope-preservation follow-up. Reviewed
+storybook module hash remains unchanged;63/63 Node checks rerun successfully.
+Independent actual390x844 browser review passes: video strip100px, game strip
+hidden, and collapsed first/final book geometry retained. Tiny Next-button
+comparison variance is its existing hint animation, not a reduced target.
+
+## 2026-11-01 — Preschool book critique, repair and independent reinspection
+
+WSP00/15/22/50/84/97,14/P1(C2/I4/D4/Impact4): smallest layer is the existing
+book presentation, not a new game/RSI engine. Holo lexical bundle found the
+EDUIT owner but has UNKNOWN freshness/index gap; direct current docs,
+test inventory and source establish this lane. Optional absent SPEC/PRD are not
+new work; narrative search noise was reranked to the book/CSS/runbook.
+
+012's Home Screen photo disproves the earlier whole-PWA readability inference.
+Existing Shorts book now uses near-full-screen words and24px familiar primary
+actions. First independent568x320 last-page result clipped Close; second showed
+an88px wrapped video action and overlapping voice notice. Keep failed screenshots,
+replace redundant final Skip with compact ▶ Video beside Close, isolate notice
+in its own landscape grid row, and reinspect without reducing48px words/64px
+targets or changing the oracle. Independent60 page states pass across both
+routes/five dimensions plus silent and synthetic-unavailable cases. Node63/63
+passes. Original simulation, video bytes and speech sequencing are retained.
+
+Review candidate0.3.2 and production0.2.6 now require child-view critique of each
+affected page after every repair and published revision; extend the existing
+viewer harness. These are prototype procedures, not runtime RSI promotion or
+proof of child comprehension. Existing deployment runbook gains012-authorized,
+fresh GoDaddy/Google Voice Gmail-code workflow without retaining numbers/secrets.
+DNS changes and native Home Screen verification remain separate evidence gates.
+Raw failures, final independent receipt and rollback snapshot are retained under
+outputs/storytime-preschool-20261101; no child interaction data collected.
+
+Published Sites19 (`preschool-19`) from repository0d1b9c1ff and Sites source
+f63db104d34ea4771b0da4c8325b46c3b2a46239, keeping verified25s media unchanged.
+The expanded existing browser harness completed964 checks with no failures.
+GoDaddy's original verification iframe has zero height; opening the normal
+challenge permits delivery of fresh Google Voice Gmail notifications. Two
+matching fresh codes were submitted privately, but verification remains loading
+after submission. Reconciliation still shows42 DNS records and masked forwarding;
+no apex cutover performed. Keep this provider completion blocker distinct from
+successful direct-origin publication and unverified native Home Screen launch.
+
+Follow-up reconciliation supersedes the preliminary authentication summary:
+the second challenge rejected a stale code from Gmail's grouped preview. Fresh
+resend + exact notification/container binding returned the normal challenge to
+authenticated DNS. The queued save still reopens GoDaddy's zero-height embedded
+verification frame and is not committed. Runbook now freezes message identity,
+not the first code in a conversation. Live19 independent first/final phone and
+landscape checks pass and match reviewed CSS/book hashes; manifest bytes and
+launch route match the saved payload. One batched-navigation screenshot captured
+the earlier page; preserve it, separate navigation/observation/capture and verify
+the replacement pixels as THUMP5/5. No native-install or child-effectiveness claim.
+
+## 2026-11-01 — Hidden-menu selection reveal follow-up
+
+Live app17 review caught a retained Mermaid selection partly outside the rail:
+initial centering ran while its native dialog was hidden. Existing wheel owner
+now re-centers the same selection instantly on positive-width reveal/resize,
+skips active pointer drags, emits no selection/interaction and disconnects on
+teardown. Keep zero-size callbacks inert. Component regression plus independent
+actual-browser selected-card visibility checks own acceptance. App-scene-18 and
+UIcachev12 identify the repair; media/source bindings remain unchanged. Interactive
+review candidate0.3.1 adds this hidden-surface criterion; no automatic promotion.
+
+
+## 2026-11-01 — App-sized settings and one continuous fullscreen scene
+
+WSP00/15/22/50/84/97,15/P1(C3/I4/D4/Impact4). Latest012 photos require
+app presentation, not a shrinking document of settings. Existing #options is now
+a native Storytime menu: Characters/Music/Language panels, >=64px targets, sticky
+Done and grouped advanced controls. The existing mounted controls move once;
+opening/choosing/closing pauses without changing simulation or starting music.
+Independent browser failures exposed side-safe-area arithmetic and delayed focus
+return; both were repaired. A cross-origin domain wrapper gets an explicit
+Open full-size Storytime link to this same app, never automatic top navigation.
+
+Expanded game uses one SVG with symmetric sky/soil around the canonical world.
+The whole foot descends from the actual top, contacts at the unchanged base
+position and exits above the actual top on lift. Revealed openings join upper
+sky for both skins. World hit targets keep the same transformed subrectangle;
+freeze remains canonical960x540. Default scene golden hashes and mechanics are
+unchanged. Ending controls occupy empty space rather than covering the family.
+Existing25s engine film is freshly rerendered for current source bindings.
+
+The interactive review skill0.3.0 and Shorts build skill0.2.5 now require an app
+presentation gate: actual target/hit bounds, safe areas, focus, one continuous
+animation, canonical world/feedback mapping and independent output inspection.
+Candidate skill correction, not admitted promotion or next-tile RSI transfer.
+Retrieval used source-bound lexical owner bundle with UNKNOWN freshness/indexgap;
+core documents were verified directly and broad/historical results reranked.
+Native iOS touch/listening and actual custom-domain DNS repair remain separate.
+
+
+## 2026-11-01 — Whole story before a same-engine demonstration
+
+WSP00/15/22/50/84/97, existing Shorts presentation and rendering owners.
+Auto play now explicitly restarts all five plates; first speech is requested
+inside Play, not a delayed frame. Centered dialog/text retain64px controls,
+bounded portrait/landscape sizing and native closed-dialog hiding. Video stays
+paused while the book is open. Completion closes synchronously and starts video
+once from0; Skip/Close never starts it. A blocked browser keeps an explicit Play
+fallback. Ordinary video Play routes through the book once per page visit unless
+012 explicitly dismissed it. Action cues read the packaged replay timeline;
+old film intro narration is not repeated or silently substituted on missing data.
+
+The25s film is an offline deterministic playthrough of unchanged engine advance,
+actorPose, gameWorld and scene: five legal rescues and the existing victory reveal.
+Original15s game Foley is separated into game-foley.wav to preserve source offsets.
+No new engine, scene redesign, child records or admitted RSI activation.
+The first render predating an event-end correction was rejected; the final build
+has exact source/asset bindings. Domain eduit.org was observed returning a masked
+frameset with no viewport meta; app publication alone does not repair that wrapper.
+Physical iOS speech/audio and child-learning efficacy remain unverified.
+
+
+## 2026-11-01 — Character/music wheels and verified branch repairs
+
+Latest012 direction authorizes Sites preview and verified GitHub pushes.
+WSP00/15/22/50/84/97:15/P1(C3/I4/D4/Impact4), existing engine/sleeve owners.
+Visible swipeable MAMMA/original Mermaid choices, actual local rig previews,
+keyboard/arrows and optional Off/Carefree/Wholesome music. Tracks by Kevin
+MacLeod, CC BY4.0, source/credits/change notices retained; no generated music.
+Music is quiet and explicit-Play only, pauses for story/video/hidden state.
+
+Independent review caught held-drag settlement, blocked-play retry from rescue
+taps and missing overlay Replay support; bounded fixes retain their red evidence.
+Programmatic centering preserves the selected choice. Cue traces now sample
+live media time, follow view completion and return detached bounded snapshots;
+callbacks do not certify acoustic onset. Prior closed-dialog repair is retained.
+
+Five baseline failures traced and repaired without changing golden assertions:
+native file-URL paths, explicitUTF8 root projection, pocket/actor/roof layering,
+original H740 safety boundary and original MAMMA footprint palette. Mermaid
+palette retained. Engine/rig unchanged. Full Node53/53 and independent31 held-outs
+pass, including native cp932 with UTF8mode0 and original source/frame comparison.
+Fresh canonical media rerendered after the layer repair. Browser and publication
+receipts remain separate. UI-TARS model loaded and returned real-pixel inference,
+but existing bridge rejected its coordinate format; no autonomous player PASS.
+See docs/CHARACTER_MUSIC_CHOICES.md; primary outputs/storytime-rsi-20261101 and
+outputs/storytime-wheels-20261101 retain exact review/failure evidence. No child
+records, model promotion, native worker admission or retained RSI claim.
+
 ## 2026-10-28 — Storytime RSI continuity architecture (documentation-only)
 
 - Cross-linked README, INTERFACE and ROADMAP to `docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md`.
@@ -304,3 +633,48 @@ normal-zoom visualViewport offsets/scroll and foreground refresh; changed bounds
 pause both owners. Existing manifest/gesture/game/media/feedback identity retained.
 See docs/PHONE_FULLSCREEN_REPAIR.md for red baseline, browser/Node evidence and
 native-device limits. Remaining issue2252 findings are not relabeled repaired.
+
+## 2026-10-29 — Local GitHub comparison and closed-book regression
+
+Compared PR2256 head3651c518 with its fetched remote: the Storytime source
+matches. New main commits through01b87f0e do not alter the scoped Storytime
+owners. The original dirty PC checkout and old PR2221 lane remain preserved;
+only the unoccupied local main reference was fast-forwarded.
+
+The Shorts-owned portrait storybook rule now applies only while its dialog is
+open. Added a dedicated real-browser oracle to the existing director harness;
+retained the original closed-but-visible failure and92 passing candidate checks.
+See docs/PHONE_FULLSCREEN_REPAIR.md for evidence, cache-refresh qualification
+and platform limits. No game, scene, renderer, movie or PWA lifecycle change.
+These are uncommitted local repairs; no GitHub/Sites push or deployment.
+
+## 2026-10-08 — brand styling clarification
+
+Use EDuIT for styled branding and EDuIT Discovery for the internal capability.
+Preserve EDUIT in historical quotations/source titles, and eduit in machine identifiers.
+No eDuit branding, new entity, route, token, domain, or historical-source rewrite.
+
+## 2026-10-08 — historical recovery and software-first specification
+
+Request: recover EDUIT/eSingularity/teaching-tablet work, retain historical application,
+choose a subordinate product/module name, and prepare the core FoundUp build documents.
+
+Added: source register/history, naming decision, requirements, architecture/interfaces,
+game and data contracts, evaluation/safeguards, DAE/RSI governance, onboarding map,
+roadmap, contributor rules, test inventory and memory boundary. Selected the working
+label EDuIT Discovery within `eduit`; preserved The Experience, GuiGame and Baby0 lineage.
+Prepared the declarative manifest/registry entry with SPECIFIED and NO_RUNTIME boundaries.
+
+Preserved: original Drive documents, historical media/social lane, unrelated registry
+entries and `esingularity_001`. No domain/catalog/deployment/token/outreach activation.
+
+Recovery: earlier oversized response windows were truncated, a GitHub response citation
+was rejected as a Files materialization reference, and one export lacked a visible
+completion result. The retried Malaysia text export succeeded. These observations do
+not establish the platform crash’s internal root cause. Small reads and durable local
+artifacts replace repeated unbounded source dumps.
+
+WSP references: 97 evidence/truth boundary; 91 observable outputs; 104 namespace; current
+FoundUp onboarding/template. Connector-only documentation execution: no WRE worker or
+repository-native bootstrap/HoloIndex runtime receipt is claimed. Full integration
+checks and runtime admission remain separate from document/package validation.

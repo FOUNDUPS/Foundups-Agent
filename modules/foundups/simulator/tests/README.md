@@ -1,5 +1,8 @@
 # FoundUps Simulator Test Suite
 
+## Observable Swarm Orchestration telemetry suite — 2026-11-15
+- `test_observable_swarm_telemetry.py` (`11 passed, 0 skipped`): verifies 8 canonical work states, missing-DB `unknown` state, expired lease/TTL `stale` state, missing `_effect_evidence` -> `unknown`, structured context lineage (`parent_task_id`, `depends_on`, `work_order_id`, `swarm_lane`) and `lease_active` redaction/deduplication, deterministic seeded multi-table SQLite SHA-256 read-only invariance on clean checkouts plus conditional live Sprint 4/5 DB SHA-256 invariance, path/secret redaction, GET-only `/api/work-telemetry` (`403`/`405`), and Node VM HUD/ticker assertions on `public/js/foundup-cube.js`.
+
 ## Prospective micro-UPS acceptance — 2026-11-05
 
 P4 is VERIFIED_SIMULATED within the [selected preview contract](../../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1).

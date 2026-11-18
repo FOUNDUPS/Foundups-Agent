@@ -77,6 +77,7 @@ def test_git_oauth_exact_discovery_and_single_tool(tmp_path, monkeypatch):
             tools = allowed.json()["result"]["tools"]
             assert [tool["name"] for tool in tools] == ["get_git_inventory"]
             assert set(tools[0]["inputSchema"]["properties"]) == {"request_id", "section", "offset"}
+            assert "stashes" in tools[0]["inputSchema"]["properties"]["section"]["enum"]
             assert tools[0]["_meta"]["securitySchemes"] == [{"type": "oauth2", "scopes": ["git:read"]}]
             bad_origin = await client.post(
                 "/mcp", json=arguments, headers={**headers, "Origin": "https://other.example.test"},

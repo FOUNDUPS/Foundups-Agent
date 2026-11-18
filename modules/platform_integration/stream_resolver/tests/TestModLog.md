@@ -1,5 +1,15 @@
 # Testing Evolution Log - Stream Resolver
 
+## 2026-11-15 — Zero-skip `test_stream_resolver.py` contract repair (supersedes PR #408)
+
+WSP 00/5/22/50/97. Repaired all 13 failing cases in `modules/platform_integration/stream_resolver/tests/test_stream_resolver.py` against current `DelayUtils`, `YouTubeAPIOperations`, and `StreamResolver` contracts with zero `@pytest.mark.skip` markers (superseding PR #408, which had skipped 10 tests).
+
+```text
+PYTHONDONTWRITEBYTECODE=1 python -B -m pytest -p no:cacheprovider modules/platform_integration/stream_resolver/tests/test_stream_resolver.py -v
+```
+
+Result: **33 passed, 0 skipped** (combined with `test_no_quota_stream_checker.py` + `test_no_quota_anti_rate_limit.py`: **77 passed, 0 skipped**). Covered `DelayUtils` low-activity jitter (`[27.0, 33.0]`), idle exponential failure backoff, `force_dev_delay=True`, `YouTubeAPIOperations` `part="snippet,liveStreamingDetails,status"` + `maxResults=1` normalized video/search contracts, multi-candidate upcoming-to-live verification, circuit-breaker 403 `quotaExceeded` handling, `StreamResolver._fetch_chat_id_with_rotation` credential rotation + 3-attempt exhaustion, and `StreamResolver.resolve_stream` Priority 5 API fallback exhaustion.
+
 ## 2026-10-23 - Quota gate: full checker unit suite and negative controls
 
 WSP 00/5/22/34/50/97. Reused both existing test files; no new test family.

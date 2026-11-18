@@ -1,7 +1,7 @@
 # Member Area Interface
 
 **Module**: `public/member/`
-**Version**: 2.2.0
+**Version**: 2.3.0
 
 ## Public Interface
 
@@ -135,7 +135,7 @@ is retained when leaving the product. Property detail identity is
 
 | View | Storage key / schema |
 | --- | --- |
-| Ordinary video Mall | `pfmall_mall_state_v1`; scope, projection, layout, vertical and category-row offsets |
+| Ordinary video Mall | `pfmall_mall_state_v1`; scope, projection, layout, vertical and category-row offsets, plus optional `activeVideo: { foundupId, videoId, queueQuery }` (`localStorage`, ordinary `/member/` only; HPC's tab-local `pfmall_video_scope_hpc_v1` in `sessionStorage` is isolated and unaffected) |
 | Move2Japan | `pfmall_product_move2japan_state_v1`; `pfmall_product_state.v1`, geographic rows and stable listing anchors |
 | Account return | Session-only `pfmall_product_return_v1`; one use, 15 minutes, allowlisted filters and fixed member destination |
 
@@ -311,8 +311,10 @@ Video Mall tile grid with field scope projections.
 | **Video Runtime** | |
 | `startLanePreview(foundupIndex, videoIndex, muted)` | Start lane autoplay through FoundUp's video queue |
 | `advanceToNextInLane()` | Advance to next video in queue (loops at end) |
-| `togglePlay(index)` | Start lane autoplay on tile (entry point for tap gesture) |
+| `togglePlay(index)` | Start lane autoplay on tile, or route zero-video `hpc` tile to `/member/?foundup=hpc` after saving Mall state |
 | `getPlayingIndex()` | Get currently playing tile index |
+| `getActiveVideo()` | Return `{ foundupId, videoId, queueQuery }` when inline/fullscreen playback is open (`null` otherwise) |
+| `restoreActiveVideo(activeVideo)` | Restore saved inline playback (`autoplay: false`) with preserved `queueQuery` |
 | `expandFoundUp(index)` | Expand tile to FoundUp view |
 | `collapseFoundUp()` | Collapse back to Mall |
 | `isExpanded()` | Returns boolean |
@@ -333,6 +335,7 @@ Video Mall tile grid with field scope projections.
 | `searchByCreator(query)` | Case-insensitive creator search |
 | `filterByCategory(cat)` | Filter by category |
 | `filterByTag(tag)` | Filter by tag |
+| `filterBySourceGroup(group)` | Filter by source group (`'videos'` \| `'apps'`) |
 | `clearFieldScope()` | Clear scope, show all |
 | `getFieldScope()` | Get current scope object |
 
@@ -343,6 +346,7 @@ Video Mall tile grid with field scope projections.
 | `creator` | Substring match on creator/entity |
 | `category` | Exact match (case-insensitive) |
 | `tag` | Exact match in tags array |
+| `source_group` | `'videos'` (`videos.length > 0` / `video_count > 0`) or `'apps'` (`github_repo`, `external_app`, `internal_app`, `internal_service`) |
 
 ---
 
@@ -392,6 +396,7 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 | `isOpen()` | Returns boolean |
 | `getFoundUpId()` | Current queue constraint |
 | `getCurrentIndex()` | Current video index |
+| `getCurrentVideoId()` | Current video ID string (`video_id`), or `''` when closed |
 | `getQueueLength()` | Queue length |
 | **Save (Phase 2)** | |
 | `isCurrentSaved()` | Returns boolean — is current video saved |

@@ -1,3 +1,20 @@
+## 2026-11-16 — Isolated iPhone YouTube baseline probe parameterization and Build v19 browser alignment
+
+- Extended `modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_{probe.js,reference.html}` with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts) and `?host=youtube|nocookie` official-host comparison, bidirectional `Mall <-> official embed` selection retention, controls strictly below `#hpc-probe-embed`, sanitized `deployment.json` + `SW controller` provenance receipt, and explicit separation of IFrame `101/150` from screen-observed `LOGIN_REQUIRED` prompts.
+- Reconciled remaining `"Build v18"` -> `"Build v19"` modal expectations in `mall_scoped_video_browser.py` (`lines 338, 506`). Physical iPhone Safari and Home Screen PWA gates across Wi-Fi and cellular remain `UNEXECUTED` pending real-device receipts from `012`.
+
+## 2026-11-16 — Build v19 truth gates, activeVideo continuity, and test reconciliation
+
+- Updated `mall_product_state_vm.mjs` (23 passed: `pfmall-member-v19` cache migration, ordinary `/member/` `activeVideo` persistence/validation, and HPC `sessionStorage` isolation) and `test_mall_product_state.py`.
+- Extended `mall_property_listing_vm.mjs` with VM behavioral assertions for ordinary `/member/` `hpc` tile routing to `/member/?foundup=hpc`, `openDesktopVideo` `queueQuery` inheritance, and `restoreActiveVideo` (`autoplay: false`).
+- Reconciled `mall_scoped_video_browser.py` (`Build v19`), `test_non_video_action_surfaces.py` (`internal_app`), and `test_navigation_planes.py` (`foundup_id`-based `Enter FoundUp` handoff and concierge-first gesture hint contract).
+- Full member verification: `pytest -q -p no:cacheprovider public/member/tests` (`1531 passed, 0 failed`) and all 6 Node VM suites (`EXIT=0`).
+
+## 2026-11-15 — Build v18 discovery filters, internal_app quick-view, and viewport verification
+
+- Updated `mall_product_state_vm.mjs` (22 passed including `pfmall-member-v18` cache upgrade and `localStorage` `source_group` round-trip), `mall_scoped_video_browser.py` (`Build v18`), and `test_non_video_quickview_actions.py` (`internal_app`).
+- Verified `1440x900`, `390x844`, `844x390`, and `320x700` member viewports via Python Playwright against an ephemeral localhost server (`verify_sprint6_viewports.py`): zero horizontal overflow, dynamic `Videos`/`Apps`/`HPC` pills, `gotjunk_001` `Open App` CTA, and state reload persistence.
+
 ## 2026-11-14 · Mall build identification
 
 The scoped browser fixture checks the build next to #SchumerOUT at desktop

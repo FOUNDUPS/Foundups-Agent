@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1840,
+  "total_tests": 1851,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -2371,6 +2371,19 @@
       "description": "Unit Tests for Confidence Tracker\n\nTests decay-based confidence algorithm with time-weighted scoring,\nfailure multiplier, and JSONL audit trail.\n\nWSP Compliance:\n- WSP 5 (Test Coverage): Comprehensive unit tests\n- WSP 6 (Test Audit): Documents test coverage"
     },
     {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_independent_repair_verifier",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_independent_repair_verifier.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for Independent Repair Verifier & Context Firewall.\n\nGoverned by WSP_00, WSP_50, WSP_80, WSP_97 (Issue #1522 / Slice 2)."
+    },
+    {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_kimi_k3_request_truth",
       "path": "modules/ai_intelligence/ai_gateway/tests/test_kimi_k3_request_truth.py",
       "owner": "modules/ai_intelligence/ai_gateway",
@@ -2382,6 +2395,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Request-truth contract tests for the exact OpenRouter Kimi K3 route."
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_audio_timing_benchmark",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_model_audio_timing_benchmark.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic stdlib fixtures; no providers, audio, reference lyrics or files."
     },
     {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_autoresearch_authenticated_promotion_authority",
@@ -2814,7 +2840,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_panel_signed_evidence.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -2827,7 +2853,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_promotion_gate.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -15648,6 +15674,32 @@
       "description": ""
     },
     {
+      "id": "test::modules::foundups::getk::tests::test_getk_contracts",
+      "path": "modules/foundups/getk/tests/test_getk_contracts.py",
+      "owner": "modules/foundups/getk",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-getk-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "GetK PoC contract tests -- pure, no network, no external imports."
+    },
+    {
+      "id": "test::modules::foundups::getk::tests::test_getk_manifest",
+      "path": "modules/foundups/getk/tests/test_getk_manifest.py",
+      "owner": "modules/foundups/getk",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-getk-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "GetK manifest + registry-entry contract tests."
+    },
+    {
       "id": "test::modules::foundups::gotjunk::tests::test_backend_security",
       "path": "modules/foundups/gotjunk/tests/test_backend_security.py",
       "owner": "modules/foundups/gotjunk",
@@ -15922,7 +15974,9 @@
       "owner": "modules/foundups/pfmall",
       "suite_class": "unit",
       "shard_id": "modules-foundups-pfmall-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -16467,6 +16521,21 @@
       "description": "Unit tests for market stress and scenario confidence modeling."
     },
     {
+      "id": "test::modules::foundups::simulator::tests::test_observable_swarm_telemetry",
+      "path": "modules/foundups/simulator/tests/test_observable_swarm_telemetry.py",
+      "owner": "modules/foundups/simulator",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for Observable Swarm Orchestration vertical slice (WSP 97 / WSP 110).\n\nVerifies:\n- Strictly read-only SQLite telemetry provider (`?mode=ro` + `PRAGMA query_only = ON`)\n  across AgentDB and PatternMemory tables, preserving SHA-256 DB invariance.\n- Complete 8-state canonical mapping (`spawn`, `claim`, `progress`, `complete`,\n  `fail`, `cancel`, `stale`, `unknown`).\n- Honest unknown/stale reporting for missing stores, expired leases/TTLs, and\n  missing completion `_effect_evidence`.\n- Path an"
+    },
+    {
       "id": "test::modules::foundups::simulator::tests::test_operational_profit_proxy_flow",
       "path": "modules/foundups/simulator/tests/test_operational_profit_proxy_flow.py",
       "owner": "modules/foundups/simulator",
@@ -16549,7 +16618,7 @@
       "path": "modules/foundups/simulator/tests/test_staker_hurdle_state.py",
       "owner": "modules/foundups/simulator",
       "suite_class": "unit",
-      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "shard_id": "modules-foundups-simulator-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -19362,6 +19431,19 @@
       "description": "YTR3 - Undetected Browser Anti-Detection Test Harness\n\nTests UndetectedBrowserManager with mocked undetected_chromedriver.\nNo live browser, no Chrome process, deterministic.\n\nWSP 97: Mocks external systems (undetected_chromedriver), tests production code."
     },
     {
+      "id": "test::modules::infrastructure::foundups_selenium::tests::test_wre_visual_runner",
+      "path": "modules/infrastructure/foundups_selenium/tests/test_wre_visual_runner.py",
+      "owner": "modules/infrastructure/foundups_selenium",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-foundups-selenium-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline verification contracts. All browser/model/memory evidence is synthetic."
+    },
+    {
       "id": "test::modules::infrastructure::foundups_selenium::tests::test_youtube_verification",
       "path": "modules/infrastructure/foundups_selenium/tests/test_youtube_verification.py",
       "owner": "modules/infrastructure/foundups_selenium",
@@ -19415,7 +19497,9 @@
       "owner": "modules/infrastructure/foundups_vision",
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-foundups-vision-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -20625,11 +20709,24 @@
       "description": "Adversarial tests for immutable create-scaffold route snapshots."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_getk_monorepo_poc_dryrun_proof",
+      "path": "modules/infrastructure/wre_core/tests/test_getk_monorepo_poc_dryrun_proof.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "GetK monorepo-PoC dry-run PROOF (W6).\n\nSlice: GETK_FOUNDUP_MONOREPO_POC_BOOTSTRAP_PHASE1\n\nProves the NEW FoundUp ``getk`` routes through the EXISTING OpenClaw/WRE\ncreate+drain dry-run seam -- the same path exercised by\ntest_operational_wre_monorepo_poc_vertical_proof.py for gotjunk_001. This is a\nPROOF that reuses the path AS-IS; it adds NO production code and NO new wiring.\n\n  REAL CREATE: orchestrator.dispatch_foundup(None, \"validate foundup getk --dry-run\")\n               -> create_job(valida"
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_git_lifecycle",
       "path": "modules/infrastructure/wre_core/tests/test_git_lifecycle.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-01",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
       "capabilities": [
         "process"
       ],
@@ -21021,6 +21118,19 @@
       "description": "Semantic-first HoloIndex contract for WRE memory preflight."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_metrics_ingest_v2_schema",
+      "path": "modules/infrastructure/wre_core/tests/test_metrics_ingest_v2_schema.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Regression tests for MetricsIngestorV2 schema and rollback triggers."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_openclaw_voteballots_dryrun_proof",
       "path": "modules/infrastructure/wre_core/tests/test_openclaw_voteballots_dryrun_proof.py",
       "owner": "modules/infrastructure/wre_core",
@@ -21135,7 +21245,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_reddog_verified_draft_pr_publish.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21148,13 +21258,26 @@
       "path": "modules/infrastructure/wre_core/tests/test_reddog_verified_outcome_ratchet.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-02",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for REDDOG_VERIFIED_OUTCOME_RATCHET_PHASE1."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_repair_operation_contract",
+      "path": "modules/infrastructure/wre_core/tests/test_repair_operation_contract.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for Scientific Autonomous Self-Healing Operation Contract.\n\nGoverned by WSP_00, WSP_50, WSP_97 (Issue #1522 / Slice 1)."
     },
     {
       "id": "test::modules::infrastructure::wre_core::tests::test_route_foundup_job_live_mode_gate",
@@ -21168,6 +21291,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for route_foundup_job() live-mode security-gate discriminator + raw-dict sanitization.\n\nSlice: FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1 (narrow completion of #753)\n\nProves at the ROUTING seam (route_foundup_job, NOT validate_foundup_job_envelope):\n  1. Object job with DEFAULT PolicyFlags (dry_run_mode=True) ROUTES safely.\n  2. Object job with dry_run_mode=True still ROUTES (dry-run object path is never gated).\n  3. Raw-dict policy_flags with FORGED security_gate_passed="
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_scientific_repair_canary_e2e",
+      "path": "modules/infrastructure/wre_core/tests/test_scientific_repair_canary_e2e.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "integration",
+      "shard_id": "modules-infrastructure-wre-core-integration",
+      "capabilities": [],
+      "execution_type": "integration",
+      "collectable": true,
+      "timeout_s": 600,
+      "quarantine_reasons": [],
+      "description": "End-to-End Test Suite for Scientific Autonomous Self-Healing Canary (Slice 3).\n\nGoverned by WSP_00, WSP_15, WSP_50, WSP_80, WSP_97, WSP_109 (Issue #1522)."
     },
     {
       "id": "test::modules::infrastructure::wre_core::tests::test_security_analysis_assistant",
@@ -21575,7 +21711,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_test_registry_differential_plan_runtime.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [
         "process"
       ],
@@ -21590,7 +21726,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_test_scope_coverage.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21603,7 +21739,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_test_shard_collection_runtime.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [
         "process"
       ],
@@ -22920,6 +23056,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Offline editorial package contracts; the separate legacy scaffold is retained."
+    },
+    {
+      "id": "test::modules::platform_integration::social_media_orchestrator::tests::test_content::test_editorial_review",
+      "path": "modules/platform_integration/social_media_orchestrator/tests/test_content/test_editorial_review.py",
+      "owner": "modules/platform_integration/social_media_orchestrator",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-social-media-orchestrator-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline editorial contracts; review fixtures do not establish model quality."
     },
     {
       "id": "test::modules::platform_integration::social_media_orchestrator::tests::test_copilot_validation",

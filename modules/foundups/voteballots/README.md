@@ -27,6 +27,22 @@ VOTE then expands behind the existing pfMALL/member gate into deeper candidate r
 
 See [Oversight source classification](oversight/README.md). WSP 97 verifies actual repository state and WSP 109 governs any later independent FoundUp decision. No registry, manifest, token, tenant, route or public deployment change follows from this clarification.
 
+## Poly ownership and separate roadmaps — 2026-11-12
+
+[Poly Vote](polyvote/README.md) is a separately documented module within this
+FoundUp, with its own [roadmap](polyvote/ROADMAP.md) and interface. It does not
+create a separate FoundUp identity or duplicate public Vote discovery.
+[Poly Voice](../polyvoice/README.md) is a separate **planned FoundUp**, with its
+own [roadmap](../polyvoice/ROADMAP.md), interface and intake. It owns private
+meeting records and commitment receipts, not Voice's public calling workflow.
+
+The [current integration index](docs/VOTE_VOICE_INTEGRATION.md) links Vote,
+HPC, Voice, Poly Vote, Poly Voice and Oversight; detailed module requirements
+stay with their owners. The [reconciliation receipt](docs/POLY_RECONCILIATION_20261112.md)
+preserves earlier source research and records what changed. These are
+Markdown planning changes only, not registration or runtime activation.
+HPC and shared-Mall implementation, documents and active PRs remain untouched.
+
 ## Current Truth State
 
 ### Accountability integration and bounded public PoC

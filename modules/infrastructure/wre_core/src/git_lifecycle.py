@@ -114,6 +114,7 @@ def _empty_report(reason):
         "coverage": "unavailable",
         "reason": reason,
         "main_sha": None,
+        "branch_dispositions": [],
         "pull_requests": [],
         "pending_prs": [],
         "pc": {"status": "PC_SYNC_PENDING", "head_sha": None, "reason": reason, "updated": False},
@@ -180,6 +181,122 @@ def _pr_dispositions(github, pc, pending, previous, target, runner):
     return dispositions, [completed[key] for key in sorted(completed)[-100:]]
 
 
+def _is_same_repository(item, repository):
+    if not isinstance(repository, str) or not repository.strip():
+        return False
+    head_repository = item.get("head_repository")
+    return isinstance(head_repository, str) and head_repository.casefold() == repository.casefold()
+
+
+def _is_pr_observation_complete(github):
+    if github.get("coverage") == "unavailable":
+        return False
+    sources = github.get("coverage_by_source")
+    if not isinstance(sources, dict):
+        return False
+    return (
+        sources.get("pull_requests") == "complete"
+        and sources.get("tracked_pull_requests") in (None, "complete")
+    )
+
+
+def _branch_dispositions(github, dispositions, completed):
+    repository = github.get("repository")
+    prs_by_ref_and_number = {}
+    for source_items in (completed, dispositions):
+        for item in source_items:
+            if not isinstance(item, dict):
+                continue
+            ref = item.get("head_ref")
+            number = item.get("number")
+            if not isinstance(ref, str) or not ref or not _valid_pr_number(number):
+                continue
+            if not _is_same_repository(item, repository):
+                continue
+            prs_by_ref_and_number.setdefault(ref, {})[number] = item
+
+    prs_by_ref = {
+        ref: [by_num[num] for num in sorted(by_num)]
+        for ref, by_num in prs_by_ref_and_number.items()
+    }
+    pr_obs_complete = _is_pr_observation_complete(github)
+    rows = []
+    for branch in github.get("branches", ()):
+        ref = branch.get("ref")
+        sha = branch.get("sha")
+        protected = bool(branch.get("protected"))
+        prs_for_ref = prs_by_ref.get(ref, [])
+        pr_numbers = [item["number"] for item in prs_for_ref]
+
+        open_for_ref = [item for item in prs_for_ref if item.get("stage") == "PR_OPEN"]
+        exact_open = [item for item in open_for_ref if sha and sha == item.get("head_sha")]
+        merged_for_ref = [
+            item for item in prs_for_ref
+            if item.get("stage") in ("COMPLETE", "MAIN_VERIFICATION_PENDING", "PC_SYNC_PENDING")
+        ]
+        exact_merged = [item for item in merged_for_ref if sha and sha == item.get("head_sha")]
+        closed_unmerged_for_ref = [
+            item for item in prs_for_ref if item.get("stage") == "CLOSED_UNMERGED"
+        ]
+        exact_closed_unmerged = [
+            item for item in closed_unmerged_for_ref if sha and sha == item.get("head_sha")
+        ]
+
+        pr_number = None
+        if ref == "main":
+            stage = "MAIN_BRANCH"
+            action = None
+        elif exact_open:
+            pr = exact_open[-1]
+            pr_number = pr.get("number")
+            stage = "BRANCH_OPEN_PR"
+            action = pr.get("next_action")
+        elif open_for_ref:
+            pr = open_for_ref[-1]
+            pr_number = pr.get("number")
+            stage = "BRANCH_OPEN_PR_HEAD_MOVED"
+            action = "refresh_pull_request_evidence"
+        elif protected:
+            exact_closed = exact_merged or exact_closed_unmerged
+            pr_number = exact_closed[-1].get("number") if exact_closed else None
+            stage = "PROTECTED_BRANCH"
+            action = "assess_protected_branch_policy"
+        elif exact_merged:
+            pr = exact_merged[-1]
+            pr_number = pr.get("number")
+            stage = "BRANCH_MERGED_PR_RETAINED"
+            action = (
+                "assess_retirement_diff_against_main"
+                if pr.get("stage") == "COMPLETE"
+                else pr.get("next_action")
+            )
+        elif exact_closed_unmerged:
+            pr = exact_closed_unmerged[-1]
+            pr_number = pr.get("number")
+            stage = "BRANCH_CLOSED_PR_UNMERGED"
+            action = "reconcile_unique_work_and_owner"
+        elif not pr_obs_complete:
+            stage = "BRANCH_PR_OBSERVATION_INCOMPLETE"
+            action = "refresh_pull_request_evidence"
+        elif prs_for_ref:
+            stage = "BRANCH_PR_HEAD_MISMATCH"
+            action = "assess_full_diff_and_owner"
+        else:
+            stage = "BRANCH_UNTRACKED"
+            action = "assess_full_diff_and_owner"
+
+        rows.append({
+            "ref": ref,
+            "sha": sha,
+            "protected": protected,
+            "pr_number": pr_number,
+            "pr_numbers": pr_numbers,
+            "stage": stage,
+            "next_action": action,
+        })
+    return rows
+
+
 def _reconcile(repo_root, common, path, synchronize_pc, tracked_prs, runner):
     previous = _read_previous(path)
     pending = tuple(dict.fromkeys(
@@ -199,6 +316,7 @@ def _reconcile(repo_root, common, path, synchronize_pc, tracked_prs, runner):
         )
 
     dispositions, completed = _pr_dispositions(github, pc, set(pending), previous, target, runner)
+    branch_dispositions = _branch_dispositions(github, dispositions, completed)
     unresolved = {item["number"] for item in dispositions if item["stage"] != "COMPLETE"}
     ordered = [number for number in pending if number in unresolved]
     ordered.extend(sorted(unresolved - set(pending)))
@@ -216,6 +334,7 @@ def _reconcile(repo_root, common, path, synchronize_pc, tracked_prs, runner):
         "main_sha": github["main_sha"],
         "main_checks": github["main_checks"],
         "branches": github["branches"],
+        "branch_dispositions": branch_dispositions,
         "remote_promotion": "ADMITTED_AUTHORITY_REQUIRED",
         "pull_requests": dispositions,
         "pending_prs": ordered,

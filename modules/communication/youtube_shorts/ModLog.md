@@ -1,5 +1,126 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-02 — Clean picture and adaptive words in both player sizes
+
+WSP00/15/22/50/84/97;15/P1. Governed lexical retrieval retains UNKNOWN freshness
+and index gap; noisy older review hits were resolved against direct presenter,
+CSS, narration, docs and tests. The gap was compact/native-only playback: outside
+words previously applied only fullscreen. Existing presenter now accepts opt-in
+inline:true; director loads its verified recorded frames in either size. Same
+movie transport, canonical compact geometry and expanded leg/scene owner.
+
+Outside picture defaults to one separate word centered in the brown region;
+On picture remains selectable for comparison. Actual caption bounds determine
+fitting up to240px;48/56px floors and strict THUMP growth remain. Existing short
+landscape sidebar stays bounded. Native/hash failure preserves baked film labels
+and hides extra words. No26media, engine, sound or SQUISH-semantics change.
+89 Node tests initially pass, including inline lifecycle, no transport writes,
+hidden/dispose cancellation and native fallback. Independent browser/public
+acceptance is recorded separately under outputs/storytime-word-space-20261102.
+
+## 2026-11-02 — Outcome-bound SQUISH, successful replay3
+
+WSP00/15/22/50/84/97;15/P1. Holo lexical freshness UNKNOWN/index gap retained;
+search was noisy and direct engine/world/replay/audio owners resolved scope.
+012 clarifies that SQUISH means a caught mammal, not empty soil compression.
+The prior victory-squish was incorrect. Rescued branch now keeps its THUMP then
+no SQUISH; normal54–56s cue requires an engine `lost` actor. Defensive all-safe,
+practice and successful demo are silent for SQUISH. No engine timing/scoring,
+rescue input, physics or original loss Foley primitive changes.
+
+Use existing renderer/FFmpeg/Sharp pipeline for replay3's25s MP4, event-derived
+audio, captions,750frame sidecar and matching provenance. Current UI/game import
+revision keys and worker20 carry the change to warm clients.87 Node tests pass. Independent engine/controller checks cover8527 frames across
+loss/mixed/rescued/practice cases; only54 false cue frames differ from25, with
+identical actions/final state. Rebuilt MP4 SHA is
+`ac386b8750474ee40d73eeb36e7125abb8c2afe89c0b56de2cc15b5ec3d11d0f`;
+original loss Foley remains byte-identical. Publication receipts record media review.
+
+## 2026-11-02 — Single-word presentation, retained scene option
+
+WSP00/15/22/50/84/97;15/P1. Lexical retrieval freshness UNKNOWN/index gap retained;
+direct owner/docs/tests resolve scope. Baseline24 showed two SNIFF channels and
+a separate word ~88px below its intended center.25 defaults to one outside word,
+centered between canonical picture bounds and controls. Original scene labels
+remain selectable in grown-up controls; invalid/missing presentation data retains
+native film labels and hides the extra HTML word. No film/engine/audio rerender.
+
+Independent frozen852/852 browser assertions cover both routes/six sizes/five
+cues/two placements; fallback6/6. Review found absolute grid-area positioning
+and final far-THUMP43px failures; reset inherited grid placement and apply a
+scoped48px/56px final floor while retaining far<near<contact. Short landscape
+keeps its established sidebar and compact floor. Real one-Play observation saw
+all five cards then natural25s movie completion, game clock/score0/paused.
+Old-origin execution retained43px despite current disk code; revision-key the
+critical UI graph and share one exact narration URL.86 Node tests pass.
+See ../../foundups/eduit/docs/SINGLE_WORD_PRESENTATION.md for evidence and limits.
+
+## 2026-11-02 — Simple continuous story popup
+
+012 supersedes card navigation: two88px Play/Pause+X actions,64px glyphs, same
+five-page scheduler and automatic video handoff. Remove child arrows/Skip/Watch
+and swipe/key turns; focus primary on open. A measured scrollbar restoration
+after modal close no longer pauses the just-started movie; real geometry changes
+keep prior behavior. Existing EDUIT harness/viewport owners provide regressions.
+Preserve23film/audio/scene bytes; no new editor or renderer. See EDUIT
+docs/SIMPLE_STORY_PLAYBACK.md for baseline/independent evidence and limits.
+
+## 2026-11-01 — Storytime action voice preserves Foley
+
+Existing narration owner extends action display/speech windows from the actual
+engine replay, avoids ducking its teaching sound, and preserves progressive
+THUMP sizes after caption fitting. Pause/seek/mute/hide cancellation unchanged.
+Existing local animation owner imports optional Cairo only for its Cairo frame;
+EDUIT's existing SVG producer can use installed Sharp before the same FFmpeg
+author/editor. No new editor, pipeline or provider. Fresh25s film and provenance
+independently checked; decoded AAC contains5sniffs/progressiveTHUMPs/SQUISH,
+while native listening remains unverified. See EDUIT docs/SOUND_CUE_REPAIR.md.
+
+## 2026-11-01 — Word-tap full story and pictorial controls
+
+Existing book owner now treats teaching words/picture as a full-story start and
+ignores incidental taps during playback. Preserve manual preview, explicit pause
+and lifecycle cancellation; guard synthetic click after swipe/cancel/multitouch.
+Child controls use ▶/Ⅱ, arrows, ⏭, × and 🎬 with accessible names, hinting the
+complete-story route. EDUIT owns actual elapsed-time and independent UI-TARS/CUA
+review evidence; media and shared scene remain unchanged. Production candidate
+0.2.7 routes to review0.3.3 task-completion gate; no autonomous worker activation.
+
+## 2026-11-01 — Preschool book presentation and production review gate
+
+EDUIT photo feedback requires prominent teaching words and large familiar actions
+on every page. Existing director CSS/storybook owner fills available bounds;
+last-page Video replaces redundant Skip, Close stays reachable and unavailable
+voice has a separate landscape row. Independent visual review exposed and repaired
+two short-landscape defects;60 rendered states pass without relaxing thresholds.
+Game engine, media and narration order unchanged. Production candidate0.2.6 routes
+to updated interactive review0.3.2 and the existing authorized GoDaddy/Gmail
+deployment procedure; no new RSI worker or learning-effectiveness claim.
+
+## 2026-11-01 — Same-engine demonstration render support
+
+WSP50/84/97: EDUIT now exports legal deterministic game inputs through its
+existing engine/world/scene. Existing Shorts shot, audio and assembly functions
+accept an explicit bounded duration while preserving strict15s defaults and
+legacy assembly validation. No new renderer/provider, mechanics or artwork.
+The fixed original15s Foley remains a distinct asset so game sourceTime offsets
+cannot drift when the demonstration movie changes. Actual media, listening and
+mobile acceptance remain separate from source checks.
+
+## 2026-11-01 — Reusable sleeve choices for Storytime review
+
+Existing director now mounts a shared accessible horizontal choice wheel for
+MAMMA/original Mermaid and optional licensed music. Local rigs supply thumbnails;
+existing setAppearance owns state-safe art changes. Music Off defaults; explicit
+Play, quiet same-origin tracks, bounded cancellation/error handling and accessible
+credits. Independent held-out drag/retry defects repaired with retained controls.
+No new renderer, game engine, auth, child record or media generator. Narration
+trace timing provenance and earlier closed-dialog repair retained. EDUIT-owned
+baseline geometry/UTF8 repairs restore original golden frames; full53/53 and
+independent31 checks pass. Existing builder freshly rerendered matched media.
+Latest012 authorizes Sites preview and GitHub push; exact source/CI/live receipts
+remain separate from listening, native mobile and RSI transfer.
+
 ## 2026-11-01 — Scoped directive checks through the uploader boundary
 
 WSP11/22/50/84/97. Kept existing generator/provider, hardened authentication,
@@ -907,3 +1028,18 @@ Existing kids_review viewer now owns compact Play/About/How, science-bounded cop
 channel link and responsive control sizing. EDUIT retains roadmap/education scope;
 no new publisher or credential surface. Film and game engine unchanged. See EDUIT
 LEARNING_SHELL_REVIEW.md and EVOLUTION_PLAY_AND_SHARING_ROADMAP.md.
+
+## 2026-10-29 — Local-only closed storybook visibility repair
+
+The portrait-phone `.storybook-ready` layout rule now requires `[open]`.
+Previously its `display:flex` overrode the browser's closed-dialog hiding,
+leaving a closed storybook inline below the viewer. Open layout, controls,
+safe-area rules, narration and game/media owners are unchanged.
+
+The existing EDUIT browser harness gains an open/close/Skip/resize regression.
+Original CSS fails with `open=false`, `display:flex` and one client rectangle;
+the same oracle passes92 checks with the repair across root/director entries
+and390x844,844x390,1280x900. Closest Node layout/viewport checks:5 passed,
+2 existing Windows file-URL path failures. Harness syntax and diff checks pass.
+See EDUIT `docs/PHONE_FULLSCREEN_REPAIR.md`. No native-device/audio acceptance,
+Git commit/push, merge or publication is claimed. WSP22/50/84/97.

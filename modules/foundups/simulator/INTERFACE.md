@@ -1,5 +1,13 @@
 # INTERFACE - FoundUps Simulator
 
+## Observable Swarm Orchestration telemetry interface — 2026-11-15
+
+**Read-only observation bridge (`observation_only=True`, `authority="none"`, `FRAME_SCHEMA_VERSION = "1.0.0"`).**
+`adapters/work_telemetry_provider.py` opens SQLite databases via `?mode=ro` plus `PRAGMA query_only = ON`, maps `agents_autonomous_tasks`, `agents_signed_worker_execution_leases`, `agents_independent_assurance_reservations`, and `skill_outcomes` onto the frozen eight canonical states (`spawn`, `claim`, `progress`, `complete`, `fail`, `cancel`, `stale`, `unknown`), and redacts filesystem paths and secret tokens via `redact_sensitive_text(..., max_length)`.
+`WorkUnitFrame` carries `parent_work_id: Optional[str] = None`, `work_order_id: Optional[str] = None`, `swarm_lane: Optional[str] = None`, and `lease_active: bool = False` extracted from `agents_autonomous_tasks.context` JSON and signed worker execution leases.
+`build_work_telemetry_payload()` emits deduplicated `dependencies` edges (`depends_on`, `parent_task`, `origin_continuity`, `independent_assurance` with 64-char redacted endpoints), `active_lease_count`, and `swarm_lanes`.
+`public/js/foundup-cube.js` (`workTelemetrySync` / `getWorkTelemetrySummary()`) surfaces `dependenciesCount`, `activeLeaseCount`, `verifierCount`, `verifiers`, and `lanes` in the HUD (`DEPS`, `LEASES`, `LANES`, `VERIF`) and ticker while keeping Firestore writes and interactive promotions disabled (`observationOnly=true`, `authority='none'`).
+
 ## Prospective micro-UPS interface — 2026-11-05
 
 **VERIFIED_SIMULATED bounded preview.** The [P4 contract](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
@@ -434,6 +442,7 @@ STREAMABLE_EVENT_TYPES = {
     # State sync for DRIVEN_MODE
     "state_sync",
     "phase_command",
+    "work_telemetry_sync",
     # Synthetic user simulation
     "synthetic_user_adopted",
     "synthetic_user_rejected",
@@ -647,6 +656,14 @@ data: {"event_id": "...", "event_type": "...", "payload": {...}, ...}
 - `event: heartbeat` - Sent every 15 seconds for connection keepalive
 - `event: error` - Sent on internal server error
 
+#### GET /api/work-telemetry
+Read-only observed work telemetry snapshot for Observable Swarm Orchestration (`observation_only=true`, `authority="none"`). Reads live `AgentDB` and `PatternMemory` SQLite tables via `?mode=ro` + `PRAGMA query_only = ON`, normalizes units into `CANONICAL_WORK_STATES`, redacts paths/secrets, and reports honest `unknown`/`stale` freshness. Mutating HTTP verbs return `405 Method Not Allowed`.
+
+**Request:**
+- Method: `GET`
+- Query parameters (optional): `limit` (`1..200`), `ttl_seconds` (`>=0`)
+- Member gate headers (when enabled): `x-invite-key` + `x-member-role` (`observer_012`)
+
 #### GET /api/health
 Health check endpoint for Cloud Run readiness probes.
 
@@ -672,6 +689,7 @@ Root endpoint with API info.
     "version": "1.0.0",
     "endpoints": {
         "/api/sim-events": "SSE stream of simulator events",
+        "/api/work-telemetry": "Read-only observed work telemetry snapshot (GET only, no authority)",
         "/api/health": "Health check"
     }
 }

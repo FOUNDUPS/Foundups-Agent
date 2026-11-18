@@ -1,3 +1,17 @@
+## 2026-11-16 · Isolated HPC iPhone official YouTube baseline probe extension
+
+- Extended `tests/fixtures/hpc_iphone_playback_probe.js` and `tests/fixtures/hpc_iphone_playback_reference.html` (kept outside `public/` in git) with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts), allowlisted `?host=youtube|nocookie` (`https://www.youtube.com` vs `https://www.youtube-nocookie.com`), `Mall <-> official embed` selection retention, sanitized `deployment.json` + `SW controller` provenance receipt, and distinct `101/150` vs `LOGIN_REQUIRED` vs `autoplay-blocked` reporting, with all controls outside `#hpc-probe-embed`.
+- Added deterministic Node VM regression `tests/fixtures/hpc_iphone_playback_probe_vm.mjs` wired into `public/member/tests/test_mall_product_state.py`. WSP 22, 50, 97, 99, and 104 apply.
+
+## 2026-11-16 · Manifest schema closure, infrastructure category, and Build v19 catalog reconciliation
+
+- **Manifest Discovery & Boot Closure (`shell_core.py`, `modules/foundups/{detect_ai,eduit,shield,holoindex_prod_01}/foundup_manifest.json`)**:
+  - Added `"infrastructure"` to `VALID_CATEGORIES` and hardened `load_manifest()` with null-coalescing defaults (`or ""` / `or []` / `or {}`) so explicit JSON `null` fields never bypass typed string/collection defaults.
+  - Repaired `detect_ai`, `eduit`, `shield`, and `holoindex_prod_01` manifests (`name`, `version`, WSP 104 `idb_{foundup_id}` / `/f/{foundup_id}` alignment, and `F3_INFRA` / `conditional` readiness for `holoindex_prod_01`), achieving 12/12 clean manifest loads with zero warnings on `PfmallShell().boot()`.
+- **Registry & Catalog Truth Alignment (`modules/foundups/foundup_registry.json`, `public/member/mall-video-catalog.json`)**:
+  - Registered `eduit` in `foundup_registry.json`, unified `autopost`'s live Cloud Run URL across registry, catalog, and projection helper, added `esingularity_001` to `mall-video-catalog.json`, reconciled `gotjunk_001` and `holoindex_prod_01`, and normalized video `duration_seconds` and ISO-8601 `Z` timestamps.
+- **Test Gate Alignment (`tests/`)**: Reconciled `test_shell_core.py`, `test_mall_video_catalog.py`, `test_member_pwa_hardening.py`, `test_member_foundup_entry.py`, and `test_member_red_dog_concierge.py` against current hardened member shell and manifest contracts (`752 passed, 0 failed`). WSP 22, 49, 50, 97, and 104 apply.
+
 ## 2026-11-14 · Phone search reference refinement
 
 PFWD-1B shares the compact dock across browse and viewer. Plus anchors the
@@ -93,6 +107,28 @@ HPC joins the canonical FoundUp registry and public discovery projector under
 WSP 97, 104 and 109. The Mall refresh owner generates a global discovery card
 and a public-only video catalog from the reviewed Move2Japan source records.
 The same member-shell field and player render the fixed public lane.
+
+## 2026-10-26 — Reproject the observed process capability
+
+Allocation6b5d7902f precedes the independently accepted capabilities[] ->[process]
+reprojection, same1773/273. Unchanged generator check and existing regressions50PASS.
+All817-case sources remain exact; no classifier/quarantine/permission/manifest change.
+
+## 2026-10-26 — Qualify the actual proposal server separately
+
+Allocation665112e88,14/P1; WSP6/11/22/50/62/71/77/84/97. Add the minimal
+optional Uvicorn server profile and select it in existing contract CI; jobs,
+permissions, test selection and artifact retention remain unchanged. No launcher
+or application logic change. The existing real-RSA owner adds three actual
+loopback-process cases, retaining all814 prior IDs and43 named-definition ASTs.
+Initial missing-server RED814PASS/3FAIL; two new-fixture mistakes and a peer-found
+cleanup gap remain recorded. Repaired817PASS/0FAIL/0ERROR/0SKIP retains the one
+unsuppressed TestClient deprecation. Independent wheel review matches all28
+official release digests, with zero listed registry advisories in this snapshot.
+The manifest check passes unchanged after supplying its missing trusted Git PATH;
+the failed stripped-PATH attempt is preserved. No binary/platform security,
+OS isolation, graceful stop, live provider session, image or deployment claim.
+Independent cleanup fault-path and current-head hosted gates remain required.
 
 ## 2026-10-26 — Isolated proposal host bootstrap candidate
 
