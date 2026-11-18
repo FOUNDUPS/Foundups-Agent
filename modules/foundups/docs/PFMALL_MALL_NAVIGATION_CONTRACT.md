@@ -403,3 +403,11 @@ All FoundUps reuse this grammar and the catalog search/presentation APIs. A futu
 housing projection may group by location through a separately declared adapter;
 this slice groups by catalog category only. No unseen listings, location hierarchy,
 personalized ranking or voice runtime is claimed.
+
+## 13. Fractal work navigation
+
+**Proposed interior and discovery projections, 2026-11-19.** Tap, keyboard activation, or a supported RedDog request selects the same visible tile. In this projection a parent opens its children and an actionable leaf opens its permitted artifact. The browse field stays usable in 2D and with reduced motion. The 3D view uses spatial transitions to show which component the person has entered.
+
+Record the caller, selected tile, lens and recoverable viewport state when entering a child or following a reuse edge. From HPC, entering AutoPost and pressing Back restores HPC and its selection. Direct links with no session history use visible canonical ancestors. Use the existing scoped search dock and media player so a change of view preserves the user's query and playback position.
+
+Selecting a builder with a fresh, permitted work-to-tile association opens the referenced component. “What is this builder changing?” uses that same work reference and revision. With simulated, stale, unresolved or restricted evidence, show only the status permitted in that view. Maintain the projection boundary across history, direct links, search and agent context. The [Mall roadmap](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation) owns acceptance.
