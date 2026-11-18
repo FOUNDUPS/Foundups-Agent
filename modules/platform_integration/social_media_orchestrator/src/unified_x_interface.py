@@ -26,6 +26,7 @@ import os
 import json
 import asyncio
 import logging
+import re
 from datetime import datetime
 from typing import Dict, Any, Optional
 from enum import Enum
@@ -47,6 +48,7 @@ class XAccount(Enum):
     """Supported X/Twitter accounts"""
     FOUNDUPS = "foundups"
     MOVE2JAPAN = "move2japan"
+    ANTIFAFM = "antifafm"
 
 @dataclass
 class XPostRequest:
@@ -78,18 +80,18 @@ class UnifiedXInterface:
     def __init__(self):
         self.posted_content = {}
         self.history_file = "memory/unified_x_history.json"
-        self._load_history()
+        self._history_loaded = False
         logger.info("[UNIFIED X] Interface initialized - All X posting via MCP")
 
     def _load_history(self):
         """Load posting history for duplicate prevention"""
+        self._history_loaded = True
         try:
             if os.path.exists(self.history_file):
                 with open(self.history_file, 'r', encoding="utf-8") as f:
                     self.posted_content = json.load(f)
             else:
                 self.posted_content = {}
-                os.makedirs(os.path.dirname(self.history_file), exist_ok=True)
         except Exception as e:
             logger.warning(f"[UNIFIED X] Could not load history: {e}")
             self.posted_content = {}
@@ -97,6 +99,7 @@ class UnifiedXInterface:
     def _save_history(self):
         """Save posting history"""
         try:
+            os.makedirs(os.path.dirname(self.history_file), exist_ok=True)
             with open(self.history_file, 'w', encoding="utf-8") as f:
                 json.dump(self.posted_content, f, indent=2)
         except Exception as e:
@@ -104,6 +107,8 @@ class UnifiedXInterface:
 
     def _post_direct_via_selenium(self, request: XPostRequest) -> tuple[bool, Optional[Dict[str, Any]], Optional[str]]:
         """Fallback posting without MCP (direct Selenium)."""
+        if request.account not in (XAccount.FOUNDUPS, XAccount.MOVE2JAPAN):
+            return False, None, "Account requires the verified API route"
         try:
             from modules.platform_integration.x_twitter.src.x_anti_detection_poster import AntiDetectionX
             from modules.platform_integration.social_media_orchestrator.src.gemini_vision_analyzer import GeminiVisionAnalyzer
@@ -126,6 +131,8 @@ class UnifiedXInterface:
         """Check if content would be a duplicate post"""
         if not request.duplicate_check_key:
             return False
+        if not self._history_loaded:
+            self._load_history()
 
         duplicate_key = f"{request.content_type.value}_{request.duplicate_check_key}"
 
@@ -138,6 +145,8 @@ class UnifiedXInterface:
     def mark_as_posted(self, request: XPostRequest, success: bool = True):
         """Mark content as posted to prevent future duplicates"""
         if request.duplicate_check_key:
+            if not self._history_loaded:
+                self._load_history()
             duplicate_key = f"{request.content_type.value}_{request.duplicate_check_key}"
             self.posted_content[duplicate_key] = {
                 'timestamp': datetime.now().isoformat(),
@@ -159,6 +168,13 @@ class UnifiedXInterface:
         Returns:
             Result of posting attempt
         """
+
+        if request.account not in (XAccount.FOUNDUPS, XAccount.MOVE2JAPAN):
+            return XPostResult(
+                success=False, message="Account requires the verified API route",
+                timestamp=datetime.now(), content_type=request.content_type,
+                account=request.account,
+            )
 
         # Step 1: Duplicate check
         if self.check_duplicate(request):
@@ -269,8 +285,49 @@ class UnifiedXInterface:
             account=request.account
         )
 
+    async def post_verified_x(self, content: str, account: XAccount,
+                              campaign_id: str, job_id: str, *, client,
+                              expected_user_id: str, db_path,
+                              dry_run: bool = True) -> Dict[str, Any]:
+        """Publish through the API with a bound account and durable readback.
+
+        Dry-run validates inputs only: no client calls, imports of publishers,
+        history access, or database writes. Legacy transport is never a fallback.
+        """
+        result = dict(success=False, status="rejected", dry_run=dry_run is True,
+                      account=account.value if isinstance(account, XAccount) else None,
+                      provider_user_id=None, post_id=None, post_url=None, error=None)
+        if not isinstance(account, XAccount):
+            result["error"] = "invalid_account"
+        elif type(dry_run) is not bool:
+            result["error"] = "invalid_dry_run"
+        elif not isinstance(expected_user_id, str) or not re.fullmatch(r"[1-9][0-9]{0,19}", expected_user_id):
+            result["error"] = "invalid_expected_user_id"
+        elif not isinstance(content, str) or not content.strip() or len(content) > 280 or "\x00" in content:
+            result["error"] = "invalid_content"
+        elif any(not isinstance(v, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", v)
+                 for v in (campaign_id, job_id)):
+            result["error"] = "invalid_job_identity"
+        elif dry_run:
+            result.update(success=True, status="dry_run")
+        elif client is None:
+            result["error"] = "live_client_required"
+        else:
+            try:
+                from modules.platform_integration.x_twitter.src.verified_x_publisher import publish_verified_x
+            except Exception:
+                result["error"] = "publisher_unavailable"
+                return result
+            return await publish_verified_x(
+                content, account.value, campaign_id, job_id, client=client,
+                expected_user_id=expected_user_id, db_path=db_path,
+            )
+        return result
+
     def get_posting_statistics(self) -> Dict[str, Any]:
         """Get statistics about X/Twitter posting activity"""
+        if not self._history_loaded:
+            self._load_history()
         stats = {
             'total_posts': len(self.posted_content),
             'by_content_type': {},
@@ -298,6 +355,16 @@ class UnifiedXInterface:
 unified_x = UnifiedXInterface()
 
 # Convenience functions
+async def post_verified_x(content: str, account: XAccount, campaign_id: str,
+                          job_id: str, *, client, expected_user_id: str,
+                          db_path, dry_run: bool = True) -> Dict[str, Any]:
+    """Use the canonical interface for a verified API publication."""
+    return await unified_x.post_verified_x(
+        content, account, campaign_id, job_id, client=client,
+        expected_user_id=expected_user_id, db_path=db_path, dry_run=dry_run,
+    )
+
+
 async def post_stream_notification_x(stream_title: str, stream_url: str, video_id: str,
                                     account: XAccount = XAccount.FOUNDUPS) -> XPostResult:
     """Post stream notification to X/Twitter (280 char limit)"""

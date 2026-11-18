@@ -274,6 +274,7 @@ class TestLiveStreamDetection(unittest.TestCase):
 class TestIntegration(unittest.TestCase):
     """Integration tests for the complete system"""
 
+    @patch.dict(os.environ, {"YOUTUBE_API_ENABLED": "true", "YT_STREAM_API_VERIFY": "true"})
     @patch('requests.Session.get')
     @patch('modules.platform_integration.youtube_auth.src.youtube_auth.get_authenticated_service')
     def test_full_stream_check_workflow(self, mock_auth, mock_get):

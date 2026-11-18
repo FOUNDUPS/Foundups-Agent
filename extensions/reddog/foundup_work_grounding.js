@@ -2,7 +2,8 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { validateJsonSchema } = require('./json_schema_subset_validator');
-const targetPhrase = require('./foundup_target_phrase');
+const { isTargetReadPathDenied } = require('./target_read_path_policy');
+const brandContext = require('./foundup_brand_context');
 const REGISTRY_PATH = 'modules/foundups/foundup_registry.json';
 const REGISTRY_SCHEMA_PATH = 'modules/foundups/foundup_registry.schema.json';
 const OPERATIONS_SKILL_PATH = 'modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md';
@@ -30,11 +31,6 @@ function deepFreeze(value) {
   return value;
 }
 
-function normalized(value) {
-  return String(value || '').normalize('NFKC').toLowerCase().replace(/[_-]+/g, ' ')
-    .replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
-}
-
 function failure(reason, extra) {
   const values = Object.assign({ schema_version: RECEIPT_SCHEMA, applied: true, passed: false,
     rejection_reasons: [reason], evidence_targets: [], evidence_digests: [], safe_mutation_surfaces: [], grants_authority: false }, extra || {});
@@ -48,14 +44,8 @@ function containedRelative(relativePath) {
   return clean === '..' || clean.startsWith('../') ? null : clean;
 }
 
-function evidencePathAllowed(relativePath) {
-  const parts = String(relativePath || '').toLowerCase().split('/');
-  const leaf = parts[parts.length - 1] || '';
-  return !parts.some((part) => ['.git', 'node_modules', 'secrets', 'credentials'].includes(part))
-    && leaf !== '.env' && !leaf.startsWith('.env.') && !leaf.endsWith('.key') && !leaf.endsWith('.pem');
-}
-
 function realPathContained(repoRoot, target, kind) {
+  if (kind === 'file') return !!brandContext.realFile(repoRoot, path.relative(repoRoot, target));
   if (!fs.existsSync(target)) return false;
   const relative = path.relative(fs.realpathSync(repoRoot), fs.realpathSync(target));
   if (relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative)) return false;
@@ -90,22 +80,6 @@ function readRegistry(repoRoot, authority) {
   return { registry, registry_digest: digest(bytes), registry_schema_digest: digest(schemaBytes) };
 }
 
-function aliases(entity) {
-  const moduleBase = path.posix.basename(String(entity.module_path || '').replace(/\\/g, '/'));
-  return Array.from(new Set([entity.foundup_id, entity.display_name, entity.token_symbol, moduleBase]
-    .map(normalized).filter((value) => value.length >= 2)));
-}
-
-function selectEntity(registry, taskText) {
-  const matches = [];
-  for (const entity of registry.entities) for (const reference of aliases(entity)) {
-    if (targetPhrase.referenceNearFoundup(taskText, reference)) {
-      matches.push({ entity, reference }); break;
-    }
-  }
-  if (matches.length > 1) throw new Error('foundup_reference_ambiguous');
-  return matches[0] || null;
-}
 function unresolved(registryState, authority) {
   return deepFreeze({ applied: false, passed: true, rejection_reasons: [], foundup_language_present: true,
     foundup_resolution: 'UNRESOLVED', requires_wsp109_resolution: true,
@@ -119,10 +93,11 @@ function foundupLanguagePresent(taskText) {
   return FOUNDUP_RE.test(withoutProductName);
 }
 
-function evidencePaths(entity, modulePath) {
+function evidencePaths(entity, modulePath, brandState) {
   const values = [REGISTRY_PATH, REGISTRY_SCHEMA_PATH, containedRelative(entity.manifest_path), OPERATIONS_SKILL_PATH, SKILL_REGISTRY_PATH];
+  if (brandState) values.push(brandState.schema_path, brandState.path);
   if (modulePath) for (const suffix of ['README.md', 'INTERFACE.md', 'ROADMAP.md', 'ModLog.md', 'tests/TestModLog.md']) values.push(modulePath + '/' + suffix);
-  return Array.from(new Set(values.filter((value) => value && evidencePathAllowed(value))));
+  return Array.from(new Set(values.filter((value) => value && !isTargetReadPathDenied(value))));
 }
 
 function readEvidence(repoRoot, authority, candidates) {
@@ -146,10 +121,11 @@ function manifestState(repoRoot, entity, modulePath, records) {
   return { manifest_path: manifestPath, safe_mutation_surfaces: safe };
 }
 
-function success(repoRoot, authority, registryState, entity, reference) {
+function success(repoRoot, authority, registryState, selected) {
+  const { entity, reference, brand_state: brandState, brand_foundup_id: brandFoundupId, canonical_brand: canonicalBrand } = selected;
   const modulePath = entity.module_path == null ? null : containedRelative(entity.module_path);
   if (entity.module_path != null && (!modulePath || !realPathContained(repoRoot, path.resolve(repoRoot, modulePath), 'directory'))) throw new Error('foundup_module_path_invalid');
-  const records = readEvidence(repoRoot, authority, evidencePaths(entity, modulePath));
+  const records = readEvidence(repoRoot, authority, evidencePaths(entity, modulePath, brandState));
   if (!records.some((record) => record.path === REGISTRY_PATH)) throw new Error('foundup_registry_evidence_missing');
   if (entity.manifest_path && authority.dirty.has(containedRelative(entity.manifest_path))) throw new Error('foundup_manifest_evidence_dirty');
   const manifest = manifestState(repoRoot, entity, modulePath, records);
@@ -161,7 +137,9 @@ function success(repoRoot, authority, registryState, entity, reference) {
     registry_schema_digest: registryState.registry_schema_digest,
     registry_entity_digest: digest(entity), repo_head_sha: authority.repo_head_sha, repo_root_digest: digest(fs.realpathSync(repoRoot)),
     evidence_targets: records.map((record) => record.path), evidence_digests: records,
-    safe_mutation_surfaces: manifest.safe_mutation_surfaces, grants_authority: false };
+    safe_mutation_surfaces: manifest.safe_mutation_surfaces, grants_authority: false,
+    brand_context_path: brandState && brandState.path || null, brand_foundup_id: brandFoundupId || entity.foundup_id,
+    canonical_brand: canonicalBrand || entity.display_name };
   values.evidence_checkout_state = 'workspace_current';
   values.dirty_evidence_paths = records.map((record) => record.path).filter((item) => authority.dirty.has(item));
   return deepFreeze(Object.assign(values, { receipt_id: digest(values) }));
@@ -173,9 +151,9 @@ function resolveFoundupWorkGrounding(repoRoot, taskText, options) {
   if (!authority) return failure('foundup_authority_context_invalid');
   try {
     const registryState = readRegistry(repoRoot, authority);
-    const selected = selectEntity(registryState.registry, taskText);
+    const selected = brandContext.selectEntity(repoRoot, authority, registryState.registry, taskText);
     if (!selected) return unresolved(registryState, authority);
-    return success(repoRoot, authority, registryState, selected.entity, selected.reference);
+    return success(repoRoot, authority, registryState, selected);
   } catch (error) {
     return failure(String(error && error.message || 'foundup_grounding_failed'));
   }
@@ -192,5 +170,4 @@ function receiptIntegrityValid(receipt) {
   const payload = Object.fromEntries(Object.entries(receipt).filter(([key]) => key !== 'receipt_id'));
   return receipt.receipt_id === digest(payload);
 }
-
-module.exports = { RECEIPT_SCHEMA, REGISTRY_PATH, REGISTRY_SCHEMA_PATH, receiptIntegrityValid, resolveFoundupWorkGrounding, verifyFoundupWorkGroundingReceipt };
+module.exports = { RECEIPT_SCHEMA, REGISTRY_PATH, REGISTRY_SCHEMA_PATH, BRAND_CONTEXT_SCHEMA_PATH: brandContext.BRAND_CONTEXT_SCHEMA_PATH, receiptIntegrityValid, resolveFoundupWorkGrounding, verifyFoundupWorkGroundingReceipt };

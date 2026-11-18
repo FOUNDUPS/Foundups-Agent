@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kids Episodes · YouTube studio</title>
+<style>
+:root{font:16px system-ui;color:#173340;background:#edf5f2}*{box-sizing:border-box}body{margin:0}header{padding:28px max(5vw,20px);background:#153d3a;color:#fff}header small{color:#8ee2c6;letter-spacing:.15em}h1{font-size:36px;margin:8px 0}header p{margin:0;color:#d2e8e0}main{max-width:1200px;margin:24px auto;padding:0 20px;display:grid;grid-template-columns:1.15fr 1fr;gap:24px}section{background:white;border-radius:18px;padding:24px;margin-bottom:20px;border:1px solid #d7e4df}h2{margin:0 0 18px;font-size:20px}label{display:block;font-size:14px;font-weight:650;margin:14px 0 6px}input,select,textarea{width:100%;padding:11px;border:1px solid #bbcec6;border-radius:8px;font:inherit;color:inherit;background:#fff}textarea{min-height:100px;font:13px ui-monospace,monospace}.row{display:flex;gap:14px}.row>div{flex:1}button,.link{border:0;background:#12664f;color:white;padding:13px 18px;border-radius:9px;font:600 15px system-ui;cursor:pointer;display:inline-block;text-decoration:none;margin:6px 5px 6px 0}button:disabled{opacity:.5}button.secondary,.link{background:#e4f1eb;color:#15533f}small,.hint{color:#547269;font-size:13px}.hint{line-height:1.6}video{width:100%;max-height:410px;background:#152f2a;border-radius:12px}#status{white-space:pre-wrap;line-height:1.5}#preview[hidden]{display:none}.tag{display:inline-block;background:#dff3e9;color:#17543f;padding:6px 10px;border-radius:20px;font-size:12px}footer{font-size:12px;color:#547269;margin-top:20px}details{margin-top:14px}.timeline-item{border:1px solid #d7e4df;border-radius:12px;padding:12px 14px;margin:12px 0;background:#f8fbf9}.timeline-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.timeline-head strong{font-size:14px}.timeline-head button{font-size:12px;padding:6px 10px;margin:0}.times{display:grid;grid-template-columns:1fr 1fr;gap:12px}.timeline-item label{margin-top:8px}.timeline-item input{min-width:0}.timeline-summary{font-size:14px;font-weight:650;padding:9px 0;color:#17543f}.timeline-summary.invalid{color:#9b422c}@media(max-width:800px){main{grid-template-columns:1fr}.row{display:block}}
+</style>
+<header><small>FOUNDUPS / YOUTUBE STUDIO</small><h1>Little lessons. Big smiles.</h1><p>Make a 15-second episode with music, movement, and clear captions.</p></header>
+<main><form id="editor"><section><span class="tag">Kids Episodes · local studio</span><h2 style="margin-top:16px">1. The little lesson</h2>
+<label for="title">Episode title</label><input id="title" value="Count and clap" required>
+<label for="goal">Learning goal</label><input id="goal" value="Count from one to three" required>
+<label for="activity">Activity</label><input id="activity" value="Clap once, twice, then three times" required>
+<div class="row"><div><label for="age">Age band</label><input id="age" value="3–6" required></div><div><label for="language">Language</label><input id="language" value="en" required></div></div>
+</section><section><h2>2. Clips & captions</h2><p class="hint">Place your own or licensed media in the workspace selected when starting this editor. Enter paths relative to that folder. Clips must add up to exactly 15 seconds.</p>
+<h3>Video clips</h3><div id="clips"></div><button id="add-clip" class="secondary" type="button">+ Add a clip</button><div id="clip-total" class="timeline-summary" aria-live="polite"></div>
+<h3>Words on screen</h3><p class="hint">Set when each caption appears and disappears, in seconds.</p><div id="captions"></div><button id="add-caption" class="secondary" type="button">+ Add a caption</button><p class="hint">Align cues with the actual singing or speech. Rendering burns these cues into the video and exports an SRT subtitle file.</p></section>
+<section><h2>3. Music & voice</h2><label for="music">Music file</label><input id="music" placeholder="music.mp3" required>
+<label for="rights">Music rights / source evidence</label><input id="rights" placeholder="Original composition or licensed export reference" required>
+<label for="voice">Voice file <small>optional</small></label><input id="voice" placeholder="voice.wav">
+<p class="hint">Import an original Suno export or other licensed music. This version assembles supplied media; generating new animation, music, and automatic speech alignment are separate production steps.</p></section>
+<section><h2>4. Make the episode</h2><div class="row"><div><label for="preset">Render quality</label><select id="preset"><option value="draft">Draft · 480p</option><option value="final">Final · 1080p</option></select></div><div><label for="orientation">Video format</label><select id="orientation"><option value="landscape">Landscape · 16:9</option><option value="portrait">Shorts · 9:16</option></select></div></div>
+<button id="render" type="submit">Render 15-second episode</button><button id="save" class="secondary" type="button">Save episode plan</button>
+<label for="import">Open an episode plan</label><input type="file" id="import" accept="application/json,.json"></section></form>
+<aside><section><h2>Your preview</h2><p id="status" role="status">Add your clips and music, then render a draft.</p><div id="preview" hidden><video id="video" controls playsinline></video><a id="download" class="link" download="episode.mp4">Download video</a><a id="subtitles" class="link" download="episode.srt">Download subtitles</a></div><footer>Review the learning goal, activity, audio, and captions before publishing. YouTube publishing is handled separately through the existing channel workflow.</footer></section><section><h2>The 15-second rhythm</h2><p>Introduce → show → invite a little action.</p><p class="hint">One clear idea per episode. Use original characters, gentle pacing, and a simple action a child can try with a caregiver.</p></section></aside></main>
+<script>
+const $=id=>document.getElementById(id);
+const limits={clips:8,captions:30};
+function field(row,key,label,value,type='text',min=0,max=null){
+  const wrap=document.createElement('label');wrap.textContent=label;
+  const input=document.createElement('input');input.type=type;input.dataset.field=key;input.value=value??'';input.required=true;
+  if(type==='number'){input.min=min;input.step='0.001';if(max!==null)input.max=max;}
+  else input.maxLength=key==='text'?140:4096;
+  wrap.append(input);row.append(wrap);input.addEventListener('input',refresh);return input;
+}
+function addRow(kind,data={}){
+  if($(kind).children.length>=limits[kind])return;
+  const row=document.createElement('div');row.className='timeline-item';
+  const head=document.createElement('div');head.className='timeline-head';
+  const title=document.createElement('strong');head.append(title);
+  const remove=document.createElement('button');remove.type='button';remove.className='secondary';remove.textContent='Remove';remove.onclick=()=>{row.remove();refresh();};head.append(remove);row.append(head);
+  if(kind==='clips')field(row,'path','Video file',data.path||'');
+  else field(row,'text','Caption words',data.text||'');
+  const times=document.createElement('div');times.className='times';row.append(times);
+  field(times,'start',kind==='clips'?'Start in source (seconds)':'Appears at (seconds)',data.start??0,'number',0,kind==='clips'?null:15);
+  field(times,kind==='clips'?'duration':'end',kind==='clips'?'Length (seconds)':'Disappears at (seconds)',kind==='clips'?(data.duration??1):(data.end??15),'number',0.001,15);
+  $(kind).append(row);refresh();
+}
+function rows(kind){return [...$(kind).children].map(row=>Object.fromEntries([...row.querySelectorAll('input')].map(input=>[input.dataset.field,input.type==='number'?Number(input.value):input.value])));}
+function refresh(){
+  for(const kind of ['clips','captions']){
+    [...$(kind).children].forEach((row,i)=>{row.querySelector('strong').textContent=(kind==='clips'?'Clip ':'Caption ')+(i+1);row.querySelector('button').disabled=$(kind).children.length<=1;});
+    $(kind==='clips'?'add-clip':'add-caption').disabled=$(kind).children.length>=limits[kind];
+  }
+  const total=rows('clips').reduce((sum,clip)=>sum+clip.duration,0);
+  const ready=Number.isFinite(total)&&Math.abs(total-15)<0.000001;
+  $('clip-total').textContent=ready?'15 seconds · ready to render':`${Number.isFinite(total)?Number(total.toFixed(3)):'—'} / 15 seconds · adjust clip lengths`;
+  $('clip-total').classList.toggle('invalid',!ready);
+}
+function setRows(kind,data){if(!Array.isArray(data)||!data.length||data.length>limits[kind])throw Error(`Use 1–${limits[kind]} ${kind}.`);$(kind).replaceChildren();for(const item of data){if(!item||typeof item!=='object')throw Error('Invalid timeline row.');addRow(kind,item);}}
+$('add-clip').onclick=()=>addRow('clips');
+$('add-caption').onclick=()=>{const cues=rows('captions');const start=Math.min(cues.at(-1)?.end??0,14);addRow('captions',{start,end:15});};
+setRows('clips',[{path:'shot1.mp4',start:0,duration:8},{path:'shot2.mp4',start:0,duration:7}]);
+setRows('captions',[{start:0,end:4,text:'One little clap!'},{start:4,end:8,text:'Two little claps!'},{start:8,end:12,text:'Three little claps!'},{start:12,end:15,text:'Your turn!'}]);
+function plan(){const p={schema_version:1,title:$('title').value,learning_objective:$('goal').value,activity:$('activity').value,age_band:$('age').value,language:$('language').value,duration_seconds:15,preset:$('preset').value,orientation:$('orientation').value,clips:rows('clips'),captions:rows('captions'),music:{path:$('music').value,rights_evidence:$('rights').value}};if($('voice').value.trim())p.voice={path:$('voice').value};return p;}
+$('editor').onsubmit=async e=>{e.preventDefault();$('render').disabled=true;$('preview').hidden=true;$('status').textContent='Rendering your episode… This can take a minute.';try{const res=await fetch('/render',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(plan())});const data=await res.json();if(!res.ok)throw Error(data.error||'Render failed');$('video').src=data.video_path;$('download').href=data.video_path;$('subtitles').href=data.captions_path;$('preview').hidden=false;$('status').textContent='Episode ready. Play it through and check the words against the audio.';}catch(e){$('status').textContent=e.message;}finally{$('render').disabled=false;}};
+$('save').onclick=()=>{try{const url=URL.createObjectURL(new Blob([JSON.stringify(plan(),null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='episode.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}catch(e){$('status').textContent='Could not save this episode: '+e.message;}};
+$('import').onchange=async e=>{try{const file=e.target.files[0];if(!file)return;if(file.size>65536)throw Error('Episode plan must be under 64 KiB.');const p=JSON.parse(await file.text());for(const [id,key] of Object.entries({title:'title',goal:'learning_objective',activity:'activity',age:'age_band',language:'language',preset:'preset',orientation:'orientation'}))if(p[key]!=null)$(id).value=p[key];setRows('clips',p.clips);setRows('captions',p.captions);$('music').value=p.music?.path||'';$('rights').value=p.music?.rights_evidence||'';$('voice').value=p.voice?.path||'';$('status').textContent='Episode plan loaded.';}catch(e){$('status').textContent='Could not open that plan: '+e.message;}};
+</script></html>

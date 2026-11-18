@@ -1,5 +1,62 @@
 # GitHub Integration Module Log
 
+## 2026-10-29 — Bind WSP scans and follow-up work to one checkout
+
+Correct WSPAutomationManager's default root from the checkout's parent to the
+checkout itself, and pass that same selected root into WREGitHubIntegration.
+The read-only compliance scanner requires an exact Git top-level root; the old
+default could traverse sibling worktrees. Two isolated real-constructor cases
+cover default and explicit roots with inert dependencies. No GitHub API call,
+issue, PR or automatic remediation is executed by this validation. WSP 3/11/22/50/97.
+
+## 2026-10-29 — Adapter workflow signature syntax repair
+
+Make agent_id, session_id and cube_type required keyword-only arguments after
+optional inputs in GitHubAPIAdapter.trigger_workflow. The old declaration was
+invalid Python. Byte-source parsing and isolated signature binding pass:
+inputs remains optional and omitting any identity argument rejects. Existing
+adapter transport is still mocked; no workflow or provider request was made.
+GitHubAPIClient observation contracts are unchanged. WSP 11/22/50/97.
+
+## 2026-10-26 — Bound observation HTTP before project-control integration
+
+WSP00/6/11/15/22/50/62/71/84/97;11/P2. Extend the existing client with private
+observation-only GET policy: exact API origin, no redirects/decompression,
+identity encoding, JSON200 and looping2MiB raw-body cap before strict UTF-8.
+Per-request5/2/2/2s and whole30s deadlines preserve cancellation/cleanup; these
+are library limits, not hard wall-clock/RSS or TCP/DNS attempt guarantees.
+Retain zero application retries and aiohttp's possible single reconnect retry.
+Legacy method bodies and public observation signature/13-field DTO stay intact.
+Baseline135PASS; frozen desired RED146PASS/20FAIL; initial GREEN166PASS.
+Duplicate-header review RED166PASS/1FAIL; final167PASS preserves original
+135 exact IDs/outcomes. Test construction corrections precede the
+frozen acceptance run and remain recorded separately. No test oracles weakened.
+Existing client/test owners stay within allocated850/1020-line exceptions;
+new functions<=35. Rebind existing1471-member source closure hash and two pins;
+hosted/security checks and current-main reconciliation remain required.
+Hosted167PASS;39 observed manifest metadata bindings require separate source review
+before append to the2378-row ledger prefix. Fresh blocking scans remain required.
+No claim, provider admission, issuer, signing, mint, work or runtime activation.
+
+## 2026-10-26 — Immutable regular-file observation prerequisite
+
+WSP00/6/11/15/22/50/62/84/97; allocation15/P1. Extend the existing client with
+a frozen13-field GitHubFileObservation, exact Git ref/commit/tree/blob checks,
+regular-file modes, bounded paths/content, blob hash and sanitized errors.
+Before/after repository metadata rejects ordinary identity/branch/visibility drift;
+name-reuse races and current-tip freshness remain unproved. This is a consistency
+record, with no repository-control, work, issuer, signing or tokenization grant.
+Legacy seven-field repository and text/blob tuple remain unchanged. Repair PATCH
+dispatch for close_issue and its two stale fixture expectations; no broad catch.
+Fresh final canonical unit shard:135PASS (120 client,15 permission-probe), no
+errors/skips/warnings. Frozen desired RED:26PASS/94FAIL; retain earlier Windows
+parameter-ID setup errors separately, corrected by bounded IDs without oracle loss.
+All26 legacy methods remain;24 exact ASTs plus two allocated compatibility changes.
+New client748/test807 lines, new functions<=35. New focused hosted workflow and
+portable receipt bind current evidence; hosted/security/main gates are separate.
+Existing runtime member1471 remains; rebind only this client's hash and two pins.
+Eight manifest tests and three Node owners pass; no installed runtime activation.
+
 ## 2026-06-28 - REDDOG_GITHUB_PERMISSION_PROBE_PHASE1
 
 - ADD `src/reddog_github_permission_probe.py` — read-only `probe_repo_permission()` with gh CLI allowlist backend.

@@ -1,3 +1,20 @@
+## 2026-10-10 — Security audit: fail closed on missing scan coverage
+
+- Repaired scanner exit/schema validation, including authentication/configuration
+  errors, empty finding exits, malformed records, and Semgrep partial coverage.
+- Enabled Trivy vulnerability/secret/misconfiguration scans; normalized finding
+  categories and locations without persisting secret matches or source snippets.
+- Preserved categories/locations through WRE policy routing, including secret
+  gates when policy loading fails. CLI exits distinguish complete/gated/incomplete
+  coverage (0/1/2). Aggregate and SEC9 status preserve partial/error outcomes.
+- Expanded SEC4 proposals to website/application/test source and pnpm, uv, Poetry,
+  Pipenv, and Bun lockfiles. Dry-run calls remain non-executing.
+- Validation: 131 focused scanner/WRE/trigger/controller/E2E tests passed, no skips;
+  29 policy tests passed separately. Existing pytest asyncio-option and UTC
+  deprecation warnings remain. No real scanner services, schedulers, or models ran.
+- WSP 5/11/22/50/77/97. Source-bound lexical Holo retrieval used current audit
+  baseline; semantic freshness remains UNKNOWN/index gap explicit.
+
 # Security Scanner ModLog
 
 ## V0.1.0 - SEC1 CLI Proof (2026-04-17)

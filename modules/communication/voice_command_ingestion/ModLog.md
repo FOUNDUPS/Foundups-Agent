@@ -1,5 +1,25 @@
 # ModLog - voice_command_ingestion
 
+## 2026-09-22 - Preserve Japanese batch transcript evidence
+
+Reused the real-time language selection already on main. Extended it through
+the batch transcriber and factory, and preserved reported language in STT
+events and JSONL segments. No new recognition backend or indexer. Mocked
+language/offset regressions cover the boundary; live recognition quality is
+unverified. WSP 11/22/50/84/97.
+
+### 2026-09-10 — Japanese STT selection and public export repair
+**WSP Protocol:** 05, 06, 22, 84, 97
+**Phase:** Enhancement
+**Agent:** 0102 / Codex
+
+- Removed the real-time adapter's forced English; added explicit language through
+  ingestion and factory while retaining English defaults and rejecting `.en`
+  model mismatches. Reused by the Japanese phone-message prototype.
+- Restored batch classes/factory in package exports, resolving an existing batch
+  test collection failure. No batch-transcription language change.
+- Validation and test inventory: [tests/TestModLog.md](tests/TestModLog.md).
+
 ### 2026-02-24 - Faster-Whisper VAD Controls for Voice REPL Stability
 **WSP Protocol**: WSP 22, WSP 84
 **Phase**: Hardening

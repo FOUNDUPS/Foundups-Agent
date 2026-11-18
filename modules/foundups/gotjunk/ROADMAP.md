@@ -1,3 +1,12 @@
+## Priority direction — Play FoundUps convergence (2026-10-12)
+
+- [ ] Execute the staged [Mall migration handoff](PFMALL_MIGRATION_HANDOFF.md).
+- [ ] Make Mall the canonical internal listing discovery/search surface.
+- [ ] Verify shared media, listing and identity owners with Shop/GetK before provider changes.
+- [ ] Preserve existing records, offline captures and security controls through audited cutover.
+
+Earlier standalone roadmap items below are historical context and must be reconciled with this direction.
+
 # GotJUNK? FoundUp - Development Roadmap
 
 ## Phase 1: PoC (COMPLETE ✅)

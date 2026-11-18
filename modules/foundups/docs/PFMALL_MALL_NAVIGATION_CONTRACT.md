@@ -1,8 +1,8 @@
 # p.fMALL Navigation Contract
 
-**Version**: 2.0.0
-**Date**: 2026-04-03
-**Status**: Runtime Contract
+**Version**: 2.1.0
+**Date**: 2026-11-16
+**Status**: Runtime baseline with explicitly pending HPC acceptance changes
 
 ---
 
@@ -96,10 +96,13 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap tile | Start lane autoplay through FoundUp's video queue (Shorts-style) | RUNTIME |
+| tap or click video tile | Inspected wide desktop and HPC phone runtime opens the shared player at the selected tile; ordinary category rows retain inline preview and lane/clip identity. The HPC phone target in section 4.7 instead uses one top-anchored player above the scrolling grid. | RUNTIME baseline; HPC target SPECIFIED |
+| tap or click non-video tile | Open the FoundUp quick view or the property listing detail. | RUNTIME |
+| hover tile on desktop | Show available tile controls. | RUNTIME |
+| Expand button | Open the shared full player for the selected video or lane. | RUNTIME |
 | Enter button | Navigate to `/f/{foundup_id}` (WSP 104 canonical) | RUNTIME |
-| pinch-out tile | Expand FoundUp into its video field | RUNTIME |
-| pinch-in (expanded) | Collapse back to Mall | RUNTIME |
+| pinch-out on an ordinary video lane | Expand the FoundUp into its video field. Desktop Ctrl+wheel up uses the same handler. | RUNTIME |
+| pinch-in in the expanded field | Collapse back to the Mall. Desktop Ctrl+wheel down uses the same handler. | RUNTIME |
 | long-press | Reserved (future: quick actions) | RESERVED |
 
 ### 4.3 Motion Modes (Runtime)
@@ -119,8 +122,9 @@ Set via `mallTileField.setMotionMode('snap')` or `mallTileField.setMotionMode('g
 | Arrow Down | Navigate: nearer | FIXED |
 | Arrow Left | Navigate: cluster left | FIXED |
 | Arrow Right | Navigate: cluster right | FIXED |
-| Enter | Enter focused FoundUp | FIXED |
-| Escape | Reset view / close overlay | FIXED |
+| Enter on a video tile | Match click on wide desktop and HPC phone entry. Other ordinary rows open the full player. | RUNTIME |
+| Space on a tile | Use the tile's tap action. | RUNTIME |
+| Escape | Close the active desktop poster player first. The next Escape can collapse the expanded lane. | FIXED |
 
 ### 4.5 What Users Cannot Do
 
@@ -132,7 +136,81 @@ Users cannot:
 - Enter "edit mode" for the Mall itself
 - Reposition FoundUp cards manually
 
+### 4.6 Desktop poster browsing
+
+The ordinary Mall checks member admission before mounting the member
+catalog. `foundups.com/member/` remains an entry. The exact Play hostname
+root forwards to its own `/member/` and permits the `/?signin=required`
+return page. The shell loads lane and card
+metadata and hands it to the shared field. On entry at 1024 CSS px or wider
+with a fine primary pointer and hover, the default is the adaptive poster
+grid. Touch and narrower entry use category rows. Saved layout takes
+precedence, and the desktop grid retains its layout while resize adapts its
+density. The state owner restores the selected layout and position.
+[Member shell](../../../public/member/index.html) ·
+[Tile field](../../../public/member/js/mall-tile-field.js) ·
+[State restore](../../../public/member/js/mall-state-restore.js)
+
+The grid can show video-backed FoundUps and cards for apps, repositories
+and services. Non-video selection opens the existing quick view. Listings
+use their detail view. Click, Enter or Space on a wide desktop video poster
+enlarges its selected position and requests muted playback with the shared
+player. The fullscreen button opens the full viewer. Expand from the inline
+controls retains the same provider iframe. Hover reveals the action without
+mounting media. Escape or Back returns focus and scroll to the poster.
+After density reflow, dismissal restores the same tile in its new row.
+WikiTube is the design reference for the full viewer and continuous queue.
+The admitted browse dock searches the loaded Mall catalog. The full viewer
+places its left-aligned queue search beneath the video and above the rail.
+Search filters the active lane. Submit starts the first match when idle.
+It leaves active playback alone.
+[Catalog schema](PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md) ·
+[Quick view](../../../public/member/js/mall-planes.js) ·
+[Full player](PFMALL_FULLSCREEN_PLAYER_CONTRACT.md)
+
+The gesture engine recognizes double-tap and double-click. The tile field
+binds click, keyboard activation and pinch handlers. FLIP animates expansion
+and collapse of a FoundUp video field. Save and Share use explicit player
+controls. [Gesture engine](../../../public/member/js/gesture-engine.js) ·
+[Tile interactions](../../../public/member/js/mall-tile-field.js)
+
+Before this change, a controlled Windows Chromium 143 run at 1440 × 900 CSS px
+showed the member shell opening in rows. Selecting the grid gave eight columns
+and 15 cards. Hover mounted zero iframes. Clicking a video lane mounted one.
+Enter opened the shared full player, Ctrl+wheel expanded and collapsed the
+Move2Japan lane, and clicking AutoPost opened its quick view. This run used
+the real shell and catalog with a provider fixture at source `4c1d1e7d`.
+
+HPC uses a fixed scoped collection. Its wide fine-pointer view opens the
+shared theater and its narrow or touch view opens the portrait grid.
+Desktop verification and the remaining preview work are tracked in the
+shared roadmap.
+[HPC acceptance](../hpc/ROADMAP.md) ·
+[Desktop poster browsing PoC](../pfmall/ROADMAP.md#desktop-poster-browsing-poc)
+
 ---
+
+### 4.7 HPC, Vote and Contact Congress return navigation — 012 request 2026-11-16
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED, not a runtime or live-navigation claim.** The latest entire-banner request supersedes an icon-only return target. Preserve the existing PWA/tile architecture and existing Vote/Contact pages, with no parallel shell or new Voice tenant. The existing Mall implementation owner coordinates the Vote source and its existing Sites mirror.
+
+| Surface/control | Required destination or behavior | Current source at `72a3182c` |
+| --- | --- | --- |
+| HPC -> Vote / Contact Congress | Reach the existing Vote landing and Contact Congress resource; retain `https://vote.mtrout.com/contact` for the existing Voice CTA. Qualify the intended Vote host/alias independently. | Contact CTA exists; do not infer a separately admitted Voice runtime. |
+| Vote landing: entire top HPC banner | One accessible link to `https://hpc.foundups.com`, including banner text, padding and small top-corner animated Hasan icon in the same target. | `modules/foundups/voteballots/web/index.html` has no HPC banner. |
+| Call Your Congressperson: entire top HPC banner | The same single-link HPC return behavior, preserving contact forms and existing navigation. | `modules/foundups/voteballots/web/contact.html` has no HPC banner. |
+| Adjacent-surface Red Dog navigation icon | Reuse the existing Red Dog identity and link to `https://play.foundups.com`. Do not repurpose the portrait as Mall identity. | HPC scoped dog currently links to `/f/hpc#red-dog`; its portrait header currently links to `https://foundups.com/member/`. |
+| HPC phone video selection | One deliberate tile tap requests playback in the existing shared, top-anchored floating player. The grid scrolls independently below; retain WikiTube transitions/queue and close/back/query/scroll/focus recovery. | Current selected-tile placement remains implementation evidence; this new target is not implemented by this contract. |
+
+The Vote/Contact banners and distinct Mall return links have a source candidate in [PR #2411](https://github.com/FOUNDUPS/Foundups-Agent/pull/2411), with fixture evidence in [Vote's TestModLog](../voteballots/tests/TestModLog.md). The table above records the inspected base; it is not an assertion that candidate navigation is live. Phone-player placement and new portrait artwork remain separate work.
+
+Use concise **HPC** branding. Reuse the existing `public/member/hpc-icon-{180,192,512}.png` portrait and `public/logo-dog.png` Red Dog asset. 012's existing illustrated poster is the character reference for a satirical crown-of-thorns/optional-halo adaptation; the inspected portrait has neither. Materialize the supplied reference images through the supported Library route, verify local bytes and inspect pixels before image-dependent work. Keep the small portrait artwork to the recognizable face rather than the whole poster, and preserve independent/non-affiliation framing with no implied Hasan or organizational endorsement. Host approved copies on the adjacent page's existing origin without weakening its image CSP.
+
+The entire banner is **one link** with one meaningful accessible name and visible focus, no nested anchor or competing clickable portrait. Provide at least a 44 CSS px touch target and avoid obscuring page navigation. A subtle wiggle must have a static `prefers-reduced-motion` fallback and stop when the document is hidden. Keep application controls outside the YouTube player rectangle and leave native YouTube controls unobscured.
+
+Acceptance: exercise HPC -> Vote -> banner -> HPC and HPC -> Contact Congress -> banner -> HPC, separately on both pages; activate text, padding and portrait areas, plus keyboard Enter. Verify the distinct Red Dog -> Mall destination, page fit, focus, reduced-motion/visibility behavior, form/install controls, admission and return state. Reuse existing tests. Source, preview route/asset parity, actual phone navigation/playback and production deployment are separate gates. A saved direction or a working href alone is not completion.
+
+Deferred, not part of this immediate return-link slice: the larger shared floating Red Dog and bottom FoundUps search dock across existing surfaces. Reuse current navigation/state/search owners and do not duplicate the dock. `https://play.foundups.com` is the intended public Mall entry with its existing access policy; **144 FoundUps is a product target, not a claimed current inventory**. The ordinary Mall's internal concierge keeps its existing semantics. No production deployment is authorized by this change.
 
 ## 5. AI Projection vs User Navigation
 
@@ -307,3 +385,21 @@ Out of scope for this document:
 ---
 
 *Contract complete. SoftProto begins inside FoundUp interiors, not in the Mall shell.*
+
+
+## 12. Responsive category-row projection — 2026-10-18
+
+The default browse projection is vertically stacked category groups with horizontal
+tracks. Vertical movement visits another group; horizontal movement stays within
+that group. Category sorting alone does not establish a relevance/distance score:
+those earlier axis descriptions remain projection intent until such data exists.
+
+Visible card count follows available space, not a fixed 3x2 grid or fixed number
+of rows. Existing density presets select an explicit grid projection. Pinch-out
+opens the selected FoundUp's videos; pinch-in returns to the rows. Independent
+row offsets restore locally, using category keys and original catalog indexes.
+
+All FoundUps reuse this grammar and the catalog search/presentation APIs. A future
+housing projection may group by location through a separately declared adapter;
+this slice groups by catalog category only. No unseen listings, location hierarchy,
+personalized ranking or voice runtime is claimed.

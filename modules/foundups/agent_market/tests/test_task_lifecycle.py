@@ -1,5 +1,6 @@
 import pytest
 
+from modules.foundups.agent_market.src.authorization import CallerAuthorization
 from modules.foundups.agent_market.src.exceptions import ValidationError
 from modules.foundups.agent_market.src.in_memory import InMemoryAgentMarket
 from modules.foundups.agent_market.src.models import (
@@ -9,6 +10,9 @@ from modules.foundups.agent_market.src.models import (
     TaskStatus,
     Verification,
 )
+
+VERIFIER_AUTHORIZATION = CallerAuthorization("verifier_1", frozenset({("f_1", "verifier")}))
+TREASURY_AUTHORIZATION = CallerAuthorization("treasury_1", frozenset({("f_1", "treasury")}))
 
 
 def test_token_symbol_uniqueness_in_memory():
@@ -90,13 +94,14 @@ def test_task_lifecycle_open_to_paid():
             approved=True,
             reason="acceptance criteria met",
         ),
+        authorization=VERIFIER_AUTHORIZATION,
     )
     assert market.get_task("t_1").status == TaskStatus.VERIFIED
 
     distribution = market.publish_verified_milestone("t_1", "distribution_1")
     assert distribution.task_id == "t_1"
 
-    payout = market.trigger_payout("t_1", "treasury_1")
+    payout = market.trigger_payout("t_1", "treasury_1", authorization=TREASURY_AUTHORIZATION)
     assert payout.amount == 250
     assert market.get_task("t_1").status == TaskStatus.PAID
 

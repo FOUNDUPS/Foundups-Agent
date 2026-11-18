@@ -1,0 +1,65 @@
+[
+  {
+    "title": "Epstein Files Transparency Act, Public Law 119-38",
+    "url": "https://www.govinfo.gov/content/pkg/PLAW-119publ38/html/PLAW-119publ38.htm",
+    "pinpoint": "\u00a7\u00a7 2\u20133; approved November 19, 2025",
+    "proposition": "Enacted DOJ release and reporting provisions, with protections; distinct from later proposals.",
+    "accessed": "2026-11-07"
+  },
+  {
+    "title": "H.R. 9694 introduced text",
+    "url": "https://www.govinfo.gov/content/pkg/BILLS-119hr9694ih/html/BILLS-119hr9694ih.htm",
+    "pinpoint": "July 15, 2026; proposed \u00a7 4 and amendments",
+    "proposition": "Introduced DOJ/state/victim/member enforcement proposal; not State Department transfer or enacted authority.",
+    "accessed": "2026-11-07"
+  },
+  {
+    "title": "S. 5005 introduced record",
+    "url": "https://www.govinfo.gov/app/details/BILLS-119s5005is",
+    "pinpoint": "July 15, 2026 introduced/referred version",
+    "proposition": "Senate counterpart; latest verified bill-stage material, not complete later action history.",
+    "accessed": "2026-11-07"
+  },
+  {
+    "title": "DOJ disclosure notice",
+    "url": "https://www.justice.gov/epstein/doj-disclosures",
+    "pinpoint": "Privacy Notice and Court Records note",
+    "proposition": "Agency cautions about inadvertent personal information and existing victim/court/grand-jury redactions.",
+    "accessed": "2026-11-07"
+  },
+  {
+    "title": "Senate Standing Rules",
+    "url": "https://www.rules.senate.gov/rules-of-the-senate",
+    "pinpoint": "Rules XXV and XXVI(1)\u2013(2)",
+    "proposition": "Jurisdictions, investigative powers and committee-specific procedures.",
+    "accessed": "2026-11-07"
+  },
+  {
+    "title": "Senate investigative overview",
+    "url": "https://www.senate.gov/about/powers-procedures/investigations/overview.htm",
+    "pinpoint": "Historical overview and legislative-purpose limits",
+    "proposition": "Both chambers exercise investigative powers with legislative foundation.",
+    "accessed": "2026-11-07"
+  },
+  {
+    "title": "National Archives agency records law",
+    "url": "https://www.archives.gov/about/laws/fed-agencies.html",
+    "pinpoint": "44 U.S.C. \u00a7\u00a7 3101\u20133106",
+    "proposition": "Agency records duties; does not collapse separate Presidential Records Act regime.",
+    "accessed": "2026-11-07"
+  },
+  {
+    "title": "FoundUps work-order architecture",
+    "url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/152d52dd92088728340fbcb17fe80c4bdf63a732/docs/architecture/REDDOG_EPHEMERAL_AUTHORITY_WORKER_ROUTING.md",
+    "pinpoint": "Restaurant/work-order model and DOCS_ONLY status",
+    "proposition": "Reuse scoped work orders and temporary authority; architecture not runtime completion.",
+    "accessed": "2026-11-07"
+  },
+  {
+    "title": "WRE verification owner",
+    "url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/152d52dd92088728340fbcb17fe80c4bdf63a732/modules/infrastructure/wre_core/README.md",
+    "pinpoint": "Readiness and risk-based verification sections",
+    "proposition": "Existing verification/admission ownership; measured evidence and unknown gates remain distinct.",
+    "accessed": "2026-11-07"
+  }
+]

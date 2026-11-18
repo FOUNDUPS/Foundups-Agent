@@ -46,6 +46,7 @@ class SignerSecretGrantAuthorityPolicy:
     consensus_required_tiers: tuple[str, ...]
     rate_limit_window_seconds: int
     rate_limit_max_requests: int
+    issuer_rate_binding: object = None
 
 
 def secret_grant_policy_rejected(policy: object) -> bool:
@@ -53,12 +54,17 @@ def secret_grant_policy_rejected(policy: object) -> bool:
 
     if type(policy) is not SignerSecretGrantAuthorityPolicy:
         return True
+    if policy.issuer_rate_binding is not None:
+        from .reddog_signer_secret_grant_durable_rate_authority import protected_issuer_rate_binding_matches
+        if not protected_issuer_rate_binding_matches(policy.issuer_rate_binding, policy):
+            return True
     excluded = {
         "allowed_operations",
         "allowed_authority_tiers",
         "consensus_required_tiers",
         "rate_limit_window_seconds",
         "rate_limit_max_requests",
+        "issuer_rate_binding",
     }
     values = tuple(
         getattr(policy, item.name) for item in fields(policy) if item.name not in excluded
@@ -99,6 +105,7 @@ def secret_grant_binding_rejected(
         "consensus_required_tiers",
         "rate_limit_window_seconds",
         "rate_limit_max_requests",
+        "issuer_rate_binding",
     }
     binding_names = tuple(
         item.name for item in fields(policy) if item.name not in excluded

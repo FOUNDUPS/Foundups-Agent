@@ -1,0 +1,3 @@
+# Local publication mirrors and dated document/build exports are derived artifacts.
+.publishing/
+outputs/

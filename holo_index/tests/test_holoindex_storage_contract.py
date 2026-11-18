@@ -7,6 +7,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -28,7 +29,9 @@ from holo_index.storage_contract import (
 
 
 class _Collection:
-    pass
+    def __init__(self) -> None:
+        self._model = SimpleNamespace(configuration_json={"hnsw": {"space": "l2"}},
+                                      serialized_schema=None)
 
 
 class _MaintenanceClient:

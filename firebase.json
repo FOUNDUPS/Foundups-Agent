@@ -62,6 +62,9 @@
         ]
       }
     ],
+    "redirects": [
+      { "regex": "^/members/?$", "destination": "/member/", "type": 302 }
+    ],
     "rewrites": [
       {
         "source": "/f/**",

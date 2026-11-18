@@ -8,6 +8,10 @@ import sys
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_seed_worker_plan,
+    worker_plan_matches_execution_scope,
+)
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
     INCOMPLETE_TRUST_ANCHOR_REASONS,
 )
@@ -197,9 +201,13 @@ class ArchitectProposalExecutabilityReceipt:
     no_execution_performed: bool = True
     no_repo_mutation_performed: bool = True
     no_holoindex_reindex_performed: bool = True
+    bounded_worker_plan: Mapping[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        if self.bounded_worker_plan is None:
+            data.pop("bounded_worker_plan")
+        return data
 
 
 def current_architect_proposal_admission_policy(
@@ -261,16 +269,44 @@ def validate_architect_proposal_executability_receipt(
 ) -> ArchitectProposalExecutabilityReceipt:
     if not isinstance(value, Mapping):
         raise ValueError("proposal_admission_receipt_missing")
-    expected = set(ArchitectProposalExecutabilityReceipt.__dataclass_fields__)
-    if set(value) != expected:
+    expected = set(ArchitectProposalExecutabilityReceipt.__dataclass_fields__) - {"bounded_worker_plan"}
+    has_plan = "bounded_worker_plan" in value
+    plan = snapshot_seed_worker_plan(value.get("bounded_worker_plan"))
+    if set(value) != expected | ({"bounded_worker_plan"} if has_plan else set()):
         raise ValueError("proposal_admission_field_set_invalid")
+    if has_plan and plan is None:
+        raise ValueError("proposal_admission_worker_plan_invalid")
     data = dict(value)
+    if has_plan:
+        data["bounded_worker_plan"] = plan
     receipt_id = _text(data.pop("receipt_id"))
-    if not _valid_receipt_body(data, receipt_id):
+    if not _valid_receipt_body(data, receipt_id) or not _valid_worker_plan_binding(data):
         raise ValueError("proposal_admission_receipt_invalid")
     for field in _TUPLE_FIELDS:
         data[field] = tuple(str(item) for item in data.get(field) or ())
     return ArchitectProposalExecutabilityReceipt(receipt_id=receipt_id, **data)
+
+
+def _valid_worker_plan_binding(data: Mapping[str, Any]) -> bool:
+    plan = data.get("bounded_worker_plan")
+    if plan is None:
+        return True
+    if not worker_plan_matches_execution_scope(plan, data):
+        return False
+    packet = plan.get("m2m_envelope")
+    if packet is None:
+        return True
+    # Only explicitly supplied receipt-field mirrors are compared. WSP 99's
+    # task hash and scope/action prose are preserved, never inferred or rewritten.
+    invariants = packet["I"]
+    if any(_digest(value) != _digest(data[key]) for key, value in invariants.items()
+           if key in data and key not in {"schema_version", "bounded_worker_plan"}):
+        return False
+    score = invariants.get("wsp15", {})
+    return type(score) is dict and not (
+        "complexity" in score
+        and _digest(score["complexity"]) != _digest(data["wsp15_complexity"])
+    )
 
 
 def reevaluate_architect_proposal_execution_readiness(
@@ -630,4 +666,5 @@ __all__ = [
     "reevaluate_architect_proposal_execution_readiness",
     "reevaluate_architect_proposal_promotion_preconditions",
     "validate_architect_proposal_executability_receipt",
+    "worker_plan_matches_execution_scope",
 ]

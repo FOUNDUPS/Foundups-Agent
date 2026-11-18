@@ -1,7 +1,7 @@
 ---
 # Metadata (YAML Frontmatter)
 name: reschedule_plan
-description: Compute a dry-run REBALANCE PLAN for over-crowded schedule days -- move count>cap excess onto under-target upcoming days into US-ET peak slots per channel tz (read-only, agent-invoked; apply is Phase 2)
+description: Compute a dry-run REBALANCE PLAN for over-crowded schedule days -- move count>cap excess onto under-target upcoming days into US-ET peak slots per channel tz (read-only, agent-invoked; apply is a separate gated skill)
 domain: youtube  # WRE auto-fire tag (SkillTriggerMixin domain-discovery, skill_trigger.py:91-115) -> the youtube DAE fires this every cadence cycle. Cheap+offline+dry-run, safe to auto-fire (SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1)
 version: 1.0_prototype
 author: 0102
@@ -45,7 +45,7 @@ retirement_date: null
 
 **Purpose**: Compute a dry-run REBALANCE PLAN for over-crowded schedule days. The
 historical backlog was scheduled at up to 8/day before the per-day cap landed
-(`HARD_CAP_PER_DAY = 3`, `schedule_tracker.py`, #844). This skill proposes moving
+(`channel_daily_cap`, `schedule_tracker.py`). This skill proposes moving
 the excess (`count > cap`) off each over-crowded day onto the nearest under-target
 upcoming days, placing each moved item into a US-ET peak slot converted to the
 channel's Studio-account timezone (`peak_window.py`, #847).
@@ -66,7 +66,7 @@ This is the PREVIEW/decision layer. `DRY_RUN` is ALWAYS `True` in this slice: th
 skill RETURNS the plan and emits learning signals, but NEVER mutates a schedule,
 never opens a browser, never calls a live model. The mutating DOM apply (click
 "Scheduled" -> `ytcp-video-visibility-edit-popup` date/time picker) is an explicit
-**Phase-2** follow-up, NOT built here.
+separate [gated apply skill](../reschedule_apply/SKILLz.md); this planner never writes.
 
 ---
 
@@ -82,7 +82,7 @@ No DOM, no live model, no mutation.
 ## Plan granularity (Phase 0 finding)
 
 A video<->date mapping EXISTS (`video_ids`), so the plan NAMES which videos move
-when the ids are recorded for the over-crowded day. BUT `count` is authoritative
+when the ids are recorded for the over-crowded day. BUT `count` drives this offline plan only (live inventory must reconcile it before apply)
 and can exceed the recorded id list (`set_count()`/`sync_from_youtube()` can leave
 `video_ids` incomplete, and the historical 8/day backlog predates id tracking).
 When recorded ids are fewer than the excess, the surplus moves are labelled
@@ -99,8 +99,9 @@ For each channel:
    horizon), excluding the over-crowded source days; nearest-first.
 3. For each excess item, place it on the nearest target with free capacity, filling
    each target up to (NEVER over) the cap. Assign the peak slot by fill-index
-   (0->08:00 ET morning, 1->12:00 ET lunch, 2->20:00 ET evening), converted to the
-   channel tz (`convert_et_to_channel_tz`, DST-aware).
+   from the shared channel policy. Move2Japan uses 08:00–22:00 ET every two
+   hours; other channels retain their policy. Reject ambiguous date rollover;
+   clock conversion alone does not establish the local calendar date.
 
 Excess that finds no under-cap target within the horizon is counted as
 `unplaceable_moves`.
@@ -169,11 +170,11 @@ python -m modules.platform_integration.youtube_shorts_scheduler.skillz.reschedul
 
 ---
 
-## Out of scope (separate Phase-2 follow-ups -- NOT built here)
+## Outside this read-only planner
 
-- **DOM apply / mutation**: the `ytcp-video-visibility-edit-popup` date/time picker
-  applier that consumes the plan rows. Each plan row is already a complete move
-  instruction (channel, from_date, to_date, slot_et, slot_local, video_id).
+- **DOM apply / mutation**: the separate apply prototype consumes plan rows;
+  live qualification, inventory reconciliation and full timezone/date receipts
+  are additional gates. A plan row alone does not establish those preconditions.
 - **View-based ("low-viewed first") prioritization**: choosing WHICH videos move by
   per-video view counts -- needs view data that is NOT in the tracker (separate
   Phase-2 signal). Target-DAY selection here is date-driven.
@@ -210,3 +211,9 @@ python -m modules.platform_integration.youtube_shorts_scheduler.skillz.reschedul
 
 **WSP Compliance**: WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination),
 WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 27 (Phase 0 KNOWLEDGE).
+
+## Workflow handoff
+
+Follow the [shared scheduling workflow](../README.md) for ordered inputs,
+outputs, evidence gates and resume boundaries. This skill retains its own
+read/write permissions and prototype status; linkage does not expand authority.

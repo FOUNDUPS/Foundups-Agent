@@ -1,0 +1,79 @@
+[
+  {
+    "title": "Moltbook-Official/moltbook, skill.md",
+    "url": "https://github.com/Moltbook-Official/moltbook/blob/main/skill.md",
+    "pinpoint": "Getting Started; Core Features; Staying Active; Setup for Automatic Polling",
+    "proposition": "Official project source describes a social network for agents, human-claimed registration, submolts, service-specific credentials and four-hour-plus social check-ins; these are not a universal research or interoperability standard.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "OpenClaw, Heartbeat migration",
+    "url": "https://docs.openclaw.ai/gateway/heartbeat",
+    "pinpoint": "Upgrade an existing monitor; First setup; Monitor scratch; documentation sidebar release v2026.10.10",
+    "proposition": "Current official documentation migrates monitoring to ordinary automation jobs, removes legacy heartbeat settings after verified conversion, retires runtime reading of HEARTBEAT.md, and describes explicit initial setup with a generally 30-minute proactive job.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "OpenClaw, Tool and agent permissions",
+    "url": "https://docs.openclaw.ai/gateway/security/tool-permissions",
+    "pinpoint": "Read-only mode; Read-only tools + read-only workspace; Sub-agent delegation guardrail",
+    "proposition": "Official examples combine sandbox mode all, workspaceAccess ro and read-only tool allow/deny controls; denial of shell and file mutation is separate from workspace exposure.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "OpenClaw, Configuration — tool policy",
+    "url": "https://docs.openclaw.ai/gateway/config-tools/tool-policy",
+    "pinpoint": "MCP and plugin tools inside sandbox tool policy; tools.allow/tools.deny",
+    "proposition": "Tool policy is layered, deny wins, write/edit/apply_patch require distinct controls, and sandboxed MCP/plugin visibility has an additional allowlist gate. A catalogue entry is not proof of connection or authorization.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "A2A Protocol Specification, version 1.0.0",
+    "url": "https://a2a-protocol.org/v1.0.0/specification/",
+    "pinpoint": "Sections 3 and 8, protocol operations and Agent Card discovery",
+    "proposition": "A2A provides inter-agent discovery and task/interaction contracts; a deployed endpoint must truthfully declare its supported interface and authentication requirements.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "Model Context Protocol specification, 2026-07-28",
+    "url": "https://modelcontextprotocol.io/specification/2026-07-28",
+    "pinpoint": "Overview; Base Protocol",
+    "proposition": "MCP defines model-application integration with context and tools; this version describes stateless, self-contained requests and per-request capability negotiation.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "MCP 2026-07-28, Authorization Security Considerations",
+    "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/security-considerations",
+    "pinpoint": "Token Audience Binding and Validation; Communication Security; Access Token Privilege Restriction",
+    "proposition": "Implementations must protect tokens, use intended audiences and HTTPS, and must not pass an inbound client token through as an upstream API credential.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "offgrid-ing/arp, Agent Relay Protocol",
+    "url": "https://github.com/offgrid-ing/arp",
+    "pinpoint": "README, Why ARP and protocol overview",
+    "proposition": "This named Agent Relay Protocol project describes a stateless WebSocket relay, cryptographic public-key addresses and encrypted messages. It is distinct from Agent Relationship Protocol projects and is optional in our design.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "Agent Relationship Protocol documentation",
+    "url": "https://docs.arp.run/",
+    "pinpoint": "Version v0.1 draft/public review header and overview",
+    "proposition": "arp.run uses ARP to mean Agent Relationship Protocol and labels its current documented specification v0.1 draft; it is not the same project as offgrid-ing/arp.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "RFC 8785, JSON Canonicalization Scheme",
+    "url": "https://www.rfc-editor.org/rfc/rfc8785",
+    "pinpoint": "Sections 3 and 4",
+    "proposition": "JCS specifies deterministic canonical JSON representation suitable for repeatable hashing and signing; project-specific authorization semantics remain separate.",
+    "accessed": "2026-11-05"
+  },
+  {
+    "title": "RFC 8032, Edwards-Curve Digital Signature Algorithm (EdDSA)",
+    "url": "https://www.rfc-editor.org/rfc/rfc8032",
+    "pinpoint": "Section 5.1 and test vectors",
+    "proposition": "Specifies the Ed25519 signature mechanism; signatures authenticate key control and message integrity, not factual truth or operator independence.",
+    "accessed": "2026-11-05"
+  }
+]

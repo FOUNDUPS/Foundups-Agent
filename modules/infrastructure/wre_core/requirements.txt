@@ -16,4 +16,4 @@ pyyaml>=6.0  # WSP protocol parsing (if needed)
 
 # Note: Qwen/Gemma inference uses llama-cpp-python (optional)
 # Phase 2: Local inference via holo_index/qwen_advisor/llm_engine.py
-# If llama-cpp-python not available, gracefully falls back to mock execution
+# Unavailable local inference fails closed; generated text remains an unverified proposal.

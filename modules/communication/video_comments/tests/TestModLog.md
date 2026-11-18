@@ -1,0 +1,386 @@
+# video_comments TestModLog
+
+## 2026-11-10 — Preserve package context in manifest inspection fixtures
+
+The stdlib AST fixture now retains module metadata when supplying typing names,
+and loads the real manifest queue/policy/stream helper definitions into one
+private package. Relative owner imports resolve without running production
+package startup or replacing validation with a stub. Existing private-context,
+replay-inertness and explicit-announcement assertions remain unchanged.
+All **15 cases pass** under the existing offline effect guard, with zero
+failures/errors/skips, denied effects or model imports and unchanged source
+hashes during the run. Provider/model-status messages are synthetic fixture
+outputs, not runtime observations. A bounded test-loader search found no other
+AST loader of the queue/policy owner; ordinary imports and consumer fakes remain
+unchanged. WSP11/22/50/97; hosted acceptance remains separate.
+
+## 2026-11-10 — Preserve handle isolation with verification guard
+
+Extend the existing fake driver's interface without changing its Service or
+close_fds assertions. Both actual connect branches also assert the configured
+port on the installed verification gate; any browser command during attach
+fails. Included in the83-pass offline handoff/attachment/shadow selection.
+WSP11/22/50/97; no real browser or child-driver launch.
+
+The first hosted capture selection exposed an import-order defect in the
+fixture: the Chrome constructor was replaced before the Selenium package
+initializer subclassed it (1 failed,100 passed on Linux). Preload the real
+guard/driver module before replacing the constructor; all original Service,
+close_fds and no-browser-effect assertions remain. This corrects the test
+fixture rather than removing the production guard. Hosted acceptance is rerun.
+The matching fresh-process capture selection then passed101 cases locally with
+zero skips/warnings. Its scope overlaps the83-case handoff selection and is not
+an additional end-to-end test count.
+
+## 2026-11-07 — Close inherited worker handles in driver children
+
+Chrome and Edge connection controls verify real Selenium Service configuration,
+the unchanged debugger-address attachment and actual Popen close_fds propagation.
+Both pass in the final 138-case Windows selection (37 new capture/driver cases
+and 101 unchanged lifecycle cases). A separate finite Windows fixture confirmed
+that the previous Selenium default retains worker pipes after the worker exits;
+explicit close_fds permits EOF while the fixture driver is still alive. This
+does not validate automatic orphan reaping or live browser delivery.
+
+## 2026-11-05 — Normalize the offline Node working directory
+
+The hosted Windows Studio selection passed 137 cases, while Linux rejected
+130 Node-dependent cases: the adapter dispatched a Path but bound its exact
+process audit to a string. CPython normalizes that value on Windows only.
+The dispatch now passes the same string on both platforms; audit checks and
+effect permissions are unchanged. Independent actual-source POSIX execution
+stopped at an inert audit sentinel before any spawn and reproduced then
+resolved the mismatch. Fresh Windows validation passes the unchanged 137
+cases with zero issues/denials, plus all 17 prior effect controls and a new
+exact-string dispatch assertion. Hosted Linux validation remains required.
+
+## 2026-11-05 — Keep quality STOP state inside each fixture
+
+Hosted CI runs the stdlib 15 before the direct reply 112. The rejected-draft
+fixture reached the real quality latch and left its default STOP for the next
+step, correctly blocking three history tests before durable reservation. A
+two-process replay sharing one private STOP reproduced the exact three hosted
+failures (109 passed); the preceding stdlib 15 passed. Both fixture owners now
+use restoring private STOP/gate state. The rejected-draft control additionally
+asserts the actual persisted incident reason, scope and receipt identity.
+The identical bounded runner in a fresh directory passes 15 then 112 with the
+original case inventories, zero errors/skips or denied effects. No production
+gate, STOP state, delivery assertion or effect allowance changed.
+
+## 2026-11-05 — Visual evidence does not rewrite delivery
+
+Added 9 actual-definition controls for typed optional visual observations.
+Qualified RED: 8 assertion failures, 1 pass. GREEN: 69 combined cases, retaining
+the prior quality/memory 60 case inventory, with zero failures/errors/skips or
+denied effects. Initial canonical-registry admission refusals produced no test
+execution and remain separate from RED. Independent source review confirmed
+only the processor's observation and delivery-result handling changed in this
+layer. No screenshots or inspection content are committed; live model and
+published-reply verification remain separate gates.
+
+## 2026-11-05 — Modern Studio identity qualification
+
+Initial 71 actual-source JavaScript cases in `test_studio_row_identity.py` used
+one bounded fixed Node fixture. The unchanged-base RED run had 35 assertion
+failures, 34 passes and no errors/skips/denied effects. An initial repair run
+exposed exact-content selector priority versus a generic content wrapper; that
+run is retained. After preserving exact comment-text priority, all initial 69
+passed. Two review-held controls reproduced inner native-comment borrowing and
+class-based-reply/zero-widget contradiction (RED71: 2 failures, 69 passes).
+Historical GREEN71 and the unchanged 112 reply + 53 context case inventories pass
+under the independently admitted exact-program guards with zero issues/denials.
+The controls bind extraction through one final synthetic Submit and preserve
+strict creator-ID readback, historical-match and unknown-history boundaries.
+
+Only the two existing legacy DOM constants gain native ancestry/query support;
+whole-module AST reversal proves all other definitions/assertions unchanged.
+No new literal runs under a generic subprocess allowance. Current browser DOM
+observation is separate evidence; no public comment or creator-schema delivery
+was attempted by these tests.
+
+The retained adjacent assertion caught first-versus-last URL selection for
+repeated same-video anchors; preserving the original first URL repaired it
+without altering the assertion. One precollection attempt hit Windows WMI's
+`readline`/platform fallback to an unadmitted subprocess; the guard correctly
+denied it. That attempt is retained and excluded from test counts. One fresh
+identical-guard retry produced the qualified RED71; no guard exception was added.
+
+Native toolbar/expanded-control/creator observations then replaced the earlier
+synthetic direct-parent assumption. The original 71 assertions/parameters remain;
+117 creator/receiving/toolbar cases first produced 35 assertion failures, then
+passed. Review's second-container omission control failed once among 118 before
+the conservative multiple-container refusal. Final Studio118 passes.
+
+The separate fixed `EDITOR_DOM` ran actual clear/append/read/micro-edit scripts:
+RED16 was eight native textarea failures/eight contenteditable passes; property
+repair passed all 16. Three appended actual-definition loop controls produced
+two failures (lost micro-edited character and continued foreign recovered text).
+Prefix verification and index rewind repair them. Final editor19 passes, giving
+137 combined, zero failures/errors/skips/denied effects. Original editor16 AST
+and literal are retained; no new process/provider authority was added. The
+composed final adjacent 165 also pass, preserving the original 112/53 case-name
+digests and assertions. Its initial four fixture-contract failures are retained:
+two sender doubles needed the now-explicit `livechat` STOP scope (two stronger
+scope assertions added), and a typing double needed the exact new value/text
+getter. No runtime gate, old assertion or case name was weakened.
+
+## 2026-11-05 — Use neutral grounding data in the memory fixture
+
+PR2306 CodeQL flagged domain-substring checks in the synthetic memory fixture.
+Replace that website-shaped datum with one ordinary factual sentence, retaining
+the cold omission/warm supplied-grounding predicates, assertions and case names.
+No URL sanitizer, suppression, runtime behavior or effect boundary is changed.
+The unchanged closed quality adapter passes all 60 cases with the original case
+inventory and zero issues; hosted CodeQL alert closure remains a separate gate.
+
+## 2026-11-05 — Optional memory stays within the caller lifetime
+
+New source-bound readiness controls: original RED22 17 failures/5 passes;
+strengthened RED23 18 failures/5 passes; GREEN23 + unchanged quality37 = 60
+passes, zero errors/skips/denied effects. All prior red artifacts are retained.
+Cold controls explicitly spy/deny both the index constructor and embedding
+loader, beyond the Chroma probe. Warm review snapshots retain supplied memory.
+Event barriers drive history cancellation without a fragile 50ms positive-path
+deadline. Fake model judgments test stage/data flow, not semantic accuracy.
+The existing context fixture migration retains its prior query/title assertions
+and adds exact ready-only/token bindings. Default legacy cold initialization,
+no-new-keyword private calls and zero-vector behavior remain covered separately.
+
+## 2026-11-05 — Inbox completion requires positive evidence
+
+New `test_inbox_completion_evidence.py`: 13 cases. Initial qualified RED: 7
+failures, 4 passes, zero errors/skips. Independent actual-JavaScript review found
+two whitespace bypasses (8/10 passing); two added Python controls failed before
+normalization. Final GREEN 13 plus unchanged quality-stop 24 = 37 passes, zero
+failures/errors/skips or denied effects. Complete production definitions,
+fake DOM/clock and private telemetry test useful confirmed-empty and processed
+positives as well as timeout/error/filtered-empty/race negatives. The filtered
+DOM collaborator models the existing generic node plus explicit message veto;
+no real browser or current-selector verification was performed. The existing
+EffectGuard/run_child mechanisms are unchanged and canonical admission passed.
+Private receipts retain exact source bytes and expanded case names; publication
+and live verification are separate parent-owned gates.
+
+## 2026-11-01 — Current guarded model-routing qualification
+
+Fresh credential-free Windows runs: 63 independently authored routing/composition
+cases; 18 migrated legacy adapter cases (81 combined fixed selector); 165 retained
+and extended comment-context/semantic/history cases plus 12 subtests; 24 existing
+quality-stop controls; 15 stdlib cases; 231 adjacent Gateway/catalog/selection/
+binding/redaction/local-role cases; and the existing isolated 94-case startup
+selection. These overlap and are not additive totals. No failures/errors/skips or
+denied real effects in those selections. Raw output stays private.
+
+Legacy tests explicitly replace the retired direct-provider/forced-slogan and
+template contracts with captured identity, no synchronous model call, Gateway
+delegation, mandatory exact final review and useful approved-answer controls.
+No tests were quarantined or skipped to obtain this result. Production provider
+qualification, signed promotion, daemon startup and public delivery remain
+separate/unverified. Packaging/security and hosted checks have their own receipts.
+
+## 2026-11-01 — Migrate consumer fixtures to shared routing
+
+Existing semantic/context/quality/stdlib selectors retain positive useful replies,
+exact final mentions, cancellation, locks, theme freshness, provider provenance
+and no-post checks. Their explicit model collaborator now represents the Gateway,
+not a direct consumer-owned HTTP/Qwen/xAI client. Historical case names mentioning
+Qwen/Grok are retained for selector continuity; retired-route attributes must not
+gain call authority. A local service failure now expects no embedded fallback.
+Shared routing/security acceptance is independently authored in the AI Gateway
+YouTube consumer suite. Fresh final execution evidence is retained separately;
+no real model, browser or public delivery is claimed.
+
+## 2026-11-01 — Frozen quality-stop and diagnostic controls
+
+New independent 24-case file preserves the original repair selectors. Qualified
+pre-fix source: 18 assertion failures, 6 passes, no errors/skips. Repaired owners:
+24 passes, no errors/skips or denied real effects. Existing semantic/context/
+history: 157 passes and 12 subtests; existing stdlib inspection: 15 passes.
+The fixed new case-name digest is
+`8c6a71ffff1aa89e9458726916745e9c3389f4955f8b38086b34066b417b8822`.
+The test-only worker authored/froze acceptance before production changes; root
+executed under an explicit credential-free child with network and dotenv denies.
+Raw diagnostics stay private. Positive useful-answer and actual no-STOP Submit
+controls guard against an implementation that merely blocks everything. No
+provider/model/daemon/browser/public test was performed.
+
+## 2026-10-29 — Follow-up livechat fallback and bounded caller qualification
+
+Extend the existing `test_reply_semantic_assessment.py` source-bound selection;
+no new test family or weaker source assertions. It now contains 88 collected
+cases covering retained Grok success, four Grok failure modes, exact local HTTP
+receipts, shared-context isolation, full native snapshots, exact final 200-character
+mention review and expiry/supersession/native metadata changes. Added concurrency
+and cancellation controls exercise busy generation/review locks, preserved comment
+serialization, all three HTTP stage failures/cancellations, cancellation during
+news/history/voice preparation, actual caller heartbeat and ten-second timeout
+configuration, late payload discard, no late local fallback, both eligible caller
+identities, and theme clearing without unreviewed fallback. Six malformed native
+theme cases (source ID, handles container/item across main/direct local entry)
+reproduced successful invalid replies before repair and now block all providers.
+
+Final local selector: semantic 88 + unchanged submission history 16 = **104 passed,
+12 subtests passed**, zero failures/errors/skips, Windows CPython3.12. Original
+context selector remains separate at 53 passed; adjacent queue/lifecycle/reader
+116 and stdlib inspection 15 pass separately. Combined 157 is the same context +
+104 scope and must not be added to those counts. JUnit inventory is retained in the
+existing task TEMP evidence root as `followup-repair-results.xml`; exact-case CI
+digest/pins are owned by the publication step. Providers, model judgments and
+browser data are fixtures. A provider thread cannot be killed by await timeout;
+the tests prove result discard and prevention of later stages, not preemption.
+
+One initial caller test supplied a falsey generator and therefore skipped its
+intended branch. An explicit invocation assertion exposed that fixture gap; the
+truthy fixture now executes the real caller. No production assertion was relaxed.
+
+## 2026-10-29 — Windows completion of source repair
+
+Fresh Windows selection: original 53 reply-context plus 116 adjacent queue,
+lifecycle and control-plane cases pass. New semantic and submission-history
+selectors use real source definitions, real temporary SQLite files and synthetic
+browser/provider collaborators. The 15-case stdlib selection also passes.
+Independent fresh-context review reproduced original wrong-video/author binding
+and coder-model selection defects before their fixes. New positive controls
+exercise useful grounded draft approval, stable creator-reply readback and actual
+ChatSender payload handling; negative controls cover restart uncertainty,
+concurrent claims, stale theme at final submit/send, foreign origin and private
+instruction leaks. No public YouTube action or actual model judgment is claimed.
+
+## 2026-10-29 — Private chat-manifest and reply-inspection candidate
+
+New explicit stdlib selector: `python -B -m unittest discover -s modules/communication/video_comments/tests -p test_chat_manifest_inspection.py -v`.
+15 cases pass locally on CPython 3.12 with no third-party packages. Complete source definitions are compiled with controlled collaborators; temporary queue files are real. Providers, browser readback and the queue lock are fixtures. The actual no-post path is exercised for a rejected draft. Tests reproduce UI-TARS model rejection, uncertain stance, malformed/low-scoring reviews, private context activation, replay suppression, explicit announcements, theme prompt consumption and click-without-readback rejection. These are offline regressions, not observed model quality, Chrome selectors, durable crash safety, or live delivery.
+
+The original 53-case selector is retained; its fixtures are adapted for role validation and the new review/posting boundary, without claiming those fixtures test the inspector. Its full run and the 116 adjacent cases remain unrun here because pytest is unavailable. The broad registry and exact-case CI admission still require the owning runtime's qualification. No historical pass count is reused as a current result.
+
+
+## 2026-10-23 — PR1478 source-bound offline reconciliation
+
+Base `0d3f715bb475c6451e8f23243f43f1adf057cb0f`; original PR head
+`5f8c73453559625500f3023f23331e5e44020712` preserved in the merge ancestry.
+The pre-edit inventory below preceded extensions to the existing seven tests.
+
+- Original controlled regression selection: 8 passed, 10 failed. The seven
+  original assertions pass and are preserved as AST-equivalent assertions.
+- Final selector: 53 passed, no failures/errors/skips. Independent review found
+  ambiguous metadata IDs; its new two-case control failed once before repair,
+  then both passed. Conflicting IDs now clear title, ID and URL.
+- Existing operator queue/lifecycle/shared-context selection: 116 passed.
+- Extraction parity: 96 complete prompt and ten personality comparisons match.
+  The later ambiguity repair intentionally changes row-link selection only.
+- Independent held-outs exercise active timeout, queued cancellation, later
+  recovery, malformed results, cross-thread lock recovery and hostile links.
+  Final extraction review passed separately: 11 synthetic DOM rows, two JS
+  mutations, capture-lock mutation, real source-bound Skill0/emoji attribution,
+  actual pure-helper imports and three DAE call expressions. An independent
+  128-prompt matrix and complete personality/system/semantic data agree.
+- Eight manifest tests and Node backend/package contracts pass. Independent
+  regeneration review accepts all 1453 source hashes, paired pins, unchanged
+  byte limit and preserved registry quarantine. CI inventory controls accept
+  valid XML and reject skipped, removed, renamed, error and empty variants.
+  Hosted acceptance remains a separate exact-head gate.
+
+Exact commands, raw logs, XML, source hashes, failed controls and review records
+are retained in the existing `pr-reconciliation-20261021/refresh` evidence root:
+`pr1478-builder-ambiguity-freeze.json`, `pr1478-parent-final.xml`,
+`pr1478-adjacent-tests.xml`, `pr1478-extraction-parity.json` and the independent
+review receipts. No new evidence store or memory-ingestion claim is introduced.
+The test README records the supported selector and effect/timeout limits.
+The CI case-identity hash is `909f31dfc4a764e43cf1ae618ee2e03fcd4a14a02ddb803ff6c85ef5cfd77c6f`.
+
+
+## 2026-10-23 — PR1478 pre-edit inventory and qualification boundary
+
+Read the restored original `test_reply_context_pipeline.py` (171 lines, seven
+functions) before extending it. It imports the real generator and processor
+modules, constructs instances with `object.__new__`, and supplies a fake Qwen,
+VoiceMemory, generator and driver. Its seven original assertions cover:
+
+- Full comment, guidance, video title, history and memory in the embedded prompt;
+  stop tokens and recorded Qwen label.
+- Video title plus comment in the VoiceMemory query.
+- Existing semantic-pattern text without automatic troll attribution.
+- Row video title and receiving-channel forwarding at both boundaries.
+- A mocked driver returning prebuilt video fields (the JavaScript is not run).
+- A small label sample rejecting generic/unknown output.
+
+The original tests do not establish import-time confinement, the actual
+processor's no-post path, overlapping/timed-out generations, complete label
+validation or real DOM extraction. Historical seven-pass output is not current
+qualification. Extend this existing file with isolated providers/state and
+explicit effect controls; do not run the historical classifier command against
+the real profile store. The prior PR1759 inventory and 53 reader cases below
+remain intact. Current outcome: qualification in progress; no new pass claim.
+
+
+## 2026-10-22 — PR #1759 inventory recovery and reader regressions
+
+**Work-order correction:** this file was absent when the reader tests were
+authored and run. Review identified the missed WSP 97 section 1.2B inventory gate.
+This inventory was recovered during review by reading the actual eight
+pre-existing test files, their functions, and effect/mock boundaries. It is not
+backdated pre-authoring evidence. Runtime source and reader tests stayed frozen
+during this documentation correction.
+
+The pre-existing inventory is bound to base
+`02d1c7c14c60487619287a9cb753ff3ddaa53c14`. The directory now contains those eight
+files plus `test_commenting_control_plane.py`; `__init__.py` is package support.
+The older README omitted `test_ytr1_runtime_hardening.py`. No pass count is
+inferred from filenames, docstrings, or source inspection.
+
+### Current inventory and reuse boundaries
+
+| File | Coverage and reuse target | Effects, limits, and status for this slice |
+| --- | --- | --- |
+| `test_classifier_pipeline.py` | Five functions cover whacked-user tracking, classification timing, confidence by whack count, unknown-user defaults, and profile-to-classifier routing. Reuse for classification/profile integration. | Calls real `get_profile_store()`, `record_whacked_user()` and `get_classifier()` without temporary storage. Checks return booleans for `run_all_tests()` instead of pytest assertions; timing above the nominal threshold still returns success. Stateful; not run. |
+| `test_like_single_comment.py` | `test_like_single_comment()` discovers channel uploads/comments and invokes `like_comment()`; heart behavior is described in logs. Reuse for an explicitly scoped capability probe. | Real authentication and API reads, followed by the action helper. Logged API limitations do not make execution offline. Not run. |
+| `test_llm_integration.py` | `TestLLMIntegration`, `TestBackwardCompatibility`, and `TestWSPCompliance` cover fallback/errors, mocked responses, prompt structure, response length, dialogue history, missing-LLM behavior, public signatures, and module reuse. | Selected connector responses are mocked, but many real constructors run before replacement; ambient provider configuration and constructor/import effects are not isolated for the whole file. The dialogue case constructs its subsystem with a mock YouTube service. Partial mocks; not run. |
+| `test_move2japan_access.py` | `test_move2japan_access()` reads channel metadata, uploads, recent videos, and comments. The final posting check is descriptive logging, not a posting assertion. | Authenticated live API reads and quota use, without a local network boundary. Readiness logs do not establish posting capability. Not run. |
+| `test_poc_dialogue.py` | `CommentDialoguePOC.initialize()`, `run_poc()`, `display_status()`, and `test_specific_video()` wire realtime monitoring and status output; the CLI selects the PoC flow. | Authenticates, constructs `RealtimeCommentDialogue`, and starts monitoring that may auto-reply. The status loop is ongoing. Operational demo, not a bounded pytest acceptance suite. Not run. |
+| `test_post_comment.py` | `post_comment_on_video()` selects a video and submits a top-level comment; `test_comment_capabilities()` calls it. | Real authentication, reads, and `commentThreads().insert(...).execute()` publication. Normal pytest collection can execute the top-level test function. Not run. |
+| `test_reply_to_comment.py` | `test_reply_to_comment()` finds a comment and invokes `reply_to_comment()`; `demonstrate_reply_capability()` drives the demo. | Real authentication, API reads, and reply publication. Logging a sample request after quota failure is not delivery evidence. Not run. |
+| `test_ytr1_runtime_hardening.py` | Eleven methods in `TestTTSModelExclusion`, `TestTTSTokenRejection`, `TestDefaultTopic`, and `TestStaleElementRecovery` cover text-model selection, audio-token rejection/numeric parsing, topic defaults, and single/double stale-element handling in the reply executor. | Selected HTTP calls and Selenium driver methods are mocked; production constructors/imports still run. Stale tests use a mock driver, not a real browser. Separate boundary qualification is needed before claiming whole-file offline execution. Not run in this reader slice. |
+| `test_commenting_control_plane.py` | 53 parameterized cases cover shared schema/version, surfaces/message/expiry types and boundaries, configured paths across CWD changes, read-only shared precedence, malformed/missing-state fallback, local set/clear, and edits under active shared context followed by expiry/clear. Reuse for reader/storage contracts. | Temporary state and controlled time; actual queue resolver/constructor and reader. Relative-path fixture uses a temporary checkout root. No queue dispatch, account/model/browser calls. 53 passed in the measured run below; local fixture evidence only. |
+
+### Reuse decision
+
+None of the eight pre-existing files covers file-backed broadcast/context
+resolution or legacy-setting mutation. A cohesive reader test file was warranted;
+its follow-up persistence regressions extend that same file. Recovering this
+missing owner artifact does not erase the initial ordering failure.
+
+### Measured reader history
+
+- Initial strict-reader suite: **47 passed**, zero failures/errors/skips, 0.92s.
+  It did not cover edits while shared context was active.
+- Independent whole-path review found that `set_promo()` read the merged view
+  and could copy expiring shared text into non-expiring legacy storage. Six new
+  regressions produced **6 failed, 47 passed**, 0.60s before repair.
+- After legacy mutators were changed to read only local stored state:
+  **53 passed**, zero failures/errors/skips, 0.64s. Cases include existing and
+  missing legacy state, expiry and explicit shared clearing, original local
+  message/enablement preservation, and local-clear provenance.
+
+Execution used Windows `C:/Python312/python.exe` (CPython 3.12.2), with
+`PYTHONDONTWRITEBYTECODE=1`, `PYTHONUTF8=1`, `PYTHON_DOTENV_DISABLED=1`, and
+`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`:
+
+```text
+C:/Python312/python.exe -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -o addopts= modules/communication/video_comments/tests/test_commenting_control_plane.py -q --tb=short
+```
+
+Local receipts are under
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1759-comment-context/`:
+`reader-qualification-receipt.json`, `reader-qualification-initial-47pass.json`,
+`reader-tests.xml`, `persistence-before.xml`, and `persistence-after.xml`, with
+matching logs. The receipt records source hashes observed after execution.
+No whole-module coverage, hosted CI, production delivery, native-worker, or OS
+sandbox result is claimed here.
+
+Holo retrieval reported `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, freshness
+`UNKNOWN`, and an index gap. Source/Git fallback and the missing-artifact
+correction are explicit; no index rebuild or model call was used.
+
+Applicable ownership: WSP 22 (test history), WSP 50 (source verification),
+WSP 84 (reuse), and WSP 97 section 1.2B (inventory before test authoring).
+

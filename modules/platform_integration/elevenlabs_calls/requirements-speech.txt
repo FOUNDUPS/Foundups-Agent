@@ -1,0 +1,5 @@
+# Reuses infrastructure/cli capture and communication/voice_command_ingestion.
+numpy>=1.24,<3
+sounddevice>=0.5,<1
+faster-whisper>=1.1,<2
+# --stt cohere uses the existing local Cohere installation/model configuration.

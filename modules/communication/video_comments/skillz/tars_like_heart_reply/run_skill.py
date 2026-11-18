@@ -97,6 +97,15 @@ def _resolve_channel_id(channel_arg: str) -> str:
 DEFAULT_CHANNEL = os.getenv("MOVE2JAPAN_CHANNEL_ID", "UC-LSSlOZwpGIRIYihaz8zCw")  # Move2Japan
 
 
+def _final_heartbeat(result):
+    """A comments halt is a distinct settled outcome, including failed persistence."""
+    import time
+    from modules.communication.livechat.src.automation_gates import comments_exit_code
+    stats = result.get('stats', {}) if isinstance(result, dict) else {}
+    return {'timestamp': time.time(), 'comments_processed': stats.get('comments_processed', 0),
+            'state': 'halted' if comments_exit_code(result) else 'completed'}
+
+
 async def main():
     parser = argparse.ArgumentParser(
         description="0102 Autonomous Comment Engagement",
@@ -357,6 +366,13 @@ Or use individual switches for custom configuration.
     multiplier = tempo_multipliers.get(tempo, '1.0x')
     logger.info(f"[DAEMON][DAE-INIT]   engagement_tempo: {tempo} (multiplier: {multiplier})")
 
+    from modules.communication.livechat.src.automation_gates import comment_stop_result
+    halted = comment_stop_result()
+    if halted:
+        if args.json_output:
+            import json
+            print(json.dumps(halted))
+        return halted
     dae = CommentEngagementDAE(
         channel_id=args.channel,
         video_id=args.video,
@@ -455,11 +471,7 @@ Or use individual switches for custom configuration.
                     from pathlib import Path
                     import json
                     import time
-                    final_data = {
-                        "timestamp": time.time(),
-                        "comments_processed": result.get("stats", {}).get("comments_processed", 0) if 'result' in dir() else 0,
-                        "state": "completed",
-                    }
+                    final_data = _final_heartbeat(result if 'result' in dir() else None)
                     Path(args.heartbeat_file).write_text(json.dumps(final_data))
                 except Exception:
                     pass
@@ -470,4 +482,5 @@ Or use individual switches for custom configuration.
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    from modules.communication.livechat.src.automation_gates import comments_exit_code
+    raise SystemExit(comments_exit_code(asyncio.run(main())))

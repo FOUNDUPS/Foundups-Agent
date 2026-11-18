@@ -1,5 +1,12 @@
 # WRE Master Orchestrator - Development Roadmap
 
+## Local execution admission checkpoint — 2026-09-15
+
+Per-invocation fingerprint handoff is locally verified and shared skill-name
+admission state is removed. The [WRE roadmap](../ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
+owns the next OpenClaw cache content/policy candidate at 16/P0. Full coordinator
+concurrency and the historical consolidation tasks below remain open.
+
 ## Current State: POC (1.1.1)
 - Basic pattern memory implementation
 - Plugin architecture designed

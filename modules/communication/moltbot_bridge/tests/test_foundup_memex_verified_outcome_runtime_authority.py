@@ -5,9 +5,12 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -57,8 +60,12 @@ from modules.communication.moltbot_bridge.src.reddog_signed_receipt_chain import
     build_receipt_payload_for_signing,
 )
 from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+    RedDogVerifiedPatternMemorySink,
     reddog_verified_pattern_memory_record_digest,
     reddog_verified_pattern_memory_record_id,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_verified_pattern_memory_sink import (
+    _seed_active,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PREFIX_RECEIPT,
@@ -153,7 +160,8 @@ def _store(tmp_path: Path) -> AuthorityRuntimeVerifiedOutcomeStore:
             tmp_path / "authority.json",
             allowed_root=tmp_path,
             repo_root=REPO_ROOT,
-        )
+        ),
+        accepted_outcome_source=RedDogVerifiedPatternMemorySink(tmp_path / "memory.db"),
     )
 
 
@@ -209,19 +217,7 @@ def _publish(
     record = record or _record()
     verifier = _verifier_receipt()
     held_out = _held_out_receipt(verifier)
-    publisher = SignedVerifiedOutcomeEvidencePublisher(
-        store=store,
-        signer=_Signer(),
-        signature_verifier=_DigestSignatureVerifier(),
-        issuer_principal_id=PRINCIPAL_ID,
-        issuer_principal_provider=PRINCIPAL_PROVIDER,
-        reddog_id=REDDOG_ID,
-        signer_public_key=PUBLIC_KEY,
-        key_epoch=KEY_EPOCH,
-        authority_tier=AUTHORITY_TIER,
-        consensus_receipt_digest=CONSENSUS_DIGEST,
-        trusted_now_epoch=lambda: NOW,
-    )
+    publisher = _publisher(store)
     record_id = reddog_verified_pattern_memory_record_id(record)
     assert (
         publisher.publish(
@@ -234,8 +230,309 @@ def _publish(
     )
     assert store.load_envelope(record_id) is None
     if activate:
+        _seed_active(tmp_path / "memory.db", record_id, record)
         assert publisher.activate(record_id) == record_id
     return store, record, verifier, held_out, _reference(record)
+
+
+def _publisher(
+    store: AuthorityRuntimeVerifiedOutcomeStore, *, now_epoch: int = NOW
+) -> SignedVerifiedOutcomeEvidencePublisher:
+    return SignedVerifiedOutcomeEvidencePublisher(
+        store=store,
+        signer=_Signer(),
+        signature_verifier=_DigestSignatureVerifier(),
+        issuer_principal_id=PRINCIPAL_ID,
+        issuer_principal_provider=PRINCIPAL_PROVIDER,
+        reddog_id=REDDOG_ID,
+        signer_public_key=PUBLIC_KEY,
+        key_epoch=KEY_EPOCH,
+        authority_tier=AUTHORITY_TIER,
+        consensus_receipt_digest=CONSENSUS_DIGEST,
+        trusted_now_epoch=lambda: now_epoch,
+    )
+
+
+def _publication_attempt(tmp_path: Path) -> tuple:
+    store = _store(tmp_path)
+    record, verifier = _record(), _verifier_receipt()
+    request = dict(
+        record_id=reddog_verified_pattern_memory_record_id(record), record=record,
+        verification_receipt=verifier, held_out_receipt=_held_out_receipt(verifier),
+    )
+
+    class SingleUseSigner(_Signer):
+        def __init__(self) -> None:
+            self.requests = []
+
+        def sign(self, request: SigningRequest) -> SigningResponse:
+            self.requests.append(request)
+            assert len(self.requests) == 1, "publication requested another signing use"
+            return super().sign(request)
+
+    signer = SingleUseSigner()
+    publisher = replace(_publisher(store, now_epoch=NOW + 1), signer=signer)
+    return store, publisher, signer, request
+
+
+@pytest.mark.parametrize("conflicts", [1, 2])
+def test_publication_commit_retries_preserve_signature_and_other_updates(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, conflicts: int,
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    raw = store._store
+    commit, attempts = raw.commit, []
+
+    def competing_update(snapshot: dict, *, expected_revision: str | None) -> str:
+        attempts.append(copy.deepcopy(snapshot))
+        if len(attempts) <= conflicts:
+            other = raw.load()
+            other["concurrent_updates"] = len(attempts)
+            commit(other, expected_revision=other.get("revision"))
+        return commit(snapshot, expected_revision=expected_revision)
+
+    monkeypatch.setattr(raw, "commit", competing_update)
+    assert publisher.publish(**request) == request["record_id"]
+    envelope = store.load_publication(request["record_id"])
+    assert len(signer.requests) == 1 and len(attempts) == conflicts + 1
+    assert raw.load()["concurrent_updates"] == conflicts
+    assert all(
+        attempt["foundup_memex_verified_outcome_authority"]["evidence"][request["record_id"]]["envelope"] == envelope
+        for attempt in attempts
+    )
+    receipt = envelope["signed_receipts"][0]
+    assert receipt["issued_at"] == NOW + 1
+    assert receipt["signature"] == _signature(PUBLIC_KEY, signer.requests[0].signing_input)
+    assert store.load_envelope(request["record_id"]) is None
+
+
+@pytest.mark.parametrize("error_type", [RuntimeError, OSError])
+def test_publication_commit_recovers_lost_acknowledgment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, error_type: type[Exception],
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    commit, durable = store._store.commit, []
+
+    def commit_then_fail(snapshot: dict, *, expected_revision: str | None) -> str:
+        commit(snapshot, expected_revision=expected_revision)
+        durable.append((tmp_path / "authority.json").read_bytes())
+        raise error_type("publication_ack_lost")
+
+    monkeypatch.setattr(store._store, "commit", commit_then_fail)
+    assert publisher.publish(**request) == request["record_id"]
+    assert len(signer.requests) == len(durable) == 1
+    assert (tmp_path / "authority.json").read_bytes() == durable[0]
+    assert store.load_publication(request["record_id"]) is not None
+    assert store.load_envelope(request["record_id"]) is None
+
+
+@pytest.mark.parametrize("activate_winner", [False, True], ids=["staged", "active"])
+def test_publication_commit_reconciles_valid_competing_first_publisher(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, activate_winner: bool,
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    commit, winner_bytes = store._store.commit, []
+
+    def commit_after_winner(snapshot: dict, *, expected_revision: str | None) -> str:
+        winner = _publisher(_store(tmp_path), now_epoch=NOW)
+        assert winner.publish(**request) == request["record_id"]
+        if activate_winner:
+            _seed_active(tmp_path / "memory.db", request["record_id"], request["record"])
+            winner.activate(request["record_id"])
+        winner_bytes.append((tmp_path / "authority.json").read_bytes())
+        return commit(snapshot, expected_revision=expected_revision)
+
+    monkeypatch.setattr(store._store, "commit", commit_after_winner)
+    assert publisher.publish(**request) == request["record_id"]
+    assert len(signer.requests) == len(winner_bytes) == 1
+    assert (tmp_path / "authority.json").read_bytes() == winner_bytes[0]
+    assert store.load_publication(request["record_id"])["signed_receipts"][0]["issued_at"] == NOW
+    assert (store.load_envelope(request["record_id"]) is not None) == activate_winner
+
+
+@pytest.mark.parametrize("change", ["record", "principal", "signature", "key_epoch"])
+def test_publication_commit_rejects_invalid_competing_evidence(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str,
+) -> None:
+    source, _record_value, _verifier, _held_out, reference = _publish(tmp_path / "source")
+    envelope = source.load_envelope(reference.record_id)
+    if change == "record":
+        envelope["record"]["tampered"] = True
+    elif change == "principal":
+        envelope["issuer_principal_id"] = "another-principal"
+    elif change == "signature":
+        envelope["signed_receipts"][0]["signature"] = "invalid"
+    else:
+        envelope["key_epoch"] = "another-epoch"
+    envelope.pop("envelope_digest")
+    envelope["envelope_digest"] = _digest(envelope)
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    commit, winner_bytes = store._store.commit, []
+
+    def commit_after_invalid_winner(snapshot: dict, *, expected_revision: str | None) -> str:
+        _store(tmp_path).publish(envelope)
+        winner_bytes.append((tmp_path / "authority.json").read_bytes())
+        return commit(snapshot, expected_revision=expected_revision)
+
+    monkeypatch.setattr(store._store, "commit", commit_after_invalid_winner)
+    with pytest.raises((RuntimeError, ValueError)):
+        publisher.publish(**request)
+    assert len(signer.requests) == len(winner_bytes) == 1
+    assert (tmp_path / "authority.json").read_bytes() == winner_bytes[0]
+    assert store.load_envelope(request["record_id"]) is None
+
+
+@pytest.mark.parametrize("failure", ["io", "runtime", "conflict"])
+def test_publication_commit_failure_without_evidence_stays_bounded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str,
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    attempts = []
+
+    def fail_commit(snapshot: dict, *, expected_revision: str | None) -> str:
+        attempts.append(snapshot)
+        if failure == "io":
+            raise OSError("publication_io_failure")
+        raise RuntimeError("revision_conflict" if failure == "conflict" else "publication_runtime_failure")
+
+    monkeypatch.setattr(store._store, "commit", fail_commit)
+    with pytest.raises((RuntimeError, OSError)):
+        publisher.publish(**request)
+    assert len(signer.requests) == 1
+    assert len(attempts) == (3 if failure == "conflict" else 1)
+    assert store.load_publication(request["record_id"]) is None
+    assert not (tmp_path / "authority.json").exists()
+
+
+@pytest.mark.parametrize("signal", [KeyboardInterrupt, SystemExit])
+def test_publication_commit_does_not_swallow_cancellation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, signal: type[BaseException],
+) -> None:
+    store, publisher, signer, request = _publication_attempt(tmp_path)
+    commit = store._store.commit
+
+    def commit_then_cancel(snapshot: dict, *, expected_revision: str | None) -> str:
+        commit(snapshot, expected_revision=expected_revision)
+        raise signal()
+
+    monkeypatch.setattr(store._store, "commit", commit_then_cancel)
+    with pytest.raises(signal):
+        publisher.publish(**request)
+    assert len(signer.requests) == 1
+    assert store.load_publication(request["record_id"]) is not None
+    assert store.load_envelope(request["record_id"]) is None
+
+
+def test_publication_commit_recovery_does_not_bypass_signer_rejection(tmp_path: Path) -> None:
+    store, publisher, _signer, request = _publication_attempt(tmp_path)
+
+    class RejectingSigner:
+        def sign(self, _request: SigningRequest) -> SigningResponse:
+            _publisher(_store(tmp_path)).publish(**request)
+            raise ValueError("signer_rejected")
+
+    with pytest.raises(ValueError, match="signer_rejected"):
+        replace(publisher, signer=RejectingSigner()).publish(**request)
+    assert store.load_publication(request["record_id"]) is not None
+    assert store.load_envelope(request["record_id"]) is None
+
+
+@pytest.mark.parametrize("activate", [False, True], ids=["staged", "active"])
+def test_publication_retry_after_process_restart_preserves_exact_evidence(
+    tmp_path: Path, activate: bool
+) -> None:
+    store, record, verifier, held_out, reference = _publish(tmp_path, activate=activate)
+    original_bytes = (tmp_path / "authority.json").read_bytes()
+    # A separate interpreter opens the existing store with a later clock. A retry
+    # acknowledges durable evidence; it must not request another signing use.
+    result = subprocess.run(
+        [
+            sys.executable, "-B", "-c",
+            "from pathlib import Path\n"
+            "import sys\n"
+            "from dataclasses import replace\n"
+            "from modules.communication.moltbot_bridge.tests.test_foundup_memex_verified_outcome_runtime_authority import _store, _publisher, _record, _verifier_receipt, _held_out_receipt, NOW\n"
+            "class NoSigningOnRetry:\n"
+            "    def sign(self, request):\n"
+            "        raise AssertionError('retry requested a new signing use')\n"
+            "store = _store(Path(sys.argv[1]))\n"
+            "record_id = sys.argv[2]\n"
+            "record = _record()\n"
+            "verifier = _verifier_receipt()\n"
+            "held_out = _held_out_receipt(verifier)\n"
+            "publisher = replace(_publisher(store, now_epoch=NOW + 1), signer=NoSigningOnRetry())\n"
+            "assert publisher.publish(record_id=record_id, record=record, verification_receipt=verifier, held_out_receipt=held_out) == record_id\n",
+            str(tmp_path), reference.record_id,
+        ],
+        cwd=REPO_ROOT, capture_output=True, text=True, timeout=30, check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / "authority.json").read_bytes() == original_bytes
+    assert (store.load_envelope(reference.record_id) is not None) is activate
+    if not activate:
+        with pytest.raises(ValueError, match="durable_source_missing"):
+            _authority(store).issue(reference)
+
+
+def test_later_publication_retry_does_not_renew_or_unrevoke_evidence(tmp_path: Path) -> None:
+    store, record, verifier, held_out, reference = _publish(tmp_path)
+    original_bytes = (tmp_path / "authority.json").read_bytes()
+    assert _publisher(store, now_epoch=NOW + 601).publish(
+        record_id=reference.record_id, record=record,
+        verification_receipt=verifier, held_out_receipt=held_out,
+    ) == reference.record_id
+    assert (tmp_path / "authority.json").read_bytes() == original_bytes
+    with pytest.raises(ValueError, match="expired"):
+        _authority(store, now_epoch=NOW + 601).issue(reference)
+    with pytest.raises(ValueError, match="signer_revoked"):
+        _authority(store, revocation_oracle=_RevocationOracle(True)).issue(reference)
+
+
+@pytest.mark.parametrize("field,value", [
+    ("issuer_principal_id", "another-principal"),
+    ("issuer_principal_provider", "another-provider"),
+    ("reddog_id", "another-reddog"),
+    ("signer_public_key", "another-key"),
+    ("key_epoch", "another-epoch"),
+])
+def test_publication_retry_rejects_changed_publisher_identity(
+    tmp_path: Path, field: str, value: str
+) -> None:
+    store, record, verifier, held_out, reference = _publish(tmp_path)
+    original_bytes = (tmp_path / "authority.json").read_bytes()
+    publisher = replace(_publisher(store, now_epoch=NOW + 1), **{field: value})
+    with pytest.raises(ValueError, match="verified_outcome_evidence_conflict"):
+        publisher.publish(
+            record_id=reference.record_id, record=record,
+            verification_receipt=verifier, held_out_receipt=held_out,
+        )
+    assert (tmp_path / "authority.json").read_bytes() == original_bytes
+
+
+@pytest.mark.parametrize("field,value", [
+    ("signature", "invalid-signature"),
+    ("issued_at", True),
+    ("issued_at", NOW + 2),
+    ("unexpected", True),
+])
+def test_publication_retry_rejects_rehashed_invalid_signed_evidence(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    source, record, verifier, held_out, reference = _publish(tmp_path / "source")
+    envelope = dict(source.load_envelope(reference.record_id))
+    envelope["signed_receipts"][0][field] = value
+    envelope.pop("envelope_digest")
+    envelope["envelope_digest"] = _digest(envelope)
+    store = _store(tmp_path / "invalid")
+    store.publish(envelope)
+    original_bytes = (tmp_path / "invalid" / "authority.json").read_bytes()
+    with pytest.raises(ValueError, match="verified_outcome_evidence_conflict"):
+        _publisher(store, now_epoch=NOW + 1).publish(
+            record_id=reference.record_id, record=record,
+            verification_receipt=verifier, held_out_receipt=held_out,
+        )
+    assert (tmp_path / "invalid" / "authority.json").read_bytes() == original_bytes
+    assert store.load_envelope(reference.record_id) is None
 
 
 def test_staged_evidence_is_not_consumable_before_activation(tmp_path: Path) -> None:
@@ -247,6 +544,7 @@ def test_staged_evidence_is_not_consumable_before_activation(tmp_path: Path) -> 
     with pytest.raises(ValueError, match="durable_source_missing"):
         _authority(store).issue(reference)
 
+    _seed_active(tmp_path / "memory.db", reference.record_id, _record_value)
     assert store.activate(reference.record_id) == reference.record_id
     assert _authority(store).issue(reference) is not None
 
@@ -460,10 +758,16 @@ def test_attacker_rehashed_record_and_envelope_cannot_reuse_signature(
         key_epoch=KEY_EPOCH,
     )
     store.publish(forged)
+    _seed_active(tmp_path / "memory.db", forged_id, forged_record)
     store.activate(forged_id)
 
     with pytest.raises(ValueError, match="signed_digest_mismatch"):
         _authority(store).issue(_reference(forged_record))
+    with pytest.raises(ValueError, match="verified_outcome_evidence_conflict"):
+        _publisher(store, now_epoch=NOW + 1).publish(
+            record_id=forged_id, record=forged_record,
+            verification_receipt=verifier, held_out_receipt=held_out,
+        )
 
 
 def test_signer_policy_binds_exact_canonical_payload() -> None:
@@ -517,3 +821,107 @@ def test_signer_policy_binds_exact_canonical_payload() -> None:
             )
             is None
         )
+
+
+def test_failed_memory_activation_cannot_expose_durable_authority(tmp_path: Path) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_pattern_memory_admission_handler import _activate_published
+    from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_pattern_memory_admission_handler import _CanonicalPatternMemorySink
+    store, record, _verifier, _held_out, reference = _publish(tmp_path, activate=False)
+    sink = _CanonicalPatternMemorySink(activation_fail=True)
+    result = _activate_published(publisher=_publisher(store), sink=sink,
+        payload={}, record=record, record_id=reference.record_id)
+    assert result["pattern_memory_write_performed"] is False
+    assert store.load_envelope(reference.record_id) is None
+    with pytest.raises(ValueError, match="durable_source_missing"):
+        _authority(store).issue(reference)
+    assert sink.records == []
+
+
+def test_unbound_acceptance_source_hides_preexisting_active_evidence(tmp_path: Path) -> None:
+    store, record, _verifier, _held_out, reference = _publish(tmp_path)
+    unbound = AuthorityRuntimeVerifiedOutcomeStore(store._store)
+    original = (tmp_path / "authority.json").read_bytes()
+    assert unbound.load_envelope(reference.record_id) is None
+    assert unbound.load_verified_outcome(reference.record_id) is None
+    with pytest.raises(ValueError, match="acceptance_source_required"):
+        unbound.activate(reference.record_id)
+    with pytest.raises(ValueError, match="durable_source_missing"):
+        _authority(unbound).issue(reference)
+    assert unbound.load_publication(reference.record_id)["record"] == record
+    assert (tmp_path / "authority.json").read_bytes() == original
+
+
+@pytest.mark.parametrize("active", [False, True])
+@pytest.mark.parametrize("failure", ["missing", "changed", "invalid", "read_error"])
+def test_memory_disagreement_rejects_activation_and_readback(tmp_path, monkeypatch, active, failure):
+    store, record, _verifier, _held_out, reference = _publish(tmp_path, activate=active)
+    original = (tmp_path / "authority.json").read_bytes()
+    def load(_record_id):
+        assert _record_id == reference.record_id
+        if failure == "read_error":
+            raise OSError("fixture storage failure")
+        return {"missing": None, "changed": {**record, "unexpected": True}, "invalid": True}[failure]
+    monkeypatch.setattr(store, "_accepted_outcome_source", SimpleNamespace(load_verified_outcome=load))
+    with pytest.raises(ValueError, match="accepted_record_mismatch|acceptance_source_unavailable"):
+        store.activate(reference.record_id)
+    assert store.load_envelope(reference.record_id) is None
+    assert store.load_verified_outcome(reference.record_id) is None
+    with pytest.raises(ValueError, match="durable_source_missing"):
+        _authority(store).issue(reference)
+    assert (tmp_path / "authority.json").read_bytes() == original
+
+
+def test_memory_staging_is_not_accepted_record_evidence(tmp_path: Path) -> None:
+    store, record, _verifier, _held_out, reference = _publish(tmp_path, activate=False)
+    assert store._accepted_outcome_source.stage_verified_outcome(record) == reference.record_id
+    original = (tmp_path / "authority.json").read_bytes()
+    with pytest.raises(ValueError, match="accepted_record_mismatch"):
+        store.activate(reference.record_id)
+    assert store.load_envelope(reference.record_id) is None
+    assert (tmp_path / "authority.json").read_bytes() == original
+    _seed_active(tmp_path / "memory.db", reference.record_id, record)
+    assert store.activate(reference.record_id) == reference.record_id
+    assert _store(tmp_path).load_verified_outcome(reference.record_id) == record
+
+
+def test_memory_loss_at_authority_commit_is_unacknowledged_and_retryable(tmp_path, monkeypatch):
+    store, record, _verifier, _held_out, reference = _publish(tmp_path, activate=False)
+    _seed_active(tmp_path / "memory.db", reference.record_id, record)
+    source, commit = store._accepted_outcome_source, store._store.commit
+    calls = []
+    def lose_memory_after_commit(*args, **kwargs):
+        value = commit(*args, **kwargs)
+        calls.append(True)
+        monkeypatch.setattr(store, "_accepted_outcome_source", SimpleNamespace(load_verified_outcome=lambda _id: None))
+        return value
+    monkeypatch.setattr(store._store, "commit", lose_memory_after_commit)
+    with pytest.raises(ValueError, match="accepted_record_mismatch"):
+        store.activate(reference.record_id)
+    assert calls == [True]
+    original = (tmp_path / "authority.json").read_bytes()
+    assert store.load_envelope(reference.record_id) is None
+    assert store.load_publication(reference.record_id)["record"] == record
+    monkeypatch.setattr(store, "_accepted_outcome_source", source)
+    assert store.activate(reference.record_id) == reference.record_id
+    assert store.load_verified_outcome(reference.record_id) == record
+    assert calls == [True] and (tmp_path / "authority.json").read_bytes() == original
+
+
+@pytest.mark.parametrize("source", [True, {"activation_ready": True}])
+def test_acceptance_readiness_marker_is_not_a_record_source(tmp_path, source):
+    store = _store(tmp_path)
+    with pytest.raises(ValueError, match="acceptance_source_invalid"):
+        AuthorityRuntimeVerifiedOutcomeStore(store._store, accepted_outcome_source=source)
+
+
+def test_acceptance_read_preserves_cancellation_without_mutation(tmp_path, monkeypatch):
+    store, _record_value, _verifier, _held_out, reference = _publish(tmp_path)
+    original = (tmp_path / "authority.json").read_bytes()
+    def cancelled(_record_id):
+        raise KeyboardInterrupt("fixture cancellation")
+    monkeypatch.setattr(store, "_accepted_outcome_source", SimpleNamespace(load_verified_outcome=cancelled))
+    with pytest.raises(KeyboardInterrupt):
+        store.activate(reference.record_id)
+    with pytest.raises(KeyboardInterrupt):
+        store.load_envelope(reference.record_id)
+    assert (tmp_path / "authority.json").read_bytes() == original

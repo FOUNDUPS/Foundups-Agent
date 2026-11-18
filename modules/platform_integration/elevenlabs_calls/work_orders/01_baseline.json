@@ -1,0 +1,74 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "verifier",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "QA",
+  "S": {
+    "owner": "modules/platform_integration/elevenlabs_calls",
+    "read": [
+      "modules/platform_integration/elevenlabs_calls/src",
+      "modules/platform_integration/elevenlabs_calls/tests",
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "write": []
+  },
+  "M": "qa",
+  "T": "JP-CALL-01",
+  "R": [
+    0,
+    5,
+    6,
+    21,
+    22,
+    34,
+    84,
+    97,
+    99
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "single_carrier_adapter": true,
+    "delivery_requires_external_confirmation": true,
+    "automatic_redial": false,
+    "effect_boundary": "Offline only; no provider writes or calls."
+  },
+  "O": [
+    "baseline report with commit and exact test output",
+    "work_orders/results/JP-CALL-01.json (redacted; coordinator integrates)"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Credential disclosure risk",
+    "Attempt to claim unobserved live success"
+  ],
+  "X": {
+    "status": "ready",
+    "created_utc": "2026-09-11T00:00:00Z",
+    "timestamp_precision": "date; midnight is a date marker, not execution time",
+    "baseline_commit": "196976aea3516426552238e70be54e015c397999",
+    "depends_on": [],
+    "objective": "Reproduce the existing prototype baseline and identify concrete gaps without rebuilding it.",
+    "steps": [
+      "Bind the current candidate commit and inspect AGENTS.md plus module interfaces and existing test inventory.",
+      "Run the scoped command in tests/README.md; inspect preview, duplicate suppression, ambiguous submission and profile drift behavior.",
+      "Compare results with the historical 91-test baseline and report changes with evidence."
+    ],
+    "acceptance": [
+      "Scoped tests pass on the bound commit or every failure is classified with a reproducer.",
+      "Baseline report distinguishes mocked provider/model boundaries from live behavior."
+    ],
+    "token_budget": {
+      "analysis": 2500,
+      "planning": 1500,
+      "implementation": 2500,
+      "documentation": 2000
+    },
+    "coherence": {
+      "required_threshold": 0.618,
+      "measured": null
+    },
+    "rollback": "Revert only owned changes; preserve journal and evidence. Reconcile any external effects; never automatically redial."
+  }
+}

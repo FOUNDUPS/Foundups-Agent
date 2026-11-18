@@ -300,6 +300,23 @@ GROK_MODELS: Dict[str, ModelInfo] = {
 # OPENROUTER MODELS (explicit AutoResearch / RedDog evaluation)
 # =============================================================================
 OPENROUTER_MODELS: Dict[str, ModelInfo] = {
+    # Observed by the existing public catalog owner on 2026-11-01. These are
+    # evaluation candidates; neither this registry nor free pricing promotes them.
+    "google/gemma-4-26b-a4b-it:free": ModelInfo(
+        model_id="google/gemma-4-26b-a4b-it:free", provider="openrouter",
+        status=ModelStatus.CURRENT,
+        notes="YouTube language evaluation candidate; current catalog and signed promotion required",
+    ),
+    "google/gemma-4-31b-it:free": ModelInfo(
+        model_id="google/gemma-4-31b-it:free", provider="openrouter",
+        status=ModelStatus.CURRENT,
+        notes="YouTube language evaluation candidate; current catalog and signed promotion required",
+    ),
+    "nvidia/nemotron-3.5-lightning:free": ModelInfo(
+        model_id="nvidia/nemotron-3.5-lightning:free", provider="openrouter",
+        status=ModelStatus.CURRENT,
+        notes="YouTube language evaluation candidate; shadow proposal is not production authority",
+    ),
     "z-ai/glm-5.2": ModelInfo(
         model_id="z-ai/glm-5.2",
         provider="openrouter",
@@ -398,6 +415,10 @@ ALL_MODELS: Dict[str, ModelInfo] = {
 # RECOMMENDED MODELS BY TASK
 # =============================================================================
 RECOMMENDED_MODELS = {
+    "youtube_reply": [
+        "google/gemma-4-26b-a4b-it:free", "google/gemma-4-31b-it:free",
+        "nvidia/nemotron-3.5-lightning:free",
+    ],
     # 012's activity routing matrix (primary task types) — Feb 2026 current
     "coding": [
         "claude-opus-4-6", "gpt-5.2-codex", "grok-code-fast-1",

@@ -101,6 +101,7 @@ def query_model_runtime_binding(
     environ: Mapping[str, str] | None = None,
     model_runtime_verifier: Any = None,
     trusted_now_epoch: Any = None,
+    expected_surface: str = EXPECTED_SURFACE,
 ) -> ModelRuntimeBindingQueryReceipt:
     """Return one validated architect model binding or fail closed."""
 
@@ -123,7 +124,7 @@ def query_model_runtime_binding(
     except Exception:
         return _receipt(configured=True, status=STATUS_NOT_READY,
                         reasons=("model_runtime_binding_artifact_invalid",))
-    reasons = runtime_binding_rejections(binding, expected_surface=EXPECTED_SURFACE)
+    reasons = runtime_binding_rejections(binding, expected_surface=expected_surface)
     if reasons:
         return _receipt(configured=True, status=STATUS_NOT_READY,
                         reasons=tuple(reasons))
@@ -156,7 +157,7 @@ def query_model_runtime_binding(
             selection=selection,
             available_providers=providers,
             now=int(clock()),
-            expected_runtime_surface=EXPECTED_SURFACE,
+            expected_runtime_surface=expected_surface,
         )
         endpoints = consume_resolved_runtime_topology(
             topology, trusted_now_epoch=clock

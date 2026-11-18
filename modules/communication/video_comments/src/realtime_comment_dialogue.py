@@ -98,7 +98,7 @@ class RealtimeCommentDialogue:
         # Response generation - Use LLM if available
         if LLMCommentGenerator:
             try:
-                self.llm_generator = LLMCommentGenerator(provider="grok")  # Or "claude", "gpt"
+                self.llm_generator = LLMCommentGenerator()
                 logger.info("[BOT] Using LLM for intelligent comment responses")
             except Exception as e:
                 logger.warning(f"[U+26A0]️ LLM initialization failed: {e}")
@@ -478,36 +478,11 @@ class RealtimeCommentDialogue:
             else:
                 context['personality'] = 'welcoming and helpful'
             
-            # Use LLM if available, otherwise fallback
-            if self.llm_generator:
-                response = self.llm_generator.generate_dialogue_response(
-                    thread, text, author
-                )
-                logger.info(f"[BOT] LLM generated response for {author}")
-            else:
-                # Fallback to template engine
-                response = self.chat_engine.generate_response(
-                    text,
-                    author,
-                    context
-                )
-            
-            # Keep concise for comments
-            if response and len(response) > 400:
-                response = response[:397] + "..."
-            
-            # Add friendly elements for dialogue
-            if len(thread.messages) == 1 and '?' not in text:
-                # First reply - ask a question to encourage dialogue
-                response += " What brings you to the stream today?"
-            elif len(thread.messages) > 3:
-                # Deep in conversation - add emoji occasionally
-                import random
-                if random.random() < 0.3:
-                    emojis = ['[U+1F60A]', '[U+1F44D]', '[CELEBRATE]', '[U+1F4AC]', '[U+1F914]']
-                    response += f" {random.choice(emojis)}"
-            
-            return response
+            # Preserve the exact reviewed text. This legacy nested route remains
+            # unqualified for public use and cannot fill missing identity with templates.
+            if not self.llm_generator:
+                return None
+            return self.llm_generator.generate_dialogue_response(thread, text, author)
             
         except Exception as e:
             logger.error(f"Failed to generate dialogue response: {e}")
