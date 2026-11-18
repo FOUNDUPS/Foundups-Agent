@@ -1,3 +1,9 @@
+## 2026-11-18 — Moshpit receipt privacy and event-date ordering
+
+- Extend the existing `skillz/yumori_moshpit/SKILLz.md`; no second skill, ledger, sender or runtime integration. Use compact action/result/source-link receipts and preserve private manuscripts in their existing owners. Check destination audience before linking.
+- Resolve the actual project/case destination and event's JST date rather than hardcoding YUMORI/today. Replace ambiguous learning-log append wording with evidence-based newest-first insertion; preserve generic conversation ordering.
+- Validation: isolated exact-source projection/renderer synthetic suite: 87 passed. Existing Moshpit registration/projection policy contract against candidate: 1 passed, 24 deselected. Independent scenario review covered late event versus body-only future deadline, distinct learning-log routing, private link scope and no runtime claims. This is source-policy/synthetic verification, not a live Google Docs mutation, production authorized-source admission or full repository test run. WSP 00/3/22/50/84/97; no case documents or private source identifiers added.
+
 ## 2026-11-18 — Reconcile PR #1685 CCP v2 audit and repository-first material intake
 
 - Reconciled `PR #1685` onto current `main`: preserved the four byte-identical `docs/materials/` intake artifacts (`README.md`, `source_registry.json`, `YUMORI_CCP_V2_AUDIT.md`, and `YUMORI_03_RESEARCH_INTEGRATION.md` blob `215e6fb79071425b8ca034e0354cbb2004f57b00`) plus the chronological `2026-09-12` ModLog, README, and ROADMAP sections, subordinated to current canonical `docs/DRIVE_DOCUMENT_INDEX.md`, `docs/YUMORI_ECONOMIC_MODEL.md`, and `docs/GRANTS_AND_SUBSIDIES.md` authorities (`WSP 22`, `WSP 50`, `WSP 97`).
