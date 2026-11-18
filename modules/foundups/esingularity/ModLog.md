@@ -1,3 +1,8 @@
+## 2026-11-18 — Reconcile PR #1685 CCP v2 audit and repository-first material intake
+
+- Reconciled `PR #1685` onto current `main`: preserved the four byte-identical `docs/materials/` intake artifacts (`README.md`, `source_registry.json`, `YUMORI_CCP_V2_AUDIT.md`, and `YUMORI_03_RESEARCH_INTEGRATION.md` blob `215e6fb79071425b8ca034e0354cbb2004f57b00`) plus the chronological `2026-09-12` ModLog, README, and ROADMAP sections, subordinated to current canonical `docs/DRIVE_DOCUMENT_INDEX.md`, `docs/YUMORI_ECONOMIC_MODEL.md`, and `docs/GRANTS_AND_SUBSIDIES.md` authorities (`WSP 22`, `WSP 50`, `WSP 97`).
+- Executed local verification that had been deferred at original draft closeout (`WSP_00` tracker gate, HoloIndex lexical owner query, 23 unique source IDs / 11 language pairs / pitch subtraction arithmetic check, and `88/88` `esingularity/tests`). Remains a non-publishing documentation intake slice (`PUBLICATION_STATUS=NOT_PUBLISHED`).
+
 ## 2026-11-18 — Reconcile PR #1906 STT normalization guard
 
 - Reconciled `PR #1906` onto current `main`: preserved both the canonical `Speech-to-text normalization guard` section and existing `STT / transcription protected vocabulary` in `frontend/audit/SOURCE_OF_TRUTH.md`, and integrated `test_stt_artifacts_are_rejected_from_current_public_surfaces` (extending STT corruption artifact rejection across `app/page.tsx`, `app/future/page.tsx`, `components/LanguageSwitcher.tsx`, and `content/yumori-vision.ts`) into `tests/test_contracts.py` (`WSP 22`, `WSP 50`, `WSP 97`).
@@ -480,6 +485,18 @@ social content contract for evidence, limits and remaining owner work.
 - Published the exact routing source (`b8bd40eb82475bccba0507a17167cfc2c8b21cc3`) as Sites version 43; deployment `appgdep_6aa556c60e588191aafe94caef929fe6` completed successfully on the existing public eSingularity project.
 - DNS was not changed. Sites already reported eSingularity.ai, www.eSingularity.ai, YUMORI.me and www.YUMORI.me active with active SSL; public YUMORI.me apex A and www CNAME records matched the platform-supplied targets. YUMORI.info was not modified.
 - Fresh cache-busted production checks returned the YUMORI page at YUMORI.me and www while retaining each hostname and query string, retained the project homepage at eSingularity.ai, and retained YUMORI.info's redirect to eSingularity.ai. Direct `/yumori`, JHR, signup destination, representative assets and mobile-user-agent responses remained healthy.
+
+## 2026-09-12 — CCP v2 audit and repository-first material intake
+
+- Text-reviewed all 23 documents in the supplied CCP v2 Drive folder and the current 03; recorded every source ID, language pair, disposition, coverage limit and known unread legacy record in `docs/materials/source_registry.json`.
+- Added `docs/materials/YUMORI_CCP_V2_AUDIT.md` with 20 claim-disposition findings, limited official-source checks and a reproducible diagnostic of the supplied investor pitch. This does not certify or replace the separate FIN workbook.
+- Added Japanese-first `docs/materials/YUMORI_03_RESEARCH_INTEGRATION.md` with a complete English review version. It is a proposed source unit, not the complete 03 source, and has not been published to Drive.
+- Reused existing public-claim, vision, JHR and private-contact ownership boundaries. Did not import raw contact directories or correspondence into public Git.
+- Recorded 012's correction that YUMORI.info redirects to eSingularity.ai, rather than treating the alias as another content source. No DNS or deployment change was made.
+- Connected the intake to this module's README and roadmap, with bounded MATERIALS-02 through MATERIALS-05 continuation work for legacy intake, reconciliation, existing-ID publication and anti-drift preflight.
+- Local static checks passed for 23 unique source IDs, 11 language pairs and the transcribed financial arithmetic. These are not repository tests.
+- Verification limits: WSP_00 runtime gate, HoloIndex owner-query and repository tests were not performed because no runnable checkout was obtained. Complete WSP_15 allocation verification also remains outstanding. GitHub retrieval was the fallback. This is a docs-only draft review slice, not a fully WSP-executed promotion.
+- Full project-material migration, native-layout audit, all-source verification, Drive publication and automated synchronization remain incomplete. Existing Drive documents, public site, runtime and tests were unchanged.
 
 ## 2026-09-11 — Real-building full-screen YUMORI vision deck
 

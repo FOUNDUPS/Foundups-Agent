@@ -134,6 +134,12 @@ Use the module-owned [YUMORI Moshpit Skillz](skillz/yumori_moshpit/SKILLz.md) fo
 
 The campaign Moshpit is reverse chronological within each JST day. Agent-internal repairs and learning belong in the private 0102 Moshpit unless the same event materially changes campaign history.
 
+## Project materials and Drive outputs
+
+Start with [docs/materials/README.md](docs/materials/README.md) before creating or revising a project document. It links the 23-document CCP v2 intake registry, claim-disposition audit and Japanese-first proposed 03 integration source. Accepted project material belongs in this module; Drive documents are derived outputs with stable existing file IDs, not independent factual masters.
+
+012 clarified on 2026-09-12 that **YUMORI.info redirects to eSingularity.ai**. It is an alias for the same project publication destination, not a separate content source. YUMORI.me remains the movement surface. The materials migration is partial; the registry records unread legacy records, unpublished outputs and runtime checks not performed. No automatic Drive synchronization is activated.
+
 ## Campaign ticker updates
 
 Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. A routine verbal update becomes one Japanese/English/Portuguese `frontend/content/current-field-status.json` payload on the dedicated `live/yumori-field-status` branch; the deployed shared `CampaignTicker.tsx` polls it for both eSingularity.ai and YUMORI.me. Each item is explicitly time-limited in Japan time and falls back safely after expiry.
@@ -180,6 +186,7 @@ modules/foundups/esingularity/
 ├── src/                    # Stable FoundUp identity contract
 ├── tests/                  # Manifest, registry, route, and hosting checks
 ├── docs/                   # Migration, architecture, narrative contracts, Drive index, grant and evidence records
+│   └── materials/          # Research intake, source registry and derived-document source units
 ├── memory/                 # WSP 60 module memory documentation
 ├── foundup_manifest.json   # p.fMALL/FoundUps discovery contract
 ├── module.json             # Module discovery metadata
