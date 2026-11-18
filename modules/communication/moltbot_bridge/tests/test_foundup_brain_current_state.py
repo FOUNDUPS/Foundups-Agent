@@ -128,7 +128,7 @@ def _assemble(**overrides):
         "snapshot": _snapshot(),
         "identity": _identity(),
         "roadmap_state": _roadmap(),
-        "verified_outcomes": [_verified_outcome()],
+        "verified_outcomes": [],
         "now_iso": VALID_NOW,
         "policy_foundup_scope": (FOUNDUP_ID,),
     }
@@ -178,7 +178,7 @@ def test_cross_foundup_identity_roadmap_and_outcome_are_rejected() -> None:
     assert result.accepted is False
     assert "identity_foundup_id_mismatch" in result.rejection_reasons
     assert "roadmap_foundup_id_mismatch" in result.rejection_reasons
-    assert "verified_outcome_foundup_id_mismatch" in result.rejection_reasons
+    assert "verified_outcome_runtime_binding_required" in result.rejection_reasons
 
 
 def test_cross_foundup_work_claim_and_queue_item_are_excluded_not_leaked() -> None:
@@ -275,7 +275,7 @@ def test_identity_roadmap_outcome_and_policy_scope_must_match_foundup() -> None:
     assert result.accepted is False
     assert "identity_missing_foundup_id" in result.rejection_reasons
     assert "roadmap_missing_foundup_id" in result.rejection_reasons
-    assert "verified_outcome_missing_foundup_id" in result.rejection_reasons
+    assert "verified_outcome_runtime_binding_required" in result.rejection_reasons
     assert "policy_foundup_scope_mismatch" in result.rejection_reasons
 
 
@@ -298,6 +298,26 @@ def test_unverified_or_incomplete_outcome_cannot_enter_current_brain_view() -> N
     outcome["held_out_passed"] = False
     outcome["verification_receipt_id"] = ""
     result = _assemble(verified_outcomes=[outcome])
+    assert result.accepted is False
+    assert result.rejection_reasons == ("verified_outcome_runtime_binding_required",)
+
+
+def test_raw_accepted_outcome_without_authenticated_receipts_is_rejected() -> None:
+    result = _assemble(verified_outcomes=[_verified_outcome()])
+    assert result.accepted is False
+    assert result.view is None
+    assert result.rejection_reasons == ("verified_outcome_runtime_binding_required",)
+
+
+def test_raw_outcome_validation_remains_explicit_nonresident_compatibility_only() -> None:
+    outcome = _verified_outcome()
+    outcome["held_out_passed"] = False
+    outcome["verification_receipt_id"] = ""
+    result = _assemble(
+        verified_outcomes=[outcome],
+        resident_mode=False,
+        legacy_single_foundup_compatibility=True,
+    )
     assert result.accepted is False
     assert "unverified_outcome_rejected" in result.rejection_reasons
     assert "missing_verified_outcome_field:verification_receipt_id" in result.rejection_reasons

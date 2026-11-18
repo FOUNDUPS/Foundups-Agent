@@ -8,6 +8,7 @@ repository-root, SSD, generation, baseline, or maintenance proof.
 from __future__ import annotations
 
 import os
+import re
 import stat
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,6 +32,8 @@ from modules.infrastructure.foundups_mcp_bridge.src.holo_query_freshness_gate im
 
 RECEIPT_PATH_MISMATCH_CODE = "HOLOINDEX_FRESHNESS_RECEIPT_PATH_MISMATCH"
 RECEIPT_PATH_MISMATCH_REASON = "freshness_receipt_path_not_canonical"
+EXPECTED_HEAD_INVALID_CODE = "HOLOINDEX_EXPECTED_REPO_HEAD_INVALID"
+EXPECTED_HEAD_INVALID_REASON = "expected_repo_head_sha_invalid"
 WINDOWS_REPARSE_POINT = 0x400
 
 
@@ -126,10 +129,12 @@ def _evaluate_gate(
     gate: HoloQueryFreshnessGate,
     root: Path,
     repository_state_reader: Callable[[Path], Any] | None,
+    expected_repo_head_sha: str = "",
 ) -> ReadonlyQueryAdmission:
     error, head_sha = gate.repository_error(
         repository_state_reader or read_repository_state,
         root,
+        expected_repo_head_sha,
     )
     if error:
         return ReadonlyQueryAdmission(
@@ -186,9 +191,59 @@ def evaluate_readonly_query_admission(
     return _evaluate_gate(gate, root, repository_state_reader)
 
 
+def rehydrate_canonical_freshness_proof(
+    *,
+    repo_root: Path | str,
+    ssd_path: Path | str,
+    expected_repo_head_sha: str,
+    repository_state_reader: Callable[[Path], Any] | None = None,
+    receipt_loader: Callable[[Path], Any] | None = None,
+    freshness_evaluator: Callable[..., Any] | None = None,
+    maintenance_probe: Callable[[Path], Any] | None = None,
+) -> ReadonlyQueryAdmission:
+    """Rehydrate one canonical exact-HEAD proof without opening the index owner."""
+    root = Path(repo_root).resolve(strict=False)
+    ssd = Path(ssd_path).resolve(strict=False)
+    expected_sha = str(expected_repo_head_sha or "").strip().lower()
+    if re.fullmatch(r"[0-9a-f]{40}", expected_sha) is None:
+        return ReadonlyQueryAdmission(
+            False,
+            EXPECTED_HEAD_INVALID_CODE,
+            (EXPECTED_HEAD_INVALID_REASON,),
+            "UNKNOWN",
+            {},
+        )
+    canonical_receipt, invalid_receipt = _canonical_receipt_binding(ssd, None)
+    if invalid_receipt:
+        return ReadonlyQueryAdmission(
+            False,
+            RECEIPT_PATH_MISMATCH_CODE,
+            (RECEIPT_PATH_MISMATCH_REASON,),
+            "UNKNOWN",
+            {},
+        )
+    gate = _build_gate(
+        root,
+        ssd,
+        canonical_receipt,
+        receipt_loader,
+        freshness_evaluator,
+        maintenance_probe,
+    )
+    return _evaluate_gate(
+        gate,
+        root,
+        repository_state_reader,
+        expected_sha,
+    )
+
+
 __all__ = [
+    "EXPECTED_HEAD_INVALID_CODE",
+    "EXPECTED_HEAD_INVALID_REASON",
     "RECEIPT_PATH_MISMATCH_CODE",
     "RECEIPT_PATH_MISMATCH_REASON",
     "ReadonlyQueryAdmission",
     "evaluate_readonly_query_admission",
+    "rehydrate_canonical_freshness_proof",
 ]

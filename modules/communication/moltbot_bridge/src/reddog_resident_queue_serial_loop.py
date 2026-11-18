@@ -20,6 +20,7 @@ from typing import Any, Dict, Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     ResidentQueueChainResultsStore,
+    resident_queue_chain_snapshot_is_canonical,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_dispatch import (
     RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT,
@@ -37,13 +38,17 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
 
 RESIDENT_QUEUE_SERIAL_LOOP_COMPLETE = "RESIDENT_QUEUE_SERIAL_LOOP_COMPLETE"
 RESIDENT_QUEUE_SERIAL_LOOP_LIMIT_REACHED = "RESIDENT_QUEUE_SERIAL_LOOP_LIMIT_REACHED"
+RESIDENT_QUEUE_SERIAL_LOOP_BLOCKED_ASSURANCE_CAPACITY = (
+    "BLOCKED_ASSURANCE_CAPACITY"
+)
 RESIDENT_QUEUE_SERIAL_LOOP_REJECT = "RESIDENT_QUEUE_SERIAL_LOOP_REJECT"
 
-MAX_RESIDENT_QUEUE_SERIAL_LOOP_STEPS = 16
+MAX_RESIDENT_QUEUE_SERIAL_LOOP_STEPS = 24
 
 FAIL_EXPLICIT_LOOP_MISSING = "FAIL_EXPLICIT_RESIDENT_QUEUE_SERIAL_LOOP_MISSING"
 FAIL_MAX_STEPS_INVALID = "FAIL_MAX_STEPS_INVALID"
 FAIL_PLAN_NOT_READY = "FAIL_PLAN_NOT_READY"
+FAIL_CHAIN_RESULTS_INTEGRITY = "FAIL_CHAIN_RESULTS_INTEGRITY"
 FAIL_DISPATCH_REJECTED = "FAIL_DISPATCH_REJECTED"
 
 
@@ -59,6 +64,8 @@ class ResidentQueueSerialLoopResult:
     next_action: Optional[str] = None
     final_plan: Optional[ResidentQueueOrchestrationPlan] = None
     dispatch_results: tuple[ResidentQueueNextStageDispatchResult, ...] = ()
+    queue_chain_requeue_required: bool = False
+    retry_at: Optional[str] = None
     no_default_handler_used: bool = True
     no_dependency_created_by_loop: bool = True
     no_signing_performed_by_loop: bool = True
@@ -104,6 +111,12 @@ def _plan(
     now_iso: str,
 ) -> ResidentQueueOrchestrationPlan:
     state = _mapping(store.load())
+    if (
+        state.get("schema_version") == "reddog_resident_queue_chain_results.v1"
+        and state.get("revision") is not None
+        and not resident_queue_chain_snapshot_is_canonical(state)
+    ):
+        raise ValueError(FAIL_CHAIN_RESULTS_INTEGRITY)
     return plan_reddog_resident_queue_orchestration(
         work_state_snapshot,
         chain_results=_stage_results(state),
@@ -155,12 +168,13 @@ def run_reddog_resident_queue_serial_loop(
 
     dispatched: list[str] = []
     dispatch_results: list[ResidentQueueNextStageDispatchResult] = []
-    current_plan = _plan(
-        work_state_snapshot=work_state_snapshot,
-        store=store,
-        requested_queue_item_id=requested_queue_item_id,
-        now_iso=now_iso,
-    )
+    try:
+        current_plan = _plan(
+            work_state_snapshot=work_state_snapshot, store=store,
+            requested_queue_item_id=requested_queue_item_id, now_iso=now_iso,
+        )
+    except ValueError:
+        return _reject([FAIL_CHAIN_RESULTS_INTEGRITY])
     if current_plan.accepted is True and current_plan.status == RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE:
         return ResidentQueueSerialLoopResult(
             accepted=True,
@@ -195,15 +209,36 @@ def run_reddog_resident_queue_serial_loop(
                 dispatch_results=tuple(dispatch_results),
             )
         dispatch_results.append(dispatch)
-        if dispatch.dispatched_stage:
+        if (
+            dispatch.dispatched_stage
+            and dispatch.record_result is not None
+        ):
             dispatched.append(dispatch.dispatched_stage)
-
-        current_plan = _plan(
-            work_state_snapshot=work_state_snapshot,
-            store=store,
-            requested_queue_item_id=requested_queue_item_id,
-            now_iso=now_iso,
-        )
+        if dispatch.deferred:
+            return ResidentQueueSerialLoopResult(
+                accepted=True,
+                status=(
+                    dispatch.defer_reason
+                    or RESIDENT_QUEUE_SERIAL_LOOP_BLOCKED_ASSURANCE_CAPACITY
+                ),
+                steps_run=len(dispatch_results),
+                dispatched_stages=tuple(dispatched),
+                next_action=dispatch.next_action,
+                final_plan=dispatch.plan or current_plan,
+                dispatch_results=tuple(dispatch_results),
+                queue_chain_requeue_required=True,
+                retry_at=dispatch.retry_at,
+            )
+        try:
+            current_plan = _plan(
+                work_state_snapshot=work_state_snapshot, store=store,
+                requested_queue_item_id=requested_queue_item_id, now_iso=now_iso,
+            )
+        except ValueError:
+            return _reject(
+                [FAIL_CHAIN_RESULTS_INTEGRITY], steps_run=len(dispatch_results),
+                dispatched_stages=tuple(dispatched), dispatch_results=tuple(dispatch_results),
+            )
         if current_plan.accepted is True and current_plan.status == RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE:
             return ResidentQueueSerialLoopResult(
                 accepted=True,
@@ -236,11 +271,13 @@ def run_reddog_resident_queue_serial_loop(
 
 __all__ = [
     "FAIL_DISPATCH_REJECTED",
+    "FAIL_CHAIN_RESULTS_INTEGRITY",
     "FAIL_EXPLICIT_LOOP_MISSING",
     "FAIL_MAX_STEPS_INVALID",
     "FAIL_PLAN_NOT_READY",
     "MAX_RESIDENT_QUEUE_SERIAL_LOOP_STEPS",
     "RESIDENT_QUEUE_SERIAL_LOOP_COMPLETE",
+    "RESIDENT_QUEUE_SERIAL_LOOP_BLOCKED_ASSURANCE_CAPACITY",
     "RESIDENT_QUEUE_SERIAL_LOOP_LIMIT_REACHED",
     "RESIDENT_QUEUE_SERIAL_LOOP_REJECT",
     "ResidentQueueSerialLoopResult",

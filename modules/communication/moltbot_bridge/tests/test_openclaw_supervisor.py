@@ -1,15 +1,22 @@
 import json
 import os
+import threading
+import time
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+from modules.communication.moltbot_bridge.src import openclaw_supervisor as supervisor_module
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     OpenClawSupervisor,
     SupervisorState,
 )
-from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
-    allocate_reddog_wsp15_receipt,
+from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
+    SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    with_queue_wsp15_allocation,
 )
 from modules.infrastructure.database.src.db_manager import DatabaseManager
 
@@ -22,17 +29,18 @@ def isolated_agent_db(tmp_path, monkeypatch):
     DatabaseManager.reset_for_tests()
 
 
-def _queue_wsp15_allocation_receipt() -> dict[str, object]:
-    return allocate_reddog_wsp15_receipt(
-        requested_operation="create_foundup",
-        prompt_text="RedDog resident queue runtime authority worktree execution",
-        changed_paths=("modules/communication/moltbot_bridge/src/openclaw_supervisor.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/openclaw_supervisor.py",),
-    ).to_dict()
-
-
 def _queue_snapshot() -> dict[str, object]:
-    allocation = _queue_wsp15_allocation_receipt()
+    queue_item = with_queue_wsp15_allocation(
+        {
+            "queue_item_id": "queue-1",
+            "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+            "no_execution_performed": True,
+        }
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -46,22 +54,7 @@ def _queue_snapshot() -> dict[str, object]:
                 "freshness_receipt_id": "fresh-1",
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": [
-                    "claim:claim-1",
-                    "freshness:fresh-1",
-                    f"wsp15_allocation:{allocation['receipt_id']}",
-                ],
-                "wsp15_allocation_receipt": allocation,
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -82,6 +75,9 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         "executor_plan": {"decision": "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"},
         "execution_valve": {"decision": "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"},
         "worktree_create": {"decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT"},
+        "assurance_capacity_admission": {
+            "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
+        },
         "bounded_worker_pilot": {
             "decision": "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
         },
@@ -357,7 +353,9 @@ def test_run_cycle_claims_signed_0102_bounded_code_task_with_profile_runtime_pat
     repo = tmp_path / "repo"
     repo.mkdir()
     runtime_root = tmp_path / "resident-runtime"
-    _write_runtime_queue_state(runtime_root, accepted_through="worktree_create")
+    _write_runtime_queue_state(
+        runtime_root, accepted_through="assurance_capacity_admission"
+    )
     broker = MagicMock()
     broker.get_runtime_status.side_effect = lambda dae_id: {
         "registered": True,
@@ -420,7 +418,153 @@ def test_run_cycle_claims_signed_0102_bounded_code_task_with_profile_runtime_pat
     assert result["verify"]["completed_task_ids"] == ("task-code",)
 
 
-def test_run_cycle_claims_queue_stage_progress_task_with_profile_runtime_paths(tmp_path):
+def test_author_failure_revokes_reserved_independent_assurance(monkeypatch) -> None:
+    db = MagicMock()
+    db.get_independent_assurance_reservation_for_task.return_value = {
+        "accepted": True,
+        "reservation": {
+            "reservation_id": "assurance-reservation-1",
+            "status": "RESERVED",
+        },
+    }
+    db.revoke_independent_assurance.return_value = {"accepted": True}
+    monkeypatch.setattr(
+        supervisor_module,
+        "_persist_reddog_signed_worker_dispatch_task_result",
+        lambda *args, **kwargs: True,
+    )
+    context = {
+        "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "worker_runtime": "0102",
+        "capability": "bounded_code_change",
+    }
+
+    result = supervisor_module._signed_worker_reject_claimed_task(
+        db=db,
+        task_id="author-task-1",
+        context=context,
+        reasons=("runner_declined",),
+    )
+
+    assert result["accepted"] is False
+    db.get_independent_assurance_reservation_for_task.assert_called_once_with(
+        "author-task-1",
+        task_kind="author",
+    )
+    db.revoke_independent_assurance.assert_called_once()
+    args, kwargs = db.revoke_independent_assurance.call_args
+    assert args == ("assurance-reservation-1",)
+    assert kwargs["reason"].startswith("author_task_failed:runner_declined")
+    assert kwargs["now_iso"]
+
+
+def test_supervisor_renews_one_expired_verifier_only_when_stage_ready(
+    monkeypatch,
+) -> None:
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_claim_admission as claim_admission,
+    )
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_openclaw_queue_loop_runtime_binding as queue_binding,
+    )
+
+    db = MagicMock()
+    conn = db.db.get_connection.return_value.__enter__.return_value
+    context = {
+        "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "queue_item_id": "attacker-queue",
+        "worker_runtime": "attacker-runtime",
+        "capability": "attacker-capability",
+    }
+    verified_context = {
+        "source": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "queue_item_id": "queue-1",
+        "worker_runtime": "openclaw",
+        "capability": "independent_slice_verification",
+    }
+    conn.execute.return_value.fetchall.return_value = [
+        {
+            "task_id": "verifier-task-1",
+            "context": json.dumps(context, sort_keys=True),
+        }
+    ]
+    db.get_independent_assurance_reservation_for_task.return_value = {
+        "accepted": True,
+        "reservation": {
+            "request_schema_version": "reddog_assurance_capacity_request.v1",
+            "reservation_id": "assurance-reservation-1",
+            "work_order_id": "work-order-1",
+            "queue_item_id": "queue-1",
+            "author_task_id": "author-task-1",
+            "author_principal_id": "author-0102",
+            "verifier_task_id": "verifier-task-1",
+            "verifier_principal_id": "verifier-openclaw",
+            "capability": "independent_slice_verification",
+            "worker_runtime": "openclaw",
+            "operational_snapshot_id": "snapshot-1",
+            "wsp15_allocation_receipt_id": "allocation-1",
+            "status": "EXPIRED",
+            "renewal_count": 0,
+        },
+    }
+    db.renew_independent_assurance.return_value = {"accepted": True}
+    seen_stage_contexts = []
+    monkeypatch.setattr(
+        supervisor_module,
+        "_openclaw_independent_verifier_ready_from_env",
+        lambda verified, env, repo_root: (
+            seen_stage_contexts.append(dict(verified))
+            or verified.get("queue_item_id") == "queue-1"
+        ),
+    )
+    monkeypatch.setattr(
+        claim_admission,
+        "rehydrate_signed_worker_agentdb_context",
+        lambda **_kwargs: verified_context,
+    )
+    monkeypatch.setattr(
+        queue_binding,
+        "is_openclaw_independent_verifier_signed_worker_context",
+        lambda verified: verified == verified_context,
+    )
+    now_iso = datetime(2026, 7, 14, tzinfo=timezone.utc).isoformat()
+
+    claim_admission.renew_expired_verified_assurance(
+        db=db,
+        source=SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        env={"REDDOG_RESIDENT_QUEUE_NOW_ISO": now_iso},
+        repo_root="O:/Foundups-Agent",
+        authority_verification_context=None,
+        rehydrate=lambda **kwargs: (
+            claim_admission.rehydrate_signed_worker_agentdb_context(
+                **kwargs,
+                env={"REDDOG_RESIDENT_QUEUE_NOW_ISO": now_iso},
+            )
+        ),
+        is_verifier_context=(
+            queue_binding.is_openclaw_independent_verifier_signed_worker_context
+        ),
+        is_stage_ready=(
+            supervisor_module._openclaw_independent_verifier_ready_from_env
+        ),
+    )
+
+    db.get_independent_assurance_reservation_for_task.assert_called_once_with(
+        "verifier-task-1",
+        task_kind="verifier",
+    )
+    db.renew_independent_assurance.assert_called_once()
+    renewal = db.renew_independent_assurance.call_args.args[0]
+    assert renewal["reservation_id"] == "assurance-reservation-1"
+    assert renewal["renewal_count"] == 1
+    assert renewal["reserved_at"] == now_iso
+    assert str(renewal["reservation_digest"]).startswith("sha256:")
+    assert seen_stage_contexts == [verified_context]
+
+
+def test_run_cycle_does_not_claim_queue_stage_progress_for_bounded_worker_stage(
+    tmp_path,
+):
     from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
         SIGNED_WORKER_DISPATCH_TASK_SOURCE,
     )
@@ -484,11 +628,12 @@ def test_run_cycle_claims_queue_stage_progress_task_with_profile_runtime_paths(t
         mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
         result = supervisor.run_cycle()
 
-    assert result["plan"]["action"] == "claim_signed_worker_tasks_until_idle"
-    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_called_once_with(
-        max_claims=1
-    )
-    assert result["verify"]["completed_task_ids"] == ("task-stage",)
+    assert result["triage"] == {
+        "kind": "idle",
+        "reason": "resident_openclaw_healthy",
+    }
+    assert "plan" not in result
+    supervisor.claim_reddog_signed_worker_dispatch_tasks_until_idle.assert_not_called()
 
 
 def test_run_cycle_does_not_claim_queue_stage_task_when_profile_runtime_files_missing(tmp_path):
@@ -937,6 +1082,46 @@ def test_plan_ai_analysis_exception_stores_error(tmp_path):
     assert "Holo unavailable" in ai_analysis["error"]
     # Plan should still complete even with AI analysis error
     assert result["plan"]["action"] == "execute_autonomous_task"
+
+
+def test_triage_never_routes_signed_origin_task_to_generic_executor(
+    tmp_path,
+    monkeypatch,
+):
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+    }
+    observer = MagicMock()
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda *_: None,
+    )
+    signed_origin = {
+        "task_id": "signed-task-with-stripped-context",
+        "status": "pending",
+        "discovered_by": SIGNED_WORKER_DISPATCH_TASK_SOURCE,
+        "required_skills": ["attacker_skill"],
+        "context": {},
+    }
+    db = MagicMock()
+    db.get_autonomous_tasks.return_value = [signed_origin]
+    monkeypatch.setenv("OPENCLAW_AUTO_TASKS_ENABLED", "1")
+    monkeypatch.setenv("OPENCLAW_SIGNED_WORKER_TASKS_ENABLED", "0")
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result.get("action") != "execute_autonomous_task"
+    assert db.get_autonomous_tasks.called
 
 
 # --------------------------------------------------------------------------- #
@@ -1611,6 +1796,80 @@ def test_maintenance_loop_e2e_self_audit_via_agentdb(tmp_path, monkeypatch):
     assert "self_audit" in result["action_result"]["executor"]
 
 
+def test_postmerge_dispatch_exception_releases_claim_to_retry(tmp_path):
+    task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+    context = {
+        "schema_version": "holoindex_postmerge_coordination_v1",
+        "source": "holoindex_postmerge_coordinator",
+        "target_repo_head_sha": "a" * 40,
+        "authority_root_digest": "sha256:" + ("b" * 64),
+    }
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=MagicMock(),
+        observer=MagicMock(),
+        action_reporter=lambda *_args: None,
+    )
+    plan = {
+        "action": "execute_maintenance_task",
+        "task": {
+            "task_id": task_id,
+            "family": "holoindex_postmerge",
+        },
+    }
+
+    with (
+        patch(
+            "modules.infrastructure.database.src.agent_db.AgentDB"
+        ) as mock_db_class,
+        patch(
+            "modules.communication.moltbot_bridge.scripts.run_task.execute_task",
+            side_effect=RuntimeError("interrupted"),
+        ) as mock_execute,
+    ):
+        mock_db = MagicMock()
+        mock_db_class.return_value = mock_db
+        claimed_context = {
+            **context,
+            "claim_id": "hpmc_test",
+            "claim_binding_digest": "sha256:" + ("c" * 64),
+        }
+        mock_db.get_autonomous_task_by_id.side_effect = [
+            {
+                "task_id": task_id,
+                "status": "pending",
+                "context": context,
+            },
+            {
+                "task_id": task_id,
+                "status": "assigned",
+                "context": claimed_context,
+            },
+        ]
+        mock_db.claim_holoindex_postmerge_task.return_value = "hpmc_test"
+        mock_db.fail_holoindex_postmerge_task.return_value = True
+
+        result = supervisor._execute(plan)
+
+    assert result["ok"] is False
+    assert result["status"] == "execute_error"
+    mock_execute.assert_called_once_with(
+        task_id,
+        repo_root=tmp_path,
+        execution_claim={
+            "claim_id": "hpmc_test",
+            "claim_binding_digest": "sha256:" + ("c" * 64),
+        },
+    )
+    mock_db.fail_holoindex_postmerge_task.assert_called_once_with(
+        task_id,
+        "openclaw_supervisor",
+        claim_id="hpmc_test",
+        claim_binding_digest="sha256:" + ("c" * 64),
+        status="failed",
+    )
+
+
 def test_supervisor_action_reporter_recursively_redacts_nested_secrets(tmp_path):
     reports = []
     supervisor = OpenClawSupervisor(
@@ -1674,3 +1933,330 @@ def test_supervisor_pattern_memory_receives_redacted_context_only(tmp_path):
     assert "second-cookie-secret" not in serialized
     assert "pattern-memory-token" not in serialized
     assert "[REDACTED]" in serialized
+def test_observe_polls_postmerge_coordinator_when_maintenance_enabled(
+    tmp_path,
+    monkeypatch,
+):
+    from modules.infrastructure.idle_automation.src import (
+        holoindex_postmerge_coordinator,
+    )
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+        "state": "running",
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+    monkeypatch.setenv("OPENCLAW_MAINTENANCE_ENABLED", "1")
+    calls = []
+    monkeypatch.setattr(
+        holoindex_postmerge_coordinator,
+        "coordinate_holoindex_postmerge",
+        lambda **kwargs: (
+            calls.append(kwargs)
+            or type(
+                "Result",
+                (),
+                {
+                    "to_dict": lambda self: {
+                        "accepted": True,
+                        "status": "QUEUED",
+                    }
+                },
+            )()
+        ),
+    )
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+    )
+    monkeypatch.setattr(
+        supervisor,
+        "_git_summary",
+        lambda: {"branch": "main", "dirty_files": 0},
+    )
+
+    first = supervisor._observe()
+    assert supervisor._holoindex_postmerge_poller.future is not None
+    supervisor._holoindex_postmerge_poller.future.result(timeout=2)
+    second = supervisor._observe()
+
+    assert first["holoindex_postmerge"]["status"] == "MAINTENANCE_CHECK_SCHEDULED"
+    assert second["holoindex_postmerge"]["status"] == "QUEUED"
+    assert calls == [{"repo_root": tmp_path.resolve()}]
+    supervisor.stop()
+
+
+def test_observe_polls_postmerge_coordinator_by_default(tmp_path, monkeypatch):
+    from modules.infrastructure.idle_automation.src import (
+        holoindex_postmerge_coordinator,
+    )
+
+    monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
+    monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
+    calls = []
+    target_sha = "a" * 40
+    task_id = "holoindex_postmerge_refresh:" + target_sha
+    monkeypatch.setattr(
+        holoindex_postmerge_coordinator,
+        "coordinate_holoindex_postmerge",
+        lambda **kwargs: calls.append(kwargs)
+        or MagicMock(
+            to_dict=lambda: {
+                "accepted": True,
+                "status": "QUEUED",
+                "target_repo_head_sha": target_sha,
+                "task_id": task_id,
+            }
+        ),
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    observation = {}
+
+    supervisor._observe_holoindex_postmerge(observation)
+    supervisor._holoindex_postmerge_poller.future.result(timeout=2)
+    supervisor._observe_holoindex_postmerge({})
+
+    assert observation["holoindex_postmerge"]["status"] == (
+        "MAINTENANCE_CHECK_SCHEDULED"
+    )
+    assert calls == [{"repo_root": tmp_path.resolve()}]
+    assert supervisor._holoindex_postmerge_poller.task_id == task_id
+    supervisor.stop()
+
+
+def test_postmerge_poller_rejects_noncanonical_task_identity():
+    from modules.communication.moltbot_bridge.src.holoindex_postmerge_supervisor_policy import (
+        _canonical_task_id,
+    )
+
+    target_sha = "a" * 40
+    valid = {
+        "accepted": True,
+        "target_repo_head_sha": target_sha,
+        "task_id": "holoindex_postmerge_refresh:" + target_sha,
+    }
+
+    assert _canonical_task_id(valid) == valid["task_id"]
+    assert _canonical_task_id({**valid, "accepted": False}) == ""
+    assert _canonical_task_id({**valid, "target_repo_head_sha": "g" * 40}) == ""
+    assert _canonical_task_id({**valid, "task_id": "attacker:" + target_sha}) == ""
+
+
+def test_postmerge_coordinator_explicit_disable_is_visible(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", "0")
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    observation = {}
+
+    supervisor._observe_holoindex_postmerge(observation)
+
+    assert observation["holoindex_postmerge"] == {
+        "accepted": False,
+        "status": "OWNER_DISABLED",
+        "rejection_reasons": ["postmerge_coordinator_disabled"],
+    }
+    assert supervisor._holoindex_postmerge_poller.future is None
+
+
+def test_default_maintenance_candidates_include_only_postmerge():
+    from modules.communication.moltbot_bridge.src.holoindex_postmerge_supervisor_policy import (
+        maintenance_candidates,
+    )
+
+    tasks = [
+        {"task_id": "holo", "context": {"source": "holoindex_postmerge_coordinator"}},
+        {"task_id": "audit", "context": {"source": "self_audit"}},
+    ]
+
+    assert maintenance_candidates(
+        tasks,
+        general_maintenance_enabled=False,
+        postmerge_enabled=True,
+    ) == [tasks[0]]
+    assert maintenance_candidates(
+        tasks,
+        general_maintenance_enabled=False,
+        postmerge_enabled=False,
+    ) == []
+    assert maintenance_candidates(
+        tasks,
+        general_maintenance_enabled=True,
+        postmerge_enabled=True,
+    ) == tasks
+    assert maintenance_candidates(
+        tasks,
+        general_maintenance_enabled=True,
+        postmerge_enabled=False,
+    ) == [tasks[1]]
+
+
+def test_triage_claims_only_postmerge_by_default(tmp_path, monkeypatch):
+    monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
+    monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
+    db = MagicMock()
+    task_id = "holoindex_postmerge_refresh:" + ("a" * 40)
+    db.get_autonomous_task_by_id.return_value = {
+        "task_id": task_id,
+        "status": "pending",
+        "description": "Refresh exact-SHA HoloIndex authority",
+        "context": {
+            "schema_version": "holoindex_postmerge_coordination_v1",
+            "source": "holoindex_postmerge_coordinator",
+        },
+        "required_skills": ["holo-search"],
+    }
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    supervisor._holoindex_postmerge_poller._task_id = task_id
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result["action"] == "execute_maintenance_task"
+    assert result["task"]["task_id"] == (
+        "holoindex_postmerge_refresh:" + ("a" * 40)
+    )
+    assert result["task"]["family"] == "holoindex_postmerge"
+
+
+def test_generic_autonomous_executor_cannot_claim_postmerge_task(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("OPENCLAW_AUTO_TASKS_ENABLED", "1")
+    monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
+    monkeypatch.delenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", raising=False)
+    postmerge_task = {
+        "task_id": "holoindex_postmerge_refresh:" + ("a" * 40),
+        "status": "pending",
+        "description": "Refresh exact-SHA HoloIndex authority",
+        "context": {
+            "schema_version": "holoindex_postmerge_coordination_v1",
+            "source": "holoindex_postmerge_coordinator",
+        },
+        "required_skills": ["holo-search"],
+    }
+    db = MagicMock()
+    db.get_autonomous_tasks.return_value = [postmerge_task]
+    db.get_autonomous_task_by_id.return_value = postmerge_task
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    supervisor._holoindex_postmerge_poller._task_id = postmerge_task["task_id"]
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result["action"] == "execute_maintenance_task"
+    assert result["task"]["family"] == "holoindex_postmerge"
+    assert result["reason"] == "bounded_maintenance_task"
+
+
+def test_triage_postmerge_explicit_disable_keeps_general_maintenance_off(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.delenv("OPENCLAW_MAINTENANCE_ENABLED", raising=False)
+    monkeypatch.setenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", "0")
+    db = MagicMock()
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result["kind"] == "idle"
+    db.get_autonomous_tasks.assert_not_called()
+
+
+def test_triage_postmerge_disable_preserves_other_explicit_maintenance(
+    tmp_path,
+    monkeypatch,
+):
+    monkeypatch.setenv("OPENCLAW_MAINTENANCE_ENABLED", "1")
+    monkeypatch.setenv("HOLOINDEX_POSTMERGE_COORDINATOR_ENABLED", "0")
+    db = MagicMock()
+    db.get_autonomous_tasks.return_value = [
+        {
+            "task_id": "holo",
+            "description": "Refresh exact-SHA HoloIndex authority",
+            "context": {"source": "holoindex_postmerge_coordinator"},
+            "required_skills": ["holo-search"],
+        },
+        {
+            "task_id": "audit",
+            "description": "Apply safe audit fix",
+            "context": {"source": "self_audit"},
+            "required_skills": [],
+        },
+    ]
+    monkeypatch.setattr(
+        "modules.infrastructure.database.src.agent_db.AgentDB",
+        lambda: db,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+
+    result = supervisor._triage(
+        {"openclaw_runtime": {"registered": True, "running": True}}
+    )
+
+    assert result["action"] == "execute_maintenance_task"
+    assert result["task"]["family"] == "self_audit_fix"
+    assert result["task"]["task_id"] == "audit"
+
+
+def test_postmerge_shutdown_waits_and_prevents_reschedule(tmp_path, monkeypatch):
+    from modules.infrastructure.idle_automation.src import (
+        holoindex_postmerge_coordinator,
+    )
+
+    started = threading.Event()
+    release = threading.Event()
+    calls = []
+
+    def coordinate(**kwargs):
+        calls.append(kwargs)
+        started.set()
+        assert release.wait(timeout=2)
+        return MagicMock(to_dict=lambda: {"accepted": True, "status": "CURRENT"})
+
+    monkeypatch.setattr(
+        holoindex_postmerge_coordinator,
+        "coordinate_holoindex_postmerge",
+        coordinate,
+    )
+    supervisor = OpenClawSupervisor(repo_root=tmp_path)
+    supervisor._observe_holoindex_postmerge({})
+    assert started.wait(timeout=2)
+    stopper = threading.Thread(target=supervisor.stop)
+    stopper.start()
+    time.sleep(0.05)
+    assert stopper.is_alive()
+
+    release.set()
+    stopper.join(timeout=2)
+    observation = {}
+    supervisor._observe_holoindex_postmerge(observation)
+
+    assert not stopper.is_alive()
+    assert calls == [{"repo_root": tmp_path.resolve()}]
+    assert observation["holoindex_postmerge"]["status"] == "OWNER_STOPPED"

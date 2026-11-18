@@ -30,6 +30,7 @@ from .model_intelligence_catalog import ModelCatalogSnapshot
 from .model_intelligence_outcomes import ModelBenchmarkEvidenceReceipt, ModelPromotionEvidenceReceipt
 from .model_intelligence_selection import ModelSelectionReceipt, SelectionDecision, SelectionMode, SelectionPurpose
 from .model_runtime_binding import ModelRuntimeBindingPolicy
+from . import model_evidence_authority_validation as evidence_authority
 from .model_signed_evidence import (
     ModelEvidenceKeyResolver,
     ModelSignedEvidenceReceipt,
@@ -37,7 +38,6 @@ from .model_signed_evidence import (
     VerifiedModelProductionEvidence,
     build_verified_model_production_evidence,
 )
-
 
 PANEL_EVIDENCE_SCHEMA_VERSION = "model_panel_signed_evidence_receipt.v1"
 VERIFIED_PANEL_EVIDENCE_SCHEMA_VERSION = "verified_model_panel_evidence.v1"
@@ -399,7 +399,6 @@ def _verify_model_panel_evidence_inputs(
     revoked_member_key_epochs: Sequence[str] = (), revoked_panel_key_epochs: Sequence[str] = (),
     leeway_s: int = 60,
 ) -> tuple[ModelPanelSignedEvidenceReceipt, tuple[VerifiedModelEvidenceEntry, ...]]:
-    """Verify member chains first, then the aggregate envelope and nonce last."""
     aggregate_record, benchmark_run_receipt_id = _aggregate_record_and_run(aggregate_receipt)
     entries, bindings = _verify_member_inputs(
         catalog_snapshot_id=catalog_snapshot.snapshot_id,
@@ -413,6 +412,7 @@ def _verify_model_panel_evidence_inputs(
         leeway_s=leeway_s,
     )
     receipt = rehydrate_model_panel_signed_evidence_receipt(aggregate_record)
+    evidence_authority.assert_independent_panel_authority(receipt, entries)
     _assert_panel_context(
         catalog_snapshot=catalog_snapshot,
         selection_receipt=selection_receipt,

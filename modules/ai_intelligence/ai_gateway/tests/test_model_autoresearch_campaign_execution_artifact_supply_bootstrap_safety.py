@@ -17,6 +17,7 @@ from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_executio
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_BOOTSTRAP_APPLIED,
     MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_BOOTSTRAP_NOT_READY,
     MODEL_AUTORESEARCH_CAMPAIGN_EXACT_OUTPUT_DIGEST_VERIFIER,
+    MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
     run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap,
 )
 from modules.ai_intelligence.ai_gateway.src.model_autoresearch_configured_gateway_evidence import (
@@ -144,6 +145,15 @@ def _set_two_tasks(files) -> None:
     prompts = json.loads(files["prompts"].read_text(encoding="utf-8"))
     prompts["prompts"].append({**prompts["prompts"][0], "task_id": "task-002"})
     _write_json(files["prompts"], prompts)
+
+
+def _set_semantic_expectation(files) -> None:
+    payload = json.loads(files["tasks"].read_text(encoding="utf-8"))
+    for task in payload["tasks"]:
+        task["metadata"] = {
+            "expected_answer_contains": "configured;gateway;answer"
+        }
+    _write_json(files["tasks"], payload)
 
 
 def _set_panel_candidate(files, *, include_critic_budget: bool) -> None:
@@ -397,17 +407,24 @@ def test_two_tasks_exceed_campaign_total_cap_before_first_call(tmp_path: Path) -
     assert not files["evidence"].exists()
 
 
-def test_two_task_configured_campaign_is_phase1_no_go_even_with_exact_cap(
+def test_two_task_configured_campaign_executes_after_atomic_preflight(
     tmp_path: Path,
 ) -> None:
     files, gateway = _safety_inputs(tmp_path)
     _set_two_tasks(files)
-    result = _configured_call(files, gateway, runner_max_total_calls=2)
-    assert result.accepted is False
-    assert "model_autoresearch_campaign_multi_call_not_supported" in (
-        result.rejection_reasons
+    _set_semantic_expectation(files)
+    result = _configured_call(
+        files,
+        gateway,
+        runner_max_total_calls=2,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
     )
-    assert gateway.calls == []
+    assert result.accepted is True, result.rejection_reasons
+    assert len(gateway.calls) == 2
+    attempts = read_call_attempt_receipts_jsonl(files["attempts"])
+    assert [item.status for item in attempts] == [
+        "ATTEMPTED", "COMPLETED", "ATTEMPTED", "COMPLETED"
+    ]
 
 
 def test_multi_role_candidate_exceeds_campaign_total_cap_precall(tmp_path: Path) -> None:
@@ -427,22 +444,21 @@ def test_multi_role_candidate_exceeds_campaign_total_cap_precall(tmp_path: Path)
     assert not files["attempts"].exists()
 
 
-def test_panel_configured_campaign_is_phase1_no_go_even_with_exact_cap(
+def test_panel_configured_campaign_executes_exact_routes_after_atomic_preflight(
     tmp_path: Path,
 ) -> None:
     files, gateway = _safety_inputs(tmp_path)
     _set_panel_candidate(files, include_critic_budget=True)
+    _set_semantic_expectation(files)
     result = _configured_call(
         files,
         gateway,
         runner_max_calls_per_sample=2,
         runner_max_total_calls=2,
+        verifier_mode=MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_SEMANTIC_VERIFIER,
     )
-    assert result.accepted is False
-    assert "model_autoresearch_campaign_multi_call_not_supported" in (
-        result.rejection_reasons
-    )
-    assert gateway.calls == []
+    assert result.accepted is True, result.rejection_reasons
+    assert [item["model"] for item in gateway.calls] == ["new", "critic"]
 
 
 def test_all_selected_panel_assignments_require_exact_budget(tmp_path: Path) -> None:

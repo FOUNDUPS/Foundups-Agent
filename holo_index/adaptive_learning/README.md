@@ -1,7 +1,20 @@
 # Adaptive Learning System - Phase 3 Intelligence
 
+## Current implementation boundary
+
+This package is experimental and is not part of the production HoloIndex query
+path. CLI initialization is explicitly disabled because it caused hangs. The
+orchestrator can execute an isolated optimization pipeline, but no governed
+retrieval proposer, evaluator admission, ranker promotion, canary, rollback,
+or production outcome binding calls it. Its outputs must not be reported as
+operational RSI or as changes applied to the live ranker.
+
+`AdaptiveLearningOrchestrator` does not implement `record_feedback()` or
+`get_adaptation_metrics()`. Feedback examples and performance percentages in
+older revisions were design targets, not verified public APIs or measurements.
+
 ## Overview
-The Adaptive Learning system implements Phase 3 of HoloIndex evolution, providing self-improving search capabilities through continuous learning from user interactions and search patterns.
+The package prototypes components proposed for Phase 3 HoloIndex evolution.
 
 ## Purpose
 Enable HoloIndex to **learn and adapt** from usage patterns to:
@@ -11,7 +24,7 @@ Enable HoloIndex to **learn and adapt** from usage patterns to:
 - Enhance response quality
 - Learn from user feedback
 
-## Architecture
+## Prototype architecture
 
 ### Core Components
 
@@ -82,7 +95,7 @@ User Query
 Learning Feedback Loop
 ```
 
-## Key Features
+## Prototype component behaviors (not production capabilities)
 
 ### 1. Query Learning
 - **Pattern Recognition**: Identifies common query patterns
@@ -117,13 +130,13 @@ Learning Feedback Loop
 - **Memory Efficiency**: 0.0 - 1.0
 - **Overall Adaptation Score**: 0.0 - 1.0
 
-### Typical Performance
-- **Adaptation Score**: 0.70 - 0.75 (after learning)
-- **Query Enhancement**: 30-40% improvement
-- **Memory Reduction**: 20-30% savings
-- **Response Quality**: 25-35% improvement
+### Historical targets (not accepted measurements)
+- Adaptation score target: 0.70 - 0.75
+- Query-enhancement target: 30-40%
+- Memory-reduction target: 20-30%
+- Response-quality target: 25-35%
 
-## Configuration
+## Historical design configuration
 
 ### Learning Parameters
 ```python
@@ -143,9 +156,9 @@ E:/HoloIndex/adaptive_learning/
 +-- memory_evolution.json
 ```
 
-## Integration
+## Isolated research integration
 
-### With HoloIndex
+### With the experimental orchestrator
 ```python
 from holo_index.adaptive_learning import AdaptiveLearningOrchestrator
 
@@ -159,16 +172,12 @@ result = await orchestrator.process_adaptive_request(
 ```
 
 ### Learning from Feedback
-```python
-# Record user feedback
-orchestrator.record_feedback(
-    query=query,
-    results=results,
-    rating="useful"  # or "needs_more"
-)
-```
 
-## Learning Strategies
+No orchestrator-level feedback API is implemented. A future API must bind
+feedback to an exact retrieval candidate, benchmark/evaluator receipt, and
+production outcome before it can influence admission or promotion.
+
+## Proposed Learning Strategies
 
 ### 1. Reinforcement Learning
 - Positive feedback reinforces patterns
@@ -185,10 +194,10 @@ orchestrator.record_feedback(
 - Strengthens successful patterns
 - Balances exploration vs exploitation
 
-## WSP Compliance
-- **WSP 48**: Recursive Self-Improvement
-- **WSP 60**: Module Memory Architecture
-- **WSP 84**: Code Memory Verification
+## WSP alignment boundary
+- **WSP 48**: RSI candidate research; production RSI is not implemented
+- **WSP 60**: Experimental memory work without admitted live writeback
+- **WSP 84**: Existing-source verification requirement
 - **WSP 87**: Code Navigation Protocol
 
 ## Future Enhancements

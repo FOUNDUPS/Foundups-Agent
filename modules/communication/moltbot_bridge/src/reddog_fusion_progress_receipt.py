@@ -42,6 +42,7 @@ _STAGE_STATUS = {
     "redaction_start": "STARTED", "redaction_pass": "COMPLETED", "redaction_blocked": "BLOCKED",
     "fusion_alias_start": "STARTED", "fusion_alias_done": "COMPLETED",
     "lead_start": "STARTED", "lead_done": "COMPLETED",
+    "lead_retry": "OBSERVED", "panel_retry": "OBSERVED",
     "panel_start": "STARTED", "panel_done": "COMPLETED", "panel_blocked": "BLOCKED",
     "synthesis_start": "STARTED", "synthesis_done": "COMPLETED",
     "single_start": "STARTED", "single_done": "COMPLETED",

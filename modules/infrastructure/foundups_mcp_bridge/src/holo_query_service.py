@@ -8,10 +8,8 @@ Lexical fallback is never represented as semantic evidence.
 
 from __future__ import annotations
 
-import json
 import math
 import os
-import re
 import secrets
 import threading
 import time
@@ -24,23 +22,51 @@ from holo_index.freshness_receipt import (
     freshness_receipt_path,
     load_freshness_receipt,
 )
-from holo_index.repository_state import read_repository_state
+from holo_index.repository_state import read_repository_state, repository_root_digest
+from holo_index.retrieval_runtime_binding import (
+    loaded_retrieval_ranker_digest,
+    loaded_retrieval_runtime_root,
+)
+from holo_index.query_receipt import digest_json
 from holo_index.storage_contract import resolve_holoindex_ssd_path
+from .reddog_holoindex_acceptance_guards import StoreProof
+from .reddog_holoindex_query_replica_descriptor import ActiveQueryReplicaBinding
+from .holo_query_service_replica import (
+    build_query_replica_runtime,
+    prepare_query_backend,
+)
+from .reddog_holoindex_runtime_environment_binding import (
+    OWNER_STARTUP_FORCED_ENVIRONMENT,
+    QUERY_RUNTIME_FORCED_ENVIRONMENT,
+    RuntimeEnvironmentBindingError,
+    exact_runtime_closure_verified,
+    runtime_environment_manifest,
+)
+from .holo_query_service_request import (
+    ALLOWED_DOC_TYPE_FILTERS,
+    EXPECTED_ROOT_DIGEST_PATTERN,
+    EXPECTED_SHA_PATTERN,
+    validate_payload as _validate_payload,
+)
 from .holo_query_freshness_gate import (
     BASELINE_COLLECTIONS,
     BASELINE_FRESHNESS_PATHS,
     FreshnessSnapshot as _FreshnessSnapshot,
     HoloQueryFreshnessGate as _FreshnessGate,
     maintenance_reason_for_error,
-    normalize_binding as _binding,
-    snapshot_error as _snapshot_error,
 )
+from .holo_query_service_response import (
+    build_response as _response,
+    failure_reason as _failure_reason,
+    flatten_hits as _flatten_hits,  # noqa: F401 - legacy test/import surface
+    semantic_canary_empty_response as _empty_canary_response,
+)
+from .holo_query_transport import MIN_BEARER_TOKEN_CHARS
 
 
 SCHEMA_VERSION = "holoindex_query_service.v1"
 QUERY_PATH, HEALTH_PATH = "/holoindex/v1/query", "/holoindex/v1/health"
 TOKEN_ENV = "HOLOINDEX_QUERY_SERVICE_TOKEN"
-MIN_BEARER_TOKEN_CHARS = 32
 TOKEN_TOO_SHORT_ERROR = "HOLOINDEX_QUERY_SERVICE_TOKEN_TOO_SHORT"
 DEFAULT_BIND_HOST, DEFAULT_PORT = "127.0.0.1", 8127
 DEFAULT_LIMIT, MAX_LIMIT = 8, 50
@@ -48,141 +74,10 @@ MAX_QUERY_CHARS, MAX_REQUEST_BYTES = 4_096, 16_384
 DEFAULT_QUERY_TIMEOUT_SECONDS, MAX_QUERY_TIMEOUT_SECONDS = 15.0, 30.0
 DEFAULT_STARTUP_WARMUP_TIMEOUT_SECONDS = 270.0
 MAX_STARTUP_WARMUP_TIMEOUT_SECONDS = 300.0
-ALLOWED_DOC_TYPE_FILTERS = frozenset(
-    {"all", "code", "wsp", "test", "skill", "docs", "knowledge"}
-)
-EXPECTED_SHA_PATTERN = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
 
 def _default_backend_factory(ssd_path: Path) -> Any:
     from holo_index.core.holo_index import HoloIndex
     return HoloIndex(ssd_path=ssd_path, quiet=True)
-
-
-def _dedupe(values: Sequence[str]) -> tuple[str, ...]:
-    return tuple(dict.fromkeys(value for value in values if value))
-
-
-def _failure_reason(error: str) -> str:
-    """Map service errors to stable, low-cardinality stale reasons."""
-    exact = {
-        "QUERY_TIMEOUT": "holoindex_query_timeout",
-        "QUERY_OWNER_POISONED": "query_owner_poisoned",
-        "QUERY_QUEUE_TIMEOUT": "query_owner_queue_timeout",
-        "OWNER_BUSY": "query_owner_busy",
-        "SEMANTIC_BACKEND_UNAVAILABLE": "semantic_backend_unavailable",
-    }
-    if error in exact:
-        return exact[error]
-    if error.startswith("REPOSITORY") or error.startswith("REPO_"):
-        return "repository_state_unproven"
-    if error in {"UNAUTHORIZED", "AUTH_NOT_CONFIGURED", TOKEN_TOO_SHORT_ERROR}:
-        return "query_owner_authentication_failed"
-    return "holoindex_owner_query_failed"
-
-
-def _flatten_hits(result: Mapping[str, Any], limit: int) -> list[Mapping[str, Any]]:
-    hits: list[Mapping[str, Any]] = []
-    seen: set[str] = set()
-    buckets = (
-        ("code_hits", "code"), ("wsp_hits", "wsp"), ("docs_hits", "docs"),
-        ("knowledge_hits", "knowledge"), ("test_hits", "test"),
-        ("skill_hits", "skill"), ("symbol_hits", "symbol"),
-    )
-    for key, kind in buckets:
-        values = result.get(key)
-        if not isinstance(values, Sequence) or isinstance(values, (str, bytes)):
-            continue
-        for item in values:
-            if not isinstance(item, Mapping):
-                continue
-            path = str(
-                item.get("path") or item.get("file") or item.get("location") or ""
-            ).replace("\\", "/").strip()
-            identity = path or json.dumps(item, sort_keys=True, default=str)
-            if identity in seen:
-                continue
-            seen.add(identity)
-            normalized = dict(item)
-            normalized.setdefault("type", kind)
-            hits.append(normalized)
-            if len(hits) >= limit:
-                return hits
-    return hits
-
-
-def _response(
-    *,
-    ok: bool,
-    query: str,
-    freshness: str,
-    error: str,
-    reasons: Sequence[str] = (),
-    binding: Mapping[str, Any] | None = None,
-    raw: Mapping[str, Any] | None = None,
-    hits: Sequence[Mapping[str, Any]] = (),
-    mode: str = "unknown",
-    latency_ms: int = 0,
-) -> dict[str, Any]:
-    stale = list(_dedupe([str(value) for value in reasons]))
-    normalized_freshness = str(freshness or "UNKNOWN").upper()
-    if not ok and normalized_freshness != "UNKNOWN":
-        normalized_freshness = "STALE"
-    if not ok and not stale:
-        stale = [_failure_reason(error)]
-    return {
-        "schema_version": SCHEMA_VERSION,
-        "ok": ok, "source": "holoindex", "query": query,
-        "freshness": normalized_freshness, "hits": list(hits), "error": error,
-        "stale_reasons": stale, "index_gap_detected": bool(stale or not ok),
-        "retrieval_mode": mode, "raw_result": dict(raw or {}),
-        "latency_ms": max(0, int(latency_ms)),
-        "no_holoindex_reindex_performed": True,
-        **_binding(binding),
-    }
-
-
-def _validate_payload(
-    payload: Any,
-    *,
-    request_size: int | None,
-    max_request_bytes: int,
-    max_query_chars: int,
-    max_limit: int,
-) -> tuple[dict[str, Any] | None, str]:
-    if request_size is not None and request_size > max_request_bytes:
-        return None, "REQUEST_TOO_LARGE"
-    if not isinstance(payload, Mapping):
-        return None, "INVALID_REQUEST"
-    try:
-        size = len(
-            json.dumps(payload, separators=(",", ":"), ensure_ascii=False).encode()
-        )
-    except (TypeError, ValueError):
-        return None, "INVALID_REQUEST"
-    if size > max_request_bytes:
-        return None, "REQUEST_TOO_LARGE"
-    allowed = {"query", "limit", "doc_type_filter", "expected_repo_head_sha"}
-    if set(payload) - allowed:
-        return None, "UNSUPPORTED_REQUEST_FIELDS"
-    query_value = payload.get("query")
-    if not isinstance(query_value, str) or not query_value.strip():
-        return None, "EMPTY_QUERY"
-    query = query_value.strip()
-    if len(query) > max_query_chars:
-        return None, "QUERY_TOO_LARGE"
-    limit = payload.get("limit", DEFAULT_LIMIT)
-    if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= max_limit:
-        return None, "INVALID_LIMIT"
-    doc_type = payload.get("doc_type_filter", "all")
-    if not isinstance(doc_type, str) or doc_type not in ALLOWED_DOC_TYPE_FILTERS:
-        return None, "INVALID_DOC_TYPE_FILTER"
-    expected_sha = payload.get("expected_repo_head_sha")
-    if not isinstance(expected_sha, str) or not EXPECTED_SHA_PATTERN.fullmatch(expected_sha):
-        return None, "EXPECTED_REPO_HEAD_SHA_REQUIRED"
-    return {
-        "query": query, "limit": limit, "doc_type_filter": doc_type,
-        "expected_repo_head_sha": expected_sha,
-    }, ""
 
 
 def validate_bind_host(host: str) -> str:
@@ -234,24 +129,84 @@ def _new_owner_executor() -> ThreadPoolExecutor:
     )
 
 
+def _freshness_gate(
+    repo_root: Path, ssd_path: Path, receipt_path: Path,
+    receipt_loader: Callable[[Path], Any] | None,
+    freshness_evaluator: Callable[..., Any] | None,
+    maintenance_probe: Callable[[Path], Any] | None,
+) -> _FreshnessGate:
+    return _FreshnessGate(
+        repo_root, ssd_path, receipt_path,
+        receipt_loader or load_freshness_receipt,
+        freshness_evaluator or evaluate_freshness_for_paths,
+        maintenance_probe,
+    )
+
+
+def _service_storage_paths(
+    repo_root: Path | str, canonical_input: Path | str | None,
+) -> tuple[Path, Path, Path]:
+    root = Path(repo_root).resolve(strict=False)
+    canonical = resolve_holoindex_ssd_path(canonical_input)
+    return root, canonical, freshness_receipt_path(canonical)
+
+
+def _owner_runtime_environment(
+    replica: Any, backend_factory: Callable[[Path], Any] | None,
+) -> tuple[str, str, bool]:
+    ranker_digest = loaded_retrieval_ranker_digest()
+    manifest = runtime_environment_manifest(
+        source_root=loaded_retrieval_runtime_root(),
+        ranker_digest=ranker_digest,
+        replica_binding=replica.public_binding,
+        replica_artifacts=(replica.binding.artifacts if replica.binding else ()),
+        require_complete_replica_binding=backend_factory is None,
+        required_environment=(
+            {**OWNER_STARTUP_FORCED_ENVIRONMENT, **QUERY_RUNTIME_FORCED_ENVIRONMENT}
+            if backend_factory is None else None
+        ),
+    )
+    return ranker_digest, digest_json(manifest), exact_runtime_closure_verified(manifest)
+
+
+def _service_replica_runtime(
+    *, repo_root: Path, canonical_ssd_path: Path,
+    proof: StoreProof | None,
+    injected: Callable[[], ActiveQueryReplicaBinding] | None,
+    backend_factory: Callable[[Path], Any] | None,
+) -> Any:
+    return build_query_replica_runtime(
+        repo_root=repo_root, canonical_ssd_path=canonical_ssd_path,
+        proof=proof, injected=injected, require_replica=backend_factory is None,
+    )
+
+
+def _required_owner_runtime_environment(
+    replica: Any, backend_factory: Callable[[Path], Any] | None,
+) -> tuple[str, str, bool]:
+    try:
+        return _owner_runtime_environment(replica, backend_factory)
+    except RuntimeEnvironmentBindingError:
+        raise ValueError("HOLOINDEX_RUNTIME_ENVIRONMENT_UNAVAILABLE") from None
+
+
 class HoloIndexQueryOwnerService:
     """Singleton, serialized owner for generation-pinned semantic queries."""
 
     def __init__(
-        self,
-        *,
-        repo_root: Path | str,
+        self, *, repo_root: Path | str,
         ssd_path: Path | str | None = None,
+        canonical_ssd_path: Path | str | None = None,
+        query_replica_root_proof: StoreProof | None = None,
         backend_factory: Callable[[Path], Any] | None = None,
+        _replica_verifier_for_test: Callable[[], ActiveQueryReplicaBinding] | None = None,
         receipt_loader: Callable[[Path], Any] | None = None,
         freshness_evaluator: Callable[..., Any] | None = None,
         repository_state_reader: Callable[[Path], Any] | None = None,
         maintenance_probe: Callable[[Path], Any] | None = None,
-        bearer_token: str | None = None,
-        query_timeout_seconds: float = DEFAULT_QUERY_TIMEOUT_SECONDS,
+        bearer_token: str | None = None, query_timeout_seconds: float = DEFAULT_QUERY_TIMEOUT_SECONDS,
         startup_warmup_timeout_seconds: float = DEFAULT_STARTUP_WARMUP_TIMEOUT_SECONDS,
-        max_query_chars: int = MAX_QUERY_CHARS,
-        max_request_bytes: int = MAX_REQUEST_BYTES,
+        max_query_chars: int = MAX_QUERY_CHARS, max_request_bytes: int = MAX_REQUEST_BYTES,
         max_limit: int = MAX_LIMIT,
     ) -> None:
         timeout, warmup_timeout, query_chars, request_bytes, result_limit = (
@@ -260,32 +215,53 @@ class HoloIndexQueryOwnerService:
                 max_query_chars, max_request_bytes, max_limit,
             )
         )
-        self.repo_root = Path(repo_root).resolve(strict=False)
-        self.ssd_path = resolve_holoindex_ssd_path(ssd_path)
-        self.receipt_path = freshness_receipt_path(self.ssd_path)
-        self.query_timeout_seconds = timeout
-        self.startup_warmup_timeout_seconds = warmup_timeout
+        canonical_input = canonical_ssd_path if canonical_ssd_path is not None else ssd_path
+        self.repo_root, self.canonical_ssd_path, self.receipt_path = _service_storage_paths(
+            repo_root, canonical_input
+        )
+        self.ssd_path = self.canonical_ssd_path  # compatibility: freshness authority
+        self.query_timeout_seconds, self.startup_warmup_timeout_seconds = timeout, warmup_timeout
         self.max_query_chars, self.max_request_bytes = query_chars, request_bytes
         self.max_limit = result_limit
         self._bearer_token = _captured_bearer_token(bearer_token)
         self._factory = backend_factory or _default_backend_factory
+        self._replica = _service_replica_runtime(
+            repo_root=self.repo_root, canonical_ssd_path=self.canonical_ssd_path,
+            proof=query_replica_root_proof, injected=_replica_verifier_for_test,
+            backend_factory=backend_factory,
+        )
+        self.query_ssd_path = self._replica.query_ssd_path
+        (self.retrieval_runtime_ranker_digest, self.runtime_environment_digest,
+         self.runtime_environment_exact_closure_verified) = _required_owner_runtime_environment(
+            self._replica, backend_factory)
         self._repository_state_reader = repository_state_reader or read_repository_state
-        self._freshness = _FreshnessGate(
-            self.repo_root,
-            self.ssd_path,
-            self.receipt_path,
-            receipt_loader or load_freshness_receipt,
-            freshness_evaluator or evaluate_freshness_for_paths,
-            maintenance_probe,
+        self._freshness = _freshness_gate(
+            self.repo_root, self.canonical_ssd_path, self.receipt_path,
+            receipt_loader, freshness_evaluator, maintenance_probe,
         )
         self._backend: Any | None = None
         self._backend_lock, self._request_lock = threading.Lock(), threading.Lock()
-        self._poisoned = threading.Event()
-        self._warmed = threading.Event()
+        self._poisoned, self._warmed = threading.Event(), threading.Event()
         self._executor = _new_owner_executor()
+
+    def _verify_replica_binding(self) -> ActiveQueryReplicaBinding | None:
+        return self._replica.verify()
+
+    @property
+    def replica_public_binding(self) -> Mapping[str, str]:
+        return self._replica.public_binding
 
     def close(self) -> None:
         self._executor.shutdown(wait=False, cancel_futures=True)
+        if not self._request_lock.acquire(blocking=False):
+            return
+        try:
+            backend, self._backend = self._backend, None
+            close = getattr(backend, "close", None)
+            if callable(close):
+                close()
+        finally:
+            self._request_lock.release()
 
     def authorization_error(self, authorization: str | None) -> str:
         expected = self._bearer_token
@@ -303,24 +279,7 @@ class HoloIndexQueryOwnerService:
             return self._backend
         with self._backend_lock:
             if self._backend is None:
-                os.environ.update(
-                    {
-                        "HOLOINDEX_QUERY_READONLY": "1", "HOLO_OFFLINE": "1",
-                        "HOLO_DISABLE_PIP_INSTALL": "1", "HOLO_ALLOW_PIP_INSTALL": "0",
-                        "ANONYMIZED_TELEMETRY": "false", "HOLO_SILENT": "1",
-                        "HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1",
-                        "HF_DATASETS_OFFLINE": "1",
-                        "HOLO_USE_TURBOQUANT": "0",
-                        "HOLOINDEX_SSD_PATH": str(self.ssd_path),
-                    }
-                )
-                backend = self._factory(self.ssd_path)
-                # Phase 1 proves generations outside HoloIndex's legacy
-                # query/filter-only cache key, so cached cross-generation hits
-                # are categorically disabled in the resident owner.
-                backend.search_cache = None
-                backend.strict_semantic_owner = True
-                self._backend = backend
+                self._backend = prepare_query_backend(self._replica, self._factory)
         return self._backend
 
     def _search(self, query: str, limit: int, doc_type: str) -> Any:
@@ -380,12 +339,21 @@ class HoloIndexQueryOwnerService:
             failure_reasons.extend(snapshot.stale_reasons)
         if not failure_reasons:
             failure_reasons.append(_failure_reason(error))
+        response_binding = dict(snapshot.binding if snapshot else {})
+        response_binding.update(self.replica_public_binding)
         return _response(
             ok=False, query=query,
             freshness=snapshot.freshness if snapshot else "UNKNOWN",
             error=error,
             reasons=failure_reasons,
-            binding=snapshot.binding if snapshot else None,
+            binding=response_binding,
+            retrieval_runtime_ranker_digest=(
+                self.retrieval_runtime_ranker_digest
+            ),
+            runtime_environment_digest=self.runtime_environment_digest,
+            runtime_environment_exact_closure_verified=(
+                self.runtime_environment_exact_closure_verified
+            ),
             raw=raw, mode=mode,
             latency_ms=int((time.monotonic() - started) * 1000) if started else 0,
         )
@@ -428,6 +396,12 @@ def _handle_query(
     if error or request is None:
         return owner._failure(
             error or "INVALID_REQUEST", query=query, started=started
+        )
+    if request["expected_repo_root_digest"] and request[
+        "expected_repo_root_digest"
+    ] != repository_root_digest(owner.repo_root):
+        return owner._failure(
+            "REPO_ROOT_MISMATCH", query=query, started=started
         )
     remaining = max(0.0, deadline - time.monotonic())
     if not owner._request_lock.acquire(timeout=remaining):
@@ -489,14 +463,7 @@ def _health_result(
     if result.get("ok") is not True:
         return result
     if not result.get("hits"):
-        return {
-            **result,
-            "ok": False,
-            "freshness": "STALE",
-            "error": "SEMANTIC_CANARY_EMPTY",
-            "stale_reasons": ["semantic_canary_empty"],
-            "index_gap_detected": True,
-        }
+        return _empty_canary_response(result)
     owner._warmed.set()
     return {**result, "query": "", "hits": [], "raw_result": {}}
 
@@ -547,7 +514,7 @@ __all__ = [
     "HoloIndexQueryOwnerService", "MAX_LIMIT", "MAX_QUERY_CHARS",
     "MAX_REQUEST_BYTES", "MAX_STARTUP_WARMUP_TIMEOUT_SECONDS",
     "MIN_BEARER_TOKEN_CHARS", "QUERY_PATH",
-    "TOKEN_ENV", "TOKEN_TOO_SHORT_ERROR", "app",
+    "TOKEN_ENV", "TOKEN_TOO_SHORT_ERROR", "app",  # noqa: F822
     "create_holo_query_app", "create_stdlib_server", "main",
     "validate_bind_host",
 ]

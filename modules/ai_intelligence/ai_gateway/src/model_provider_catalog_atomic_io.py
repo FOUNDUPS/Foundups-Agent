@@ -132,9 +132,7 @@ def _open_windows_descriptor(path: Path, desired_access: int) -> int:
     if handle == ctypes.c_void_p(-1).value:
         raise ctypes.WinError(ctypes.get_last_error())
     try:
-        return msvcrt.open_osfhandle(
-            handle, os.O_RDONLY | getattr(os, "O_BINARY", 0)
-        )
+        return msvcrt.open_osfhandle(handle, os.O_RDONLY | getattr(os, "O_BINARY", 0))
     except Exception:
         close_handle(handle)
         raise
@@ -163,7 +161,9 @@ def _publish_verified(
     return verified
 
 
-def _rename_windows_descriptor(descriptor: int, target: Path) -> None:
+def _rename_windows_descriptor(
+    descriptor: int, target: Path, *, replace_existing: bool = True
+) -> None:
     import ctypes
     import msvcrt
     from ctypes import wintypes
@@ -177,13 +177,12 @@ def _rename_windows_descriptor(descriptor: int, target: Path) -> None:
 
     nt_path = _windows_nt_path(target)
     raw_name = nt_path.encode("utf-16-le")
-    name_offset = _FileRenameInfoHead.name_len.offset + ctypes.sizeof(
-        wintypes.DWORD
-    )
+    name_offset = _FileRenameInfoHead.name_len.offset + ctypes.sizeof(wintypes.DWORD)
     size = ctypes.sizeof(_FileRenameInfoHead) + len(raw_name)
     buffer = ctypes.create_string_buffer(size)
     header = _FileRenameInfoHead.from_buffer(buffer)
-    header.replace, header.root, header.name_len = 1, None, len(raw_name)
+    header.replace = int(replace_existing)
+    header.root, header.name_len = None, len(raw_name)
     ctypes.memmove(ctypes.addressof(buffer) + name_offset, raw_name, len(raw_name))
     kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
     rename = kernel32.SetFileInformationByHandle
@@ -255,9 +254,7 @@ def _restore_prior_target(target: Path, prior: _PriorTarget) -> None:
 def _target_matches_prior(target: Path, prior: _PriorTarget) -> bool:
     try:
         named = os.lstat(target)
-        descriptor = os.open(
-            target, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
-        )
+        descriptor = os.open(target, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
     except (OSError, ValueError):
         return False
     try:
@@ -282,9 +279,7 @@ def _remove_temp(path: Path | None) -> None:
         pass
 
 
-def _remove_owned_temp(
-    path: Path | None, proof: _TempArtifactProof | None
-) -> None:
+def _remove_owned_temp(path: Path | None, proof: _TempArtifactProof | None) -> None:
     if path is None:
         return
     if proof is None:

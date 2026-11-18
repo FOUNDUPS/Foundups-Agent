@@ -1,0 +1,131 @@
+{
+  "schema": "foundups.reserve-quote.reconciliation.v1",
+  "recorded_at_utc": "2026-11-01T03:35:10.039947+00:00",
+  "status": "LOCAL_COMBINED_OVERLAY_QUALIFIED; PUBLICATION_PENDING",
+  "scope": "Additive source/package reconciliation with PR2287; no blockchain economic code, consumer or authority change.",
+  "classification": "A representation/integration only; class C/D unit/issuance decisions remain unresolved.",
+  "source_context": {
+    "owned_HEAD": "b0b112572f75c1e12b69305b6753b1a2f346f2ae",
+    "upstream_PR2287_main": "b3e0465c237bd53bfa473195720c2c5e55a1882a",
+    "uncommitted_merge_overlay": true,
+    "future_commit_self_binding": false,
+    "kind": "Dated prepublication test context, not an assertion about later HEAD/worktree state"
+  },
+  "original_qualification": {
+    "source_base": "4c96d6b17429226248c3a82de5544262e773c41e",
+    "source_carrying_commit": "cc67f4634e13951a9a35fedac24f6bd54aa6c524",
+    "receipt": "docs/architecture/receipts/FOUNDUPS_RESERVE_QUOTE_OBSERVATION_20261101.json",
+    "receipt_sha256": "8040a5d9b5a034b98bed7e6bc7a891393117742ea8d0eab749944cc3c36bf205",
+    "runtime_members": 1478,
+    "rule": "Sealed contract and all original source/test/package proofs remain dated pre-integration evidence, not relabeled as a combined run."
+  },
+  "preserved_LF_sha256": {
+    "modules/foundups/simulator/economics/btc_reserve.py": "9c3ff563c03a650c1e0b3baad79eaed7babb953d0e865361f736db7d1e24d594",
+    "modules/foundups/simulator/tests/test_btc_reserve_semantics.py": "9df009d5b10575dd04f2524e62899a4bbffc7f83171ca5e8ad0e7c108c7fd55b",
+    "docs/architecture/receipts/FOUNDUPS_RESERVE_QUOTE_OBSERVATION_20261101.json": "8040a5d9b5a034b98bed7e6bc7a891393117742ea8d0eab749944cc3c36bf205"
+  },
+  "preservation": {
+    "upstream_nonshared_paths": 48,
+    "all48_equal_upstream_Git": true,
+    "simulator_fam_python_sources_including_tests": 174,
+    "all174_equal_qualified_owned_sources": true,
+    "inherited_metadata_union": "Both reviewed parent sets and their ordered provenance retained: 3236 inherited bindings. This is not a fresh scanner approval.",
+    "source_proof": {
+      "file": "root-source-preservation.json",
+      "sha256": "439d5a94aecd9d001a70d6c589130438812f0060c963a5089f22d8582809506a"
+    },
+    "independent_preexecution": {
+      "file": "independent-preexecution-review.json",
+      "sha256": "986d066e657b7299bf5f35a4b8e7d803e97116dc06e7d3ab59f86cff32625a93"
+    }
+  },
+  "combined_actual_tests": {
+    "evidence": {
+      "file": "independent-execution-review.json",
+      "sha256": "f0131205deeb1f20a42d2173c892ea81bfa187b366cf1a78b31e6f3e4265c734"
+    },
+    "broader": {
+      "passed": 1019,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "guard_denials": 0,
+      "source_snapshots_unchanged": 174,
+      "same_case_ID_order_as_prior": true,
+      "result": {
+        "file": "broader-simulator-green/result.json",
+        "sha256": "3a45d6d768d1e558ed9732e97fee5248c7c5689cdba3a4c9400acbbca96dd089"
+      },
+      "deselected_exact_ids": [
+        "modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ]
+    },
+    "controlled_candidate": {
+      "passed": 1,
+      "guard_denials": 0,
+      "trace_sha256": "672d12c9d8fb6286624ea892fb3a5d0315c475ee45f8c83c9a271ba4328f0ff1",
+      "equals_retained_fb58_reference_bytes": true,
+      "reference_rerun": false,
+      "result": {
+        "file": "controlled-candidate/result.json",
+        "sha256": "2ed6fc98fcbce7f30e946ee6a8441eea360773f4a0c2b3ee208a0b82e722c858"
+      },
+      "scope": "One repeated finite 240-tick scenario using the frozen fresh-process/hash-seed profile; not another distinct regression case or seed-only portability."
+    },
+    "counts": "Scopes overlap original 113/96/1,019; not summed. Original 113 need not rerun: source/oracles unchanged and current 1,019 contains promoted 96."
+  },
+  "package": {
+    "evidence": {
+      "file": "canonical-packaging/package-result.json",
+      "sha256": "7c113f94be067b8a3e214f203647e4918b387e05e0feb967876faec2c285c415"
+    },
+    "canonical_digest": "9d923a60e196924024bb5df6ab180e7581017dbd357b0f6468b7be1dc2e3a79b",
+    "runtime_members": 1481,
+    "same_ordered_members_as_upstream": true,
+    "added_main_owners": [
+      "modules/communication/livechat/src/operator_video_policy_owner.py",
+      "modules/communication/livechat/src/video_policy.py",
+      "modules/platform_integration/youtube_shorts_scheduler/src/video_policy.py"
+    ],
+    "only_hash_delta_from_upstream": "modules/foundups/simulator/economics/btc_reserve.py",
+    "check": "PASS",
+    "Python_cases_passed": 8,
+    "Python_snapshots_unchanged": 1488,
+    "Node_entrypoints_exit0": 3,
+    "registry_owners": 1800,
+    "registry_quarantines": 260,
+    "registry_unchanged": true,
+    "LF_manifest_bytes": 334850,
+    "CRLF_manifest_bytes": 337885,
+    "unchanged_manifest_cap_bytes": 337920,
+    "CRLF_headroom_bytes": 35,
+    "unchanged_individual_source_cap_bytes": 2097152,
+    "unchanged_total_source_cap_bytes": 33554432,
+    "count_boundary": "1481 accepted/1482 rejected; inherited upstream oracles retained",
+    "limits": "Staged merged-overlay bindings; sanitized harness/Python guards are not OS/native confinement. Node entrypoints overlap; no summed unique JS count."
+  },
+  "line_ending_diagnostic": {
+    "evidence": {
+      "file": "root-manifest-byte-domain-review.json",
+      "sha256": "accacf73b97ae9d5b6fc64ee8a9100f7dc8f51b0c8a3976e1d23f6721665f1c4"
+    },
+    "initial_stop": "The post-write raw-byte guard stopped when canonical generation changed CRLF to LF; the original failed preflight is preserved.",
+    "accepted_correction": "Canonical generation materialized LF. Root verified and accepted exact CRLF-to-LF equality/exact index bytes; canonical digest unchanged, no manual authority/source reset.",
+    "rerun_scope": "Existing --check/eight Python/three Node/registry checks then passed with original guards; no extra generator --write or byte-cap change.",
+    "classification": "Operational byte-domain preflight, not a behavioral desired RED or weakened acceptance."
+  },
+  "gates": {
+    "fresh_security_scan": "PENDING on actual immutable candidate",
+    "PR_and_resulting_main": "PENDING on exact published sources",
+    "actual_PC_and_Holo": "PENDING; no semantic CURRENT claim for this overlay",
+    "economic_or_chain_activation": "BLOCKED"
+  },
+  "limits": [
+    "No global UPS atom scale, approved exchange/redemption right, combined 21M/release rule or funded quote is selected.",
+    "No authenticated source/currentness, grant issuer, signer/custody, funding, token issuance, broadcast, finality or live YouTube operation is authorized.",
+    "New runtime owners/source growth need separate resource admission: 35 CRLF bytes remain; reserve 597/620 was the prior slice allocation, not a successor exemption.",
+    "Original sealed records are immutable. This compact receipt references their contract and binds only actual new observations by filenames/hashes."
+  ]
+}

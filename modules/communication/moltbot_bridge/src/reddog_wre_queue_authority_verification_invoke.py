@@ -12,7 +12,7 @@ publish PRs, settle rewards, or re-index HoloIndex.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
@@ -31,6 +31,10 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     WorkAuthorityVerificationPhase,
     verify_delegated_work_authority,
 )
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    recorded_authority_verification_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import canonical_work_authority_digest, work_authority_digest_matches
 
 
 QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT = "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
@@ -41,6 +45,7 @@ class QueueAuthorityVerificationInvokeReason:
     EXPLICIT_INVOKE_MISSING = "REJECT_EXPLICIT_QUEUE_AUTHORITY_VERIFICATION_INVOKE_MISSING"
     AUTHORITY_RUNTIME_NOT_ACCEPTED = "REJECT_QUEUE_AUTHORITY_RUNTIME_NOT_ACCEPTED"
     AUTHORITY_PAYLOAD_MISSING = "REJECT_AUTHORITY_PAYLOAD_MISSING"
+    AUTHORITY_DIGEST_MISMATCH = "REJECT_AUTHORITY_DIGEST_MISMATCH"
     SIGNATURE_VERIFIER_REJECTED = "REJECT_SIGNATURE_VERIFIER_REJECTED"
 
 
@@ -49,6 +54,9 @@ class QueueAuthorityVerificationInvokeResult:
     decision: str
     rejection_reasons: List[str] = field(default_factory=list)
     verification_result: Optional[VerificationResult] = None
+    verified_work_authority_digest: Optional[str] = None
+    authority_verification_receipt_id: Optional[str] = None
+    authority_verification_receipt_digest: Optional[str] = None
     explicit_queue_authority_verification_requested: bool = False
     no_signing_performed: bool = True
     no_authority_issued: bool = True
@@ -135,6 +143,12 @@ def invoke_reddog_wre_queue_authority_verification(
             [QueueAuthorityVerificationInvokeReason.AUTHORITY_PAYLOAD_MISSING],
             explicit_requested=True,
         )
+    verified_work_authority_digest = canonical_work_authority_digest(work_authority)
+    if not work_authority_digest_matches(work_authority, receipt.get("work_authority_digest")):
+        return _reject(
+            [QueueAuthorityVerificationInvokeReason.AUTHORITY_DIGEST_MISMATCH],
+            explicit_requested=True,
+        )
 
     verification = verify_delegated_work_authority(
         work_authority=work_authority,
@@ -161,11 +175,31 @@ def invoke_reddog_wre_queue_authority_verification(
             verification_result=verification,
         )
 
-    return QueueAuthorityVerificationInvokeResult(
+    provisional = QueueAuthorityVerificationInvokeResult(
         decision=QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
         rejection_reasons=[],
         verification_result=verification,
+        verified_work_authority_digest=verified_work_authority_digest,
         explicit_queue_authority_verification_requested=True,
+    )
+    binding = recorded_authority_verification_binding(
+        runtime,
+        provisional.to_dict(),
+    )
+    if not binding:
+        return _reject(
+            [QueueAuthorityVerificationInvokeReason.AUTHORITY_DIGEST_MISMATCH],
+            explicit_requested=True,
+            verification_result=verification,
+        )
+    return replace(
+        provisional,
+        authority_verification_receipt_id=binding[
+            "authority_verification_receipt_id"
+        ],
+        authority_verification_receipt_digest=binding[
+            "authority_verification_receipt_digest"
+        ],
     )
 
 

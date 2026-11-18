@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -73,6 +74,27 @@ def test_incomplete_or_ambiguous_cache_fails_closed(tmp_path: Path) -> None:
         tmp_path, "all-MiniLM-L6-v2"
     ) is None
 
+
+def test_resolver_can_preserve_source_alias_for_strict_callers(tmp_path: Path) -> None:
+    target = _complete_snapshot(tmp_path / "target-cache", "revision-a")
+    alias = tmp_path / "sentence_transformers" / "all-MiniLM-L6-v2"
+    alias.parent.mkdir(parents=True)
+    try:
+        os.symlink(target, alias, target_is_directory=True)
+    except OSError:
+        import pytest
+
+        pytest.skip("directory symlink unavailable on this host")
+
+    assert resolve_sentence_transformer_snapshot(
+        tmp_path,
+        "all-MiniLM-L6-v2",
+        preserve_source_path=True,
+    ) == alias
+    assert resolve_sentence_transformer_snapshot(
+        tmp_path,
+        "all-MiniLM-L6-v2",
+    ) == target.resolve(strict=False)
 
 def test_artifact_or_backend_change_changes_embedding_space(tmp_path: Path) -> None:
     snapshot = _complete_snapshot(tmp_path, "revision-a")

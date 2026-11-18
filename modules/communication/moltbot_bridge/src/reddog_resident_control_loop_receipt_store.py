@@ -55,6 +55,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     secure_append_runtime_text,
     secure_read_confined_bytes,
     validate_runtime_artifact_path,
+    validate_runtime_root_path,
 )
 
 
@@ -316,46 +317,69 @@ def append_resident_control_loop_receipt(
     nonce: str | None = None,
     signing_context: ControlLoopReceiptSigningContext | None = None,
     require_authentication: bool = False,
+    runtime_root: Path | str | None = None,
     head_state_path: Path | str | None = None,
 ) -> ResidentControlLoopReceipt:
     """CAS-append one chain-linked control-loop receipt."""
 
     if require_authentication and signing_context is None:
         raise ValueError("resident_control_loop_receipt_signer_required")
-    target = validate_runtime_artifact_path(path, repo_root=repo_root)
-    resolved_head_path = (
-        head_state_path
-        if head_state_path is not None
-        else target.parent / "authority_runtime_state.json"
-        if require_authentication
-        else None
-    )
-    head_target = (
-        validate_runtime_artifact_path(resolved_head_path, repo_root=repo_root)
-        if resolved_head_path
-        else None
+    target, confined_root, head_target = _control_runtime_paths(
+        path=path, repo_root=repo_root, runtime_root=runtime_root,
+        head_state_path=head_state_path, require_authentication=require_authentication,
     )
     resolved_cycle_id = _bounded_text(cycle_id, 160) or _new_cycle_id()
     resolved_nonce = _bounded_text(nonce, 192) or _new_nonce()
     operation_identity = str(target) + ".control-chain-operation"
     with runtime_operation_lock(operation_identity):
         chain, head_store, head_state = _load_control_chain_for_append(
-            target, head_target, repo_root, signing_context, require_authentication
+            target, head_target, confined_root, repo_root,
+            signing_context, require_authentication
         )
         return _build_commit_append_receipt(
             target=target, chain=chain, result=result, repo_root=repo_root,
             created_at=created_at, cycle_id=resolved_cycle_id,
             nonce=resolved_nonce, signing_context=signing_context,
             require_authentication=require_authentication,
-            head_store=head_store, head_state=head_state,
+            runtime_root=confined_root, head_store=head_store, head_state=head_state,
         )
+
+
+def _control_runtime_paths(
+    *,
+    path: Path | str,
+    repo_root: Path | str,
+    runtime_root: Path | str | None,
+    head_state_path: Path | str | None,
+    require_authentication: bool,
+) -> tuple[Path, Path | None, Path | None]:
+    if require_authentication and runtime_root is None:
+        raise ValueError("resident_control_loop_runtime_root_required")
+    confined_root = (
+        validate_runtime_root_path(runtime_root, repo_root=repo_root)
+        if runtime_root is not None else None
+    )
+    target = validate_runtime_artifact_path(
+        path, repo_root=repo_root, allowed_root=confined_root
+    )
+    head_path = head_state_path
+    if head_path is None and require_authentication:
+        head_path = target.parent / "authority_runtime_state.json"
+    head_target = (
+        validate_runtime_artifact_path(
+            head_path, repo_root=repo_root, allowed_root=confined_root
+        )
+        if head_path is not None else None
+    )
+    return target, confined_root, head_target
 
 
 def _build_commit_append_receipt(
     *, target: Path, chain: Mapping[str, Any], result: Mapping[str, Any],
     repo_root: Path | str, created_at: str, cycle_id: str, nonce: str,
     signing_context: ControlLoopReceiptSigningContext | None,
-    require_authentication: bool, head_store: Any, head_state: Any,
+    require_authentication: bool, runtime_root: Path | None,
+    head_store: Any, head_state: Any,
 ) -> ResidentControlLoopReceipt:
     receipt = build_resident_control_loop_receipt(
         result=result, repo_root=repo_root, created_at=created_at,
@@ -372,7 +396,7 @@ def _build_commit_append_receipt(
         )
     _append_receipt_once(
         target, receipt, repo_root, signing_context=signing_context,
-        require_authentication=require_authentication,
+        require_authentication=require_authentication, runtime_root=runtime_root,
     )
     return receipt
 
@@ -380,25 +404,34 @@ def _build_commit_append_receipt(
 def _load_control_chain_for_append(
     target: Path,
     head_target: Path | None,
+    runtime_root: Path | None,
     repo_root: Path | str,
     signing_context: ControlLoopReceiptSigningContext | None,
     require_authentication: bool,
 ) -> tuple[dict[str, Any], Any, Any]:
     chain = _validate_existing_receipts(
-        _read_existing_chain(target),
+        _read_existing_chain(target, runtime_root),
         signing_context=signing_context,
         require_authenticated_current=require_authentication,
     )
     if not require_authentication or head_target is None:
         return chain, None, None
-    store, state, head = load_control_receipt_head(head_target)
+    if runtime_root is None:
+        raise ValueError("resident_control_loop_runtime_root_required")
+    store, state, head = load_control_receipt_head(
+        head_target,
+        runtime_root=runtime_root,
+        repo_root=repo_root,
+    )
     chain = reconcile_control_receipt_head(
         target=target, chain=chain, head=head, repo_root=repo_root,
         signing_context=signing_context,
         verify_receipt=verify_resident_control_loop_receipt,
-        append_receipt=_append_receipt_once,
+        append_receipt=lambda *args, **kwargs: _append_receipt_once(
+            *args, **kwargs, runtime_root=runtime_root
+        ),
         validate_chain=_validate_existing_receipts,
-        read_chain=_read_existing_chain,
+        read_chain=lambda path: _read_existing_chain(path, runtime_root),
     )
     return chain, store, state
 
@@ -410,6 +443,7 @@ def _append_receipt_once(
     *,
     signing_context: ControlLoopReceiptSigningContext | None,
     require_authentication: bool,
+    runtime_root: Path | None,
 ) -> None:
     line = json.dumps(receipt.to_dict(), sort_keys=True, separators=(",", ":")) + "\n"
     if len(line.encode("utf-8")) > 64 * 1024:
@@ -444,19 +478,20 @@ def _append_receipt_once(
         target,
         line,
         repo_root=repo_root,
+        allowed_root=runtime_root,
         validate_existing=validate_before_append,
         max_existing_bytes=MAX_CONTROL_RECEIPT_CHAIN_BYTES,
     )
 
 
-def _read_existing_chain(path: Path) -> str:
+def _read_existing_chain(path: Path, runtime_root: Path | None) -> str:
     if not path.exists():
         return ""
     if path.stat().st_size > MAX_CONTROL_RECEIPT_CHAIN_BYTES:
         raise ValueError("runtime_artifact_retention_limit_exceeded")
     raw, offset = secure_read_confined_bytes(
         path,
-        allowed_root=path.parent,
+        allowed_root=runtime_root or path.parent,
         max_bytes=MAX_CONTROL_RECEIPT_CHAIN_BYTES,
     )
     if offset != path.stat().st_size:

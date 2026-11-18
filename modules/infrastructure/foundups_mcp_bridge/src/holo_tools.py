@@ -246,6 +246,215 @@ def _build_s2_validation_error_envelope(
     }
 
 
+def _resolve_holo_search_inputs(
+    limit: Optional[int], top_k: Optional[int],
+    doc_type_filter: Optional[str], scope: Optional[str],
+) -> tuple[int, str, List[str]]:
+    """Resolve canonical S2 inputs and retain every compatibility warning."""
+
+    warnings: List[str] = []
+    if limit is not None:
+        effective_limit_raw = limit
+    elif top_k is not None:
+        effective_limit_raw = top_k
+        warnings.append(
+            "Legacy 'top_k' parameter accepted as alias for canonical 'limit'; "
+            "please migrate per WSP 96 Annex A.2."
+        )
+    else:
+        effective_limit_raw = ANNEX_A_LIMIT_DEFAULT
+    if doc_type_filter is not None:
+        effective_filter = doc_type_filter
+    elif scope is not None:
+        effective_filter = scope
+        warnings.append(
+            "Legacy 'scope' parameter accepted as alias for canonical "
+            "'doc_type_filter'; please migrate per WSP 96 Annex A.2."
+        )
+    else:
+        effective_filter = "all"
+    try:
+        bounded_limit = int(effective_limit_raw)
+    except (TypeError, ValueError):
+        bounded_limit = ANNEX_A_LIMIT_DEFAULT
+        warnings.append(
+            f"Invalid limit value {effective_limit_raw!r}; defaulted to "
+            f"{ANNEX_A_LIMIT_DEFAULT} per WSP 96 Annex A.2."
+        )
+    clamped_limit = max(1, min(bounded_limit, ANNEX_A_LIMIT_MAX))
+    if clamped_limit != bounded_limit:
+        warnings.append(
+            f"limit clamped to Annex A.2 range (1..{ANNEX_A_LIMIT_MAX}): "
+            f"requested={bounded_limit}, applied={clamped_limit}."
+        )
+    return clamped_limit, effective_filter, warnings
+
+
+def _foundup_validation_error(
+    code: str, message: str, details: Dict[str, Any], query: str,
+    effective_filter: str, foundup_id: str, include_shared: bool,
+) -> Dict[str, Any]:
+    """Build one foundup validation failure without weakening its context."""
+
+    return _build_s2_validation_error_envelope(
+        code=code,
+        message=message,
+        details=details,
+        query=query,
+        doc_type_filter=effective_filter,
+        foundup_id=foundup_id,
+        include_shared=include_shared if foundup_id else None,
+    )
+
+
+def _validate_foundup_scope(
+    query: str, effective_filter: str, foundup_id: Optional[str],
+    include_shared: bool, warnings: List[str],
+) -> Optional[Dict[str, Any]]:
+    """Validate registry ownership and append the canonical scope warnings."""
+
+    if foundup_id is None:
+        return None
+    loader, load_error = _get_registry_loader()
+    if load_error is not None:
+        return _foundup_validation_error(
+            "REGISTRY_UNAVAILABLE",
+            "FoundUp registry could not be loaded. Scope validation requires registry access.",
+            {
+                "exception_type": type(load_error).__name__,
+                "exception_message": str(load_error),
+            },
+            query, effective_filter, foundup_id, include_shared,
+        )
+    if not loader.is_valid_foundup_id(foundup_id):
+        pattern_valid = (
+            bool(re.match(r"^[a-z0-9_]+$", foundup_id))
+            if isinstance(foundup_id, str) else False
+        )
+        return _foundup_validation_error(
+            "INVALID_FOUNDUP_ID",
+            f"Unknown foundup_id: '{foundup_id}'. Valid IDs must be registered in foundup_registry.json.",
+            {
+                "provided_id": foundup_id,
+                "pattern_valid": pattern_valid,
+                "registry_checked": True,
+            },
+            query, effective_filter, foundup_id, include_shared,
+        )
+    warnings.append(
+        "foundup_id validated against registry; result filtering deferred to Phase 2."
+    )
+    warnings.append(federation_scope_warning(S2_SURFACE_ID))
+    return None
+
+
+def _canonical_semantic_hits(
+    results: Dict[str, Any], clamped_limit: int,
+) -> List[Dict[str, Any]]:
+    """Project backend buckets into the canonical relevance-sorted hit list."""
+
+    hits = [{
+        "type": "code",
+        "path": hit.get("path") or hit.get("location"),
+        "relevance": _parse_similarity(hit.get("similarity", "0%")),
+        "preview": hit.get("preview", "")[:200],
+        "need": hit.get("need", ""),
+    } for hit in results.get("code_hits", [])[:clamped_limit]]
+    hits.extend({
+        "type": "wsp",
+        "path": hit.get("path"),
+        "title": hit.get("title"),
+        "summary": hit.get("summary", "")[:200],
+        "relevance": _parse_similarity(hit.get("similarity", "0%")),
+    } for hit in results.get("wsp_hits", [])[:clamped_limit])
+    hits.extend({
+        "type": "test",
+        "path": hit.get("path"),
+        "relevance": _parse_similarity(hit.get("similarity", "0%")),
+    } for hit in results.get("test_hits", [])[:clamped_limit])
+    hits.extend({
+        "type": "skill",
+        "path": hit.get("path"),
+        "name": hit.get("name"),
+        "relevance": _parse_similarity(hit.get("similarity", "0%")),
+    } for hit in results.get("skill_hits", [])[:clamped_limit])
+    hits.sort(key=lambda item: item.get("relevance", 0), reverse=True)
+    return hits[:clamped_limit]
+
+
+def _try_holo_backend(
+    holo: Any, query: str, clamped_limit: int, effective_filter: str,
+    foundup_id: Optional[str], include_shared: bool, warnings: List[str],
+) -> tuple[Optional[Dict[str, Any]], float]:
+    """Return a semantic response or preserve the exact lexical fallback state."""
+
+    if not holo:
+        warnings.append("HoloIndex unavailable; using lexical fallback.")
+        return None, 0.4
+    try:
+        results = holo.search(
+            query, limit=clamped_limit, doc_type_filter=effective_filter,
+        )
+        return _build_s2_ok_envelope(
+            query=query,
+            effective_filter=effective_filter,
+            foundup_id=foundup_id,
+            include_shared=include_shared,
+            hits=_canonical_semantic_hits(results, clamped_limit),
+            engine_metadata=results.get("metadata", {}),
+            retrieval_mode="semantic",
+            source="holoindex",
+            confidence=0.8,
+            warnings=warnings,
+        ), 0.8
+    except Exception as error:
+        logger.warning(f"[MCP] HoloIndex search failed, using fallback: {error}")
+        warnings.append(
+            f"HoloIndex backend error; using lexical fallback: {error}"
+        )
+        return None, 0.5
+
+
+def _fallback_holo_search(
+    repo_root: Path, query: str, clamped_limit: int, effective_filter: str,
+    foundup_id: Optional[str], include_shared: bool, warnings: List[str],
+    confidence: float,
+) -> Dict[str, Any]:
+    """Run the canonical lexical fallback and retain its weaker confidence."""
+
+    from .repo_tools import search_repo
+
+    result = search_repo(repo_root, query=query, path=".", top_k=clamped_limit)
+    if result.get("status") != "ok":
+        return _build_s2_error_envelope(
+            code="BACKEND_UNAVAILABLE",
+            message=(
+                "Both HoloIndex and ripgrep fallback failed; cannot serve "
+                "holo_search on S2 right now."
+            ),
+            details={"fallback_error": result.get("error", "unknown")},
+        )
+    hits = [{
+        "type": "code",
+        "path": match.get("file"),
+        "preview": match.get("line", "")[:200],
+        "line_num": match.get("line_num"),
+        "relevance": ANNEX_A_FALLBACK_RELEVANCE_CAP,
+    } for match in result["data"].get("matches", [])][:clamped_limit]
+    return _build_s2_ok_envelope(
+        query=query,
+        effective_filter=effective_filter,
+        foundup_id=foundup_id,
+        include_shared=include_shared,
+        hits=hits,
+        engine_metadata={"engine_version": "ripgrep_fallback"},
+        retrieval_mode="lexical",
+        source="fallback",
+        confidence=confidence,
+        warnings=warnings,
+    )
+
+
 def holo_search(
     repo_root: Path,
     query: str,
@@ -259,77 +468,11 @@ def holo_search(
     scope: Optional[str] = None,
     top_k: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """Semantic search across the repository (S2 — canonical internal adapter).
+    """Search S2 using the canonical semantic/fallback response contract."""
 
-    Conforms to WSP 96 Annex A.2 (request schema) and Annex A.3 (response
-    envelope). Federation auth/scope (`foundup_id`, `include_shared`) is
-    accepted but NOT enforced at this surface — enforcement lands in
-    MCPA1 Slice 6. `data.metadata.warnings` truthfully reports this gap.
-
-    Args:
-        repo_root: Repository root path.
-        query: Natural-language search query (required, non-empty).
-        limit: Annex A.2 canonical name. Default 10, range 1..50.
-        doc_type_filter: Annex A.2 canonical name. Enum: all|code|wsp|test|
-            skill|docs|knowledge.
-        foundup_id: Federation tenant scope (echoed; not yet enforced).
-        include_shared: Federation share flag (only meaningful when
-            `foundup_id` is set; otherwise echoed as None).
-        scope: Legacy alias for `doc_type_filter` (back-compat). If
-            `doc_type_filter` is also passed, the canonical name wins.
-        top_k: Legacy alias for `limit` (back-compat). If `limit` is also
-            passed, the canonical name wins.
-
-    Returns:
-        WSP 96 Annex A.3 canonical envelope:
-        - `status`: "ok" | "error"
-        - `data`: {query, doc_type_filter, scope (alias), foundup_id,
-                   include_shared, hits[], hit_count, metadata}
-        - `meta`: {timestamp, source, tool, surface, confidence, ...}
-        - `error` (when status="error"): {code, message, details?}
-    """
-    # ----- Resolve canonical inputs (canonical wins over aliases) -----
-    warnings: List[str] = []
-
-    if limit is not None:
-        effective_limit_raw = limit
-    elif top_k is not None:
-        effective_limit_raw = top_k
-        warnings.append(
-            "Legacy 'top_k' parameter accepted as alias for canonical 'limit'; "
-            "please migrate per WSP 96 Annex A.2."
-        )
-    else:
-        effective_limit_raw = ANNEX_A_LIMIT_DEFAULT
-
-    if doc_type_filter is not None:
-        effective_filter = doc_type_filter
-    elif scope is not None:
-        effective_filter = scope
-        warnings.append(
-            "Legacy 'scope' parameter accepted as alias for canonical "
-            "'doc_type_filter'; please migrate per WSP 96 Annex A.2."
-        )
-    else:
-        effective_filter = "all"
-
-    # Annex A.2: clamp limit to [1..50]; surface clamping truthfully.
-    try:
-        bounded_limit = int(effective_limit_raw) if effective_limit_raw is not None else ANNEX_A_LIMIT_DEFAULT
-    except (TypeError, ValueError):
-        bounded_limit = ANNEX_A_LIMIT_DEFAULT
-        warnings.append(
-            f"Invalid limit value {effective_limit_raw!r}; defaulted to "
-            f"{ANNEX_A_LIMIT_DEFAULT} per WSP 96 Annex A.2."
-        )
-    clamped_limit = max(1, min(bounded_limit, ANNEX_A_LIMIT_MAX))
-    if clamped_limit != bounded_limit:
-        warnings.append(
-            f"limit clamped to Annex A.2 range (1..{ANNEX_A_LIMIT_MAX}): "
-            f"requested={bounded_limit}, applied={clamped_limit}."
-        )
-
-    # ----- Empty-query rejection (Annex A.2 + WSP 97 truth boundary) -----
+    clamped_limit, effective_filter, warnings = _resolve_holo_search_inputs(
+        limit, top_k, doc_type_filter, scope,
+    )
     if not query or not query.strip():
         return _build_s2_error_envelope(
             code="EMPTY_QUERY",
@@ -339,156 +482,19 @@ def holo_search(
             ),
         )
 
-    # ----- Fail-closed foundup_id validation (WSP 97 + WSP 104) -----
-    # Phase 1: validate existence only; filtering deferred to Phase 2.
-    if foundup_id is not None:
-        loader, load_error = _get_registry_loader()
-
-        if load_error is not None:
-            return _build_s2_validation_error_envelope(
-                code="REGISTRY_UNAVAILABLE",
-                message="FoundUp registry could not be loaded. Scope validation requires registry access.",
-                details={
-                    "exception_type": type(load_error).__name__,
-                    "exception_message": str(load_error),
-                },
-                query=query,
-                doc_type_filter=effective_filter,
-                foundup_id=foundup_id,
-                include_shared=include_shared if foundup_id else None,
-            )
-
-        if not loader.is_valid_foundup_id(foundup_id):
-            import re
-            pattern_valid = bool(re.match(r"^[a-z0-9_]+$", foundup_id)) if isinstance(foundup_id, str) else False
-            return _build_s2_validation_error_envelope(
-                code="INVALID_FOUNDUP_ID",
-                message=f"Unknown foundup_id: '{foundup_id}'. Valid IDs must be registered in foundup_registry.json.",
-                details={
-                    "provided_id": foundup_id,
-                    "pattern_valid": pattern_valid,
-                    "registry_checked": True,
-                },
-                query=query,
-                doc_type_filter=effective_filter,
-                foundup_id=foundup_id,
-                include_shared=include_shared if foundup_id else None,
-            )
-
-        warnings.append(
-            "foundup_id validated against registry; result filtering deferred to Phase 2."
-        )
-
-    # ----- Real backend path -----
+    validation_error = _validate_foundup_scope(
+        query, effective_filter, foundup_id, include_shared, warnings,
+    )
+    if validation_error is not None:
+        return validation_error
     holo = _get_holoindex(repo_root)
-    source = "holoindex"
-    confidence = 0.8
-    retrieval_mode = "semantic"
-
-    if holo:
-        try:
-            results = holo.search(query, limit=clamped_limit, doc_type_filter=effective_filter)
-
-            hits: List[Dict[str, Any]] = []
-            for hit in results.get("code_hits", [])[:clamped_limit]:
-                hits.append({
-                    "type": "code",
-                    "path": hit.get("path") or hit.get("location"),
-                    "relevance": _parse_similarity(hit.get("similarity", "0%")),
-                    "preview": hit.get("preview", "")[:200],
-                    "need": hit.get("need", ""),
-                })
-            for hit in results.get("wsp_hits", [])[:clamped_limit]:
-                hits.append({
-                    "type": "wsp",
-                    "path": hit.get("path"),
-                    "title": hit.get("title"),
-                    "summary": hit.get("summary", "")[:200],
-                    "relevance": _parse_similarity(hit.get("similarity", "0%")),
-                })
-            for hit in results.get("test_hits", [])[:clamped_limit]:
-                hits.append({
-                    "type": "test",
-                    "path": hit.get("path"),
-                    "relevance": _parse_similarity(hit.get("similarity", "0%")),
-                })
-            for hit in results.get("skill_hits", [])[:clamped_limit]:
-                hits.append({
-                    "type": "skill",
-                    "path": hit.get("path"),
-                    "name": hit.get("name"),
-                    "relevance": _parse_similarity(hit.get("similarity", "0%")),
-                })
-
-            hits.sort(key=lambda x: x.get("relevance", 0), reverse=True)
-            hits = hits[:clamped_limit]
-
-            return _build_s2_ok_envelope(
-                query=query,
-                effective_filter=effective_filter,
-                foundup_id=foundup_id,
-                include_shared=include_shared,
-                hits=hits,
-                engine_metadata=results.get("metadata", {}),
-                retrieval_mode=retrieval_mode,
-                source=source,
-                confidence=confidence,
-                warnings=warnings,
-            )
-
-        except Exception as e:
-            logger.warning(f"[MCP] HoloIndex search failed, using fallback: {e}")
-            warnings.append(
-                f"HoloIndex backend error; using lexical fallback: {e}"
-            )
-            source = "fallback"
-            confidence = 0.5
-            retrieval_mode = "lexical"
-    else:
-        warnings.append("HoloIndex unavailable; using lexical fallback.")
-        source = "fallback"
-        confidence = 0.4
-        retrieval_mode = "lexical"
-
-    # ----- Fallback path (ripgrep) -----
-    from .repo_tools import search_repo
-    fallback_result = search_repo(repo_root, query=query, path=".", top_k=clamped_limit)
-
-    if fallback_result.get("status") != "ok":
-        return _build_s2_error_envelope(
-            code="BACKEND_UNAVAILABLE",
-            message=(
-                "Both HoloIndex and ripgrep fallback failed; cannot serve "
-                "holo_search on S2 right now."
-            ),
-            details={"fallback_error": fallback_result.get("error", "unknown")},
-        )
-
-    # Convert fallback results to canonical hit shape.
-    # Annex A.3: surfaces using lexical fallback MUST cap relevance at 0.6
-    # to truthfully signal weaker confidence (WSP 97).
-    fallback_hits: List[Dict[str, Any]] = []
-    for match in fallback_result["data"].get("matches", []):
-        fallback_hits.append({
-            "type": "code",
-            "path": match.get("file"),
-            "preview": match.get("line", "")[:200],
-            "line_num": match.get("line_num"),
-            "relevance": ANNEX_A_FALLBACK_RELEVANCE_CAP,
-        })
-    fallback_hits = fallback_hits[:clamped_limit]
-
-    return _build_s2_ok_envelope(
-        query=query,
-        effective_filter=effective_filter,
-        foundup_id=foundup_id,
-        include_shared=include_shared,
-        hits=fallback_hits,
-        engine_metadata={"engine_version": "ripgrep_fallback"},
-        retrieval_mode=retrieval_mode,
-        source=source,
-        confidence=confidence,
-        warnings=warnings,
+    semantic, fallback_confidence = _try_holo_backend(
+        holo, query, clamped_limit, effective_filter,
+        foundup_id, include_shared, warnings,
+    )
+    return semantic or _fallback_holo_search(
+        repo_root, query, clamped_limit, effective_filter,
+        foundup_id, include_shared, warnings, fallback_confidence,
     )
 
 

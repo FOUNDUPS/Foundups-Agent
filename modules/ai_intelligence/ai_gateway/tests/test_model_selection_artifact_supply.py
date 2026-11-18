@@ -29,7 +29,10 @@ from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     StaticModelEvidenceKeyResolver,
 )
 from model_signed_evidence_test_helpers import (
+    BENCHMARK_FINGERPRINT,
     BENCHMARK_PUBLIC_KEY,
+    KEY_EPOCH,
+    PROMOTION_FINGERPRINT,
     PROMOTION_PUBLIC_KEY,
     DeterministicSignatureVerifier,
     make_signed_evidence_receipt,
@@ -151,8 +154,16 @@ def _serialized_evidence_bundle(snapshot):
 def _key_resolver():
     return StaticModelEvidenceKeyResolver(
         {
-            ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: BENCHMARK_PUBLIC_KEY,
-            ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value: PROMOTION_PUBLIC_KEY,
+            (
+                ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value,
+                BENCHMARK_FINGERPRINT,
+                KEY_EPOCH,
+            ): BENCHMARK_PUBLIC_KEY,
+            (
+                ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value,
+                PROMOTION_FINGERPRINT,
+                KEY_EPOCH,
+            ): PROMOTION_PUBLIC_KEY,
         }
     )
 

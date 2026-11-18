@@ -13,9 +13,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional
 
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
     DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
@@ -23,11 +25,25 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_clie
     SignerSocketConnector,
     build_reddog_isolated_signer_socket_client,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
-    SigningRequest,
+from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
+    FAIL_HANDSHAKE_SIGNATURE_INVALID,
+    SignatureVerifier,
+    VerifiedSignerPeerHandshake,
+    build_signer_peer_handshake_request,
+    verify_signer_peer_handshake_response,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_packet_supply import (
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_schema import (
     SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credential_attestor import (
+    rehydrate_peer_credential_policy,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_peer_instance_packet_validator import (
+    signer_run_packet_static_valid,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    secure_read_confined_text,
+    validate_runtime_root_path,
 )
 
 
@@ -41,6 +57,9 @@ FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING = "signer_healthcheck_profile_missing"
 FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID = "signer_healthcheck_requester_invalid"
 FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED = "signer_healthcheck_client_rejected"
 FAIL_SIGNER_HEALTHCHECK_SIGNER_REJECTED = "signer_healthcheck_signer_rejected"
+FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED = (
+    "signer_healthcheck_manifest_binding_required"
+)
 
 
 @dataclass(frozen=True)
@@ -60,6 +79,10 @@ class SignerServiceHealthcheckResult:
     request_digest: str | None
     response_digest: str | None
     rejection_reasons: tuple[str, ...]
+    manifest_id: str | None = None
+    artifact_generation_digest: str | None = None
+    peer_handshake_verified: bool = False
+    peer_handshake_expires_at: int | None = None
     no_signature_value_returned: bool = True
     no_secret_values_resolved: bool = True
     no_signer_started: bool = True
@@ -72,9 +95,24 @@ class SignerServiceHealthcheckResult:
     no_pr_created: bool = True
     no_reward_settlement_performed: bool = True
     no_holoindex_reindex_performed: bool = True
+    session_id: str | None = None
+    socket_path_digest: str | None = None
+    key_epoch: str | None = None
+    server_identity_verified: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class _HealthcheckContext:
+    root: Path
+    packet: Mapping[str, Any]
+    packet_path: Path
+    config_digest: str
+    profile: Mapping[str, Any]
+    requester: str
+    socket_path: Path
 
 
 def run_reddog_signer_socket_service_healthcheck(
@@ -86,82 +124,280 @@ def run_reddog_signer_socket_service_healthcheck(
     timeout_s: float = DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
     max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     connector: Optional[SignerSocketConnector] = None,
+    now_epoch: Callable[[], int] | None = None,
+    challenge_factory: Callable[[], str] | None = None,
+    signature_verifier: SignatureVerifier | None = None,
+    manifest_id: str | None = None,
+    artifact_generation_digest: str | None = None,
+    expected_server_uid: int | None = None, expected_server_gid: int | None = None,
+    trusted_socket_root: Path | str | None = None,
+    secret_access_grant_supplier: Callable[[Any], Mapping[str, Any] | None] | None = None,
 ) -> SignerServiceHealthcheckResult:
     """Validate run packet/config and probe an already-running signer socket."""
 
+    context, rejected = _prepare_healthcheck(
+        repo_root,
+        run_packet_path,
+        requester_principal_id,
+        signer_profile_id,
+    )
+    if rejected is not None:
+        return rejected
+    assert context is not None
+    return _run_peer_handshake(
+        context,
+        timeout_s=timeout_s,
+        max_response_bytes=max_response_bytes,
+        connector=connector,
+        now_epoch=now_epoch,
+        challenge_factory=challenge_factory,
+        signature_verifier=signature_verifier,
+        manifest_id=manifest_id,
+        artifact_generation_digest=artifact_generation_digest,
+        expected_server_uid=expected_server_uid, expected_server_gid=expected_server_gid,
+        trusted_socket_root=trusted_socket_root, grant_supplier=secret_access_grant_supplier,
+    )
+
+
+def _prepare_healthcheck(
+    repo_root: Path | str,
+    run_packet_path: Path | str | None,
+    requester_principal_id: str | None,
+    signer_profile_id: str,
+) -> tuple[_HealthcheckContext | None, SignerServiceHealthcheckResult | None]:
     root = Path(repo_root).resolve()
-    packet, packet_path, packet_reasons = _read_run_packet(root, run_packet_path)
+    packet, packet_path, packet_reasons = _read_run_packet(
+        root, run_packet_path
+    )
     if packet_reasons:
-        return _reject(packet_reasons)
+        return None, _reject(packet_reasons)
     assert packet is not None
     assert packet_path is not None
     config, config_digest, config_reasons = _read_bound_config(root, packet)
     if config_reasons:
-        return _reject(config_reasons, packet_path=str(packet_path), packet=packet)
+        rejected = _reject(
+            config_reasons, packet_path=str(packet_path), packet=packet
+        )
+        return None, rejected
     assert config is not None
     assert config_digest is not None
     profile = _select_profile(config, signer_profile_id)
     if profile is None:
-        return _reject(
+        rejected = _reject(
             (FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING,),
             packet_path=str(packet_path),
             packet=packet,
             config_digest=config_digest,
         )
-    requester = requester_principal_id or _default_requester(config)
+        return None, rejected
+    requester = _default_requester(config) if requester_principal_id is None else requester_principal_id
     if not _ascii_string(requester):
-        return _reject(
+        rejected = _reject(
             (FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID,),
             packet_path=str(packet_path),
             packet=packet,
             config_digest=config_digest,
         )
-    socket_path = Path(str(packet["socket_path"])).resolve()
+        return None, rejected
+    return _HealthcheckContext(
+        root=root,
+        packet=packet,
+        packet_path=packet_path,
+        config_digest=config_digest,
+        profile=profile,
+        requester=str(requester),
+        socket_path=Path(str(packet["socket_path"])).resolve(),
+    ), None
+
+
+def _run_peer_handshake(
+    context: _HealthcheckContext,
+    *,
+    timeout_s: float,
+    max_response_bytes: int,
+    connector: Optional[SignerSocketConnector],
+    now_epoch: Callable[[], int] | None,
+    challenge_factory: Callable[[], str] | None,
+    signature_verifier: SignatureVerifier | None,
+    manifest_id: str | None,
+    artifact_generation_digest: str | None,
+    expected_server_uid: int | None, expected_server_gid: int | None,
+    trusted_socket_root: Path | str | None, grant_supplier: Callable | None,
+) -> SignerServiceHealthcheckResult:
+    rejected = _manifest_binding_rejection(
+        context, manifest_id, artifact_generation_digest
+    )
+    if rejected is not None:
+        return rejected
+    client, rejected = _healthcheck_client(
+        context, timeout_s, max_response_bytes, connector,
+        expected_server_uid, expected_server_gid, trusted_socket_root,
+    )
+    if rejected is not None:
+        return rejected
+    assert client is not None
+    trusted_now = now_epoch or (lambda: int(time.time()))
+    request = _build_peer_request(
+        context,
+        str(manifest_id),
+        str(artifact_generation_digest),
+        trusted_now(),
+        challenge_factory,
+    )
+    response = _sign_peer_request(client, request, grant_supplier)
+    if response is None:
+        return _handshake_reject(context, request.to_dict(),
+            "signer_healthcheck_grant_unavailable", ("signer_healthcheck_grant_unavailable",))
+    verification = verify_signer_peer_handshake_response(
+        request, response, now_epoch=trusted_now(), verifier=signature_verifier
+    )
+    if not verification.accepted:
+        return _handshake_reject(
+            context, request.to_dict(), response.rejection_code,
+            verification.rejection_reasons,
+        )
+    return _handshake_accept(
+        context, request.to_dict(), response.to_dict(), verification,
+        server_identity_verified=expected_server_uid is not None and expected_server_gid is not None,
+    )
+
+
+def _sign_peer_request(client, request, grant_supplier):
+    if grant_supplier is None:
+        return client.sign(request)
+    try:
+        grant = grant_supplier(request)
+        if not isinstance(grant, Mapping):
+            return None
+        return client.sign_with_secret_grant(request, grant)
+    except Exception:
+        return None
+
+
+def _manifest_binding_rejection(
+    context: _HealthcheckContext,
+    manifest_id: object,
+    artifact_generation_digest: object,
+) -> SignerServiceHealthcheckResult | None:
+    if all(
+        _sha256_digest(value)
+        for value in (manifest_id, artifact_generation_digest)
+    ):
+        return None
+    return _reject(
+        (FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED,),
+        packet_path=str(context.packet_path),
+        packet=context.packet,
+        config_digest=context.config_digest,
+        profile=context.profile,
+        requester=context.requester,
+    )
+
+
+def _build_peer_request(
+    context: _HealthcheckContext,
+    manifest_id: str,
+    artifact_generation_digest: str,
+    now_epoch: int,
+    challenge_factory: Callable[[], str] | None,
+) -> Any:
+    return build_signer_peer_handshake_request(
+        run_packet_id=str(context.packet["run_packet_id"]),
+        config_digest=context.config_digest,
+        session_id=str(context.packet["session_id"]),
+        socket_path=str(context.socket_path),
+        signer_profile_id=str(context.profile["signer_profile_id"]),
+        signer_public_key=str(context.profile["expected_public_key"]),
+        key_epoch=str(context.profile["expected_key_epoch"]),
+        requester_principal_id=context.requester,
+        manifest_id=manifest_id,
+        artifact_generation_digest=artifact_generation_digest,
+        now_epoch=now_epoch,
+        challenge_factory=challenge_factory,
+    )
+
+
+def _healthcheck_client(
+    context: _HealthcheckContext,
+    timeout_s: float,
+    max_response_bytes: int,
+    connector: Optional[SignerSocketConnector],
+    expected_server_uid: int | None, expected_server_gid: int | None,
+    trusted_socket_root: Path | str | None,
+) -> tuple[Any | None, SignerServiceHealthcheckResult | None]:
     built = build_reddog_isolated_signer_socket_client(
-        repo_root=root,
-        socket_path=socket_path,
+        repo_root=context.root,
+        socket_path=context.socket_path,
         timeout_s=timeout_s,
         max_response_bytes=max_response_bytes,
         connector=connector,
+        expected_server_uid=expected_server_uid, expected_server_gid=expected_server_gid,
+        trusted_socket_root=trusted_socket_root,
     )
     if not built.accepted or built.client is None:
-        return _reject(
+        rejected = _reject(
             (FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED, *built.rejection_reasons),
-            packet_path=str(packet_path),
-            packet=packet,
-            config_digest=config_digest,
-            profile=profile,
-            requester=requester,
+            packet_path=str(context.packet_path),
+            packet=context.packet,
+            config_digest=context.config_digest,
+            profile=context.profile,
+            requester=context.requester,
         )
-    request = _health_request(packet=packet, profile=profile, requester=requester)
-    response = built.client.sign(request)
-    if not response.accepted or response.signer_public_key != profile["expected_public_key"]:
-        return _reject(
-            (
-                FAIL_SIGNER_HEALTHCHECK_SIGNER_REJECTED,
-                str(response.rejection_code or ""),
-            ),
-            packet_path=str(packet_path),
-            packet=packet,
-            config_digest=config_digest,
-            profile=profile,
-            requester=requester,
-            request_digest=_digest(request.to_dict()),
-        )
+        return None, rejected
+    return built.client, None
+
+
+def _handshake_accept(
+    context: _HealthcheckContext,
+    request: Mapping[str, Any],
+    response: Mapping[str, Any],
+    verification: VerifiedSignerPeerHandshake,
+    *, server_identity_verified: bool = False,
+) -> SignerServiceHealthcheckResult:
+    packet = context.packet
+    profile = context.profile
     return SignerServiceHealthcheckResult(
         accepted=True,
         status=SIGNER_SERVICE_HEALTHCHECK_READY,
-        run_packet_path=str(packet_path),
+        run_packet_path=str(context.packet_path),
         run_packet_id=str(packet["run_packet_id"]),
         config_path=str(packet["config_path"]),
-        config_digest=config_digest,
-        socket_path=str(socket_path),
+        config_digest=context.config_digest,
+        socket_path=str(context.socket_path),
         signer_profile_id=str(profile["signer_profile_id"]),
         signer_public_key=str(profile["expected_public_key"]),
-        requester_principal_id=str(requester),
-        request_digest=_digest(request.to_dict()),
-        response_digest=_digest(response.to_dict()),
+        requester_principal_id=context.requester,
+        request_digest=_digest(request),
+        response_digest=_digest(response),
+        manifest_id=verification.manifest_id,
+        artifact_generation_digest=verification.artifact_generation_digest,
+        peer_handshake_verified=True,
+        session_id=verification.session_id, key_epoch=verification.key_epoch,
+        socket_path_digest="sha256:" + hashlib.sha256(str(context.socket_path).encode("utf-8")).hexdigest(),
+        server_identity_verified=server_identity_verified,
+        peer_handshake_expires_at=verification.expires_at,
         rejection_reasons=(),
+    )
+
+
+def _handshake_reject(
+    context: _HealthcheckContext,
+    request: Mapping[str, Any],
+    rejection_code: str,
+    reasons: tuple[str, ...],
+) -> SignerServiceHealthcheckResult:
+    return _reject(
+        (
+            FAIL_SIGNER_HEALTHCHECK_SIGNER_REJECTED,
+            str(rejection_code or ""),
+            *reasons,
+        ),
+        packet_path=str(context.packet_path),
+        packet=context.packet,
+        config_digest=context.config_digest,
+        profile=context.profile,
+        requester=context.requester,
+        request_digest=_digest(request),
     )
 
 
@@ -178,7 +414,7 @@ def _read_run_packet(
         return None, None, reasons
     assert path is not None
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = _secure_json_read(repo_root, path)
     except Exception:
         return None, None, (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
     if not isinstance(payload, dict) or _packet_reasons(repo_root, payload):
@@ -187,6 +423,8 @@ def _read_run_packet(
 
 
 def _packet_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, ...]:
+    if not signer_run_packet_static_valid(payload, root=repo_root):
+        return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
     if payload.get("schema_version") != SIGNER_SERVICE_RUN_PACKET_SCHEMA_VERSION:
         return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
     if not _ascii_deep(payload):
@@ -197,7 +435,10 @@ def _packet_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, .
     without_id = {key: value for key, value in payload.items() if key != "run_packet_id"}
     if packet_id != _digest(without_id):
         return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
-    if payload.get("run_mode") != "signer_owned_cli_sidecar":
+    if (
+        payload.get("run_mode")
+        != "signer_owned_system_service_entrypoint"
+    ):
         return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
     if payload.get("redDog_must_not_spawn") is not True:
         return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
@@ -221,7 +462,11 @@ def _packet_reasons(repo_root: Path, payload: Mapping[str, Any]) -> tuple[str, .
             return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
         if Path(str(payload[key])).resolve() != repo_root:
             return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
-    for key in ("config_path", "socket_path"):
+    for key in (
+        "config_path",
+        "owner_authority_config_path",
+        "socket_path",
+    ):
         path_text = str(payload.get(key) or "")
         if "\x00" in path_text or path_text.startswith("\\\\?\\") or path_text.startswith("//?/"):
             return (FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,)
@@ -244,7 +489,7 @@ def _read_bound_config(
         return None, None, reasons
     assert config_path is not None
     try:
-        payload = json.loads(config_path.read_text(encoding="utf-8"))
+        payload = _secure_json_read(repo_root, config_path)
     except Exception:
         return None, None, (FAIL_SIGNER_HEALTHCHECK_CONFIG_MISMATCH,)
     if not isinstance(payload, dict) or not _ascii_deep(payload):
@@ -255,6 +500,20 @@ def _read_bound_config(
     if str(payload.get("socket_path") or "") != str(packet.get("socket_path") or ""):
         return None, None, (FAIL_SIGNER_HEALTHCHECK_CONFIG_MISMATCH,)
     return payload, digest, ()
+
+
+def _secure_json_read(repo_root: Path, path: Path) -> object:
+    allowed_root = validate_runtime_root_path(
+        path.parent,
+        repo_root=repo_root,
+    )
+    return json.loads(
+        secure_read_confined_text(
+            path,
+            allowed_root=allowed_root,
+            max_bytes=256 * 1024,
+        )
+    )
 
 
 def _select_profile(config: Mapping[str, Any], signer_profile_id: str) -> Mapping[str, Any] | None:
@@ -271,46 +530,17 @@ def _select_profile(config: Mapping[str, Any], signer_profile_id: str) -> Mappin
 
 
 def _default_requester(config: Mapping[str, Any]) -> str | None:
-    peer_policy = config.get("peer_policy")
-    if not isinstance(peer_policy, Mapping):
+    policy = rehydrate_peer_credential_policy(config.get("peer_policy"))
+    if policy is None:
         return None
-    uid_map = peer_policy.get("uid_to_principal")
-    if not isinstance(uid_map, Mapping) or not uid_map:
+    try:
+        uid, gid = os.geteuid(), os.getegid()
+    except (AttributeError, OSError):
         return None
-    first_key = sorted(str(key) for key in uid_map.keys())[0]
-    return str(uid_map.get(first_key) or "")
-
-
-def _health_request(
-    *,
-    packet: Mapping[str, Any],
-    profile: Mapping[str, Any],
-    requester: str,
-) -> SigningRequest:
-    payload = {
-        "run_packet_id": str(packet["run_packet_id"]),
-        "config_digest": str(packet["config_digest"]),
-        "socket_path": str(packet["socket_path"]),
-        "signer_profile_id": str(profile["signer_profile_id"]),
-    }
-    signing_input = "reddog-signer-health.v1." + json.dumps(
-        payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=True,
-    )
-    return SigningRequest(
-        signing_input=signing_input,
-        payload_digest=_digest(payload),
-        signer_role="healthcheck",
-        signer_public_key=str(profile["expected_public_key"]),
-        requester_principal_id=requester,
-        nonce="signer-healthcheck:" + str(packet["run_packet_id"]).removeprefix("sha256:")[:16],
-        key_epoch=str(profile["expected_key_epoch"]),
-        requested_operation="signer_socket_healthcheck",
-        authority_tier="LOW",
-        consensus_receipt_digest=None,
-    )
+    if policy.allowed_gids and gid not in policy.allowed_gids:
+        return None
+    # A local selection hint only; the server attests the connecting peer.
+    return policy.uid_to_principal.get(uid)
 
 
 def _resolve_existing_outside_file(
@@ -355,6 +585,8 @@ def _reject(
         requester_principal_id=requester,
         request_digest=request_digest,
         response_digest=None,
+        peer_handshake_verified=False,
+        peer_handshake_expires_at=None,
         rejection_reasons=_dedupe(reasons),
     )
 
@@ -362,6 +594,16 @@ def _reject(
 def _digest(payload: Mapping[str, Any]) -> str:
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _sha256_digest(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 71
+        and value.startswith("sha256:")
+        and all(char in "0123456789abcdef" for char in value[7:])
+        and value[7:] != "0" * 64
+    )
 
 
 def _dedupe(values: tuple[str, ...]) -> tuple[str, ...]:
@@ -398,11 +640,13 @@ def _ascii_deep(value: object) -> bool:
 __all__ = [
     "FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED",
     "FAIL_SIGNER_HEALTHCHECK_CONFIG_MISMATCH",
+    "FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED",
     "FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING",
     "FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID",
     "FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED",
     "FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_PATH_INVALID",
     "FAIL_SIGNER_HEALTHCHECK_SIGNER_REJECTED",
+    "FAIL_HANDSHAKE_SIGNATURE_INVALID",
     "SIGNER_SERVICE_HEALTHCHECK_READY",
     "SIGNER_SERVICE_HEALTHCHECK_REJECT",
     "SignerServiceHealthcheckResult",

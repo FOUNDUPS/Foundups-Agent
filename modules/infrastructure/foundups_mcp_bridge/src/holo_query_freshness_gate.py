@@ -16,10 +16,12 @@ from holo_index.freshness_receipt import (
     BASELINE_QUERY_FRESHNESS_PATHS,
 )
 from holo_index.maintenance_lock import (
+    authority_update_lock_path,
     maintenance_lock_path,
     probe_maintenance_lock,
 )
 from holo_index.query_receipt import generation_binding_from_receipt
+from holo_index.repository_state import repository_root_digest
 from holo_index.storage_contract import storage_path_identity
 
 
@@ -53,6 +55,7 @@ def normalize_binding(value: Mapping[str, Any] | None = None) -> dict[str, str]:
             "freshness_receipt_digest",
             "freshness_receipt_path",
             "repo_head_sha",
+            "repo_root_digest",
         )
     }
 
@@ -126,20 +129,28 @@ class HoloQueryFreshnessGate:
         self.repo_root = repo_root.resolve(strict=False)
         self.ssd_path = ssd_path.resolve(strict=False)
         self.receipt_path = receipt_path
-        self.lock_path = maintenance_lock_path(ssd_path)
+        self.lock_paths = (
+            authority_update_lock_path(ssd_path), maintenance_lock_path(ssd_path)
+        )
+        self.lock_path = self.lock_paths[1]  # compatibility test surface
         self._loader, self._evaluator = loader, evaluator
         self._maintenance_probe = maintenance_probe or probe_maintenance_lock
 
     def maintenance_block(self) -> tuple[str, str]:
-        try:
-            probe = self._maintenance_probe(self.lock_path)
-        except Exception:
+        for lock_path in self.lock_paths:
+            try:
+                probe = self._maintenance_probe(lock_path)
+            except Exception:
+                return MAINTENANCE_UNPROVEN_ERROR, MAINTENANCE_UNPROVEN_REASON
+            if getattr(probe, "clear", False) is True:
+                continue
+            if (
+                getattr(probe, "held", False) is True
+                or getattr(probe, "status", "") == "held"
+            ):
+                return MAINTENANCE_ACTIVE_ERROR, MAINTENANCE_ACTIVE_REASON
             return MAINTENANCE_UNPROVEN_ERROR, MAINTENANCE_UNPROVEN_REASON
-        if getattr(probe, "clear", False) is True:
-            return "", ""
-        if getattr(probe, "held", False) is True or getattr(probe, "status", "") == "held":
-            return MAINTENANCE_ACTIVE_ERROR, MAINTENANCE_ACTIVE_REASON
-        return MAINTENANCE_UNPROVEN_ERROR, MAINTENANCE_UNPROVEN_REASON
+        return "", ""
 
     def repository_error(
         self,
@@ -177,6 +188,7 @@ class HoloQueryFreshnessGate:
         fields = generation_binding_from_receipt(
             None, receipt_path=self.receipt_path
         )
+        fields["repo_root_digest"] = repository_root_digest(self.repo_root)
         return FreshnessSnapshot(
             normalize_binding(fields), "UNKNOWN", (reason,), False, {}
         )
@@ -233,6 +245,7 @@ class HoloQueryFreshnessGate:
                 receipt, receipt_path=self.receipt_path
             )
         )
+        fields["repo_root_digest"] = repository_root_digest(self.repo_root)
         reasons, required, check_ok = self._evaluate_receipt(
             receipt,
             expected_sha,

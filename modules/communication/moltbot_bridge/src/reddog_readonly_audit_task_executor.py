@@ -297,7 +297,7 @@ def _bound_fallback_snapshots(
     if not set(verified.repo_file_targets).issubset(allowed):
         return None, ReadOnlyAuditTaskRejectReason.GROUNDING_RECEIPT_INVALID
     fallback = receipt.get("repo_audit_fallback")
-    reads, reasons = reread_bound_repo_audit_evidence(repo_root, fallback)
+    reads, reasons = reread_bound_repo_audit_evidence(repo_root, fallback, require_object_binding=receipt.get("schema_version") == "reddog_grounded_target_receipt.v2")
     if reasons:
         return None, ReadOnlyAuditTaskRejectReason.GROUNDING_EVIDENCE_CHANGED
     return tuple(_snapshot_from_secure_read(item) for item in reads), ""

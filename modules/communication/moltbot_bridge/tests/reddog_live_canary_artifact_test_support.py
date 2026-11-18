@@ -7,11 +7,17 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import (
+    canonical_model_runtime_binding_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_resolver_artifact_supply import (
     run_reddog_authority_runtime_resolver_artifact_supply,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment_supply import (
     run_reddog_execution_valve_environment_supply,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
     run_reddog_signer_socket_service_config_supply,
@@ -21,6 +27,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_run_p
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_BOUNDED_EXECUTION,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
     model_selection_and_runtime_binding_receipts,
@@ -33,6 +42,8 @@ from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_seria
 PERMISSION_DIGEST = "sha256:" + "a" * 64
 CONSENSUS_DIGEST = "sha256:" + "b" * 64
 SOVEREIGN_DIGEST = "sha256:" + "c" * 64
+PRINCIPAL_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32)))
+REDDOG_PUBLIC_KEY = encode_ed25519_public_key(bytes(range(32, 64)))
 
 
 def write_live_canary_artifacts(
@@ -66,7 +77,8 @@ def _governed_lineage(
     claim = work["worker_claims"][0]
     queue["queue_item_id"] = queue_id
     determination_id = "sha256:canary-determination"
-    selection_digest, runtime_digest = _digest(selection), _digest(runtime_binding)
+    selection_digest = _digest(selection)
+    runtime_digest = canonical_model_runtime_binding_digest(runtime_binding)
     memex_id, memex_digest = "sha256:canary-memex", _digest({"receipt_id": "sha256:canary-memex"})
     queue.update({
         "source_determination_receipt_id": determination_id,
@@ -114,8 +126,8 @@ def _profile(
 ) -> dict:
     return {
         "principal_id": "github:mjtrout", "principal_provider": "github",
-        "principal_public_key": "ed25519-pub-v1:principal",
-        "reddog_id": "reddog:canary", "reddog_public_key": "ed25519-pub-v1:reddog",
+        "principal_public_key": PRINCIPAL_PUBLIC_KEY,
+        "reddog_id": "reddog:canary", "reddog_public_key": REDDOG_PUBLIC_KEY,
         "repo_full_name": "FOUNDUPS/Foundups-Agent", "foundup_id": "paccess_001",
         "allowed_paths": ["modules/foundups/paccess_001/**"], "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
         "requested_operation": "feature_slice", "permission_snapshot_digest": PERMISSION_DIGEST,
@@ -148,7 +160,7 @@ def _resolver_inputs(now: int) -> tuple[dict, dict]:
         "can_write": True, "can_admin": False, "repo_full_name": "FOUNDUPS/Foundups-Agent",
     }, {
         "principal_id": "github:mjtrout", "principal_provider": "github",
-        "principal_public_key": "ed25519-pub-v1:principal",
+        "principal_public_key": PRINCIPAL_PUBLIC_KEY,
         "repo_scope": ["FOUNDUPS/Foundups-Agent"], "foundup_scope": ["paccess_001"],
         "verified_subject_digest": "sha256:verified",
     })
@@ -161,13 +173,19 @@ def _write_valve(repo: Path, runtime: Path, work: dict, profile: dict, queue_id:
         principal_authority_records=_read(runtime / "principal_authority_records.json"),
         output_path=runtime / "execution_valve_env.json",
         requested_valve_state=VALVE_OPEN_WORKTREE_CREATE, queue_item_id=queue_id, now_epoch=now,
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
     assert result.accepted, result.rejection_reasons
 
 
 def _write_signer(repo: Path, runtime: Path, profile: dict) -> None:
     config = run_reddog_signer_socket_service_config_supply(
-        repo_root=repo, authority_profile=profile, output_path=runtime / "signer_service_config.json",
+        repo_root=repo,
+        runtime_root=runtime,
+        signer_runtime_root=runtime.parent / f"{runtime.name}-signer-state",
+        authority_profile=profile,
+        authoritative_work_state_path=runtime / "authoritative_work_state.json",
+        output_path=runtime / "signer_service_config.json",
         socket_path=runtime / "reddog_signer.sock",
         principal_signing_key_ref="op://vault/principal/private",
         principal_audit_mac_key_ref="op://vault/principal/audit",
@@ -178,7 +196,11 @@ def _write_signer(repo: Path, runtime: Path, profile: dict) -> None:
     assert config.accepted
     packet = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=repo, config_path=runtime / "signer_service_config.json",
-        output_path=runtime / "signer_service_run_packet.json", python_executable="python",
+        output_path=runtime / "signer_service_run_packet.json",
+        owner_authority_config_path=(
+            runtime.parent / "signer-owner" / "owner.json"
+        ),
+        python_executable="python",
         session_id="canary-test",
     )
     assert packet.accepted

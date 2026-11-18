@@ -1,0 +1,88 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "25010f02c8391f30b0c9a7439312a3291e0325c8"
+  },
+  "execution_id": "REDDOG_HOLO_RETRIEVAL_TRUTH_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "Governed owner retrieval failed closed with HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH: authority 25010f02c8391f30b0c9a7439312a3291e0325c8 versus candidate 2805030710bfa061fe6985bc1dcf13003f4888c8; no query, reindex, or authority-worktree mutation occurred.",
+      "PR 1571 Linux CI independently reproduced a backend compatibility rejection at test_backend_compatibility_contract.js:250.",
+      "The CI log showed all preceding RedDog fast members passing and the compatibility preflight alone rejecting the stale authenticated Python closure."
+    ],
+    "research": [
+      "The canonical backend generator and its independent tests were inspected before regeneration.",
+      "The changed AI Overseer benchmark is in the authenticated Python runtime closure; excluding it would weaken the backend integrity boundary.",
+      "The extension contract shards authenticate current-version assertions and therefore required deterministic digest rebinding after the 0.4.120 version advance."
+    ],
+    "micro_pass": [
+      "The canonical generator produced 1350 runtime files and digest ee679968a31aff63f670eb6c3f6da4467a8ebb01c3b80de0246be39d53f9ab80.",
+      "Generator parity plus the focused AI Overseer and NAV suites passed 13 tests with 13 optional capability skips.",
+      "The complete RedDog fast tier passed all 14 members, including backend compatibility and authenticated shard reconstruction."
+    ],
+    "macro_pass": [
+      "The test registry remained current at 1588 tests and 268 quarantined programs.",
+      "The package surface remained within its 1048576-byte cap at 67 files and 945469 bytes.",
+      "CodeQL, language analysis, lint, security, Holo freshness, and red-team observation had passed on the predecessor candidate; GitHub CI is required to rerun against the amended identity."
+    ],
+    "hard_think": [
+      "WSP 15 allocation: Complexity 2, Importance 5, Deferability 5, Impact 5, total 17/P0; the stale closure blocked RedDog against the proposed main and prevented Holo activation progress.",
+      "The smallest valid repair is to regenerate the canonical closure, pin its digest, advance the VSIX identity, and rebind existing version fixtures and shard identities.",
+      "No Holo maintenance, indexing, worker, model, GitHub, or merge authority was added to the extension."
+    ],
+    "dialectic_sweep": [
+      "Bypassing the compatibility test would defeat the exact fail-closed behavior it correctly exercised.",
+      "Leaving version 0.4.119 would distribute changed extension bytes under an existing package identity; advancing to 0.4.120 preserves install truth.",
+      "Removing the repaired benchmark from the runtime closure would hide a reachable Python dependency rather than authenticate it."
+    ],
+    "first_principles": [
+      "A thin client must refuse a repository backend whose executable closure differs from the closure it authenticates.",
+      "A backend change and a distributable VSIX identity are separate but bound release facts.",
+      "Holo retrieval remains unavailable until exact-main authority and the immutable query replica are activated after merge."
+    ],
+    "execute": [
+      "PR 1571 candidate branch fix/reddog-holo-retrieval-truth",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/package.json",
+      "extensions/reddog/extension.js",
+      "extensions/reddog/tests/contract_shards/manifest.json",
+      "extensions/reddog/ModLog.md",
+      "extensions/reddog/tests/TestModLog.md"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_RETRIEVAL_TRUTH_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "modules/ai_intelligence/ai_overseer/ModLog.md",
+    "modules/ai_intelligence/ai_overseer/tests/TestModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "GitHub PR 1571 status checks"
+  ]
+}

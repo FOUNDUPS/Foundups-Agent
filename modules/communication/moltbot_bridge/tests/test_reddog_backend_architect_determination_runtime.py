@@ -59,6 +59,10 @@ from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_te
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
+    architect_model_output as _model_output,
+    runtime_kwargs as _runtime_kwargs,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -148,19 +152,19 @@ def _work_state() -> dict[str, object]:
     }
 
 
-def _fresh_holo_receipt() -> HoloIndexFreshnessReceipt:
+def _fresh_holo_receipt(now_iso: str = NOW) -> HoloIndexFreshnessReceipt:
     return build_fresh_holoindex_receipt(
         repo_root=REPO_ROOT,
         head_sha=HEAD,
-        generated_at=NOW,
+        generated_at=now_iso,
     )
 
 
 def _build_inputs(
-    *,
-    include_reports: bool = True,
+    *, include_reports: bool = True,
     include_runtime_binding: bool = True,
     architect_runtime_binding: Mapping[str, Any] | None = None,
+    now_iso: str = NOW,
 ):
     if architect_runtime_binding is None:
         architect_runtime_binding = model_runtime_binding_receipt(
@@ -169,9 +173,9 @@ def _build_inputs(
     snapshot_result = build_operational_context_snapshot(
         repo_state=_repo_state(),
         work_state_snapshot=_work_state(),
-        holoindex_receipt=_fresh_holo_receipt(),
+        holoindex_receipt=_fresh_holo_receipt(now_iso),
         changed_paths=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
-        now_iso=NOW,
+        now_iso=now_iso,
         breadcrumb_scope="REDDOG_BACKEND_ARCHITECT_DETERMINATION_RUNTIME_PHASE1",
     )
     assert snapshot_result.accepted is True
@@ -191,7 +195,7 @@ def _build_inputs(
         current_work_state_revision=REVISION,
         requested_operation="backend_architect_determination",
         prompt_text="Produce backend architect determination",
-        now_iso=NOW,
+        now_iso=now_iso,
     )
     assert fusion_gate.accepted is True
     plan = plan_reddog_openclaw_readonly_audit_swarm(
@@ -217,10 +221,10 @@ def _build_inputs(
     if include_runtime_binding:
         allocation_kwargs["architect_model_runtime_binding_receipt"] = architect_runtime_binding
     allocation = allocate_reddog_wsp15_receipt(
-        requested_operation="backend_architect_determination",
-        prompt_text="RedDog backend architect determination runtime",
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_backend_architect_determination_runtime.py",),
+        requested_operation="edit_foundup_module",
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=("modules/foundups/demo/src/worker.py",),
+        allowed_read_targets=("modules/foundups/demo/src/worker.py",),
         **allocation_kwargs,
     ).to_dict()
     return {
@@ -266,31 +270,6 @@ def _reports(plan) -> tuple[dict[str, Any], ...]:
             }
         )
     return tuple(reports)
-
-
-def _model_output(allocation: Mapping[str, Any], evidence_ref: str, *, action: str = ACTION_FIX) -> dict[str, Any]:
-    return {
-        "action": action,
-        "next_slice_name": "REDDOG_NEXT_RUNTIME_SLICE_PHASE1" if action != "STOP" else None,
-        "summary": "Verified reports support one next backend runtime slice.",
-        "decision_reasons": ["selected verified P0 runtime gap"],
-        "evidence_refs": [evidence_ref],
-        "wsp15_allocation_receipt_id": allocation["receipt_id"],
-    }
-
-
-def _runtime_kwargs(inputs: Mapping[str, Any]) -> dict[str, Any]:
-    kwargs = {
-        "snapshot": inputs["snapshot"],
-        "context_view": inputs["context_view"],
-        "evidence_bundle": inputs["evidence_bundle"],
-        "fusion_gate": inputs["fusion_gate"],
-        "report_collection": inputs["report_collection"],
-        "reports": inputs["reports"],
-    }
-    if inputs["architect_runtime_binding"] is not None:
-        kwargs["model_runtime_binding_receipt"] = inputs["architect_runtime_binding"]
-    return kwargs
 
 
 def _provider_call_evidence_from_binding(

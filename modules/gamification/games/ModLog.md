@@ -1,5 +1,12 @@
 # Games Module - ModLog
 
+## 2026-10-27 — Cross-product review candidate
+
+Linked EDUIT's prototype interactive-experience Skillz for audience, visible UI,
+timing, incentives and state audits. Reused WRE ownership and evidence boundaries;
+no game runtime, registry, admission or scheduler changes. First-use evidence
+belongs to EDUIT. Cross-game transfer remains unverified. WSP 95/97; docs only.
+
 ## V1.0.0 (2026-03-05)
 
 ### Initial Release

@@ -1,0 +1,175 @@
+{
+  "version": "0.4.0",
+  "date": "2026-11-07",
+  "summary": "24 document records; selected high-risk claims checked by separately tasked collaborating AI agents. These agents share one system/operator context. Unreviewed propositions, full later bill action history, handbook details and qualified human legal/parliamentary review remain explicit gaps. Source fingerprints bind repository text, not external Google Doc edits or truth.",
+  "documents": [
+    {
+      "path": "MASTER_BLUEPRINT.md",
+      "title": "Master Blueprint & Distributed Agent Engine",
+      "sha256": "95b58a611f19a594f7e333d483cd5c034c6b524357b1e9da5172fbb7ab105893",
+      "scope": "Consolidation of source chapters and new material. Underlying review coverage varies by chapter; not an exhaustive manual audit.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/00-executive-summary.md",
+      "title": "Executive Summary \u2014 Strategic Theory of the Case",
+      "sha256": "735088882252e883af8ed8ccb2f2b5147fb9ac706389a8c1ddc92909579db2fa",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/01-hub-and-authorities.md",
+      "title": "Section I \u2014 The Central Legal Hub and Governing Authorities",
+      "sha256": "c986cd62ec53e50be573dc04dbc7fed7dce39f5360f6ce5d130ebb7d77a813ab",
+      "scope": "Focused AI source audit of selected authority, restriction, enforcement and referral propositions; full legal review not completed.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/02-state-referrals.md",
+      "title": "Section III. Independent State Enforcement and the Evidentiary Referral Layer",
+      "sha256": "d5ea50137d2d391bf6b086f734ddf207caf835c476a1dfcb599235a71efd82ce",
+      "scope": "Focused AI source audit of selected authority, restriction, enforcement and referral propositions; full legal review not completed.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/03-financial-forensics.md",
+      "title": "Financial Forensics: Emoluments, Corporate Payments, and Digital Assets",
+      "sha256": "5dfc7f12f2655853d21c4687914402a7839e0f30a39d803933bcd877b285ea13",
+      "scope": "Focused AI source audit of selected forensic, privilege, historical, witness and staffing propositions; handbook detail inaccessible.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/04-jan6-and-readiness.md",
+      "title": "Section IV. Learning from January 6: institutional design, testimony, and public presentation",
+      "sha256": "6e7f4eccd55cc51b3120d27134a3073d6dae78757dcd0dad095d3fb6a5451965",
+      "scope": "Focused AI source audit of selected forensic, privilege, historical, witness and staffing propositions; handbook detail inaccessible.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/05-litigation-and-privilege.md",
+      "title": "Constitutional litigation, privilege, and enforcement",
+      "sha256": "b1cf43bb27e9e9cda4531f3fc98b5d2c6ae76a0c52ea022c57177c37a3914aa1",
+      "scope": "Focused AI source audit of selected authority, restriction, enforcement and referral propositions; full legal review not completed.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/07-agent-skill-tree.md",
+      "title": "Section VII. Appendix E \u2014 Hierarchical Agent Skill Tree",
+      "sha256": "220a24e642d54d10d06dc45b7f63434d9fa19a89efcfa80a0a691f8679a6dddf",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/08-distributed-github-engine.md",
+      "title": "Section VIII \u2014 Appendix F: Distributed GitHub Hub-and-Spoke Engine",
+      "sha256": "c5aef190d4aa626aa419d221a4e577d24965fc689a9afcae166d152de58ef304",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/09-public-portal.md",
+      "title": "Section IX \u2014 Public Portal and Interactive Knowledge Graph",
+      "sha256": "a804032d6684e3febc7f6ff3f4a9c170c2bcaa169ed8b2eca4a134cc64a7a7b4",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/10-autonomous-network.md",
+      "title": "Appendix G. Autonomous research network and independent audit architecture",
+      "sha256": "b396c62779699901c13e6ad25137a6621dd82473bdb53570f26662bf984532f4",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "templates/appendix-a-house-rules.md",
+      "title": "Appendix A \u2014 Model 120th Congress Financial-Integrity Oversight Resolution",
+      "sha256": "bf730f99de6bf3d943ce5d293f52725957ebedbce96bc8b639645cc01aa40a12",
+      "scope": "Focused AI source audit of selected authority, restriction, enforcement and referral propositions; full legal review not completed.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "templates/appendix-b-legislative-purpose.md",
+      "title": "Appendix B \u2014 Model Legislative Purpose and Collection Decision Memorandum",
+      "sha256": "a2e29133b2d3b3f904a35b2cdc83565287c6fb8d097679f6d8bff4eb0b2189da",
+      "scope": "Focused AI source audit of selected forensic, privilege, historical, witness and staffing propositions; handbook detail inaccessible.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "templates/appendix-c-subpoena-and-wave-one.md",
+      "title": "Appendix C \u2014 Model Third-Party Document Rider and Wave-One Schedule",
+      "sha256": "576f86ca4b4df285a8253fb87b611ede1d05302828a7d4752df3d4a016ffe9bf",
+      "scope": "Focused AI source audit of selected forensic, privilege, historical, witness and staffing propositions; handbook detail inaccessible.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "templates/appendix-d-state-referral.md",
+      "title": "Appendix D. State Evidentiary Referral Transmittal Package",
+      "sha256": "5257d54daafa4751fe9972c2e6b524fa3c97be4ccfecb45f919fb15f61c7bd90",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "ROADMAP.md",
+      "title": "Roadmap \u2014 Hub-and-Spoke Oversight and Autonomous Research Network",
+      "sha256": "732346fc4fbd2bcd3f6ce1679ad7b7a08a5370165337508c9260e4edeb1eeb51",
+      "scope": "Delivery/status reconciliation by architect; independent interface/code checks are separately recorded. No institutional acceptance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/11-house-first-pwa.md",
+      "title": "House-first product contract",
+      "sha256": "9ad5ebc3848d4ed1a0a8d4935bd23682b8d1c193113f2efe0971e4a000a485ac",
+      "scope": "Delivery/status reconciliation by architect; independent interface/code checks are separately recorded. No institutional acceptance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "templates/staffing-and-recruitment-plan.md",
+      "title": "Staffing and Recruitment \u2014 Prepared House Office Plan",
+      "sha256": "932f87b591d05587f5280967a6189c51193ce70ac7583b6a4b44a88f024a232f",
+      "scope": "Focused AI source audit of selected forensic, privilege, historical, witness and staffing propositions; handbook detail inaccessible.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "templates/central-hub-charter.md",
+      "title": "Central Legal Hub \u2014 Model Operating Charter",
+      "sha256": "055f6e66a149a6d0aece0683b59cc11c669a60e77ff0c522edeb18311f41e91c",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "templates/committee-node-operating-plan.md",
+      "title": "Committee Nodes \u2014 Model Mandates and First Deliverables",
+      "sha256": "7af90230677608b6b3dcf842e66481cab7e2a6ec4bde2a930ad39e735a925c58",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "templates/house-office-briefing.md",
+      "title": "Three Steps to Financial Oversight Readiness",
+      "sha256": "b042b06950e42a5579644bd4c7cf3860222dd8abc5a7f8772b533f9933ac8438",
+      "scope": "Draft exists. Not independently re-audited in this slice; source checking and human legal review remain necessary before reliance.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/12-member-start-here.md",
+      "title": "A member\u2019s guide \u2014 one shared hub, separate lawful powers",
+      "sha256": "283f88b1eb57651fe4f6d57960399d420d3a7ea2a0f5c5ae1b57fdbb9697db21",
+      "scope": "New text independently checked for legislative powers, law/proposal status, privacy and review-label boundaries; professional review pending.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/13-oversight-topics-and-epstein.md",
+      "title": "Oversight questions \u2014 a source-linked research agenda",
+      "sha256": "b7940dbd4d5bf8151e54bda1304b8438e00adc025a611044269de7854464fd2d",
+      "scope": "New text independently checked for legislative powers, law/proposal status, privacy and review-label boundaries; professional review pending.",
+      "human_legal_review": "pending"
+    },
+    {
+      "path": "docs/14-worker-review-and-quality.md",
+      "title": "Research workers, independent review and release quality",
+      "sha256": "b6d94701e1556f06dd9dd8c0f62cd1501ed11dcc3b16264bb28e68136337454f",
+      "scope": "New text independently checked for legislative powers, law/proposal status, privacy and review-label boundaries; professional review pending.",
+      "human_legal_review": "pending"
+    }
+  ]
+}

@@ -60,7 +60,7 @@ class SearchPattern:
     query_type: str  # 'code', 'wsp', 'dae', 'pattern'
     enhancement: str  # Query enhancement strategy
     caching: bool    # Whether to cache results
-    tokens: int      # Token cost
+    tokens: int      # Configured budget hint; not measured usage
 
 
 class HoloIndexPlugin(OrchestratorPlugin):
@@ -68,20 +68,15 @@ class HoloIndexPlugin(OrchestratorPlugin):
     HoloIndex WRE Plugin - Semantic Code Discovery Service
 
     Provides pattern-based code search and WSP guidance to all WRE components.
-    Achieves 97% token reduction by finding existing code instead of writing it.
+    Token reduction remains unmeasured until receipt-backed telemetry exists.
     """
 
     def __init__(self):
-        """Initialize HoloIndex as WRE plugin"""
+        """Initialize a dormant compatibility shell without opening Holo state."""
         super().__init__("holoindex")
-
-        if not HOLOINDEX_AVAILABLE:
-            raise ImportError("HoloIndex not available - install dependencies")
-
-        # Initialize core components
-        self.holo = HoloIndex(ssd_path="E:/HoloIndex")
-        self.advisor = QwenAdvisor()
-        self.dae_organizer = DAECubeOrganizer()
+        self.holo = None
+        self.advisor = None
+        self.dae_organizer = None
 
         # Pattern cache for learned search patterns
         self.pattern_cache: Dict[str, SearchPattern] = {}
@@ -120,37 +115,16 @@ class HoloIndexPlugin(OrchestratorPlugin):
 
     def execute(self, task: Dict) -> Any:
         """
-        Execute HoloIndex operations through WRE
+        Block the dormant direct-Holo compatibility route.
 
-        Operations:
-        - search: Semantic code/WSP search
-        - index: Update search indexes
-        - wsp_guidance: Get WSP compliance guidance
-        - dae_context: Get DAE structure intelligence
-        - discover_patterns: Find reusable patterns
+        Governed retrieval uses the generation-bound owner-query script.
+        Maintenance remains a separate WRE/CI transaction; an injected plugin
+        callback is not freshness, topology, or maintenance authorization.
         """
-        operation = task.get('operation', 'search')
-
-        # Recall pattern from WRE master
-        if self.master:
-            pattern = self.master.recall_pattern(f"holoindex_{operation}")
-        else:
-            # Fallback to local patterns
-            pattern = self._get_local_pattern(operation)
-
-        # Apply pattern
-        if operation == 'search':
-            return self._search_with_patterns(task, pattern)
-        elif operation == 'index':
-            return self._index_with_patterns(task, pattern)
-        elif operation == 'wsp_guidance':
-            return self._get_wsp_guidance(task, pattern)
-        elif operation == 'dae_context':
-            return self._get_dae_context(task, pattern)
-        elif operation == 'discover_patterns':
-            return self._discover_patterns(task, pattern)
-        else:
-            raise ValueError(f"Unknown operation: {operation}")
+        raise PermissionError(
+            "direct HoloIndex plugin execution is blocked; "
+            "use the governed owner query"
+        )
 
     def _get_local_pattern(self, operation: str) -> Pattern:
         """Get pattern from local cache"""
@@ -174,7 +148,7 @@ class HoloIndexPlugin(OrchestratorPlugin):
         """
         Perform semantic search using patterns
 
-        Token Cost: ~150 (vs 5000+ to write code)
+        Configured pattern budget: 150. This is not measured token usage.
         """
         query = task.get('query', '')
         limit = task.get('limit', 5)
@@ -204,7 +178,8 @@ class HoloIndexPlugin(OrchestratorPlugin):
             'operation': 'search',
             'query': query,
             'results': results,
-            'tokens_used': pattern.tokens,
+            'configured_token_budget': pattern.tokens,
+            'token_usage_measured': False,
             'pattern_applied': pattern.id
         }
 
@@ -212,7 +187,7 @@ class HoloIndexPlugin(OrchestratorPlugin):
         """
         Update HoloIndex indexes
 
-        Token Cost: ~200 (one-time indexing)
+        Configured pattern budget: 200. This is not measured token usage.
         """
         index_type = task.get('type', 'all')
 
@@ -227,14 +202,15 @@ class HoloIndexPlugin(OrchestratorPlugin):
             'operation': 'index',
             'type': index_type,
             'status': 'completed',
-            'tokens_used': pattern.tokens
+            'configured_token_budget': pattern.tokens,
+            'token_usage_measured': False,
         }
 
     def _get_wsp_guidance(self, task: Dict, pattern: Pattern) -> Dict:
         """
         Get WSP compliance guidance
 
-        Token Cost: ~100 (vs 3000+ manual checking)
+        Configured pattern budget: 100. This is not measured token usage.
         """
         query = task.get('query', '')
         code = task.get('code', '')
@@ -258,14 +234,15 @@ class HoloIndexPlugin(OrchestratorPlugin):
             'reminders': advisor_result.reminders,
             'violations': advisor_result.metadata.get('violations', []),
             'risk_level': advisor_result.metadata.get('risk_level'),
-            'tokens_used': pattern.tokens
+            'configured_token_budget': pattern.tokens,
+            'token_usage_measured': False,
         }
 
     def _get_dae_context(self, task: Dict, pattern: Pattern) -> Dict:
         """
         Get DAE structure intelligence
 
-        Token Cost: ~120 (vs 2000+ manual analysis)
+        Configured pattern budget: 120. This is not measured token usage.
         """
         dae_type = task.get('dae_type', 'auto')
 
@@ -278,14 +255,15 @@ class HoloIndexPlugin(OrchestratorPlugin):
             'operation': 'dae_context',
             'dae_type': dae_type,
             'context': context,
-            'tokens_used': pattern.tokens
+            'configured_token_budget': pattern.tokens,
+            'token_usage_measured': False,
         }
 
     def _discover_patterns(self, task: Dict, pattern: Pattern) -> Dict:
         """
         Discover reusable patterns in code
 
-        Token Cost: ~180 (vs 4000+ manual analysis)
+        Configured pattern budget: 180. This is not measured token usage.
         """
         module_path = task.get('module', '')
         pattern_type = task.get('pattern_type', 'all')
@@ -309,7 +287,8 @@ class HoloIndexPlugin(OrchestratorPlugin):
             'module': module_path,
             'patterns_found': len(discovered_patterns),
             'patterns': discovered_patterns[:10],  # Top 10
-            'tokens_used': pattern.tokens
+            'configured_token_budget': pattern.tokens,
+            'token_usage_measured': False,
         }
 
     def _store_search_pattern(self, query: str, results: Dict):
@@ -343,8 +322,9 @@ class HoloIndexPlugin(OrchestratorPlugin):
         """Get plugin performance metrics"""
         return {
             "patterns_cached": len(self.pattern_cache),
-            "average_tokens": 150,
-            "token_reduction": "97%",
+            "average_tokens": None,
+            "token_reduction": None,
+            "token_reduction_measured": False,
             "services_available": len(self.get_service_endpoints())
         }
 
@@ -361,7 +341,7 @@ def register_with_wre(master_orchestrator):
 
     print(f"[HoloIndex] Registered as WRE plugin")
     print(f"[HoloIndex] Services available: {list(plugin.get_service_endpoints().keys())}")
-    print(f"[HoloIndex] Token reduction: 97% vs traditional search")
+    print("[HoloIndex] Token reduction telemetry: unmeasured")
 
     return plugin
 
@@ -379,7 +359,7 @@ if __name__ == "__main__":
     })
 
     print(f"Search Results: {len(result['results'].get('code', []))} code matches")
-    print(f"Tokens Used: {result['tokens_used']}")
+    print(f"Configured Token Budget: {result['configured_token_budget']}")
     print(f"Pattern Applied: {result['pattern_applied']}")
 
     # Test DAE context
@@ -389,7 +369,7 @@ if __name__ == "__main__":
     })
 
     print(f"\nDAE Context Retrieved")
-    print(f"Tokens Used: {dae_result['tokens_used']}")
+    print(f"Configured Token Budget: {dae_result['configured_token_budget']}")
 
     # Show metrics
     metrics = plugin.get_metrics()

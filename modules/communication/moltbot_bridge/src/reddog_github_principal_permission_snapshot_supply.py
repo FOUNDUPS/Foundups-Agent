@@ -38,6 +38,9 @@ from modules.platform_integration.github_integration.src.reddog_github_permissio
     is_snapshot_fresh,
     probe_repo_permission,
 )
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
 )
@@ -114,68 +117,64 @@ def run_reddog_github_principal_permission_snapshot_supply(
     probe_backend: PermissionProbeBackend | None = None,
 ) -> GitHubPrincipalPermissionSnapshotSupplyResult:
     """Materialize principal and permission inputs from a GitHub probe."""
-
     root = Path(repo_root).resolve()
-    repo = str(repo_full_name or "").strip()
-    fid = str(foundup_id or "").strip()
-    public_key = str(principal_public_key or "").strip()
-    provider = str(principal_provider or "github").strip()
-    reasons: list[str] = []
-
-    if not repo:
-        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.MISSING_REPO_FULL_NAME)
-    if not fid:
-        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.MISSING_FOUNDUP_ID)
-    elif not _valid_foundup_id(fid):
-        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.INVALID_FOUNDUP_ID)
-    if not public_key:
-        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.MISSING_PRINCIPAL_PUBLIC_KEY)
-    if not _ascii_deep(
-        {
-            "repo_full_name": repo,
-            "foundup_id": fid,
-            "principal_public_key": public_key,
-            "principal_provider": provider,
-            "reward_account": reward_account or "",
-            "owner_dae": owner_dae or "",
-            "principal_wallet": principal_wallet or "",
-        }
-    ):
-        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.NON_ASCII_INPUT)
-
-    principal_path, principal_path_reasons = _runtime_output_path(
+    repo, fid, public_key, provider, reasons = _validated_github_inputs(
+        repo_full_name=repo_full_name,
+        foundup_id=foundup_id,
+        principal_public_key=principal_public_key,
+        principal_provider=principal_provider,
+        reward_account=reward_account,
+        owner_dae=owner_dae,
+        principal_wallet=principal_wallet,
+    )
+    principal_path, permission_path, path_reasons = _authority_output_paths(
+        root,
         principal_authority_record_output_path,
-        root,
-    )
-    permission_path, permission_path_reasons = _runtime_output_path(
         permission_snapshot_output_path,
-        root,
     )
-    reasons.extend(principal_path_reasons)
-    reasons.extend(permission_path_reasons)
+    reasons.extend(path_reasons)
     if reasons:
         return _reject(reasons, repo_full_name=repo, foundup_id=fid)
 
     assert principal_path is not None
     assert permission_path is not None
-    checked = _utc_now(now)
-    snapshot = probe_repo_permission(
-        repo,
-        principal_provider=provider,
-        backend=probe_backend,
-        now=checked,
+    snapshot, probe_reasons = _probe_writable_snapshot(
+        repo=repo,
+        provider=provider,
+        now=now,
         ttl_seconds=ttl_seconds,
+        probe_backend=probe_backend,
     )
-    reasons.extend(_probe_reasons(snapshot, now=checked))
+    reasons.extend(probe_reasons)
     if reasons:
-        return _reject(
-            reasons,
-            repo_full_name=repo,
-            foundup_id=fid,
-            principal_id=_principal_id(snapshot),
-            permission_snapshot_digest=snapshot.evidence_digest,
-        )
+        return _reject_probe(reasons, repo, fid, snapshot)
+    return _materialize_github_authority(
+        root=root,
+        repo=repo,
+        fid=fid,
+        public_key=public_key,
+        snapshot=snapshot,
+        principal_path=principal_path,
+        permission_path=permission_path,
+        reward_account=reward_account,
+        owner_dae=owner_dae,
+        principal_wallet=principal_wallet,
+    )
 
+
+def _materialize_github_authority(
+    *,
+    root: Path,
+    repo: str,
+    fid: str,
+    public_key: str,
+    snapshot: RepoPermissionProbeSnapshot,
+    principal_path: Path,
+    permission_path: Path,
+    reward_account: str | None,
+    owner_dae: str | None,
+    principal_wallet: str | None,
+) -> GitHubPrincipalPermissionSnapshotSupplyResult:
     principal = _principal_record(
         snapshot,
         foundup_id=fid,
@@ -187,19 +186,13 @@ def run_reddog_github_principal_permission_snapshot_supply(
     permission = _permission_snapshot(snapshot)
     principal_payload = _principal_payload(principal, snapshot)
     permission_payload = _permission_payload(permission, snapshot)
-    receipt = _digest(
-        {
-            "principal": principal_payload,
-            "permission": permission_payload,
-            "principal_path": str(principal_path),
-            "permission_path": str(permission_path),
-        }
+    receipt = _authority_receipt(
+        principal_payload, permission_payload, principal_path, permission_path
     )
 
-    try:
-        _write_json_atomic(principal_path, principal_payload)
-        _write_json_atomic(permission_path, permission_payload)
-    except Exception:
+    if not _write_authority_pair(
+        root, principal_path, principal_payload, permission_path, permission_payload
+    ):
         return _reject(
             (GitHubPrincipalPermissionSnapshotSupplyReason.OUTPUT_WRITE_FAILED,),
             repo_full_name=repo,
@@ -220,6 +213,124 @@ def run_reddog_github_principal_permission_snapshot_supply(
         permission_snapshot_digest=permission.evidence_digest,
         rejection_reasons=(),
     )
+
+
+def _reject_probe(
+    reasons: list[str],
+    repo: str,
+    fid: str,
+    snapshot: RepoPermissionProbeSnapshot,
+) -> GitHubPrincipalPermissionSnapshotSupplyResult:
+    return _reject(
+        reasons,
+        repo_full_name=repo,
+        foundup_id=fid,
+        principal_id=_principal_id(snapshot),
+        permission_snapshot_digest=snapshot.evidence_digest,
+    )
+
+
+def _write_authority_pair(
+    root: Path,
+    principal_path: Path,
+    principal_payload: Mapping[str, Any],
+    permission_path: Path,
+    permission_payload: Mapping[str, Any],
+) -> bool:
+    try:
+        _write_authority_artifacts(
+            principal_path,
+            principal_payload,
+            permission_path,
+            permission_payload,
+            repo_root=root,
+        )
+        return True
+    except Exception:
+        return False
+
+
+def _probe_writable_snapshot(
+    *,
+    repo: str,
+    provider: str,
+    now: datetime | None,
+    ttl_seconds: int,
+    probe_backend: PermissionProbeBackend | None,
+) -> tuple[RepoPermissionProbeSnapshot, list[str]]:
+    checked = _utc_now(now)
+    snapshot = probe_repo_permission(
+        repo,
+        principal_provider=provider,
+        backend=probe_backend,
+        now=checked,
+        ttl_seconds=ttl_seconds,
+    )
+    return snapshot, _probe_reasons(snapshot, now=checked)
+
+
+def _authority_receipt(
+    principal: Mapping[str, Any],
+    permission: Mapping[str, Any],
+    principal_path: Path,
+    permission_path: Path,
+) -> str:
+    return _digest(
+        {
+            "principal": principal,
+            "permission": permission,
+            "principal_path": str(principal_path),
+            "permission_path": str(permission_path),
+        }
+    )
+
+
+def _validated_github_inputs(
+    *,
+    repo_full_name: str,
+    foundup_id: str,
+    principal_public_key: str,
+    principal_provider: str,
+    reward_account: str | None,
+    owner_dae: str | None,
+    principal_wallet: str | None,
+) -> tuple[str, str, str, str, list[str]]:
+    repo = str(repo_full_name or "").strip()
+    fid = str(foundup_id or "").strip()
+    public_key = str(principal_public_key or "").strip()
+    provider = str(principal_provider or "github").strip()
+    reasons: list[str] = []
+    if not repo:
+        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.MISSING_REPO_FULL_NAME)
+    if not fid:
+        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.MISSING_FOUNDUP_ID)
+    elif not _valid_foundup_id(fid):
+        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.INVALID_FOUNDUP_ID)
+    if not public_key:
+        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.MISSING_PRINCIPAL_PUBLIC_KEY)
+    if not _ascii_deep(
+        {
+            "repo_full_name": repo,
+            "foundup_id": fid,
+            "principal_public_key": public_key,
+            "principal_provider": provider,
+            "reward_account": reward_account or "",
+            "owner_dae": owner_dae or "",
+            "principal_wallet": principal_wallet or "",
+        }
+    ):
+        reasons.append(GitHubPrincipalPermissionSnapshotSupplyReason.NON_ASCII_INPUT)
+    return repo, fid, public_key, provider, reasons
+
+
+def _authority_output_paths(
+    root: Path,
+    principal_output: Path | str | None,
+    permission_output: Path | str | None,
+) -> tuple[Path | None, Path | None, list[str]]:
+    principal_path, principal_reasons = _runtime_output_path(principal_output, root)
+    permission_path, permission_reasons = _runtime_output_path(permission_output, root)
+    return principal_path, permission_path, [*principal_reasons, *permission_reasons]
 
 
 def _probe_reasons(snapshot: RepoPermissionProbeSnapshot, *, now: datetime) -> list[str]:
@@ -334,9 +445,25 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
     return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
-    with runtime_operation_lock(str(path) + ".operation"):
-        _write_json_atomic_unlocked(path, payload)
+def _write_authority_artifacts(
+    principal_path: Path,
+    principal_payload: Mapping[str, Any],
+    permission_path: Path,
+    permission_payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
+    with runtime_operation_lock(str(principal_path) + ".operation"):
+        with runtime_operation_lock(str(permission_path) + ".operation"):
+            with reddog_runtime_artifact_generation_lock(
+                principal_path.parent, repo_root=repo_root
+            ):
+                _write_json_atomic_unlocked(
+                    principal_path, principal_payload
+                )
+                _write_json_atomic_unlocked(
+                    permission_path, permission_payload
+                )
 
 
 def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:

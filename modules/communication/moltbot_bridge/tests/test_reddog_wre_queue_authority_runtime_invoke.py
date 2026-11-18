@@ -35,6 +35,20 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    _admit_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    canonical_delegated_authority_request_digest,
+    rehydrate_delegated_authority_request,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_test_support import (
+    sign_with_test_consensus,
+    verified_consensus_for_request,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -82,6 +96,9 @@ class _MockSigner:
             no_secret_material_returned=True,
         )
 
+    def sign_with_elevated_consensus(self, request, permit):
+        return sign_with_test_consensus(self, request, permit, now=NOW)
+
 
 class _PrincipalResolver:
     def resolve(self, principal_id: str, principal_provider: str):
@@ -115,7 +132,7 @@ def _queue_result():
     receipt = {
         "receipt_id": "wre_queue_consumer_1234",
         "queue_item_id": "queue-1",
-        "slice_id": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "slice_id": "REDDOG_TEST_SLICE_PHASE1",
         "claim_id": "claim-1",
         "worker_id": "reddog-main-bootstrap",
         "freshness_receipt_id": "fresh-1",
@@ -124,8 +141,18 @@ def _queue_result():
         "wsp15_priority": "P0",
         "wsp15_mps_total": 20,
         "reasoning_tier": "ULTRA",
+        **signed_stage_binding(
+            requested_operation="edit_foundup_module",
+            changed_paths=(f"modules/foundups/{FID}/src/worker.py",),
+        ),
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + "d" * 64,
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
-        "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_digest": "sha256:" + "a" * 64,
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:" + "b" * 64
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + "c" * 64,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
         "no_queue_mutation_performed": True,
@@ -136,10 +163,32 @@ def _queue_result():
         "rejection_reasons": [],
         "receipt": receipt,
         "selected_queue_item_id": "queue-1",
-        "selected_slice": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }
+
+
+def _authoritative_queue_item():
+    item = dict(_queue_result()["receipt"])
+    item.update(
+        status="QUEUED",
+        no_execution_performed=True,
+        independent_verifier_required=item[
+            "progressive_policy_stage_receipt"
+        ]["independent_verifier_required"],
+    )
+    return item
+
+
+def _queue_admission(dryrun=None):
+    request = rehydrate_delegated_authority_request(
+        (dryrun or _dryrun())["delegated_authority_request"]
+    )
+    return _admit_current_queue_authority(
+        request=request,
+        authoritative_queue_item=_authoritative_queue_item(),
+    )
 
 
 def _profile(**overrides):
@@ -154,7 +203,7 @@ def _profile(**overrides):
         "base_ref": "main",
         "allowed_paths": [f"modules/foundups/{FID}/**"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
@@ -165,8 +214,14 @@ def _profile(**overrides):
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + "d" * 64,
         "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:abc123",
-        "model_runtime_binding_digest": "sha256:model-runtime-binding",
+        "model_runtime_binding_digest": "sha256:" + "a" * 64,
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:" + "b" * 64
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + "c" * 64,
     }
     profile.update(overrides)
     return profile
@@ -183,6 +238,20 @@ def _dryrun():
         authority_profile=_profile(),
         work_order=work_order,
     ).to_dict()
+
+
+def _authorized_dryrun():
+    dryrun = _dryrun()
+    request = rehydrate_delegated_authority_request(
+        dryrun["delegated_authority_request"]
+    )
+    request, capability, _ = verified_consensus_for_request(request, now=NOW)
+    payload = request.to_dict()
+    dryrun["delegated_authority_request"] = payload
+    dryrun["receipt"]["delegated_authority_request_digest"] = (
+        canonical_delegated_authority_request_digest(payload)
+    )
+    return dryrun, capability
 
 
 def test_explicit_invoke_missing_rejects_before_signer_call() -> None:
@@ -243,10 +312,68 @@ def test_invalid_request_payload_rejects_before_signer_call() -> None:
     assert signer.requests == []
 
 
-def test_default_signer_rejection_is_preserved() -> None:
+def test_substituted_valid_request_rejects_before_signer_or_store_effect() -> None:
+    signer = _MockSigner()
+    store = InMemoryAuthorityRuntimeStore()
+    initial_state = store.load()
+    dryrun = _dryrun()
+    request = dryrun["delegated_authority_request"]
+    request["memex_supply_receipt_id"] = "memex-supply-attacker"
+    request["memex_supply_digest"] = "sha256:" + "7" * 64
+
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
-        queue_authority_request_dryrun=_dryrun(),
+        queue_authority_request_dryrun=dryrun,
+        store=store,
+        signer=signer,
+        principal_resolver=_PrincipalResolver(),
+        snapshot_resolver=_SnapshotResolver(),
+        now=NOW,
+    )
+
+    assert result.decision == QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT
+    assert (
+        QueueAuthorityRuntimeInvokeReason.REQUEST_DIGEST_MISMATCH
+        in result.rejection_reasons
+    )
+    assert signer.requests == []
+    assert store.load() == initial_state
+
+
+def test_falsy_non_string_request_substitution_rejects_without_effect() -> None:
+    for value in (0, False, [], {}):
+        signer = _MockSigner()
+        store = InMemoryAuthorityRuntimeStore()
+        initial_state = store.load()
+        dryrun = _dryrun()
+        dryrun["delegated_authority_request"]["memex_supply_receipt_id"] = value
+
+        result = invoke_reddog_wre_queue_authority_runtime(
+            explicit_queue_authority_runtime_requested=True,
+            queue_authority_request_dryrun=dryrun,
+            store=store,
+            signer=signer,
+            principal_resolver=_PrincipalResolver(),
+            snapshot_resolver=_SnapshotResolver(),
+            now=NOW,
+        )
+
+        assert result.decision == QUEUE_AUTHORITY_RUNTIME_INVOKE_REJECT
+        assert (
+            QueueAuthorityRuntimeInvokeReason.REQUEST_PAYLOAD_INVALID
+            in result.rejection_reasons
+        )
+        assert signer.requests == []
+        assert store.load() == initial_state
+
+
+def test_default_signer_rejection_is_preserved() -> None:
+    dryrun, consensus = _authorized_dryrun()
+    result = invoke_reddog_wre_queue_authority_runtime(
+        explicit_queue_authority_runtime_requested=True,
+        queue_authority_request_dryrun=dryrun,
+        queue_authority_admission=_queue_admission(dryrun),
+        elevated_consensus_capability=consensus,
         store=InMemoryAuthorityRuntimeStore(),
         signer=None,
         principal_resolver=_PrincipalResolver(),
@@ -264,10 +391,13 @@ def test_default_signer_rejection_is_preserved() -> None:
 def test_invokes_injected_signer_and_issues_authority_without_execution() -> None:
     signer = _MockSigner()
     store = InMemoryAuthorityRuntimeStore()
+    dryrun, consensus = _authorized_dryrun()
 
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
-        queue_authority_request_dryrun=_dryrun(),
+        queue_authority_request_dryrun=dryrun,
+        queue_authority_admission=_queue_admission(dryrun),
+        elevated_consensus_capability=consensus,
         store=store,
         signer=signer,
         principal_resolver=_PrincipalResolver(),
@@ -320,13 +450,33 @@ def test_payload_round_trips_into_runtime_request_type() -> None:
         denied_paths=tuple(request["denied_paths"]),
         requested_operation=str(request["requested_operation"]),
         permission_snapshot_digest=str(request["permission_snapshot_digest"]),
+        queue_consumer_receipt_digest=str(request["queue_consumer_receipt_digest"]),
+        queue_consumer_receipt=dict(request["queue_consumer_receipt"]),
+        wsp15_allocation_receipt=dict(request["wsp15_allocation_receipt"]),
         wsp15_allocation_receipt_id=str(request["wsp15_allocation_receipt_id"]),
         wsp15_allocation_digest=str(request["wsp15_allocation_digest"]),
         wsp15_priority=str(request["wsp15_priority"]),
         wsp15_mps_total=int(request["wsp15_mps_total"]),
         wsp15_reasoning_tier=str(request["wsp15_reasoning_tier"]),
-        model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
-        model_runtime_binding_digest=str(request["model_runtime_binding_digest"]),
+        progressive_policy_stage_receipt_id=str(
+            request["progressive_policy_stage_receipt_id"]
+        ),
+        progressive_policy_stage_digest=str(
+            request["progressive_policy_stage_digest"]
+        ),
+            progressive_policy_stage_receipt=dict(
+                request["progressive_policy_stage_receipt"]
+            ),
+            model_selection_receipt_id=str(request["model_selection_receipt_id"]),
+            model_selection_digest=str(request["model_selection_digest"]),
+                model_runtime_binding_receipt_id=str(request["model_runtime_binding_receipt_id"]),
+            model_runtime_binding_digest=str(request["model_runtime_binding_digest"]),
+            model_runtime_binding_verification_receipt_id=str(
+                request["model_runtime_binding_verification_receipt_id"]
+            ),
+            model_runtime_binding_verification_digest=str(
+                request["model_runtime_binding_verification_digest"]
+            ),
         identity_nonce=str(request["identity_nonce"]),
         work_authority_nonce=str(request["work_authority_nonce"]),
         issued_at=int(request["issued_at"]),

@@ -1,0 +1,115 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "worker",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "A",
+  "S": {
+    "owner": "modules/foundups/memory_horizon/src/app",
+    "read": [
+      "modules/foundups/memory_horizon/src/game",
+      "modules/foundups/memory_horizon/src/measurement",
+      "modules/foundups/memory_horizon/src/content",
+      "modules/foundups/memory_horizon/src/analytics",
+      "modules/foundups/memory_horizon/docs/GAME_DESIGN_SWEEPS.md",
+      "WSP_framework/src/WSP_102_FoundUps_Web_Design_Protocol.md"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/src/app",
+      "modules/foundups/memory_horizon/tests/integration",
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-06.json"
+    ]
+  },
+  "M": "exec",
+  "T": "MH-RSI-06",
+  "A": "INTEGRATE Sweep 0-1 into one mobile-first browser POC",
+  "R": [
+    0,
+    6,
+    11,
+    15,
+    22,
+    34,
+    49,
+    50,
+    62,
+    84,
+    97,
+    99,
+    102,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "depends_on": [
+      "MH-RSI-02",
+      "MH-RSI-03",
+      "MH-RSI-04",
+      "MH-RSI-05"
+    ],
+    "low_fi_ui": true,
+    "one_tap_start_target": true,
+    "game_measurement_separation": true,
+    "natural_and_explicit_probes": true,
+    "no_public_shell_mutation": true,
+    "effect_boundary": "Tenant app integration only; no /public shell writes."
+  },
+  "O": [
+    "single playable browser app composition",
+    "explicit card and natural in-world probe renderers using same probe schema",
+    "mobile-first controls and session flow",
+    "integration tests",
+    "work_orders/results/MH-RSI-06.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_dependencies",
+    "depends_on": [
+      "MH-RSI-02",
+      "MH-RSI-03",
+      "MH-RSI-04",
+      "MH-RSI-05"
+    ],
+    "objective": "Integrate the independently built components into a playable 10-minute Sweep 0-1 POC without collapsing measurement and game state.",
+    "steps": [
+      "Compose game/content/measurement/analytics through explicit interfaces.",
+      "Implement low-fi mobile UI with four archetypes and simple exploration controls.",
+      "Render at least one explicit-card and one natural gameplay probe from the same measurement record.",
+      "Keep export local and visible to the player/researcher.",
+      "Add integration tests for event->probe->retire->export flow."
+    ],
+    "wsp15": {
+      "complexity": 4,
+      "importance": 5,
+      "deferability": 5,
+      "impact": 5,
+      "total": 19,
+      "priority": "P0"
+    },
+    "requirements": {
+      "compute_class": "HIGH",
+      "reasoning_depth": "DEEP",
+      "tools": [
+        "repository_read",
+        "repository_write",
+        "test_runner"
+      ],
+      "verification_class": "INTEGRATION"
+    },
+    "acceptance": [
+      "10-minute deterministic demo path is playable.",
+      "Game and measurement states remain separately inspectable.",
+      "At least 12 unique scorable events are available.",
+      "Explicit and natural probes share one canonical underlying schema.",
+      "No shell/public route mutation occurred."
+    ],
+    "rollback": "Revert only app/integration-test paths; keep accepted G1 components intact."
+  }
+}

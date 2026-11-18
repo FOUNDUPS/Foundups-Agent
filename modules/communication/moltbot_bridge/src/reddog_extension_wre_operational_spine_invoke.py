@@ -15,8 +15,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, MutableSet, Optional, Sequence, Union
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
     AuthoritativeUseLease,
+    consume_authoritative_use_lease,
+    is_authoritative_use_lease,
+)
+from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
+    authoritative_worktree_lease_digest,
 )
 
 from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_selection import (
@@ -33,6 +38,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_operational_spine impor
     WORKTREE_SPINE_ACCEPT,
     RedDogWREOperationalSpineResult,
     run_reddog_wre_worktree_create_spine,
+)
+from modules.communication.moltbot_bridge.src.reddog_registered_foundup_target_verifier import (
+    verify_registered_foundup_target,
 )
 
 EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT = (
@@ -52,6 +60,7 @@ class ExtensionWREOperationalSpineInvokeReason:
     SELECTION_AUTHORITY_BOUNDARY_INVALID = "REJECT_SELECTION_AUTHORITY_BOUNDARY_INVALID"
     SELECTION_ALREADY_EXECUTED = "REJECT_SELECTION_ALREADY_EXECUTED"
     WORKTREE_SPINE_REJECTED = "REJECT_WRE_OPERATIONAL_SPINE_REJECTED"
+    FOUNDUP_TARGET_INVALID = "REJECT_REGISTERED_FOUNDUP_TARGET_INVALID"
 
 
 @dataclass(frozen=True)
@@ -135,6 +144,31 @@ def _validate_selection_receipt(selection_receipt: Mapping[str, Any]) -> List[st
     return list(dict.fromkeys(reasons))
 
 
+def _lease_consumer_factory(
+    lease: Optional[AuthoritativeUseLease], work_order: Mapping[str, Any]
+):
+    def build(executor: Mapping[str, Any], valve: Mapping[str, Any]):
+        receipt = _mapping(work_order.get("queue_consumer_receipt"))
+        queue_item_id = str(receipt.get("queue_item_id") or "")
+        selected_slice = str(receipt.get("slice_id") or "")
+        digest = authoritative_worktree_lease_digest(
+            queue_item_id, selected_slice, work_order, executor, valve
+        )
+        if not is_authoritative_use_lease(
+            lease,
+            effect_kind="worktree_create",
+            effect_request_digest=digest,
+        ):
+            return None
+        return lambda: consume_authoritative_use_lease(
+            lease,
+            effect_kind="worktree_create",
+            effect_request_digest=digest,
+        )
+
+    return build
+
+
 def invoke_reddog_extension_wre_operational_spine_explicit_valve(
     work_order: Mapping[str, Any],
     *,
@@ -165,6 +199,14 @@ def invoke_reddog_extension_wre_operational_spine_explicit_valve(
 
     selection = _selection_mapping(selection_receipt)
     reasons = _validate_selection_receipt(selection)
+    target_reasons = verify_registered_foundup_target(
+        repo_root or Path.cwd(),
+        _mapping(work_order).get("registered_foundup_target_receipt"),
+        selection_receipt=selection,
+        work_order=_mapping(work_order),
+    )
+    if target_reasons:
+        reasons.extend([ExtensionWREOperationalSpineInvokeReason.FOUNDUP_TARGET_INVALID, *target_reasons])
     if reasons:
         return _reject(reasons, explicit_requested=True)
 
@@ -183,11 +225,7 @@ def invoke_reddog_extension_wre_operational_spine_explicit_valve(
         intake_target=intake_target,
         permission_ttl_seconds=permission_ttl_seconds,
         permission_expires_at=permission_expires_at,
-        admission_consumer=(
-            authoritative_use_lease.consume
-            if authoritative_use_lease is not None
-            else None
-        ),
+        admission_consumer_factory=_lease_consumer_factory(authoritative_use_lease, work_order),
     )
     if spine_result.decision != WORKTREE_SPINE_ACCEPT:
         reasons = [ExtensionWREOperationalSpineInvokeReason.WORKTREE_SPINE_REJECTED]

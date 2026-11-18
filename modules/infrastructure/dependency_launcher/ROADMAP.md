@@ -72,6 +72,89 @@ Provide zero-friction startup for YouTube DAE by automatically launching all req
 
 ---
 
+## Runtime Freshness and Compatibility
+
+- [x] Phase 1: read-only, digest-bound startup advisory receipt.
+- [x] Phase 2: WRE watchlist producer for official OpenClaw/Hermes release
+  evidence plus promoted Qwen/backend expectation references.
+- [ ] Authenticate source receipts and bind Qwen/backend compatibility to
+  signed model benchmark and promotion evidence at use time.
+- [ ] Canary and rollback receipts before any runtime or model update.
+
+### Signed expectation projection qualification — 2026-09-22
+
+- [x] Qualify the existing AI Gateway-to-supplier boundary, WSP15 C3/I4/D3/Impact3
+  =13/P1. The [interface contract](INTERFACE.md#signed-expectation-projection-contract--qualification-2026-09-22)
+  identifies exact owner decisions and a fixed nine-row acceptance matrix.
+  Existing49 owner tests pass locally; no production source or schema changed.
+- [ ] AI Gateway policy/supply owners: select explicit versioned task/surface/
+  role/model/provider-to-slot mapping and the observer verification lifecycle.
+  This is the next decision dependency, not another broad discovery audit.
+- [ ] Inventory/supply owner: qualify typed inference-backend artifact identity
+  and software provenance. Current MODEL/PANEL proof cannot fill this slot.
+- [ ] After those decisions, independently qualify the cross-owner implementation
+  against the fixed matrix; preserve v1 bytes and NOT_READY in the interim.
+
+No exact general/code mapping exists in the inspected owners; no mapping is
+invented here. Verification checks trusted current time/key state; one-shot
+consumption alone does not. Installed/running runtime versions, latest upstream
+release, canary/rollback and update admission remain separate unverified work.
+See the [system backlog](../../../docs/roadmaps/rsi_swarm_backlog.json) for
+source bindings, independent review, publication and the next WSP15 selection.
+
+Automatic updates during `main.py` startup are explicitly rejected. The runtime
+compatibility advisory observes cached evidence only; the separate opt-in WSL
+version advisory executes installed programs. WRE owns research and any later
+governed proposal.
+
+## WSL advisory lifecycle boundary — 2026-09-20
+
+- [x] Qualify current behavior and caller ownership: 25 existing tests pass;
+  seven external injected witnesses show command reachability and the
+  running-check/stop-before-exec race, with zero actual WSL calls. Independent
+  source/caller reviews accept this bounded qualification (WSP15 13/P1).
+- [x] Implement the separately qualified existing-owner repair (C2/I4/D3/Impact3,
+  12/P2) in `src/wsl_agent_runtime.py` and its existing test file; 43 focused and
+  four connected caller checks pass locally. Remote closure is tracked in the
+  canonical backlog. No runtime activation is included.
+
+Before this repair, setting only `FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED=1` executed
+two fixed version commands. It now inspects metadata without command execution.
+Microsoft documents [distribution execution and running-state observation](https://learn.microsoft.com/en-us/windows/wsl/basic-commands)
+as separate commands and [systemd startup after distribution restart](https://learn.microsoft.com/en-us/windows/wsl/systemd).
+Together with the existing Gateway cold-start handling, this establishes a
+possible lifecycle effect, not proof that this audit started any service.
+
+The implemented source contract is:
+
+| Advisory enabled | `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` | Result |
+|---|---|---|
+| false | any | Preserve existing `DISABLED` receipt bytes; no host access |
+| true | absent/false | Validate registration/base; return `NOT_READY`, empty components, stable `command_probe_disabled` reason; no command runner |
+| true | true | Preserve existing exact version vectors, parser, ten-second bounds and advisory receipt; possible distro/service startup |
+
+Capture command-mode selection before invoking the registry resolver so a
+callback cannot upgrade a metadata request by mutating its environment. This
+snapshot selects diagnostic behavior; it is not an effect-use lease or runtime
+admission. Invalid distro/base bindings still fail before execution. A separate
+running-state precheck cannot remove the stop-before-exec race and is not the
+chosen boundary.
+
+Reuse the existing receipt, resolver, probe and injected fixtures. Preserve
+`DEFAULT_DISTRO`, `resolve_trusted_wsl_executable()` and Gateway callers, the
+fail-soft main menu, and the existing 240-line file/50-line function/200-line class
+guards. No replacement launcher, supervisor, schema, skill or source owner is
+needed. Metadata observation cannot yield version `PASS`. Explicit command mode
+does not authorize workers, models, updates, deployment or provider effects.
+
+The source slice validates disabled-byte compatibility, zero calls in metadata
+mode, callback mutation, rejected bindings, explicit-mode legacy results, trusted
+executable resolution and connected main/Gateway fixtures. Source/test lifecycle
+wording is corrected; injected checks are not live sandbox qualification. The
+file remains238 lines with the original240-line guard unchanged. Exact evidence
+and the next packet are in the
+[canonical backlog](../../../docs/roadmaps/rsi_swarm_backlog.json).
+
 ## 0102 Directive
 
 Dependencies are orchestrated, not installed. The system self-heals. ✊✋🖐️

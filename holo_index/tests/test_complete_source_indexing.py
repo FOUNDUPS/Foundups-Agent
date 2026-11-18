@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -10,7 +11,9 @@ import pytest
 from holo_index.core.indexing_engine import index_skillz_entries
 from holo_index.symbol_indexer import (
     PUBLISH_BATCH_SIZE,
+    SNAPSHOT_PAGE_SIZE,
     SYMBOL_DOCSTRING_MAX_CHARS,
+    _existing_record_ids,
     index_symbol_entries,
 )
 
@@ -35,6 +38,25 @@ class _BatchModel:
 class _StatefulCollection:
     def __init__(self, metadata: dict[str, str]) -> None:
         self.metadata = dict(metadata)
+        self._model = SimpleNamespace(
+            configuration_json={"hnsw": {"space": "l2"}},
+            serialized_schema={
+                "keys": {
+                    "#embedding": {
+                        "float_list": {
+                            "vector_index": {
+                                "config": {
+                                    "hnsw": {
+                                        "batch_size": 2,
+                                        "sync_threshold": 3,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        )
         self.records: dict[str, dict[str, Any]] = {}
         self.upsert_calls: list[list[str]] = []
         self.delete_calls: list[list[str]] = []
@@ -44,12 +66,16 @@ class _StatefulCollection:
         *,
         ids: list[str] | None = None,
         include: list[str] | None = None,
+        limit: int | None = None,
+        offset: int = 0,
     ) -> dict[str, Any]:
         selected = (
             list(self.records)
             if ids is None
             else [value for value in ids if value in self.records]
         )
+        if ids is None and limit is not None:
+            selected = selected[offset : offset + limit]
         return {
             "ids": selected,
             "documents": [self.records[value]["document"] for value in selected],
@@ -293,6 +319,92 @@ def test_stale_stable_record_is_deleted_after_reconciliation(tmp_path: Path) -> 
     assert holo.symbol_collection.delete_calls == [[stale_id]]
 
 
+def test_symbol_reconciliation_pages_large_existing_snapshot(tmp_path: Path) -> None:
+    class _BoundedCollection(_StatefulCollection):
+        def __init__(self, metadata: dict[str, str]) -> None:
+            super().__init__(metadata)
+            self.snapshot_pages: list[tuple[int, int]] = []
+
+        def get(self, **kwargs: Any) -> dict[str, Any]:
+            if kwargs.get("ids") is None:
+                assert kwargs.get("include") == []
+                assert isinstance(kwargs.get("limit"), int)
+                self.snapshot_pages.append((kwargs["offset"], kwargs["limit"]))
+            return super().get(**kwargs)
+
+    source = tmp_path / "source.py"
+    source.write_text("def retained():\n    return True\n", encoding="utf-8")
+    holo = _StatefulHolo(tmp_path, _BatchModel())
+    collection = _BoundedCollection(holo.embedding_metadata)
+    for index in range(SNAPSHOT_PAGE_SIZE * 2 + 7):
+        collection.records[f"stale-{index:04d}"] = {
+            "document": "stale",
+            "metadata": {},
+            "embedding": [0.0],
+        }
+    holo.symbol_collection = collection
+
+    result = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert result.complete is True
+    assert collection.snapshot_pages == [
+        (0, SNAPSHOT_PAGE_SIZE),
+        (SNAPSHOT_PAGE_SIZE, SNAPSHOT_PAGE_SIZE),
+        (SNAPSHOT_PAGE_SIZE * 2, 7),
+    ]
+    assert collection.count() == 1
+    assert all(
+        len(batch) <= PUBLISH_BATCH_SIZE for batch in collection.delete_calls
+    )
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected_error"),
+    [
+        ("ignored_pagination", "PAGE_INCOMPLETE"),
+        ("oversized", "PAGE_INCOMPLETE"),
+        ("short", "PAGE_INCOMPLETE"),
+        ("duplicate", "PAGE_DUPLICATE"),
+        ("overlap", "PAGE_OVERLAP"),
+    ],
+)
+def test_symbol_reconciliation_rejects_unverified_page_boundaries(
+    mode: str,
+    expected_error: str,
+) -> None:
+    class _HostileCollection:
+        def count(self) -> int:
+            return SNAPSHOT_PAGE_SIZE + 1
+
+        def get(
+            self,
+            *,
+            include: list[str],
+            limit: int,
+            offset: int,
+        ) -> dict[str, list[str]]:
+            assert include == []
+            if mode == "ignored_pagination":
+                ids = [f"id-{index}" for index in range(self.count())]
+            elif mode == "oversized":
+                ids = [f"id-{offset + index}" for index in range(limit + 1)]
+            elif mode == "short":
+                ids = [f"id-{offset + index}" for index in range(max(0, limit - 1))]
+            elif mode == "duplicate":
+                ids = [f"id-{offset + index}" for index in range(limit)]
+                ids[-1] = ids[0]
+            else:
+                ids = (
+                    [f"id-{index}" for index in range(limit)]
+                    if offset == 0
+                    else ["id-0"]
+                )
+            return {"ids": ids}
+
+    with pytest.raises(ValueError, match=expected_error):
+        _existing_record_ids(_HostileCollection())
+
+
 def test_embedding_space_mismatch_forces_reset_and_reembedding(tmp_path: Path) -> None:
     source = tmp_path / "source.py"
     source.write_text("def stable():\n    return True\n", encoding="utf-8")
@@ -303,6 +415,32 @@ def test_embedding_space_mismatch_forces_reset_and_reembedding(tmp_path: Path) -
     holo.symbol_collection.metadata["embedding_space_fingerprint"] = (
         "sha256:" + ("b" * 64)
     )
+
+    result = index_symbol_entries(holo, roots=[tmp_path])
+
+    assert result.reused_count == 0
+    assert len(model.calls) == 1
+    assert holo.reset_count == 1
+
+
+@pytest.mark.parametrize("batch_size", [100, None])
+def test_incomplete_hnsw_policy_forces_reset_and_reembedding(
+    tmp_path: Path,
+    batch_size: int | None,
+) -> None:
+    source = tmp_path / "source.py"
+    source.write_text("def stable():\n    return True\n", encoding="utf-8")
+    model = _BatchModel()
+    holo = _StatefulHolo(tmp_path, model)
+    index_symbol_entries(holo, roots=[tmp_path])
+    model.calls.clear()
+    hnsw = holo.symbol_collection._model.serialized_schema["keys"]["#embedding"][
+        "float_list"
+    ]["vector_index"]["config"]["hnsw"]
+    if batch_size is None:
+        hnsw.pop("batch_size")
+    else:
+        hnsw["batch_size"] = batch_size
 
     result = index_symbol_entries(holo, roots=[tmp_path])
 
@@ -367,3 +505,34 @@ def test_skillz_agent_identifiers_accept_mixed_scalar_values(tmp_path: Path) -> 
     assert result.failed_count == 0
     metadata = holo.skill_collection.add_calls[0]["metadatas"][0]
     assert metadata["agents"] == "97,66,worker"
+
+
+from holo_index.core.holo_index import HoloIndex
+from holo_index.tests.test_vector_segment_durability import ERROR, _Raw, _config, _with_ef, _call
+
+@pytest.mark.parametrize("operation", ["ensure", "reset-existing", "reset-created"])
+def test_real_core_maintenance_refuses_unsafe_handles_before_exposing_them(operation, tmp_path, monkeypatch):
+    monkeypatch.delenv("HOLOINDEX_QUERY_READONLY", raising=False)
+    bad = _with_ef("config", {"type": "unknown"})
+    good, deleted = _Raw(_config()), []
+    instance = object.__new__(HoloIndex)
+    instance.ssd_path, instance.index_embedding_backend = tmp_path, "test"
+    instance.index_embedding_model_id, instance.index_embedding_space_fingerprint = "test", "test"
+    instance.client = SimpleNamespace(get_or_create_collection=lambda *a, **k: good if operation == "reset-created" else bad,
+        get_collection=lambda *a, **k: good if operation == "reset-created" else bad,
+        delete_collection=lambda name: deleted.append(name), create_collection=lambda *a, **k: bad)
+    with pytest.raises(ValueError, match=ERROR):
+        (instance._ensure_collection if operation == "ensure" else instance._reset_collection)("navigation_code")
+    assert deleted == (["navigation_code"] if operation == "reset-created" else [])
+    assert bad.reads == []
+
+def test_real_core_immutable_query_branch_does_not_require_native_model_fields(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOLOINDEX_QUERY_READONLY", "1")
+    sentinel = object()
+    instance = object.__new__(HoloIndex)
+    instance.ssd_path, instance.client = tmp_path, SimpleNamespace(get_collection=lambda name: sentinel)
+    assert instance._ensure_collection("navigation_code") is sentinel
+
+def test_harmless_column_names_do_not_trigger_substring_policies():
+    schema = {"keys": {"embedding_function.trust_remote_code": {}}}
+    assert _call(_Raw(_config(), schema)) == "l2"

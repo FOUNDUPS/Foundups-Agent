@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -18,9 +19,22 @@ from holo_index.freshness_receipt import (
     freshness_receipt_path,
     load_freshness_receipt,
 )
+from holo_index.owner_acquisition_contract import owner_acquisition_cycle_valid
 
 
 SCHEMA_VERSION = "holoindex_query_receipt.v1"
+SEMANTIC_EVIDENCE_SCHEMA_VERSION = "holoindex_semantic_evidence.v1"
+MAX_SEMANTIC_EVIDENCE_BYTES = 4 * 1024 * 1024
+SEMANTIC_EVIDENCE_BUCKETS = (
+    "code_hits",
+    "wsp_hits",
+    "test_hits",
+    "skill_hits",
+    "symbol_hits",
+    "docs_hits",
+    "knowledge_hits",
+    "work_ledger_hits",
+)
 SOURCE_CLASS_HOLOINDEX = "holoindex"
 SOURCE_CLASS_CODEINDEX = "codeindex"
 SOURCE_CLASS_MEMEX = "memex"
@@ -60,9 +74,19 @@ class HoloIndexQueryReceipt:
     freshness_receipt_digest: str = ""
     freshness_receipt_path: str = ""
     repo_head_sha: str = ""
+    repo_root_digest: str = ""
+    workspace_repo_head_sha: str = ""
+    authority_repo_head_sha: str = ""
+    authority_repo_root_digest: str = ""
+    workspace_overlay_present: bool = False
+    semantic_evidence_authority: str = ""
+    no_authority_worktree_mutation_performed: bool = False
     index_gap_detected: bool = False
     stale_reasons: list[str] = field(default_factory=list)
     no_holoindex_reindex_performed: bool = True
+    retrieval_runtime_ranker_digest: str = ""
+    runtime_environment_digest: str = ""
+    runtime_environment_exact_closure_verified: bool = False
     receipt_id: str = ""
 
     def to_dict(self) -> dict[str, Any]:
@@ -74,6 +98,42 @@ class HoloIndexQueryReceipt:
 def digest_json(value: Any) -> str:
     payload = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
     return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def canonical_semantic_evidence(
+    raw_result: Any,
+    *,
+    max_bytes: int = MAX_SEMANTIC_EVIDENCE_BYTES,
+) -> tuple[str, str, int]:
+    """Serialize the exact semantic evidence RedDog may consume."""
+
+    source = raw_result if isinstance(raw_result, Mapping) else {}
+    evidence: dict[str, Any] = {
+        "schema_version": SEMANTIC_EVIDENCE_SCHEMA_VERSION,
+    }
+    count = 0
+    for bucket in SEMANTIC_EVIDENCE_BUCKETS:
+        value = source.get(bucket)
+        items = (
+            [dict(item) for item in value if isinstance(item, Mapping)]
+            if isinstance(value, Sequence) and not isinstance(value, (str, bytes))
+            else []
+        )
+        evidence[bucket] = items
+        count += len(items)
+    metadata = source.get("metadata")
+    evidence["metadata"] = dict(metadata) if isinstance(metadata, Mapping) else {}
+    payload = json.dumps(
+        evidence,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        default=str,
+    )
+    if len(payload.encode("utf-8")) > max(0, int(max_bytes)):
+        raise ValueError("semantic_evidence_too_large")
+    digest = "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    return payload, digest, count
 
 
 def file_digest(path: Path | str) -> str:
@@ -156,7 +216,11 @@ def normalize_query_hits(value: Any, *, source_class: str, limit: int = 8) -> li
             HoloIndexQueryHit(
                 path=path[:240],
                 title=str(item.get("title") or "")[:160],
-                score=item.get("score"),
+                score=(
+                    str(item.get("score"))
+                    if item.get("score") is not None
+                    else ""
+                ),
                 digest=digest[:96],
                 evidence_ref=evidence_ref[:320],
                 source_class=source_class,
@@ -183,6 +247,32 @@ def _result_binding(
             result.get("freshness_receipt_path") or ""
         ),
         "repo_head_sha": str(result.get("repo_head_sha") or ""),
+        "repo_root_digest": str(result.get("repo_root_digest") or ""),
+    }
+
+
+def _authority_binding(result: Mapping[str, Any]) -> dict[str, Any]:
+    if not result.get("authority_repo_root_digest"):
+        return {}
+    return {
+        "workspace_repo_head_sha": str(
+            result.get("workspace_repo_head_sha") or ""
+        ),
+        "authority_repo_head_sha": str(
+            result.get("authority_repo_head_sha") or ""
+        ),
+        "authority_repo_root_digest": str(
+            result.get("authority_repo_root_digest") or ""
+        ),
+        "workspace_overlay_present": (
+            result.get("workspace_overlay_present") is True
+        ),
+        "semantic_evidence_authority": str(
+            result.get("semantic_evidence_authority") or ""
+        ),
+        "no_authority_worktree_mutation_performed": (
+            result.get("no_authority_worktree_mutation_performed") is True
+        ),
     }
 
 
@@ -199,6 +289,18 @@ def _result_stale_reasons(result: Mapping[str, Any]) -> list[str]:
         if reason and reason not in reasons:
             reasons.append(reason)
     return reasons
+
+
+def _observed_latency_ms(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        latency = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(latency) or latency < 0:
+        return None
+    return round(latency, 3)
 
 
 def _enforce_generation_binding(
@@ -249,21 +351,41 @@ def _per_target_verdicts(value: Any) -> list[dict[str, Any]] | None:
     ]
 
 
-def build_query_receipt(
-    *,
-    source: str,
-    source_class: str,
-    query: str,
-    result: Mapping[str, Any],
-    require_generation: bool,
-    generation_binding: Mapping[str, Any] | None = None,
-) -> Mapping[str, Any]:
-    """Normalize a query result into a deterministic receipt.
+def _runtime_receipt_evidence(result: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "retrieval_runtime_ranker_digest": str(
+            result.get("retrieval_runtime_ranker_digest") or ""
+        ),
+        "runtime_environment_digest": str(
+            result.get("runtime_environment_digest") or ""
+        ),
+        "runtime_environment_exact_closure_verified": (
+            result.get("runtime_environment_exact_closure_verified") is True
+        ),
+    }
 
-    If ``require_generation`` is true, any fresh/current success without a
-    generation id is downgraded to UNKNOWN and marked as an INDEX_GAP.
-    """
 
+def _owner_acquisition_evidence(result: Mapping[str, Any]) -> dict[str, Any]:
+    """Bind valid owner retry telemetry without normalizing malformed values."""
+
+    fields = {
+        "owner_attempts": lambda value: type(value) is int and value >= 0,
+        "owner_retry_performed": lambda value: type(value) is bool,
+        "owner_retry_reason": lambda value: type(value) is str,
+        "owner_acquisition_cycle": owner_acquisition_cycle_valid,
+    }
+    evidence: dict[str, Any] = {}
+    for field, valid in fields.items():
+        if field in result and valid(result.get(field)):
+            evidence[field] = result[field]
+    return evidence
+
+
+def _base_query_receipt_payload(
+    *, source: str, source_class: str, query: str,
+    result: Mapping[str, Any], require_generation: bool,
+    generation_binding: Mapping[str, Any] | None = None, hit_limit: int = 8,
+) -> dict[str, Any]:
     binding = _result_binding(result, generation_binding)
     freshness = str(result.get("freshness") or "UNKNOWN").upper()
     ok = result.get("ok") is True
@@ -277,9 +399,13 @@ def build_query_receipt(
         error=error,
         stale_reasons=stale_reasons,
     )
-    generation_id = str(binding.get("freshness_generation_id") or "")
-    hits = normalize_query_hits(result.get("hits"), source_class=source_class)
-    payload = {
+    hits = normalize_query_hits(
+        result.get("hits"), source_class=source_class, limit=hit_limit
+    )
+    _, semantic_evidence_digest, semantic_evidence_count = (
+        canonical_semantic_evidence(result.get("raw_result"))
+    )
+    return {
         "schema_version": SCHEMA_VERSION,
         "source": str(source or ""),
         "source_class": str(source_class or ""),
@@ -288,7 +414,7 @@ def build_query_receipt(
         "freshness": freshness,
         "hits": [hit.to_dict() for hit in hits],
         "error": error,
-        "freshness_generation_id": generation_id,
+        "freshness_generation_id": str(binding.get("freshness_generation_id") or ""),
         "freshness_receipt_digest": str(binding.get("freshness_receipt_digest") or ""),
         "freshness_receipt_path": str(binding.get("freshness_receipt_path") or ""),
         "repo_head_sha": str(binding.get("repo_head_sha") or ""),
@@ -299,7 +425,36 @@ def build_query_receipt(
         ),
         "stale_reasons": stale_reasons,
         "no_holoindex_reindex_performed": True,
+        **_runtime_receipt_evidence(result),
+        "semantic_evidence_digest": semantic_evidence_digest,
+        "semantic_evidence_count": semantic_evidence_count,
+        "observed_latency_ms": _observed_latency_ms(result.get("latency_ms")),
+        **_owner_acquisition_evidence(result),
     }
+
+
+def build_query_receipt(
+    *,
+    source: str,
+    source_class: str,
+    query: str,
+    result: Mapping[str, Any],
+    require_generation: bool,
+    generation_binding: Mapping[str, Any] | None = None,
+    hit_limit: int = 8,
+) -> Mapping[str, Any]:
+    """Normalize a query result into one deterministic generation receipt."""
+
+    payload = _base_query_receipt_payload(
+        source=source, source_class=source_class, query=query, result=result,
+        require_generation=require_generation,
+        generation_binding=generation_binding, hit_limit=hit_limit,
+    )
+    binding = _result_binding(result, generation_binding)
+    root_digest = str(binding.get("repo_root_digest") or "")
+    if root_digest:
+        payload["repo_root_digest"] = root_digest
+    payload.update(_authority_binding(result))
     retrieval_verdict = str(result.get("retrieval_verdict") or "").strip()
     if retrieval_verdict:
         payload["retrieval_verdict"] = retrieval_verdict
@@ -319,7 +474,11 @@ __all__ = [
     "SOURCE_CLASS_CODEINDEX",
     "SOURCE_CLASS_HOLOINDEX",
     "SOURCE_CLASS_MEMEX",
+    "MAX_SEMANTIC_EVIDENCE_BYTES",
+    "SEMANTIC_EVIDENCE_BUCKETS",
+    "SEMANTIC_EVIDENCE_SCHEMA_VERSION",
     "build_query_receipt",
+    "canonical_semantic_evidence",
     "digest_json",
     "file_digest",
     "generation_binding_from_receipt",

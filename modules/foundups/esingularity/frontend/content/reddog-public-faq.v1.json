@@ -1,0 +1,198 @@
+{
+  "version": "reddog.esingularity.public-faq.v1",
+  "canonical_language": "ja",
+  "languages": ["ja", "en"],
+  "effect_ceiling": "NONE",
+  "generated_from": "audit/SOURCE_OF_TRUTH.md",
+  "sources": [
+    {
+      "id": "project-page",
+      "label": { "ja": "Project eSingularity 公式構想", "en": "Project eSingularity vision" },
+      "url": "https://esingularity.ai/"
+    },
+    {
+      "id": "fukui-property-sheet",
+      "label": { "ja": "福井市 財産資料", "en": "Fukui City property sheet" },
+      "url": "https://www.city.fukui.lg.jp/sisei/plan/reform/p071776_d/fil/SUKATTO.pdf"
+    },
+    {
+      "id": "fukui-facility-record",
+      "label": { "ja": "福井市 市政のあらまし", "en": "Fukui City facility record" },
+      "url": "https://www.city.fukui.lg.jp/sisei/gikai/shigikaishikumi/p022677_d/fil/aramasi6.pdf"
+    },
+    {
+      "id": "fukui-council-0806a",
+      "label": { "ja": "福井市議会 2026年6月質問資料", "en": "Fukui City Council June 2026 question document" },
+      "url": "https://www.city.fukui.lg.jp/sisei/gikai/shitsumon/p004052_d/fil/0806a.pdf"
+    },
+    {
+      "id": "yumori-campaign",
+      "label": { "ja": "YUMORI.me 参加・市民行動", "en": "YUMORI.me participation and civic action" },
+      "url": "https://yumori.me/"
+    }
+  ],
+  "entries": [
+    {
+      "id": "project.overview",
+      "claim_ids": ["project.reuse_vision"],
+      "truth": "vision",
+      "questions": {
+        "ja": ["eSingularityとは何ですか", "何をつくる計画ですか"],
+        "en": ["What is Project eSingularity?", "What are you planning to build?"]
+      },
+      "keywords": {
+        "ja": ["eSingularity", "プロジェクト", "計画", "構想", "何"],
+        "en": ["esingularity", "project", "plan", "vision", "what"]
+      },
+      "answer": {
+        "ja": "Project eSingularityは、旧すかっとランド九頭竜の実在施設を、温泉、地域の食、文化、教育、FoundUpプロジェクト、別棟の地域AI計算基盤（COG DC）につなぐ再利用構想です。完成済みの施設ではなく、調査と合意を重ねて検証する計画です。",
+        "en": "Project eSingularity is an adaptive-reuse vision connecting the former Sukatto Land Kuzuryu facility with its onsen, local food, culture, education, FoundUp projects, and a separate community AI compute facility called COG DC. It is a proposal to validate through studies and agreements, not completed construction."
+      },
+      "source_ids": ["project-page"]
+    },
+    {
+      "id": "facility.facts",
+      "claim_ids": ["facility.opened_1994", "facility.floor_area", "facility.users_fy2018"],
+      "truth": "verified_official",
+      "questions": {
+        "ja": ["建物について教えて", "いつできた施設ですか", "利用者は何人でしたか"],
+        "en": ["Tell me about the building", "When did the facility open?", "How many people used it?"]
+      },
+      "keywords": {
+        "ja": ["建物", "施設", "開館", "面積", "利用者", "1994", "129649"],
+        "en": ["building", "facility", "opened", "area", "users", "1994", "129649"]
+      },
+      "answer": {
+        "ja": "旧すかっとランド九頭竜は1994年4月6日に開館しました。福井市の資料では延床面積8,099.56㎡、2018年度の利用者は129,649人です。",
+        "en": "The former Sukatto Land Kuzuryu opened on April 6, 1994. Fukui City records report 8,099.56 m² of total floor area and 129,649 users in fiscal 2018."
+      },
+      "source_ids": ["fukui-property-sheet", "fukui-facility-record"]
+    },
+    {
+      "id": "facility.demolition-estimate",
+      "claim_ids": ["council.demolition_estimate_2026_06"],
+      "truth": "reported_with_caveat",
+      "questions": {
+        "ja": ["解体費はいくらですか", "15.8億円は確定ですか"],
+        "en": ["How much is demolition expected to cost?", "Is the 1.58 billion yen figure final?"]
+      },
+      "keywords": {
+        "ja": ["解体", "費用", "15.8億", "確定"],
+        "en": ["demolition", "cost", "1.58", "billion", "final"]
+      },
+      "answer": {
+        "ja": "福井市議会の2026年6月質問資料では、将来の解体見込み約15.8億円が示されています。確定した予算額や契約額としては扱っていません。",
+        "en": "A June 2026 Fukui City Council question document cites an estimated future demolition cost of about ¥1.58 billion. We do not present it as a final budget or contract price."
+      },
+      "source_ids": ["fukui-council-0806a"]
+    },
+    {
+      "id": "architecture.cogdc",
+      "claim_ids": ["architecture.cogdc_separate"],
+      "truth": "vision",
+      "questions": {
+        "ja": ["COG DCとは何ですか", "データセンターは温泉の建物の中ですか"],
+        "en": ["What is COG DC?", "Will the data center be inside the onsen building?"]
+      },
+      "keywords": {
+        "ja": ["COG", "データセンター", "計算基盤", "別棟", "温泉棟"],
+        "en": ["cog", "data center", "compute", "separate", "onsen building"]
+      },
+      "answer": {
+        "ja": "COG DCは、地域で使う小規模なAI計算基盤の構想名です。温泉を残す既存建物の中ではなく、別棟として配置する計画です。容量、電力、通信、許認可、費用は検証中です。",
+        "en": "COG DC is the project name for a small community-serving AI compute facility. It is proposed as a separate building, not inside the retained onsen building. Capacity, power, network, permits, and cost remain under validation."
+      },
+      "source_ids": ["project-page"]
+    },
+    {
+      "id": "architecture.heat-reuse",
+      "claim_ids": ["architecture.heat_reuse_hypothesis"],
+      "truth": "hypothesis",
+      "questions": {
+        "ja": ["排熱で温泉を温められますか", "COG DCの熱はどう使いますか"],
+        "en": ["Can waste heat warm the onsen?", "How could COG DC heat be used?"]
+      },
+      "keywords": {
+        "ja": ["排熱", "回収熱", "熱", "温泉", "加温", "融雪"],
+        "en": ["waste heat", "recovered heat", "onsen", "heating", "snowmelt"]
+      },
+      "answer": {
+        "ja": "計算で生じる回収可能な熱を、温泉の補助加温、館内給湯、暖房、融雪などへ使えるか検証する構想です。温度、距離、年間需要、設備費を調べる必要があり、成立を前提にはしていません。",
+        "en": "The proposal is to test whether recoverable compute heat could support onsen heating, building hot water, heating, or snowmelt. Temperature, distance, annual demand, and equipment cost must be studied, so feasibility is not assumed."
+      },
+      "source_ids": ["project-page"]
+    },
+    {
+      "id": "program.innovation-space",
+      "claim_ids": ["program.innovation_space"],
+      "truth": "vision",
+      "questions": {
+        "ja": ["イノベーション・スペースとは何ですか", "建物の上の階は何に使いますか"],
+        "en": ["What is the Innovation Space?", "How would the upper floors be used?"]
+      },
+      "keywords": {
+        "ja": ["イノベーション", "スペース", "上階", "学び", "学生", "研究"],
+        "en": ["innovation space", "upper floors", "learning", "students", "research"]
+      },
+      "answer": {
+        "ja": "イノベーション・スペースは、温泉の上階で学生、小さなチーム、研究者、地域企業が学び、試作し、実課題を検証する構想です。階ごとの用途は耐震、設備、消防、法令の調査と関係者協議で変わります。",
+        "en": "The Innovation Space is a proposal for students, small teams, researchers, and local companies to learn, prototype, and validate real problems on the floors above the onsen. Floor uses may change after structural, systems, fire-safety, legal, and stakeholder review."
+      },
+      "source_ids": ["project-page"]
+    },
+    {
+      "id": "program.foundups",
+      "claim_ids": ["program.foundup_semantics", "program.sixty_project_target"],
+      "truth": "vision",
+      "questions": {
+        "ja": ["FoundUpとは人のことですか", "60のFoundUpとは何ですか"],
+        "en": ["Is a FoundUp a person?", "What does 60 FoundUps mean?"]
+      },
+      "keywords": {
+        "ja": ["FoundUp", "60", "人", "プロジェクト", "チーム"],
+        "en": ["foundup", "60", "person", "project", "team"]
+      },
+      "answer": {
+        "ja": "FoundUpは人ではなく、課題解決を目的とするプロジェクトです。「60のFoundUpプロジェクト」は構想上の運営目標で、現在60組が入居しているという意味ではありません。小さなチームがFoundUpに取り組みます。",
+        "en": "A FoundUp is a problem-solving project, not a person. “60 FoundUp projects” is a proposed operating target, not a claim that 60 teams currently occupy the building. Small teams work on FoundUps."
+      },
+      "source_ids": ["project-page"]
+    },
+    {
+      "id": "domains.roles",
+      "claim_ids": ["domains.project_campaign_split"],
+      "truth": "project_policy",
+      "questions": {
+        "ja": ["eSingularity.aiとYUMORI.meの違いは何ですか", "どこから参加できますか"],
+        "en": ["What is the difference between eSingularity.ai and YUMORI.me?", "Where can I participate?"]
+      },
+      "keywords": {
+        "ja": ["違い", "サイト", "参加", "行動", "YUMORI", "eSingularity"],
+        "en": ["difference", "site", "participate", "action", "yumori", "esingularity"]
+      },
+      "answer": {
+        "ja": "eSingularity.aiとYUMORI.infoは、施設、技術、構想、根拠を説明する情報サイトです。温泉を守る運動への参加、共有、市民行動はYUMORI.meに集約しています。",
+        "en": "eSingularity.ai and YUMORI.info explain the facility, technology, vision, and evidence. Participation in the campaign to protect the onsen, sharing, and civic action are kept together on YUMORI.me."
+      },
+      "source_ids": ["project-page", "yumori-campaign"]
+    },
+    {
+      "id": "validation.unknowns",
+      "claim_ids": ["validation.public_exclusions"],
+      "truth": "boundary",
+      "questions": {
+        "ja": ["何がまだ決まっていませんか", "収益は確定していますか"],
+        "en": ["What remains undecided?", "Are revenue projections confirmed?"]
+      },
+      "keywords": {
+        "ja": ["未定", "未確定", "検証中", "収益", "資金", "工事費"],
+        "en": ["undecided", "unverified", "validation", "revenue", "financing", "construction cost"]
+      },
+      "answer": {
+        "ja": "再利用の事業性、資金調達、工事費、COG DCの容量と時期、熱利用、建物の適合性は検証中です。監査を通過していない売上、利益、投資回収などの数値は公開根拠にしていません。",
+        "en": "Reuse economics, financing, construction cost, COG DC capacity and timing, heat use, and building feasibility remain under validation. Revenue, profit, payback, and other figures that have not passed audit are not used as public evidence."
+      },
+      "source_ids": ["project-page"]
+    }
+  ]
+}

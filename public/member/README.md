@@ -1,9 +1,42 @@
 # FoundUPS Member Mall
 
-**Status**: Invite-gated p.fMALL shell live
+**Status**: Shared p.fMALL shell; ordinary Mall admission plus registered public product discovery
 **Location**: `public/member/`
 
 ## Overview
+
+### Public scoped video
+
+HPC uses this shell's shared field, player, header brand and bottom anchor.
+Guests enter at `hpc.foundups.com`. The FoundUps `/member/` route and its
+`/members` alias require the existing member admission. Members can select
+HPC from the Mall.
+Desktop opens a centered video with scoped search and a thumbnail queue.
+Touch and narrow layouts keep three portrait columns. Playback replaces
+the selected tile in its original row. The phone dock holds
+options, collection search, dictation and the public Red Dog briefing link.
+Expand opens the shared player with search above the horizontal queue.
+HPC supplies its own standalone install name and artwork. The
+[shared media incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+tracks real provider playback and the open physical iPhone gate.
+
+### Invited Mall video browsing
+
+Select a video-backed card to play at that card. Expand keeps the same
+player and shows the floating queue search. On phones, swipe the thumbnail
+queue sideways to browse the current lane. The plus button opens options
+and a tap on Red Dog opens the concierge. Hold the dog or use the microphone
+to dictate search on supported devices. The square in Red Dog's position
+finishes dictation. Longer text wraps for review and editing before search.
+
+### Public FX directory
+
+The homepage's **FX** navigation link opens the existing public `/f/` directory.
+It searches public project IDs, names, summaries and optional declared tickers;
+landing-readiness filters remain available. Declared symbols do not establish
+token deployment or trading availability. This reads only the existing public
+projection and retains the ordinary member admission path. See
+[INTERFACE.md](INTERFACE.md#public-fx-directory--2026-10-25).
 
 `/member/` is no longer a placeholder member shell.
 
@@ -13,7 +46,40 @@ It is now the admitted-user Mall experience that sits behind the existing FoundU
 - username claim
 - then swipe into the Mall
 
-The gateway is preserved. The change is the admitted state.
+The gateway remains the admission owner. The registered public product route
+below selects a public catalog in this same page before account initialization.
+
+### Move2Japan in the actual Mall shell
+
+| Entry | Selected behavior |
+| --- | --- |
+| `/f/move2japan` | Registered FoundUp entry with **Browse houses** |
+| `/member/?foundup=move2japan` | Public houses in this actual `index.html` shell |
+| `/member/?creator=move2japan` | Existing Move2Japan video channel after ordinary admission |
+| `/move2japan/` | Fixed redirect to the selected member page; no separate shell |
+| `/f/move2japan/app` | Existing protected participation handoff |
+
+The product adapter supplies English filters and dated public facts. The existing
+Mall field owns horizontal houses within each area and vertical area rows, shared
+detail planes, gestures and the full Red Dog controller. Country, prefecture,
+city/town, locality, price, land status, plot size and source-tour filters combine.
+The initial collection is eight source observations across five Fukui municipalities;
+it is not a live or nationwide inventory. Photos, tours and broker inquiry remain
+at the linked source. See the [domain evidence and roadmap](../../modules/foundups/move2japan/docs/08_HOUSING_DISCOVERY_REBASELINE.md).
+
+`product-discovery` mode composes the public search form with the existing account
+controller. Guests browse without Firebase. Existing accounts must satisfy the
+same Clerk, invite and username checks before identity, FoundUps and invites are
+shown. This path only reads existing account records; signup and invitation writes
+stay in the normal gateway. Generation checks after asynchronous reads prevent
+sign-out or account switching from restoring stale identity. Account and video
+links target the canonical Foundups host, including from a private review mirror.
+
+Geographic browsing uses `pfmall_product_move2japan_state_v1`; video browsing keeps
+`pfmall_mall_state_v1`. Returning from the account gateway consumes a bounded,
+single-use session record only after actual admission. The shared service worker
+uses explicit public assets and separate catalog keys. The recovery candidate
+uses `pfmall-member-v7`; it never caches account data.
 
 ## Runtime Shape
 
@@ -44,47 +110,81 @@ public/member/
 | File | Role |
 |------|------|
 | `account-concierge.js` | Unified Red Dog plane. Exposes `window.redDog` API. |
-| `mall-tile-field.js` | Video Mall tile grid. Exposes `window.mallTileField` API. |
+| `mall-tile-field.js` | Shared category rows, desktop poster grid and geographic property rows. Exposes `window.mallTileField` API. |
 | `mall-planes.js` | FoundUp view planes. Exposes `window.mallPlanes` API. |
 | `gesture-engine.js` | Touch/mouse gesture detection. |
 | `red-dog-concierge.js` | Legacy FAQ topics. Will be removed when OpenClaw lands. |
 
 ## Current UX
 
+### Shared responsive discovery (2026-10-18)
+
+The invited Mall opens the poster grid on a fresh visit at 1024 CSS px or
+wider with a fine primary pointer and hover. Touch and narrower visits open
+vertical category groups with independent horizontal tracks. Saved layout
+takes precedence. Density adapts to the viewport and explicit density
+controls select grid. **Adaptive category rows** selects rows. Pinch-out
+expands a channel into its video field and pinch-in returns to the browse layout.
+
+Search Mall accepts short requests such as “show me videos on Fukui”, “show me
+houses”, “show me cars”, “show me clothes” and “I'm looking for clothing”.
+It searches only loaded catalog
+metadata and video metadata, with a small explicit English phrase/alias vocabulary.
+Recognized leading request phrases are removed; clothes, clothing and apparel
+share the same explicit alias set. Item terms such as red and dog remain searchable.
+Negation, budgets and size constraints remain literal words, not interpreted
+filters: a request containing them may return no matches. Structured shopping
+constraints belong to the selected product's domain adapter.
+Missing catalog content returns no results. It is not web search, a semantic model,
+a voice service, a recommendation engine, or a new tenant app. Device keyboard
+dictation can supply text; an authenticated future RedDog adapter can call the
+same presentation API. No microphone or external AI endpoint is introduced.
+
+Catalog entries remain the source of channel identity and capabilities. Native
+cards, RedDog search and the bounded dispatcher share `mallTileField`; FoundUps
+must supply catalog metadata and reuse this surface instead of copying it.
+Categories are rendered from data, including future housing/product/creator entries.
+Row offsets are saved locally alongside the existing outer scroll position.
+
 ### Mall Navigation
 - swipe or scroll horizontally through FoundUps (desktop: mouse drag on carousel track)
-- tap a tile to start lane autoplay through its video queue (Shorts-style)
+- in category rows, tap a video tile to start lane playback in the tile
+- on wide desktop, click a video tile for muted in-context playback and use
+  the separate fullscreen button for the full viewer
 - Enter FoundUp button to navigate to `/f/{foundup_id}` (tile or fullscreen)
 - pinch-out on tile to expand into FoundUp's video field
 - pinch-in (expanded) to collapse back to Mall
 
 ### FoundUp View
 - swipe up to close, swipe left/right to navigate between FoundUps
-- double-tap/click to save locally (heart indicator, localStorage)
-- "Full details" link navigates to dedicated entry page (`foundup.html?id={id}`)
+- Save in the full player bookmarks a video locally
+- Quick-view links use the selected FoundUp's configured destination
 
 ### Red Dog Unified Plane
 - swipe down from top or tap avatar to open Red Dog plane
 - Red Dog plane combines: identity, AI tools, channels, context briefing
 - **AI Tools**: projection sort, density presets, motion mode
 - **Channels**: "Populate My Mall", "Personal Mall", "Search Mall"
-- **Search Mall**: text input for creator search (shell-local, dev/testing shim)
+- **Search Mall**: text input for local catalog discovery (topic, location, category, creator, video metadata)
 
 ### Other
 - first-time visitors see a gesture discovery overlay (auto-dismisses, shown once)
 - invite codes remain available from Red Dog plane
 - collapsible guide topics explain the Mall, gestures, readiness states
 
-### Shell-Local vs OpenClaw
+### Shell-Local vs Resident RedDog/OpenClaw
 
-| Feature | Current (Shell-Local) | Future (OpenClaw) |
+| Feature | Current (Shell-Local) | Future (Resident RedDog/OpenClaw) |
 |---------|----------------------|-------------------|
-| Search Mall | Text input filters by creator name | AI-powered semantic search |
+| Search Mall | Loaded catalog metadata search; product-specific house filters | AI-powered semantic search |
 | Personal Mall | Filters by `creator === '012'` | Personalized recommendations |
 | Projections | Client-side sort | AI-ranked projections |
 | Density | Manual preset selection | AI-controlled adaptive density |
 
-> **Note**: Search Mall text input is a dev/testing shim. It will be replaced by OpenClaw-powered search when the gateway is ready.
+> **Note**: Search Mall text input is a dev/testing shim. A future authenticated
+> RedDog thin-client adapter may use the principal-scoped OpenClaw execution
+> layer. The current browser events and postMessage dispatcher are not a
+> conversation transport and hold no model or work authority.
 
 ## Out of Scope
 
@@ -122,3 +222,11 @@ Do not hand-edit either catalog — edit source manifests, then regenerate.
 ---
 
 *Last Updated: 2026-04-03*
+
+Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.
+
+## EDUIT episode integration design
+
+See [EDUIT episode Mall architecture](../../modules/foundups/eduit/docs/EPISODE_MALL_ARCHITECTURE.md) for the specified shared-shell
+video/game tile, gestures, locale cues, parent area and next-session handoff.
+This is a design dependency, not evidence of an active EDUIT adapter.

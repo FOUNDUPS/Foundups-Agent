@@ -5,9 +5,19 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 from modules.communication.moltbot_bridge.src import reddog_resident_queue_orchestration_plan as planner
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    governed_worker_dispatch_snapshot,
+    with_queue_wsp15_allocation,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    governed_snapshot,
+    readonly_allocation,
 )
 
 
@@ -24,18 +34,29 @@ NOW = "2026-07-14T00:00:00+00:00"
 EXPIRES = "2026-07-14T01:00:00+00:00"
 
 
+def test_bounded_queue_fixture_rejects_high_risk_prompt() -> None:
+    with pytest.raises(
+        AssertionError,
+        match="bounded queue test fixture was rejected by progressive policy",
+    ):
+        with_queue_wsp15_allocation(
+            {"slice_id": "REDDOG_TEST_SLICE_PHASE1"},
+            prompt_text="Publish signer authority changes",
+        )
+
+
 def _queue_wsp15_allocation_receipt() -> dict[str, object]:
     return allocate_reddog_wsp15_receipt(
-        requested_operation="create_foundup",
-        prompt_text="RedDog resident queue runtime authority worktree execution",
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
+        requested_operation="edit_foundup_module",
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=("modules/foundups/paccess_001/src/worker.py",),
+        allowed_read_targets=("modules/foundups/paccess_001/src/worker.py",),
     ).to_dict()
 
 
 def _snapshot() -> dict[str, object]:
     allocation = _queue_wsp15_allocation_receipt()
-    return {
+    snapshot = {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [
             {
@@ -70,6 +91,10 @@ def _snapshot() -> dict[str, object]:
             }
         ],
     }
+    return governed_worker_dispatch_snapshot(
+        snapshot,
+        task_prompt_text="Fix one bounded FoundUp module defect",
+    )
 
 
 def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
@@ -101,8 +126,14 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         "worktree_create": {
             "decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT",
         },
+        "assurance_capacity_admission": {
+            "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT",
+        },
         "bounded_worker_pilot": {
             "decision": "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT",
+        },
+        "exact_sha_commit": {
+            "decision": "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT",
         },
         "slice_verifier": {
             "decision": "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT",
@@ -161,6 +192,19 @@ def test_accepted_authority_request_advances_to_authority_runtime() -> None:
     assert result.accepted_stages == ("queue_consumer", "authority_request")
 
 
+def test_bounded_worker_advances_to_exact_sha_commit_before_verifier() -> None:
+    result = planner.plan_reddog_resident_queue_orchestration(
+        _snapshot(),
+        now_iso=NOW,
+        chain_results=_accepted_results_through("bounded_worker_pilot"),
+    )
+
+    assert result.accepted is True
+    assert result.current_stage == "exact_sha_commit"
+    assert result.next_action == planner.NEXT_QUEUE_EXACT_SHA_COMMIT
+    assert "slice_verifier" not in result.accepted_stages
+
+
 def test_rejected_stage_fails_closed_and_does_not_skip_forward() -> None:
     result = planner.plan_reddog_resident_queue_orchestration(
         _snapshot(),
@@ -213,6 +257,32 @@ def test_all_stages_accepted_completes_chain_without_mutation_authority() -> Non
     assert result.accepted_stages[-1] == "pattern_memory_admission"
     assert result.no_pr_created is True
     assert result.no_pattern_memory_write_performed is True
+
+
+def test_signed_readonly_audit_terminates_after_worker_dispatch() -> None:
+    snapshot = governed_snapshot(readonly_allocation())
+    result = planner.plan_reddog_resident_queue_orchestration(
+        snapshot,
+        now_iso=NOW,
+        chain_results=_accepted_results_through("worker_dispatch_runtime"),
+    )
+
+    assert result.accepted is True
+    assert result.status == planner.RESIDENT_QUEUE_ORCHESTRATION_PLAN_COMPLETE
+    assert result.current_stage is None
+    assert "work_order_invocation" not in result.accepted_stages
+
+
+def test_signed_readonly_audit_rejects_effect_stage_contamination() -> None:
+    snapshot = governed_snapshot(readonly_allocation())
+    contaminated = _accepted_results_through("work_order_invocation")
+
+    result = planner.plan_reddog_resident_queue_orchestration(
+        snapshot, now_iso=NOW, chain_results=contaminated
+    )
+
+    assert result.accepted is False
+    assert any("work_order_invocation" in reason for reason in result.rejection_reasons)
     assert result.no_reward_settlement_performed is True
 
 

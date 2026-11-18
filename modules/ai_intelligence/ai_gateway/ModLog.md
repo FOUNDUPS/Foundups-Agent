@@ -1,5 +1,301 @@
 # AI Gateway Module Change Log
 
+## 2026-11-16 - Preserve distinct audio observations with identical output bytes
+
+Independent review of PR2399 found response-digest-only lookup discarded case or
+candidate identity. Add `TimingObservation.lookup_key` and use full
+case/candidate/output keys internally; validate compound and legacy keys and reject
+duplicate full-identity aliases. Preserve response byte digests, existing task and
+contract checks, legacy unique-output callers and unmeasured SKIPPED quality.
+Five new synthetic tests cover candidate/case collisions, per-case duration bounds,
+duplicate aliases and different outputs for one identity. No provider transport,
+new dependency or inference request. All32 offline cases pass through the existing qualified bounded runner; zero additional inference. Exact execution receipts remain private.
+WSP11/22/50/77/97.
+
+## 2026-11-16 — Independent repair verifier firewall and model-independence policy
+
+Integrated `src/independent_repair_verifier.py` and `tests/test_independent_repair_verifier.py`
+for scientific self-healing repair verification (Issue #1522). `VerifierContextFirewall.project_evidence_packet`
+enforces a pure keyword-only allowlist over bounded repair reproduction/diff/regression
+evidence and emits an immutable SHA-256-digested `VerifierEvidencePacket` while rejecting
+builder reasoning/chat kwargs at the call boundary. `ModelIndependencePolicy` blocks
+normalized builder/verifier model collisions (`self_grading_prohibited`) and pairs with
+`IndependentVerifierReceipt`. Five offline unit tests pass; no provider calls or
+PatternMemory custody changes. WSP 11/22/49/50/77/97.
+
+## 2026-11-02 — Preserve the prepared General model's native identity
+
+The prepared PC uses a display alias distinct from its native inventory key.
+The shared local incumbent now honors existing `LM_STUDIO_NATIVE_MODEL_KEY`,
+validates it as a general-language model and records that exact selected key.
+Signed dynamic routes continue using their exact admitted identity and ignore
+this incumbent-only override. No model/server load, provider fallback or new
+configuration owner is added.
+
+Seven independently authored controls reproduced six assertion failures and
+82 passes before the fix, with zero errors/skips or denied effects. After the
+bounded fix the complete routing/legacy selector passes 88 cases: 70 independent
+routing/composition cases and 18 migrated legacy adapter cases. The useful
+positive uses the actual pure native inventory parser with a synthetic entry;
+it does not prove installed residency or live model quality. The existing CI
+selector now pins all 88 exact case names. WSP11/22/50/62/77/84/97.
+
+
+## 2026-11-01 — Shared YouTube model orchestration
+
+WSP00/10/11/22/50/62/77/84/97. Replace consumer-owned provider chains with
+`AIGateway.call_youtube_task` for assessment, writer and exact final review.
+Reuse local general-role/native residency, signed selection/runtime binding,
+Fusion approval-only redaction and existing provider transport. Keep NVIDIA
+Nemotron's topology proposer evaluation-only; discovery does not promote models.
+Configured invalid routing never silently falls back. OpenRouter uses exact
+approved non-xAI text models with zero-price/no-data-collection restrictions.
+Remove direct xAI clients, preserve reviewed live-chat text even without themes,
+rebind command adapters on channel changes, and separate review cancellation
+from the async caller's already-completed generation token. Preserve all posting
+and manifest/history owners. Lazy bridge exports avoid webhook/env startup when
+importing routing/security utilities. See video_comments/LLM_INTEGRATION.md.
+Qualification is offline; no daemon/model/public action or credential read.
+
+## [2026-10-23] - Shared OpenRouter transport containment
+
+WSP00/5/6/15/22/50/62/97, C3/I4/D4/Impact4=15/P1: reconcile the existing
+PR1648 proposal against current main. Exclude provider credentials from repr;
+disable OpenRouter redirects and replace transport diagnostics while preserving
+timeout classification. K3 request construction, campaign admission and other
+providers retain their current behavior. Bridge TestModLog owns the connected
+qualification evidence. No live calls, routing promotion or native RSI claim.
+
+
+## [2026-10-13] - Retain PR2111 historical qualification evidence
+
+WSP10/15/22/48/50/77/97/99: reconcile the unique October8 record from
+`cc32547b9677f2d2a5adf09bb924e52edbe9a4de` without restoring its stale selection.
+Saved audit0/1 accepted,3/4 facts correct,24.438s, owned load/unload, unknown token
+usage; injected panel probe and catalog368/99 remain separate evidence classes.
+No runtime or evaluator change. Root October13 selection stays current; the
+unexecuted experiment contract is archived in RSI_SWARM_DISPATCH. PR2111 closure
+requires verified integration; this entry does not claim merge or fresh CI.
+
+## [2026-10-07] - Strict model use-time clock
+
+WSP00/6/15/22/50/97,13/P1: existing verifier now requires an exact positive
+integer from its trusted clock. It no longer coerces strings/fractions or lets
+booleans masquerade as integers. Missing receipt keeps its earlier rejection.
+Baseline8fail: float/string incorrectly accepted; other six invalid types/ranges
+had inconsistent rejection. Connected security/artifact/panel/structural55passed
+in1.54s. No provider calls, runtime admission, new module or native RSI claim.
+Evidence: `outputs/rsi-permission-evidence-20261006/model-clock-connected.xml`.
+
+
+## [2026-08-22] - Nemotron Exact Model Lifecycle Evidence
+
+- Replaced the assumed already-loaded proposer boundary with an explicit exact
+  LM Studio model transaction using native installed/resident instance truth.
+- Bound lifecycle receipt ID/digest, exact instance, observed configuration,
+  origin, and load/unload confirmation into the v2 shadow-call receipt.
+- Added a public joint validator for lifecycle/call structural agreement and
+  documented that deterministic hashes are content addressing, while existing
+  signed proposer provenance supplies authentication.
+- Managed proposer loads now inherit node/port-wide capacity serialization,
+  maximum-context preflight, and durable interrupted-load recovery/quarantine.
+- Kept Nemotron evaluation-only and reasoning-off with no server launch,
+  download, fallback, verifier, promotion, or production-binding authority.
+
+## [2026-08-21] - Production Binding Restart and Reservation Closure
+
+- Moved supplier writes off deterministic claim markers onto fresh per-attempt
+  paths. Process death before either seal no longer wedges retry; unproved
+  orphan files are preserved, while terminal v3 durably binds each sealed
+  source path and exact device/inode/size/content proof for recovery.
+- Reserved the exact authority nonce/binding before provider entry and keyed
+  the runtime lock by authority nonce. Competing output bindings now permit one
+  provider callback; an unreadable existing provider receipt fails closed and
+  cannot be collapsed into absence or trigger another callback.
+- Added exact POSIX restart repair for death between hard-link publication and
+  source unlink, plus the corresponding two-link pending/target state in
+  immutable record creation. Repair removes only the exact proven sibling link
+  and flushes affected directories under the documented controlled-principal
+  boundary. Recovery transfers retained-descriptor ownership only after both
+  artifacts and all trust/evidence/time checks succeed; any later failure
+  closes every descriptor already acquired. Validation: complete AI Gateway
+  suite 830 passed, 5 platform skips; crash/WSP-62 matrix 17 passed, 3 platform skips; WSP-62 and
+  diff-check passed. WSP 00/15/22/50/62/97.
+
+## [2026-08-21] - Production Binding Ownership and Crash-Safety Correction
+
+- Replaced consumable zero-byte final claims with durable tokenized hidden-stage
+  claims. The provider bundle is persisted immediately after callback;
+  pre-terminal retry resumes it with zero callback and repeats current
+  authority, signature, evidence, runtime, and pure-time verification.
+- Retained exact stage descriptors through terminal digest and non-replacing
+  publication. Terminal v3 receipts bind source path/device/inode/size/content proofs.
+  Same-content replacement, hard links, symlinks, foreign stage swaps, and
+  occupied finals fail closed without deleting the foreign object.
+- Cleanup now removes or quarantines only an exact owned identity/content proof.
+  Windows publication renames the verified object by handle. POSIX uses an
+  exact non-replacing link commit under the documented same-principal runtime
+  directory boundary; it does not claim arbitrary same-UID exclusion.
+- Changed immutable receipt/publication creation to same-directory temporary,
+  file fsync, identity verification, non-replacing commit, and lineage fsync.
+  Midwrite process death can leave only a hidden pending file, not a partial
+  final record. Current validation is recorded in the 2026-08-21 corrective
+  entry above. WSP 00/15/22/50/62/97.
+
+## [2026-08-21] - Production Binding Terminal Recovery Hardening
+
+- Derived exact authority-use identity before the external evidence callback,
+  so exact APPLIED replay and conflicting output bindings decide with zero
+  callback. Trusted time, campaign authority, and signed evidence refresh after
+  callback and immediately before APPLIED completion.
+- Added deterministic hidden stages and a bounded durable terminal receipt.
+  APPLIED ambiguity, AUTHORIZED retry, and partial two-file publication now
+  rehydrate and use-time verify exact artifacts without provider replay. No
+  valid final artifact is exposed before APPLIED. Cleanup failure is surfaced
+  and attempts explicit `.invalid.*` quarantine; if quarantine rename also
+  fails, an explicit cleanup failure preserves the artifact. This is restart
+  recovery, not a false claim of two-file filesystem atomicity.
+- Sealed each regular, single-link stage with file and parent-directory fsync
+  before terminal persistence, and flushed each final parent after rename.
+  Pre-terminal stage durability failure leaves no terminal/APPLIED/final;
+  post-APPLIED final-directory ambiguity resumes from the terminal with zero
+  provider callback.
+- Added fresh callback-free temporal checks after authority/evidence/runtime
+  verification callbacks and before terminal/APPLIED/recovery publication.
+  Authority, both signed evidence receipts, and runtime valid-until are checked
+  from the same final trusted-time sample; callback clock advancement fails
+  closed without terminal or remaining-stage publication.
+- Validation: 52 focused authority/provenance/production/WSP-62 tests passed;
+  the complete AI Gateway suite passed 815 with 2 skips. Scoped Ruff lint and
+  format checks passed. WSP 00/15/22/50/62/87/97.
+
+## [2026-08-21] - Governed Multi-Call and Authenticated Promotion Composition
+
+- Added atomic preparation/reservation of the complete bounded configured
+  gateway campaign before first provider egress, exact per-call receipts, and
+  deterministic campaign rehydration. A two-task exact local Nemotron run
+  completed without fallback.
+- Added externally signed, durable proposer-call/admission provenance and a
+  separate campaign-promotion authority binding execution, policies, and exact
+  candidates. Short TTL, revocation, trust, signature, replay, substitution,
+  and output-preflight failures close before promotion use.
+- Added a single-model handoff into the existing independent signed production
+  evidence, deterministic selection, and runtime-binding artifact supply.
+  The handoff independently authenticates the exact durable campaign authority
+  at use time, mirrors issuance TTL limits, and now proves already-APPLIED
+  upstream publication through a non-mutating status read; missing, RESERVED,
+  or AUTHORIZED markers reject without advancement. It preflights runtime
+  policy/trust and transactionally acquires both exclusive output claims before
+  external evidence, rolling back owned placeholders on partial failure, and
+  uses durable exact publication state for restart-safe retry and replay
+  rejection. Private keys/signers remain external; panel promotion remains
+  shadow-only.
+- Extracted configured runner construction, canonical prompt-guard ownership,
+  campaign-member preflight, and transactional exclusive output claims into
+  `model_autoresearch_campaign_configured_runtime.py`. The WSP-62 bootstrap
+  ceiling decreased from 235 to 233 lines and its file ceiling from 920 to 868.
+- Extracted exact AI Gateway, LM Studio, and routed caller adapters from the
+  configured runner. The runner is now 759 lines, below its prior 769-line
+  ceiling, and both files have no function above the WSP-62 50-line ceiling.
+- Hardened new receipt and publication writes with fail-closed file plus
+  directory-lineage durability. Exact identical retries can complete a failed
+  directory flush without treating the earlier write as durable. Windows
+  flush and close calls now declare the pointer-width `HANDLE` and `BOOL` ABI
+  explicitly, preventing default C-integer handle conversion. Extracted this
+  platform boundary into a 138-line durability module; the evidence module is
+  held to 910 lines, only 21 above its exact 889-line parent. Corrected the
+  obsolete documentation claim that configured execution was one-call-only.
+  WSP 00/15/22/50/62/87/97.
+
+## [2026-08-21] - Verified Topology Resolution and Nemotron Shadow Proposer
+
+- Added a process-local one-shot resolver from canonically verified runtime
+  bindings to exact role/provider/model endpoints; unsupported providers and
+  replay reject without fallback or a model call. Resolutions now carry the
+  evidence expiry and a maximum 60-second TTL checked against trusted time at
+  consumption, so one-shot authority cannot be retained past freshness.
+- Added bounded evaluation-only Nemotron proposal generation through LM Studio's
+  native reasoning-off API. Nemotron returns compact ordered model IDs only;
+  deterministic code owns providers, roles, catalog/requirements binding, and
+  admission into held-out AutoResearch candidates. The deterministic Gateway
+  incumbent is injected into every accepted benchmark outside model control.
+- Merged complementary static/live catalog cards with conservative field-level
+  provenance and registered current OpenRouter GLM, DeepSeek, Qwen, Kimi, and
+  Nemotron candidates without creating champion authority. Missing or disjoint
+  provider modality evidence remains unknown; it is never synthesized as text.
+- Live validation against a bounded evaluation catalog: exact local Nemotron ID loaded; two four-role candidates
+  admitted in 36.7 seconds with content-bound call/admission receipts. Configured
+  multi-call/panel AutoResearch remains halted. WSP 15/22/50/62/97.
+
+## [2026-08-21] - Exact Kimi K3 Request-Truth Boundary
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_KIMI_K3_REQUEST_TRUTH_PHASE1`
+
+**What:** Hardened the exact `openrouter` / `moonshotai/kimi-k3` provider path.
+Explicit completion budget overrides environment, then the resolved value is
+floored to 4,096. Valid 8,192 through 131,072 requests are preserved; 131,073
+fails before HTTP. K3 always forces maximum reasoning and omits temperature.
+Non-K3 behavior is unchanged.
+
+**Validation boundary:** Offline mocked HTTP tests cover explicit, environment,
+precedence, floor, endpoint maximum, reasoning, temperature omission, and
+non-K3 compatibility. The focused gateway/advisory matrix passed 176 tests;
+the complete AI Gateway module passed 742 tests with 2 skips. No provider call
+or promotion authority was exercised.
+
+**WSP References:** WSP 00, WSP 15, WSP 22, WSP 49, WSP 50, WSP 62, WSP 97.
+
+## [2026-07-30] - Shared Model-Evidence Authority Validation
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`
+
+**What:** Consolidated exact trusted-key validation, signer independence, and
+panel-authority independence into one bounded helper used by both SINGLE and
+PANEL evidence paths. This removes duplicate policy islands without weakening
+freshness, revocation, topology, or signer-role checks.
+
+## [2026-07-30] - Runtime-Binding Evidence Admission Hardening
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`
+
+**What:** Replaced mapping-presence trust with canonical signed-evidence
+rehydration and closure-confined one-shot capability issuance. The production
+consumer shares no importable issuer, seal, or registry; capabilities created
+by another factory instance are rejected. Runtime-binding capabilities bind
+the full persisted artifact and verification receipt. Trusted keys resolve
+only by exact `(role, fingerprint, key_epoch)` identity; role-only fallback is
+rejected. Benchmark, promotion, panel-authority, and panel-member signers must
+be independent.
+
+**Truth boundary:** A serialized verification mapping is audit evidence, not
+authority. Only fresh re-verification against host-pinned keys, revocation,
+policy, topology, and time can issue the one-shot capability consumed at the
+provider boundary.
+
+**Validation:** Full AI Gateway `732 passed, 2 skipped`; focused authority
+surface `336 passed, 1 skipped`; compileall, WSP 62, diff, NUL, and added-line
+ASCII checks passed.
+
+**WSP References:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97.
+
+## [2026-07-29] - Provider Catalog Runtime Header and Chronology Hardening
+
+**Who/Type/Slice:** 0102 architect / Defensive /
+`REDDOG_HEALTH_AND_MODEL_FRESHNESS_ROUTING_PHASE1`
+
+**What:** Normalized aiohttp header-name subclasses to exact strings before
+the strict transport validator, fixing real HTTP 200 catalog discovery that
+previously failed as `transport_failed`. Added allowlisted `canonical_slug`
+and `created` provider fields so a freshness receipt can distinguish exact
+availability from provider chronology.
+
+**Truth boundary:** Provider chronology is candidate metadata only. It does
+not prove task fitness, promotion, availability at execution time, or
+production authority.
+
 ## [2026-07-24] - OpenRouter Endpoint Route Single-Call Admission Phase B2A
 
 **Who/Type/Slice:** 0102 RedDog Architect isolated worker / Defensive
@@ -360,3 +656,41 @@ prevented governed held-out comparison of Kimi K3 with RedDog's existing panel.
 - Cost optimization features (Phase 2)
 - Enterprise monitoring (Phase 3)
 - Multi-provider ensemble methods (Phase 4)
+
+## 2026-11-15: offline audio timing evaluation proposal
+
+The following paragraph records the initial offline checkpoint; subsequent live
+status is recorded separately below.
+
+Added the first local prototype layer in an owned partial source snapshot of
+45267dd. Reuses the AI Gateway model benchmark/verifier owner; leaves economics
+WRE auto-research and all production/provider runtime controls unchanged.
+Adds structural timing diagnostics, source/configuration binding and a shared
+in-memory attempt cap with synthetic unittest fixtures. Repository publication,
+live inference, measured singing alignment and production promotion are pending.
+WSP 3/10/22/50/71/91/97 apply. Existing RSI/WRE feedback remains the review owner.
+
+Local qualification: 27 synthetic unittest cases passed after one independently reviewed test-oracle classification correction; both attempts are retained. No live model result or production acceptance follows.
+
+### Separate live smoke evidence and integration boundary
+
+Two subsequent authorized OpenRouter transcription calls used one original
+75-second audio excerpt without reference lyrics. Qwen returned 222 timed words
+in 3.750 seconds for $0.00024975; Parakeet returned 217 in 3.485 seconds for
+$0.0012500025. Both timing lists passed structural validation, with 21 and 1
+zero-duration words respectively. The total two-attempt budget is exhausted.
+Offline replay through the existing harness remained SKIPPED/unaccepted.
+
+Actual output/hash/latency/cost/generation-ID evidence and diagnostic SRT are
+private. Performed lyrics, independent timing truth, instrumental-gap accuracy
+and model winner remain unmeasured. Separate read-only generation metadata
+resolved PrimeIntellect for both requests and Qwen's serving model
+qwen/qwen3-asr-0.6b-20260813. Gateway latency was 2018/2463 ms, model-only time
+unavailable. Metadata reported Parakeet cost $0.001250002, differing from
+transcription usage.cost by $0.0000000005; both remain separate and settlement
+is unmeasured. Source integration targets main 9816bd12 observed
+on 2026-11-15; AI Gateway and applicable bootstrap/gate
+source match the tested 45267dd base. No primary checkout, WRE dirty file,
+provider transport, production runtime or voting implementation is changed.
+The namespace/comment suite documentation is retained for follow-on review;
+it does not reset inference counts or create another evaluator/orchestrator.

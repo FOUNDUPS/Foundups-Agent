@@ -18,6 +18,9 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
     read_reddog_runtime_json_mapping,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+)
 
 
 def run_reddog_execution_valve_environment_supply_bootstrap(
@@ -33,6 +36,7 @@ def run_reddog_execution_valve_environment_supply_bootstrap(
     queue_item_id: str = "",
     now_epoch: int | None = None,
     permission_ttl_seconds: int = 300,
+    progressive_execution_stage_ceiling: str = STAGE_AUDIT,
 ) -> ExecutionValveEnvironmentSupplyResult:
     """Read four independent governed inputs and invoke the pure supplier."""
     root = Path(repo_root).resolve()
@@ -70,6 +74,7 @@ def run_reddog_execution_valve_environment_supply_bootstrap(
         queue_item_id=queue_item_id,
         now_epoch=now_epoch,
         permission_ttl_seconds=permission_ttl_seconds,
+        progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
     )
 
 

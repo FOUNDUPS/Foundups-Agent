@@ -15,6 +15,7 @@ reward settlement, merge authority, or HoloIndex re-indexing.
 from __future__ import annotations
 
 import re
+import time
 from pathlib import Path
 from typing import Mapping
 
@@ -79,7 +80,7 @@ PROFILE_RUNTIME_FLAGS = frozenset(
     {
         "REDDOG_WORK_STATE_SOURCE_RECORD_SUPPLY",
         "REDDOG_WORK_LEDGER_SOURCE_PROJECTION_SUPPLY",
-        "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF",
+        "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM",
         "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY",
         "REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY",
         "REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY",
@@ -107,6 +108,22 @@ PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_ARCHITECT_FIX_DETERMINATION_PATH": "architect_determination.json",
     "REDDOG_MODEL_SELECTION_RECEIPT_PATH": "model_selection_receipt.json",
     "REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH": "model_runtime_binding_receipt.json",
+    "REDDOG_MODEL_CATALOG_SNAPSHOT_PATH": "model_catalog_snapshot.json",
+    "REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH": (
+        "model_benchmark_evidence_receipts.json"
+    ),
+    "REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH": (
+        "model_promotion_evidence_receipts.json"
+    ),
+    "REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH": (
+        "model_production_evidence_bundle.json"
+    ),
+    "REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH": (
+        "model_runtime_binding_policy.json"
+    ),
+    "REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH": (
+        "model_evidence_trusted_keys.json"
+    ),
     "REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH": (
         "model_autoresearch_promotion_gate_receipts.json"
     ),
@@ -134,6 +151,9 @@ PROFILE_RUNTIME_PATH_FILENAMES = {
     "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH": "signer_service_run_packet.json",
     "REDDOG_SIGNER_SOCKET_PATH": "reddog_signer.sock",
     "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": "resident_queue_chain_results.json",
+    "REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH": (
+        "architect_fix_inert_profile.json"
+    ),
     "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": "authority_profile.json",
     "REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPTS_PATH": (
         "resident_queue_control_loop_receipts.jsonl"
@@ -177,6 +197,11 @@ def resident_queue_runtime_flag_enabled(env: Mapping[str, str], env_name: str) -
     raw = str(env.get(env_name) or "").strip()
     if raw:
         return raw == "1"
+    if (
+        env_name == "REDDOG_AGENTDB_FIX_PROMOTION_CLAIM"
+        and "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF" in env
+    ):
+        return False
     return (
         env_name in PROFILE_RUNTIME_FLAGS
         and resident_queue_binding_profile(env) in RESIDENT_QUEUE_PROFILES
@@ -197,6 +222,27 @@ def resident_queue_runtime_root_path(env: Mapping[str, str], repo_root: Path | s
         return ""
     runtime_root = root.parent / ".reddog" / "resident" / _repo_slug(root)
     return str(validate_runtime_root_path(runtime_root, repo_root=root))
+
+
+def resident_queue_signer_runtime_root_path(
+    env: Mapping[str, str],
+    repo_root: Path | str,
+) -> str:
+    """Return the signer-owned root kept separate from resident runtime state."""
+
+    root = Path(repo_root).resolve()
+    raw = str(env.get("REDDOG_SIGNER_RUNTIME_ROOT") or "").strip()
+    if raw:
+        path = Path(raw)
+        if not path.is_absolute():
+            path = root.parent / path
+        return str(validate_runtime_root_path(path, repo_root=root))
+    resident = resident_queue_runtime_root_path(env, root)
+    if not resident:
+        return ""
+    resident_path = Path(resident)
+    signer_root = resident_path.parent / f"{resident_path.name}-signer-state"
+    return str(validate_runtime_root_path(signer_root, repo_root=root))
 
 
 def resident_queue_runtime_file_path(
@@ -336,6 +382,23 @@ def resident_queue_materializer_mode(env: Mapping[str, str]) -> str:
     return ""
 
 
+def resident_queue_now_epoch(env: Mapping[str, str]) -> tuple[int | None, bool]:
+    """Return an optional nonnegative trusted test/runtime epoch."""
+
+    raw = str(env.get("REDDOG_RESIDENT_QUEUE_NOW_EPOCH") or "").strip()
+    if not raw:
+        return None, True
+    try:
+        value = int(raw)
+    except ValueError:
+        return None, False
+    return value, value >= 0
+
+
+def resident_queue_integer_epoch() -> int:
+    return int(time.time())
+
+
 def _repo_slug(root: Path) -> str:
     raw = root.name or "repo"
     slug = re.sub(r"[^A-Za-z0-9_.-]+", "-", raw).strip(".-_")
@@ -359,11 +422,14 @@ __all__ = [
     "resident_queue_draft_pr_runner_mode",
     "resident_queue_evidence_command_runner_mode",
     "resident_queue_materializer_mode",
+    "resident_queue_integer_epoch",
     "resident_queue_model_feedback_ledger_store_path",
+    "resident_queue_now_epoch",
     "resident_queue_outcome_ratchet_store_path",
     "resident_queue_pattern_memory_admission_db_path",
     "resident_queue_runtime_file_path",
     "resident_queue_runtime_flag_enabled",
     "resident_queue_runtime_root_path",
+    "resident_queue_signer_runtime_root_path",
     "resident_queue_worktree_runner_mode",
 ]

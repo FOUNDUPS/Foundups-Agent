@@ -13,7 +13,7 @@ from .foundup_job_router import (
     RouteStatus,
     TargetBackend,
     _make_blocked_envelope,
-    _sanitize_untrusted_policy_flags_dict,
+    _normalize_policy_flags,
 )
 from .foundup_scaffold_route_contract import (
     CreateScaffoldRequest,
@@ -90,15 +90,7 @@ def _validate_identity_and_status(job: Any) -> _StateOrEnvelope:
 
 def _validate_policy(job: Any, state: _RouteState) -> _PolicyOrEnvelope:
     policy_flags = getattr(job, "policy_flags", None)
-    policy_summary: Dict[str, bool] = {}
-    dry_run_defaulted = True
-    if policy_flags:
-        if hasattr(policy_flags, "to_dict"):
-            policy_summary = policy_flags.to_dict()
-        elif isinstance(policy_flags, dict):
-            policy_summary, dry_run_defaulted = (
-                _sanitize_untrusted_policy_flags_dict(policy_flags)
-            )
+    policy_summary, dry_run_defaulted = _normalize_policy_flags(policy_flags)
     is_live = (
         policy_summary.get("dry_run_mode") is False
         and not dry_run_defaulted

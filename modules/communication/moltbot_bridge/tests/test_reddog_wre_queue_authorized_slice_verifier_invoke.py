@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
 from pathlib import Path
 
@@ -18,6 +19,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_slice_
     QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT,
     QueueAuthorizedSliceVerifierInvokeReason,
     invoke_reddog_wre_queue_authorized_slice_verifier,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
 )
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
@@ -42,6 +46,11 @@ ARTIFACT = "modules/communication/moltbot_bridge/tests/fixtures/reddog_queue_pil
 
 def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
+
+
+def _mapping_digest(value: object) -> str:
+    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def _queue_pilot_result(*, decision: str | None = None, pilot_decision: str | None = None) -> dict:
@@ -88,11 +97,14 @@ def _queue_pilot_result(*, decision: str | None = None, pilot_decision: str | No
 
 
 def _verifier_request() -> dict:
-    return {
+    request = {
         "work_order_id": WORK_ORDER_ID,
         "slice_name": "REDDOG_WRE_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_PHASE1",
         "worker_id": "worker:author",
         "verifier_id": "worker:verifier",
+        "assurance_reservation_id": "assurance-reservation-test",
+        "assurance_reservation_digest": _digest("d"),
+        "verifier_task_id": "reddog-worker-dispatch-independent-verifier",
         "base_sha": BASE_SHA,
         "head_sha": HEAD_SHA,
         "allowed_path_patterns": [
@@ -119,7 +131,8 @@ def _verifier_request() -> dict:
         },
         "signed_authority": {
             "accepted": True,
-            "signature_gate_digest": _digest("9"),
+            "authority_id": "authority-1",
+            "work_order_id": WORK_ORDER_ID,
         },
         "signed_receipt_chain": {
             "accepted": True,
@@ -133,13 +146,26 @@ def _verifier_request() -> dict:
         "draft_pr_published": False,
         "merge_performed": False,
     }
+    request["signed_authority"][
+        "signature_gate_digest"
+    ] = canonical_work_authority_digest(
+        {
+            "authority_id": "authority-1",
+            "work_order_id": WORK_ORDER_ID,
+        }
+    )
+    return request
 
 
 def _invoke(queue_pilot: dict | None = None, verifier_request: dict | None = None):
+    request = verifier_request or _verifier_request()
     return invoke_reddog_wre_queue_authorized_slice_verifier(
         explicit_queue_authorized_slice_verifier_requested=True,
         queue_bounded_worker_pilot_result=queue_pilot or _queue_pilot_result(),
-        verifier_request=verifier_request or _verifier_request(),
+        verifier_request=request,
+        trusted_work_authority_digest=request["signed_authority"][
+            "signature_gate_digest"
+        ],
     )
 
 
@@ -151,7 +177,9 @@ def test_invokes_autonomous_verifier_from_accepted_bounded_pilot() -> None:
     assert result.verifier_result is not None
     assert result.verifier_result.decision == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
     assert result.verifier_result.receipt.changed_paths == [ARTIFACT]
-    assert result.verifier_result.receipt.worktree_receipt_digest == "bounded_wt_pilot_1234"
+    assert result.verifier_result.receipt.worktree_receipt_digest == _mapping_digest(
+        {"accepted": True, "receipt_id": "bounded_wt_pilot_1234"}
+    )
     assert result.verifier_result.receipt.no_command_execution_performed is True
     assert result.no_command_execution_performed is True
     assert result.no_github_call_performed is True
@@ -189,6 +217,9 @@ def test_explicit_invoke_missing_rejects_before_verifier() -> None:
         explicit_queue_authorized_slice_verifier_requested=False,
         queue_bounded_worker_pilot_result=_queue_pilot_result(),
         verifier_request=_verifier_request(),
+        trusted_work_authority_digest=_verifier_request()["signed_authority"][
+            "signature_gate_digest"
+        ],
     )
 
     assert result.decision == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT

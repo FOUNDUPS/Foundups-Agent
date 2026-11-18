@@ -1,6 +1,6 @@
 'use strict';
 
-const SEMANTIC_WORK_ACTION_PATTERN = /\b(?:analy[sz]e|assess|audit|build|compare|complete|create|debug|design|determine|evaluate|fix|harden|implement|improve|inspect|investigate|plan|refactor|research|review|update|verify)\b/i;
+const SEMANTIC_WORK_ACTION_PATTERN = /\b(?:analy[sz]e|assess|audit|build|compare|complete|create|debug|design|determine|enhance|evaluate|fix|harden|implement|improve|inspect|investigate|plan|refactor|research|review|update|verify)\b/i;
 const BROAD_AUDIT_ACTION_PATTERN = /\b(?:analy[sz]e|assess|audit|evaluate|inspect|investigate|review|verify)\b/i;
 const BROAD_AUDIT_QUERY_TERMS = [
   'architecture',
@@ -13,16 +13,18 @@ const BROAD_AUDIT_QUERY_TERMS = [
   'workflow'
 ];
 const SEMANTIC_GROUNDING_STOPWORDS = new Set([
-  'about', 'after', 'against', 'agent', 'all', 'analyze', 'analyse', 'assess', 'audit',
+  'about', 'after', 'against', 'agent', 'all', 'along', 'also', 'analyze', 'analyse', 'and', 'as', 'assess', 'audit',
   'based', 'before', 'bug', 'build', 'code', 'compare', 'complete', 'concept', 'create',
-  'current', 'debug', 'design', 'determine', 'does', 'evaluate', 'everything', 'fix',
+  'continue', 'current', 'debug', 'design', 'determine', 'does', 'enhance', 'evaluate',
+  'everything', 'fix',
   'following', 'foundups', 'from', 'governance', 'grounding', 'harden', 'implement',
   'implementation', 'improve', 'inspect', 'into', 'investigate', 'issue', 'it', 'make',
-  'mapping', 'module', 'need', 'needs', 'output', 'paper', 'pipeline', 'plan', 'please',
+  'mapping', 'module', 'need', 'needed', 'needs', 'output', 'paper', 'pipeline', 'plan', 'please', 'plus',
   'problem', 'question', 'read', 'refactor', 'repo', 'research', 'review', 'selection',
-  'should', 'something', 'system', 'that', 'the', 'them', 'this', 'through', 'to',
-  'topic', 'update', 'using', 'verify', 'whether', 'with', 'work', 'workflow', 'wsp'
+  'should', 'something', 'system', 'that', 'the', 'them', 'then', 'this', 'through', 'to',
+  'together', 'topic', 'update', 'using', 'verify', 'well', 'whether', 'with', 'work', 'workflow', 'wsp'
 ]);
+const EXPLICIT_SEMANTIC_STOPWORDS = new Set(['and', 'for', 'plus', 'the', 'with']);
 
 function collapseWhitespace(value) {
   return String(value || '').replace(/\s+/g, ' ').trim();
@@ -40,8 +42,76 @@ function tokenizeSemanticQuery(value) {
   return Array.from(new Set(tokens.filter((token) => token.length >= 3 && !SEMANTIC_GROUNDING_STOPWORDS.has(token))));
 }
 
+function tokenizeExplicitSemanticQuery(value) {
+  const tokens = normalizeSemanticQuery(value).match(/[a-z0-9]+/g) || [];
+  return Array.from(new Set(tokens.filter((token) => token.length >= 3 && !EXPLICIT_SEMANTIC_STOPWORDS.has(token))));
+}
+
+function openingQuoteEnd(text, index) {
+  const ch = text.charAt(index);
+  const prior = index > 0 ? text.charAt(index - 1) : '';
+  const priorIsWord = /[A-Za-z0-9]/.test(prior);
+  if (ch === '"') return '"';
+  if (ch === '`') return '`';
+  if (ch === '\u201c') return '\u201d';
+  if (ch === "'" && !priorIsWord) return "'";
+  if (ch === '\u2018' && !priorIsWord) return '\u2019';
+  return '';
+}
+
+function stripInlineQuotedText(value) {
+  const text = String(value || '');
+  let output = '';
+  let closing = '';
+  let backslashRun = 0;
+  for (let index = 0; index < text.length; index++) {
+    const ch = text.charAt(index);
+    if (ch === '\\') {
+      backslashRun += 1;
+      if (!closing) output += ch;
+      continue;
+    }
+    const escaped = backslashRun % 2 === 1;
+    backslashRun = 0;
+    if (closing) {
+      if (ch === closing && !escaped) closing = '';
+      else if (ch === '\r' || ch === '\n') {
+        closing = '';
+        output += ch;
+      }
+      continue;
+    }
+    closing = escaped ? '' : openingQuoteEnd(text, index);
+    output += closing ? ' ' : ch;
+  }
+  return output;
+}
+
+function hasSemanticWorkAction(value) {
+  return SEMANTIC_WORK_ACTION_PATTERN.test(stripInlineQuotedText(value));
+}
+
 function hasSubstantiveSemanticSubject(value) {
   return tokenizeSemanticQuery(value).length > 0;
+}
+
+function splitSemanticParts(value) {
+  return String(value || '').split(/[,;]/).map((part) => part.trim()).filter(Boolean);
+}
+
+function semanticHeaderBody(value) {
+  const text = String(value || '');
+  const match = text.match(/^\s*(semantic\s+targets?|concepts?|research\s+topic|topic|question)\s*:(.*)$/i);
+  return match ? match[2] : null;
+}
+
+function explicitSemanticTargets(value) {
+  const targets = [];
+  for (const line of String(value || '').split(/\r?\n/)) {
+    const body = semanticHeaderBody(line);
+    if (body !== null) targets.push(...splitSemanticParts(body));
+  }
+  return targets;
 }
 
 function semanticEvidenceText(hit) {
@@ -123,9 +193,14 @@ module.exports = {
   SEMANTIC_WORK_ACTION_PATTERN,
   assessBroadAuditEvidence,
   buildEffectiveHoloQuery,
+  explicitSemanticTargets,
+  hasSemanticWorkAction,
   hasSubstantiveSemanticSubject,
   normalizeSemanticQuery,
+  semanticHeaderBody,
   semanticEvidenceCategory,
   semanticEvidenceText,
+  splitSemanticParts,
+  tokenizeExplicitSemanticQuery,
   tokenizeSemanticQuery
 };

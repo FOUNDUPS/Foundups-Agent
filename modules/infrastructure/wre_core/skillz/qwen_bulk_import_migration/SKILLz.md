@@ -4,7 +4,7 @@ description: Bulk import migration assistant for Python modules
 version: 1.0_prototype
 author: 0102
 created: 2026-03-18
-agents: [qwen]
+agents: [qwen, gemma]
 primary_agent: qwen
 intent_type: REFACTORING
 promotion_state: prototype
@@ -16,16 +16,16 @@ trigger:
 ---
 # Qwen Bulk Import Migration Skill
 
-**Version**: 1.0.0
-**Agents**: qwen (planning), gemma (validation)
-**Intent Type**: REFACTOR
-**Promotion State**: production
+**Version**: 1.0_prototype
+**Agents**: qwen/gemma are intended future roles; no model adapter is bound
+**Intent Type**: REFACTORING
+**Promotion State**: prototype
 **WSP Chain**: WSP 77, WSP 50, WSP 84, WSP 22
 
 ## Purpose
 
-Migrate hardcoded values across multiple files to use a central registry import.
-Uses Qwen for strategic planning and Gemma for validation.
+Prototype deterministic migration planner for replacing hardcoded values with
+central registry imports. The current executor does not call Qwen or Gemma.
 
 ## Use Cases
 
@@ -74,13 +74,12 @@ Uses Qwen for strategic planning and Gemma for validation.
 ## Execution Flow
 
 ```
-1. Qwen: Parse migration spec, identify target files
-2. Qwen: Generate import statement for each file
-3. Qwen: Generate replacement code for each occurrence
-4. Gemma: Validate syntax of generated code
-5. Gemma: Check import doesn't create circular dependency
-6. Apply changes (if not dry_run)
-7. Update ModLogs per WSP 22
+1. Parse migration spec and identify target files deterministically
+2. Generate configured imports and literal replacements
+3. Apply the current balanced-parentheses rule check
+4. Apply changes only when `dry_run` is explicitly false
+5. Leave independent syntax, circular-dependency, test, and review gates to
+   the caller; they are not implemented by this prototype
 ```
 
 ## CLI Usage
@@ -111,5 +110,5 @@ Migrates hardcoded YouTube channel IDs to central registry.
 
 - **Dry run by default**: Must explicitly set `dry_run: false` to apply changes
 - **Backup**: Creates .bak files before modification
-- **Validation**: Gemma validates each change before apply
-- **Rollback**: Stores rollback script in case of issues
+- **Validation**: Current rule check is not Gemma or full syntax validation
+- **Recovery aid**: Creates `.bak` files; no governed rollback script exists

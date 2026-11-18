@@ -6,7 +6,7 @@ RedDog Direction Tests (WAE-L1)
 Verifies the observe -> propose -> direct loop is DRY-RUN ONLY:
   - Emits ImprovementJob(PENDING, dry_run=True) ONLY.
   - RedDog orders low-lying fruit first (WSP-15).
-  - Only LOW-risk low-fruit is marked ready-to-advance.
+  - Direct FMAS proposals remain advisory and are never ready-to-advance.
   - MEDIUM/HIGH escalate, never auto-advance.
   - advance_to_execution() fails closed (NOT_READY) - no execution.
   - NO mutation / dispatch / auto-fix primitive is invoked.
@@ -123,19 +123,13 @@ class TestObserveProposeDirect:
         # priority_rank is monotonically increasing.
         assert [p.priority_rank for p in proposals] == [0, 1, 2, 3]
 
-    def test_only_low_risk_marked_ready_to_advance(self):
-        """Only LOW-risk low-fruit is marked ready-to-advance."""
+    def test_direct_fmas_proposals_never_claim_readiness(self):
+        """Even LOW-risk direct input remains advisory without authority."""
         proposals = observe_propose_direct(_synthetic_findings())
 
-        for proposal in proposals:
-            if proposal.ready_to_advance:
-                # Anything marked ready must be LOW risk + low-fruit.
-                assert proposal.job.risk_level == ImprovementRiskLevel.LOW
-                assert proposal.job.wsp15_priority.low_lying_fruit is True
-                assert proposal.direction == RedDogDirection.MARK_READY_TO_ADVANCE
-
-        # Exactly the two low-fruit are ready.
-        assert sum(1 for p in proposals if p.ready_to_advance) == 2
+        assert not any(proposal.ready_to_advance for proposal in proposals)
+        assert proposals[0].direction == RedDogDirection.PRIORITIZE
+        assert proposals[1].direction == RedDogDirection.PRIORITIZE
 
     def test_medium_and_high_escalate_never_advance(self):
         """MEDIUM/HIGH escalate to 012; never marked ready-to-advance."""
@@ -152,24 +146,27 @@ class TestObserveProposeDirect:
             assert proposal.ready_to_advance is False
 
     def test_advance_to_execution_fails_closed(self):
-        """advance_to_execution on a ready job returns NOT_READY (no execution)."""
+        """All advisory direct proposals remain BLOCKED from execution."""
         director = RedDogDirector()
         proposals = director.observe_propose_direct(_synthetic_findings())
 
-        ready = [p for p in proposals if p.ready_to_advance]
-        assert ready, "expected at least one ready-to-advance proposal"
-
-        for proposal in ready:
-            result = director.advance_to_execution(proposal)
-            assert result.advanced is False
-            assert result.outcome == AdvanceOutcome.NOT_READY
-
-        # Non-ready proposals are BLOCKED (still no execution).
-        not_ready = [p for p in proposals if not p.ready_to_advance]
-        for proposal in not_ready:
+        for proposal in proposals:
             result = director.advance_to_execution(proposal)
             assert result.advanced is False
             assert result.outcome == AdvanceOutcome.BLOCKED
+
+    def test_invalid_scope_requests_context_and_never_advances(self):
+        """A traversal-bearing direct finding cannot inherit readiness."""
+        findings = [{
+            "type": "missing_test_readme", "severity": "low",
+            "module_path": "modules/infrastructure/example",
+            "file_path": "modules/infrastructure/example/../.env",
+            "message": "forged scope",
+        }]
+        proposal = observe_propose_direct(findings)[0]
+
+        assert proposal.direction == RedDogDirection.REQUEST_CONTEXT
+        assert proposal.ready_to_advance is False
 
     def test_no_mutation_dispatch_or_autofix_invoked(self):
         """No mutation/dispatch/auto-fix primitive is invoked by the loop.

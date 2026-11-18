@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import ast
+import hashlib
 import json
+import os
 from pathlib import Path
+
+import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_operational_context_snapshot import (
     ASSIGNMENT_CONTEXT_STALE,
@@ -18,12 +22,14 @@ from modules.communication.moltbot_bridge.src.reddog_operational_context_snapsho
     SOURCE_WORK_STATE,
     SNAPSHOT_ACCEPTED,
     SNAPSHOT_REJECTED,
+    REPO_STATE_RECEIPT_SCHEMA,
     build_evidence_bundle,
     build_operational_context_snapshot,
     load_authoritative_work_state,
     observe_repo_state,
     validate_context_before_assignment,
 )
+from modules.communication.moltbot_bridge.src import reddog_operational_context_snapshot as snapshot_module
 from modules.communication.moltbot_bridge.tests.holoindex_freshness_receipt_test_helpers import (
     build_fresh_holoindex_receipt,
 )
@@ -50,6 +56,76 @@ def _repo_state(head: str = HEAD):
         "dirty_digest": "sha256:clean",
         "worktree_digest": "sha256:worktrees",
     }
+
+
+def _digest_value(value):
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _raw_digest(value: str) -> str:
+    return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _identity(seed: str = "c"):
+    native = {
+        "dev": "1", "ino": "2", "mode": "33261", "nlink": 1,
+        "birthtime_ns": "3", "ctime_ns": "4", "mtime_ns": "5",
+    }
+    return {"portable": "sha256:" + seed * 64, "native": native, "nlink": 1}
+
+
+def _signature(platform_name: str):
+    if platform_name != "nt":
+        return {"status": "not_applicable"}
+    path_digest = "sha256:" + "f" * 64
+    root_digest = "sha256:" + "1" * 64
+    relative_digest = _raw_digest("System32/WindowsPowerShell/v1.0/powershell.exe")
+    proof = _raw_digest("\0".join((root_digest, path_digest, relative_digest)))
+    return {
+        "status": "valid", "subject_digest": "sha256:" + "2" * 64,
+        "thumbprint_digest": "sha256:" + "3" * 64,
+        "verifier": {
+            "canonical_path_digest": path_digest, "sha256": "4" * 64, "size": 1,
+            "start_identity": _identity("5"), "final_identity": _identity("5"),
+            "system_root_digest": root_digest,
+            "fixed_relative_path_digest": relative_digest,
+            "system_root_containment_proof": proof,
+        },
+    }
+
+
+def _repo_state_receipt(root: Path, platform_name: str | None = None):
+    binding = {
+        "schema_version": "reddog_governed_git_executable.v1",
+        "canonical_path_digest": "sha256:" + "a" * 64,
+        "sha256": "b" * 64,
+        "size": 1,
+        "start_identity": _identity(), "final_identity": _identity(),
+        "signature": _signature(platform_name or os.name),
+    }
+    body = {
+        "schema_version": REPO_STATE_RECEIPT_SCHEMA,
+        "repo_root_digest": _digest_value({"repo_root": str(root.resolve())}),
+        "head_sha": HEAD,
+        "dirty_paths": ["extensions/reddog/README.md"],
+        "dirty_digest": "sha256:" + "d" * 64,
+        "worktree_digest": "sha256:" + "e" * 64,
+        "governed_git_readiness": {
+            "schema_version": "reddog_governed_git_readiness.v2",
+            "ready": True,
+            "canonical_root_validated": True,
+            "git_metadata_validated": True,
+            "ownership_mismatch_observed": False,
+            "safe_directory_override_applied": False,
+            "safe_directory_scope": "none",
+            "safe_directory_wildcard": False,
+            "config_write_performed": False,
+            "git_executable_binding": binding,
+            "reason": "ready",
+        },
+    }
+    return {**body, "content_digest": _digest_value(body)}
 
 
 def _work_state(revision: str = REVISION):
@@ -276,11 +352,95 @@ def test_load_authoritative_work_state_uses_existing_snapshot_file(tmp_path: Pat
 
 
 def test_observe_repo_state_reads_head_without_repo_mutation() -> None:
-    state = observe_repo_state(REPO_ROOT)
+    state = observe_repo_state(REPO_ROOT, _repo_state_receipt(REPO_ROOT))
 
-    assert state["head_sha"]
+    assert state["head_sha"] == HEAD
+    assert state["dirty_paths"] == ("extensions/reddog/README.md",)
     assert "dirty_digest" in state
     assert "worktree_digest" in state
+
+
+def test_observe_repo_state_rejects_stale_or_unbound_receipts() -> None:
+    stale = _repo_state_receipt(REPO_ROOT)
+    stale["governed_git_readiness"]["schema_version"] = "reddog_governed_git_readiness.v1"
+    stale["content_digest"] = _digest_value(
+        {key: stale[key] for key in stale if key != "content_digest"}
+    )
+    with pytest.raises(ValueError, match="governed_git_readiness_invalid"):
+        observe_repo_state(REPO_ROOT, stale)
+    with pytest.raises(ValueError, match="governed_repo_state_receipt_missing"):
+        observe_repo_state(REPO_ROOT, None)
+
+
+def test_observe_repo_state_requires_body_digest_but_not_as_sole_proof() -> None:
+    bad_digest = _repo_state_receipt(REPO_ROOT)
+    bad_digest["content_digest"] = "sha256:" + "0" * 64
+    with pytest.raises(ValueError, match="governed_repo_state_receipt_digest_invalid"):
+        observe_repo_state(REPO_ROOT, bad_digest)
+    recomputed = _repo_state_receipt(REPO_ROOT)
+    binding = recomputed["governed_git_readiness"]["git_executable_binding"]
+    binding["start_identity"] = {}
+    binding["final_identity"] = {}
+    _rehash_receipt(recomputed)
+    with pytest.raises(ValueError, match="governed_git_executable_binding_invalid"):
+        observe_repo_state(REPO_ROOT, recomputed)
+
+
+def _rehash_receipt(receipt):
+    receipt["content_digest"] = _digest_value(
+        {key: receipt[key] for key in receipt if key != "content_digest"}
+    )
+
+
+def _assert_binding_rejected(mutator, platform_name: str | None = None) -> None:
+    receipt = _repo_state_receipt(REPO_ROOT, platform_name)
+    mutator(receipt["governed_git_readiness"]["git_executable_binding"])
+    _rehash_receipt(receipt)
+    with pytest.raises(ValueError, match="governed_git_executable_binding_invalid"):
+        observe_repo_state(REPO_ROOT, receipt)
+
+
+def test_observe_repo_state_rejects_incomplete_or_mismatched_identities() -> None:
+    _assert_binding_rejected(lambda binding: binding.update(
+        start_identity={}, final_identity={}))
+    _assert_binding_rejected(lambda binding: binding["start_identity"]["native"].pop("ino"))
+    _assert_binding_rejected(lambda binding: binding["final_identity"].update(
+        portable="sha256:" + "d" * 64))
+    _assert_binding_rejected(lambda binding: binding["start_identity"].update(nlink=False))
+    _assert_binding_rejected(lambda binding: binding["start_identity"]["native"].update(nlink=0))
+
+
+def test_observe_repo_state_rejects_bad_binding_scalars_and_unknown_fields() -> None:
+    _assert_binding_rejected(lambda binding: binding.update(canonical_path_digest="bad"))
+    _assert_binding_rejected(lambda binding: binding.update(sha256="sha256:" + "a" * 64))
+    _assert_binding_rejected(lambda binding: binding.update(size=False))
+    _assert_binding_rejected(lambda binding: binding.update(size=0))
+    _assert_binding_rejected(lambda binding: binding.update(size=256 * 1024 * 1024 + 1))
+    _assert_binding_rejected(lambda binding: binding.update(canonical_path="C:/leaked/git.exe"))
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows signature receipt contract")
+def test_observe_repo_state_rejects_forged_or_invalid_windows_signature() -> None:
+    _assert_binding_rejected(lambda binding: binding.update(signature={"status": "valid"}))
+    _assert_binding_rejected(
+        lambda binding: binding["signature"]["verifier"].update(start_identity={})
+    )
+    _assert_binding_rejected(
+        lambda binding: binding["signature"]["verifier"].update(
+            system_root_containment_proof="sha256:" + "9" * 64)
+    )
+    _assert_binding_rejected(
+        lambda binding: binding["signature"]["verifier"].update(
+            canonical_path="C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe")
+    )
+
+
+def test_observe_repo_state_validates_non_windows_signature_shape(monkeypatch) -> None:
+    monkeypatch.setattr(snapshot_module, "_platform_name", lambda: "posix")
+    observe_repo_state(REPO_ROOT, _repo_state_receipt(REPO_ROOT, "posix"))
+    _assert_binding_rejected(
+        lambda binding: binding["signature"].update(verifier={}), "posix"
+    )
 
 
 def test_snapshot_module_has_no_mutating_calls_or_runtime_authority() -> None:
@@ -308,7 +468,8 @@ def test_snapshot_module_has_no_mutating_calls_or_runtime_authority() -> None:
             assert node.func.attr not in forbidden_attrs
             if node.func.attr == "replace" and isinstance(node.func.value, ast.Name):
                 assert node.func.value.id != "os"
-    assert "subprocess.run" in source
+    assert "subprocess" not in source
+    assert "_git_readonly_lines" not in source
     for word in forbidden_git_words:
         assert f'"{word}"' not in source
         assert f"'{word}'" not in source

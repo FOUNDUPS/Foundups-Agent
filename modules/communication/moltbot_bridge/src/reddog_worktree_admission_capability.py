@@ -13,8 +13,13 @@ import threading
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
     AuthoritativeUseLease,
+    consume_authoritative_use_lease,
+    is_authoritative_use_lease,
+)
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease_contract import (
+    authoritative_use_effect_digest,
 )
 
 
@@ -27,6 +32,36 @@ def _digest(value: Mapping[str, Any]) -> str:
         allow_nan=False,
     )
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def authoritative_worktree_lease_digest(
+    queue_id: str,
+    slice_id: str,
+    work_order: Mapping[str, Any],
+    executor_plan: Mapping[str, Any],
+    valve_decision: Mapping[str, Any],
+) -> str:
+    return authoritative_use_effect_digest(
+        "worktree_create",
+        authoritative_worktree_effect_payload(
+            queue_id, slice_id, work_order, executor_plan, valve_decision
+        ),
+    )
+
+
+def authoritative_worktree_effect_payload(
+    queue_id: str, slice_id: str, work_order: Mapping[str, Any],
+    executor_plan: Mapping[str, Any], valve_decision: Mapping[str, Any],
+) -> dict[str, str]:
+    """Exact inert target shared by approval preparation and admission."""
+    return {
+        "queue_item_id": queue_id,
+        "selected_slice": slice_id,
+        "work_order_id": str(work_order.get("work_order_id") or ""),
+        "work_order_digest": _digest(work_order),
+        "executor_plan_digest": _digest(executor_plan),
+        "valve_decision_digest": _digest(valve_decision),
+    }
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,7 +103,14 @@ class InMemoryWorktreeAdmissionRegistry:
         work_order_id = str(work_order.get("work_order_id") or "").strip()
         if not all((queue_id, slice_id, work_order_id)):
             return False
-        if signed_authority_reverified is not True or authoritative_use_lease is None:
+        lease_digest = authoritative_worktree_lease_digest(
+            queue_id, slice_id, work_order, executor_plan_result, valve_decision
+        )
+        if signed_authority_reverified is not True or not is_authoritative_use_lease(
+            authoritative_use_lease,
+            effect_kind="worktree_create",
+            effect_request_digest=lease_digest,
+        ):
             return False
         capability = WorktreeAdmissionCapability(
             queue_item_id=queue_id,
@@ -106,12 +148,25 @@ class InMemoryWorktreeAdmissionRegistry:
             and capability.executor_plan_digest == _digest(executor_plan_result)
             and capability.valve_decision_digest == _digest(valve_decision)
         )
-        if not expected or capability._authoritative_use_lease.consume() is not True:
+        lease_digest = authoritative_worktree_lease_digest(
+            queue_id,
+            str(selected_slice or "").strip(),
+            work_order,
+            executor_plan_result,
+            valve_decision,
+        )
+        if not expected or not consume_authoritative_use_lease(
+            capability._authoritative_use_lease,
+            effect_kind="worktree_create",
+            effect_request_digest=lease_digest,
+        ):
             return None
         return capability
 
 
 __all__ = [
+    "authoritative_worktree_effect_payload",
+    "authoritative_worktree_lease_digest",
     "InMemoryWorktreeAdmissionRegistry",
     "WorktreeAdmissionCapability",
 ]

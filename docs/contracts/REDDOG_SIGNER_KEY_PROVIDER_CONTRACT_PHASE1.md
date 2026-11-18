@@ -1,6 +1,9 @@
 # REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1
 
-Status: CONTRACT SPEC, decision-only. No runtime key loading, no key generation,
+Status: The original Phase1 specification below is decision-only. The
+[current composition contracts](#current-composition-contracts--2026-10-15) record
+implemented source interfaces; they do not authorize installation or native use.
+The original specification performed no runtime key loading, no key generation,
 no vault configuration, no signer process launch, no socket binding, no authority
 change, no repository mutation, and no HoloIndex re-index.
 
@@ -103,7 +106,13 @@ receipts and static tests prove no secret value can serialize.
 
 - Production code must not use `MockVaultResolver` as the credential authority.
   It may be used only in tests and dry-run fixtures labeled test-only.
-- Secret references must match the WSP 71 `op://vault/item/field` shape.
+- The op provider requires the WSP 71 `op://vault/item/field` shape. The explicit
+  local-custody extension (2026-10-05) permits a homogeneous pair of
+  `systemd-creds://<credential-id>` references in the lower provider profile.
+  It requires the separately bound systemd resolver described in
+  `modules/infrastructure/secrets_mcp/INTERFACE.md`; reference possession remains
+  insufficient. Mixed backend pairs reject. This extension does not activate
+  the public startup/configuration path or supersede its admission requirements.
 - Secret values must never appear in `repr`, `str`, logs, exceptions, receipts,
   terminal output, prompts, Copy-MD, HoloIndex, or Git history.
 - A resolver result that contains a secret value is consumed only inside the
@@ -221,3 +230,206 @@ RedDog cannot become an autonomous executor until it can obtain authority from a
 signer whose key material is not reachable by RedDog's plugin-loaded runtime.
 This slice defines that boundary and keeps the private-key handling step
 SPECIFIED_NOT_IMPLEMENTED.
+
+## Current composition contracts — 2026-10-15
+
+These active contracts extend the credential and E0 boundary above. Source
+implementation is component-qualified; authenticated deployment and custody
+remain required. The earlier Phase1 sequence and verdict record that phase.
+Return to the [module interface](../../modules/communication/moltbot_bridge/INTERFACE.md)
+for adjacent generation, bootstrap and consumer contracts.
+
+## Issuer-only root LOAD — 2026-10-15
+
+Root revocation wire v2 binds `requester_role=grant_issuer`, requester principal
+and key epoch to the signed LOAD request. The existing v1 target projection and
+signing domain remain unchanged. The issuer-specific anchor factory and
+`RootAuthorizedSignerGrantRevocationOracle` construction permit LOAD and issuer
+key-epoch checks only; target protected-use and revocation mutations reject.
+The installed owner supplies the issuer UID/GID. Root socket transport access
+must also be provisioned; peer authentication does not grant filesystem access.
+
+`authorize_current_grant_authority_wsp71_use` captures authenticated permission
+state under the generation lease, releases it for root LOAD, then reacquires
+and compares authority/receipt/binding state before and after the action.
+Expiry is rechecked at use; refreshed selection timestamps alone are not an
+identity change. Custody and runtime installation remain separate contracts.
+
+
+## Callable LOW grant service — 2026-10-15
+
+`src/reddog_grant_authority_service.py` exports `serve_grant_authority_once(*,
+repo_root, owner_config_path, dependencies=None, timeout_s=5.0,
+ready_callback=None)`. It returns `GrantAuthorityServiceResult` and serves at
+most one request through the existing bounded socket owner after admission.
+There is no CLI, installation path or installed-dependency loader.
+
+`GrantAuthorityServiceDependencies` contains the current `owner_policy`,
+`issuer_profile`, `credential_binding`, durable `replay_store` and root-authorized
+`revocation_oracle`. Construction conveys no authority. The callable freezes
+the policy, checks owner/profile/reference/replay bindings, requires distinct
+signing and audit credential IDs, and applies existing peer/process-isolation
+and current permission gates before listening. Owner scope must be exactly
+`signer_socket_peer_handshake`, LOW, with empty consensus requirements.
+
+Each request must use the existing secret-grant signing operation, LOW tier,
+no consensus proof and the bound requester peer. Permission/revocation are
+renewed around current-input validation, ephemeral custody, signing and return.
+The existing durable rate authority survives fresh per-request backend creation;
+consumer replay enforcement remains in the existing grant-consumption path.
+This service does not bootstrap through the target's grant-required backend.
+
+Result fields are `accepted`, `rejection_reasons`, `requests_handled`,
+`response_digests` and `socket_removed`. `accepted` describes transport completion,
+not grant acceptance, native isolation or RSI. Inspect and independently verify
+the signing response. The wrapper does not propagate the socket owner's
+no-secret flags as claims about this credential-using composition.
+
+The next installation dependency is an independently authorized root LOAD
+request signer with the required identity, followed by protected dependency/
+custody supply and authenticated installed-source deployment. Role-key possession,
+the callable and a successful fixture socket exchange do not establish these gates.
+
+The shared resident socket owner keeps its POSIX listener open through owned-path
+cleanup on both normal and exceptional exits, then closes it. Its private path
+identity also compares change-time nanoseconds to reject stale inode metadata.
+The timestamp is supplemental defense, not an atomic unlink guarantee; cleanup
+still depends on the existing protected-parent trust boundary. Non-POSIX retains
+close-before-unlink behavior. Replacement paths are preserved on identity mismatch.
+
+
+## Protected issuer startup custody — 2026-10-16
+
+`materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_root,
+expected_owner_config_id)` loads protected owner v9 and returns the existing
+`GrantAuthorityServiceDependencies` for `serve_grant_authority_once`. It installs
+nothing and does not issue grants. Owner v1–v8 schemas retain their old fields.
+
+The v9 `grant_startup_custody` block contains `signing_key_ref`,
+`audit_mac_key_ref`, `credential_binding`, `loader_credential_binding`,
+`root_load_permission` and `replay_integrity_permission`. Signing custody names
+exactly signing/audit IDs; loader custody names exactly signing/replay IDs in
+the same protected directory. The three references must be distinct. Signing
+requester is the current E0 signer-agent ID; loader requester is the current
+issuer principal. Both bind its UID/GID and current key/epoch; its UID must differ
+from the target's. The
+issuer's UID, identity and proof key cannot substitute for target authority.
+
+Metadata does not grant permission: current authenticated E0 binds actual refs,
+profile, receipt, key and scope. Isolation precedes replay credential access.
+The existing resolver, durable replay owner and issuer-only root LOAD oracle
+are reused. No E0 generation lease spans root RPC; owner/full-policy/custody/time
+are revalidated after RPC and before returning. Each proof signing operation
+rechecks purpose, requester, identity and expiry through existing custody.
+
+The loader remains a callable with tested synthetic installation boundaries.
+Authenticated installed-runtime deployment, real custody provisioning and a
+native LOW request remain prerequisites; this is not a new service launcher.
+
+## Installed source empty-file semantics — 2026-10-16
+
+The initial enrollment authority's protected source inventory permits zero-byte
+files, including package initializers, only with their exact approved SHA256.
+Its existing root-owned descriptor reader opts in explicitly; authority/config
+reads retain nonempty defaults. Source reads retain the64KiB maximum, protected
+root ancestry, regular-file ownership checks and no-follow descriptor access.
+This does not certify the interpreter/native closure, grant profile enrollment,
+worker admission or retained learning. Those remain distinct gates.
+
+## Installed issuer preparation — 2026-10-16
+
+`compose_installed_grant_service_artifacts(profile, owner_config_id,
+repo_root_digest, source_descriptor)` uses keyword-only inputs and returns
+canonical bytes for config v3, run-packet v2 and installed-source descriptor v1.
+`validate_installed_grant_service_artifacts(artifacts)` checks exact members,
+canonical bytes, identities and cross-digests; it performs no I/O or admission.
+`validate_installed_grant_source(...)` binds declared inventory and fixed Python
+launch/import paths, service and dependency-loader callables. Protected runtime
+inspection and root-approved source provenance must independently validate it.
+
+E0 `reddog-signer-owner-e0-policy.v10` replaces
+`grant_authority_archive_source_descriptor_digest` with
+`grant_authority_installed_runtime_descriptor_digest`. The latter participates
+in the stable pre-config binding. Future permission/manifest/config fields stay
+required and signed in the final policy. V10 requires generation1 and only LOW
+`signer_socket_peer_handshake`, with no consensus tiers. V5–v9 projections and
+signing domains remain unchanged. Current legacy manifest/permission execution
+rejects v10 until its explicit authenticated enrollment/consumer is connected.
+
+## Initial handshake configuration — 2026-10-15
+
+`compose_initial_handshake_service_config(...)` in the existing
+`reddog_signer_socket_service_config_composition.py` returns a validated public
+`reddog_initial_handshake_service_config.v1` mapping; it does not write files,
+issue grants or resolve credentials. Keyword inputs: repo/runtime/signer roots,
+socket path, one key-provider profile, peer policy, E0 authority binding digest,
+timeout and request/response byte limits. The schema fixes `max_requests=1`,
+WSP71 permissioned provider mode and `allow_test_only_key_material=false`.
+
+The typed `initial_handshake_only` mode admits exactly generation1 and the
+`reddog-work-authority` / `signer:reddog` profile with distinct signing/MAC refs.
+The writable socket parent is separate from immutable artifacts and signer
+state; startup checks also preserve authority/replay/revocation separation.
+Mixed work/control/proposal/outcome/conversation policies are rejected.
+Authenticated E0 scope must be exactly `signer_socket_peer_handshake`, LOW, with
+no consensus authorities. HIGH/ULTRA rules for other configurations are unchanged.
+JSON policy lists become canonical immutable tuples after validation.
+
+Non-handshake requests reject before grant consumption/key resolution and again
+under the current-generation owner lease with exact peer-instance binding.
+Manifest authenticity, E0 scope and request grants remain independent gates.
+The separate production grant issuer composition and real native admission are
+still required; this schema does not certify their availability.
+
+## Installed issuer startup — 2026-10-16
+
+`serve_installed_grant_authority_once(*, repo_root, owner_config_path,
+expected_owner_config_id, timeout_s=5.0)` uses only the fixed protected dependency
+loader then `serve_grant_authority_once`. Timeout must be a finite numeric value
+in(0,30]; boolean values reject. Old direct calls without dependencies still
+reject. The fixed `main` accepts only repo root, owner-authority-config and exact
+expected-owner-config-id; it prints the existing result and returns0/2. Success
+means bounded transport completion, not grant acceptance or RSI.
+
+Installed E0v10 metadata is authenticated against current owner selection, fixed
+protected approval and exact manifest/artifact/config/source bindings. Only the
+explicit installed binding permits an empty archive field; legacy evidence stays
+mandatory. The issuer guard checks the authenticated descriptor against its
+current Linux3.12 isolated process, read-only root, static inventory and mapped
+files. It runs before replay secrets, service custody and root-LOAD proof keys;
+root-LOAD permission freshness is rechecked after the guard and after signing.
+The generic consumer is usable outside that issuer runtime and claims no local
+confinement. Checks are sampled, trusting host root/kernel, not immutable future
+execution or authentication of seccomp filter rules.
+
+Owner v10 adds an issuer-private `grant_rate_store` with purpose
+`grant-issuer-rate.v1` and distinct nonce/high-water paths, store ID, binding and
+durability receipt. Its integrity permission uses `grant-issuer-rate-integrity.v1`.
+Full signed E0 already binds owner_config_id; its schema staysv10. Target replay
+identity is unchanged and derived from protected metadata without issuer access
+to target-private files. Legacy owner v9 retains its coupled-store behavior.
+
+The installed Python invocation must establish the descriptor's exact sys.path
+through its protected fixed bootstrap before calling main; bare isolated
+`python -m` does not make `/opt/grant-source` importable. Runtime installation,
+credential delivery, permissions, root authority and actual worker admission are
+separate gates. This callable/CLI does not create them.
+
+## Initial root control identity — 2026-10-16
+
+Root initialization can validate an exact v2 descriptor with an empty grants
+list using the existing identity validator. Target revocation/protected-use
+factories permit that path only with validated installed E0 v10. Initial LOW,
+integer generation1, exact empty-list identity may explicitly set
+`consensus_receipt_digest: null`; missing fields, malformed values, other tiers,
+legacy descriptors and later generations retain their rejection. Existing
+hashed control descriptors remain compatible. Descriptor digest, distinct root
+control key, current owner/source/E0, peer, signature, store and freshness checks
+remain mandatory. Null is absence of consensus, never an installation hash.
+
+Full outcome validation explicitly requires a SHA256 consensus digest before
+independently signed nonempty grants. Reserve/commit, outcome clients and response
+record reconstruction retain that validator. Target signed/witnessed revocation
+ADVANCE is still required to establish the initial protected-use anchor; issuer
+LOAD cannot perform it. This closes a bootstrap dependency, not work admission,
+promotion, rollback or demonstrated RSI learning.

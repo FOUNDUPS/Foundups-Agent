@@ -285,6 +285,41 @@ class TestAdapterDryRunReject:
         assert result.decision == ADAPTER_DRYRUN_REJECT
         assert "path_outside_allowed_scope" in result.rejection_reasons
 
+    def test_malformed_external_worktree_shape_rejects(self):
+        order, policy, receipt, invocation, executor, valve = _full_spine_with_open_valve()
+        executor_payload = executor.to_dict()
+        executor_payload["plan"]["proposed_worktree_path"] = (
+            "C:/tmp/.reddog/worktrees/wo-adapter-dryrun-001/nonce/"
+        )
+        result = plan_reddog_openclaw_adapter_dryrun(
+            order,
+            policy,
+            receipt,
+            invocation.to_dict(),
+            executor_payload,
+            valve.to_dict(),
+        )
+        assert result.decision == ADAPTER_DRYRUN_REJECT
+        assert "worktree_path_outside_scope" in result.rejection_reasons
+
+    def test_canonical_shape_under_wrong_root_rejects(self):
+        order, policy, receipt, invocation, executor, valve = _full_spine_with_open_valve()
+        executor_payload = executor.to_dict()
+        executor_payload["plan"]["proposed_worktree_path"] = (
+            "C:/evil/.reddog/worktrees/Foundups-Agent/"
+            "wo-adapter-dryrun-001/nonce-adapter-dryrun-001/"
+        )
+        result = plan_reddog_openclaw_adapter_dryrun(
+            order,
+            policy,
+            receipt,
+            invocation.to_dict(),
+            executor_payload,
+            valve.to_dict(),
+        )
+        assert result.decision == ADAPTER_DRYRUN_REJECT
+        assert "worktree_path_outside_scope" in result.rejection_reasons
+
 
 class TestAdapterDryRunStability:
     def test_deterministic_digest_and_json_serializable(self):

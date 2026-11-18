@@ -1,0 +1,107 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "coordinator",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "ORCH",
+  "S": {
+    "owner": "0102_public_surface",
+    "read": [
+      "modules/foundups/memory_horizon",
+      "modules/foundups/foundup_registry.json",
+      "public/f/index.html",
+      "public/member",
+      "WSP_framework/src/WSP_102_FoundUps_Web_Design_Protocol.md",
+      "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/foundup_manifest.json",
+      "modules/foundups/foundup_registry.json",
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-09.json"
+    ]
+  },
+  "M": "exec",
+  "T": "MH-RSI-09",
+  "A": "INTEGRATE verified POC with canonical FoundUps shell route without root sprawl",
+  "R": [
+    0,
+    6,
+    11,
+    15,
+    22,
+    49,
+    50,
+    71,
+    84,
+    97,
+    99,
+    102,
+    104,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "depends_on": [
+      "MH-RSI-08"
+    ],
+    "canonical_landing": "/f/memory_horizon",
+    "canonical_app": "/f/memory_horizon/app",
+    "data_namespace": "idb_memory_horizon",
+    "no_bespoke_root_route": true,
+    "public_catalog_promotion_requires_separate_readiness": true,
+    "effect_boundary": "Manifest/registry route readiness only unless current shell owner explicitly admits additional path."
+  },
+  "O": [
+    "route/namespace integration evidence",
+    "manifest/registry readiness reconciliation",
+    "public-surface blocked/ready disposition",
+    "work_orders/results/MH-RSI-09.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_MH-RSI-08",
+    "depends_on": [
+      "MH-RSI-08"
+    ],
+    "objective": "Have 0102 integrate the verified tenant app into the existing FoundUps shell contract rather than hand-building an unrelated website.",
+    "steps": [
+      "Re-read WSP 102/104 and current shell route implementation.",
+      "Confirm exact foundup_id/manifest/registry consistency.",
+      "Bind tenant runtime to canonical app mount or record the exact missing shell seam.",
+      "Do not add root pages or public catalog promotion without its separate gate.",
+      "Record actual publication status truthfully."
+    ],
+    "wsp15": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 5,
+      "total": 16,
+      "priority": "P0"
+    },
+    "requirements": {
+      "compute_class": "HIGH",
+      "reasoning_depth": "DEEP",
+      "tools": [
+        "repository_read",
+        "repository_write",
+        "test_runner"
+      ],
+      "verification_class": "PUBLIC_SURFACE_AUTHORITY"
+    },
+    "acceptance": [
+      "WSP 104 namespace invariants preserved.",
+      "No tenant root sprawl or cross-tenant storage.",
+      "Public status is not upgraded without evidence.",
+      "If shell integration is blocked, exact owner/seam is documented."
+    ],
+    "rollback": "Revert only coordinator-owned manifest/registry changes; preserve verified tenant app."
+  }
+}

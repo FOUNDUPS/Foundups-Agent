@@ -47,8 +47,9 @@ import sqlite3
 import sys
 import tempfile
 import time
+from contextlib import closing
 from dataclasses import dataclass, asdict, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Generator
 import urllib.request
@@ -61,8 +62,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Fix Windows console encoding
-if sys.platform == 'win32':
+# Fix Windows console encoding only for the interactive CLI. Importers such as
+# pytest own their capture streams and must not have them replaced.
+if __name__ == "__main__" and sys.platform == 'win32':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
@@ -119,7 +121,7 @@ class TranscribedLyrics:
             duration_sec=song.duration_sec,
             word_count=len(lyrics.split()),
             style=song.style,
-            transcribed_at=datetime.utcnow().isoformat()
+            transcribed_at=datetime.now(timezone.utc).isoformat()
         )
 
 
@@ -302,15 +304,18 @@ class SunoSTTTranscriber:
 class LyricsDeduplicator:
     """Hash-based lyrics deduplication with SQLite storage."""
 
-    def __init__(self, db_path: Path = LYRICS_DB):
-        self.db_path = db_path
+    def __init__(self, db_path: Optional[Path] = None):
+        configured_path = os.getenv("ANTIFAFM_LYRICS_DB")
+        self.db_path = Path(db_path or configured_path or LYRICS_DB)
         self._init_db()
 
     def _init_db(self):
         """Initialize SQLite database."""
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with sqlite3.connect(self.db_path) as conn:
+        # sqlite3.Connection.__exit__ commits or rolls back but does not close
+        # the handle. Explicit closing is required before Windows temp cleanup.
+        with closing(sqlite3.connect(self.db_path)) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS unique_lyrics (
                     lyrics_hash TEXT PRIMARY KEY,
@@ -345,7 +350,7 @@ class LyricsDeduplicator:
         Returns:
             (is_new, lyrics_hash) - is_new=True if this is a new unique lyrics
         """
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             # Check if hash exists
             existing = conn.execute(
                 "SELECT lyrics_hash FROM unique_lyrics WHERE lyrics_hash = ?",
@@ -378,7 +383,7 @@ class LyricsDeduplicator:
 
     def get_stats(self) -> Dict:
         """Get deduplication statistics."""
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             unique_count = conn.execute("SELECT COUNT(*) FROM unique_lyrics").fetchone()[0]
             song_count = conn.execute("SELECT COUNT(*) FROM song_lyrics_map").fetchone()[0]
 
@@ -400,7 +405,7 @@ class LyricsDeduplicator:
 
     def is_processed(self, song_id: str) -> bool:
         """Check if song was already processed."""
-        with sqlite3.connect(self.db_path) as conn:
+        with closing(sqlite3.connect(self.db_path)) as conn:
             result = conn.execute(
                 "SELECT 1 FROM song_lyrics_map WHERE song_id = ?",
                 (song_id,)
@@ -586,7 +591,8 @@ class SunoSTTLyricsExtractor:
         self,
         model_size: str = "base",
         device: str = "cpu",
-        skip_processed: bool = True
+        skip_processed: bool = True,
+        db_path: Optional[Path] = None,
     ):
         """Initialize extractor.
 
@@ -594,10 +600,12 @@ class SunoSTTLyricsExtractor:
             model_size: Whisper model (tiny, base, small, medium, large-v3)
             device: Inference device (cpu, cuda)
             skip_processed: Skip already processed songs
+            db_path: Explicit lyrics database path; tests and isolated callers
+                should supply this or set ``ANTIFAFM_LYRICS_DB``.
         """
         self.downloader = SunoAudioDownloader()
         self.transcriber = SunoSTTTranscriber(model_size, device)
-        self.deduplicator = LyricsDeduplicator()
+        self.deduplicator = LyricsDeduplicator(db_path=db_path)
         self.playlist_fetcher = SunoPlaylistFetcher()
         self.skip_processed = skip_processed
 
@@ -781,7 +789,7 @@ def import_stt_to_karaoke_cache(limit: int = 0) -> dict:
     stats = {"imported": 0, "skipped": 0, "errors": 0}
 
     # Read from STT database
-    with sqlite3.connect(LYRICS_DB) as conn:
+    with closing(sqlite3.connect(Path(os.getenv("ANTIFAFM_LYRICS_DB", str(LYRICS_DB))))) as conn:
         cursor = conn.execute("""
             SELECT m.song_id, m.title, m.artist, m.duration_sec, l.lyrics
             FROM song_lyrics_map m

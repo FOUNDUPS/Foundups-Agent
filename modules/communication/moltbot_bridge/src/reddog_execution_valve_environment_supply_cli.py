@@ -10,6 +10,9 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment
     run_reddog_execution_valve_environment_supply_bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import VALVE_CLOSED
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -25,6 +28,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--queue-item-id", default="")
     parser.add_argument("--now-epoch", type=int)
     parser.add_argument("--permission-ttl-seconds", type=int, default=300)
+    parser.add_argument("--progressive-execution-stage-ceiling", default=STAGE_AUDIT)
     args = parser.parse_args(argv)
     result = run_reddog_execution_valve_environment_supply_bootstrap(
         repo_root=args.repo_root,
@@ -38,6 +42,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         queue_item_id=args.queue_item_id,
         now_epoch=args.now_epoch,
         permission_ttl_seconds=args.permission_ttl_seconds,
+        progressive_execution_stage_ceiling=args.progressive_execution_stage_ceiling,
     )
     print(json.dumps(result.to_dict(), sort_keys=True))
     return 0 if result.accepted else 2

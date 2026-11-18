@@ -360,6 +360,17 @@ class YouTubeDAEHeartbeat:
             run_id = os.getenv("YT_AUTOMATION_RUN_ID", "").strip()
             payload["run_id"] = run_id or None
             payload["automation_gates"] = gate_snapshot()
+            operator_manifest = getattr(self.dae, "operator_manifest_queue", None)
+            payload["operator_commands"] = getattr(
+                operator_manifest, "last_result", {"checked_at": None, "processed": 0}
+            )
+            # The last result is historical, not proof of a live watcher.
+            watcher = getattr(self.dae, "operator_manifest_task", None)
+            payload["operator_watcher"] = (
+                "inactive" if watcher is None else
+                "cancelled" if watcher.cancelled() else
+                "stopped" if watcher.done() else "running"
+            )
 
             # Write as JSONL (one JSON object per line)
             with open(telemetry_file, 'a', encoding='utf-8') as f:

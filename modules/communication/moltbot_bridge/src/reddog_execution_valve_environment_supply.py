@@ -16,6 +16,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    architect_fix_committed_publication_reasons,
+)
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
@@ -28,6 +31,13 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_OPEN_DRYRUN_ONLY,
     VALVE_OPEN_LIVE_ENQUEUE,
     VALVE_OPEN_WORKTREE_CREATE,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+    STAGE_BOUNDED_EXECUTION,
+)
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
@@ -76,6 +86,7 @@ def run_reddog_execution_valve_environment_supply(
     queue_item_id: str = "",
     now_epoch: int | None = None,
     permission_ttl_seconds: int = 300,
+    progressive_execution_stage_ceiling: str = STAGE_AUDIT,
 ) -> ExecutionValveEnvironmentSupplyResult:
     """Validate governed inputs and atomically write a canonical valve artifact."""
     root = Path(repo_root).resolve()
@@ -84,6 +95,11 @@ def run_reddog_execution_valve_environment_supply(
     reasons = list(path_reasons)
     if state not in _STATES:
         reasons.append("requested_valve_state_invalid")
+    stage_ceiling = str(progressive_execution_stage_ceiling or "")
+    if stage_ceiling not in {STAGE_AUDIT, STAGE_BOUNDED_EXECUTION}:
+        reasons.append("progressive_execution_stage_ceiling_invalid")
+    if state != VALVE_CLOSED and stage_ceiling != STAGE_BOUNDED_EXECUTION:
+        reasons.append("progressive_execution_stage_ceiling_closed")
     lineage, lineage_reasons = _lineage(
         work_state, authority_profile, permission_snapshots, principal_authority_records, queue_item_id
     )
@@ -101,20 +117,30 @@ def run_reddog_execution_valve_environment_supply(
     expires_epoch = min(epoch + ttl, int(lineage["permission_expires_at_epoch"]))
     if expires_epoch <= epoch:
         return _reject(("permission_snapshot_expired",))
-    return _materialize_environment(target, state, lineage, ttl, expires_epoch)
+    return _materialize_environment(
+        target, state, lineage, ttl, expires_epoch,
+        progressive_execution_stage_ceiling=stage_ceiling, repo_root=root,
+    )
 
 
 def _materialize_environment(
-    target: Path, state: str, lineage: Mapping[str, Any], ttl: int, expires_epoch: int,
+    target: Path, state: str, lineage: Mapping[str, Any], ttl: int,
+    expires_epoch: int, *, progressive_execution_stage_ceiling: str,
+    repo_root: Path,
 ) -> ExecutionValveEnvironmentSupplyResult:
-    core = _environment_core(state, lineage, ttl, expires_epoch)
+    core = _environment_core(
+        state, lineage, ttl, expires_epoch,
+        progressive_execution_stage_ceiling=progressive_execution_stage_ceiling,
+    )
     environment_digest = _digest(core)
     receipt = _supply_receipt(core, lineage, environment_digest)
     payload = dict(core)
     payload["supply_provenance"] = receipt
     try:
         governed = GovernedExecutionValveEnvironment.from_mapping(payload)
-        _write_json_atomic(target, governed.to_dict())
+        _write_json_atomic(
+            target, governed.to_dict(), repo_root=repo_root
+        )
     except Exception:
         return _reject(("execution_valve_environment_write_failed",))
     return ExecutionValveEnvironmentSupplyResult(
@@ -155,6 +181,14 @@ def _lineage(
         reasons.append("work_state_schema_invalid")
     queue, claim, allocation, expected, queue_reasons = _queue_lineage(work_state, queue_item_id)
     reasons.extend(queue_reasons)
+    reasons.extend(
+        architect_fix_committed_publication_reasons(
+            work_state,
+            profile,
+            queue_item_id=str(queue.get("queue_item_id") or ""),
+            claim_id=str(claim.get("claim_id") or ""),
+        )
+    )
     binding, authority_reasons = _authority_binding(profile, expected)
     reasons.extend(authority_reasons)
     snapshot, principal, resolver_reasons = _resolver_records(profile, permissions, principals)
@@ -321,7 +355,10 @@ def _cross_bind(
     return reasons
 
 
-def _environment_core(state: str, lineage: Mapping[str, Any], ttl: int, expires: int) -> dict[str, Any]:
+def _environment_core(
+    state: str, lineage: Mapping[str, Any], ttl: int, expires: int,
+    *, progressive_execution_stage_ceiling: str,
+) -> dict[str, Any]:
     flags = {
         "valve_dryrun_enabled": state != VALVE_CLOSED,
         "valve_live_enqueue_enabled": state == VALVE_OPEN_LIVE_ENQUEUE,
@@ -348,6 +385,7 @@ def _environment_core(state: str, lineage: Mapping[str, Any], ttl: int, expires:
         "authorization_mode": authorization_mode,
         "authorization_binding_digest": authorization_binding_digest,
         "requested_valve_state": state,
+        "progressive_execution_stage_ceiling": progressive_execution_stage_ceiling,
         **flags,
         **bindings,
     }
@@ -392,9 +430,17 @@ def _output_path(value: Path | str | None, repo_root: Path) -> tuple[Path | None
     return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+def _write_json_atomic(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
     with runtime_operation_lock(str(path) + ".operation"):
-        _write_json_atomic_unlocked(path, payload)
+        with reddog_runtime_artifact_generation_lock(
+            path.parent, repo_root=repo_root
+        ):
+            _write_json_atomic_unlocked(path, payload)
 
 
 def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:

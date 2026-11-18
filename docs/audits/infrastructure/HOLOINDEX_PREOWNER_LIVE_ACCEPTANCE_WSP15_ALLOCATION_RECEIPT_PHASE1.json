@@ -1,0 +1,83 @@
+{
+  "allowed_read_targets": [
+    "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+    "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+    "WSP_framework/src/WSP_22_ModLog_Structure.md",
+    "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+    "docs/audits/infrastructure/HOLOINDEX_PREOWNER_REPO_HEAD_REPAIR_WSP97_EXECUTION_RECEIPT_PHASE1.json"
+  ],
+  "architect_model_runtime_binding_digest": "",
+  "architect_model_runtime_binding_receipt_id": "",
+  "changed_paths": [
+    "docs/audits/infrastructure/HOLOINDEX_PREOWNER_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json",
+    "docs/audits/infrastructure/HOLOINDEX_PREOWNER_LIVE_ACCEPTANCE_WSP15_ALLOCATION_RECEIPT_PHASE1.json",
+    "docs/audits/infrastructure/HOLOINDEX_PREOWNER_LIVE_ACCEPTANCE_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "holo_index/README.md",
+    "holo_index/ROADMAP.md",
+    "holo_index/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/communication/moltbot_bridge/README.md",
+    "modules/communication/moltbot_bridge/ROADMAP.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "modules/communication/moltbot_bridge/docs/HOLOINDEX_RUNTIME.md",
+    "modules/communication/moltbot_bridge/tests/README.md",
+    "modules/communication/moltbot_bridge/tests/TestModLog.md",
+    "modules/infrastructure/idle_automation/README.md",
+    "modules/infrastructure/idle_automation/ROADMAP.md",
+    "modules/infrastructure/idle_automation/ModLog.md",
+    "modules/infrastructure/idle_automation/tests/TestModLog.md"
+  ],
+  "complexity": 5,
+  "deferability": 5,
+  "impact": 5,
+  "importance": 5,
+  "input_digest": "sha256:ff59d2d9d8a35ab4d9db76d190702244d77bdbd66321d1d729e9535dc18f4a42",
+  "model_runtime_binding_digest": "",
+  "model_runtime_binding_receipt_id": "",
+  "mps_total": 20,
+  "no_holoindex_reindex_performed": true,
+  "no_model_call_performed": true,
+  "no_queue_mutation_performed": true,
+  "no_repo_mutation_performed": true,
+  "no_worker_spawn_performed": true,
+  "priority": "P0",
+  "prompt_digest": "sha256:d1d4b5e25f69e2d5f206150a546b20ed010c3b69e723c72f06757a0280f356e5",
+  "reasoning_tier": "ULTRA",
+  "receipt_id": "sha256:aeb19576e26adb9d0bb51ba18c2a8bf2a443e84424390ab8e5ca688a21577bac",
+  "requested_operation": "reconcile_reddog_holoindex_preowner_live_acceptance_documentation",
+  "schema_version": "reddog_wsp15_allocation_receipt.v1",
+  "scoring_method": "deterministic_wsp15_runtime_heuristic",
+  "scoring_rationale": {
+    "complexity": "Implementation complexity derived from 28 unique repo targets and structural work terms.",
+    "deferability": "Cannot defer because authority-sensitive and blocking/operational terms are present.",
+    "impact": "Transformative operational impact for RedDog/WRE governance.",
+    "importance": "Essential because authority-sensitive RedDog/WRE terms are present."
+  },
+  "validation": {
+    "accepted": true,
+    "rejection_reasons": []
+  },
+  "worker_plan": {
+    "coding_worker_count": 2,
+    "critic_count": 2,
+    "fusion_required": true,
+    "hermes_execution_allowed": false,
+    "independent_verifier_required": true,
+    "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
+    "openclaw_candidate": true,
+    "queue_mutation_allowed": false,
+    "reasoning_tier": "ULTRA",
+    "schema_version": "reddog_wsp15_worker_plan.v1"
+  },
+  "wsp97_label": "INFERRED",
+  "wsp_refs": [
+    "WSP_15",
+    "WSP_97"
+  ]
+}

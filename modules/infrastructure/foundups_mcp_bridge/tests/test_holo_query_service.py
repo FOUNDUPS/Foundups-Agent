@@ -10,25 +10,33 @@ from typing import Any, Mapping
 
 import pytest
 
+from modules.infrastructure.foundups_mcp_bridge.src import holo_query_service
 from holo_index.freshness_receipt import (
     ALL_COLLECTIONS,
     CollectionFreshness,
     SCHEMA_VERSION as FRESHNESS_SCHEMA_VERSION,
     _receipt_generation_id,
 )
+from holo_index.repository_state import repository_root_digest
 from holo_index.source_scope import canonical_source_scope_id
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
-    BASELINE_COLLECTIONS,
     HoloIndexQueryOwnerService,
     TOKEN_TOO_SHORT_ERROR,
     main,
     validate_bind_host,
 )
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_http import (
+    _http_status,
+)
+from modules.infrastructure.foundups_mcp_bridge.tests.holo_query_service_fixtures import (
+    QUERY,
+    SHA,
+    SPACE_FINGERPRINT,
+    TOKEN,
+    _Backend,
+    _raw_result,
+)
 
-
-TOKEN = "owner-service-test-token-with-strong-length"
-SHA = "a" * 40
-SPACE_FINGERPRINT = "sha256:" + ("1" * 64)
 
 
 def _test_digest(value: str) -> str:
@@ -98,54 +106,9 @@ def _receipt(
     return _bind_receipt_generation(receipt) if generation else receipt
 
 
-def _raw_result(*, mode: str = "semantic", error: str = "") -> Mapping[str, Any]:
-    metadata: dict[str, Any] = {
-        "retrieval_mode": mode,
-        "embedding_backend": "sentence_transformers" if mode == "semantic" else "none",
-    }
-    if mode == "semantic":
-        metadata["collection_embedding_space_map"] = {
-            name: SPACE_FINGERPRINT for name in BASELINE_COLLECTIONS
-        }
-    if error:
-        metadata["error"] = error
-    return {
-        "code_hits": [{"path": "modules/example/src/example.py", "score": 0.91}],
-        "wsp_hits": [{"path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"}],
-        "wsps": [{"path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"}],
-        "docs_hits": [{"path": "modules/example/README.md"}],
-        "knowledge_hits": [{"path": "WSP_knowledge/docs/Papers/example.md"}],
-        "knowledge": [{"path": "WSP_knowledge/docs/Papers/example.md"}],
-        "metadata": metadata,
-    }
-
-
-class _Backend:
-    def __init__(self, result: Mapping[str, Any] | None = None, *, mode: str = "semantic") -> None:
-        self.result = result or _raw_result(mode=mode)
-        self.retrieval_mode = mode
-        self.collection_embedding_space_map = {
-            name: SPACE_FINGERPRINT for name in BASELINE_COLLECTIONS
-        }
-        self.search_calls = 0
-        self.index_calls = 0
-
-    def search(self, query: str, *, limit: int, doc_type_filter: str) -> Mapping[str, Any]:
-        self.search_calls += 1
-        return self.result
-
-    def index_code_entries(self) -> None:  # pragma: no cover - must never execute
-        self.index_calls += 1
-        raise AssertionError("query owner attempted indexing")
-
-    def index_wsp_entries(self) -> None:  # pragma: no cover - must never execute
-        self.index_calls += 1
-        raise AssertionError("query owner attempted indexing")
-
-
 def _request(**overrides: Any) -> Mapping[str, Any]:
     request = {
-        "query": "find the operational contract",
+        "query": QUERY,
         "limit": 8,
         "doc_type_filter": "all",
         "expected_repo_head_sha": SHA,
@@ -165,6 +128,15 @@ def _service(
     **kwargs: Any,
 ) -> HoloIndexQueryOwnerService:
     monkeypatch.setenv("HOLOINDEX_QUERY_SERVICE_TOKEN", TOKEN)
+    monkeypatch.setattr(
+        holo_query_service,
+        "_owner_runtime_environment",
+        lambda _replica, _backend_factory: (
+            _test_digest("synthetic-ranker"),
+            _test_digest("synthetic-runtime"),
+            False,
+        ),
+    )
     selected_backend = backend or _Backend()
     factory = backend_factory or (lambda _path: selected_backend)
     raw_loader = receipt_loader or (lambda _path: _receipt())
@@ -233,23 +205,26 @@ def test_health_rejects_semantic_backend_with_zero_canary_hits(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    backend = _Backend(
-        {
-            "metadata": {
-                "retrieval_mode": "semantic",
-                "embedding_backend": "sentence_transformers",
-                "collection_embedding_space_map": {
-                    name: SPACE_FINGERPRINT for name in BASELINE_COLLECTIONS
-                },
-            }
-        }
-    )
+    raw = dict(_raw_result())
+    for key in (
+        "code_hits", "wsp_hits", "test_hits", "code", "wsps", "tests",
+        "skills", "skill_hits", "symbol_hits", "docs_hits", "knowledge_hits",
+        "docs", "knowledge", "work_ledger_hits", "work_ledger",
+    ):
+        raw[key] = []
+    metadata = dict(raw["metadata"])
+    for key in tuple(name for name in metadata if name.endswith("_count")):
+        metadata[key] = 0
+    raw["metadata"] = metadata
+    backend = _Backend(raw)
     owner = _service(tmp_path, monkeypatch, backend=backend)
     try:
         result = owner.handle_health(authorization=f"Bearer {TOKEN}")
         assert result["ok"] is False
         assert result["error"] == "SEMANTIC_CANARY_EMPTY"
         assert result["status"] == "unavailable"
+        assert result["hits"] == []
+        assert result["raw_result"] == {}
     finally:
         owner.close()
 
@@ -314,6 +289,42 @@ def test_request_contract_is_strict_and_bounded(
         assert result["ok"] is False
         assert result["error"] == expected_error
         assert backend.search_calls == 0
+    finally:
+        owner.close()
+
+
+def test_query_rejects_mismatched_expected_repository_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    backend = _Backend()
+    owner = _service(tmp_path, monkeypatch, backend=backend)
+    try:
+        result = _query(
+            owner,
+            _request(expected_repo_root_digest="sha256:" + "f" * 64),
+        )
+        assert result["ok"] is False
+        assert result["error"] == "REPO_ROOT_MISMATCH"
+        assert backend.search_calls == 0
+    finally:
+        owner.close()
+
+
+def test_query_binds_matching_repository_root_digest(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    owner = _service(tmp_path, monkeypatch)
+    try:
+        result = _query(
+            owner,
+            _request(
+                expected_repo_root_digest=repository_root_digest(tmp_path)
+            ),
+        )
+        assert result["ok"] is True
+        assert result["repo_root_digest"] == repository_root_digest(tmp_path)
     finally:
         owner.close()
 
@@ -482,6 +493,8 @@ def test_stable_semantic_generation_preserves_complete_raw_wsp_and_knowledge(
         assert result["ok"] is True
         assert result["freshness"] == "CURRENT"
         assert result["retrieval_mode"] == "semantic"
+        assert result["retrieval_runtime_ranker_digest"].startswith("sha256:")
+        assert len(result["retrieval_runtime_ranker_digest"]) == 71
         assert result["freshness_generation_id"] == _receipt(
             repo_root=tmp_path,
             ssd_path=tmp_path / "holo-store",
@@ -500,7 +513,7 @@ def test_stable_semantic_generation_preserves_complete_raw_wsp_and_knowledge(
 
 
 @pytest.mark.parametrize("mode", ["lexical", "failed", "unknown"])
-def test_nonsemantic_modes_are_rejected_with_raw_truth_preserved(
+def test_nonsemantic_modes_are_rejected_without_untrusted_evidence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str
 ) -> None:
     raw = _raw_result(mode=mode)
@@ -511,7 +524,8 @@ def test_nonsemantic_modes_are_rejected_with_raw_truth_preserved(
         assert result["ok"] is False
         assert result["error"] == "SEMANTIC_BACKEND_UNAVAILABLE"
         assert result["retrieval_mode"] == mode
-        assert result["raw_result"] == raw
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
     finally:
         owner.close()
 
@@ -523,6 +537,36 @@ def test_search_error_payload_is_not_accepted_as_semantic_evidence(
     owner = _service(tmp_path, monkeypatch, backend=_Backend(raw))
     try:
         assert _query(owner)["error"] == "SEMANTIC_BACKEND_UNAVAILABLE"
+    finally:
+        owner.close()
+
+
+@pytest.mark.parametrize(
+    ("producer_error", "expected_status"),
+    [
+        ("HOLOINDEX_TIER0_INCOMPLETE", 409),
+        ("HOLOINDEX_TIER0_LOOKUP_FAILED", 503),
+        ("HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE", 503),
+    ],
+)
+def test_allowlisted_producer_failures_preserve_stable_owner_classification(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    producer_error: str,
+    expected_status: int,
+) -> None:
+    owner = _service(
+        tmp_path,
+        monkeypatch,
+        backend=_Backend(_raw_result(error=producer_error)),
+    )
+    try:
+        result = _query(owner)
+        assert result["ok"] is False
+        assert result["error"] == producer_error
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
+        assert _http_status(result) == expected_status
     finally:
         owner.close()
 
@@ -555,7 +599,8 @@ def test_repository_is_reproven_after_semantic_retrieval(
     try:
         result = _query(owner)
         assert result["error"] == "REPO_HEAD_MISMATCH"
-        assert result["raw_result"] == _raw_result()
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
         assert backend.search_calls == 1
         assert receipt_reads == 1
     finally:
@@ -590,7 +635,8 @@ def test_repository_is_reproven_after_final_freshness_snapshot(
     try:
         result = _query(owner)
         assert result["error"] == "HOLOINDEX_REPOSITORY_DIRTY"
-        assert result["raw_result"] == _raw_result()
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
         assert backend.search_calls == 1
         assert receipt_reads == 2
     finally:

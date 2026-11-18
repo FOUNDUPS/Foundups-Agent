@@ -36,9 +36,6 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     _CHAIN,
     plan_reddog_resident_queue_orchestration,
 )
-from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_serial_loop import (
-    _snapshot,
-)
 from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test_support import (
     NOW,
     QUEUE_ID,
@@ -48,6 +45,7 @@ from modules.communication.moltbot_bridge.tests.reddog_resident_live_canary_test
     _kwargs,
     _roots,
     _runner,
+    _snapshot,
     _write_pre_state,
     _write_control_receipt_and_head,
 )
@@ -68,12 +66,14 @@ PRODUCTION_PATHS = (
     SRC_ROOT / "reddog_resident_control_loop_outcomes.py",
     SRC_ROOT / "reddog_resident_control_loop_effects.py",
     SRC_ROOT / "reddog_resident_live_canary_environment.py",
+    SRC_ROOT / "reddog_resident_live_canary_provider_readiness.py",
     SRC_ROOT / "reddog_resident_live_canary_control_preflight.py",
 )
 COMMUNICATION_TEST_PATHS = (
     Path(__file__),
     Path(__file__).with_name("reddog_resident_live_canary_test_support.py"),
     Path(__file__).with_name("test_reddog_resident_live_canary_integration.py"),
+    Path(__file__).with_name("test_reddog_resident_live_canary_provider_readiness.py"),
 )
 def test_readiness_is_non_executing_and_does_not_serialize_secret(tmp_path: Path) -> None:
     repo, runtime = _roots(tmp_path)
@@ -83,7 +83,10 @@ def test_readiness_is_non_executing_and_does_not_serialize_secret(tmp_path: Path
     assert receipt.ready_for_execution is False
     assert receipt.execution_invoked is False
     assert receipt.live_proof_complete is False
-    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in receipt.blockers
+    assert (
+        "canonical_signed_runtime_artifact_manifest_selection_verifier_missing"
+        in receipt.blockers
+    )
     serialized = (runtime / "live_canary_receipt.json").read_text(encoding="utf-8")
     assert "must-never-be-serialized" not in serialized
     assert json.loads(serialized)["secret_values_serialized"] is False
@@ -136,7 +139,7 @@ def test_false_control_receipts_cannot_complete_proof(
 
     assert receipt.status == LIVE_CANARY_BLOCKED
     assert receipt.execution_invoked is False
-    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in (
+    assert "canonical_signed_runtime_artifact_manifest_selection_verifier_missing" in (
         receipt.blockers
     )
 
@@ -146,7 +149,10 @@ def test_runner_result_must_match_one_new_persisted_control_receipt(tmp_path: Pa
     receipt = _execute(repo, runtime, result_receipt_id="different-receipt")
 
     assert receipt.live_proof_complete is False
-    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in receipt.blockers
+    assert (
+        "canonical_signed_runtime_artifact_manifest_selection_verifier_missing"
+        in receipt.blockers
+    )
 
 
 def test_malformed_control_receipt_stream_blocks_before_runner(tmp_path: Path) -> None:
@@ -178,7 +184,7 @@ def test_valid_json_signature_tamper_blocks_before_runner(tmp_path: Path) -> Non
     repo, runtime = _roots(tmp_path)
     _write_pre_state(repo, runtime)
     control = _control_receipt(repo)
-    _write_control_receipt_and_head(runtime, control)
+    _write_control_receipt_and_head(repo, runtime, control)
     control["status"] = "TAMPERED"
     (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
         json.dumps(control) + "\n", encoding="utf-8"
@@ -207,7 +213,7 @@ def test_canary_blocks_when_signer_anchor_is_ahead_of_resident_chain(
 
     repo, runtime = _roots(tmp_path)
     first = _control_receipt(repo)
-    _write_control_receipt_and_head(runtime, first)
+    _write_control_receipt_and_head(repo, runtime, first)
     second = build_resident_control_loop_receipt(
         result={
             "accepted": True,
@@ -230,7 +236,11 @@ def test_canary_blocks_when_signer_anchor_is_ahead_of_resident_chain(
     config = json.loads(
         (runtime / "signer_service_config.json").read_text(encoding="utf-8")
     )
-    store = AtomicSignerControlLoopAnchorStore(config["control_loop_anchor_path"])
+    store = AtomicSignerControlLoopAnchorStore(
+        config["control_loop_anchor_path"],
+        runtime_root=config["signer_runtime_root"],
+        repo_root=repo,
+    )
     state = store.load()
     unsigned = {
         key: value
@@ -280,7 +290,7 @@ def test_signed_chain_suffix_truncation_blocks_before_runner(tmp_path: Path) -> 
             path=path, result=base_result, repo_root=repo,
             created_at=f"2026-07-14T00:00:0{index}Z",
             cycle_id=f"truncate-cycle-{index}", nonce=f"truncate-nonce-{index}",
-            signing_context=_SIGNING_CONTEXT, require_authentication=True,
+            signing_context=_SIGNING_CONTEXT, require_authentication=True, runtime_root=path.parent,
             head_state_path=runtime / "authority_runtime_state.json",
         )
     first_line = path.read_text(encoding="utf-8").splitlines()[0]
@@ -305,7 +315,7 @@ def test_head_consumed_evidence_tamper_blocks_before_runner(tmp_path: Path) -> N
     repo, runtime = _roots(tmp_path)
     _write_pre_state(repo, runtime)
     control = _control_receipt(repo)
-    _write_control_receipt_and_head(runtime, control)
+    _write_control_receipt_and_head(repo, runtime, control)
     state_path = runtime / "authority_runtime_state.json"
     state = json.loads(state_path.read_text(encoding="utf-8"))
     state["control_receipt_head"]["consumed_child_evidence_digests"] = [
@@ -330,26 +340,20 @@ def test_head_consumed_evidence_tamper_blocks_before_runner(tmp_path: Path) -> N
     assert "control_receipt_prestate_auth_or_integrity_invalid" in receipt.blockers
 
 
-def test_preseeded_complete_chain_cannot_be_relabelled_as_new_live_proof(tmp_path: Path) -> None:
+def test_complete_chain_cannot_be_preseeded_without_durable_outcome_authority(
+    tmp_path: Path,
+) -> None:
     repo, runtime = _roots(tmp_path)
     _write_pre_state(repo, runtime)
-    _runner(repo, runtime)(repo)
-    (runtime / "resident_queue_control_loop_receipts.jsonl").unlink()
-    control = _control_receipt(repo)
+    with pytest.raises(AssertionError):
+        _runner(repo, runtime)(repo)
 
-    def runner(_: Path) -> dict[str, object]:
-        (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
-            json.dumps(control) + "\n", encoding="utf-8"
-        )
-        return {"accepted": True, "status": "PASS", "receipt_id": control["receipt_id"]}
-
-    receipt = run_reddog_resident_live_canary(
-        **_kwargs(repo, runtime), execute=True, confirmation=LIVE_CANARY_CONFIRMATION,
-        queue_item_id=QUEUE_ID, control_loop_runner=runner,
-        now=lambda: __import__("datetime").datetime.fromisoformat(NOW),
+    chain = json.loads(
+        (runtime / "resident_queue_chain_results.json").read_text(encoding="utf-8")
     )
-    assert receipt.live_proof_complete is False
-    assert "control_receipt_prestate_auth_or_integrity_invalid" in receipt.blockers
+    assert "pattern_memory_admission" not in chain["stage_results"]
+    assert not (runtime / "pattern_memory.db").exists()
+    assert not (runtime / "resident_queue_control_loop_receipts.jsonl").exists()
 
 
 def test_canary_rejects_control_receipt_stream_replacement(tmp_path: Path) -> None:
@@ -379,7 +383,7 @@ def test_canary_rejects_control_receipt_stream_replacement(tmp_path: Path) -> No
     original = control("canary-prefix-cycle", "canary-prefix-nonce")
     replacement = control("canary-replacement-cycle", "canary-replacement-nonce")
     path = runtime / "resident_queue_control_loop_receipts.jsonl"
-    _write_control_receipt_and_head(runtime, original)
+    _write_control_receipt_and_head(repo, runtime, original)
 
     def runner(_: Path) -> dict[str, object]:
         path.write_text(json.dumps(replacement) + "\n", encoding="utf-8")
@@ -397,7 +401,7 @@ def test_canary_rejects_control_receipt_stream_replacement(tmp_path: Path) -> No
     )
 
     assert receipt.execution_invoked is False
-    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in (
+    assert "canonical_signed_runtime_artifact_manifest_selection_verifier_missing" in (
         receipt.blockers
     )
 
@@ -413,7 +417,10 @@ def test_live_proof_requires_a_pre_invocation_chain_revision(tmp_path: Path) -> 
         now=lambda: __import__("datetime").datetime.fromisoformat(NOW),
     )
     assert receipt.live_proof_complete is False
-    assert "canonical_signed_runtime_artifact_manifest_producer_missing" in receipt.blockers
+    assert (
+        "canonical_signed_runtime_artifact_manifest_selection_verifier_missing"
+        in receipt.blockers
+    )
 
 
 def test_receipt_path_allows_only_canonical_name_inside_runtime(tmp_path: Path) -> None:
@@ -483,9 +490,10 @@ def test_canary_and_evidence_reads_reject_linked_parent(tmp_path: Path) -> None:
     assert _read_json_mapping(
         linked / "artifact.json", allowed_root=tmp_path
     ) == {}
-    assert read_control_receipts(
-        linked / "receipts.jsonl", allowed_root=tmp_path
-    ) == ()
+    with pytest.raises(ValueError, match="^control_receipt_stream_unreadable$") as caught:
+        read_control_receipts(linked / "receipts.jsonl", allowed_root=tmp_path)
+    assert isinstance(caught.value.__cause__, ValueError)
+    assert str(caught.value.__cause__) == "confined_read_path_link_rejected"
 
 
 def test_receipt_path_inside_repo_is_rejected(tmp_path: Path) -> None:

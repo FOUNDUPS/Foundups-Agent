@@ -20,19 +20,23 @@ import json
 import os
 import tempfile
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_agentdb_architect_determination_reader import (
+    load_agentdb_architect_determination,
+)
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ACTION_FIX,
     ARCHITECT_DETERMINATION_ACCEPT,
-    AgentDbArchitectDeterminationStore,
-    ArchitectDeterminationStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_agentdb_cycle import (
     AgentDbResidentArchitectCycleStore,
-    ResidentArchitectCycleStore,
     STATUS_DETERMINED,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    rehydrate_operational_memex_supply_receipt,
 )
 
 
@@ -53,6 +57,7 @@ class ResidentFixHandoffReason:
     MEMEX_SNAPSHOT_MISMATCH = "memex_supply_snapshot_mismatch"
     DETERMINATION_OUTPUT_INVALID = "architect_determination_output_invalid"
     MEMEX_OUTPUT_INVALID = "memex_supply_output_invalid"
+    OUTPUT_PATHS_ALIAS = "artifact_output_paths_alias"
     OUTPUT_WRITE_FAILED = "artifact_output_write_failed"
 
 
@@ -87,18 +92,16 @@ def run_reddog_resident_fix_promotion_artifact_handoff(
     intent_id: str,
     architect_determination_output_path: Path | str | None,
     memex_supply_receipt_output_path: Path | str | None,
-    cycle_store: ResidentArchitectCycleStore | None = None,
-    architect_store: ArchitectDeterminationStore | None = None,
+    expected_claim_binding: Mapping[str, str] | None = None,
+    now_iso: str | None = None,
 ) -> ResidentFixPromotionArtifactHandoffResult:
     """Materialize promotion input artifacts from one determined resident cycle."""
 
-    root = Path(repo_root).resolve()
-    cleaned_intent = _clean(intent_id)
+    root, cleaned_intent = Path(repo_root).resolve(), _clean(intent_id)
     if not cleaned_intent:
         return _reject(cleaned_intent, None, None, (ResidentFixHandoffReason.MISSING_INTENT_ID,))
 
-    cycle_reader = cycle_store or AgentDbResidentArchitectCycleStore()
-    architect_reader = architect_store or AgentDbArchitectDeterminationStore()
+    cycle_reader = AgentDbResidentArchitectCycleStore()
     cycle = cycle_reader.load_cycle_by_intent(cleaned_intent)
     if not isinstance(cycle, Mapping) or not cycle:
         return _reject(cleaned_intent, None, None, (ResidentFixHandoffReason.CYCLE_NOT_FOUND,))
@@ -106,29 +109,25 @@ def run_reddog_resident_fix_promotion_artifact_handoff(
     cycle_id = _clean(cycle.get("cycle_id"))
     architect_id = _clean(cycle.get("architect_determination_id"))
     reasons = _validate_cycle(cycle)
-    determination_record: Mapping[str, Any] | None = None
-    determination_payload: Mapping[str, Any] | None = None
-    if cycle_id and not reasons:
-        determination_record = architect_reader.load_architect_determination_by_cycle(cycle_id)
-        determination_payload = _mapping(determination_record, "determination")
-        reasons.extend(_validate_determination(determination_payload, expected_id=architect_id))
+    if cycle_id and architect_id and not reasons:
+        determination_payload, determination_reasons = _load_determination(
+            cycle,
+            architect_id=architect_id,
+            expected_claim_binding=expected_claim_binding,
+        )
+        reasons.extend(determination_reasons)
     else:
+        determination_payload = None
         reasons.append(ResidentFixHandoffReason.DETERMINATION_NOT_FOUND)
 
     memex_supply = _memex_supply_receipt(cycle)
-    reasons.extend(_validate_memex_supply(memex_supply, determination_payload))
-    determination_path, determination_reasons = _runtime_output_path(
+    reasons.extend(_validate_memex_supply(memex_supply, determination_payload, cycle=cycle, now_iso=_now_iso(now_iso)))
+    determination_path, memex_path, path_reasons = _resolve_output_paths(
         architect_determination_output_path,
-        root,
-        ResidentFixHandoffReason.DETERMINATION_OUTPUT_INVALID,
-    )
-    memex_path, memex_reasons = _runtime_output_path(
         memex_supply_receipt_output_path,
         root,
-        ResidentFixHandoffReason.MEMEX_OUTPUT_INVALID,
     )
-    reasons.extend(determination_reasons)
-    reasons.extend(memex_reasons)
+    reasons.extend(path_reasons)
     deduped = _dedupe(reasons)
     if deduped:
         return _reject(cleaned_intent, cycle_id, architect_id, deduped)
@@ -137,10 +136,10 @@ def run_reddog_resident_fix_promotion_artifact_handoff(
     assert memex_supply is not None
     assert determination_path is not None
     assert memex_path is not None
-    try:
-        _write_json_atomic(determination_path, determination_payload)
-        _write_json_atomic(memex_path, memex_supply)
-    except Exception:
+    artifacts_written = _write_handoff_artifacts(
+        determination_path, determination_payload, memex_path, memex_supply
+    )
+    if not artifacts_written:
         return _reject(
             cleaned_intent,
             cycle_id,
@@ -160,8 +159,12 @@ def run_reddog_resident_fix_promotion_artifact_handoff(
     )
 
 
-def _validate_cycle(cycle: Mapping[str, Any]) -> list[str]:
+def _validate_cycle(
+    cycle: Mapping[str, Any],
+) -> list[str]:
     reasons: list[str] = []
+    if cycle.get("_store_integrity_valid") is not True:
+        reasons.append("resident_cycle_integrity_invalid")
     if _clean(cycle.get("status")) != STATUS_DETERMINED:
         reasons.append(ResidentFixHandoffReason.CYCLE_NOT_DETERMINED)
     if _clean(cycle.get("architect_action")) != ACTION_FIX:
@@ -169,6 +172,64 @@ def _validate_cycle(cycle: Mapping[str, Any]) -> list[str]:
     if not _clean(cycle.get("cycle_id")) or not _clean(cycle.get("architect_determination_id")):
         reasons.append(ResidentFixHandoffReason.DETERMINATION_NOT_FOUND)
     return reasons
+
+
+def _load_determination(
+    cycle: Mapping[str, Any],
+    *,
+    architect_id: str,
+    expected_claim_binding: Mapping[str, str] | None,
+) -> tuple[Mapping[str, Any] | None, list[str]]:
+    record = load_agentdb_architect_determination(architect_id)
+    payload = _mapping(record, "determination")
+    if payload is None and isinstance(record, Mapping):
+        payload = record
+    reasons = _validate_determination(payload, expected_id=architect_id)
+    reasons.extend(
+        _validate_expected_claim_binding(
+            cycle,
+            payload,
+            expected_claim_binding,
+        )
+    )
+    return payload, reasons
+
+
+def _validate_expected_claim_binding(
+    cycle: Mapping[str, Any],
+    determination: Mapping[str, Any] | None,
+    expected: Mapping[str, str] | None,
+) -> list[str]:
+    if expected is None:
+        return ["fix_claim_binding_missing"]
+    candidate = (
+        determination.get("queue_candidate")
+        if isinstance(determination, Mapping)
+        else None
+    )
+    allocation = (
+        candidate.get("wsp15_allocation_receipt")
+        if isinstance(candidate, Mapping)
+        else None
+    )
+    observed = {
+        "cycle_id": _clean(cycle.get("cycle_id")),
+        "snapshot_id": _clean(cycle.get("snapshot_id")),
+        "determination_id": _clean(
+            determination.get("determination_receipt_id")
+            if isinstance(determination, Mapping)
+            else ""
+        ),
+        "queue_candidate_id": _clean(
+            candidate.get("queue_candidate_id")
+            if isinstance(candidate, Mapping)
+            else ""
+        ),
+        "wsp15_allocation_receipt_id": _clean(
+            allocation.get("receipt_id") if isinstance(allocation, Mapping) else ""
+        ),
+    }
+    return [] if observed == dict(expected) else ["fix_claim_binding_mismatch"]
 
 
 def _validate_determination(
@@ -201,31 +262,64 @@ def _memex_supply_receipt(cycle: Mapping[str, Any]) -> Mapping[str, Any] | None:
 def _validate_memex_supply(
     receipt: Mapping[str, Any] | None,
     determination: Mapping[str, Any] | None,
+    *,
+    cycle: Mapping[str, Any],
+    now_iso: str,
 ) -> list[str]:
     if not isinstance(receipt, Mapping) or not receipt:
         return [ResidentFixHandoffReason.MISSING_MEMEX_SUPPLY_RECEIPT]
-    reasons: list[str] = []
-    required = (
-        "schema_version",
-        "receipt_id",
-        "snapshot_receipt_id",
-        "snapshot_content_digest",
-        "memex_view_id",
-        "holoindex_generation_id",
-        "source_revision",
-        "no_holoindex_reindex_performed",
+    if not isinstance(determination, Mapping) or not determination:
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    proposal = determination.get("proposal_admission")
+    intent = cycle.get("intent")
+    expected_view_id = _memex_supply_view_id(cycle)
+    if not isinstance(proposal, Mapping) or not isinstance(intent, Mapping):
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    expected_foundup = _clean(intent.get("foundup_id"))
+    expected_principal = _clean(
+        intent.get("principal_id")
+        or intent.get("principal_ref")
+        or intent.get("origin_principal")
     )
-    missing = [field for field in required if receipt.get(field) in (None, "", ())]
-    if missing or receipt.get("schema_version") != "reddog_operational_memex_snapshot_supply_receipt.v1":
-        reasons.append(ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID)
-    if receipt.get("no_holoindex_reindex_performed") is not True:
-        reasons.append(ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID)
-    if isinstance(determination, Mapping) and determination:
-        if _clean(receipt.get("snapshot_receipt_id")) != _clean(determination.get("snapshot_receipt_id")):
-            reasons.append(ResidentFixHandoffReason.MEMEX_SNAPSHOT_MISMATCH)
-        if _clean(receipt.get("snapshot_content_digest")) != _clean(determination.get("snapshot_content_digest")):
-            reasons.append(ResidentFixHandoffReason.MEMEX_SNAPSHOT_MISMATCH)
-    return reasons
+    if not expected_foundup or not expected_principal or not expected_view_id:
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    if _clean(receipt.get("memex_view_id")) != expected_view_id:
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    if (
+        _clean(receipt.get("snapshot_receipt_id"))
+        != _clean(determination.get("snapshot_receipt_id"))
+        or _clean(receipt.get("snapshot_content_digest"))
+        != _clean(determination.get("snapshot_content_digest"))
+    ):
+        return [ResidentFixHandoffReason.MEMEX_SNAPSHOT_MISMATCH]
+    try:
+        rehydrate_operational_memex_supply_receipt(
+            receipt,
+            expected_foundup_id=expected_foundup,
+            expected_principal_id=expected_principal,
+            expected_snapshot_receipt_id=_clean(determination.get("snapshot_receipt_id")),
+            expected_snapshot_content_digest=_clean(determination.get("snapshot_content_digest")),
+            expected_holoindex_generation_id=_clean(proposal.get("holoindex_generation_id")),
+            expected_source_revision=_clean(proposal.get("work_state_revision")),
+            now_iso=now_iso,
+        )
+    except (TypeError, ValueError):
+        return [ResidentFixHandoffReason.MEMEX_SUPPLY_INVALID]
+    return []
+
+
+def _memex_supply_view_id(cycle: Mapping[str, Any]) -> str:
+    for key in ("initial_bootstrap", "final_bootstrap"):
+        bootstrap = cycle.get(key)
+        if isinstance(bootstrap, Mapping):
+            value = _clean(bootstrap.get("memex_snapshot_supply_view_id"))
+            if value:
+                return value
+    return ""
+
+
+def _now_iso(value: str | None) -> str:
+    return value or datetime.now(timezone.utc).isoformat()
 
 
 def _runtime_output_path(
@@ -249,6 +343,27 @@ def _runtime_output_path(
     return resolved, []
 
 
+def _resolve_output_paths(
+    determination_output: Path | str | None,
+    memex_output: Path | str | None,
+    repo_root: Path,
+) -> tuple[Path | None, Path | None, list[str]]:
+    determination_path, determination_reasons = _runtime_output_path(
+        determination_output,
+        repo_root,
+        ResidentFixHandoffReason.DETERMINATION_OUTPUT_INVALID,
+    )
+    memex_path, memex_reasons = _runtime_output_path(
+        memex_output,
+        repo_root,
+        ResidentFixHandoffReason.MEMEX_OUTPUT_INVALID,
+    )
+    reasons = [*determination_reasons, *memex_reasons]
+    if determination_path is not None and determination_path == memex_path:
+        reasons.append(ResidentFixHandoffReason.OUTPUT_PATHS_ALIAS)
+    return determination_path, memex_path, reasons
+
+
 def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
@@ -256,6 +371,58 @@ def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
             json.dump(payload, handle, sort_keys=True, indent=2)
             handle.write("\n")
+        os.replace(tmp_name, path)
+    finally:
+        if os.path.exists(tmp_name):
+            os.unlink(tmp_name)
+
+
+def _write_json_pair_atomic(
+    items: tuple[tuple[Path, Mapping[str, Any]], ...],
+) -> None:
+    prior = tuple(
+        (path, path.read_bytes() if path.exists() else None)
+        for path, _payload in items
+    )
+    try:
+        for path, payload in items:
+            _write_json_atomic(path, payload)
+    except Exception:
+        for path, content in prior:
+            if content is None:
+                path.unlink(missing_ok=True)
+            else:
+                _write_bytes_atomic(path, content)
+        raise
+
+
+def _write_handoff_artifacts(
+    determination_path: Path,
+    determination_payload: Mapping[str, Any],
+    memex_path: Path,
+    memex_supply: Mapping[str, Any],
+) -> bool:
+    try:
+        _write_json_pair_atomic(
+            (
+                (determination_path, determination_payload),
+                (memex_path, memex_supply),
+            )
+        )
+    except Exception:
+        return False
+    return True
+
+
+def _write_bytes_atomic(path: Path, content: bytes) -> None:
+    fd, tmp_name = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=str(path.parent),
+    )
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(content)
         os.replace(tmp_name, path)
     finally:
         if os.path.exists(tmp_name):

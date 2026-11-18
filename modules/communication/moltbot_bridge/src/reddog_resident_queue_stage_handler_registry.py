@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Mapping, MutableSet, Optional, Sequence
+from typing import Any, Callable, Dict, Mapping, MutableSet, Optional, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_request_handler import (
     AUTHORITY_REQUEST_STAGE_KEY,
@@ -27,6 +27,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_ru
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_verification_handler import (
     AUTHORITY_VERIFICATION_STAGE_KEY,
     build_reddog_resident_queue_authority_verification_stage_handler,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_assurance_capacity_admission_handler import (
+    ASSURANCE_CAPACITY_ADMISSION_STAGE_KEY,
+    build_reddog_resident_queue_assurance_capacity_admission_stage_handler,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_bounded_worker_pilot_handler import (
     BOUNDED_WORKER_PILOT_STAGE_KEY,
@@ -42,6 +46,10 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_execution_va
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_executor_plan_handler import (
     EXECUTOR_PLAN_STAGE_KEY,
     build_reddog_resident_queue_executor_plan_stage_handler,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_queue_exact_sha_commit_handler import (
+    EXACT_SHA_COMMIT_STAGE_KEY,
+    build_reddog_resident_queue_exact_sha_commit_stage_handler,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_held_out_regression_gate_handler import (
     HELD_OUT_REGRESSION_GATE_STAGE_KEY,
@@ -88,7 +96,6 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_worktree_cre
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     VALVE_OPEN_WORKTREE_CREATE,
-    ExecutionValveEnvironment,
     GovernedExecutionValveEnvironment,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
@@ -96,6 +103,9 @@ from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_au
 )
 from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
     InMemoryWorktreeAdmissionRegistry,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    WorkerDispatchAuthorityVerificationContext,
 )
 
 
@@ -180,6 +190,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     work_state_snapshot: Mapping[str, Any],
     chain_results_store: ResidentQueueChainResultsStore,
     now_iso: str,
+    authoritative_work_state_store: Any = None,
     authority_profile: Optional[Mapping[str, Any]] = None,
     authority_store: Any = None,
     signer: Any = None,
@@ -209,6 +220,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     ] = None,
     intake_target: str = "foundup_job",
     expected_valve_state: str = VALVE_OPEN_WORKTREE_CREATE,
+    worktree_lease_issuer: Any = None,
     worktree_runner: Any = None,
     pilot_dryrun_binding_enabled: bool = False,
     generic_writer_dryrun_result: Optional[Mapping[str, Any]] = None,
@@ -217,6 +229,9 @@ def build_reddog_resident_queue_stage_handler_registry(
     artifact_generation_request: Optional[Mapping[str, Any]] = None,
     artifact_generation_request_binding_enabled: bool = False,
     artifact_generator: Any = None,
+    model_runtime_binding_verifier: Any = None,
+    commit_runner: Any = None,
+    commit_evidence_runner: Any = None,
     operation_cwd: Optional[Path] = None,
     holoindex_evidence: Optional[Mapping[str, Any]] = None,
     verifier_request: Optional[Mapping[str, Any]] = None,
@@ -234,29 +249,25 @@ def build_reddog_resident_queue_stage_handler_registry(
     held_out_gate_request: Optional[Mapping[str, Any]] = None,
     admission_request: Optional[Mapping[str, Any]] = None,
     pattern_memory_admission_sink: Any = None,
+    verified_outcome_evidence_publisher: Any = None,
     worker_dispatch_writer: Any = None,
+    elevated_consensus_capability_supplier: Any = None,
+    trusted_now_epoch: Optional[Callable[[], int]] = None,
+    assurance_reservation_store: Any = None,
     worktree_admission_registry: Optional[InMemoryWorktreeAdmissionRegistry] = None,
 ) -> ResidentQueueStageHandlerRegistry:
     """Build a handler map from explicitly injected dependencies."""
-
     handlers: Dict[str, ResidentQueueStageHandler] = {}
     missing: Dict[str, tuple[str, ...]] = {}
     root = Path(repo_root) if repo_root is not None else None
-    admission_registry = (
-        worktree_admission_registry or InMemoryWorktreeAdmissionRegistry()
-    )
+    admission_registry = worktree_admission_registry or InMemoryWorktreeAdmissionRegistry()
     if valve_environment is not None and not isinstance(
         valve_environment, GovernedExecutionValveEnvironment
     ):
         return ResidentQueueStageHandlerRegistry(
             handlers={},
-            missing_stage_reasons={
-                "production_environment": (
-                    "governed_execution_valve_environment_required",
-                )
-            },
+            missing_stage_reasons={"production_environment": ("governed_execution_valve_environment_required",)},
         )
-
     _add_if_ready(
         handlers,
         missing,
@@ -291,6 +302,10 @@ def build_reddog_resident_queue_stage_handler_registry(
             snapshot_resolver=snapshot_resolver,
             now=int(now_epoch or 0),
             leeway_s=leeway_s,
+            work_state_snapshot=work_state_snapshot,
+            authority_profile=authority_profile or {},
+            work_state_supplier=getattr(authoritative_work_state_store, "load", None),
+            elevated_consensus_capability_supplier=elevated_consensus_capability_supplier,
         ),
     )
     _add_if_ready(
@@ -333,11 +348,33 @@ def build_reddog_resident_queue_stage_handler_registry(
         handlers,
         missing,
         WORKER_DISPATCH_RUNTIME_STAGE_KEY,
-        _missing(("worker_dispatch_writer", worker_dispatch_writer)),
+        _missing(
+            ("worker_dispatch_writer", worker_dispatch_writer),
+            ("signature_verifier", signature_verifier),
+            ("principal_key_resolver", principal_key_resolver),
+            ("nonce_store", nonce_store),
+            ("snapshot_resolver", snapshot_resolver),
+            ("revocation_oracle", revocation_oracle),
+            ("trusted_now_epoch", trusted_now_epoch),
+        ),
         lambda: build_reddog_resident_queue_worker_dispatch_runtime_stage_handler(
             work_state_snapshot=work_state_snapshot,
             chain_results_store=chain_results_store,
             writer=worker_dispatch_writer,
+            authority_verification_context=WorkerDispatchAuthorityVerificationContext(
+                signature_verifier=signature_verifier,
+                principal_key_resolver=principal_key_resolver,
+                nonce_store=nonce_store,
+                snapshot_resolver=snapshot_resolver,
+                revocation_oracle=revocation_oracle,
+                trusted_now_epoch=trusted_now_epoch,
+                required_valve_state=required_valve_state,
+                forbidden_operations=tuple(forbidden_operations),
+                revoked_key_epochs=tuple(revoked_key_epochs),
+                leeway_s=leeway_s,
+            ),
+            work_state_store=authoritative_work_state_store,
+            now=now_datetime,
         ),
     )
     _add_if_ready(
@@ -386,7 +423,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             now=now_datetime,
             intake_target=intake_target,
             expected_valve_state=expected_valve_state,
-            worktree_admission_registry=admission_registry,
+            worktree_admission_registry=admission_registry, worktree_lease_issuer=worktree_lease_issuer,
         ),
     )
     _add_if_ready(
@@ -407,6 +444,20 @@ def build_reddog_resident_queue_stage_handler_registry(
     _add_if_ready(
         handlers,
         missing,
+        ASSURANCE_CAPACITY_ADMISSION_STAGE_KEY,
+        _missing(
+            ("assurance_reservation_store", assurance_reservation_store),
+        ),
+        lambda: build_reddog_resident_queue_assurance_capacity_admission_stage_handler(
+            work_state_snapshot=work_state_snapshot,
+            chain_results_store=chain_results_store,
+            reservation_store=assurance_reservation_store,
+            now=now_datetime,
+        ),
+    )
+    _add_if_ready(
+        handlers,
+        missing,
         BOUNDED_WORKER_PILOT_STAGE_KEY,
         _bounded_worker_pilot_missing(
             work_order_resolver=work_order_resolver,
@@ -416,6 +467,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             artifact_generation_request=artifact_generation_request,
             artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
             artifact_generator=artifact_generator,
+            model_runtime_binding_verifier=model_runtime_binding_verifier,
             pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
             repo_root=root,
         ),
@@ -431,6 +483,25 @@ def build_reddog_resident_queue_stage_handler_registry(
             artifact_generation_request=artifact_generation_request,
             artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
             artifact_generator=artifact_generator,
+            model_runtime_binding_verifier=model_runtime_binding_verifier,
+        ),
+    )
+    _add_if_ready(
+        handlers,
+        missing,
+        EXACT_SHA_COMMIT_STAGE_KEY,
+        _missing(
+            ("work_order_resolver", work_order_resolver),
+            ("commit_runner", commit_runner),
+            ("commit_evidence_runner", commit_evidence_runner),
+            ("repo_root", root),
+        ),
+        lambda: build_reddog_resident_queue_exact_sha_commit_stage_handler(
+            chain_results_store=chain_results_store,
+            work_order_resolver=work_order_resolver,
+            commit_runner=commit_runner,
+            evidence_command_runner=commit_evidence_runner,
+            repo_root=root or Path("."),
         ),
     )
     _add_if_ready(
@@ -444,6 +515,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
             work_order_resolver=work_order_resolver,
             repo_root=root,
+            assurance_reservation_store=assurance_reservation_store,
         ),
         lambda: build_reddog_resident_queue_slice_verifier_stage_handler(
             chain_results_store=chain_results_store,
@@ -454,6 +526,8 @@ def build_reddog_resident_queue_stage_handler_registry(
             repo_root=root,
             slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
             holoindex_evidence=holoindex_evidence,
+            assurance_reservation_store=assurance_reservation_store,
+            trusted_now=now_datetime,
         ),
     )
     _add_if_ready(
@@ -516,13 +590,10 @@ def build_reddog_resident_queue_stage_handler_registry(
             chain_results_store=chain_results_store,
             admission_request=admission_request or {},
             sink=pattern_memory_admission_sink,
+            evidence_publisher=verified_outcome_evidence_publisher,
         ),
     )
-
-    return ResidentQueueStageHandlerRegistry(
-        handlers=handlers,
-        missing_stage_reasons=missing,
-    )
+    return ResidentQueueStageHandlerRegistry(handlers=handlers, missing_stage_reasons=missing)
 
 
 def _bounded_worker_pilot_missing(
@@ -534,6 +605,7 @@ def _bounded_worker_pilot_missing(
     artifact_generation_request: Optional[Mapping[str, Any]],
     artifact_generation_request_binding_enabled: bool,
     artifact_generator: Any,
+    model_runtime_binding_verifier: Any,
     pilot_dryrun_binding_enabled: bool,
     repo_root: Optional[Path],
 ) -> tuple[str, ...]:
@@ -552,9 +624,10 @@ def _bounded_worker_pilot_missing(
         )
     if artifact_contents:
         return tuple(reasons)
-    if artifact_generation_request and artifact_generator is not None:
-        return tuple(reasons)
-    if artifact_generation_request_binding_enabled and artifact_generator is not None:
+    if (
+        artifact_generator is not None and model_runtime_binding_verifier is not None
+        and (artifact_generation_request or artifact_generation_request_binding_enabled)
+    ):
         return tuple(reasons)
     if not artifact_contents:
         reasons.append("missing_dependency:artifact_contents")
@@ -562,6 +635,8 @@ def _bounded_worker_pilot_missing(
         reasons.append("missing_dependency:artifact_generation_request")
     if artifact_generator is None:
         reasons.append("missing_dependency:artifact_generator")
+    if model_runtime_binding_verifier is None:
+        reasons.append("missing_dependency:model_runtime_binding_verifier")
     return tuple(reasons)
 
 
@@ -573,16 +648,22 @@ def _slice_verifier_missing(
     slice_verifier_request_binding_enabled: bool,
     work_order_resolver: Any,
     repo_root: Optional[Path],
+    assurance_reservation_store: Any,
 ) -> tuple[str, ...]:
     if verifier_request:
-        return ()
+        return _missing(
+            ("assurance_reservation_store", assurance_reservation_store),
+        )
     if evidence_producer_request and evidence_command_runner is not None:
-        return ()
+        return _missing(
+            ("assurance_reservation_store", assurance_reservation_store),
+        )
     if slice_verifier_request_binding_enabled:
         return _missing(
             ("work_order_resolver", work_order_resolver),
             ("repo_root", repo_root),
             ("evidence_command_runner", evidence_command_runner),
+            ("assurance_reservation_store", assurance_reservation_store),
         )
     reasons: list[str] = []
     if not verifier_request:

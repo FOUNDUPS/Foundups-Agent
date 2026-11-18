@@ -55,4 +55,4 @@ __all__ = [
 ]
 
 __version__ = "3.0.0"
-__status__ = "operational"
+__status__ = "experimental_cli_disabled"

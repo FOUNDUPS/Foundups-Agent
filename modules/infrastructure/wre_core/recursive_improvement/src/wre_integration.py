@@ -88,7 +88,7 @@ class WREIntegration:
         try:
             self.error_count += 1
 
-            # First check fingerprints for instant solution (95% token reduction)
+            # Reuse is a proposal; efficiency stays unmeasured without receipts.
             if self.fingerprint_nav:
                 fingerprint_solution = self.fingerprint_nav.apply_pattern_from_fingerprint(error)
                 if fingerprint_solution:
@@ -147,20 +147,17 @@ class WREIntegration:
         Args:
             operation: Name/ID of the operation
             context: Additional context
-            tokens_used: Tokens consumed (for efficiency tracking)
+            tokens_used: Caller-reported token count. It is stored as
+                unverified context and is not converted into savings.
         """
         try:
             self.success_count += 1
-
-            # Track token efficiency
-            if tokens_used > 0:
-                self.engine.metrics['tokens_saved'] += (1000 - tokens_used)  # Baseline 1000
 
             # Store success pattern
             success_data = {
                 'operation': operation,
                 'timestamp': datetime.now().isoformat(),
-                'tokens': tokens_used,
+                'reported_tokens_unverified': tokens_used,
                 'context': context or {}
             }
 
@@ -205,7 +202,8 @@ class WREIntegration:
                         return {
                             'approach': 'fingerprint_pattern',
                             'solution': pattern.get('solution'),
-                            'expected_savings': '95% token reduction',
+                            'expected_savings': None,
+                            'token_reduction_measured': False,
                             'confidence': 0.9
                         }
 
@@ -214,7 +212,8 @@ class WREIntegration:
                 if operation in improvement.target and improvement.applied:
                     return {
                         'approach': improvement.after_state,
-                        'expected_savings': improvement.metrics.get('token_savings', 0),
+                        'expected_savings': None,
+                        'token_reduction_measured': False,
                         'confidence': improvement.metrics.get('confidence', 0.5)
                     }
 
@@ -232,7 +231,8 @@ class WREIntegration:
             'patterns_extracted': len(self.engine.error_patterns),
             'solutions_available': len(self.engine.solutions),
             'improvements_applied': self.engine.metrics['improvements_applied'],
-            'tokens_saved': self.engine.metrics['tokens_saved'],
+            'tokens_saved': None,
+            'token_reduction_measured': False,
             'learning_velocity': self.engine.metrics['learning_velocity'],
             'fingerprint_patterns_found': self.patterns_found
         }
@@ -244,7 +244,8 @@ class WREIntegration:
                 'current_dae': summary['dae'],
                 'modules_tracked': summary['total_modules'],
                 'unused_modules': summary['unused_modules'],
-                'token_efficiency': summary['token_efficiency']
+                'token_efficiency': None,
+                'token_reduction_measured': False,
             }
 
         return stats

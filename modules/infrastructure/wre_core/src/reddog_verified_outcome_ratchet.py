@@ -13,7 +13,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass, field
+import math
+from copy import deepcopy
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Protocol
 
@@ -69,7 +71,7 @@ class InMemoryOutcomeRatchetStore:
         self.records: List[Dict[str, Any]] = []
 
     def append(self, record: Mapping[str, Any]) -> str:
-        payload = dict(record)
+        payload = deepcopy(dict(record))
         self.records.append(payload)
         return str(payload["ratchet_id"])
 
@@ -82,7 +84,9 @@ class JsonlOutcomeRatchetStore:
 
     def append(self, record: Mapping[str, Any]) -> str:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        line = json.dumps(record, sort_keys=True, separators=(",", ":"), default=str)
+        line = json.dumps(
+            record, sort_keys=True, separators=(",", ":"), default=str, allow_nan=False,
+        )
         with self.path.open("a", encoding="utf-8", newline="\n") as handle:
             handle.write(line + "\n")
         return str(record["ratchet_id"])
@@ -182,6 +186,15 @@ def _receipt_digest(value: Any) -> str:
     return _digest(_mapping(value) if isinstance(value, Mapping) else value)
 
 
+def _redact_receipt_labels(receipt: Any) -> Any:
+    """Remove secret markers from text fields of the existing receipt dataclasses."""
+    changes = {
+        name: "[redacted]" for name, value in vars(receipt).items()
+        if isinstance(value, str) and _contains_secret(value)
+    }
+    return replace(receipt, **changes) if changes else receipt
+
+
 def _verification_accepted(verification_result: Mapping[str, Any]) -> bool:
     return (
         verification_result.get("accepted") is True
@@ -200,12 +213,21 @@ def _publish_accepted(publish_result: Mapping[str, Any]) -> bool:
     )
 
 
+def _scope_matches(receipt: Mapping[str, Any], request: Mapping[str, Any]) -> bool:
+    return all(
+        isinstance(request.get(key), str)
+        and bool(request[key].strip())
+        and receipt.get(key) == request[key]
+        for key in ("work_order_id", "slice_name")
+    )
+
+
 def _holoindex_ok(holoindex_evidence: Mapping[str, Any]) -> bool:
     if holoindex_evidence.get("index_gap_detected") is True:
         return False
     if str(holoindex_evidence.get("retrieval_quality") or "").upper() == "INDEX_GAP":
         return False
-    return bool(str(holoindex_evidence.get("holoindex_freshness_receipt_digest") or ""))
+    return _is_digest(holoindex_evidence.get("holoindex_freshness_receipt_digest"))
 
 
 def _is_digest(value: Any) -> bool:
@@ -257,17 +279,17 @@ def _runtime_binding_ok(request: Mapping[str, Any]) -> tuple[bool, Optional[str]
 
 
 def _cost_latency_ok(cost: Mapping[str, Any], latency: Mapping[str, Any]) -> bool:
-    for key in ("total_tokens", "estimated_cost_usd"):
-        if key not in cost:
-            return False
-        if float(cost.get(key) or 0) < 0:
-            return False
-    for key in ("wall_time_ms", "queue_time_ms"):
-        if key not in latency:
-            return False
-        if int(latency.get(key) or 0) < 0:
-            return False
-    return True
+    values = [
+        cost.get("total_tokens"), cost.get("estimated_cost_usd"),
+        latency.get("wall_time_ms"), latency.get("queue_time_ms"),
+    ]
+    try:
+        return type(cost.get("total_tokens")) is int and all(
+            type(value) in (int, float) and math.isfinite(value) and value >= 0
+            for value in values
+        )
+    except OverflowError:
+        return False
 
 
 def _build_receipt(
@@ -297,6 +319,7 @@ def _build_receipt(
     )
     outcome_status = str(request.get("outcome_status") or "")
     seed = {
+        "identity_version": 2,
         "work_order_id": work_order_id,
         "slice_name": slice_name,
         "outcome_status": outcome_status,
@@ -305,13 +328,16 @@ def _build_receipt(
         "request_digest": _receipt_digest(request.get("request_receipt")),
         "execution_receipts_digest": _digest(execution_receipts),
         "verification_digest": _receipt_digest(verification_result),
+        "publication_digest": _receipt_digest(publish_result),
+        "cost_receipt_digest": _receipt_digest(cost),
+        "latency_receipt_digest": _receipt_digest(latency),
+        "holoindex_evidence_digest": _receipt_digest(holoindex),
         "acceptance_receipt_digest": _receipt_digest(acceptance),
         "failure_receipt_digest": _receipt_digest(failure) if failure else None,
         "model_runtime_binding_receipt_id": runtime_binding_id or "",
         "model_runtime_binding_digest": runtime_binding_digest,
-        "rejection_reasons": reasons,
     }
-    return VerifiedOutcomeRatchetReceipt(
+    receipt = VerifiedOutcomeRatchetReceipt(
         ratchet_id="outcome_ratchet_" + _digest(seed).removeprefix("sha256:")[:16],
         work_order_id=work_order_id,
         slice_name=slice_name,
@@ -335,6 +361,7 @@ def _build_receipt(
         pattern_memory_record_id=pattern_memory_record_id,
         rejection_reasons=reasons,
     )
+    return _redact_receipt_labels(receipt) if FAIL_SECRET_IN_RECEIPT in reasons else receipt
 
 
 def ratchet_verified_outcome(
@@ -344,7 +371,7 @@ def ratchet_verified_outcome(
     pattern_memory_sink: Optional[PatternMemorySink] = None,
 ) -> VerifiedOutcomeRatchetResult:
     """Persist an autonomous-work outcome and gate PatternMemory admission."""
-    req = _mapping(request)
+    req = deepcopy(dict(_mapping(request)))
     verification_result = _mapping(req.get("verification_result"))
     publish_result = _mapping(req.get("publish_result"))
     execution_receipts = _list(req.get("execution_receipts"))
@@ -362,8 +389,14 @@ def ratchet_verified_outcome(
         or not str(req.get("slice_name") or "").strip()
     ):
         reasons.append(FAIL_REQUIRED_FIELD)
-    verified = _verification_accepted(verification_result)
-    published = _publish_accepted(publish_result)
+    verification_receipt = _mapping(verification_result.get("receipt"))
+    publish_receipt = _mapping(publish_result.get("receipt"))
+    verified = _verification_accepted(verification_result) and _scope_matches(verification_receipt, req)
+    published = (
+        _publish_accepted(publish_result)
+        and _scope_matches(publish_receipt, req)
+        and publish_receipt.get("verifier_receipt_id") == verification_receipt.get("receipt_id")
+    )
     if not verified:
         reasons.append(FAIL_VERIFICATION_RECEIPT)
     if outcome_status == "accepted" and not published:
@@ -372,26 +405,23 @@ def ratchet_verified_outcome(
         reasons.append(FAIL_RECEIPT_SET)
     if not acceptance and not failure:
         reasons.append(FAIL_RECEIPT_SET)
+    if outcome_status == "accepted" and (acceptance.get("accepted") is not True or failure):
+        reasons.append(FAIL_RECEIPT_SET)
     if not _cost_latency_ok(cost, latency):
         reasons.append(FAIL_COST_LATENCY)
     if not _holoindex_ok(holoindex):
         reasons.append(FAIL_HOLOINDEX_EVIDENCE)
     if not runtime_binding_ok:
         reasons.append(FAIL_MODEL_RUNTIME_BINDING)
-    if _contains_secret(
-        {
-            "request": req.get("request_receipt"),
-            "execution": execution_receipts,
-            "acceptance": acceptance,
-            "failure": failure,
-        }
-    ):
+    if _contains_secret(req):
         reasons.append(FAIL_SECRET_IN_RECEIPT)
 
     pattern_requested = req.get("enable_pattern_memory_write") is True
-    pattern_eligible = verified and published and outcome_status == "accepted"
+    pattern_eligible = not reasons and verified and published and outcome_status == "accepted"
     if pattern_requested and not pattern_eligible:
         reasons.append(FAIL_PATTERN_MEMORY_UNVERIFIED)
+    if pattern_requested and pattern_memory_sink is None:
+        reasons.append(FAIL_PATTERN_MEMORY_WRITE)
 
     deduped = _dedupe(reasons)
     pattern_memory_record_id: Optional[str] = None
@@ -399,7 +429,7 @@ def ratchet_verified_outcome(
     receipt = _build_receipt(
         request=req,
         reasons=deduped,
-        pattern_memory_eligible=pattern_eligible,
+        pattern_memory_eligible=pattern_eligible and not deduped,
         pattern_memory_write_performed=False,
         pattern_memory_record_id=None,
     )
@@ -422,16 +452,19 @@ def ratchet_verified_outcome(
         "latency_receipt": latency,
         "acceptance_receipt": acceptance,
         "failure_receipt": failure,
+        "holoindex_evidence": holoindex,
     }
 
     try:
-        store_record_id = store.append(record)
+        store_record_id = store.append(deepcopy(record))
+        if not isinstance(store_record_id, str) or not store_record_id.strip():
+            raise ValueError("Store returned no record acknowledgment")
     except Exception:
         deduped = _dedupe([*deduped, FAIL_STORE_WRITE])
         receipt = _build_receipt(
             request=req,
             reasons=deduped,
-            pattern_memory_eligible=pattern_eligible,
+            pattern_memory_eligible=False,
             pattern_memory_write_performed=False,
             pattern_memory_record_id=None,
         )
@@ -445,7 +478,10 @@ def ratchet_verified_outcome(
 
     if not deduped and pattern_requested and pattern_memory_sink is not None:
         try:
-            pattern_memory_record_id = pattern_memory_sink.store_verified_outcome(record)
+            pattern_memory_record_id = pattern_memory_sink.store_verified_outcome(deepcopy(record))
+            if not isinstance(pattern_memory_record_id, str) or not pattern_memory_record_id.strip():
+                pattern_memory_record_id = None
+                raise ValueError("Memory sink returned no record acknowledgment")
             pattern_memory_write_performed = True
         except Exception:
             deduped = [FAIL_PATTERN_MEMORY_WRITE]
@@ -453,7 +489,7 @@ def ratchet_verified_outcome(
     receipt = _build_receipt(
         request=req,
         reasons=deduped,
-        pattern_memory_eligible=pattern_eligible,
+        pattern_memory_eligible=pattern_eligible and not deduped,
         pattern_memory_write_performed=pattern_memory_write_performed,
         pattern_memory_record_id=pattern_memory_record_id,
     )

@@ -14,6 +14,7 @@ import pytest
 from holo_index.freshness_receipt import (
     ALL_COLLECTIONS,
     SCHEMA_VERSION,
+    SNAPSHOT_PAGE_SIZE,
     build_freshness_receipt,
     build_maintenance_invalidation,
     collections_for_changed_paths,
@@ -26,8 +27,15 @@ from holo_index.freshness_receipt import (
     write_freshness_receipt,
 )
 from holo_index.maintenance_lock import (
+    AUTHORITY_BLOCK_MARKER_CONTENT,
     MaintenanceLeaseBusy,
+    MaintenanceLockError,
+    acquire_existing_maintenance_lease,
+    acquire_authority_update_lease,
     acquire_maintenance_lease,
+    authority_block_marker_path,
+    authority_block_marker_valid,
+    authority_update_lock_path,
     maintenance_lock_path,
     probe_maintenance_lock,
 )
@@ -144,6 +152,47 @@ def test_receipt_contains_all_expected_collections(tmp_path: Path) -> None:
         _assert_sha256_digest(entry.source_manifest_digest)
         _assert_sha256_digest(entry.indexed_paths_digest)
         _assert_sha256_digest(entry.removed_paths_digest)
+
+
+def test_large_snapshot_manifest_reads_bounded_pages(tmp_path: Path) -> None:
+    class PagedSnapshotCollection(SnapshotCollection):
+        def __init__(self, name: str, count: int):
+            super().__init__(name, count)
+            self.pages: list[tuple[int, int]] = []
+
+        def get(self, *, include=None, limit=None, offset=0):
+            assert include == ["documents", "metadatas", "embeddings"]
+            assert isinstance(limit, int)
+            self.pages.append((offset, limit))
+            snapshot = super().get(include=include)
+            return {
+                key: value[offset : offset + limit]
+                for key, value in snapshot.items()
+            }
+
+    count = SNAPSHOT_PAGE_SIZE * 2 + 3
+    collection = PagedSnapshotCollection("navigation_code", count)
+    holo = _holo()
+    holo.code_collection = collection
+
+    receipt = build_freshness_receipt(
+        holo,
+        ssd_path=tmp_path,
+        repo_root=REPO_ROOT,
+        source="manual_index",
+        repo_head_sha="abc123",
+    )
+
+    entry = next(
+        value for value in receipt.collections if value.name == "navigation_code"
+    )
+    assert entry.verification == "PASS"
+    assert entry.count == count
+    assert collection.pages == [
+        (0, SNAPSHOT_PAGE_SIZE),
+        (SNAPSHOT_PAGE_SIZE, SNAPSHOT_PAGE_SIZE),
+        (SNAPSHOT_PAGE_SIZE * 2, 3),
+    ]
 
 
 def test_snapshot_verification_uses_fresh_client_collection_handle(
@@ -716,6 +765,55 @@ def test_read_only_lock_probe_does_not_create_absent_path(tmp_path: Path) -> Non
     assert lock_path.parent.exists() is False
 
 
+def test_existing_lease_never_creates_an_absent_sentinel(tmp_path: Path) -> None:
+    lock_path = maintenance_lock_path(tmp_path / "never-created")
+
+    with pytest.raises(MaintenanceLockError, match="sentinel is absent"):
+        acquire_existing_maintenance_lease(lock_path)
+
+    assert not lock_path.exists()
+    assert not lock_path.parent.exists()
+
+
+def test_existing_lease_retains_exact_bytes_and_excludes_contenders(
+    tmp_path: Path,
+) -> None:
+    lock_path = maintenance_lock_path(tmp_path)
+    lock_path.parent.mkdir(parents=True)
+    lock_path.write_bytes(b"stable-sentinel-v1\n")
+    before = lock_path.read_bytes()
+
+    with acquire_existing_maintenance_lease(lock_path) as lease:
+        assert lease.sentinel_proof.size == len(before)
+        with pytest.raises(MaintenanceLeaseBusy):
+            acquire_maintenance_lease(lock_path)
+        lease.revalidate_sentinel()
+
+    assert lock_path.read_bytes() == before
+    with acquire_existing_maintenance_lease(lock_path):
+        pass
+
+
+def test_existing_lease_rejects_nonregular_and_hardlinked_sentinels(
+    tmp_path: Path,
+) -> None:
+    directory = maintenance_lock_path(tmp_path / "directory")
+    directory.mkdir(parents=True)
+    with pytest.raises(MaintenanceLockError, match="sentinel is invalid"):
+        acquire_existing_maintenance_lease(directory)
+
+    lock_path = maintenance_lock_path(tmp_path / "hardlink")
+    lock_path.parent.mkdir(parents=True)
+    lock_path.write_bytes(b"sentinel\n")
+    alias = lock_path.with_name("sentinel-alias.lock")
+    try:
+        alias.hardlink_to(lock_path)
+    except OSError:
+        pytest.skip("hardlink creation unavailable")
+    with pytest.raises(MaintenanceLockError, match="sentinel is invalid"):
+        acquire_existing_maintenance_lease(lock_path)
+
+
 def test_lock_probe_fails_closed_for_invalid_sentinel(tmp_path: Path) -> None:
     lock_path = maintenance_lock_path(tmp_path)
     lock_path.parent.mkdir(parents=True)
@@ -782,6 +880,29 @@ def test_acquiring_lease_does_not_rewrite_freshness_receipt(tmp_path: Path) -> N
         assert receipt_path.read_bytes() == before
 
     assert receipt_path.read_bytes() == before
+
+
+def test_authority_and_maintenance_leases_are_distinct_and_can_nest(
+    tmp_path: Path,
+) -> None:
+    assert authority_update_lock_path(tmp_path) != maintenance_lock_path(tmp_path)
+
+    with acquire_authority_update_lease(tmp_path):
+        with acquire_maintenance_lease(maintenance_lock_path(tmp_path)):
+            assert authority_update_lock_path(tmp_path).exists()
+            assert maintenance_lock_path(tmp_path).exists()
+        assert probe_maintenance_lock(maintenance_lock_path(tmp_path)).clear
+
+
+def test_authority_block_marker_requires_exact_regular_content(
+    tmp_path: Path,
+) -> None:
+    marker = authority_block_marker_path(tmp_path)
+    assert not authority_block_marker_valid(tmp_path)
+    marker.write_bytes(b"wrong")
+    assert not authority_block_marker_valid(tmp_path)
+    marker.write_bytes(AUTHORITY_BLOCK_MARKER_CONTENT)
+    assert authority_block_marker_valid(tmp_path)
 
 
 def test_maintenance_invalidation_preserves_only_unplanned_proof(

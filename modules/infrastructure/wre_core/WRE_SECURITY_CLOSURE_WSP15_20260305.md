@@ -1,5 +1,10 @@
 # WRE Security Closure (WSP 15)
 
+> **Historical closure receipt — non-authoritative after 2026-03-05.**
+> “Closed” means addressed in that bounded transaction, not permanently secure
+> or currently production-ready. Re-run exact-current security, admission, and
+> effect verification before relying on any control below.
+
 Date: 2026-03-05  
 Scope: 24/7 0102 runtime hardening for Claw + WRE.
 
@@ -47,4 +52,3 @@ Scoring formula: `MPS = C + I + (5 - D) + Im`.
 - Updated:
   - `modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py`
   - `modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py`
-

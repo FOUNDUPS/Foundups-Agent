@@ -88,3 +88,37 @@ def test_code_probe_matches_code_indexer_manifest_formula(
 
 def test_canonical_code_scope_includes_modern_javascript_modules() -> None:
     assert {".mjs", ".cjs"}.issubset(CANONICAL_WEB_EXTENSIONS)
+
+
+def test_docs_source_manifest_includes_holoindex_current_contracts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    expected = {
+        "holo_index/README.md",
+        "holo_index/INTERFACE.md",
+        "holo_index/ROADMAP.md",
+        "holo_index/ModLog.md",
+        "holo_index/CLI_REFERENCE.md",
+        "holo_index/tests/README.md",
+        "holo_index/tests/TestModLog.md",
+        "holo_index/memory/README.md",
+        "holo_index/adaptive_learning/README.md",
+        "holo_index/adaptive_learning/INTERFACE.md",
+    }
+    for relative_path in (*expected, "holo_index/unrelated.md"):
+        path = tmp_path / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(relative_path, encoding="utf-8")
+    monkeypatch.setattr(
+        manifest_module,
+        "filter_git_tracked_files",
+        lambda root, values: list(values),
+    )
+
+    files = manifest_module._docs_source_files(
+        SimpleNamespace(project_root=tmp_path)
+    )
+    relative = {path.relative_to(tmp_path).as_posix() for path in files}
+
+    assert expected <= relative
+    assert "holo_index/unrelated.md" not in relative

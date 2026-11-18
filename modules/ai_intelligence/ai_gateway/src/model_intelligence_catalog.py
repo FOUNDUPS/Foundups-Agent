@@ -86,7 +86,7 @@ class ModelCapabilityCard:
             source=_clean_token(self.source),
             freshness=_clean_token(self.freshness),
             task_families=tuple(sorted({_clean_token(v) for v in self.task_families if str(v).strip()})),
-            modalities=tuple(sorted({_clean_token(v) for v in self.modalities if str(v).strip()})) or ("text",),
+            modalities=tuple(sorted({_clean_token(v) for v in self.modalities if str(v).strip()})),
             supported_parameters=tuple(
                 sorted({_clean_token(v) for v in self.supported_parameters if str(v).strip()})
             ),
@@ -237,6 +237,29 @@ def normalize_local_role_cards(selections: Mapping[str, Any]) -> tuple[ModelCapa
     return tuple(sorted(cards, key=lambda card: card.canonical_model_id))
 
 
+def merge_model_capability_cards(
+    cards: Iterable[ModelCapabilityCard],
+) -> tuple[ModelCapabilityCard, ...]:
+    """Merge complementary evidence for the same provider/model identity.
+
+    Static policy supplies task-family intent while live provider catalogs
+    supply context, pricing and protocol capabilities. Keeping those as two
+    cards makes both ineligible for compound requirements. This merge is
+    deliberately conservative: it never manufactures CHAMPION state, uses the
+    smallest asserted context window and the highest asserted price, and keeps
+    provider identities separate.
+    """
+
+    grouped: dict[tuple[str, str], list[ModelCapabilityCard]] = {}
+    for value in cards:
+        card = value.normalized()
+        grouped.setdefault((card.provider, card.canonical_model_id), []).append(card)
+    return tuple(
+        _merge_card_group(values)
+        for _, values in sorted(grouped.items(), key=lambda item: item[0])
+    )
+
+
 def build_canonical_model_catalog(
     *,
     static_registry: bool = True,
@@ -258,11 +281,111 @@ def build_canonical_model_catalog(
     if local_role_selections is not None:
         cards.extend(normalize_local_role_cards(local_role_selections))
     return build_model_catalog_snapshot(
-        cards,
+        merge_model_capability_cards(cards),
         source_receipts=source_receipts,
         rejected_records=rejected,
         generated_at=generated_at,
     )
+
+
+def _merge_card_group(values: Sequence[ModelCapabilityCard]) -> ModelCapabilityCard:
+    if not values:
+        raise ValueError("missing_model_capability_cards")
+    first = values[0]
+    if len({value.model_id for value in values}) != 1:
+        raise ValueError("conflicting_model_capability_card_model_ids")
+    provider_evidence = tuple(value for value in values if value.source == "openrouter_catalog")
+    capability_values = provider_evidence or tuple(values)
+    return _build_merged_card(first, values, capability_values)
+
+
+def _build_merged_card(
+    first: ModelCapabilityCard,
+    values: Sequence[ModelCapabilityCard],
+    capability_values: Sequence[ModelCapabilityCard],
+) -> ModelCapabilityCard:
+    contexts = [
+        value.context_window for value in capability_values if value.context_window is not None
+    ]
+    input_costs = [
+        value.input_cost_per_million
+        for value in capability_values
+        if value.input_cost_per_million is not None
+    ]
+    output_costs = [
+        value.output_cost_per_million
+        for value in capability_values
+        if value.output_cost_per_million is not None
+    ]
+    verifier_rates = [value.verifier_pass_rate for value in values if value.verifier_pass_rate is not None]
+    common_modalities = _common_values(value.modalities for value in capability_values)
+    common_parameters = _common_values(
+        value.supported_parameters for value in capability_values
+    )
+    privacy_values = {value.privacy_policy for value in capability_values}
+    return ModelCapabilityCard(
+        provider=first.provider,
+        model_id=first.model_id,
+        canonical_model_id=first.canonical_model_id,
+        source="+".join(sorted({value.source for value in values})),
+        availability=_merged_availability(capability_values),
+        freshness="+".join(sorted({value.freshness for value in values})),
+        promotion_state=_merged_promotion_state(values),
+        task_families=tuple(sorted({item for value in values for item in value.task_families})),
+        context_window=min(contexts) if contexts else None,
+        input_cost_per_million=max(input_costs) if input_costs else None,
+        output_cost_per_million=max(output_costs) if output_costs else None,
+        supports_tools=all(value.supports_tools for value in capability_values),
+        supports_structured_output=all(
+            value.supports_structured_output for value in capability_values
+        ),
+        supports_reasoning=all(value.supports_reasoning for value in capability_values),
+        modalities=tuple(sorted(common_modalities)),
+        supported_parameters=tuple(sorted(common_parameters)),
+        privacy_policy=next(iter(privacy_values)) if len(privacy_values) == 1 else "unknown",
+        verifier_pass_rate=min(verifier_rates) if verifier_rates else None,
+        benchmark_scores=_merged_benchmark_scores(values),
+    ).normalized()
+
+
+def _common_values(values: Iterable[Sequence[str]]) -> set[str]:
+    populated = [set(value) for value in values if value]
+    return set.intersection(*populated) if populated else set()
+
+
+def _merged_benchmark_scores(
+    values: Sequence[ModelCapabilityCard],
+) -> dict[str, float]:
+    keys = sorted({key for value in values for key in value.benchmark_scores})
+    return {
+        key: min(
+            float(value.benchmark_scores[key])
+            for value in values
+            if key in value.benchmark_scores
+        )
+        for key in keys
+    }
+
+
+def _merged_availability(values: Sequence[ModelCapabilityCard]) -> Availability:
+    states = {value.availability for value in values}
+    if Availability.UNAVAILABLE in states:
+        return Availability.UNAVAILABLE
+    if states == {Availability.AVAILABLE}:
+        return Availability.AVAILABLE
+    return Availability.UNKNOWN
+
+
+def _merged_promotion_state(values: Sequence[ModelCapabilityCard]) -> PromotionState:
+    states = {value.promotion_state for value in values}
+    if PromotionState.BLOCKED in states:
+        return PromotionState.BLOCKED
+    if PromotionState.DEPRECATED in states:
+        return PromotionState.DEPRECATED
+    if len(states) == 1:
+        return next(iter(states))
+    # Conflicting lifecycle evidence must never synthesize production authority.
+    return PromotionState.CANDIDATE
 
 
 def _task_index(recommended_models: Mapping[str, Sequence[str]]) -> dict[str, tuple[str, ...]]:
@@ -289,7 +412,7 @@ def _modalities_from_openrouter(architecture: Mapping[str, Any]) -> tuple[str, .
     values: list[str] = []
     values.extend(_string_tuple(architecture.get("input_modalities")))
     values.extend(_string_tuple(architecture.get("output_modalities")))
-    return tuple(sorted(set(values))) or ("text",)
+    return tuple(sorted(set(values)))
 
 
 def _string_tuple(value: Any) -> tuple[str, ...]:

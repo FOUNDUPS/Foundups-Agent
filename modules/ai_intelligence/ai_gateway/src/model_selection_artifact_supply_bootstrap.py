@@ -155,7 +155,7 @@ def _key_resolver(payload: Mapping[str, Any]) -> tuple[StaticModelEvidenceKeyRes
     raw = payload.get("trusted_public_keys", payload)
     keys: dict[object, str] = {}
     if isinstance(raw, Mapping):
-        keys.update({str(role): str(public_key) for role, public_key in raw.items() if str(role) and str(public_key)})
+        return None, ("exact_model_evidence_trusted_key_tuples_required",)
     elif isinstance(raw, list):
         for item in raw:
             if not isinstance(item, Mapping):

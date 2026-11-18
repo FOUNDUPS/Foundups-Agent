@@ -15,11 +15,11 @@
 | WRE_REACT_MODE | 1 | Enable ReAct retry loop (max 3 iterations) |
 | WRE_REACT_MAX_ITER | 3 | Maximum ReAct retry iterations |
 | WRE_REACT_FIDELITY | 0.90 | Fidelity threshold for success |
-| WRE_AGENTIC_RAG | 1 | Enable HoloIndex retrieval preflight |
+| WRE_AGENTIC_RAG | 0 | Legacy direct retrieval is blocked pending the governed Holo owner adapter |
 | WRE_TOT_SELECTION | 1 | Enable Tree-of-Thought skill selection |
 | WRE_TOT_MAX_BRANCHES | 5 | Maximum ToT candidates to evaluate |
-| WRE_CODEACT_ENABLED | 1 | Enable hybrid CodeAct execution |
-| WRE_CODEACT_STRICT | 1 | Enforce strict CodeAct shell safety policy |
+| WRE_CODEACT_ENABLED | 0 | CodeAct is a non-admitted prototype and remains runtime-blocked |
+| WRE_CODEACT_STRICT | 1 | Prototype executor policy; not production admission authority |
 | WRE_SKILL_SCAN_REQUIRED | 1 | Require WRE per-skill scan gate before execute |
 | WRE_SKILL_SCAN_ENFORCED | 1 | Block WRE execution when scan gate fails |
 | WRE_SKILL_SCAN_ALWAYS | 0 | Re-scan every execution instead of TTL cache |
@@ -67,20 +67,20 @@ print(dashboard)
 
 Key metrics:
 - `tot_confidence_rate`: Should be >70% for healthy ToT
-- `codeact_success_rate`: Should be >90% for healthy CodeAct
-- `retrieval_coverage`: Should be >80% for healthy RAG
+- CodeAct and legacy direct-RAG counters are historical and are not current
+  production-health evidence.
 
 ## Troubleshooting
 
 ### Low fidelity scores
 1. Check ReAct is enabled: `WRE_REACT_MODE=1`
-2. Verify RAG retrieval: `WRE_AGENTIC_RAG=1`
-3. Check skill variations: `dashboard['variations_promoted']`
+2. Confirm `WRE_AGENTIC_RAG=0`; production retrieval is unavailable until the
+   governed owner adapter is implemented.
+3. Inspect proposal candidates; none is automatically promoted.
 
-### CodeAct failures
-1. Check safety gates in skill spec
-2. Verify allowed_commands includes required commands
-3. Check `codeact_gate_triggers` counter
+### CodeAct requests
+CodeAct requests fail with `codeact_prototype_boundary`. Do not enable the
+legacy flag; implement WSP 95 admission and effect receipts first.
 
 ### ToT poor selection
 1. Verify sufficient execution history (need 5+ per skill)

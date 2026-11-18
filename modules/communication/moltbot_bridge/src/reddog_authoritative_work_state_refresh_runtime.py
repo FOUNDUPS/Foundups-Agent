@@ -19,12 +19,10 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
-import tempfile
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
+from typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple
 
 from modules.communication.moltbot_bridge.src.reddog_lane_state_reconciler import (
     LaneReconciliationReport,
@@ -37,8 +35,10 @@ from modules.communication.moltbot_bridge.src.reddog_lane_state_reconciler impor
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
-from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    runtime_operation_lock,
+from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_store import (
+    AtomicJsonAuthoritativeWorkStateStore,
+    AuthoritativeWorkStateStore,
+    InMemoryAuthoritativeWorkStateStore,
 )
 
 
@@ -190,78 +190,6 @@ class AuthoritativeWorkStateRefreshResult:
             "queue_sync_receipt": self.queue_sync_receipt.to_dict() if self.queue_sync_receipt else None,
             "snapshot": self.snapshot,
         }
-
-
-class AuthoritativeWorkStateStore(Protocol):
-    """Atomic store interface for authoritative work-state snapshots."""
-
-    def load(self) -> Dict[str, Any]:
-        """Return the current snapshot, or an empty dict."""
-
-    def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        """Atomically commit snapshot and return the committed revision."""
-
-
-class InMemoryAuthoritativeWorkStateStore:
-    """Test/runtime helper implementing optimistic atomic commits in memory."""
-
-    def __init__(self, initial: Optional[Mapping[str, Any]] = None, *, fail_commit: bool = False) -> None:
-        self._state: Dict[str, Any] = dict(initial or {})
-        self.fail_commit = fail_commit
-
-    def load(self) -> Dict[str, Any]:
-        return json.loads(json.dumps(self._state, sort_keys=True))
-
-    def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        if self.fail_commit:
-            raise RuntimeError("commit_failed")
-        current_revision = self._state.get("revision")
-        if current_revision != expected_revision:
-            raise RuntimeError("revision_conflict")
-        committed = json.loads(json.dumps(snapshot, sort_keys=True))
-        revision = _canonical_digest(committed)
-        committed["revision"] = revision
-        self._state = committed
-        return revision
-
-
-class AtomicJsonAuthoritativeWorkStateStore:
-    """Single-file JSON store using atomic replace."""
-
-    def __init__(self, path: str | Path) -> None:
-        self.path = Path(path)
-
-    def load(self) -> Dict[str, Any]:
-        with runtime_operation_lock(str(self.path) + ".operation"):
-            return self._load_unlocked()
-
-    def _load_unlocked(self) -> Dict[str, Any]:
-        if not self.path.exists():
-            return {}
-        return json.loads(self.path.read_text(encoding="utf-8"))
-
-    def commit(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        with runtime_operation_lock(str(self.path) + ".operation"):
-            return self._commit_unlocked(snapshot, expected_revision=expected_revision)
-
-    def _commit_unlocked(self, snapshot: Mapping[str, Any], *, expected_revision: Optional[str]) -> str:
-        current = self._load_unlocked()
-        if current.get("revision") != expected_revision:
-            raise RuntimeError("revision_conflict")
-        committed = json.loads(json.dumps(snapshot, sort_keys=True))
-        revision = _canonical_digest(committed)
-        committed["revision"] = revision
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        fd, tmp_name = tempfile.mkstemp(prefix=f".{self.path.name}.", suffix=".tmp", dir=str(self.path.parent))
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-                json.dump(committed, handle, sort_keys=True, indent=2)
-                handle.write("\n")
-            os.replace(tmp_name, self.path)
-        finally:
-            if os.path.exists(tmp_name):
-                os.unlink(tmp_name)
-        return revision
 
 
 def _canonical_digest(payload: Mapping[str, Any]) -> str:
@@ -644,8 +572,9 @@ def refresh_authoritative_work_state_runtime(
             report=report,
             freshness=freshness,
         )
-
     current = store.load()
+    if any(isinstance(item, Mapping) and item.get("state") != "COMMITTED" for item in (current.get("architect_fix_publications") or [])):
+        return _reject(now_iso=now_iso, reasons=("architect_fix_publication_pending",), report=report, freshness=freshness)
     selected = report.prework_packet.chosen_slice
     if not selected:
         queue_sync = WREQueueSyncReceipt(
@@ -703,10 +632,8 @@ def refresh_authoritative_work_state_runtime(
             selected_slice=selected,
             rejection_reasons=(),
         )
-
     records = _authoritative_records(report)
-    previous_claims = [dict(claim) for claim in (current.get("worker_claims") or []) if isinstance(claim, Mapping)]
-    previous_queue = [dict(item) for item in (current.get("wre_queue_items") or []) if isinstance(item, Mapping)]
+    preserved = {key: [dict(item) for item in (current.get(key) or []) if isinstance(item, Mapping)] for key in ("worker_claims", "wre_queue_items", "architect_fix_promotions", "architect_fix_publications")}
     snapshot = {
         "schema_version": WORK_STATE_SCHEMA_VERSION,
         "updated_at": now_iso,
@@ -719,14 +646,15 @@ def refresh_authoritative_work_state_runtime(
         "selected_slice": selected,
         "slices": [record.to_dict() for record in records],
         "freshness_receipts": [freshness.to_dict()],
-        "worker_claims": previous_claims + ([durable_claim.to_dict()] if durable_claim else []),
-        "wre_queue_items": previous_queue + [item.to_dict() for item in queue_items],
+        "worker_claims": preserved["worker_claims"] + ([durable_claim.to_dict()] if durable_claim else []),
+        "wre_queue_items": preserved["wre_queue_items"] + [item.to_dict() for item in queue_items],
+        "architect_fix_promotions": preserved["architect_fix_promotions"],
+        "architect_fix_publications": preserved["architect_fix_publications"],
         "queue_sync_receipts": [queue_sync.to_dict()],
         "no_holoindex_mutation_performed": True,
         "no_worker_spawn_performed": True,
         "no_execution_performed": True,
     }
-
     try:
         revision = store.commit(snapshot, expected_revision=current.get("revision"))
     except Exception as exc:  # noqa: BLE001 - commit backend errors are fail-closed.

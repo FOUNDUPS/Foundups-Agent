@@ -1,0 +1,41 @@
+{
+  "schema": "memory_horizon_work_order_result.v1",
+  "task_id": null,
+  "status": "pending",
+  "candidate_commit": null,
+  "integrated_commit": null,
+  "dependency_evidence": [],
+  "deliverable_summary": null,
+  "edits_or_actions": [],
+  "work_order_binding": {
+    "digest": null,
+    "source_commit": null
+  },
+  "wsp_compliance": {
+    "gate_evidence": [],
+    "wsp97_evidence": []
+  },
+  "runtime_binding": {
+    "worker": null,
+    "model": null,
+    "provider": null,
+    "evidence_refs": []
+  },
+  "validation": [],
+  "acceptance_results": [],
+  "external_effects": [],
+  "blockers": [],
+  "metrics": {
+    "calls": null,
+    "retries": null,
+    "duration_ms": null,
+    "tokens": null,
+    "cost": null
+  },
+  "next_best_step": null,
+  "review": {
+    "verifier": null,
+    "decision": null,
+    "evidence_refs": []
+  }
+}

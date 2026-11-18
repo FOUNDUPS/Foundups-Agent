@@ -108,6 +108,16 @@ def _function_size(path: Path, name: str) -> int:
     return node.end_lineno - node.lineno + 1
 
 
+def _oversized_functions(path: Path, limit: int = 50) -> tuple[tuple[str, int], ...]:
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    return tuple(
+        (node.name, node.end_lineno - node.lineno + 1)
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        and node.end_lineno - node.lineno + 1 > limit
+    )
+
+
 def test_corrective_slice_preserves_exact_wsp62_boundaries() -> None:
     main_path = REPO_ROOT / "main.py"
     assert len(main_path.read_text(encoding="utf-8").splitlines()) <= 4978
@@ -132,6 +142,18 @@ def test_corrective_slice_preserves_exact_wsp62_boundaries() -> None:
         source / "model_autoresearch_semantic_verifier.py",
         "_v2_runner_digest_rejections",
     ) <= 50
+    runner = source / "model_autoresearch_configured_gateway_runner.py"
+    callers = source / "model_autoresearch_configured_gateway_callers.py"
+    evidence = source / "model_autoresearch_configured_gateway_evidence.py"
+    durability = source / "model_autoresearch_configured_gateway_durability.py"
+    assert len(runner.read_text(encoding="utf-8").splitlines()) <= 769
+    assert len(callers.read_text(encoding="utf-8").splitlines()) <= 200
+    assert len(evidence.read_text(encoding="utf-8").splitlines()) <= 910
+    assert len(durability.read_text(encoding="utf-8").splitlines()) <= 200
+    assert _oversized_functions(runner) == ()
+    assert _oversized_functions(callers) == ()
+    assert _oversized_functions(evidence) == ()
+    assert _oversized_functions(durability) == ()
 
 
 def test_inherited_wsp62_exemptions_are_exact_no_growth_ceils() -> None:
@@ -140,7 +162,7 @@ def test_inherited_wsp62_exemptions_are_exact_no_growth_ceils() -> None:
         (module / "wsp_62_exemptions.yaml").read_text(encoding="utf-8")
     )
     expected = {
-        "run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap": 235,
+        "run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap": 233,
         "build_model_autoresearch_output_evidence_semantic_verifier": 96,
         "_verifier": 83,
     }

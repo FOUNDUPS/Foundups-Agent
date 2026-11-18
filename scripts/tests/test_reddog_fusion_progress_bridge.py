@@ -48,9 +48,23 @@ def _run_main(payload: dict[str, object], *, api_key: str = "") -> dict[str, obj
     stdout = io.StringIO()
     stderr = io.StringIO()
     env = {bridge.ENV_API_KEY: api_key} if api_key else {}
+    lead = str(payload.get("lead_model") or payload.get("model") or "")
+    receipt = mock.Mock(
+        status=bridge.MODEL_RUNTIME_BINDING_READY,
+        accepted=True,
+        principal_model=lead,
+        panel_models=(),
+        role_bindings=({"role": "principal", "provider": "openrouter", "model_id": lead},),
+        binding_receipt_id="binding:test",
+        topology_resolution_receipt_id="verified_model_runtime_topology:test",
+        topology_verification_receipt_id="verified_model_runtime_binding:test",
+        topology_valid_until=1_900_000_000,
+    )
     with mock.patch.object(sys, "stdin", stdin), mock.patch.object(sys, "stdout", stdout), mock.patch.object(
         sys, "stderr", stderr
-    ), mock.patch.dict(os.environ, env, clear=True):
+    ), mock.patch.dict(os.environ, env, clear=True), mock.patch.object(
+        bridge, "query_model_runtime_binding", return_value=receipt
+    ):
         bridge.main()
     return json.loads(stdout.getvalue())
 
@@ -82,7 +96,7 @@ def test_openrouter_response_metadata_and_usage_are_retained_without_content() -
         seen_request = request
         return _Response(response)
 
-    with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+    with mock.patch.object(bridge, "_openrouter_urlopen", side_effect=fake_urlopen):
         data, meta = bridge._post_openrouter("key", {"model": "requested/model", "messages": []}, 30)
 
     assert data["choices"][0]["message"]["content"] == "model output"

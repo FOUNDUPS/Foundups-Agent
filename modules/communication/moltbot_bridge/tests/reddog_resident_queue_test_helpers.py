@@ -2,10 +2,47 @@
 
 from __future__ import annotations
 
-from typing import Any
+import hashlib
+import hmac
+from copy import deepcopy
+from dataclasses import replace
+from pathlib import Path
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+    evaluate_proposal_stage,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication_validation import (
+    architect_fix_publication_state_projection,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    canonical_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    WorkerDispatchAuthorityVerificationContext,
+    recorded_authority_verification_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    InMemoryNonceStore,
+    PermissionSnapshot,
+    canonical_signing_input,
+)
+from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
+    derive_worker_dispatch_roles,
+)
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    build_work_order_materialization_binding,
+    canonical_full_work_order_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
+    plan_reddog_wre_queue_consumer_dry_run,
 )
 
 
@@ -17,19 +54,141 @@ WORKER_DISPATCH_RUNTIME_STAGE_RESULT = {
     "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT",
 }
 
+ASSURANCE_RESERVATION = {
+    "reservation_id": "assurance-reservation-" + "1" * 20,
+    "reservation_digest": "sha256:" + "0" * 64,
+    "status": "reserved",
+    "work_order_id": "wo-resident-queue-1",
+    "author_task_id": "reddog-worker-dispatch-" + "1" * 16,
+    "author_principal_id": "worker:author",
+    "verifier_task_id": "reddog-worker-dispatch-" + "2" * 16,
+    "verifier_principal_id": "worker:verifier",
+}
 
-def queue_wsp15_allocation_receipt(*, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
+ASSURANCE_CAPACITY_ADMISSION_STAGE_RESULT = {
+    "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT",
+    "reservation": ASSURANCE_RESERVATION,
+}
+
+_TEST_NOW = 1000
+_TEST_REPO = "FOUNDUPS/Foundups-Agent"
+_TEST_FOUNDUP = "paccess_001"
+_TEST_PRINCIPAL_SECRET = b"worker-dispatch-principal"
+_TEST_REDDOG_SECRET = b"worker-dispatch-reddog"
+_TEST_WORK_ORDER_DIGEST = "sha256:" + "1" * 64
+_TEST_PERMISSION_SNAPSHOT_DIGEST = "sha256:" + "2" * 64
+_TEST_FRESHNESS_RECEIPT_ID = "fresh-worker-dispatch-1"
+_TEST_CLAIM_ID = "claim-worker-dispatch-1"
+_TEST_WORKER_ID = "reddog-main-bootstrap"
+_TEST_SLICE_ID = "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+_TEST_DETERMINATION_ID = "sha256:determination"
+_TEST_MODEL_SELECTION_ID = "sha256:model-selection"
+_TEST_MEMEX_SUPPLY_ID = "memex-supply-test-receipt"
+_TEST_MEMEX_SUPPLY_DIGEST = (
+    "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+)
+
+
+class _WorkerDispatchSignatureVerifier:
+    def verify(self, public_key: str, signing_input: str, signature: str) -> bool:
+        secret = {
+            "pub:worker-dispatch-principal": _TEST_PRINCIPAL_SECRET,
+            "pub:worker-dispatch-reddog": _TEST_REDDOG_SECRET,
+        }.get(public_key)
+        if secret is None:
+            return False
+        expected = hmac.new(
+            secret,
+            signing_input.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+        return hmac.compare_digest(expected, signature)
+
+
+class _WorkerDispatchPrincipalResolver:
+    def resolve(self, principal_id: str, principal_provider: str):
+        if principal_id == "github:mjtrout" and principal_provider == "github":
+            return "pub:worker-dispatch-principal"
+        return None
+
+
+class _WorkerDispatchSnapshotResolver:
+    def resolve(self, digest: str):
+        if digest != _TEST_PERMISSION_SNAPSHOT_DIGEST:
+            return None
+        return PermissionSnapshot(
+            evidence_digest=digest,
+            expires_at=_TEST_NOW + 600,
+            can_write=True,
+            repo_full_name=_TEST_REPO,
+        )
+
+
+class _WorkerDispatchNoRevocation:
+    def is_revoked(self, **_kwargs: Any) -> bool:
+        return False
+
+
+class FakeAssuranceReservationStore:
+    def __init__(self) -> None:
+        self.reservation = dict(ASSURANCE_RESERVATION)
+        self.reservations = {
+            str(self.reservation["reservation_id"]): dict(self.reservation)
+        }
+
+    def reserve_independent_assurance(self, request):
+        self.reservation = {**dict(request), "status": "reserved"}
+        self.reservations[str(self.reservation["reservation_id"])] = dict(
+            self.reservation
+        )
+        return {
+            "accepted": True,
+            "status": "ASSURANCE_CAPACITY_RESERVED",
+            "reservation": dict(self.reservation),
+        }
+
+    def get_independent_assurance_reservation(self, reservation_id: str):
+        value = self.reservations.get(reservation_id)
+        return dict(value) if value is not None else None
+
+    def stage_independent_assurance_completion(self, request):
+        reservation_id = str(request.get("reservation_id") or "")
+        if (
+            reservation_id not in self.reservations
+            or not request.get("terminal_receipt_id")
+        ):
+            return {"accepted": False, "status": "rejected"}
+        return {"accepted": True, "status": "STAGED"}
+
+
+_BOUNDED_TEST_PROMPT = "Fix one bounded FoundUp module defect"
+
+
+def queue_wsp15_allocation_receipt(*, prompt_text: str = _BOUNDED_TEST_PROMPT) -> dict[str, Any]:
     return allocate_reddog_wsp15_receipt(
-        requested_operation="create_foundup",
+        requested_operation="edit_foundup_module",
         prompt_text=prompt_text,
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_orchestration_plan.py",),
+        changed_paths=("modules/foundups/paccess_001/src/worker.py",),
+        allowed_read_targets=("modules/foundups/paccess_001/src/worker.py",),
     ).to_dict()
 
 
-def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str = "RedDog resident queue worktree authority") -> dict[str, Any]:
+def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str = _BOUNDED_TEST_PROMPT) -> dict[str, Any]:
     allocation = queue_wsp15_allocation_receipt(prompt_text=prompt_text)
     item = dict(queue_item)
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice=str(item.get("slice_id") or ""),
+        requested_operation="edit_foundup_module",
+        changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text=prompt_text,
+    )
+    if stage.no_effect_authority:
+        raise AssertionError(
+            "bounded queue test fixture was rejected by progressive policy: "
+            f"{stage.risk_classes or stage.rejection_reasons or stage.would_block_reasons}"
+        )
     refs = [str(ref) for ref in item.get("evidence_refs") or ()]
     refs.extend(
         [
@@ -38,4 +197,724 @@ def with_queue_wsp15_allocation(queue_item: dict[str, Any], *, prompt_text: str 
     )
     item["evidence_refs"] = list(dict.fromkeys(refs))
     item["wsp15_allocation_receipt"] = allocation
+    item["progressive_policy_stage_receipt_id"] = stage.receipt_id
+    item["progressive_policy_stage_digest"] = canonical_digest(stage.to_dict())
+    item["progressive_policy_stage_receipt"] = stage.to_dict()
+    item["independent_verifier_required"] = True
     return item
+
+
+def governed_worker_dispatch_snapshot(
+    snapshot: dict[str, Any],
+    *,
+    task_prompt_text: str = _BOUNDED_TEST_PROMPT,
+) -> dict[str, Any]:
+    """Add the minimum real queue lineage required by the signed worker path."""
+    governed = deepcopy(snapshot)
+    queue_items = governed.get("wre_queue_items")
+    if not isinstance(queue_items, list) or not queue_items:
+        return governed
+    queue = queue_items[0]
+    queue.setdefault("slice_id", _TEST_SLICE_ID)
+    queue.setdefault("claim_id", _TEST_CLAIM_ID)
+    queue.setdefault("worker_id", _TEST_WORKER_ID)
+    queue.setdefault("no_execution_performed", True)
+    queue.setdefault("source_determination_receipt_id", _TEST_DETERMINATION_ID)
+    queue.setdefault("model_selection_receipt_id", _TEST_MODEL_SELECTION_ID)
+    queue.setdefault("model_selection_digest", "sha256:model-selection")
+    queue.setdefault("memex_supply_receipt_id", _TEST_MEMEX_SUPPLY_ID)
+    queue.setdefault("memex_supply_digest", _TEST_MEMEX_SUPPLY_DIGEST)
+    allocation = queue.get("wsp15_allocation_receipt") or {}
+    if not queue.get("progressive_policy_stage_receipt") and allocation:
+        operation = str(allocation.get("requested_operation") or "")
+        changed_paths = tuple(allocation.get("changed_paths") or ())
+        if operation.startswith("signed_0102_readonly_review:") and not changed_paths:
+            stage = evaluate_proposal_stage(
+                action="RESEARCH_MORE", reuse_decision="REUSE_EXISTING",
+                effect_plane="READ_ONLY_AUDIT", allocation=allocation,
+                selected_slice=str(queue.get("slice_id") or ""),
+                requested_operation=operation, changed_paths=(),
+                task_prompt_text=task_prompt_text,
+                stage_ceiling="AUDIT_NO_EFFECT",
+            )
+        else:
+            stage = admit_bounded_execution(
+                determination_action="FIX",
+                allocation=allocation,
+                selected_slice=str(queue.get("slice_id") or ""),
+                requested_operation=operation or "bounded_code_change",
+                changed_paths=changed_paths,
+                task_prompt_text=task_prompt_text,
+            )
+        queue["progressive_policy_stage_receipt_id"] = stage.receipt_id
+        queue["progressive_policy_stage_digest"] = canonical_digest(stage.to_dict())
+        queue["progressive_policy_stage_receipt"] = stage.to_dict()
+        queue["independent_verifier_required"] = True
+    allocation_id = str(allocation.get("receipt_id") or "")
+    runtime = model_runtime_authority_fields(queue)
+    runtime_id = runtime["model_runtime_binding_receipt_id"]
+    runtime_verification_id = runtime["model_runtime_binding_verification_receipt_id"]
+    refs = [str(ref) for ref in queue.get("evidence_refs") or ()]
+    refs.extend(
+        [
+            f"claim:{queue['claim_id']}",
+            f"freshness:{_TEST_FRESHNESS_RECEIPT_ID}",
+            f"wsp15_allocation:{allocation_id}",
+            f"architect_determination:{queue['source_determination_receipt_id']}",
+            f"model_selection:{queue['model_selection_receipt_id']}",
+        ]
+    )
+    memex_id = str(queue.get("memex_supply_receipt_id") or "")
+    if memex_id:
+        refs.append(f"memex_supply:{memex_id}")
+    if runtime_id:
+        refs.append(f"model_runtime_binding:{runtime_id}")
+    if runtime_verification_id:
+        refs.append(f"model_runtime_binding_verification:{runtime_verification_id}")
+    queue["evidence_refs"] = list(dict.fromkeys(refs))
+    governed.setdefault(
+        "freshness_receipts",
+        [{"receipt_id": _TEST_FRESHNESS_RECEIPT_ID, "fresh": True}],
+    )
+    governed.setdefault(
+        "worker_claims",
+        [
+            {
+                "claim_id": str(queue["claim_id"]),
+                "slice_id": str(queue["slice_id"]),
+                "worker_id": str(queue["worker_id"]),
+                "status": "ACTIVE",
+                "expires_at": "2030-01-01T00:00:00+00:00",
+                "freshness_receipt_id": _TEST_FRESHNESS_RECEIPT_ID,
+                "lane_id": "reddog_operational",
+                "reconciliation_report_id": "sha256:reconciliation",
+                "source_determination_receipt_id": str(
+                    queue["source_determination_receipt_id"]
+                ),
+                "model_selection_receipt_id": str(
+                    queue["model_selection_receipt_id"]
+                ),
+                **runtime,
+                "memex_supply_receipt_id": memex_id,
+            }
+        ],
+    )
+    return governed
+
+
+def worker_dispatch_work_order_digest(
+    snapshot: dict[str, Any],
+    *,
+    work_order_id: str = "wo-1",
+    base_ref: str = "main",
+    queue_item_id: str = "queue-1",
+) -> str:
+    """Derive the signed digest from the authoritative queue receipt."""
+
+    result = plan_reddog_wre_queue_consumer_dry_run(
+        snapshot,
+        now_iso="2026-07-16T00:00:00+00:00",
+        requested_queue_item_id=queue_item_id,
+        require_governed_lineage=True,
+    )
+    if not result.accepted or result.receipt is None:
+        raise AssertionError(result.rejection_reasons)
+    binding = build_work_order_materialization_binding(
+        work_order_id=work_order_id,
+        base_ref=base_ref,
+        queue_consumer_receipt=result.receipt.to_dict(),
+    )
+    return canonical_full_work_order_digest(binding)
+
+
+def worker_dispatch_queue_receipt_digest(
+    snapshot: dict[str, Any],
+    *,
+    queue_item_id: str = "queue-1",
+) -> str:
+    return canonical_full_work_order_digest(
+        worker_dispatch_queue_receipt(
+            snapshot,
+            queue_item_id=queue_item_id,
+        )
+    )
+
+
+def worker_dispatch_queue_receipt(
+    snapshot: dict[str, Any],
+    *,
+    queue_item_id: str = "queue-1",
+) -> dict[str, Any]:
+    """Return the canonical consumer receipt for signer integration tests."""
+
+    result = plan_reddog_wre_queue_consumer_dry_run(
+        snapshot,
+        now_iso="2026-07-16T00:00:00+00:00",
+        requested_queue_item_id=queue_item_id,
+        require_governed_lineage=True,
+    )
+    if not result.accepted or result.receipt is None:
+        raise AssertionError(result.rejection_reasons)
+    return result.receipt.to_dict()
+
+
+def worker_dispatch_authority_stages(
+    allocation: dict[str, Any],
+    *,
+    work_state_snapshot: dict[str, Any] | None = None,
+    queue_item_id: str = "queue-1",
+    **work_authority_overrides: Any,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build mutually bound authority/verification stages for runtime tests."""
+
+    if "memex_supply_receipt_id" not in work_authority_overrides:
+        work_authority_overrides["memex_supply_receipt_id"] = (
+            _queue_binding_value(
+                work_state_snapshot,
+                queue_item_id,
+                "memex_supply_receipt_id",
+            )
+            or ""
+        )
+    if "memex_supply_digest" not in work_authority_overrides:
+        work_authority_overrides["memex_supply_digest"] = (
+            _queue_binding_value(
+                work_state_snapshot,
+                queue_item_id,
+                "memex_supply_digest",
+            )
+            or ""
+        )
+    for field in (
+        "progressive_policy_stage_receipt_id",
+        "progressive_policy_stage_digest",
+    ):
+        if field not in work_authority_overrides:
+            work_authority_overrides[field] = _queue_binding_value(
+                work_state_snapshot, queue_item_id, field
+            ) or ""
+    if "progressive_policy_stage_receipt" not in work_authority_overrides:
+        work_authority_overrides["progressive_policy_stage_receipt"] = (
+            _queue_binding_mapping(
+                work_state_snapshot,
+                queue_item_id,
+                "progressive_policy_stage_receipt",
+            )
+        )
+    identity = {
+        "principal_id": "github:mjtrout",
+        "principal_provider": "github",
+        "principal_public_key": "pub:worker-dispatch-principal",
+        "reddog_id": "reddog:worker-dispatch",
+        "reddog_public_key": "pub:worker-dispatch-reddog",
+        "repo_scope": [_TEST_REPO],
+        "foundup_scope": [_TEST_FOUNDUP],
+        "issued_at": _TEST_NOW - 5,
+        "expires_at": _TEST_NOW + 3600,
+    }
+    identity["signature"] = _sign(
+        _TEST_PRINCIPAL_SECRET,
+        canonical_signing_input(identity, "reddog-identity.v1"),
+    )
+    work_order_id = str(work_authority_overrides.get("work_order_id") or "wo-1")
+    base_ref = str(work_authority_overrides.get("base_ref") or "main")
+    work_order_digest = _TEST_WORK_ORDER_DIGEST
+    queue_receipt_digest = "sha256:" + "4" * 64
+    if work_state_snapshot is not None:
+        work_order_digest = worker_dispatch_work_order_digest(
+            work_state_snapshot,
+            work_order_id=work_order_id,
+            base_ref=base_ref,
+            queue_item_id=queue_item_id,
+        )
+        queue_receipt_digest = worker_dispatch_queue_receipt_digest(
+            work_state_snapshot,
+            queue_item_id=queue_item_id,
+        )
+    work_authority = {
+        "work_order_id": "wo-1",
+        "work_order_digest": work_order_digest,
+        "base_ref": "main",
+        "principal_id": "github:mjtrout",
+        "reddog_id": "reddog:worker-dispatch",
+        "repo_full_name": _TEST_REPO,
+        "foundup_id": _TEST_FOUNDUP,
+        "allowed_paths": list(allocation.get("changed_paths") or ()),
+        "denied_paths": [],
+        "requested_operation": str(
+            allocation.get("requested_operation") or "bounded_code_change"
+        ),
+        "permission_snapshot_digest": _TEST_PERMISSION_SNAPSHOT_DIGEST,
+        "queue_consumer_receipt_digest": queue_receipt_digest,
+        "selected_slice": str(
+            work_authority_overrides.get("selected_slice")
+            or _queue_binding_mapping(
+                work_state_snapshot,
+                queue_item_id,
+                "progressive_policy_stage_receipt",
+            ).get("selected_slice")
+            or _mapping_selected_slice(
+                work_authority_overrides.get(
+                    "progressive_policy_stage_receipt"
+                )
+            )
+            or "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1"
+        ),
+        "wsp15_allocation_receipt": dict(allocation),
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": canonical_digest(allocation),
+        "wsp15_priority": allocation["priority"],
+        "wsp15_mps_total": allocation["mps_total"],
+        "wsp15_reasoning_tier": allocation["reasoning_tier"],
+        "nonce": "worker-dispatch-nonce-0001",
+        "issued_at": _TEST_NOW - 5,
+        "expires_at": _TEST_NOW + 300,
+        "valve_state_required": (
+            "VALVE_OPEN_DRYRUN_ONLY"
+            if not tuple(allocation.get("changed_paths") or ())
+            else "VALVE_OPEN_WORKTREE_CREATE"
+        ),
+        "key_epoch": "epoch-1",
+        **work_authority_overrides,
+    }
+    work_authority["signature"] = _sign(
+        _TEST_REDDOG_SECRET,
+        canonical_signing_input(work_authority, "reddog-workauth.v1"),
+    )
+    authority_digest = canonical_digest(work_authority)
+    authority_runtime = {
+        "decision": "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT",
+        "authority_result": {
+            "accepted": True,
+            "receipt": {
+                "status": "DELEGATED_AUTHORITY_ISSUED",
+                "receipt_id": "authority-runtime-receipt-1",
+                "work_authority_digest": authority_digest,
+            },
+            "work_authority": work_authority,
+            "identity": identity,
+        },
+    }
+    authority_verification = {
+        "decision": "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT",
+        "verification_result": {
+            "accepted": True,
+            "reason_codes": [],
+            "work_order_id": str(work_authority["work_order_id"]),
+        },
+        "verified_work_authority_digest": authority_digest,
+    }
+    authority_verification.update(
+        recorded_authority_verification_binding(
+            authority_runtime,
+            authority_verification,
+        )
+    )
+    return authority_runtime, authority_verification
+
+
+def _queue_binding_value(
+    snapshot: dict[str, Any] | None,
+    queue_item_id: str,
+    field: str,
+) -> str:
+    if snapshot is None:
+        return ""
+    for item in snapshot.get("wre_queue_items", ()):
+        if str(item.get("queue_item_id") or "") == queue_item_id:
+            return str(item.get(field) or "")
+    return ""
+
+
+def _queue_binding_mapping(
+    snapshot: dict[str, Any] | None, queue_item_id: str, field: str
+) -> dict[str, Any]:
+    if snapshot is None:
+        return {}
+    for item in snapshot.get("wre_queue_items", ()):
+        if str(item.get("queue_item_id") or "") == queue_item_id:
+            value = item.get(field)
+            return dict(value) if isinstance(value, dict) else {}
+    return {}
+
+
+def _mapping_selected_slice(value: Any) -> str:
+    return str(value.get("selected_slice") or "") if isinstance(value, Mapping) else ""
+
+
+def worker_dispatch_authority_verification_context(
+    *, required_valve_state: str = "VALVE_OPEN_WORKTREE_CREATE"
+):
+    return WorkerDispatchAuthorityVerificationContext(
+        signature_verifier=_WorkerDispatchSignatureVerifier(),
+        principal_key_resolver=_WorkerDispatchPrincipalResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=_WorkerDispatchSnapshotResolver(),
+        revocation_oracle=_WorkerDispatchNoRevocation(),
+        trusted_now_epoch=lambda: _TEST_NOW,
+        required_valve_state=required_valve_state,
+    )
+
+
+def install_signed_worker_envelope_test_authority(monkeypatch: Any) -> None:
+    """Use real runtime authority when configured, otherwise the HMAC fixture."""
+
+    from modules.communication.moltbot_bridge.src import (
+        reddog_signed_worker_agentdb_envelope as envelope_module,
+    )
+
+    original_configured = envelope_module.build_worker_dispatch_authority_context
+    original_from_env = envelope_module.build_worker_dispatch_authority_context_from_env
+
+    def _configured_context(**kwargs: Any):
+        try:
+            return replace(
+                original_configured(**kwargs),
+                trusted_now_epoch=lambda: _TEST_NOW,
+            )
+        except Exception:
+            return worker_dispatch_authority_verification_context()
+
+    def _context(**kwargs: Any):
+        try:
+            return replace(
+                original_from_env(**kwargs),
+                trusted_now_epoch=lambda: _TEST_NOW,
+            )
+        except Exception:
+            return worker_dispatch_authority_verification_context()
+
+    monkeypatch.setattr(
+        envelope_module,
+        "build_worker_dispatch_authority_context",
+        _configured_context,
+    )
+    monkeypatch.setattr(
+        envelope_module,
+        "build_worker_dispatch_authority_context_from_env",
+        _context,
+    )
+
+
+def configure_signed_worker_claim_authority_env(
+    monkeypatch: Any,
+    *,
+    chain_path: Path,
+    signature_backend: str,
+) -> None:
+    """Bind restart authority files co-located with the queue chain."""
+
+    root = chain_path.parent
+    values = {
+        "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion",
+        "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(root / "authority_state.json"),
+        "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(root / "snapshots.json"),
+        "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(root / "principals.json"),
+        "REDDOG_SIGNATURE_VERIFIER_BACKEND": signature_backend,
+    }
+    for name, value in values.items():
+        monkeypatch.setenv(name, value)
+
+
+def configure_signed_worker_claim_test_authority(
+    monkeypatch: Any, *, chain_path: Path, signature_backend: str
+) -> None:
+    """Bind persisted authority files and a deterministic claim-time clock."""
+
+    configure_signed_worker_claim_authority_env(
+        monkeypatch,
+        chain_path=chain_path,
+        signature_backend=signature_backend,
+    )
+    install_signed_worker_envelope_test_authority(monkeypatch)
+
+
+def worker_dispatch_dryrun_result(allocation: dict[str, Any]) -> dict[str, Any]:
+    """Build a canonical synthetic dry-run from the authoritative worker plan."""
+
+    model_refs = {
+        **model_runtime_authority_fields(allocation),
+        "memex_supply_receipt_id": "",
+        "memex_supply_digest": "",
+    }
+    base = {
+        "work_order_id": "wo-1",
+        "foundup_id": _TEST_FOUNDUP,
+        "requested_operation": "create_foundup",
+        "wsp15_allocation_receipt_id": allocation["receipt_id"],
+        "wsp15_allocation_digest": canonical_digest(allocation),
+        **model_refs,
+        "architect_fix_publication_receipt_id": "",
+        "architect_fix_publication_binding_digest": "",
+    }
+    intents = [
+        {
+            "intent_id": f"worker_dispatch_intent_{role}",
+            "role": role,
+            "worker_runtime": worker_runtime,
+            "capability": capability,
+            **base,
+            "dry_run_only": True,
+            "no_worker_spawn_performed": True,
+            "no_openclaw_enqueue_performed": True,
+            "no_hermes_dispatch_performed": True,
+        }
+        for role, worker_runtime, capability in derive_worker_dispatch_roles(allocation)
+    ]
+    return {
+        "accepted": True,
+        "decision": "SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT",
+        "rejection_reasons": [],
+        "receipt": {
+            "receipt_id": "signed_authority_worker_dispatch_abc",
+            **base,
+            "wsp15_priority": allocation["priority"],
+            "wsp15_mps_total": allocation["mps_total"],
+            "wsp15_reasoning_tier": allocation["reasoning_tier"],
+            "dispatch_intent_count": len(intents),
+            "dispatch_intents": intents,
+            "no_worker_spawn_performed": True,
+            "no_queue_mutation_performed": True,
+            "no_worktree_created": True,
+            "no_shell_command_executed": True,
+            "no_openclaw_enqueue_performed": True,
+            "no_hermes_dispatch_performed": True,
+            "no_repo_mutation_performed": True,
+            "no_holoindex_reindex_performed": True,
+            "no_pr_created": True,
+            "no_reward_settlement_performed": True,
+        },
+    }
+
+
+def _sign(secret: bytes, signing_input: str) -> str:
+    return hmac.new(
+        secret,
+        signing_input.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def publish_bound_worker_dispatch(**kwargs: Any):
+    """Call the runtime publisher with an independently built authority proof."""
+
+    from modules.communication.moltbot_bridge.src import (
+        reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
+    )
+
+    snapshot = kwargs.get("work_state_snapshot", {})
+    queue_items = snapshot.get("wre_queue_items", [])
+    allocation = queue_items[0]["wsp15_allocation_receipt"]
+    call_args = dict(kwargs)
+    supplied_dryrun = dict(call_args.pop("worker_dispatch_dryrun_result"))
+    receipt = dict(supplied_dryrun["receipt"])
+    signed_optional = {
+        field: receipt[field]
+        for field in (
+            "model_runtime_binding_receipt_id",
+            "model_runtime_binding_digest",
+            "model_runtime_binding_verification_receipt_id",
+            "model_runtime_binding_verification_digest",
+            "memex_supply_receipt_id",
+            "memex_supply_digest",
+            "architect_fix_publication_receipt_id",
+            "architect_fix_publication_binding_digest",
+        )
+        if receipt.get(field)
+    }
+    authority_runtime, authority_verification = worker_dispatch_authority_stages(
+        allocation,
+        work_state_snapshot=snapshot,
+        queue_item_id=str(call_args.get("queue_item_id") or "queue-1"),
+        **signed_optional,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
+        plan_reddog_signed_authority_worker_dispatch_dry_run,
+    )
+
+    dryrun = plan_reddog_signed_authority_worker_dispatch_dry_run(
+        explicit_signed_authority_worker_dispatch_dryrun_requested=True,
+        queue_authority_verification_result=authority_verification,
+        queue_authority_runtime_result=authority_runtime,
+        wsp15_allocation_receipt=allocation,
+    ).to_dict()
+    assert dryrun["accepted"] is True
+    return runtime.publish_reddog_signed_worker_dispatch_runtime(
+        **call_args,
+        worker_dispatch_dryrun_result=dryrun,
+        queue_authority_runtime_result=authority_runtime,
+        queue_authority_verification_result=authority_verification,
+        authority_verification_context=worker_dispatch_authority_verification_context(
+            required_valve_state=str(
+                authority_runtime["authority_result"]["work_authority"][
+                    "valve_state_required"
+                ]
+            )
+        ),
+    )
+
+
+def publish_agentdb_task_for_intent(
+    *,
+    allocation: dict[str, Any],
+    intent_overrides: dict[str, Any],
+    dryrun_builder: Any,
+    snapshot_builder: Any,
+    context_override_builder: Any,
+    digest_builder: Any,
+):
+    """Publish a real planned intent or a deliberately invalid outer fixture."""
+
+    from modules.communication.moltbot_bridge.src import (
+        reddog_openclaw_hermes_0102_worker_dispatch_runtime as runtime,
+    )
+
+    requested_role = str(intent_overrides.get("role") or "")
+    result = publish_bound_worker_dispatch(
+        worker_dispatch_dryrun_result=dryrun_builder(allocation=allocation),
+        work_state_snapshot=snapshot_builder(allocation),
+        queue_item_id="queue-1",
+        writer=_CollectingAgentDbSpecWriter(),
+    )
+    assert result.accepted is True and result.receipt is not None, result.to_dict()
+    matching = [
+        task
+        for task in result.tasks
+        if str(task.context.get("worker_role") or "") == requested_role
+    ]
+    base = matching[0] if matching else result.tasks[0]
+    if matching:
+        specs = (base,)
+    else:
+        context = context_override_builder(base.context, intent_overrides)
+        intent = context["worker_dispatch_intent"]
+        task_id = "reddog-worker-dispatch-" + digest_builder(
+            {"intent_id": intent["intent_id"], "context": context}
+        )[7:23]
+        specs = (
+            runtime.SignedWorkerDispatchTaskSpec(
+                task_id=task_id,
+                description=f"RedDog signed worker dispatch test fixture: {intent['role']}",
+                required_skills=(
+                    runtime.SIGNED_WORKER_DISPATCH_TASK_SKILL,
+                    f"runtime:{intent['worker_runtime']}",
+                    f"capability:{intent['capability']}",
+                ),
+                estimated_complexity=base.estimated_complexity,
+                priority_score=base.priority_score,
+                context=context,
+                origin_continuity_id=base.origin_continuity_id,
+            ),
+        )
+    writer = runtime.AgentDbSignedWorkerDispatchTaskWriter()
+    written = writer.enqueue_signed_worker_dispatch_tasks(specs, result.receipt)
+    assert written["ok"] is True
+    activated = writer.activate_signed_worker_dispatch_tasks(specs, result.receipt)
+    assert activated["ok"] is True
+    return specs[0].task_id
+
+
+class _CollectingAgentDbSpecWriter:
+    def enqueue_signed_worker_dispatch_tasks(self, tasks: Any, receipt: Any):
+        return {
+            "ok": True,
+            "created_task_ids": [task.task_id for task in tasks],
+        }
+
+    def activate_signed_worker_dispatch_tasks(self, tasks: Any, receipt: Any):
+        return self.enqueue_signed_worker_dispatch_tasks(tasks, receipt)
+
+
+def with_architect_fix_publication(
+    snapshot: dict[str, Any],
+    authority_profile: dict[str, Any],
+    *,
+    state: str = "COMMITTED",
+) -> tuple[dict[str, Any], dict[str, Any], str, str]:
+    """Bind a resident queue fixture to one architect FIX publication."""
+
+    publication_id = "sha256:" + "4" * 64
+    queue_item_id = "sha256:" + "5" * 64
+    claim_id = "sha256:" + "6" * 64
+    attestation_id = "reddog_architect_proposal_attestation_" + "7" * 32
+    queue_candidate = snapshot["wre_queue_items"][0]
+    operational_context: dict[str, Any] = {
+        "queue_item_id": queue_item_id,
+        "claim_id": claim_id,
+    }
+    authorized_base_sha = authority_profile.get("authorized_base_sha")
+    if isinstance(authorized_base_sha, str) and authorized_base_sha:
+        operational_context.update(
+            {
+                "authorized_base_sha": authorized_base_sha,
+                "proposal_admission": {
+                    "repo_head_sha": authorized_base_sha,
+                },
+            }
+        )
+    determination_id = queue_candidate.get("source_determination_receipt_id")
+    if determination_id:
+        operational_context["architect_determination_receipt_id"] = determination_id
+    allocation = authority_profile.get("wsp15_allocation_receipt")
+    if isinstance(allocation, Mapping):
+        operational_context["wsp15_allocation_receipt"] = dict(allocation)
+    profile = {
+        **authority_profile,
+        "promotion_publication_id": publication_id,
+        "proposal_authenticity_attestation_id": attestation_id,
+        "operational_context_binding": operational_context,
+    }
+    current = _replace_queue_claim_ids(
+        snapshot,
+        queue_item_id=queue_item_id,
+        claim_id=claim_id,
+    )
+    promotion = {
+        "publication_id": publication_id,
+        "queue_item_id": queue_item_id,
+        "claim_id": claim_id,
+        "authority_profile_digest": canonical_digest(profile),
+        "proposal_authenticity_attestation_id": attestation_id,
+    }
+    current["architect_fix_promotions"] = [promotion]
+    current["revision"] = "8" * 64
+    projection = architect_fix_publication_state_projection(
+        current,
+        publication_id=publication_id,
+    )
+    current["architect_fix_publications"] = [{
+        "schema_version": "reddog_architect_fix_promotion_publication.v1",
+        "publication_id": publication_id,
+        "state": state,
+        "proposal_authenticity_attestation_id": attestation_id,
+        "authority_profile_digest": canonical_digest(profile),
+        "active_work_state_digest": canonical_digest(projection),
+        "base_work_state_digest": (
+            None if state == "COMMITTED" else "sha256:" + "9" * 64
+        ),
+    }]
+    return current, profile, queue_item_id, claim_id
+
+
+def _replace_queue_claim_ids(
+    snapshot: dict[str, Any],
+    *,
+    queue_item_id: str,
+    claim_id: str,
+) -> dict[str, Any]:
+    current = {**snapshot}
+    claim = {**current["worker_claims"][0], "claim_id": claim_id}
+    queue = {
+        **current["wre_queue_items"][0],
+        "queue_item_id": queue_item_id,
+        "claim_id": claim_id,
+    }
+    refs = [
+        ref
+        for ref in queue.get("evidence_refs") or ()
+        if not str(ref).startswith("claim:")
+    ]
+    queue["evidence_refs"] = [f"claim:{claim_id}", *refs]
+    current["worker_claims"] = [claim]
+    current["wre_queue_items"] = [queue]
+    return current

@@ -1,0 +1,103 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "worker",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "A",
+  "S": {
+    "owner": "modules/foundups/memory_horizon/src/analytics",
+    "read": [
+      "modules/foundups/memory_horizon/docs/DATA_AND_SCORING_CONTRACT.md",
+      "modules/foundups/memory_horizon/docs/GAME_DESIGN_SWEEPS.md"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/src/analytics",
+      "modules/foundups/memory_horizon/tests/analytics",
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-05.json"
+    ]
+  },
+  "M": "exec",
+  "T": "MH-RSI-05",
+  "A": "IMPLEMENT local session export and transparent retention visualization model",
+  "R": [
+    0,
+    6,
+    11,
+    15,
+    22,
+    34,
+    49,
+    50,
+    62,
+    71,
+    84,
+    97,
+    99,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "local_private_default": true,
+    "export_formats": [
+      "json",
+      "csv"
+    ],
+    "raw_observations_primary": true,
+    "no_cloud_upload": true,
+    "no_black_box_score": true,
+    "effect_boundary": "Module-local analytics/export/tests only."
+  },
+  "O": [
+    "session serialization and round-trip parser",
+    "JSON/CSV export",
+    "timeline/retention-series projection data",
+    "focused privacy/round-trip tests",
+    "work_orders/results/MH-RSI-05.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_MH-RSI-01",
+    "depends_on": [
+      "MH-RSI-01"
+    ],
+    "objective": "Make every result auditable from raw local session data without creating a cloud health-data service.",
+    "steps": [
+      "Implement versioned local session schema.",
+      "Export raw event/probe/observer records without hidden derived state.",
+      "Produce chart-ready transparent series from raw observations.",
+      "Round-trip export and verify no automatic network behavior."
+    ],
+    "wsp15": {
+      "complexity": 3,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "total": 15,
+      "priority": "P1"
+    },
+    "requirements": {
+      "compute_class": "MID",
+      "reasoning_depth": "MEDIUM",
+      "tools": [
+        "repository_read",
+        "repository_write",
+        "test_runner"
+      ],
+      "verification_class": "DATA_PRIVACY"
+    },
+    "acceptance": [
+      "Round-trip recreates session observations.",
+      "Derived series can be recomputed from export.",
+      "No automatic upload or remote storage.",
+      "No single opaque medical/cognitive score."
+    ],
+    "rollback": "Revert only analytics/test paths; preserve evidence."
+  }
+}

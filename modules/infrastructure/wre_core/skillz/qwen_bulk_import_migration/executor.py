@@ -2,7 +2,7 @@
 """
 Qwen Bulk Import Migration Skill Executor
 
-Migrates hardcoded values to central registry imports using Qwen/Gemma coordination.
+Deterministic prototype for hardcoded-value registry-import migrations.
 WSP Compliance: WSP 77 (Agent Coordination), WSP 50 (Pre-Action), WSP 84 (Code Reuse)
 """
 
@@ -99,10 +99,10 @@ PRESETS: Dict[str, MigrationSpec] = {
 
 class BulkImportMigrator:
     """
-    Bulk import migration executor using Qwen/Gemma coordination.
+    Rule-based migration prototype; no Qwen or Gemma inference is invoked.
 
-    Phase 1 (Qwen): Strategic planning - identify files, plan replacements
-    Phase 2 (Gemma): Validation - syntax check, circular dependency check
+    Phase 1: Identify files and plan configured literal replacements
+    Phase 2: Apply a limited balanced-parentheses rule check
     Phase 3: Apply changes (if not dry_run)
     """
 
@@ -140,7 +140,7 @@ class BulkImportMigrator:
         result.replacements_made = len([c for c in result.changes if c.change_type == "replacement"])
         result.files_modified = len(set(c.file for c in result.changes))
 
-        # Phase 3: Validate changes (simplified - could use Gemma here)
+        # Phase 3: Apply the limited deterministic rule check.
         result.validation_passed = self._validate_changes(result.changes, spec)
 
         # Phase 4: Apply changes (if not dry_run)
@@ -224,7 +224,7 @@ class BulkImportMigrator:
         return f"from {spec.registry_module} import ({imports})"
 
     def _validate_changes(self, changes: List[MigrationChange], spec: MigrationSpec) -> bool:
-        """Validate proposed changes (could use Gemma here)"""
+        """Apply the prototype's limited balanced-parentheses rule check."""
         # Basic validation - check for syntax issues
         for change in changes:
             if change.change_type == "replacement":

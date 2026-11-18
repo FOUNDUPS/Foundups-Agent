@@ -28,8 +28,21 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     HIGH_AUTHORITY_VALVE_STATES,
     PrincipalAuthorityRecord,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_safety import (
+    authority_profile_malformed_digest_paths,
+    authority_profile_secret_field_paths,
+    authority_profile_unknown_field_paths,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_seed,
+    rehydrate_authority_profile_source,
+    snapshot_authority_profile_m2m,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
+)
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
@@ -86,6 +99,10 @@ class AuthorityProfileSourceSupplyReason:
     KEY_REUSE = "authority_profile_principal_reddog_key_reuse"
     OUTPUT_PATH_INVALID = "authority_profile_source_output_path_invalid"
     OUTPUT_WRITE_FAILED = "authority_profile_source_output_write_failed"
+    SECRET_FIELD = "authority_profile_secret_field_rejected"
+    UNKNOWN_FIELD = "authority_profile_unknown_field_rejected"
+    DIGEST_FORMAT = "authority_profile_digest_format_invalid"
+    TYPED_SCHEMA = "authority_profile_typed_schema_invalid"
 
 
 @dataclass(frozen=True)
@@ -130,11 +147,32 @@ def run_reddog_authority_profile_source_artifact_supply(
 
     root = Path(repo_root).resolve()
     seed = _mapping(authority_seed)
+    try:
+        seed = snapshot_authority_profile_m2m(seed)
+    except ValueError:
+        return _reject((AuthorityProfileSourceSupplyReason.TYPED_SCHEMA,))
     reasons: list[str] = []
     if not seed:
         reasons.append(AuthorityProfileSourceSupplyReason.SEED_MISSING)
     elif not _ascii_deep(seed):
         reasons.append(AuthorityProfileSourceSupplyReason.SEED_NON_ASCII)
+    reasons.extend(
+        f"{AuthorityProfileSourceSupplyReason.SECRET_FIELD}:{path}"
+        for path in authority_profile_secret_field_paths(seed)
+    )
+    reasons.extend(
+        f"{AuthorityProfileSourceSupplyReason.UNKNOWN_FIELD}:{path}"
+        for path in authority_profile_unknown_field_paths(seed, seed=True)
+    )
+    reasons.extend(
+        f"{AuthorityProfileSourceSupplyReason.DIGEST_FORMAT}:{path}"
+        for path in authority_profile_malformed_digest_paths(seed)
+    )
+    if seed:
+        try:
+            seed = rehydrate_authority_profile_seed(seed)
+        except ValueError:
+            reasons.append(AuthorityProfileSourceSupplyReason.TYPED_SCHEMA)
     missing = [field for field in _REQUIRED_SEED_FIELDS if field not in seed or seed.get(field) in (None, "", (), [])]
     if missing:
         reasons.extend(
@@ -164,9 +202,14 @@ def run_reddog_authority_profile_source_artifact_supply(
     assert principal is not None
     assert snapshot is not None
     assert output is not None
-    profile = _profile(seed, principal, snapshot)
     try:
-        _write_json_atomic(output, profile)
+        profile = rehydrate_authority_profile_source(
+            _profile(seed, principal, snapshot)
+        )
+    except ValueError:
+        return _reject((AuthorityProfileSourceSupplyReason.TYPED_SCHEMA,))
+    try:
+        _write_json_atomic(output, profile, repo_root=root)
     except Exception:
         return _reject((AuthorityProfileSourceSupplyReason.OUTPUT_WRITE_FAILED,))
     return AuthorityProfileSourceSupplyResult(
@@ -295,7 +338,9 @@ def _profile(
         body["owner_dae"] = principal.owner_dae
     if principal.principal_wallet:
         body["principal_wallet"] = principal.principal_wallet
-    body["authority_profile_source_receipt_id"] = _digest(body)
+    body["authority_profile_source_receipt_id"] = (
+        canonical_authority_profile_source_digest(body)
+    )
     return body
 
 
@@ -353,9 +398,17 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
         return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
+def _write_json_atomic(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
     with runtime_operation_lock(str(path) + ".operation"):
-        _write_json_atomic_unlocked(path, payload)
+        with reddog_runtime_artifact_generation_lock(
+            path.parent, repo_root=repo_root
+        ):
+            _write_json_atomic_unlocked(path, payload)
 
 
 def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:
@@ -428,6 +481,14 @@ def _digest(payload: Mapping[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def canonical_authority_profile_source_digest(
+    payload: Mapping[str, Any],
+) -> str:
+    """Return the canonical digest of a profile before receipt insertion."""
+
+    return _digest(payload)
+
+
 def _reject(reasons: Sequence[str]) -> AuthorityProfileSourceSupplyResult:
     return AuthorityProfileSourceSupplyResult(
         accepted=False,
@@ -452,5 +513,6 @@ __all__ = [
     "AUTHORITY_PROFILE_SOURCE_SUPPLY_REJECT",
     "AuthorityProfileSourceSupplyReason",
     "AuthorityProfileSourceSupplyResult",
+    "canonical_authority_profile_source_digest",
     "run_reddog_authority_profile_source_artifact_supply",
 ]

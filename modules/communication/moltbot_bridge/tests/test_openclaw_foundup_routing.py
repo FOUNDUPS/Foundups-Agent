@@ -33,7 +33,7 @@ class TestFoundupDispatch:
 
     def test_dispatch_routes_to_fam_adapter(self):
         """Dispatch should call fam_adapter.handle_fam_intent."""
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "what is cabr"
         mock_intent.sender = "test_user"
         mock_dae = MagicMock()
@@ -153,7 +153,7 @@ class TestFoundupPlanSteps:
         mock_dae.IntentCategory = MockIntentCategory
         mock_dae.ExecutionPlan = MockPlan
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.category = MockIntentCategory.FOUNDUP
         mock_intent.target_domain = "fam_adapter"
         mock_intent.extracted_task = "test task"
@@ -203,11 +203,12 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "start build gotjunk"
         mock_intent.sender = "test_user"
         mock_intent.session_key = "session_123"
         mock_intent.channel = "discord"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         result = dispatch_foundup(mock_dae, mock_intent)
@@ -232,11 +233,12 @@ class TestFoundupJobCreation:
             dispatch_foundup,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "hermes build social_twin"
         mock_intent.sender = "012"
         mock_intent.session_key = None
         mock_intent.channel = "voice_repl"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         result = dispatch_foundup(mock_dae, mock_intent)
@@ -255,11 +257,12 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "extract foundup move2japan"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
         mock_intent.channel = "local_repl"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         dispatch_foundup(mock_dae, mock_intent)
@@ -276,11 +279,12 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "validate foundup kosei"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
         mock_intent.channel = "local_repl"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         dispatch_foundup(mock_dae, mock_intent)
@@ -297,11 +301,12 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "start build gotjunk"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
         mock_intent.channel = "discord"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         result = dispatch_foundup(mock_dae, mock_intent)
@@ -325,11 +330,12 @@ class TestFoundupJobCreation:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "openclaw build pqn_portal"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
         mock_intent.channel = "local_repl"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         dispatch_foundup(mock_dae, mock_intent)
@@ -461,11 +467,12 @@ class TestDryRunPolicyFlagAlignment:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "build foundup gotjunk dry_run=true"
         mock_intent.sender = "test_user"
         mock_intent.session_key = "session_dry1"
         mock_intent.channel = "discord"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         result = dispatch_foundup(mock_dae, mock_intent)
@@ -485,11 +492,12 @@ class TestDryRunPolicyFlagAlignment:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "hermes build kosei --dry-run"
         mock_intent.sender = "012"
         mock_intent.session_key = None
         mock_intent.channel = "local_repl"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         result = dispatch_foundup(mock_dae, mock_intent)
@@ -508,11 +516,12 @@ class TestDryRunPolicyFlagAlignment:
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "start build social_twin [dry-run]"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
         mock_intent.channel = "voice"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         dispatch_foundup(mock_dae, mock_intent)
@@ -522,18 +531,19 @@ class TestDryRunPolicyFlagAlignment:
         assert queue[0].policy_flags.dry_run_mode is True
         assert queue[0].foundup_id == "social_twin"
 
-    def test_missing_dry_run_leaves_flag_false(self):
-        """Normal build without dry-run should have dry_run_mode=False."""
+    def test_missing_dry_run_defaults_safe(self):
+        """Normal build without an explicit live grant remains dry-run."""
         from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
             dispatch_foundup,
             get_job_queue,
         )
 
-        mock_intent = MagicMock()
+        mock_intent = MagicMock(metadata={}, payload=None)
         mock_intent.raw_message = "build foundup gotjunk"
         mock_intent.sender = "test_user"
         mock_intent.session_key = None
         mock_intent.channel = "discord"
+        mock_intent.is_authorized_commander = True
         mock_dae = MagicMock()
 
         result = dispatch_foundup(mock_dae, mock_intent)
@@ -541,9 +551,9 @@ class TestDryRunPolicyFlagAlignment:
         queue = get_job_queue()
         assert len(queue) == 1
         job = queue[0]
-        assert job.policy_flags.dry_run_mode is False
-        assert "[DRY-RUN]" not in result
-        assert "dry_run_mode: False" in result
+        assert job.policy_flags.dry_run_mode is True
+        assert "[DRY-RUN]" in result
+        assert "dry_run_mode: True" in result
 
     def test_no_is_dry_run_field_on_foundup_job(self):
         """Verify FoundUpJob does NOT have is_dry_run field (WSP 97)."""
@@ -557,7 +567,7 @@ class TestDryRunPolicyFlagAlignment:
         # Verify policy_flags.dry_run_mode exists
         job = FoundUpJob(job_id="test_j", tenant_id="test_t")
         assert hasattr(job.policy_flags, "dry_run_mode")
-        assert job.policy_flags.dry_run_mode is False  # Default
+        assert job.policy_flags.dry_run_mode is True  # Safe default
 
     def test_dry_run_receipt_maps_to_not_required(self):
         """Dry-run job receipt should have verification_status=NOT_REQUIRED."""

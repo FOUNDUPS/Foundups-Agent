@@ -14,6 +14,7 @@ const rootExemptionYaml = fs.readFileSync(path.join(root, 'wsp_62_exemptions.yam
 const exemptionYaml = fs.readFileSync(path.join(extDir, 'wsp_62_exemptions.yaml'), 'utf8');
 const roadmap = fs.readFileSync(path.join(extDir, 'ROADMAP.md'), 'utf8');
 const fusionProgress = require(path.join(extDir, 'fusion_progress_receipt.js'));
+const runtimeBindingQuery = require(path.join(extDir, 'model_runtime_binding_query.js'));
 const defaultPanel = packageJson.contributes.configuration.properties['reddog.panelModels'].default;
 const configState = {
   reddog: {},
@@ -66,6 +67,52 @@ function workerWithPanel(panelValue, supplied) {
   return reddog.fusionWorkerFromConfig();
 }
 
+function runtimeBindingReceipt(worker) {
+  const models = [worker.lead, ...worker.panel];
+  const value = {
+    schema_version: runtimeBindingQuery.SCHEMA_VERSION, configured: true, accepted: true,
+    status: runtimeBindingQuery.STATUS_READY,
+    binding_receipt_id: 'reddog_model_runtime_binding:' + 'a'.repeat(64),
+    runtime_surface: 'reddog_backend_architect', catalog_snapshot_id: 'snapshot:test',
+    selection_receipt_id: 'selection:test', task_family: 'reddog_runtime_model_call',
+    principal_model: worker.lead, panel_models: worker.panel,
+    role_bindings: models.map((model, index) => ({ role: index ? 'critic_' + index : 'principal', model_id: model, provider: 'test' })),
+    benchmark_evidence_receipt_ids: [], promotion_evidence_receipt_ids: [],
+    signed_promotion_receipt_ids: [], min_verifier_pass_rate: 0.9,
+    topology_resolution_receipt_id: 'verified_model_runtime_topology:' + 'b'.repeat(64),
+    topology_verification_receipt_id: 'verification:test',
+    topology_valid_until: Math.floor(Date.now() / 1000) + 60,
+    available_providers: ['test'], rejection_reasons: [],
+    no_model_call_performed: true, no_holoindex_query_performed: true,
+    no_holoindex_reindex_performed: true, no_command_execution_performed: true,
+    no_repo_mutation_performed: true, no_runtime_artifact_mutation_performed: true
+  };
+  value.query_receipt_id = runtimeBindingQuery.canonicalDigest(value);
+  return value;
+}
+
+function finishFakeBridge(child, onPayload, stdinText) {
+  const payload = JSON.parse(stdinText);
+  onPayload(payload);
+  const progress = JSON.stringify({
+    event: 'progress', stage: 'lead_start', text: 'Lead request started.',
+    run_id: 'run-contract', event_id: 'event-contract', sequence: 1,
+    status: 'STARTED', role: 'lead', model: 'model-a', elapsed_ms: 3
+  });
+  child.stderr.emit('data', Buffer.from(progress.slice(0, 23)));
+  child.stderr.emit('data', Buffer.from(progress.slice(23)));
+  child.stdout.emit('data', Buffer.from(JSON.stringify({
+    ok: false, reason: 'contract_probe',
+    fusion_progress_receipt: {
+      run_id: payload.bridge_run_id, receipt_id: 'contract-receipt'
+    },
+    fusion_progress_receipt_validation: {
+      applied: true, valid: true, rejection_reasons: []
+    }
+  })));
+  child.emit('close', 0);
+}
+
 function fakeBridgeChild(onPayload) {
   const child = new EventEmitter();
   child.stdout = new EventEmitter();
@@ -79,24 +126,7 @@ function fakeBridgeChild(onPayload) {
     write: (chunk) => {
       stdinText += String(chunk);
     },
-    end: () => {
-      const payload = JSON.parse(stdinText);
-      onPayload(payload);
-      const progress = JSON.stringify({
-        event: 'progress', stage: 'lead_start', text: 'Lead request started.',
-        run_id: 'run-contract', event_id: 'event-contract', sequence: 1,
-        status: 'STARTED', role: 'lead', model: 'model-a', elapsed_ms: 3
-      });
-      child.stderr.emit('data', Buffer.from(progress.slice(0, 23)));
-      child.stderr.emit('data', Buffer.from(progress.slice(23)));
-      child.stdout.emit('data', Buffer.from(JSON.stringify({
-        ok: false,
-        reason: 'contract_probe',
-        fusion_progress_receipt: { run_id: payload.bridge_run_id, receipt_id: 'contract-receipt' },
-        fusion_progress_receipt_validation: { applied: true, valid: true, rejection_reasons: [] }
-      })));
-      child.emit('close', 0);
-    }
+    end: () => finishFakeBridge(child, onPayload, stdinText)
   };
   return child;
 }
@@ -117,7 +147,10 @@ async function captureBridgeInvocation(worker, mode) {
   try {
     const state = { bridgeChild: null, disposed: false };
     const result = await reddog.callFusion({}, worker, 'contract prompt', 'bounded context', 'system prompt', [], mode,
-      (stage, text, metadata) => progressEvents.push({ stage, text, metadata }), state, {}, {});
+      (stage, text, metadata) => progressEvents.push({ stage, text, metadata }), state, {}, {
+        backendCompatibility: { passed: true },
+        runtimeBindingQuery: async () => runtimeBindingReceipt(worker)
+      });
     return { invocation, payload, progressEvents, result, spawnCount, state };
   } finally {
     cp.spawn = originalSpawn;
@@ -188,7 +221,11 @@ async function assertModeCases(mode, cases) {
     assert.strictEqual(captured.invocation.options.env.OPENROUTER_API_KEY, undefined);
     assert.strictEqual(captured.payload.mode, mode, mode + '/' + name + ': mode mismatch');
     assert(/^reddog_bridge_run:[0-9a-f]{32}$/.test(captured.payload.bridge_run_id), mode + '/' + name + ': bridge run ID missing');
-    assert.deepStrictEqual(captured.payload.panel_models, expected, mode + '/' + name + ': stdin mismatch');
+    assert.deepStrictEqual(
+      captured.payload.panel_models,
+      expected.slice(0, reddog.FUSION_PANEL_RUNTIME_LIMIT),
+      mode + '/' + name + ': receipt-bound stdin mismatch'
+    );
     const bridgeProgress = captured.progressEvents.filter((event) => event.stage === 'lead_start');
     assert.strictEqual(bridgeProgress.length, 1, mode + '/' + name + ': fragmented progress must decode once');
     assert.strictEqual(bridgeProgress[0].metadata.role, 'lead', mode + '/' + name + ': progress metadata missing');
@@ -207,6 +244,29 @@ function restoreApiKey(value) {
   }
 }
 
+async function assertProviderEnvironmentScope() {
+  const priorKey = process.env.OPENROUTER_API_KEY;
+  const priorSentinel = process.env.REDDOG_UNRELATED_SENTINEL;
+  process.env.OPENROUTER_API_KEY = 'provider-contract-marker';
+  process.env.REDDOG_UNRELATED_SENTINEL = 'ambient-contract-marker';
+  try {
+    const captured = await captureBridgeInvocation(
+      workerWithPanel(undefined, false), 'foundups_fusion'
+    );
+    assert.strictEqual(
+      captured.invocation.options.env.OPENROUTER_API_KEY,
+      'provider-contract-marker'
+    );
+    assert.strictEqual(
+      captured.invocation.options.env.REDDOG_UNRELATED_SENTINEL, undefined
+    );
+  } finally {
+    restoreApiKey(priorKey);
+    if (priorSentinel === undefined) delete process.env.REDDOG_UNRELATED_SENTINEL;
+    else process.env.REDDOG_UNRELATED_SENTINEL = priorSentinel;
+  }
+}
+
 async function main() {
   assertRuntimeLimits();
   assertWsp62Contracts();
@@ -215,6 +275,7 @@ async function main() {
   try {
     await assertModeCases('foundups_fusion', panelCases());
     await assertModeCases('openrouter_fusion_alias', panelCases());
+    await assertProviderEnvironmentScope();
   } finally {
     restoreApiKey(priorApiKey);
   }

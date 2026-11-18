@@ -40,6 +40,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, Any, Callable, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
+    capture_worker_dispatch_authority_verification_config,
+)
+
 # Load environment variables for DAEs (API keys, ports, feature flags).
 # Managed mode builds `.env.managed` from `.env` (last duplicate wins) for
 # deterministic runtime behavior while preserving shell env precedence.
@@ -191,6 +195,12 @@ from modules.infrastructure.git_push_dae.scripts.launch import (
 
 # Extracted to modules/infrastructure/dae_infrastructure/foundups_vision_dae/scripts/launch.py per WSP 62
 from modules.infrastructure.dae_infrastructure.foundups_vision_dae.scripts.launch import run_vision_dae
+
+# Extracted to modules/infrastructure/foundups_mcp_bridge/scripts/launch.py per WSP 62
+from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
+    run_mcp_bridge_sse,
+    stop_mcp_bridge_sse,
+)
 
 # Extracted to modules/ai_intelligence/training_system/scripts/launch.py per WSP 62
 from modules.ai_intelligence.training_system.scripts.launch import run_training_system
@@ -514,12 +524,12 @@ def search_with_holoindex(query: str):
 
 
 def _create_ai_overseer_for_preflight(repo_root: Path) -> Any:
-    """Create AI Overseer with quieter logs during startup preflight."""
+    """Create deterministic preflight monitors without loading inference models."""
     _prev_level = logging.root.level
     try:
         logging.root.setLevel(logging.WARNING)
         from modules.ai_intelligence.ai_overseer.src.ai_overseer import AIIntelligenceOverseer
-        return AIIntelligenceOverseer(repo_root)
+        return AIIntelligenceOverseer(repo_root, initialize_models=False)
     finally:
         logging.root.setLevel(_prev_level)
 
@@ -672,17 +682,32 @@ def run_dependency_security_preflight(repo_root: Path) -> bool:
         print(f"[DEP-SECURITY] Preflight warning: {exc}")
         return True
 
-    totals = status.get("totals", {}) if isinstance(status, dict) else {}
+    return _report_dependency_security_status(status, enforced=enforced)
+
+
+def _report_dependency_security_status(
+    status: Mapping[str, Any], *, enforced: bool,
+) -> bool:
+    totals = status.get("totals", {})
     critical = int(totals.get("critical", 0) or 0)
     high = int(totals.get("high", 0) or 0)
     unknown = int(totals.get("unknown", 0) or 0)
     tool_failures = int(status.get("tool_failures", 0) or 0)
+    evidence_failures = int(status.get("evidence_failures", 0) or 0)
     cached = bool(status.get("cached", False))
     passed = bool(status.get("passed", False))
+    degraded = bool(status.get("degraded", False))
     cache_state = "cached" if cached else "fresh"
+    decision = "PASS" if passed else ("WARN" if degraded else "FAIL")
+    findings = (
+        "counts=WITHHELD"
+        if status.get("counts_withheld", False)
+        else f"critical={critical} high={high} unknown={unknown}"
+    )
     print(
-        f"[DEP-SECURITY] preflight={'PASS' if passed else 'FAIL'} ({cache_state}) "
-        f"critical={critical} high={high} unknown={unknown} tool_failures={tool_failures}"
+        f"[DEP-SECURITY] preflight={decision} ({cache_state}) "
+        f"{findings} "
+        f"tool_failures={tool_failures} evidence_failures={evidence_failures}"
     )
 
     if not passed:
@@ -691,18 +716,15 @@ def run_dependency_security_preflight(repo_root: Path) -> bool:
                 on_preflight_fail,
             )
 
-            severity = "critical" if critical > 0 else ("high" if high > 0 else "medium")
+            severity, payload = _dependency_failure_payload(
+                status, critical=critical, high=high, unknown=unknown,
+                tool_failures=tool_failures, evidence_failures=evidence_failures,
+                cache_state=cache_state, enforced=enforced,
+            )
             on_preflight_fail(
                 component="dep_security",
                 severity=severity,
-                payload={
-                    "critical": critical,
-                    "high": high,
-                    "unknown": unknown,
-                    "tool_failures": tool_failures,
-                    "cache_state": cache_state,
-                    "enforced": enforced,
-                },
+                payload=payload,
                 source="main.py:run_dep_security_preflight",
             )
         except Exception as exc:
@@ -712,6 +734,22 @@ def run_dependency_security_preflight(repo_root: Path) -> bool:
         print("[DEP-SECURITY] Startup blocked by OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED=1")
         return False
     return True
+
+
+def _dependency_failure_payload(
+    status: Mapping[str, Any], **values: object,
+) -> tuple[str, dict[str, object]]:
+    payload = dict(values)
+    if bool(status.get("counts_withheld", False)):
+        payload.pop("critical", None)
+        payload.pop("high", None)
+        payload.pop("unknown", None)
+        payload["counts_withheld"] = True
+        payload["cache_authority"] = str(status.get("cache_authority", "ADVISORY_ONLY"))
+        return "medium", payload
+    critical = int(payload.get("critical", 0) or 0)
+    high = int(payload.get("high", 0) or 0)
+    return ("critical" if critical > 0 else "high" if high > 0 else "medium"), payload
 
 
 def run_env_hygiene_preflight(repo_root: Path) -> bool:
@@ -871,8 +909,9 @@ def run_connect_wre(repo_root: Path) -> dict:
 
     Returns structured status:
         coded: YES (command is wired in CLI)
-        connection: CONNECTED | PARTIAL | DISCONNECTED
-        readiness: READY | INSUFFICIENT_DATA | DEGRADED | BLOCKED | DISABLED
+        connection: CHECKED | PARTIAL | DISCONNECTED (diagnostic, not runtime admission)
+        readiness: READY | UNKNOWN | DEGRADED | BLOCKED | DISABLED
+        admission_allowed: existing cold-start/critical policy; not a security receipt
         manual_enforced: bool
         auto_enforced_now: bool
         sample_coverage: int (executions vs min_samples)
@@ -882,6 +921,7 @@ def run_connect_wre(repo_root: Path) -> dict:
         "coded": "YES",
         "connection": "DISCONNECTED",
         "readiness": "DISABLED",
+        "admission_allowed": False,
         "manual_enforced": False,
         "auto_enforced_now": False,
         "sample_coverage": 0,
@@ -894,6 +934,7 @@ def run_connect_wre(repo_root: Path) -> dict:
             DashboardAlertMonitor,
             check_dashboard_health,
         )
+        from modules.infrastructure.wre_core.src.dae_preflight import dashboard_readiness
 
         monitor = DashboardAlertMonitor()
         health = check_dashboard_health() or {}
@@ -903,37 +944,31 @@ def run_connect_wre(repo_root: Path) -> dict:
         min_samples = int(health.get("min_samples", 25))
         in_watch = monitor.is_in_watch_period()
 
-        manual_enforced = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
-        auto_enforce = _wre_dashboard_auto_enforce_enabled()
-        auto_enforced_now = bool(auto_enforce and not in_watch and not insufficient_data)
+        policy = dashboard_readiness(health, in_watch=in_watch)
 
         alerts = health.get("alerts", []) if isinstance(health.get("alerts"), list) else []
         critical_count = sum(1 for a in alerts if a.get("severity") == "critical")
         warning_count = sum(1 for a in alerts if a.get("severity") == "warning")
         healthy = bool(health.get("healthy", True))
 
-        result["connection"] = "CONNECTED"
-        result["manual_enforced"] = manual_enforced
-        result["auto_enforced_now"] = auto_enforced_now
+        result["connection"] = "CHECKED"
+        result["manual_enforced"] = policy["manual_enforced"]
+        result["auto_enforced_now"] = policy["auto_enforced"]
+        result["admission_allowed"] = (policy["evidence_valid"] and policy["enabled"]
+                                       and policy["readiness"] in {"READY", "UNKNOWN"})
         result["sample_coverage"] = total_executions
         result["alert_counts"] = {"critical": critical_count, "warning": warning_count}
 
-        if insufficient_data:
-            result["readiness"] = "INSUFFICIENT_DATA"
-        elif critical_count > 0:
-            result["readiness"] = "BLOCKED" if (manual_enforced or auto_enforced_now) else "DEGRADED"
-        elif not healthy:
-            result["readiness"] = "DEGRADED"
-        else:
-            result["readiness"] = "READY"
+        result["readiness"] = policy["readiness"]
+        result["unknown_metrics"] = health.get("unknown_metrics", [])
 
     except ImportError:
         result["connection"] = "PARTIAL"
-        result["readiness"] = "DEGRADED"
+        result["readiness"] = "UNKNOWN"
     except Exception as exc:
         logger.error(f"[WRE] connect-wre check failed: {exc}")
         result["connection"] = "PARTIAL"
-        result["readiness"] = "DEGRADED"
+        result["readiness"] = "UNKNOWN"
 
     return result
 
@@ -941,18 +976,13 @@ def run_connect_wre(repo_root: Path) -> dict:
 def _wre_dashboard_auto_enforce_enabled(*, interactive_menu: bool = False) -> bool:
     """Default dashboard auto-enforcement to autonomous runtimes, not menu startup."""
 
-    explicit = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE")
-    if explicit is not None:
-        return explicit != "0"
-    if interactive_menu:
-        return False
-    return os.getenv("OPENCLAW_24X7", "0") != "0"
+    from modules.infrastructure.wre_core.src.dae_preflight import dashboard_auto_enforce_enabled
+    return dashboard_auto_enforce_enabled(interactive_menu=interactive_menu)
 
 
 def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = True) -> bool:
     """
-    Run WRE dashboard preflight at startup.
-
+    Run WRE dashboard preflight and advisory research display at startup.
     This mirrors DAE-level enforcement logic so `python main.py` has the same
     health gate semantics as individual DAE launchers.
 
@@ -960,7 +990,7 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
       WRE_DASHBOARD_PREFLIGHT=1             Enable startup warning checks
       WRE_DASHBOARD_PREFLIGHT_ENFORCED=0    Manual override to block startup
       WRE_DASHBOARD_AUTO_ENFORCE            Explicit override to auto-block on criticals
-      OPENCLAW_24X7=1                       Autonomous runtime defaults to enforced outside menu startup
+      Action startup defaults to enforced; interactive menu display defaults advisory.
     """
     enabled = os.getenv("WRE_DASHBOARD_PREFLIGHT", "1") != "0"
     if not enabled:
@@ -974,22 +1004,25 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
         from modules.infrastructure.wre_core.src.dashboard_alerts import (
             DashboardAlertMonitor,
             check_dashboard_health,
+            print_research_report_summary,
         )
-
+        from modules.infrastructure.wre_core.src.dae_preflight import dashboard_readiness
+        print_research_report_summary()
         monitor = DashboardAlertMonitor()
         health = check_dashboard_health() or {}
         insufficient_data = bool(health.get("insufficient_data", False))
         total_executions = int(health.get("total_executions", 0))
         min_samples = int(health.get("min_samples", 25))
         in_watch = monitor.is_in_watch_period()
-        auto_enforced = bool(auto_enforce and not in_watch and not insufficient_data)
-        enforced = bool(manual_enforced or auto_enforced)
+        policy = dashboard_readiness(health, in_watch=in_watch, interactive_menu=interactive_menu)
+        auto_enforced = policy["auto_enforced"]
+        enforced = policy["enforced"]
 
-        if insufficient_data:
+        if insufficient_data and not health.get("alerts"):
             watch_label = "WATCH" if in_watch else "STABLE"
             print(
-                f"[WRE-DASHBOARD] preflight=WARN ({watch_label}, INSUFFICIENT_DATA) "
-                f"samples={total_executions}/{min_samples}"
+                f"[WRE-DASHBOARD] preflight=UNKNOWN ({watch_label}, INSUFFICIENT_DATA) "
+                f"per-metric minimum={min_samples}; historical executions={total_executions}"
             )
             # DJ2-A: Dispatch insufficient_data as warning tier (WSP 97 truth distinction)
             try:
@@ -1011,13 +1044,15 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
                 )
             except Exception as dispatch_exc:
                 logger.debug(f"[WRE-DASHBOARD] dispatch skipped: {dispatch_exc}")
-            return True
+            if not policy["allowed"]:
+                print("[WRE-DASHBOARD] Startup blocked: enforced readiness requires measured evidence")
+            return policy["allowed"]
 
         alerts = health.get("alerts", []) if isinstance(health.get("alerts"), list) else []
         critical_count = sum(1 for a in alerts if a.get("severity") == "critical")
         warning_count = sum(1 for a in alerts if a.get("severity") == "warning")
         healthy = bool(health.get("healthy", True))
-        status = "PASS" if healthy else "FAIL"
+        status = policy["status"]
         mode_label = "WATCH" if in_watch else ("STABLE, ENFORCED" if auto_enforced else "STABLE")
         print(
             f"[WRE-DASHBOARD] preflight={status} ({mode_label}) "
@@ -1025,7 +1060,7 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
             f"samples={total_executions}/{min_samples}"
         )
 
-        if critical_count > 0 and enforced:
+        if not policy["allowed"]:
             try:
                 from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
                     on_preflight_fail,
@@ -1056,7 +1091,7 @@ def run_wre_dashboard_preflight(repo_root: Path, *, interactive_menu: bool = Tru
         return True
     except Exception as exc:
         logger.error(f"[WRE-DASHBOARD] Startup preflight failed: {exc}")
-        if manual_enforced:
+        if manual_enforced or auto_enforce:
             print(f"[WRE-DASHBOARD] Preflight FAILED: {exc}")
             return False
         print(f"[WRE-DASHBOARD] Preflight warning: {exc}")
@@ -1149,61 +1184,25 @@ def run_wsp_framework_preflight(repo_root: Path, overseer: Any | None = None) ->
 
 
 def run_git_main_merge_sentinel_preflight(repo_root: Path) -> bool:
-    """
-    Run git main-merge sentinel at startup.
-
-    Optionally auto-merges feature branches to main to prevent drift.
-
-    Env:
-        GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
-        GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
-        GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Delete merged branch (default ON)
-    """
-    if os.getenv("GIT_MAIN_MERGE_SENTINEL", "0") != "1":
-        logger.info("[GIT-MERGE-SENTINEL] Startup preflight disabled")
-        return True
-
+    """Refresh GitHub lifecycle evidence on the WRE startup path."""
+    enforced = (
+        os.getenv("GIT_MAIN_MERGE_SENTINEL", "0") == "1"
+        and os.getenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "0") == "1"
+    )
     try:
-        from modules.infrastructure.wre_core.src.git_main_merge_sentinel import (
-            run_main_merge_sentinel,
+        from modules.infrastructure.wre_core.src.git_lifecycle import reconcile_git_lifecycle
+
+        receipt = reconcile_git_lifecycle(repo_root)
+        logger.info(
+            "[GIT-LIFECYCLE] coverage=%s pending_prs=%d pc=%s",
+            receipt["coverage"], len(receipt["pending_prs"]), receipt["pc"]["status"],
         )
-
-        result = run_main_merge_sentinel(repo_root)
-
-        # Build status line
-        status = "PASS" if result["passed"] else "FAIL"
-        merged = result.get("merged", False)
-        branch = result.get("branch") or "main"
-        actions_count = len(result.get("actions", []))
-
-        if result["error"]:
-            print(
-                f"[GIT-MERGE-SENTINEL] preflight={status} branch={branch} "
-                f"merged={merged} error={result['error']}"
-            )
-        else:
-            print(
-                f"[GIT-MERGE-SENTINEL] preflight={status} branch={branch} "
-                f"merged={merged} actions={actions_count}"
-            )
-
-        # Log actions for debugging
-        for action in result.get("actions", []):
-            logger.debug(f"[GIT-MERGE-SENTINEL] {action}")
-
-        return result["passed"]
-
-    except ImportError as exc:
-        logger.error(f"[GIT-MERGE-SENTINEL] Import failed: {exc}")
-        print(f"[GIT-MERGE-SENTINEL] preflight=WARN import_error")
-        return True  # Non-blocking import failure
-    except Exception as exc:
-        logger.error(f"[GIT-MERGE-SENTINEL] Startup preflight failed: {exc}")
-        if os.getenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "0") == "1":
-            print(f"[GIT-MERGE-SENTINEL] preflight=FAIL error={exc}")
-            return False
-        print(f"[GIT-MERGE-SENTINEL] preflight=WARN error={exc}")
-        return True
+        return not enforced or (
+            receipt["coverage"] == "complete" and receipt.get("main_checks", {}).get("verified") is True
+        )
+    except (ImportError, OSError, ValueError) as exc:
+        logger.warning("[GIT-LIFECYCLE] startup unavailable (%s)", type(exc).__name__)
+        return not enforced
 
 
 def run_reddog_readonly_operational_bootstrap_preflight(repo_root: Path) -> bool:
@@ -1430,15 +1429,21 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
 
         active_slice_ledger_path = os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", "")
         work_ledger_json_path = os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", "")
-        github_pr_records_path = resident_queue_runtime_file_path(
-            os.environ,
-            repo_root,
-            "REDDOG_GITHUB_PR_RECORDS_PATH",
+        github_pr_records_path = (
+            os.getenv("REDDOG_GITHUB_PR_RECORDS_PATH", "").strip()
+            or resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_GITHUB_PR_RECORDS_PATH",
+            )
         )
-        w10_report_records_path = resident_queue_runtime_file_path(
-            os.environ,
-            repo_root,
-            "REDDOG_W10_REPORT_RECORDS_PATH",
+        w10_report_records_path = (
+            os.getenv("REDDOG_W10_REPORT_RECORDS_PATH", "").strip()
+            or resident_queue_runtime_file_path(
+                os.environ,
+                repo_root,
+                "REDDOG_W10_REPORT_RECORDS_PATH",
+            )
         )
         source_supply_requested = resident_queue_runtime_flag_enabled(
             os.environ,
@@ -1493,15 +1498,21 @@ def run_reddog_authoritative_work_state_refresh_preflight(repo_root: Path) -> bo
                 repo_root=repo_root,
                 github_pr_records_path=github_pr_records_path,
                 w10_report_records_path=w10_report_records_path,
-                active_slice_ledger_output_path=resident_queue_runtime_file_path(
-                    os.environ,
-                    repo_root,
-                    "REDDOG_ACTIVE_SLICE_LEDGER_PATH",
+                active_slice_ledger_output_path=(
+                    os.getenv("REDDOG_ACTIVE_SLICE_LEDGER_PATH", "").strip()
+                    or resident_queue_runtime_file_path(
+                        os.environ,
+                        repo_root,
+                        "REDDOG_ACTIVE_SLICE_LEDGER_PATH",
+                    )
                 ),
-                work_ledger_json_output_path=resident_queue_runtime_file_path(
-                    os.environ,
-                    repo_root,
-                    "REDDOG_WORK_LEDGER_JSON_PATH",
+                work_ledger_json_output_path=(
+                    os.getenv("REDDOG_WORK_LEDGER_JSON_PATH", "").strip()
+                    or resident_queue_runtime_file_path(
+                        os.environ,
+                        repo_root,
+                        "REDDOG_WORK_LEDGER_JSON_PATH",
+                    )
                 ),
             )
             projection_status = "PASS" if projection.accepted else "WARN"
@@ -1612,7 +1623,11 @@ def run_reddog_wre_queue_consumer_preflight(repo_root: Path) -> bool:
         print(f"[REDDOG-WRE-QUEUE] preflight=WARN error={type(exc).__name__}")
         return True
 
-    status = "PASS" if result.ready else "WARN"
+    return _report_reddog_wre_queue_consumer_result(result, enforced=enforced)
+
+
+def _report_reddog_wre_queue_consumer_result(result, *, enforced: bool) -> bool:
+    status = "PASS" if result.ready else ("FAIL" if enforced else "WARN")
     reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
     print(
         f"[REDDOG-WRE-QUEUE] preflight={status} status={result.status} "
@@ -1686,103 +1701,33 @@ def _reddog_bounded_json_env(name: str, *, max_chars: int = 16384) -> Any | None
         return None
 
 
-def _reddog_mapping_sequence(payload: Any, keys: Sequence[str], *, limit: int) -> tuple[Mapping[str, Any], ...]:
-    source: Any = payload
-    if isinstance(payload, Mapping):
-        for key in keys:
-            candidate = payload.get(key)
-            if isinstance(candidate, list):
-                source = candidate
-                break
-    if not isinstance(source, list):
-        return ()
-    records: list[Mapping[str, Any]] = []
-    for item in source:
-        if isinstance(item, Mapping):
-            records.append(dict(item))
-            if len(records) >= limit:
-                break
-    return tuple(records)
-
-
-def _reddog_resident_memory_limit() -> int:
-    return _reddog_positive_int_env("REDDOG_RESIDENT_MEMORY_MAX_RECORDS", 20)
-
-
 def _reddog_resident_brain_state_from_artifacts() -> Mapping[str, Any] | None:
-    if not _reddog_truthy_env_value(os.getenv("REDDOG_RESIDENT_BRAIN_CONTEXT", "1")):
-        return None
-
-    raw_path = os.getenv("REDDOG_RESIDENT_BRAIN_STATE_PATH", "").strip()
-    if raw_path:
-        path = Path(raw_path)
-    else:
-        try:
-            from modules.infrastructure.wre_core.scripts.extract_brain_artifacts import (
-                DEFAULT_OUTPUT_DIR,
-                DEFAULT_STATE_FILE,
-            )
-
-            path = DEFAULT_OUTPUT_DIR / DEFAULT_STATE_FILE
-        except Exception:
-            return None
-
-    payload = _reddog_bounded_json_file(path)
-    if not isinstance(payload, Mapping):
-        return None
-
-    signature = payload.get("signature") if isinstance(payload.get("signature"), Mapping) else {}
-    summary = payload.get("summary") if isinstance(payload.get("summary"), Mapping) else {}
-    record_count = (
-        payload.get("conversations")
-        or signature.get("conversation_count", 0)
-        or summary.get("total_artifacts", 0)
-        or 0
+    from modules.communication.moltbot_bridge.src.reddog_resident_memory_context import (
+        resident_brain_state_from_artifacts,
     )
-    try:
-        normalized_count = int(record_count)
-    except (TypeError, ValueError):
-        normalized_count = 0
 
-    return {
-        "available": True,
-        "signature_digest": _reddog_digest_payload(signature),
-        "summary_digest": _reddog_digest_payload(summary),
-        "record_count": normalized_count,
-        "source": "brain_artifact_state",
-        "updated_at": str(payload.get("updated_at", "")),
-    }
+    return resident_brain_state_from_artifacts()
 
 
-def _reddog_resident_breadcrumbs_from_runtime(*, work_focus: str, foundup_id: str) -> tuple[Mapping[str, Any], ...]:
-    if not _reddog_truthy_env_value(os.getenv("REDDOG_RESIDENT_BREADCRUMBS_CONTEXT", "1")):
-        return ()
+def _reddog_resident_breadcrumbs_from_runtime(
+    *, work_focus: str, foundup_id: str
+) -> tuple[Mapping[str, Any], ...]:
+    from modules.communication.moltbot_bridge.src.reddog_resident_memory_context import (
+        resident_breadcrumbs_from_runtime,
+    )
 
-    limit = _reddog_resident_memory_limit()
-    raw_path = os.getenv("REDDOG_RESIDENT_BREADCRUMBS_PATH", "").strip()
-    if raw_path:
-        payload = _reddog_bounded_json_file(Path(raw_path))
-        return _reddog_mapping_sequence(payload, ("breadcrumbs", "records", "items"), limit=limit)
-
-    try:
-        from modules.communication.moltbot_bridge.src.openclaw_memory_queries import search_breadcrumbs
-
-        topic = os.getenv("REDDOG_RESIDENT_MEMORY_QUERY", "").strip() or work_focus or foundup_id
-        return tuple(dict(item) for item in search_breadcrumbs(topic, limit=limit) if isinstance(item, Mapping))
-    except Exception:
-        return ()
+    return resident_breadcrumbs_from_runtime(
+        work_focus=work_focus,
+        foundup_id=foundup_id,
+    )
 
 
 def _reddog_resident_workspace_memory_notes_from_env() -> tuple[Mapping[str, Any], ...]:
-    raw_path = os.getenv("REDDOG_RESIDENT_WORKSPACE_MEMORY_NOTES_PATH", "").strip()
-    if not raw_path:
-        return ()
-    payload = _reddog_bounded_json_file(Path(raw_path))
-    return _reddog_mapping_sequence(
-        payload,
-        ("workspace_memory_notes", "notes", "records", "items"),
-        limit=_reddog_resident_memory_limit(),
+    from modules.communication.moltbot_bridge.src.reddog_resident_memory_context import (
+        resident_workspace_memory_notes_from_env,
     )
+
+    return resident_workspace_memory_notes_from_env()
 
 
 def _reddog_resident_architect_cycle_requested() -> bool:
@@ -1962,75 +1907,11 @@ def run_reddog_resident_architect_durable_cycle_preflight(repo_root: Path) -> bo
 def _reddog_resident_model_runtime_bindings_from_env(
     repo_root: Path,
 ) -> tuple[Mapping[str, Any] | None, Mapping[str, Any] | None, str]:
-    runtime_root_value = os.getenv("REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT", "").strip()
-    audit_path_value = os.getenv(
-        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH", ""
-    ).strip()
-    architect_path_value = os.getenv(
-        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH", ""
-    ).strip()
-    if not runtime_root_value:
-        return None, None, "missing_model_runtime_binding_root"
-    if not audit_path_value:
-        return None, None, "missing_audit_model_runtime_binding_path"
-    if not architect_path_value:
-        return None, None, "missing_architect_model_runtime_binding_path"
-    runtime_root = Path(runtime_root_value)
-    audit_path = Path(audit_path_value)
-    architect_path = Path(architect_path_value)
-    if not runtime_root.is_absolute() or not audit_path.is_absolute() or not architect_path.is_absolute():
-        return None, None, "model_runtime_binding_path_not_absolute"
-    root = repo_root.resolve()
-    runtime_root = runtime_root.resolve()
-    try:
-        runtime_root.relative_to(root)
-        return None, None, "model_runtime_binding_root_inside_repo"
-    except ValueError:
-        pass
-    audit_identity = Path(os.path.abspath(audit_path))
-    architect_identity = Path(os.path.abspath(architect_path))
-    try:
-        audit_identity.relative_to(root)
-        return None, None, "model_runtime_binding_artifact_inside_repo"
-    except ValueError:
-        pass
-    try:
-        architect_identity.relative_to(root)
-        return None, None, "model_runtime_binding_artifact_inside_repo"
-    except ValueError:
-        pass
-    if os.path.normcase(str(audit_identity)) == os.path.normcase(str(architect_identity)):
-        return None, None, "model_runtime_binding_artifacts_not_distinct"
-    try:
-        from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import (
-            ModelRuntimeBindingDecision,
-        )
-        from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
-            rehydrate_model_runtime_binding_receipt,
-        )
-        from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
-            read_reddog_runtime_json_mapping,
-        )
+    from modules.communication.moltbot_bridge.src.reddog_resident_model_runtime_bindings import (
+        load_resident_model_runtime_bindings,
+    )
 
-        audit = read_reddog_runtime_json_mapping(audit_path, allowed_root=runtime_root)
-        architect = read_reddog_runtime_json_mapping(architect_path, allowed_root=runtime_root)
-        audit_receipt = rehydrate_model_runtime_binding_receipt(audit)
-        architect_receipt = rehydrate_model_runtime_binding_receipt(architect)
-    except Exception:
-        return None, None, "model_runtime_binding_artifact_invalid"
-    if (
-        audit_receipt.decision != ModelRuntimeBindingDecision.BOUND
-        or not audit_receipt.principal_model
-        or audit_receipt.runtime_surface != "reddog_readonly_audit_worker"
-    ):
-        return None, None, "audit_model_runtime_binding_surface_invalid"
-    if (
-        architect_receipt.decision != ModelRuntimeBindingDecision.BOUND
-        or not architect_receipt.principal_model
-        or architect_receipt.runtime_surface != "reddog_backend_architect"
-    ):
-        return None, None, "architect_model_runtime_binding_surface_invalid"
-    return audit, architect, ""
+    return load_resident_model_runtime_bindings(repo_root)
 
 
 def _reddog_startup_blocker_token(value: str) -> str:
@@ -2110,88 +1991,7 @@ def _handle_startup_blocker(repo_root: Path, *, component: str, stage: str) -> N
 
 
 def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
-    """
-    Optionally promote a backend architect FIX determination into the resident queue.
-
-    Env:
-        REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME=0             Enable promotion bridge
-        REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED=0            Block startup if rejected
-        REDDOG_AUTHORITATIVE_WORK_STATE_PATH                 Existing work-state snapshot
-        REDDOG_ARCHITECT_FIX_DETERMINATION_PATH              Outside-repo determination JSON
-        REDDOG_MODEL_SELECTION_RECEIPT_PATH                  Outside-repo model receipt JSON
-        REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH            Outside-repo runtime binding receipt JSON
-        REDDOG_MEMEX_SUPPLY_RECEIPT_PATH                     Outside-repo Memex supply JSON
-        REDDOG_AUTHORITY_PROFILE_SOURCE_PATH                 Outside-repo authority seed JSON
-        REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH         Outside-repo promoted profile JSON
-        REDDOG_RESIDENT_QUEUE_BINDING_PROFILE                Optional profile-derived output path
-        REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=0              Materialize determination/Memex from AgentDB cycle
-        REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY=0             Materialize model selection receipt from signed evidence
-        REDDOG_MODEL_RUNTIME_BINDING_ARTIFACT_SUPPLY=0       Materialize runtime binding receipt from signed evidence
-        REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY=0     Materialize model AutoResearch plan from verified receipts
-        REDDOG_MODEL_AUTORESEARCH_PLAN_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY=0 Execute campaign fixture or configured gateway
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN=0 Run gate->cycle->feedback chain
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_CHAIN_ENFORCED=0 Block startup if chain rejected
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY=0 Materialize campaign promotion-gate receipts
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_GATE_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY=0 Materialize campaign cycle receipt
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION=0 Admit cycle receipt to feedback ledger
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_ADMISSION_ENFORCED=0 Block startup if rejected
-        REDDOG_MODEL_CATALOG_SNAPSHOT_PATH                   Outside-repo model catalog snapshot JSON
-        REDDOG_MODEL_PRODUCTION_EVIDENCE_BUNDLE_PATH         Outside-repo signed production evidence bundle JSON
-        REDDOG_MODEL_SELECTION_REQUIREMENTS_PATH             Outside-repo selection requirements JSON
-        REDDOG_MODEL_BENCHMARK_EVIDENCE_RECEIPTS_PATH        Outside-repo benchmark evidence receipts JSON
-        REDDOG_MODEL_PROMOTION_EVIDENCE_RECEIPTS_PATH        Outside-repo promotion evidence receipts JSON
-        REDDOG_MODEL_RUNTIME_BINDING_POLICY_PATH             Outside-repo runtime binding policy JSON
-        REDDOG_MODEL_AUTORESEARCH_PROMOTION_GATE_RECEIPTS_PATH Outside-repo promotion gate receipts JSON
-        REDDOG_MODEL_AUTORESEARCH_CANDIDATE_POOL_PATH        Outside-repo benchmark candidate pool JSON
-        REDDOG_MODEL_AUTORESEARCH_POLICY_PATH                Outside-repo AutoResearch policy JSON
-        REDDOG_MODEL_AUTORESEARCH_FEEDBACK_RECORDS_PATH      Optional outside-repo feedback JSON/JSONL
-        REDDOG_MODEL_AUTORESEARCH_PLAN_RECEIPT_PATH          Outside-repo AutoResearch plan output JSON
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_TASKS_PATH        Outside-repo held-out campaign tasks JSON
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMPTS_PATH      Outside-repo held-out prompt records JSON
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_OUTPUT_EVIDENCE_PATH Outside-repo raw output evidence JSONL for configured_gateway
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_RECEIPT_PATH Outside-repo campaign execution output JSON
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_DIGEST   Verifier digest required by plan policy
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_HELD_OUT_SPLIT_ID Held-out split ID for benchmark receipt
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MODE       deterministic_fixture or configured_gateway
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_VERIFIER_MODE     deterministic_fixture, exact_output_digest, or output_evidence_semantic
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_ALLOWED_PROVIDERS ; or , separated allowlist
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_PROMPT_CHARS Optional positive int
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_CALLS_PER_SAMPLE Optional positive int
-        REDDOG_MODEL_AUTORESEARCH_RUNNER_MAX_TOTAL_CALLS       Required configured campaign call cap
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_RUNNER_MAX_COST_USD_PER_SAMPLE Canonical positive decimal string
-        REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_PROMOTION_POLICIES_PATH Outside-repo promotion policies JSON
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_RECEIPT_PATH         Outside-repo AutoResearch cycle receipt JSON
-        REDDOG_MODEL_AUTORESEARCH_CYCLE_FEEDBACK_LEDGER_PATH Outside-repo AutoResearch cycle feedback JSONL
-        REDDOG_MODEL_AUTORESEARCH_PROMOTION_AUTHORITY_RECEIPT_ID Optional promotion authority receipt ID
-        REDDOG_MODEL_AUTORESEARCH_SIGNED_PROMOTION_RECEIPT_ID Optional signed promotion receipt ID
-        REDDOG_MODEL_EVIDENCE_TRUSTED_KEYS_PATH              Outside-repo trusted model evidence public keys JSON
-        REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY=0 Materialize principal/snapshot from GitHub probe
-        REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED=0 Block startup if rejected
-        REDDOG_GITHUB_REPO_FULL_NAME                         GitHub repo full name for permission probe
-        REDDOG_AUTHORITY_FOUNDUP_ID                          FoundUp scope for principal authority record
-        REDDOG_PRINCIPAL_PUBLIC_KEY                          Principal public key, required; never inferred
-        REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY=0               Materialize authority seed from resident receipts
-        REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_ENFORCED=0      Block startup if seed supply fails
-        REDDOG_REDDOG_ID                                     Delegated RedDog id for authority seed
-        REDDOG_REDDOG_PUBLIC_KEY                             RedDog public key for authority seed
-        REDDOG_AUTHORITY_REQUESTED_OPERATION                  Authority operation, default feature_slice
-        REDDOG_AUTHORITY_ALLOWED_PATHS                        ; or , separated path allowlist
-        REDDOG_AUTHORITY_DENIED_PATHS                         ; or , separated path denylist
-        REDDOG_AUTHORITY_REQUIRED_TESTS                       ; or , separated required tests
-        REDDOG_AUTHORITY_REQUIRED_POLICY_GATES                ; or , separated policy gates
-        REDDOG_AUTHORITY_CONSENSUS_RECEIPT_DIGEST             Required for high-authority operations
-        REDDOG_AUTHORITY_SOVEREIGN_AUTHORIZATION_DIGEST       Required for high-authority operations
-        REDDOG_AUTHORITY_PROFILE_SEED_NOW_EPOCH               Deterministic seed issue time for tests
-        REDDOG_AUTHORITY_PROFILE_SOURCE_ARTIFACT_SUPPLY=0    Materialize authority source from seed/principal/snapshot
-        REDDOG_AUTHORITY_PROFILE_SEED_PATH                   Outside-repo authority seed input JSON
-        REDDOG_PRINCIPAL_AUTHORITY_RECORD_PATH               Outside-repo principal authority record JSON
-        REDDOG_PERMISSION_SNAPSHOT_PATH                      Outside-repo permission snapshot JSON
-        REDDOG_RESIDENT_ARCHITECT_INTENT_ID                  Intent ID for the determined resident cycle
-    """
+    """Run the documented RedDog FIX artifact and promotion preflight chain."""
 
     try:
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
@@ -2218,6 +2018,7 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
         repo_root,
         "REDDOG_MODEL_RUNTIME_BINDING_RECEIPT_PATH",
     )
+    holoindex_receipt_path = os.getenv("HOLOINDEX_FRESHNESS_RECEIPT", "")
     model_autoresearch_plan_receipt_path = resident_queue_runtime_file_path(
         os.environ,
         repo_root,
@@ -2269,11 +2070,33 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
     authority_profile_path = resident_queue_runtime_file_path(
         os.environ,
         repo_root,
+        "REDDOG_ARCHITECT_FIX_INERT_PROFILE_PATH",
+    )
+    active_authority_profile_path = resident_queue_runtime_file_path(
+        os.environ,
+        repo_root,
         "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH",
     )
     handoff_requested = resident_queue_runtime_flag_enabled(os.environ, "REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF")
     handoff_enforced = os.getenv("REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF_ENFORCED", "0") != "0"
-    if handoff_requested:
+    from modules.communication.moltbot_bridge.src.reddog_main_fix_promotion_claim_preparation import (
+        prepare_reddog_main_fix_promotion_claim,
+    )
+
+    claim_preparation = prepare_reddog_main_fix_promotion_claim(
+        repo_root=repo_root,
+        environment=os.environ,
+        architect_determination_path=architect_determination_path,
+        memex_supply_receipt_path=memex_supply_receipt_path,
+    )
+    if not claim_preparation.continue_pipeline:
+        return claim_preparation.startup_result
+    durable_claim = claim_preparation.claim
+    durable_claim_store = claim_preparation.store
+    if durable_claim is not None:
+        architect_determination_path = claim_preparation.architect_determination_path
+        memex_supply_receipt_path = claim_preparation.memex_supply_receipt_path
+    elif handoff_requested:
         try:
             from modules.communication.moltbot_bridge.src.reddog_resident_fix_promotion_artifact_handoff import (
                 run_reddog_resident_fix_promotion_artifact_handoff,
@@ -2313,6 +2136,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
 
     model_supply_requested = resident_queue_runtime_flag_enabled(os.environ, "REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY")
     model_supply_enforced = os.getenv("REDDOG_MODEL_SELECTION_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
+    if durable_claim is not None and not durable_claim_store.renew(durable_claim):
+        print("[REDDOG-FIX-CLAIM] preflight=WARN reason=promotion_claim_lease_lost")
+        return os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") == "0"
     if model_supply_requested:
         try:
             from modules.ai_intelligence.ai_gateway.src.model_selection_artifact_supply_bootstrap import (
@@ -2492,6 +2318,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
     autoresearch_campaign_enforced = (
         os.getenv("REDDOG_MODEL_AUTORESEARCH_CAMPAIGN_EXECUTION_ARTIFACT_SUPPLY_ENFORCED", "0") != "0"
     )
+    if durable_claim is not None and not durable_claim_store.renew(durable_claim):
+        print("[REDDOG-FIX-CLAIM] preflight=WARN reason=promotion_claim_lease_lost")
+        return os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") == "0"
     if autoresearch_campaign_requested:
         try:
             from modules.ai_intelligence.ai_gateway.src.model_autoresearch_campaign_execution_artifact_supply_bootstrap import (
@@ -2822,6 +2651,9 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
     principal_snapshot_supply_enforced = (
         os.getenv("REDDOG_GITHUB_PRINCIPAL_PERMISSION_SNAPSHOT_SUPPLY_ENFORCED", "0") != "0"
     )
+    if durable_claim is not None and not durable_claim_store.renew(durable_claim):
+        print("[REDDOG-FIX-CLAIM] preflight=WARN reason=promotion_claim_lease_lost")
+        return os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") == "0"
     if principal_snapshot_supply_requested:
         try:
             from modules.communication.moltbot_bridge.src.reddog_github_principal_permission_snapshot_supply_bootstrap import (
@@ -2997,71 +2829,29 @@ def run_reddog_architect_fix_promotion_preflight(repo_root: Path) -> bool:
             )
             return False
 
-    required_inputs_present = all(
-        str(value or "").strip()
-        for value in (
+    from modules.communication.moltbot_bridge.src.reddog_main_fix_promotion_claim_runtime import (
+        MainFixPromotionRuntimeInputs,
+        run_claim_bound_fix_promotion_preflight,
+    )
+
+    return run_claim_bound_fix_promotion_preflight(
+        repo_root=repo_root,
+        environment=os.environ,
+        inputs=MainFixPromotionRuntimeInputs(
             work_state_path,
             architect_determination_path,
             model_selection_receipt_path,
+            model_runtime_binding_receipt_path,
+            model_runtime_binding_receipt_path_supplied,
             memex_supply_receipt_path,
             authority_profile_source_path,
-        )
-    ) and bool(authority_profile_path)
-    raw_requested = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_RUNTIME")
-    requested = raw_requested == "1" or (raw_requested is None and required_inputs_present)
-    if not requested:
-        logger.info("[REDDOG-FIX-PROMOTION] Startup promotion bridge disabled")
-        return True
-
-    enforced = os.getenv("REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED", "0") != "0"
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_main_architect_fix_promotion_bootstrap import (
-            run_reddog_main_architect_fix_promotion_bootstrap,
-        )
-
-        result = run_reddog_main_architect_fix_promotion_bootstrap(
-            repo_root=repo_root,
-            work_state_path=work_state_path,
-            architect_determination_path=architect_determination_path,
-            model_selection_receipt_path=model_selection_receipt_path,
-            model_runtime_binding_receipt_path=(
-                model_runtime_binding_receipt_path if model_runtime_binding_receipt_path_supplied else None
-            ),
-            memex_supply_receipt_path=memex_supply_receipt_path,
-            authority_profile_source_path=authority_profile_source_path,
-            authority_profile_output_path=authority_profile_path,
-            worker_id=os.getenv(
-                "REDDOG_ARCHITECT_FIX_PROMOTION_WORKER_ID",
-                "reddog-main-architect-fix-promotion",
-            ),
-        )
-    except Exception as exc:
-        logger.error(f"[REDDOG-FIX-PROMOTION] Startup promotion bridge failed: {exc}")
-        if enforced:
-            print(f"[REDDOG-FIX-PROMOTION] preflight=FAIL error={type(exc).__name__}")
-            return False
-        print(f"[REDDOG-FIX-PROMOTION] preflight=WARN error={type(exc).__name__}")
-        return True
-
-    status = "PASS" if result.accepted else "WARN"
-    reasons = ",".join(result.rejection_reasons) if result.rejection_reasons else "(none)"
-    print(
-        f"[REDDOG-FIX-PROMOTION] preflight={status} status={result.status} "
-        f"queue_item={result.queue_item_id or '(none)'} "
-        f"selected_slice={result.selected_slice or '(none)'} reasons={reasons}"
+            authority_profile_path,
+            active_authority_profile_path,
+            holoindex_receipt_path,
+        ),
+        durable_claim=durable_claim,
+        durable_claim_store=durable_claim_store,
     )
-    if result.accepted and result.authority_profile_path:
-        os.environ["REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH"] = result.authority_profile_path
-        print(
-            f"[REDDOG-FIX-PROMOTION] receipt={result.promotion_receipt_id} "
-            f"revision={result.committed_revision}"
-        )
-        return True
-
-    if enforced:
-        print("[REDDOG-FIX-PROMOTION] Startup blocked by REDDOG_ARCHITECT_FIX_PROMOTION_ENFORCED=1")
-        return False
-    return True
 
 
 def run_reddog_resident_queue_orchestration_plan_preflight(repo_root: Path) -> bool:
@@ -3154,7 +2944,6 @@ def run_reddog_resident_queue_next_stage_dispatch_preflight(repo_root: Path) -> 
         REDDOG_PERMISSION_SNAPSHOTS_PATH                     Outside-repo permission snapshot JSON
         REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH              Outside-repo principal authority JSON
         REDDOG_WORK_ORDERS_PATH                              Outside-repo canonical work-order JSON
-        REDDOG_RESIDENT_QUEUE_NOW_EPOCH                      Optional runtime epoch for authority checks
         REDDOG_WRE_QUEUE_ITEM_ID                             Optional exact queue item id
     """
 
@@ -3267,9 +3056,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY=0                Materialize signer-owned CLI config from authority profile
         REDDOG_SIGNER_SERVICE_CONFIG_SUPPLY_ENFORCED=0       Block startup if signer config supply fails
         REDDOG_SIGNER_SERVICE_CONFIG_PATH                    Outside-repo signer CLI config JSON
-        REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY=0            Materialize signer-owned CLI argv packet
+        REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY=0            Materialize stable signer service argv packet
         REDDOG_SIGNER_SERVICE_RUN_PACKET_SUPPLY_ENFORCED=0   Block startup if run-packet supply fails
-        REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH                Outside-repo signer CLI run-packet JSON
+        REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH                Outside-repo signer service run-packet JSON
         REDDOG_SIGNER_SERVICE_HEALTHCHECK=0                  Validate signer run packet and probe existing socket
         REDDOG_SIGNER_SERVICE_HEALTHCHECK_ENFORCED=0         Block startup if signer healthcheck fails
         REDDOG_SIGNER_HEALTHCHECK_REQUESTER_PRINCIPAL_ID     Optional requester principal for healthcheck request
@@ -3284,11 +3073,9 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         REDDOG_DRAFT_PR_RUNNER_MODE                          Optional `real` draft-PR runner mode
         REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S                     Optional draft-PR runner timeout
     """
-
     from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
         resident_queue_runtime_flag_enabled,
     )
-
     if not resident_queue_runtime_flag_enabled(os.environ, "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP"):
         logger.info("[REDDOG-QUEUE-LOOP] Startup serial loop disabled")
         run_reddog_resident_queue_serial_loop_preflight.last_result = {
@@ -3299,17 +3086,11 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             "rejection_reasons": (),
         }
         return True
-
     enforced = os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_ENFORCED", "0") != "0"
     try:
         max_steps = int(os.getenv("REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS", "1"))
     except ValueError:
         max_steps = 0
-    try:
-        now_epoch_value = os.getenv("REDDOG_RESIDENT_QUEUE_NOW_EPOCH", "")
-        now_epoch = int(now_epoch_value) if now_epoch_value else None
-    except ValueError:
-        now_epoch = None
     try:
         signer_socket_timeout_value = os.getenv("REDDOG_SIGNER_SOCKET_TIMEOUT_S", "")
         signer_socket_timeout_s = float(signer_socket_timeout_value) if signer_socket_timeout_value else 5.0
@@ -3330,7 +3111,6 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
         draft_pr_runner_timeout_s = int(draft_pr_runner_timeout_value) if draft_pr_runner_timeout_value else 120
     except ValueError:
         draft_pr_runner_timeout_s = 0
-
     try:
         from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
             run_reddog_main_resident_queue_serial_loop_bootstrap,
@@ -3346,12 +3126,12 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             resident_queue_pattern_memory_admission_db_path,
             resident_queue_runtime_file_path,
             resident_queue_runtime_root_path,
+            resident_queue_signer_runtime_root_path,
             resident_queue_worktree_runner_mode,
         )
         from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
             build_reddog_verified_pattern_memory_sink,
         )
-
         pattern_memory_admission_sink = build_reddog_verified_pattern_memory_sink(
             repo_root=repo_root,
             db_path=resident_queue_pattern_memory_admission_db_path(os.environ, repo_root)
@@ -3365,7 +3145,6 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             if draft_pr_runner_timeout_s <= 0:
                 raise ValueError("invalid_draft_pr_runner_timeout")
             from modules.foundups.agent.src.worktree_pr_runner import RealWorktreeRunner
-
             draft_pr_runner = RealWorktreeRunner(
                 repo_root=repo_root,
                 timeout_s=draft_pr_runner_timeout_s,
@@ -3484,11 +3263,12 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             )
             signer_config = run_reddog_signer_socket_service_config_supply(
                 repo_root=repo_root,
-                authority_profile=(
-                    authority_profile_payload
-                    if isinstance(authority_profile_payload, Mapping)
-                    else None
-                ),
+                runtime_root=resident_queue_runtime_root_path(os.environ, repo_root),
+                signer_runtime_root=resident_queue_signer_runtime_root_path(os.environ, repo_root),
+                authority_profile=authority_profile_payload
+                if isinstance(authority_profile_payload, Mapping)
+                else None,
+                authoritative_work_state_path=resident_queue_runtime_file_path(os.environ, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH") or None,
                 output_path=config_output_path or None,
                 socket_path=config_socket_path or None,
                 principal_signing_key_ref=str(
@@ -3509,7 +3289,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                 timeout_s=_reddog_float_env("REDDOG_SIGNER_CONFIG_TIMEOUT_S", 5.0),
                 max_request_bytes=_reddog_positive_int_env(
                     "REDDOG_SIGNER_CONFIG_MAX_REQUEST_BYTES",
-                    16384,
+                    163840,
                 ),
                 max_response_bytes=_reddog_positive_int_env(
                     "REDDOG_SIGNER_CONFIG_MAX_RESPONSE_BYTES",
@@ -3568,6 +3348,7 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
                     "REDDOG_SIGNER_SERVICE_RUN_PACKET_PATH",
                 )
                 or None,
+                owner_authority_config_path=(os.getenv("REDDOG_SIGNER_SYSTEM_SERVICE_OWNER_CONFIG_PATH") or "").strip() or None,
                 op_executable=str(os.getenv("REDDOG_SIGNER_SERVICE_OP_EXECUTABLE") or "op"),
                 op_timeout_s=_reddog_float_env("REDDOG_SIGNER_SERVICE_OP_TIMEOUT_S", 10.0),
                 ttl_seconds=_reddog_positive_int_env("REDDOG_SIGNER_SERVICE_TTL_SECONDS", 300),
@@ -3671,7 +3452,16 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             )
         if signer_socket_path and not signature_verifier_backend:
             signature_verifier_backend = "ed25519"
-
+        run_reddog_resident_queue_serial_loop_preflight.authority_verification_config = (
+            capture_worker_dispatch_authority_verification_config(
+                repo_root=repo_root,
+                runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
+                authority_state_path=authority_state_path,
+                permission_snapshots_path=permission_snapshots_path,
+                principal_authority_records_path=principal_authority_records_path,
+                signature_verifier_backend=signature_verifier_backend,
+            )
+        )
         worker_dispatch_writer = None
         if resident_queue_runtime_flag_enabled(
             os.environ,
@@ -3682,7 +3472,6 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             )
 
             worker_dispatch_writer = AgentDbSignedWorkerDispatchTaskWriter()
-
         explicit_valve_environment_path = str(
             os.getenv("REDDOG_EXECUTION_VALVE_ENV_PATH") or ""
         ).strip()
@@ -3697,6 +3486,13 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             if candidate_valve_path.exists():
                 valve_environment_path = profile_valve_environment_path
 
+        trusted_authority_clock = lambda: int(time.time())
+        now_epoch = trusted_authority_clock() if authority_state_path else None
+        # Share the configured AgentDB with signed worker dispatch. Reserving
+        # independent verification capacity is mandatory before author work.
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        assurance_reservation_store = AgentDB()
         result = run_reddog_main_resident_queue_serial_loop_bootstrap(
             repo_root=repo_root,
             runtime_allowed_root=resident_queue_runtime_root_path(os.environ, repo_root),
@@ -3790,8 +3586,10 @@ def run_reddog_resident_queue_serial_loop_preflight(repo_root: Path) -> bool:
             draft_pr_runner=draft_pr_runner,
             pattern_memory_admission_sink=pattern_memory_admission_sink,
             worker_dispatch_writer=worker_dispatch_writer,
+            assurance_reservation_store=assurance_reservation_store,
             requested_queue_item_id=os.getenv("REDDOG_WRE_QUEUE_ITEM_ID", "") or None,
             now_epoch=now_epoch,
+            trusted_now_epoch=trusted_authority_clock,
             max_steps=max_steps,
         )
     except Exception as exc:
@@ -3958,6 +3756,7 @@ def _reddog_record_queue_control_result(repo_root: Path, result: Mapping[str, An
         from modules.communication.moltbot_bridge.src.reddog_resident_queue_binding_profile import (
             resident_queue_runtime_file_path,
             resident_queue_runtime_flag_enabled,
+            resident_queue_runtime_root_path,
         )
 
         if resident_queue_runtime_flag_enabled(
@@ -3971,7 +3770,11 @@ def _reddog_record_queue_control_result(repo_root: Path, result: Mapping[str, An
             )
             if receipt_path:
                 _reddog_persist_queue_control_receipt(
-                    repo_root, recorded, receipt_path, resident_queue_runtime_file_path
+                    repo_root,
+                    recorded,
+                    receipt_path,
+                    resident_queue_runtime_file_path,
+                    resident_queue_runtime_root_path,
                 )
     except Exception as exc:
         recorded["accepted"] = False
@@ -4009,6 +3812,7 @@ def _reddog_persist_queue_control_receipt(
     recorded: Dict[str, Any],
     receipt_path: Path,
     runtime_file_path: Any,
+    runtime_root_path: Any,
 ) -> None:
     from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
         append_resident_control_loop_receipt,
@@ -4032,6 +3836,9 @@ def _reddog_persist_queue_control_receipt(
         expected_authority_profile_source_receipt_id=os.getenv(
             "REDDOG_AUTHORITY_PROFILE_SOURCE_RECEIPT_ID", ""
         ),
+        authoritative_work_state_path=runtime_file_path(
+            os.environ, repo_root, "REDDOG_AUTHORITATIVE_WORK_STATE_PATH"
+        ),
         signer_socket_timeout_s=timeout_s,
         signer_socket_max_response_bytes=max_response_bytes,
     )
@@ -4042,6 +3849,7 @@ def _reddog_persist_queue_control_receipt(
         created_at=datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         signing_context=signing_context,
         require_authentication=True,
+        runtime_root=runtime_root_path(os.environ, repo_root),
         head_state_path=runtime_file_path(
             os.environ, repo_root, "REDDOG_AUTHORITY_RUNTIME_STATE_PATH"
         ),
@@ -4183,13 +3991,25 @@ def _reddog_control_result(
 def _reddog_run_control_round(
     repo_root: Path, state: Dict[str, Any]
 ) -> tuple[bool, int, int, Callable[..., Any]]:
+    run_reddog_resident_queue_serial_loop_preflight.authority_verification_config = None
     serial_ok = run_reddog_resident_queue_serial_loop_preflight(repo_root)
     serial_progress = _reddog_control_add_serial(state, serial_ok)
     if not serial_ok or _reddog_queue_stage_rejected(
         run_reddog_resident_queue_serial_loop_preflight
     ):
         return False, serial_progress, 0, run_reddog_resident_queue_serial_loop_preflight
-    claim_ok = run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root)
+    verification_config = getattr(
+        run_reddog_resident_queue_serial_loop_preflight,
+        "__dict__",
+        {},
+    ).get("authority_verification_config")
+    if verification_config is None:
+        claim_ok = run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root)
+    else:
+        claim_ok = run_reddog_openclaw_signed_worker_claim_loop_preflight(
+            repo_root,
+            authority_verification_config=verification_config,
+        )
     claim_progress = _reddog_control_add_claim(state, claim_ok)
     if not claim_ok or _reddog_queue_stage_rejected(
         run_reddog_openclaw_signed_worker_claim_loop_preflight
@@ -4376,20 +4196,63 @@ def _reddog_signed_worker_max_claims() -> int:
 
 
 def _reddog_claim_signed_worker_tasks(
-    repo_root: Path, max_claims: int
+    repo_root: Path,
+    max_claims: int,
+    *,
+    authority_verification_config: Any | None = None,
 ) -> tuple[Mapping[str, Any] | None, Exception | None]:
     try:
         from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
             claim_reddog_signed_worker_dispatch_tasks_until_idle,
         )
+        claim_kwargs: Dict[str, Any] = {}
+        if authority_verification_config is not None:
+            from modules.communication.moltbot_bridge.src.reddog_signed_worker_agentdb_envelope import (
+                build_worker_dispatch_authority_context,
+            )
+
+            claim_kwargs["authority_verification_context"] = (
+                build_worker_dispatch_authority_context(
+                    config=authority_verification_config
+                )
+            )
         return claim_reddog_signed_worker_dispatch_tasks_until_idle(
-            repo_root=repo_root, max_claims=max_claims
+            repo_root=repo_root,
+            max_claims=max_claims,
+            **claim_kwargs,
         ), None
     except Exception as exc:
         return None, exc
 
 
-def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> bool:
+def _reddog_claim_failure_allows_startup(
+    exc: Exception,
+    *,
+    enforced: bool,
+) -> bool:
+    logger.error(
+        f"[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop failed: {exc}"
+    )
+    run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
+        "accepted": False,
+        "status": "EXCEPTION",
+        "progress_count": 0,
+        "claimed_count": 0,
+        "rejection_reasons": (type(exc).__name__,),
+    }
+    status = "FAIL" if enforced else "WARN"
+    print(
+        f"[REDDOG-OPENCLAW-CLAIM-LOOP] "
+        f"preflight={status} error={type(exc).__name__}"
+    )
+    return not enforced
+
+
+def run_reddog_openclaw_signed_worker_claim_loop_preflight(
+    repo_root: Path,
+    *,
+    authority_verification_config: Any | None = None,
+) -> bool:
     """Run the optional bounded OpenClaw signed-worker claim loop."""
     if not _reddog_signed_worker_claim_loop_enabled():
         logger.info("[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop disabled")
@@ -4410,22 +4273,16 @@ def run_reddog_openclaw_signed_worker_claim_loop_preflight(repo_root: Path) -> b
         }
         return not enforced
 
-    result, exc = _reddog_claim_signed_worker_tasks(repo_root, max_claims)
+    result, exc = _reddog_claim_signed_worker_tasks(
+        repo_root,
+        max_claims,
+        authority_verification_config=authority_verification_config,
+    )
     if exc is not None or result is None:
-        exc = exc or RuntimeError("empty_claim_result")
-        logger.error(f"[REDDOG-OPENCLAW-CLAIM-LOOP] Startup claim loop failed: {exc}")
-        run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = {
-            "accepted": False,
-            "status": "EXCEPTION",
-            "progress_count": 0,
-            "claimed_count": 0,
-            "rejection_reasons": (type(exc).__name__,),
-        }
-        if enforced:
-            print(f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=FAIL error={type(exc).__name__}")
-            return False
-        print(f"[REDDOG-OPENCLAW-CLAIM-LOOP] preflight=WARN error={type(exc).__name__}")
-        return True
+        return _reddog_claim_failure_allows_startup(
+            exc or RuntimeError("empty_claim_result"),
+            enforced=enforced,
+        )
 
     run_reddog_openclaw_signed_worker_claim_loop_preflight.last_result = (
         _reddog_signed_worker_claim_state(result)
@@ -4562,6 +4419,15 @@ def bootstrap_runtime_dae_launches() -> None:
             heartbeat_interval_sec=15.0,
             description="Broker-managed PQN simulation against the theory archive.",
         ),
+        DAELaunchSpec(
+            dae_id="mcp_bridge_sse",
+            dae_name="FoundUps MCP Bridge SSE Server",
+            domain="infrastructure",
+            module_path="modules.infrastructure.foundups_mcp_bridge.scripts.launch",
+            start_callable=run_mcp_bridge_sse,
+            stop_callable=stop_mcp_bridge_sse,
+            description="FastMCP SSE remote endpoint for ChatGPT and remote agents.",
+        ),
     ])
     for spec in specs:
         broker.register_launch_spec(spec)
@@ -4583,6 +4449,31 @@ def bootstrap_runtime_dae_launches() -> None:
             result = broker.start_dae("openclaw_supervisor", actor_id="0102")
             launch_status = result.get("status", result.get("error", "unknown"))
             print(f"[OPENCLAW-SUPERVISOR] bootstrap={launch_status}")
+
+    mcp_bridge_autostart = os.getenv("FOUNDUPS_MCP_AUTOSTART", "1") != "0"
+    if mcp_bridge_autostart:
+        status = broker.get_runtime_status("mcp_bridge_sse")
+        if not status.get("running"):
+            result = broker.start_dae("mcp_bridge_sse", actor_id="0102")
+            launch_status = result.get("status", result.get("error", "unknown"))
+            print(f"[MCP-BRIDGE-SSE] bootstrap={launch_status}")
+
+
+def run_runtime_compatibility_advisory_preflight(repo_root: Path) -> bool:
+    """Emit runtime drift evidence without ever blocking the product menu."""
+    try:
+        from modules.infrastructure.dependency_launcher.src.runtime_compatibility_preflight import (
+            run_runtime_compatibility_advisory,
+        )
+        from modules.infrastructure.dependency_launcher.src.wsl_agent_runtime import (
+            run_wsl_agent_runtime_advisory,
+        )
+
+        run_runtime_compatibility_advisory(repo_root)
+        run_wsl_agent_runtime_advisory()
+    except Exception as exc:
+        print(f"[RUNTIME-COMPAT] preflight=NOT_READY reason=adapter_error:{type(exc).__name__}")
+    return True
 
 
 def main():
@@ -4676,6 +4567,7 @@ def main():
         return
 
     bootstrap_runtime_dae_launches()
+    run_runtime_compatibility_advisory_preflight(repo_root)
 
     # MAIN_MENU_ANTIFAFM_STARTUP_BOUNDARY_FIX_PHASE1:
     # Legacy ANTIFAFM_AUTO_START block removed. The env var is now ignored at menu boot.
@@ -4759,7 +4651,7 @@ def run_headless() -> int:
 
     # Fail-closed: check WRE readiness first
     wre_status = run_connect_wre(repo_root)
-    if wre_status["readiness"] not in ("READY", "INSUFFICIENT_DATA"):
+    if not wre_status.get("admission_allowed", wre_status["readiness"] in ("READY", "INSUFFICIENT_DATA")):
         print(
             f"[HEADLESS] FAIL-CLOSED: WRE not ready "
             f"(readiness={wre_status['readiness']}, "

@@ -1,5 +1,10 @@
 # AI Entry Points Mapping - Complete Codebase Analysis
 
+> **Historical inventory — superseded and non-authoritative (2025-10-20).**
+> Paths, counts, and “complete” claims below are point-in-time observations, not
+> a current registry or execution grant. Use HoloIndex evidence plus current
+> module contracts and WSP 95 v2.1 before acting on an entry point.
+
 **Purpose**: Map ALL AI entry points across the codebase to identify where skills are needed
 **Date**: 2025-10-20
 **Next Step**: Qwen analyzes patterns → Generates baseline skill templates

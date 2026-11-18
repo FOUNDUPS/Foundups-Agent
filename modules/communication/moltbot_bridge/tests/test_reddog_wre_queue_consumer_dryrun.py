@@ -7,12 +7,20 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from modules.communication.moltbot_bridge.src import (
     reddog_wre_queue_consumer_dryrun as consumer,
 )
 from modules.communication.moltbot_bridge.src.reddog_main_wre_queue_consumer_bootstrap import (
     REDDOG_WRE_QUEUE_BOOTSTRAP_READY,
     run_reddog_main_wre_queue_consumer_bootstrap,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    evaluate_proposal_stage,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
 )
 
 
@@ -37,25 +45,26 @@ NOW = "2026-07-14T00:00:00+00:00"
 
 
 def _allocation_receipt():
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 18,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "fusion_required": True,
-            "independent_verifier_required": True,
-            "queue_mutation_allowed": False,
-            "hermes_execution_allowed": False,
-        },
-    }
+    return allocate_reddog_wsp15_receipt(
+        requested_operation="edit_foundup_module",
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=("modules/foundups/demo/src/worker.py",),
+        allowed_read_targets=("modules/foundups/demo/src/worker.py",),
+    ).to_dict()
 
 
 def _snapshot(**overrides):
     claim_id = "claim-1"
     freshness_id = "fresh-1"
     allocation = _allocation_receipt()
+    stage = evaluate_proposal_stage(
+        action="FIX", reuse_decision="EXTEND_EXISTING",
+        effect_plane="REPOSITORY_CODE_CHANGE", allocation=allocation,
+        selected_slice="REDDOG_SAMPLE_SLICE_PHASE1",
+        requested_operation="edit_foundup_module",
+        changed_paths=("modules/foundups/demo/src/worker.py",),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+    )
     determination_id = "sha256:determination"
     selection_id = "sha256:model-selection"
     runtime_id = "reddog_model_runtime_binding:abc123"
@@ -103,6 +112,12 @@ def _snapshot(**overrides):
                     f"memex_supply:{memex_id}",
                 ],
                 "wsp15_allocation_receipt": allocation,
+                "progressive_policy_stage_receipt_id": stage.receipt_id,
+                "progressive_policy_stage_digest": consumer._digest(
+                    stage.to_dict()
+                ),
+                "progressive_policy_stage_receipt": stage.to_dict(),
+                "independent_verifier_required": True,
                 "source_determination_receipt_id": determination_id,
                 "model_selection_receipt_id": selection_id,
                 "model_selection_digest": "sha256:model-selection",
@@ -131,11 +146,12 @@ def test_accepts_one_fresh_queued_item_without_execution() -> None:
     assert result.next_required_gate == consumer.NEXT_GATE_SIGNED_AUTHORITY_REQUIRED
     assert result.execution_ready is False
     assert result.receipt is not None
-    assert result.receipt.wsp15_allocation_receipt_id == "sha256:wsp15-allocation"
+    allocation = _allocation_receipt()
+    assert result.receipt.wsp15_allocation_receipt_id == allocation["receipt_id"]
     assert result.receipt.wsp15_allocation_digest.startswith("sha256:")
-    assert result.receipt.wsp15_priority == "P0"
-    assert result.receipt.wsp15_mps_total == 18
-    assert result.receipt.reasoning_tier == "ULTRA"
+    assert result.receipt.wsp15_priority == allocation["priority"]
+    assert result.receipt.wsp15_mps_total == allocation["mps_total"]
+    assert result.receipt.reasoning_tier == allocation["reasoning_tier"]
     assert result.receipt.model_selection_receipt_id == "sha256:model-selection"
     assert result.receipt.model_selection_digest == "sha256:model-selection"
     assert result.receipt.model_runtime_binding_receipt_id == "reddog_model_runtime_binding:abc123"
@@ -264,6 +280,7 @@ def test_bootstrap_loads_work_state_outside_repo(tmp_path: Path) -> None:
 
     result = run_reddog_main_wre_queue_consumer_bootstrap(
         repo_root=REPO_ROOT,
+        runtime_allowed_root=tmp_path,
         work_state_path=path,
         now_iso=NOW,
     )
@@ -280,6 +297,7 @@ def test_bootstrap_loads_work_state_outside_repo(tmp_path: Path) -> None:
 def test_bootstrap_rejects_work_state_inside_repo() -> None:
     result = run_reddog_main_wre_queue_consumer_bootstrap(
         repo_root=REPO_ROOT,
+        runtime_allowed_root=REPO_ROOT.parent / "resident-runtime",
         work_state_path=REPO_ROOT / "inside-repo.json",
         now_iso=NOW,
     )
@@ -288,9 +306,103 @@ def test_bootstrap_rejects_work_state_inside_repo() -> None:
     assert "work_state_path_inside_repo" in result.rejection_reasons
 
 
+def test_bootstrap_requires_runtime_artifact_root(tmp_path: Path) -> None:
+    path = tmp_path / "authoritative_work_state.json"
+    path.write_text(json.dumps(_snapshot()), encoding="utf-8")
+
+    result = run_reddog_main_wre_queue_consumer_bootstrap(
+        repo_root=REPO_ROOT,
+        work_state_path=path,
+        now_iso=NOW,
+    )
+
+    assert result.ready is False
+    assert result.rejection_reasons == ("missing_runtime_artifact_root",)
+
+
+def test_bootstrap_rejects_work_state_outside_runtime_root(tmp_path: Path) -> None:
+    runtime_root = tmp_path / "runtime"
+    runtime_root.mkdir()
+    outside = tmp_path / "outside" / "authoritative_work_state.json"
+    outside.parent.mkdir()
+    outside.write_text(json.dumps(_snapshot()), encoding="utf-8")
+
+    result = run_reddog_main_wre_queue_consumer_bootstrap(
+        repo_root=REPO_ROOT,
+        runtime_allowed_root=runtime_root,
+        work_state_path=outside,
+        now_iso=NOW,
+    )
+
+    assert result.ready is False
+    assert result.rejection_reasons == (
+        "work_state_path_outside_runtime_root_or_linked",
+    )
+
+
+def test_bootstrap_rejects_invalid_runtime_root_inside_repo() -> None:
+    result = run_reddog_main_wre_queue_consumer_bootstrap(
+        repo_root=REPO_ROOT,
+        runtime_allowed_root=REPO_ROOT / "runtime",
+        work_state_path=REPO_ROOT / "runtime" / "state.json",
+        now_iso=NOW,
+    )
+
+    assert result.ready is False
+    assert result.rejection_reasons == ("invalid_runtime_artifact_root",)
+
+
+def test_bootstrap_rejects_linked_work_state_path(tmp_path: Path) -> None:
+    runtime_root = tmp_path / "runtime"
+    runtime_root.mkdir()
+    target = runtime_root / "target.json"
+    target.write_text(json.dumps(_snapshot()), encoding="utf-8")
+    linked = runtime_root / "linked.json"
+    try:
+        linked.symlink_to(target)
+    except OSError as exc:
+        pytest.skip(f"symlink unavailable: {exc}")
+
+    result = run_reddog_main_wre_queue_consumer_bootstrap(
+        repo_root=REPO_ROOT,
+        runtime_allowed_root=runtime_root,
+        work_state_path=linked,
+        now_iso=NOW,
+    )
+
+    assert result.ready is False
+    assert result.rejection_reasons == (
+        "work_state_path_outside_runtime_root_or_linked",
+    )
+
+
+def test_bootstrap_rejects_linked_runtime_root(tmp_path: Path) -> None:
+    target_root = tmp_path / "actual-runtime"
+    target_root.mkdir()
+    path = target_root / "state.json"
+    path.write_text(json.dumps(_snapshot()), encoding="utf-8")
+    linked_root = tmp_path / "linked-runtime"
+    try:
+        linked_root.symlink_to(target_root, target_is_directory=True)
+    except OSError as exc:
+        pytest.skip(f"directory symlink unavailable: {exc}")
+
+    result = run_reddog_main_wre_queue_consumer_bootstrap(
+        repo_root=REPO_ROOT,
+        runtime_allowed_root=linked_root,
+        work_state_path=linked_root / "state.json",
+        now_iso=NOW,
+    )
+
+    assert result.ready is False
+    assert result.rejection_reasons == ("invalid_runtime_artifact_root",)
+
+
 def test_main_queue_consumer_preflight_passes_when_bootstrap_ready(tmp_path: Path) -> None:
     import main
 
+    runtime_root = tmp_path / "resident-runtime"
+    work_state_path = runtime_root / "state.json"
     with patch(
         "modules.communication.moltbot_bridge.src.reddog_main_wre_queue_consumer_bootstrap.run_reddog_main_wre_queue_consumer_bootstrap",
         return_value=type(
@@ -313,13 +425,15 @@ def test_main_queue_consumer_preflight_passes_when_bootstrap_ready(tmp_path: Pat
             {
                 "REDDOG_WRE_QUEUE_CONSUMER_DRYRUN": "1",
                 "REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_ENFORCED": "0",
-                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
+                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(work_state_path),
+                "REDDOG_RESIDENT_RUNTIME_ROOT": str(runtime_root),
             },
             clear=False,
         ):
             assert main.run_reddog_wre_queue_consumer_preflight(REPO_ROOT) is True
 
-    assert mocked.call_args.kwargs["work_state_path"] == str(tmp_path / "state.json")
+    assert mocked.call_args.kwargs["work_state_path"] == str(work_state_path)
+    assert mocked.call_args.kwargs["runtime_allowed_root"] == str(runtime_root)
 
 
 def test_main_queue_consumer_preflight_profile_derives_work_state_path(tmp_path: Path) -> None:
@@ -357,7 +471,44 @@ def test_main_queue_consumer_preflight_profile_derives_work_state_path(tmp_path:
     assert mocked.call_args.kwargs["work_state_path"] == str(
         runtime_root / "authoritative_work_state.json"
     )
+    assert mocked.call_args.kwargs["runtime_allowed_root"] == str(runtime_root)
     assert not runtime_root.exists()
+
+
+def test_main_queue_consumer_real_bootstrap_warns_without_runtime_root(capsys) -> None:
+    import main
+
+    with patch.dict(
+        "os.environ",
+        {
+            "REDDOG_WRE_QUEUE_CONSUMER_DRYRUN": "1",
+            "REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_ENFORCED": "0",
+        },
+        clear=True,
+    ):
+        assert main.run_reddog_wre_queue_consumer_preflight(REPO_ROOT) is True
+
+    output = capsys.readouterr().out
+    assert "preflight=WARN" in output
+    assert "missing_runtime_artifact_root" in output
+
+
+def test_main_queue_consumer_real_bootstrap_blocks_when_enforced(capsys) -> None:
+    import main
+
+    with patch.dict(
+        "os.environ",
+        {
+            "REDDOG_WRE_QUEUE_CONSUMER_DRYRUN": "1",
+            "REDDOG_WRE_QUEUE_CONSUMER_DRYRUN_ENFORCED": "1",
+        },
+        clear=True,
+    ):
+        assert main.run_reddog_wre_queue_consumer_preflight(REPO_ROOT) is False
+
+    output = capsys.readouterr().out
+    assert "preflight=FAIL" in output
+    assert "missing_runtime_artifact_root" in output
 
 
 def test_main_queue_consumer_preflight_blocks_when_enforced() -> None:

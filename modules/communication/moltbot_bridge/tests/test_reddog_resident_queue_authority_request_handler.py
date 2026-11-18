@@ -7,6 +7,7 @@ from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_authority_request_handler import (
     AUTHORITY_REQUEST_STAGE_KEY,
+    FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED,
     FAIL_DISPATCH_NEXT_ACTION_MISMATCH,
     FAIL_DISPATCH_STAGE_MISMATCH,
     FAIL_QUEUE_SELECTION_MISMATCH,
@@ -32,6 +33,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request
     QUEUE_AUTHORITY_REQUEST_DRYRUN_REJECT,
 )
 from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    with_architect_fix_publication,
     with_queue_wsp15_allocation,
 )
 
@@ -153,6 +155,52 @@ def test_handler_builds_authority_request_dryrun_without_signing() -> None:
     assert result["no_pr_created"] is True
     assert result["no_reward_settlement_performed"] is True
     assert result["delegated_authority_request"]["requested_operation"] == "create_foundup"
+
+
+def test_architect_fix_request_requires_current_committed_publication() -> None:
+    committed, profile, queue_id, _ = with_architect_fix_publication(
+        _snapshot(),
+        _profile(),
+    )
+    prepared, _, _, _ = with_architect_fix_publication(
+        _snapshot(),
+        _profile(),
+        state="STATE_PREPARED",
+    )
+    current = {"value": committed}
+    handler = build_reddog_resident_queue_authority_request_stage_handler(
+        work_state_snapshot=committed,
+        authority_profile=profile,
+        work_order_resolver=_WorkOrderResolver(),
+        now_iso=NOW,
+        work_state_supplier=lambda: current["value"],
+    )
+    request = type(
+        "Request",
+        (),
+        {
+            "stage_key": AUTHORITY_REQUEST_STAGE_KEY,
+            "next_action": NEXT_QUEUE_AUTHORITY_REQUEST_DRYRUN,
+            "queue_item_id": queue_id,
+            "selected_slice": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        },
+    )()
+
+    accepted = dict(handler(request))
+    current["value"] = prepared
+    rejected = dict(handler(request))
+
+    assert accepted["accepted"] is True
+    assert accepted["delegated_authority_request"][
+        "architect_fix_publication_receipt_id"
+    ] == profile["promotion_publication_id"]
+    assert accepted["delegated_authority_request"][
+        "architect_fix_publication_binding_digest"
+    ].startswith("sha256:")
+    assert rejected["accepted"] is False
+    assert FAIL_ARCHITECT_FIX_PUBLICATION_NOT_COMMITTED in rejected[
+        "rejection_reasons"
+    ]
 
 
 def test_dispatcher_records_handler_result_and_advances_to_authority_runtime() -> None:

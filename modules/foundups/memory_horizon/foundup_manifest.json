@@ -1,0 +1,23 @@
+{
+  "foundup_id": "memory_horizon",
+  "manifest_version": "1.0.0",
+  "name": "Memory Horizon",
+  "display_name": "Memory Horizon",
+  "version": "0.1.0",
+  "category": "ai-research",
+  "description": "Browser-first adaptive episodic-memory retention game and deferred assistive-memory companion specification.",
+  "lifecycle_stage": "incubating",
+  "tier": "F0_DAE",
+  "implementation_status": "SPECIFIED",
+  "runtime_status": "NO_RUNTIME",
+  "poc_status": "idea",
+  "token_status": "TOKEN_DEFERRED",
+  "created_date": "2026-09-20",
+  "last_updated": "2026-09-20",
+  "maintainer": "0102",
+  "dependencies": [],
+  "routing_prefix": "/f/memory_horizon",
+  "app_route": "/f/memory_horizon/app",
+  "data_namespace": "idb_memory_horizon",
+  "next_slice": "MEMORY_HORIZON_POC_PHASE1"
+}

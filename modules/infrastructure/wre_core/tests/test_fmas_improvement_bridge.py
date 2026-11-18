@@ -38,6 +38,9 @@ from modules.infrastructure.wre_core.src.improvement_job_contract import (
     ImprovementStatus,
     ImprovementType,
 )
+from modules.infrastructure.wre_core.src.fmas_wsp62_contract import (
+    parse_wsp62_finding_text,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -141,6 +144,43 @@ class TestWspViolationFinding:
         job = parse_fmas_finding(finding_dict)
 
         assert job.improvement_type == ImprovementType.WSP_VIOLATION
+
+    @pytest.mark.parametrize(
+        "level,expected_severity",
+        [
+            ("CRITICAL", FMASSeverity.CRITICAL),
+            ("ERROR", FMASSeverity.HIGH),
+            ("INHERITED", FMASSeverity.INFO),
+            ("WARNING", FMASSeverity.MEDIUM),
+            ("APPROACHING", FMASSeverity.LOW),
+            ("ADVISORY_ARCHIVE", FMASSeverity.INFO),
+            ("EXEMPTION_EXPIRED", FMASSeverity.INFO),
+        ],
+    )
+    def test_wsp62_levels_preserve_trusted_severity(self, level, expected_severity):
+        raw = (
+            f"WSP 62 {level}: ai_intelligence/example/src/large.py "
+            "(1600 lines)"
+        )
+        finding = parse_fmas_string(raw)
+
+        assert finding.finding_type == FMASFindingType.WSP_VIOLATION
+        assert finding.severity == expected_severity
+        assert finding.module_path == "modules/ai_intelligence/example"
+        assert finding.file_path == "modules/ai_intelligence/example/src/large.py"
+        assert finding.wsp_refs == ["WSP 62"]
+
+    @pytest.mark.parametrize("extension", ["json", "jsx", "js", "tsx", "ts"])
+    def test_wsp62_path_parser_requires_complete_longest_extension(self, extension):
+        raw = (
+            "WSP 62 ERROR: candidate size growth "
+            f"ai_intelligence/example/src/artifact.{extension} (300->301)"
+        )
+        finding = parse_fmas_string(raw)
+
+        assert finding.file_path == (
+            f"modules/ai_intelligence/example/src/artifact.{extension}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -532,6 +572,84 @@ class TestRawFMASStringParsing:
         assert jobs[0].improvement_type == ImprovementType.MODULE_REPAIR
         assert jobs[1].improvement_type == ImprovementType.TEST_HYGIENE
         assert jobs[2].improvement_type == ImprovementType.DOC_LEDGER_HYGIENE
+
+    def test_direct_wsp62_strings_are_quarantined(self):
+        """WSP 62 text must enter through the governed health-audit gate."""
+        jobs = parse_fmas_strings([
+            "WSP 62 ERROR: infrastructure/wre_core/src/a.py (801 lines)"
+        ])
+
+        assert len(jobs) == 1
+        assert jobs[0].status == ImprovementStatus.BLOCKED
+        assert "run_wsp62_health_audit" in jobs[0].status_reason_human
+
+    def test_direct_structured_wsp62_is_quarantined(self):
+        """Structured form cannot bypass the governed WSP 62 entry point."""
+        parsed = parse_fmas_string(
+            "WSP 62 ERROR: infrastructure/wre_core/src/a.py (801 lines)"
+        )
+
+        job = parse_fmas_finding(parsed.to_dict())
+
+        assert job.status == ImprovementStatus.BLOCKED
+        assert "run_wsp62_health_audit" in job.status_reason_human
+
+    @pytest.mark.parametrize("source", [None, "fmas", "manual", "FMAS_WSP62"])
+    def test_structured_wsp62_quarantine_does_not_trust_source_label(self, source):
+        """Caller-controlled source labels cannot bypass WSP 62 admission."""
+        finding = {
+            "finding_id": "wsp62_adversarial",
+            "finding_type": "wsp_violation",
+            "severity": "high",
+            "module_path": "modules/infrastructure/wre_core",
+            "file_path": "modules/infrastructure/wre_core/src/a.py",
+            "raw_finding": "WSP 62 ERROR: infrastructure/wre_core/src/a.py (801 lines)",
+            "wsp_refs": ["WSP 62"],
+        }
+        if source is not None:
+            finding["source"] = source
+
+        job = parse_fmas_finding(finding)
+
+        assert job.status == ImprovementStatus.BLOCKED
+        assert "run_wsp62_health_audit" in job.status_reason_human
+
+    @pytest.mark.parametrize("wsp_refs", [["WSP_62"], "WSP 62"])
+    def test_structured_wsp62_reference_alone_is_quarantined(self, wsp_refs):
+        """A WSP 62 reference is sufficient even when raw text is omitted."""
+        job = parse_fmas_finding({
+            "finding_id": "wsp62_ref_only",
+            "finding_type": "wsp_violation",
+            "severity": "medium",
+            "module_path": "modules/infrastructure/wre_core",
+            "file_path": "modules/infrastructure/wre_core/src/a.py",
+            "message": "candidate function debt",
+            "wsp_refs": wsp_refs,
+            "source": "manual",
+        })
+
+        assert job.status == ImprovementStatus.BLOCKED
+
+    def test_structured_wsp62_with_null_source_is_quarantined(self):
+        """A malformed optional label cannot suppress canonical raw evidence."""
+        job = parse_fmas_finding({
+            "finding_id": "wsp62_null_source",
+            "finding_type": "wsp_violation",
+            "severity": "high",
+            "module_path": "modules/infrastructure/wre_core",
+            "file_path": "modules/infrastructure/wre_core/src/a.py",
+            "raw_finding": "WSP 62 ERROR: infrastructure/wre_core/src/a.py (801 lines)",
+            "wsp_refs": [],
+            "source": None,
+        })
+
+        assert job.status == ImprovementStatus.BLOCKED
+
+    def test_wsp62_parser_rejects_oversized_adversarial_path_input(self):
+        """Bounded linear parsing rejects attacker-sized path material."""
+        raw = "WSP 62 ERROR: " + ("!/" * 5000) + "target.py"
+
+        assert parse_wsp62_finding_text(raw) is None
 
 
 if __name__ == "__main__":

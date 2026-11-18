@@ -1,5 +1,10 @@
 # WRE Phase 1: COMPLETE ✓
 
+> **Historical record — superseded and non-authoritative (2025-10-23).**
+> The completion claims below are retained as session memory only. They do not
+> prove current runtime admission, execution, effect, or RSI capability; consult
+> the module `README.md`, `INTERFACE.md`, `ROADMAP.md`, and WSP 95 v2.1.
+
 **Date**: 2025-10-23
 **Status**: Phase 1 infrastructure 100% operational
 **Next**: Phase 2 - Wire Qwen/Gemma inference

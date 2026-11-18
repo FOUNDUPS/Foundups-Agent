@@ -45,3 +45,7 @@ print(out.output_path)
 ## Notes
 - Uploading is done via existing YouTube Studio automation (scheduler).
 - Indexing is handled via stub at scheduling time, then full indexing via `video_indexer`.
+
+## Preschool Story Time destination
+
+Kids Episodes uses **Us_Story_Time** (`us_story_time`) for reviewed preschool story output. Assembly stays here/the existing Kids renderer; upload stays in `YouTubeShortsUploader.publish_story_episode`, with FoundUps OAuth set 10 and an exact channel-ID check. See [binding instructions](../youtube_shorts/docs/KIDS_LOCAL_PRODUCTION.md#us_story_time-publishing-destination--2026-10-26). This destination registration does not install a headless worker or schedule uploads.

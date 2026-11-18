@@ -5,6 +5,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     InMemoryResidentQueueChainResultsStore,
 )
@@ -37,7 +39,9 @@ ALL_STAGE_KEYS = (
     "executor_plan",
     "execution_valve",
     "worktree_create",
+    "assurance_capacity_admission",
     "bounded_worker_pilot",
+    "exact_sha_commit",
     "slice_verifier",
     "verified_draft_pr_publish",
     "verified_outcome_ratchet",
@@ -113,15 +117,20 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
         principal_key_resolver=dummy,
         nonce_store=dummy,
         revocation_oracle=dummy,
+        trusted_now_epoch=lambda: 1783984309,
         work_order_resolver=dummy,
         worker_dispatch_writer=dummy,
+        assurance_reservation_store=dummy,
         repo_root=tmp_path,
         valve_environment=GovernedExecutionValveEnvironment(values={}),
         governed_use_time_authority_resolver=dummy,
+        worktree_lease_issuer=dummy,
         worktree_runner=dummy,
         generic_writer_dryrun_result={"accepted": True},
         governed_shell_dryrun_result={"accepted": True},
         artifact_contents={"README.md": "content"},
+        commit_runner=dummy,
+        commit_evidence_runner=dummy,
         verifier_request={"verifier_id": "verifier-1"},
         publish_request={"publish_id": "publish-1"},
         draft_pr_runner=dummy,
@@ -134,8 +143,75 @@ def test_registry_registers_all_stages_when_every_dependency_is_injected(tmp_pat
     )
 
     assert registry.registered_stage_keys == ALL_STAGE_KEYS
+    assert registry.handlers["execution_valve"].worktree_lease_issuer is dummy
     assert registry.registered_stage_count == len(ALL_STAGE_KEYS)
     assert registry.missing_stage_reasons == {}
+
+
+def test_registry_threads_current_state_and_consensus_supplier_to_runtime() -> None:
+    dummy = Dummy()
+
+    def capability_supplier(request: object) -> object:
+        return request
+
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authoritative_work_state_store=dummy,
+        authority_profile={"principal_id": "github:mjtrout"},
+        authority_store=dummy,
+        signer=dummy,
+        principal_resolver=dummy,
+        snapshot_resolver=dummy,
+        now_epoch=1783984309,
+        elevated_consensus_capability_supplier=capability_supplier,
+        now_iso=NOW_ISO,
+    )
+
+    handler = registry.handlers["authority_runtime"]
+    assert handler.work_state_supplier == dummy.load
+    assert handler.elevated_consensus_capability_supplier is capability_supplier
+
+
+@pytest.mark.parametrize(
+    "missing_name",
+    (
+        "worker_dispatch_writer",
+        "signature_verifier",
+        "principal_key_resolver",
+        "nonce_store",
+        "snapshot_resolver",
+        "revocation_oracle",
+        "trusted_now_epoch",
+    ),
+)
+def test_worker_dispatch_runtime_requires_use_time_authority_dependencies(
+    missing_name: str,
+) -> None:
+    dummy = Dummy()
+    dependencies = {
+        "worker_dispatch_writer": dummy,
+        "signature_verifier": dummy,
+        "principal_key_resolver": dummy,
+        "nonce_store": dummy,
+        "snapshot_resolver": dummy,
+        "revocation_oracle": dummy,
+        "trusted_now_epoch": lambda: 1783984309,
+    }
+    dependencies[missing_name] = None
+
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        now_iso=NOW_ISO,
+        **dependencies,
+    )
+
+    assert "worker_dispatch_runtime" not in registry.registered_stage_keys
+    assert f"missing_dependency:{missing_name}" in (
+        registry.missing_stage_reasons["worker_dispatch_runtime"]
+    )
 
 
 def test_registry_to_dict_omits_callable_handlers(tmp_path: Path) -> None:
@@ -185,6 +261,8 @@ def test_registry_rejects_empty_mapping_dependencies() -> None:
     assert "missing_dependency:artifact_contents" in registry.missing_stage_reasons["bounded_worker_pilot"]
     assert "missing_dependency:artifact_generation_request" in registry.missing_stage_reasons["bounded_worker_pilot"]
     assert "missing_dependency:artifact_generator" in registry.missing_stage_reasons["bounded_worker_pilot"]
+    assert "missing_dependency:commit_runner" in registry.missing_stage_reasons["exact_sha_commit"]
+    assert "missing_dependency:commit_evidence_runner" in registry.missing_stage_reasons["exact_sha_commit"]
     assert "missing_dependency:verifier_request" in registry.missing_stage_reasons["slice_verifier"]
     assert "missing_dependency:evidence_producer_request" in registry.missing_stage_reasons["slice_verifier"]
     assert "missing_dependency:evidence_command_runner" in registry.missing_stage_reasons["slice_verifier"]
@@ -202,11 +280,31 @@ def test_registry_registers_bounded_worker_pilot_from_artifact_generation_depend
         governed_shell_dryrun_result={"accepted": True},
         artifact_generation_request={"explicit_artifact_generation_requested": True},
         artifact_generator=dummy,
+        model_runtime_binding_verifier=dummy,
         now_iso=NOW_ISO,
     )
 
     assert "bounded_worker_pilot" in registry.registered_stage_keys
     assert "bounded_worker_pilot" not in registry.missing_stage_reasons
+
+
+def test_registry_registers_exact_sha_commit_only_with_explicit_runners(
+    tmp_path: Path,
+) -> None:
+    dummy = Dummy()
+    registry = build_reddog_resident_queue_stage_handler_registry(
+        work_state_snapshot=_snapshot(),
+        chain_results_store=_store(),
+        authority_profile={"principal_id": "github:mjtrout"},
+        work_order_resolver=dummy,
+        repo_root=tmp_path,
+        commit_runner=dummy,
+        commit_evidence_runner=dummy,
+        now_iso=NOW_ISO,
+    )
+
+    assert "exact_sha_commit" in registry.registered_stage_keys
+    assert "exact_sha_commit" not in registry.missing_stage_reasons
     assert registry.no_default_runner_created is True
 
 
@@ -224,6 +322,7 @@ def test_registry_registers_bounded_worker_pilot_from_artifact_generation_bindin
         governed_shell_dryrun_result={"accepted": True},
         artifact_generation_request_binding_enabled=True,
         artifact_generator=dummy,
+        model_runtime_binding_verifier=dummy,
         now_iso=NOW_ISO,
     )
 
@@ -248,6 +347,9 @@ def test_registry_artifact_generation_binding_still_requires_generator(tmp_path:
 
     assert "bounded_worker_pilot" not in registry.registered_stage_keys
     assert "missing_dependency:artifact_generator" in (
+        registry.missing_stage_reasons["bounded_worker_pilot"]
+    )
+    assert "missing_dependency:model_runtime_binding_verifier" in (
         registry.missing_stage_reasons["bounded_worker_pilot"]
     )
 
@@ -304,6 +406,7 @@ def test_registry_registers_slice_verifier_from_evidence_producer_dependencies(t
         repo_root=tmp_path,
         evidence_producer_request={"explicit_evidence_production_requested": True},
         evidence_command_runner=dummy,
+        assurance_reservation_store=dummy,
         now_iso=NOW_ISO,
     )
 
@@ -321,6 +424,7 @@ def test_registry_registers_slice_verifier_from_request_binding_dependencies(tmp
         work_order_resolver=dummy,
         repo_root=tmp_path,
         evidence_command_runner=dummy,
+        assurance_reservation_store=dummy,
         slice_verifier_request_binding_enabled=True,
         now_iso=NOW_ISO,
     )

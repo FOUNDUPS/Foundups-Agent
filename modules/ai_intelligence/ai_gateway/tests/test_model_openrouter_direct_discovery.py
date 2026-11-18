@@ -13,7 +13,9 @@ from modules.ai_intelligence.ai_gateway.src.model_provider_catalog_artifact_stor
     AtomicArtifactOps,
 )
 from modules.ai_intelligence.ai_gateway.src.model_openrouter_direct_discovery import (
+    AioHTTPTransport,
     HTTPResponse,
+    HTTPRequest,
     discover_openrouter_model_catalog,
 )
 from modules.ai_intelligence.ai_gateway.src.model_provider_catalog_snapshot import (
@@ -46,6 +48,10 @@ class _Clock:
     def __call__(self) -> int:
         self.value += 1
         return self.value
+
+
+class _HeaderName(str):
+    """Match aiohttp's multidict istr header-name behavior."""
 
 
 def _success_transport() -> _FakeTransport:
@@ -98,6 +104,54 @@ def test_success_uses_fixed_unauthenticated_envelope_and_writes_both_artifacts(
     assert rehydrate_candidate_snapshot(
         candidate, now_ms=result.candidate.observed_at_ms
     ) == result.candidate
+
+
+def test_aiohttp_transport_normalizes_header_subclasses_to_exact_strings(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class _Content:
+        async def iter_chunked(self, _size):
+            yield b'{"data":[]}'
+
+    class _Response:
+        status = 200
+        headers = {_HeaderName("Content-Type"): "application/json"}
+        history = ()
+        content = _Content()
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+    class _Session:
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_args):
+            return None
+
+        def get(self, *_args, **_kwargs):
+            return _Response()
+
+    import aiohttp
+
+    monkeypatch.setattr(aiohttp, "ClientSession", lambda **_kwargs: _Session())
+    response = asyncio.run(
+        AioHTTPTransport().fetch(
+            HTTPRequest(
+                "GET",
+                "https://openrouter.ai/api/v1/models",
+                {"Accept": "application/json"},
+                False,
+                15.0,
+                MAX_RESPONSE_BYTES,
+                2048,
+            )
+        )
+    )
+    assert type(next(iter(response.headers))) is str
 
 
 @pytest.mark.parametrize(

@@ -160,15 +160,17 @@ def run_main_resident_architect_cycle_preflight(
     if not hooks.cycle_requested():
         logger.info("[REDDOG-RESIDENT-CYCLE] Startup preflight disabled")
         return True
+    enforced = os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "0") != "0"
     audit_binding, architect_binding, binding_reason = hooks.model_runtime_bindings(repo_root)
     if binding_reason:
-        logger.error(
+        log_binding_failure = logger.error if enforced else logger.warning
+        log_binding_failure(
             "[REDDOG-RESIDENT-CYCLE] Runtime model binding preflight failed: %s",
             binding_reason,
         )
-        print(f"[REDDOG-RESIDENT-CYCLE] preflight=FAIL reason={binding_reason}")
-        return False
-    enforced = os.getenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "0") != "0"
+        status = "FAIL" if enforced else "WARN"
+        print(f"[REDDOG-RESIDENT-CYCLE] preflight={status} reason={binding_reason}")
+        return not enforced
     scope, scope_reason = _authorized_scope_from_env()
     if scope_reason:
         return _configuration_failure(scope_reason, enforced=enforced, logger=logger)

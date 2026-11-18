@@ -175,6 +175,7 @@ def _rehydrate_verified_evidence_bundle(
     signature_verifier: SignatureVerifier,
     now: int | None,
     consume_nonces: bool,
+    revoked_key_epochs: Sequence[str] = (),
 ) -> VerifiedModelProductionEvidence:
     if bundle.get("schema_version") != EVIDENCE_BUNDLE_SCHEMA_VERSION:
         raise ValueError("invalid_evidence_bundle_schema")
@@ -206,6 +207,7 @@ def _rehydrate_verified_evidence_bundle(
             signature_verifier=signature_verifier,
             now=int(now if now is not None else bundle.get("now", 0)),
             consume_nonces=consume_nonces,
+            revoked_key_epochs=revoked_key_epochs,
         )
         verified_entries.extend(evidence.entries)
     return VerifiedModelProductionEvidence(entries=tuple(verified_entries))

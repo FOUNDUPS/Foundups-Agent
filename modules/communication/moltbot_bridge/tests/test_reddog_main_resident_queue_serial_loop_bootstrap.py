@@ -2,19 +2,19 @@
 
 from __future__ import annotations
 
-import ast
 import hashlib
 import json
 import socket
-import tempfile
 import threading
-import uuid
 from pathlib import Path
 from typing import Mapping
 from unittest.mock import patch
 
 import pytest
 
+from modules.communication.moltbot_bridge.src.reddog_verified_pattern_memory_sink import (
+    reddog_verified_pattern_memory_record_id,
+)
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap import (
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
     REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY,
@@ -23,9 +23,6 @@ from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_
     _materialize_work_orders_from_authority_profile,
     _operational_context_binding,
     run_reddog_main_resident_queue_serial_loop_bootstrap as _run_bootstrap,
-)
-from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
-    RUNTIME_SURFACE_READONLY_AUDIT,
 )
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
     REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
@@ -52,9 +49,9 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
 )
-from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_service import (
-    SIGNER_SOCKET_SERVICE_SERVED,
-    serve_reddog_isolated_signer_socket_once,
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
+    SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
+    serve_reddog_isolated_signer_socket_bounded,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -67,9 +64,17 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     GovernedExecutionValveEnvironment,
     VALVE_OPEN_WORKTREE_CREATE,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
     GovernedValveUseTimeResolution,
+)
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import (
+    StubAuthoritativeUseLease,
+)
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_downstream_test_support import (
+    with_downstream_test_consensus,
 )
 from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
     ArtifactGenerationModelResult,
@@ -86,29 +91,35 @@ from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized
     FakeDraftPrRunner,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    model_runtime_binding_test_capability,
     model_selection_and_runtime_binding_receipts,
-    model_runtime_binding_receipt,
 )
-from modules.infrastructure.wre_core.src import reddog_verified_outcome_ratchet as ratchet
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+    canonical_model_runtime_binding_digest,
+    verification_receipt_digest,
+    verified_runtime_binding_receipt,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    FakeAssuranceReservationStore,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+)
+from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
+    allocate_reddog_wsp15_receipt,
+)
 from modules.infrastructure.wre_core.src.wre_autonomous_slice_verifier_runtime import (
     AUTONOMOUS_SLICE_VERIFIER_ACCEPT,
     verify_autonomous_slice_runtime,
 )
 from modules.infrastructure.wre_core.src.wre_independent_evidence_producer_runtime import (
     CommandResult,
-    EVIDENCE_PRODUCER_ACCEPT,
 )
-
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-MODULE_PATH = (
-    REPO_ROOT
-    / "modules"
-    / "communication"
-    / "moltbot_bridge"
-    / "src"
-    / "reddog_main_resident_queue_serial_loop_bootstrap.py"
-)
 NOW = "2026-07-14T00:00:00+00:00"
 EXPIRES = "2026-07-14T01:00:00+00:00"
 WORK_ORDER_ID = "resident-queue-work-order-001"
@@ -117,6 +128,7 @@ PILOT_OPERATION = "queue_bounded_pilot_docs_patch"
 PILOT_DOMAIN_ID = FOUNDUP_ID
 PILOT_ARTIFACT = f"modules/foundups/{PILOT_DOMAIN_ID}/README.md"
 PERMISSION_DIGEST = "sha256:" + ("1" * 64)
+_ASSURANCE_RESERVATION_STORE = FakeAssuranceReservationStore()
 
 
 class _InjectedUseTimeResolver:
@@ -136,7 +148,11 @@ def _test_governed_environment(
     work_order: Mapping[str, object], *, queue_item_id: str = "queue-1"
 ) -> tuple[dict[str, object], dict[str, object]]:
     allocation = work_order.get("wsp15_allocation_receipt")
-    allocation = allocation if isinstance(allocation, Mapping) else _queue_wsp15_allocation_receipt()
+    allocation = (
+        allocation
+        if isinstance(allocation, Mapping)
+        else _queue_wsp15_allocation_receipt()
+    )
     snapshot = work_order.get("repo_permission_snapshot")
     snapshot = snapshot if isinstance(snapshot, Mapping) else {}
     expected = {field: "" for field in CANONICAL_BINDING_FIELDS}
@@ -166,7 +182,9 @@ def _test_governed_environment(
     authorization_binding_digest = _sha256_json(
         {
             "authorization_mode": authorization_mode,
-            "bindings": {field: expected[field] for field in sorted(CANONICAL_BINDING_FIELDS)},
+            "bindings": {
+                field: expected[field] for field in sorted(CANONICAL_BINDING_FIELDS)
+            },
         }
     )
     core = {
@@ -178,6 +196,7 @@ def _test_governed_environment(
         "valve_dryrun_enabled": True,
         "valve_live_enqueue_enabled": False,
         "valve_worktree_create_enabled": True,
+        "progressive_execution_stage_ceiling": "BOUNDED_EXECUTION",
     }
     provenance = {
         "schema_version": "reddog_execution_valve_environment_supply_receipt.v1",
@@ -195,11 +214,16 @@ def _test_governed_environment(
     return {**core, "supply_provenance": provenance}, expected
 
 
+@with_downstream_test_consensus
 def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
     """Exercise downstream stages with an explicitly injected governed resolution."""
 
     if "runtime_allowed_root" not in kwargs and kwargs.get("work_state_path"):
         kwargs["runtime_allowed_root"] = Path(kwargs["work_state_path"]).parent
+    kwargs.setdefault(
+        "assurance_reservation_store",
+        _ASSURANCE_RESERVATION_STORE,
+    )
     valve_path = kwargs.get("valve_environment_path")
     if valve_path:
         work_order = _work_order()
@@ -209,18 +233,29 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
             orders = raw_orders.get("work_orders", raw_orders)
             work_order = next(iter(orders.values()))
         elif kwargs.get("work_order_materializer_mode") == "authority_profile":
-            snapshot = json.loads(Path(kwargs["work_state_path"]).read_text(encoding="utf-8"))
-            profile = json.loads(Path(kwargs["authority_profile_path"]).read_text(encoding="utf-8"))
+            snapshot = json.loads(
+                Path(kwargs["work_state_path"]).read_text(encoding="utf-8")
+            )
+            profile = json.loads(
+                Path(kwargs["authority_profile_path"]).read_text(encoding="utf-8")
+            )
             orders, reasons = _materialize_work_orders_from_authority_profile(
                 snapshot=snapshot,
                 authority_profile=profile,
-                requested_queue_item_id=str(kwargs.get("requested_queue_item_id") or "queue-1"),
+                requested_queue_item_id=str(
+                    kwargs.get("requested_queue_item_id") or "queue-1"
+                ),
                 now_iso=str(kwargs.get("now_iso") or NOW),
             )
             if orders and not reasons:
                 work_order = next(iter(orders.values()))
-        payload, expected = _test_governed_environment(work_order)
-        Path(valve_path).write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+        payload, expected = _test_governed_environment(
+            work_order,
+            queue_item_id=str(kwargs.get("requested_queue_item_id") or "queue-1"),
+        )
+        Path(valve_path).write_text(
+            json.dumps(payload, sort_keys=True), encoding="utf-8"
+        )
         governed = GovernedExecutionValveEnvironment.from_mapping(payload)
         injected_resolver = _InjectedUseTimeResolver(
             GovernedValveUseTimeResolution(
@@ -230,54 +265,111 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(**kwargs: object):
                 permission_expires_at=EXPIRES,
                 rejection_reasons=(),
                 signed_authority_reverified=True,
-                authoritative_use_lease=AuthoritativeUseLease(
+                authoritative_use_lease=StubAuthoritativeUseLease(
                     lambda: True,
                     expires_at_epoch=2_000_000_000,
                     trusted_now_epoch=lambda: 1_000_000_000,
                 ),
             )
         )
-        with patch(
-            "modules.communication.moltbot_bridge.src."
-            "reddog_main_resident_queue_serial_loop_bootstrap."
-            "GovernedValveUseTimeAuthorityResolver",
-            return_value=injected_resolver,
+        with (
+            patch(
+                "modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability.is_authoritative_use_lease",
+                return_value=True,
+            ),
+            patch(
+                "modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability.consume_authoritative_use_lease",
+                side_effect=lambda value, **_expected: value.consume(),
+            ),
+            patch(
+                "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.GovernedValveUseTimeAuthorityResolver",
+                return_value=injected_resolver,
+            ),
         ):
             return _run_bootstrap(**kwargs)
     return _run_bootstrap(**kwargs)
 
 
-def _queue_wsp15_allocation_receipt() -> dict[str, object]:
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation-queue",
-        "complexity": 5,
-        "importance": 5,
-        "deferability": 5,
-        "impact": 5,
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 2,
-            "coding_worker_count": 2,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "queue_mutation_allowed": False,
-            "hermes_execution_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
+def _assert_bootstrap_yielded_at_assurance(
+    result: object,
+    chain_path: Path,
+) -> None:
+    """Assert admission was persisted before the bootstrap yielded control."""
+
+    assert result.accepted is True, result.rejection_reasons
+    assert result.steps_run == 10
+    assert result.dispatched_stages[-1] == "assurance_capacity_admission"
+    assert result.queue_chain_requeue_required is True
+    stored = json.loads(chain_path.read_text(encoding="utf-8"))
+    assert (
+        stored["stage_results"]["assurance_capacity_admission"]["decision"]
+        == "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
+    )
+    assert "bounded_worker_pilot" not in stored["stage_results"]
+    assert "slice_verifier" not in stored["stage_results"]
 
 
-def _snapshot() -> dict[str, object]:
-    allocation = _queue_wsp15_allocation_receipt()
+def _queue_wsp15_allocation_receipt(
+    *,
+    requested_operation: str = "edit_foundup_module",
+    changed_path: str = PILOT_ARTIFACT,
+) -> dict[str, object]:
+    return allocate_reddog_wsp15_receipt(
+        requested_operation=requested_operation,
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=(changed_path,),
+        allowed_read_targets=(changed_path,),
+    ).to_dict()
+
+
+def _snapshot(
+    *,
+    requested_operation: str = "edit_foundup_module",
+    changed_path: str = PILOT_ARTIFACT,
+) -> dict[str, object]:
+    allocation = _queue_wsp15_allocation_receipt(
+        requested_operation=requested_operation,
+        changed_path=changed_path,
+    )
     determination_id = "sha256:determination-1"
     selection_id = "sha256:model-selection-1"
     memex_id = "sha256:memex-1"
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        requested_operation=requested_operation,
+        changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+    )
+    queue_item = {
+        "queue_item_id": "queue-1",
+        "slice_id": "REDDOG_TEST_SLICE_PHASE1",
+        "claim_id": "claim-1",
+        "worker_id": "reddog-0102",
+        "status": "QUEUED",
+        "evidence_refs": [
+            "claim:claim-1",
+            "freshness:fresh-1",
+            f"wsp15_allocation:{allocation['receipt_id']}",
+            f"architect_determination:{determination_id}",
+            f"model_selection:{selection_id}",
+            f"memex_supply:{memex_id}",
+        ],
+        "source_determination_receipt_id": determination_id,
+        "model_selection_receipt_id": selection_id,
+        "model_selection_digest": "sha256:model-selection-digest",
+        "model_runtime_binding_receipt_id": "",
+        "model_runtime_binding_digest": "",
+        "memex_supply_receipt_id": memex_id,
+        "memex_supply_digest": "sha256:" + ("d" * 64),
+        "wsp15_allocation_receipt": allocation,
+        "progressive_policy_stage_receipt_id": stage.receipt_id,
+        "progressive_policy_stage_digest": _canonical_digest(stage.to_dict()),
+        "progressive_policy_stage_receipt": stage.to_dict(),
+        "independent_verifier_required": True,
+        "no_execution_performed": True,
+    }
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -297,32 +389,7 @@ def _snapshot() -> dict[str, object]:
                 "memex_supply_receipt_id": memex_id,
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_TEST_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": [
-                    "claim:claim-1",
-                    "freshness:fresh-1",
-                    f"wsp15_allocation:{allocation['receipt_id']}",
-                    f"architect_determination:{determination_id}",
-                    f"model_selection:{selection_id}",
-                    f"memex_supply:{memex_id}",
-                ],
-                "wsp15_allocation_receipt": allocation,
-                "source_determination_receipt_id": determination_id,
-                "model_selection_receipt_id": selection_id,
-                "model_selection_digest": "sha256:model-selection-digest",
-                "model_runtime_binding_receipt_id": "",
-                "model_runtime_binding_digest": "",
-                "memex_supply_receipt_id": memex_id,
-                "memex_supply_digest": "sha256:memex-digest",
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -337,9 +404,9 @@ def _profile(**overrides: object) -> dict[str, object]:
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": FOUNDUP_ID,
         "base_ref": "main",
-        "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
-        "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
-        "requested_operation": "feature_slice",
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": PERMISSION_DIGEST,
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
@@ -358,7 +425,7 @@ def _profile(**overrides: object) -> dict[str, object]:
         "model_selection_receipt_id": "sha256:model-selection-1",
         "model_selection_digest": "sha256:model-selection-digest",
         "memex_supply_receipt_id": "sha256:memex-1",
-        "memex_supply_digest": "sha256:memex-digest",
+        "memex_supply_digest": "sha256:" + ("d" * 64),
         "holoindex_evidence": {
             "holoindex_query": "RedDog resident queue materialized work order",
             "holoindex_status": "bundle_json_ok",
@@ -379,6 +446,14 @@ def _profile(**overrides: object) -> dict[str, object]:
         },
     }
     profile.update(overrides)
+    if (
+        profile["requested_operation"] == PILOT_OPERATION
+        and "wsp15_allocation_receipt" not in overrides
+    ):
+        profile["wsp15_allocation_receipt"] = _queue_wsp15_allocation_receipt(
+            requested_operation=PILOT_OPERATION,
+            changed_path=PILOT_ARTIFACT,
+        )
     return profile
 
 
@@ -398,11 +473,11 @@ def _work_order(**overrides: object) -> dict[str, object]:
             "source": "test",
             "digest": PERMISSION_DIGEST,
         },
-        "requested_operation": "feature_slice",
+        "requested_operation": "edit_foundup_module",
         "valve_state_required": VALVE_OPEN_WORKTREE_CREATE,
         "authority_tier": "source",
-        "allowed_paths": [f"modules/foundups/{FOUNDUP_ID}/**"],
-        "denied_paths": [f"modules/foundups/{FOUNDUP_ID}/secrets/**"],
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
         "branch_name": "feat/paccess-001-resident-queue",
         "base_ref": "main",
         "task_summary": "Resident queue startup reaches the execution valve only.",
@@ -412,7 +487,11 @@ def _work_order(**overrides: object) -> dict[str, object]:
         ],
         "skillz_candidates": [],
         "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
-        "required_policy_gates": ["openclaw_policy_gate", "signed_work_order_authority"],
+        "slice_verifier_plan": _slice_verifier_plan(),
+        "required_policy_gates": [
+            "openclaw_policy_gate",
+            "signed_work_order_authority",
+        ],
         "required_reviewers": [],
         "sentinel_checks": [],
         "rollback_plan": "No live worktree created by this bootstrap slice.",
@@ -452,21 +531,31 @@ def _work_order(**overrides: object) -> dict[str, object]:
     return payload
 
 
-def test_authority_profile_materializer_carries_model_runtime_binding_receipt() -> None:
-    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_READONLY_AUDIT)
+def test_authority_profile_materializer_carries_memex_supply_binding() -> None:
+    work_orders, reasons = _materialize_work_orders_from_authority_profile(
+        snapshot=_snapshot(),
+        authority_profile=_profile(),
+        requested_queue_item_id="queue-1",
+        now_iso=NOW,
+    )
+
+    assert reasons == ()
+    assert work_orders is not None
+    work_order = work_orders[WORK_ORDER_ID]
+    assert work_order["memex_supply_receipt_id"] == "sha256:memex-1"
+    assert work_order["memex_supply_digest"] == "sha256:" + ("d" * 64)
+
+
+def test_authority_profile_materializer_rejects_conflicting_memex_supply_binding() -> (
+    None
+):
     snapshot = _snapshot()
-    queue_item = snapshot["wre_queue_items"][0]
-    queue_item["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
-    queue_item["model_runtime_binding_digest"] = _canonical_digest(runtime_binding)
-    snapshot["worker_claims"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
-    queue_item["evidence_refs"].append(
-        f"model_runtime_binding:{runtime_binding['receipt_id']}"
-    )
     profile = _profile(
-        model_runtime_binding_receipt=runtime_binding,
-        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-        model_runtime_binding_digest=_canonical_digest(runtime_binding),
+        memex_supply_receipt_id="sha256:attacker-memex",
+        memex_supply_digest="sha256:" + ("e" * 64),
     )
+    snapshot_before = _canonical_digest(snapshot)
+    profile_before = _canonical_digest(profile)
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
         snapshot=snapshot,
@@ -475,12 +564,10 @@ def test_authority_profile_materializer_carries_model_runtime_binding_receipt() 
         now_iso=NOW,
     )
 
-    assert reasons == ()
-    assert work_orders is not None
-    work_order = work_orders[WORK_ORDER_ID]
-    assert work_order["model_runtime_binding_receipt_id"] == runtime_binding["receipt_id"]
-    assert work_order["model_runtime_binding_digest"] == _canonical_digest(runtime_binding)
-    assert work_order["model_runtime_binding_receipt"]["receipt_id"] == runtime_binding["receipt_id"]
+    assert work_orders is None
+    assert "work_order_materializer_authority:FAIL_MEMEX_SUPPLY_BINDING" in reasons
+    assert _canonical_digest(snapshot) == snapshot_before
+    assert _canonical_digest(profile) == profile_before
 
 
 def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> None:
@@ -492,7 +579,7 @@ def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> 
     )
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=profile,
         requested_queue_item_id="queue-1",
         now_iso=NOW,
@@ -503,12 +590,14 @@ def test_authority_profile_materializer_carries_scoped_bounded_worker_plan() -> 
     assert work_orders[WORK_ORDER_ID]["bounded_worker_plan"] == plan
 
 
-def test_authority_profile_materializer_rejects_bounded_worker_plan_outside_scope() -> None:
+def test_authority_profile_materializer_rejects_bounded_worker_plan_outside_scope() -> (
+    None
+):
     plan = _pilot_bounded_worker_plan()
     plan["planned_artifacts"] = ["modules/foundups/other_foundup/README.md"]
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=_profile(
             requested_operation=PILOT_OPERATION,
             allowed_paths=_pilot_allowed_paths(),
@@ -519,15 +608,20 @@ def test_authority_profile_materializer_rejects_bounded_worker_plan_outside_scop
     )
 
     assert work_orders is None
-    assert "work_order_materializer_bounded_worker_plan_artifact_outside_allowed_paths" in reasons
+    assert (
+        "work_order_materializer_bounded_worker_plan_artifact_outside_allowed_paths"
+        in reasons
+    )
 
 
-def test_authority_profile_materializer_rejects_bounded_worker_plan_domain_mismatch() -> None:
+def test_authority_profile_materializer_rejects_bounded_worker_plan_domain_mismatch() -> (
+    None
+):
     plan = _pilot_bounded_worker_plan()
     plan["domain_id"] = "other_foundup"
 
     work_orders, reasons = _materialize_work_orders_from_authority_profile(
-        snapshot=_snapshot(),
+        snapshot=_snapshot(requested_operation=PILOT_OPERATION),
         authority_profile=_profile(
             requested_operation=PILOT_OPERATION,
             allowed_paths=_pilot_allowed_paths(),
@@ -538,7 +632,10 @@ def test_authority_profile_materializer_rejects_bounded_worker_plan_domain_misma
     )
 
     assert work_orders is None
-    assert "work_order_materializer_bounded_worker_plan_scope_mismatch:domain_id" in reasons
+    assert (
+        "work_order_materializer_bounded_worker_plan_scope_mismatch:domain_id"
+        in reasons
+    )
 
 
 def test_authority_profile_materializer_rejects_non_ascii_bounded_worker_plan() -> None:
@@ -628,7 +725,7 @@ def _valve_environment(**overrides: object) -> dict[str, object]:
 
 
 def _pilot_allowed_paths() -> list[str]:
-    return [f"modules/foundups/{PILOT_DOMAIN_ID}/**"]
+    return [PILOT_ARTIFACT]
 
 
 def _pilot_domain_profile() -> GenericAgentWorktreeDomainProfile:
@@ -654,8 +751,12 @@ def _pilot_domain_profile() -> GenericAgentWorktreeDomainProfile:
 def _pilot_path_overrides() -> dict[str, object]:
     return {
         "requested_operation": PILOT_OPERATION,
-        "allowed_paths": _pilot_allowed_paths(),
-        "denied_paths": [f"modules/foundups/{PILOT_DOMAIN_ID}/secrets/**"],
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": _queue_wsp15_allocation_receipt(
+            requested_operation=PILOT_OPERATION,
+            changed_path=PILOT_ARTIFACT,
+        ),
         "required_tests": [
             "python -m pytest "
             "modules/communication/moltbot_bridge/tests/"
@@ -682,7 +783,9 @@ def _pilot_signed_authority_for_bootstrap() -> dict[str, object]:
     return authority
 
 
-def _pilot_payloads(repo: Path, worktree: Path, work_order: Mapping[str, object]) -> dict[str, object]:
+def _pilot_payloads(
+    repo: Path, worktree: Path, work_order: Mapping[str, object]
+) -> dict[str, object]:
     writer = plan_generic_agent_worktree_writer_dry_run(
         {
             "work_order_id": WORK_ORDER_ID,
@@ -758,7 +861,7 @@ def _pilot_bounded_worker_plan() -> dict[str, object]:
         "domain_id": PILOT_DOMAIN_ID,
         "domain_profile": _pilot_domain_profile().to_dict(),
         "planned_artifacts": [PILOT_ARTIFACT],
-        "requested_allowed_paths": _pilot_allowed_paths(),
+        "requested_allowed_paths": [PILOT_ARTIFACT],
         "shell_profile": _pilot_shell_profile().to_dict(),
         "shell_argv": [
             "python",
@@ -779,6 +882,29 @@ def _digest(ch: str) -> str:
     return "sha256:" + ch * 64
 
 
+def _mapping_digest(value: Mapping[str, object]) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        default=str,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def _signed_authority_fixture() -> dict[str, object]:
+    work_authority = {
+        "authority_id": "authority-test",
+        "work_order_id": WORK_ORDER_ID,
+    }
+    return {
+        **work_authority,
+        "accepted": True,
+        "signature_gate_digest": canonical_work_authority_digest(work_authority),
+    }
+
+
 def _slice_verifier_request() -> dict[str, object]:
     base_sha = "b" * 40
     head_sha = "a" * 40
@@ -787,6 +913,9 @@ def _slice_verifier_request() -> dict[str, object]:
         "slice_name": "REDDOG_MAIN_RESIDENT_QUEUE_SLICE_VERIFIER_BOOTSTRAP_PHASE1",
         "worker_id": "worker:author",
         "verifier_id": "worker:verifier",
+        "assurance_reservation_id": "assurance-reservation-resident-queue",
+        "assurance_reservation_digest": _digest("6"),
+        "verifier_task_id": "reddog-worker-dispatch-independent-verifier",
         "base_sha": base_sha,
         "head_sha": head_sha,
         "allowed_path_patterns": _pilot_allowed_paths(),
@@ -809,10 +938,7 @@ def _slice_verifier_request() -> dict[str, object]:
                 {"name": "security", "head_sha": head_sha, "conclusion": "pass"},
             ],
         },
-        "signed_authority": {
-            "accepted": True,
-            "signature_gate_digest": _digest("9"),
-        },
+        "signed_authority": _signed_authority_fixture(),
         "signed_receipt_chain": {
             "accepted": True,
             "terminal_receipt_hash": _digest("a"),
@@ -883,6 +1009,26 @@ def _evidence_producer_request(repo: Path, worktree: Path) -> dict[str, object]:
 
 
 def _artifact_generation_request(worktree: Path) -> dict[str, object]:
+    selection, runtime_binding = model_selection_and_runtime_binding_receipts(
+        runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+    )
+    verification = verified_runtime_binding_receipt(runtime_binding)
+    assert verification is not None
+    signed_authority = _signed_authority_fixture()
+    signed_authority.update(
+        {
+            "model_selection_receipt_id": selection["receipt_id"],
+            "model_selection_digest": _mapping_digest(selection),
+            "model_runtime_binding_receipt_id": runtime_binding["receipt_id"],
+            "model_runtime_binding_digest": canonical_model_runtime_binding_digest(
+                runtime_binding
+            ),
+            "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+            "model_runtime_binding_verification_digest": (
+                verification_receipt_digest(verification)
+            ),
+        }
+    )
     return {
         "explicit_artifact_generation_requested": True,
         "work_order_id": WORK_ORDER_ID,
@@ -896,14 +1042,13 @@ def _artifact_generation_request(worktree: Path) -> dict[str, object]:
             "retrieval_quality": "HIGH",
             "holoindex_freshness_receipt_digest": _digest("b"),
         },
-        "signed_authority": {
-            "accepted": True,
-            "signature_gate_digest": _digest("9"),
-        },
+        "signed_authority": signed_authority,
         "signed_receipt_chain": {
             "accepted": True,
             "terminal_receipt_hash": _digest("a"),
         },
+        "model_selection_receipt": selection,
+        "model_runtime_binding_receipt": runtime_binding,
         "timeout_seconds": 30,
     }
 
@@ -938,8 +1083,15 @@ def _draft_pr_publish_plan() -> dict[str, object]:
 def _outcome_ratchet_request(
     verification_result: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    verifier_request = _slice_verifier_request()
     verifier_result = dict(
-        verification_result or verify_autonomous_slice_runtime(_slice_verifier_request()).to_dict()
+        verification_result
+        or verify_autonomous_slice_runtime(
+            verifier_request,
+            trusted_work_authority_digest=verifier_request["signed_authority"][
+                "signature_gate_digest"
+            ],
+        ).to_dict()
     )
     verifier_receipt = verifier_result["receipt"]
     return {
@@ -986,8 +1138,15 @@ def _outcome_ratchet_request(
 def _held_out_gate_request(
     verification_result: Mapping[str, object] | None = None,
 ) -> dict[str, object]:
+    verifier_request = _slice_verifier_request()
     verifier_result = dict(
-        verification_result or verify_autonomous_slice_runtime(_slice_verifier_request()).to_dict()
+        verification_result
+        or verify_autonomous_slice_runtime(
+            verifier_request,
+            trusted_work_authority_digest=verifier_request["signed_authority"][
+                "signature_gate_digest"
+            ],
+        ).to_dict()
     )
     verifier_receipt = verifier_result["receipt"]
     head_sha = str(verifier_receipt["head_sha"])
@@ -1100,7 +1259,9 @@ def _accepted_socket_signer(
 
 
 class _AuditMacBuilder:
-    def build(self, request: SigningRequest, signature: str, peer: SignerPeerAttestation) -> str:
+    def build(
+        self, request: SigningRequest, signature: str, peer: SignerPeerAttestation
+    ) -> str:
         return "audit:" + request.payload_digest
 
 
@@ -1109,7 +1270,7 @@ class _StaticSocketPeerAttestor:
         return SignerPeerAttestation(
             peer_principal_id="github:mjtrout",
             transport="unix_socket",
-            credential_source="test_peer_credential",
+            credential_source="SO_PEERCRED",
             boundary_attested=True,
         )
 
@@ -1118,7 +1279,13 @@ class _SwitchingSignerBackend:
     def __init__(self, backends: Mapping[str, Ed25519SignerBackend]) -> None:
         self._backends = dict(backends)
 
-    def sign(self, request: SigningRequest, peer: SignerPeerAttestation) -> SigningResponse:
+    def sign(
+        self, request: SigningRequest, peer: SignerPeerAttestation
+    ) -> SigningResponse:
+        from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+            bind_exact_signing_request,
+        )
+
         backend = self._backends.get(request.signer_public_key)
         if backend is None:
             return SigningResponse(
@@ -1126,7 +1293,7 @@ class _SwitchingSignerBackend:
                 rejection_code=RuntimeRejectCode.SIGNER_NOT_CONFIGURED,
                 no_secret_material_returned=True,
             )
-        return backend.sign(request, peer)
+        return bind_exact_signing_request(backend, request).sign(request, peer)
 
 
 class _FakeWorktreeRunner:
@@ -1135,10 +1302,17 @@ class _FakeWorktreeRunner:
         self.calls: list[tuple[str, str, str | None, str | None]] = []
 
     def create_worktree(self, *, worktree_path: Path, branch_name: str, base_ref: str):
-        self.calls.append(("create_worktree", str(worktree_path), branch_name, base_ref))
+        self.calls.append(
+            ("create_worktree", str(worktree_path), branch_name, base_ref)
+        )
         if self.ok:
             Path(worktree_path).mkdir(parents=True, exist_ok=True)
-        return {"ok": self.ok, "returncode": 0 if self.ok else 1, "stdout": "", "stderr": ""}
+        return {
+            "ok": self.ok,
+            "returncode": 0 if self.ok else 1,
+            "stdout": "",
+            "stderr": "",
+        }
 
     def cleanup_worktree(self, *, worktree_path: Path):
         self.calls.append(("cleanup_worktree", str(worktree_path), None, None))
@@ -1168,6 +1342,72 @@ class _FakeEvidenceRunner:
                 ),
             )
         return CommandResult(returncode=0, stdout="ok\n")
+
+
+class _FakeExactShaEvidenceRunner:
+    def __init__(self, *, branch_name: str) -> None:
+        self.branch_name = branch_name
+        self.head = "b" * 40
+        self.parent = "b" * 40
+        self.tree = "c" * 40
+        self.dirty = True
+        self.commit_message = ""
+        self.calls: list[tuple[str, ...]] = []
+
+    def run(self, argv, *, cwd: Path, timeout_s: int) -> CommandResult:
+        _ = (cwd, timeout_s)
+        args = tuple(argv)
+        self.calls.append(args)
+        if args == ("git", "symbolic-ref", "--short", "HEAD"):
+            return CommandResult(returncode=0, stdout=self.branch_name + "\n")
+        if args == ("git", "rev-parse", "HEAD"):
+            return CommandResult(returncode=0, stdout=self.head + "\n")
+        if args == ("git", "rev-parse", f"{self.head}^"):
+            return CommandResult(returncode=0, stdout=self.parent + "\n")
+        if args == ("git", "diff", "--cached", "--name-only"):
+            return CommandResult(returncode=0, stdout="")
+        if args == ("git", "diff", "--name-only"):
+            return CommandResult(
+                returncode=0,
+                stdout=(PILOT_ARTIFACT + "\n") if self.dirty else "",
+            )
+        if args == ("git", "ls-files", "--others", "--exclude-standard"):
+            return CommandResult(returncode=0, stdout="")
+        if args[:4] == ("git", "rev-list", "--parents", "-n"):
+            return CommandResult(
+                returncode=0,
+                stdout=f"{self.head} {self.parent}\n",
+            )
+        if args[:4] == ("git", "log", "-1", "--format=%B"):
+            return CommandResult(returncode=0, stdout=self.commit_message)
+        if args[:3] == ("git", "diff", "--name-only") and len(args) == 6:
+            return CommandResult(returncode=0, stdout=PILOT_ARTIFACT + "\n")
+        if args[:3] == ("git", "diff", "--unified=0"):
+            return CommandResult(
+                returncode=0,
+                stdout=(
+                    f"diff --git a/{PILOT_ARTIFACT} b/{PILOT_ARTIFACT}\n"
+                    f"+++ b/{PILOT_ARTIFACT}\n"
+                    "+resident queue produced independent evidence\n"
+                ),
+            )
+        if args == ("git", "rev-parse", f"{self.head}^{{tree}}"):
+            return CommandResult(returncode=0, stdout=self.tree + "\n")
+        return CommandResult(returncode=0, stdout="ok\n")
+
+
+class _FakeCommitDraftPrRunner(FakeDraftPrRunner):
+    def __init__(self, evidence_runner: _FakeExactShaEvidenceRunner) -> None:
+        super().__init__()
+        self.evidence_runner = evidence_runner
+
+    def commit_all(self, *, worktree_path: Path, add_paths, message: str):
+        self.calls.append(("commit_all", str(worktree_path), tuple(add_paths), message))
+        self.evidence_runner.head = "a" * 40
+        self.evidence_runner.parent = "b" * 40
+        self.evidence_runner.dirty = False
+        self.evidence_runner.commit_message = message
+        return {"ok": True, "returncode": 0, "stdout": "", "stderr": ""}
 
 
 class _FakeArtifactGenerator:
@@ -1202,13 +1442,53 @@ class _FakeArtifactGenerator:
         )
 
 
+class _FakeModelRuntimeBindingVerifier:
+    trusted_now_epoch = staticmethod(lambda: 1000)
+
+    def verify(self, *, binding: Mapping[str, object], selection: Mapping[str, object]):
+        capability = model_runtime_binding_test_capability(
+            dict(selection), dict(binding)
+        )
+        assert capability is not None
+        return capability
+
+
 class _FakePatternMemoryAdmissionSink:
     def __init__(self) -> None:
         self.records: list[dict[str, object]] = []
+        self.staged: dict[str, dict[str, object]] = {}
+
+    @property
+    def activation_ready(self) -> bool:
+        return True
 
     def store_verified_outcome(self, record: Mapping[str, object]) -> str:
-        self.records.append(dict(record))
-        return "pattern-memory-record-1"
+        raise ValueError("verified_outcome_activation_capability_required")
+
+    def stage_verified_outcome(self, record: Mapping[str, object]) -> str:
+        record_id = reddog_verified_pattern_memory_record_id(record)
+        self.staged[record_id] = dict(record)
+        return record_id
+
+    def activate_verified_outcome(
+        self, record_id: str, record: Mapping[str, object]
+    ) -> str:
+        assert self.staged[record_id] == record
+        self.records.append(self.staged.pop(record_id))
+        return record_id
+
+
+class _FakeVerifiedOutcomePublisher:
+    def __init__(self) -> None:
+        self.records: dict[str, dict[str, object]] = {}
+
+    def publish(self, **payload: object) -> str:
+        record_id = str(payload["record_id"])
+        self.records[record_id] = dict(payload["record"])
+        return record_id
+
+    def activate(self, record_id: str) -> object:
+        return record_id
 
 
 class _FakeWorkerDispatchTaskWriter:
@@ -1230,13 +1510,20 @@ class _FakeWorkerDispatchTaskWriter:
             "receipt_id": receipt.receipt_id,
         }
 
+    def activate_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {
+            "ok": self.accepted,
+            "created_task_ids": [task.task_id for task in tasks],
+            "receipt_id": receipt.receipt_id,
+        }
 
-def _ed25519_signing_material():
+
+def _ed25519_signing_material(*, principal_key=None, reddog_key=None):
     from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
-    principal_key = Ed25519PrivateKey.generate()
-    reddog_key = Ed25519PrivateKey.generate()
+    principal_key = principal_key or Ed25519PrivateKey.generate()
+    reddog_key = reddog_key or Ed25519PrivateKey.generate()
     principal_public = encode_ed25519_public_key(
         principal_key.public_key().public_bytes(
             encoding=serialization.Encoding.Raw,
@@ -1270,13 +1557,24 @@ def _ed25519_signing_material():
         ),
     }
 
-    def connector(socket_path: Path, request_bytes: bytes, timeout_s: float, max_response_bytes: int) -> bytes:
+    def connector(
+        socket_path: Path,
+        request_bytes: bytes,
+        timeout_s: float,
+        max_response_bytes: int,
+    ) -> bytes:
+        from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_policy_gate import (
+            bind_exact_signing_request,
+        )
+
         assert socket_path.is_absolute()
         assert timeout_s > 0
         assert max_response_bytes >= 1024
         decoded = json.loads(request_bytes.decode("utf-8").strip())
         request = SigningRequest(**decoded["request"])
-        response = backends[request.signer_public_key].sign(request, peer)
+        response = bind_exact_signing_request(
+            backends[request.signer_public_key], request
+        ).sign(request, peer)
         return json.dumps(response.to_dict(), sort_keys=True).encode("utf-8")
 
     return principal_public, reddog_public, connector
@@ -1322,8 +1620,85 @@ def _ed25519_signing_material_with_socket_backend():
     )
 
 
-def _outside_repo_socket_path() -> Path:
-    return Path(tempfile.gettempdir()) / f"rdog-{uuid.uuid4().hex}.sock"
+def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
+    with patch(
+        "modules.ai_intelligence.ai_gateway.tests."
+        "model_signed_evidence_test_helpers.NOW",
+        1000,
+    ):
+        selection, binding = model_selection_and_runtime_binding_receipts(
+            runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION,
+            verified_at_epoch=1000,
+        )
+    verification = verified_runtime_binding_receipt(binding)
+    assert verification is not None
+    lineage = {
+        "model_selection_receipt_id": selection["receipt_id"],
+        "model_selection_digest": _mapping_digest(selection),
+        "model_runtime_binding_receipt_id": binding["receipt_id"],
+        "model_runtime_binding_digest": canonical_model_runtime_binding_digest(binding),
+        "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+        "model_runtime_binding_verification_digest": verification_receipt_digest(
+            verification
+        ),
+    }
+    snapshot = _snapshot()
+    queue = snapshot["wre_queue_items"][0]
+    progressive = signed_stage_binding(
+        requested_operation=PILOT_OPERATION,
+        changed_paths=(PILOT_ARTIFACT,),
+    )
+    allocation = progressive["wsp15_allocation_receipt"]
+    queue.update(progressive)
+    queue.update(lineage)
+    snapshot["worker_claims"][0].update(
+        {
+            "model_selection_receipt_id": selection["receipt_id"],
+            "model_runtime_binding_receipt_id": binding["receipt_id"],
+            "model_runtime_binding_verification_receipt_id": verification.receipt_id,
+        }
+    )
+    queue["evidence_refs"] = [
+        item
+        for item in queue["evidence_refs"]
+        if not str(item).startswith("wsp15_allocation:")
+    ]
+    queue["evidence_refs"].append(f"wsp15_allocation:{allocation['receipt_id']}")
+    queue["evidence_refs"].extend(
+        f"{kind}:{value}"
+        for kind, value in (
+            ("model_selection", selection["receipt_id"]),
+            ("model_runtime_binding", binding["receipt_id"]),
+            ("model_runtime_binding_verification", verification.receipt_id),
+        )
+    )
+    common = {
+        "model_selection_receipt": selection,
+        "model_runtime_binding_receipt": binding,
+        **lineage,
+    }
+    profile = _profile(
+        principal_public_key=principal_public,
+        reddog_public_key=reddog_public,
+        requested_operation=PILOT_OPERATION,
+        allowed_paths=[PILOT_ARTIFACT],
+        denied_paths=[],
+        wsp15_allocation_receipt=allocation,
+        **common,
+    )
+    work_order_values = {
+        **overrides,
+        "requested_operation": PILOT_OPERATION,
+        "allowed_paths": [PILOT_ARTIFACT],
+        "denied_paths": [],
+        "wsp15_allocation_receipt": allocation,
+        "bounded_worker_plan": _pilot_bounded_worker_plan(),
+        **common,
+    }
+    work_order = _work_order(
+        **work_order_values,
+    )
+    return snapshot, profile, work_order
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -1332,149 +1707,21 @@ def _repo(tmp_path: Path) -> Path:
     return path
 
 
-def _run_bootstrap_to_verified_outcome_ratchet(tmp_path: Path) -> dict[str, object]:
-    repo = _repo(tmp_path)
-    principal_public, reddog_public, connector = _ed25519_signing_material()
-    pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-        ),
-    )
-    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _work_order(**pilot_overrides)
-    work_orders = _write_runtime_json(
-        tmp_path,
-        "work_orders.json",
-        {"work_orders": {WORK_ORDER_ID: work_order}},
-    )
-    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
-    chain = tmp_path / "runtime" / "chain_results.json"
-    authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = tmp_path / "runtime" / "signer.sock"
-    worktree_runner = _FakeWorktreeRunner()
-    worktree = _pilot_worktree_path(repo, work_order)
-    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
-    generic_writer = _write_runtime_json(
-        tmp_path,
-        "generic_writer.json",
-        pilot_payloads["generic_writer_dryrun_result"],
-    )
-    governed_shell = _write_runtime_json(
-        tmp_path,
-        "governed_shell.json",
-        pilot_payloads["governed_shell_dryrun_result"],
-    )
-    artifacts = _write_runtime_json(
-        tmp_path,
-        "artifact_contents.json",
-        pilot_payloads["artifact_contents"],
-    )
-    holoindex = _write_runtime_json(
-        tmp_path,
-        "holoindex_evidence.json",
-        pilot_payloads["holoindex_evidence"],
-    )
-    verifier = _write_runtime_json(
-        tmp_path,
-        "verifier_request.json",
-        _slice_verifier_request(),
-    )
-    publish_request = _write_runtime_json(
-        tmp_path,
-        "publish_request.json",
-        _draft_pr_publish_request(worktree),
-    )
-    outcome_store = tmp_path / "runtime" / "outcomes" / "ratchet.jsonl"
-    draft_pr_runner = FakeDraftPrRunner()
-
-    verifier_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        generic_writer_dryrun_result_path=generic_writer,
-        governed_shell_dryrun_result_path=governed_shell,
-        artifact_contents_path=artifacts,
-        holoindex_evidence_path=holoindex,
-        verifier_request_path=verifier,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
-        worktree_runner=worktree_runner,
-        now_iso=NOW,
-        now_epoch=1000,
-        requested_queue_item_id="queue-1",
-        max_steps=11,
-    )
-    assert verifier_run.accepted is True
-    verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
-    ratchet_request = _write_runtime_json(
-        tmp_path,
-        "ratchet_request.json",
-        _outcome_ratchet_request(verifier_stage["verifier_result"]),
+def _run_bootstrap_to_verified_outcome_ratchet(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+):
+    from modules.communication.moltbot_bridge.tests.reddog_outcome_ratchet_test_support import (
+        _run_bootstrap_to_verified_outcome_ratchet as run_support,
     )
 
-    ratchet_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        generic_writer_dryrun_result_path=generic_writer,
-        governed_shell_dryrun_result_path=governed_shell,
-        artifact_contents_path=artifacts,
-        holoindex_evidence_path=holoindex,
-        verifier_request_path=verifier,
-        publish_request_path=publish_request,
-        ratchet_request_path=ratchet_request,
-        outcome_ratchet_store_path=outcome_store,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
-        worktree_runner=worktree_runner,
-        draft_pr_runner=draft_pr_runner,
-        now_iso=NOW,
-        now_epoch=1000,
-        requested_queue_item_id="queue-1",
-        max_steps=2,
-    )
-    assert ratchet_run.accepted is True
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    assert stored["stage_results"]["verified_outcome_ratchet"]["decision"] == (
-        "QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT"
-    )
-
-    return {
-        "repo": repo,
-        "state": state,
-        "profile": profile,
-        "chain": chain,
-        "verifier_stage": verifier_stage,
-    }
+    return run_support(tmp_path, monkeypatch)
 
 
-def _run_bootstrap_to_held_out_regression_gate(tmp_path: Path) -> dict[str, object]:
-    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path)
+def _run_bootstrap_to_held_out_regression_gate(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> dict[str, object]:
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path, monkeypatch)
     verifier_stage = ctx["verifier_stage"]
     held_out_request = _write_runtime_json(
         tmp_path,
@@ -1496,14 +1743,21 @@ def _run_bootstrap_to_held_out_regression_gate(tmp_path: Path) -> dict[str, obje
     assert stored["stage_results"]["model_feedback_admission"]["decision"] == (
         "QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE_ACCEPT"
     )
-    assert stored["stage_results"]["model_feedback_admission"]["model_feedback_write_performed"] is False
+    assert (
+        stored["stage_results"]["model_feedback_admission"][
+            "model_feedback_write_performed"
+        ]
+        is False
+    )
     assert stored["stage_results"]["held_out_regression_gate"]["decision"] == (
         "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
     )
     return ctx
 
 
-def test_bootstrap_serial_loop_applies_one_stage_with_existing_dependencies(tmp_path: Path) -> None:
+def test_bootstrap_serial_loop_applies_one_stage_with_existing_dependencies(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
@@ -1531,10 +1785,15 @@ def test_bootstrap_serial_loop_applies_one_stage_with_existing_dependencies(tmp_
     assert result.no_repo_mutation_performed is True
     assert result.no_holoindex_reindex_performed is True
     stored = json.loads(chain.read_text(encoding="utf-8"))
-    assert stored["stage_results"]["authority_request"]["status"] == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
+    assert (
+        stored["stage_results"]["authority_request"]["status"]
+        == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
+    )
 
 
-def test_bootstrap_serial_loop_fails_closed_when_later_dependency_missing(tmp_path: Path) -> None:
+def test_bootstrap_serial_loop_fails_closed_when_later_dependency_missing(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
@@ -1560,7 +1819,9 @@ def test_bootstrap_serial_loop_fails_closed_when_later_dependency_missing(tmp_pa
     assert "stage:authority_runtime" in result.rejection_reasons
 
 
-def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_path: Path) -> None:
+def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
@@ -1580,13 +1841,17 @@ def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_
         principal_authority_records_path=principals,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=2,
     )
 
     assert result.accepted is False
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.runtime_dependency_bundle_status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert (
+        result.runtime_dependency_bundle_status
+        == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    )
     assert result.runtime_dependency_bundle_requested is True
     assert result.steps_run == 1
     assert result.dispatched_stages == ("authority_request",)
@@ -1597,10 +1862,15 @@ def test_bootstrap_serial_loop_invokes_fail_closed_authority_runtime_bundle(tmp_
     assert RuntimeRejectCode.SIGNER_NOT_CONFIGURED in result.rejection_reasons
     stored = json.loads(chain.read_text(encoding="utf-8"))
     assert "authority_runtime" not in stored["stage_results"]
-    assert stored["stage_results"]["authority_request"]["status"] == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
+    assert (
+        stored["stage_results"]["authority_request"]["status"]
+        == "QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT"
+    )
 
 
-def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path: Path) -> None:
+def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
@@ -1623,13 +1893,17 @@ def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path
         signer_socket_connector=_accepted_socket_signer,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=2,
     )
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.runtime_dependency_bundle_status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert (
+        result.runtime_dependency_bundle_status
+        == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    )
     assert result.runtime_dependency_bundle_requested is True
     assert result.steps_run == 2
     assert result.dispatched_stages == ("authority_request", "authority_runtime")
@@ -1638,24 +1912,33 @@ def test_bootstrap_serial_loop_uses_socket_signer_for_authority_runtime(tmp_path
     assert result.no_openclaw_enqueue_performed is True
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
-    assert stored["stage_results"]["authority_runtime"]["decision"] == "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
+    assert (
+        stored["stage_results"]["authority_runtime"]["decision"]
+        == "QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT"
+    )
     authority = json.loads(authority_state.read_text(encoding="utf-8"))
     issued = authority["issued_authorities"]
     assert len(issued) == 1
     assert next(iter(issued.values()))["status"] == "DELEGATED_AUTHORITY_ISSUED"
 
 
-def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_path: Path) -> None:
+def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
     socket_path = tmp_path / "runtime" / "signer.sock"
@@ -1675,13 +1958,17 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
         worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=3,
     )
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.runtime_dependency_bundle_status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert (
+        result.runtime_dependency_bundle_status
+        == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    )
     assert result.steps_run == 3
     assert result.dispatched_stages == (
         "authority_request",
@@ -1703,38 +1990,47 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(tmp_pa
 
 
 def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
-    tmp_path: Path,
+    tmp_path_factory,
 ) -> None:
     if not hasattr(socket, "AF_UNIX"):
         pytest.skip("AF_UNIX sockets are unavailable in this Python build")
 
+    # Keep the socket confined to its runtime root and below AF_UNIX path limits.
+    tmp_path = tmp_path_factory.mktemp("resident-socket")
     repo = _repo(tmp_path)
-    principal_public, reddog_public, backend = _ed25519_signing_material_with_socket_backend()
+    principal_public, reddog_public, backend = (
+        _ed25519_signing_material_with_socket_backend()
+    )
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = _outside_repo_socket_path()
+    socket_path = tmp_path / "runtime" / "signer.sock"
     ready = threading.Event()
     service_result: dict[str, object] = {}
 
-    def serve_once() -> None:
-        service_result["result"] = serve_reddog_isolated_signer_socket_once(
+    def serve_pair() -> None:
+        service_result["result"] = serve_reddog_isolated_signer_socket_bounded(
             repo_root=repo,
             socket_path=socket_path,
             backend=backend,
             peer_attestor=_StaticSocketPeerAttestor(),
+            max_requests=2,
             timeout_s=5.0,
             ready_callback=ready.set,
         )
 
-    thread = threading.Thread(target=serve_once, daemon=True)
+    thread = threading.Thread(target=serve_pair, daemon=True)
     thread.start()
     assert ready.wait(5.0)
 
@@ -1743,6 +2039,7 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
         principal_authority_records_path=principals,
@@ -1751,6 +2048,7 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
         worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=3,
     )
@@ -1758,9 +2056,10 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
 
     assert thread.is_alive() is False
     served = service_result["result"]
-    assert served.accepted is True
-    assert served.status == SIGNER_SOCKET_SERVICE_SERVED
-    assert served.request_handled is True
+    assert served.accepted is True, (served.rejection_reasons, result.rejection_reasons)
+    assert served.status == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
+    assert served.requests_handled == 2
+    assert len(served.response_digests) == 2
     assert served.socket_removed is True
     assert served.no_private_key_loaded is True
     assert served.no_repo_mutation_performed is True
@@ -1769,7 +2068,10 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
 
     assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
-    assert result.runtime_dependency_bundle_status == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    assert (
+        result.runtime_dependency_bundle_status
+        == REDDOG_RUNTIME_DEPENDENCY_BUNDLE_READY
+    )
     assert result.steps_run == 3
     assert result.dispatched_stages == (
         "authority_request",
@@ -1789,7 +2091,9 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
     assert verification["decision"] == "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
     assert verification["verification_result"]["accepted"] is True
     authority = json.loads(authority_state.read_text(encoding="utf-8"))
-    assert authority["verified_work_authority_nonces"] == ["workauth-nonce-0001"]
+    # Queue verification is preflight; only authoritative use consumes this nonce.
+    assert authority.get("verified_work_authority_nonces", []) == []
+    assert len(authority["issued_authorities"]) == 1
     assert not socket_path.exists()
 
 
@@ -1802,10 +2106,14 @@ def test_bootstrap_rejects_legacy_token_environment_before_execution_valve(
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
@@ -1830,6 +2138,7 @@ def test_bootstrap_rejects_legacy_token_environment_before_execution_valve(
         worker_dispatch_writer=worker_dispatch_writer,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=8,
     )
@@ -1868,7 +2177,9 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
@@ -1887,9 +2198,10 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=8,
     )
@@ -1902,8 +2214,8 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
+        "worker_dispatch_runtime",
+        "work_order_invocation",
         "executor_plan",
         "execution_valve",
     )
@@ -1911,14 +2223,23 @@ def test_bootstrap_serial_loop_materializes_work_order_from_authority_profile(
 
     stored = json.loads(chain.read_text(encoding="utf-8"))
     stage_results = stored["stage_results"]
-    assert stage_results["work_order_invocation"]["decision"] == "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"
+    assert (
+        stage_results["work_order_invocation"]["decision"]
+        == "QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT"
+    )
     invocation = stage_results["work_order_invocation"]["invocation_result"]
     assert invocation["work_order_id"] == WORK_ORDER_ID
     assert invocation["receipt_digest"]
     assert invocation["policy_gate_receipt_digest"]
     assert invocation["no_execution_performed"] is True
-    assert stage_results["executor_plan"]["decision"] == "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"
-    assert stage_results["execution_valve"]["decision"] == "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"
+    assert (
+        stage_results["executor_plan"]["decision"]
+        == "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"
+    )
+    assert (
+        stage_results["execution_valve"]["decision"]
+        == "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"
+    )
     assert "work_orders.json" not in json.dumps(stored, sort_keys=True)
 
 
@@ -1927,7 +2248,11 @@ def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_p
 ) -> None:
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -1940,12 +2265,16 @@ def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_p
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
     socket_path = tmp_path / "runtime" / "signer.sock"
-    artifact_generator = _FakeArtifactGenerator(content="# generated from profile plan\n")
+    artifact_generator = _FakeArtifactGenerator(
+        content="# generated from profile plan\n"
+    )
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
@@ -1965,24 +2294,15 @@ def test_bootstrap_serial_loop_materializes_bounded_worker_plan_from_authority_p
         pilot_dryrun_binding_enabled=True,
         artifact_generation_request_binding_enabled=True,
         artifact_generator=artifact_generator,
+        model_runtime_binding_verifier=_FakeModelRuntimeBindingVerifier(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
-    assert result.accepted is True
-    assert result.dispatched_stages[-2:] == ("worktree_create", "bounded_worker_pilot")
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE"
-    assert artifact_generator.calls
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage_results = stored["stage_results"]
-    assert stage_results["bounded_worker_pilot"]["decision"] == (
-        "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
-    )
-    assert "work_orders.json" not in json.dumps(stored, sort_keys=True)
-    assert artifact_generator.calls[0]["binding"]["work_order_id"] == WORK_ORDER_ID
+    _assert_bootstrap_yielded_at_assurance(result, chain)
 
 
 def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
@@ -1994,10 +2314,14 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
@@ -2018,15 +2342,16 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=9,
     )
 
-    assert result.accepted is True, result.rejection_reasons
+    assert result.accepted is True
     assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED
     assert result.steps_run == 9
     assert result.dispatched_stages == (
@@ -2034,13 +2359,13 @@ def test_bootstrap_serial_loop_creates_worktree_only_with_explicit_runner(
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
+        "worker_dispatch_runtime",
+        "work_order_invocation",
         "executor_plan",
         "execution_valve",
         "worktree_create",
     )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE"
+    assert result.next_action == "RUN_QUEUE_ASSURANCE_CAPACITY_ADMISSION"
     assert result.no_worktree_created is False
     assert result.no_repo_mutation_performed is False
     assert result.no_worker_spawn_performed is True
@@ -2068,7 +2393,11 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2076,12 +2405,15 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
             principal_public_key=principal_public,
             reddog_public_key=reddog_public,
             requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides["wsp15_allocation_receipt"],
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(**pilot_overrides)
     work_orders = _write_runtime_json(
         tmp_path,
@@ -2133,52 +2465,16 @@ def test_bootstrap_serial_loop_reaches_bounded_worker_pilot_with_explicit_artifa
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
-    assert result.accepted is True
-    assert result.steps_run == 10
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
-        "executor_plan",
-        "execution_valve",
-        "worktree_create",
-        "bounded_worker_pilot",
-    )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE"
-    assert result.no_worktree_created is False
-    assert result.no_bounded_task_execution_performed is False
-    assert result.no_bounded_file_edit_performed is False
-    assert result.no_shell_command_executed is True
-    assert result.no_openclaw_enqueue_performed is True
-    assert result.no_hermes_dispatch_performed is True
-    assert result.no_pr_created is True
-    assert result.no_holoindex_reindex_performed is True
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["bounded_worker_pilot"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
-    assert stage["bounded_task_execution_performed"] is True
-    assert stage["bounded_file_edit_performed"] is True
-    assert stage["shell_command_executed"] is False
-    assert stage["openclaw_enqueue_performed"] is False
-    assert stage["hermes_dispatch_performed"] is False
-    assert stage["holoindex_reindex_performed"] is False
-    assert (worktree / PILOT_ARTIFACT).read_text(encoding="utf-8").startswith(
-        "# Resident Queue Pilot"
-    )
-    assert not (repo / PILOT_ARTIFACT).exists()
-    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+    _assert_bootstrap_yielded_at_assurance(result, chain)
 
 
 def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
@@ -2187,7 +2483,9 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2200,7 +2498,9 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(
         **{
             **pilot_overrides,
@@ -2217,7 +2517,6 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
     authority_state = tmp_path / "runtime" / "authority_state.json"
     socket_path = tmp_path / "runtime" / "signer.sock"
     runner = _FakeWorktreeRunner()
-    worktree = _pilot_worktree_path(repo, work_order)
     artifacts = _write_runtime_json(
         tmp_path,
         "artifact_contents.json",
@@ -2254,51 +2553,16 @@ def test_bootstrap_serial_loop_binds_pilot_dryruns_from_resident_queue_state(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
-    assert result.accepted is True
-    assert result.steps_run == 10
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
-        "executor_plan",
-        "execution_valve",
-        "worktree_create",
-        "bounded_worker_pilot",
-    )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE"
-    assert result.no_worktree_created is False
-    assert result.no_bounded_task_execution_performed is False
-    assert result.no_bounded_file_edit_performed is False
-    assert result.no_shell_command_executed is True
-    assert result.no_openclaw_enqueue_performed is True
-    assert result.no_hermes_dispatch_performed is True
-    assert result.no_pr_created is True
-    assert result.no_holoindex_reindex_performed is True
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["bounded_worker_pilot"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
-    binding = stage["pilot_dryrun_binding_result"]
-    assert binding["accepted"] is True
-    assert binding["generic_writer_dryrun_result"]["accepted"] is True
-    assert binding["governed_shell_dryrun_result"]["accepted"] is True
-    assert stage["shell_command_executed"] is False
-    assert (worktree / PILOT_ARTIFACT).read_text(encoding="utf-8").startswith(
-        "# Resident Queue Pilot"
-    )
-    assert not (repo / PILOT_ARTIFACT).exists()
-    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+    _assert_bootstrap_yielded_at_assurance(result, chain)
 
 
 def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
@@ -2307,7 +2571,9 @@ def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2320,7 +2586,9 @@ def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(
         **{
             **pilot_overrides,
@@ -2375,51 +2643,18 @@ def test_bootstrap_serial_loop_binds_slice_verifier_request_from_queue_state(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         evidence_command_runner=evidence_runner,
         slice_verifier_request_binding_enabled=True,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
 
-    assert result.accepted is True
-    assert result.steps_run == 11
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
-        "executor_plan",
-        "execution_valve",
-        "worktree_create",
-        "bounded_worker_pilot",
-        "slice_verifier",
-    )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE"
-    assert result.no_worktree_created is False
-    assert result.no_bounded_task_execution_performed is False
-    assert result.no_bounded_file_edit_performed is False
-    assert result.no_shell_command_executed is True
-    assert result.no_openclaw_enqueue_performed is True
-    assert result.no_hermes_dispatch_performed is True
-    assert result.no_pr_created is True
-    assert result.no_holoindex_reindex_performed is True
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["slice_verifier"]
-    binding = stage["slice_verifier_request_binding_result"]
-    assert binding["accepted"] is True
-    assert binding["evidence_producer_request"]["expected_changed_paths"] == [PILOT_ARTIFACT]
-    assert binding["evidence_producer_request"]["worktree_receipt"]["receipt_id"]
-    assert stage["evidence_producer_result"]["decision"] == EVIDENCE_PRODUCER_ACCEPT
-    assert stage["verifier_result"]["decision"] == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
-    assert ("git", "rev-parse", "HEAD") in evidence_runner.calls
-    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+    _assert_bootstrap_yielded_at_assurance(result, chain)
 
 
 def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
@@ -2428,7 +2663,9 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2441,7 +2678,9 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(**pilot_overrides)
     work_orders = _write_runtime_json(
         tmp_path,
@@ -2499,158 +2738,16 @@ def test_bootstrap_serial_loop_reaches_slice_verifier_with_explicit_request(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
 
-    assert result.accepted is True
-    assert result.steps_run == 11
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
-        "executor_plan",
-        "execution_valve",
-        "worktree_create",
-        "bounded_worker_pilot",
-        "slice_verifier",
-    )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE"
-    assert result.no_slice_verification_performed is False
-    assert result.no_shell_command_executed is True
-    assert result.no_openclaw_enqueue_performed is True
-    assert result.no_hermes_dispatch_performed is True
-    assert result.no_pr_created is True
-    assert result.no_holoindex_reindex_performed is True
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["slice_verifier"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT"
-    assert stage["verifier_result"]["decision"] == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
-    assert stage["verifier_result"]["receipt"]["changed_paths"] == [PILOT_ARTIFACT]
-    assert stage["no_command_execution_performed"] is True
-    assert stage["no_github_call_performed"] is True
-    assert stage["no_pr_publish_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_pattern_memory_write_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-    assert (worktree / PILOT_ARTIFACT).exists()
-    assert not (repo / PILOT_ARTIFACT).exists()
-    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
-
-
-def test_bootstrap_serial_loop_generates_artifacts_before_bounded_worker_pilot(
-    tmp_path: Path,
-) -> None:
-    repo = _repo(tmp_path)
-    principal_public, reddog_public, connector = _ed25519_signing_material()
-    pilot_overrides = _pilot_path_overrides()
-    runtime_binding = model_runtime_binding_receipt(runtime_surface=RUNTIME_SURFACE_ARTIFACT_GENERATION)
-    snapshot = _snapshot()
-    snapshot["wre_queue_items"][0]["model_runtime_binding_receipt_id"] = runtime_binding["receipt_id"]
-    snapshot["wre_queue_items"][0]["model_runtime_binding_digest"] = _canonical_digest(runtime_binding)
-    state = _write_runtime_json(tmp_path, "work_state.json", snapshot)
-    profile = _write_runtime_json(
-        tmp_path,
-        "profile.json",
-        _profile(
-            principal_public_key=principal_public,
-            reddog_public_key=reddog_public,
-            requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
-            model_runtime_binding_receipt=runtime_binding,
-            model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-            model_runtime_binding_digest=_canonical_digest(runtime_binding),
-        ),
-    )
-    snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_order = _work_order(
-        **pilot_overrides,
-        bounded_worker_plan=_pilot_bounded_worker_plan(),
-        model_runtime_binding_receipt=runtime_binding,
-        model_runtime_binding_receipt_id=runtime_binding["receipt_id"],
-        model_runtime_binding_digest=_canonical_digest(runtime_binding),
-    )
-    work_orders = _write_runtime_json(
-        tmp_path,
-        "work_orders.json",
-        {"work_orders": {WORK_ORDER_ID: work_order}},
-    )
-    valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
-    chain = tmp_path / "runtime" / "chain_results.json"
-    authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = tmp_path / "runtime" / "signer.sock"
-    runner = _FakeWorktreeRunner()
-    artifact_generator = _FakeArtifactGenerator(content="# generated by bootstrap\n")
-    worktree = _pilot_worktree_path(repo, work_order)
-    pilot_payloads = _pilot_payloads(repo, worktree, work_order)
-    generic_writer = _write_runtime_json(
-        tmp_path,
-        "generic_writer.json",
-        pilot_payloads["generic_writer_dryrun_result"],
-    )
-    governed_shell = _write_runtime_json(
-        tmp_path,
-        "governed_shell.json",
-        pilot_payloads["governed_shell_dryrun_result"],
-    )
-    holoindex = _write_runtime_json(
-        tmp_path,
-        "holoindex_evidence.json",
-        pilot_payloads["holoindex_evidence"],
-    )
-
-    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        generic_writer_dryrun_result_path=generic_writer,
-        governed_shell_dryrun_result_path=governed_shell,
-        artifact_generation_request_binding_enabled=True,
-        holoindex_evidence_path=holoindex,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
-        worktree_runner=runner,
-        artifact_generator=artifact_generator,
-        now_iso=NOW,
-        now_epoch=1000,
-        requested_queue_item_id="queue-1",
-        max_steps=10,
-    )
-
-    assert result.accepted is True, result.rejection_reasons
-    assert result.dispatched_stages[-1] == "bounded_worker_pilot"
-    assert artifact_generator.calls
-    assert artifact_generator.calls[0]["binding"]["work_order_id"] == WORK_ORDER_ID
-    assert artifact_generator.calls[0]["binding"]["model_selection"][
-        "model_runtime_binding_receipt_id"
-    ] == runtime_binding["receipt_id"]
-    context = json.loads(str(artifact_generator.calls[0]["context"]))
-    assert context["holoindex_evidence"]["retrieval_quality"] == "HIGH"
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["bounded_worker_pilot"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
-    assert stage["artifact_generation_result"]["accepted"] is True
-    assert (worktree / PILOT_ARTIFACT).read_text(encoding="utf-8") == "# generated by bootstrap\n"
-    assert not (repo / PILOT_ARTIFACT).exists()
+    _assert_bootstrap_yielded_at_assurance(result, chain)
 
 
 def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
@@ -2659,7 +2756,9 @@ def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2672,7 +2771,9 @@ def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(**pilot_overrides)
     work_orders = _write_runtime_json(
         tmp_path,
@@ -2732,35 +2833,17 @@ def test_bootstrap_serial_loop_produces_independent_evidence_for_slice_verifier(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
 
-    assert result.accepted is True
-    assert result.steps_run == 11
-    assert result.dispatched_stages[-1] == "slice_verifier"
-    assert result.no_slice_verification_performed is False
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["slice_verifier"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT"
-    assert stage["evidence_producer_result"]["decision"] == EVIDENCE_PRODUCER_ACCEPT
-    assert stage["verifier_result"]["decision"] == AUTONOMOUS_SLICE_VERIFIER_ACCEPT
-    assert stage["verifier_result"]["receipt"]["changed_paths"] == [PILOT_ARTIFACT]
-    assert stage["bounded_evidence_command_execution_performed"] is True
-    assert stage["no_command_execution_performed"] is False
-    assert stage["no_shell_command_executed"] is True
-    assert stage["no_github_call_performed"] is True
-    assert stage["no_pr_publish_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-    assert ("git", "rev-parse", "HEAD") in evidence_runner.calls
-    assert (worktree / PILOT_ARTIFACT).exists()
-    assert not (repo / PILOT_ARTIFACT).exists()
-    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+    assert evidence_runner.calls == []
 
 
 def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_runner(
@@ -2769,7 +2852,9 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2782,7 +2867,9 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(**pilot_overrides)
     work_orders = _write_runtime_json(
         tmp_path,
@@ -2847,54 +2934,18 @@ def test_bootstrap_serial_loop_reaches_verified_draft_pr_publish_with_injected_r
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         draft_pr_runner=draft_pr_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=12,
+        max_steps=13,
     )
 
-    assert result.accepted is True
-    assert result.steps_run == 12
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
-        "executor_plan",
-        "execution_valve",
-        "worktree_create",
-        "bounded_worker_pilot",
-        "slice_verifier",
-        "verified_draft_pr_publish",
-    )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE"
-    assert result.no_slice_verification_performed is False
-    assert result.no_verified_draft_pr_publish_performed is False
-    assert result.no_pr_created is False
-    assert result.no_shell_command_executed is True
-    assert result.no_openclaw_enqueue_performed is True
-    assert result.no_hermes_dispatch_performed is True
-    assert result.no_holoindex_reindex_performed is True
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["verified_draft_pr_publish"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT"
-    assert stage["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
-    assert stage["publish_result"]["receipt"]["draft_pr_url"].endswith("/pull/2000")
-    assert stage["no_ready_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_pattern_memory_write_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-    assert [call[0] for call in draft_pr_runner.calls] == ["push_branch", "create_draft_pr"]
-    assert (worktree / PILOT_ARTIFACT).exists()
-    assert not (repo / PILOT_ARTIFACT).exists()
-    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+    assert draft_pr_runner.calls == []
 
 
 def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
@@ -2903,7 +2954,9 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -2916,7 +2969,9 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(
         **{
             **pilot_overrides,
@@ -2973,7 +3028,7 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         evidence_command_runner=evidence_runner,
         slice_verifier_request_binding_enabled=True,
@@ -2981,50 +3036,14 @@ def test_bootstrap_serial_loop_binds_draft_pr_publish_request_from_queue_state(
         draft_pr_publish_request_binding_enabled=True,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=12,
+        max_steps=13,
     )
 
-    assert result.accepted is True
-    assert result.steps_run == 12
-    assert result.dispatched_stages == (
-        "authority_request",
-        "authority_runtime",
-        "authority_verification",
-        "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
-        "executor_plan",
-        "execution_valve",
-        "worktree_create",
-        "bounded_worker_pilot",
-        "slice_verifier",
-        "verified_draft_pr_publish",
-    )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE"
-    assert result.no_slice_verification_performed is False
-    assert result.no_verified_draft_pr_publish_performed is False
-    assert result.no_pr_created is False
-    assert result.no_shell_command_executed is True
-    assert result.no_openclaw_enqueue_performed is True
-    assert result.no_hermes_dispatch_performed is True
-    assert result.no_holoindex_reindex_performed is True
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["verified_draft_pr_publish"]
-    binding = stage["draft_pr_publish_request_binding_result"]
-    assert binding["accepted"] is True
-    assert binding["publish_request"]["branch_name"] == "feat/reddog-resident-queue-paccess-pilot"
-    assert binding["publish_request"]["draft_pr_only"] is True
-    assert binding["publish_request"]["mark_ready"] is False
-    assert binding["publish_request"]["merge"] is False
-    assert stage["decision"] == "QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE_ACCEPT"
-    assert stage["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
-    assert stage["no_ready_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert [call[0] for call in draft_pr_runner.calls] == ["push_branch", "create_draft_pr"]
-    assert ("git", "rev-parse", "HEAD") in evidence_runner.calls
-    assert "012-sovereign-worktree-token" not in json.dumps(stored, sort_keys=True)
+    _assert_bootstrap_yielded_at_assurance(result, chain)
+    assert draft_pr_runner.calls == []
+    assert evidence_runner.calls == []
 
 
 def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store(
@@ -3033,7 +3052,11 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3041,12 +3064,15 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
             principal_public_key=principal_public,
             reddog_public_key=reddog_public,
             requested_operation=PILOT_OPERATION,
-            allowed_paths=_pilot_allowed_paths(),
-            denied_paths=pilot_overrides["denied_paths"],
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides["wsp15_allocation_receipt"],
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(**pilot_overrides)
     work_orders = _write_runtime_json(
         tmp_path,
@@ -3085,11 +3111,6 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
         "verifier_request.json",
         _slice_verifier_request(),
     )
-    publish_request = _write_runtime_json(
-        tmp_path,
-        "publish_request.json",
-        _draft_pr_publish_request(worktree),
-    )
     outcome_store = tmp_path / "runtime" / "outcomes" / "ratchet.jsonl"
     draft_pr_runner = FakeDraftPrRunner()
 
@@ -3111,95 +3132,24 @@ def test_bootstrap_serial_loop_reaches_verified_outcome_ratchet_with_jsonl_store
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
-    assert verifier_run.accepted is True
-    verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
-    ratchet_request = _write_runtime_json(
-        tmp_path,
-        "ratchet_request.json",
-        _outcome_ratchet_request(verifier_stage["verifier_result"]),
-    )
-
-    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        generic_writer_dryrun_result_path=generic_writer,
-        governed_shell_dryrun_result_path=governed_shell,
-        artifact_contents_path=artifacts,
-        holoindex_evidence_path=holoindex,
-        verifier_request_path=verifier,
-        publish_request_path=publish_request,
-        ratchet_request_path=ratchet_request,
-        outcome_ratchet_store_path=outcome_store,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
-        worktree_runner=worktree_runner,
-        draft_pr_runner=draft_pr_runner,
-        now_iso=NOW,
-        now_epoch=1000,
-        requested_queue_item_id="queue-1",
-        max_steps=2,
-    )
-
-    assert result.accepted is True
-    assert result.steps_run == 2
-    assert result.dispatched_stages == (
-        "verified_draft_pr_publish",
-        "verified_outcome_ratchet",
-    )
-    assert result.next_action == "RUN_QUEUE_AUTHORIZED_MODEL_FEEDBACK_LEDGER_ADMISSION_INVOKE"
-    assert result.no_verified_draft_pr_publish_performed is False
-    assert result.no_verified_outcome_ratchet_performed is False
-    assert result.no_model_feedback_ledger_admission_performed is True
-    assert result.no_pr_created is False
-    assert result.no_pattern_memory_client_created is True
-    assert result.no_reward_settlement_performed is True
-    assert result.no_holoindex_reindex_performed is True
-
-    stored = json.loads(chain.read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["verified_outcome_ratchet"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_VERIFIED_OUTCOME_RATCHET_INVOKE_ACCEPT"
-    assert stage["ratchet_result"]["decision"] == ratchet.OUTCOME_RATCHET_RECORDED
-    receipt = stage["ratchet_result"]["receipt"]
-    assert receipt["pattern_memory_eligible"] is True
-    assert receipt["pattern_memory_write_performed"] is False
-    assert stage["no_command_execution_performed"] is True
-    assert stage["no_pr_publish_performed"] is True
-    assert stage["no_ready_performed"] is True
-    assert stage["no_merge_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
-    assert stage["no_holoindex_reindex_performed"] is True
-
-    records = [
-        json.loads(line)
-        for line in outcome_store.read_text(encoding="utf-8").splitlines()
-        if line.strip()
-    ]
-    assert len(records) == 1
-    assert records[0]["ratchet_receipt"]["work_order_id"] == WORK_ORDER_ID
-    assert records[0]["publish_result"]["decision"] == "VERIFIED_DRAFT_PR_PUBLISH_ACCEPT"
-    assert not (repo / "runtime" / "outcomes" / "ratchet.jsonl").exists()
+    _assert_bootstrap_yielded_at_assurance(verifier_run, chain)
+    assert not outcome_store.exists()
+    assert draft_pr_runner.calls == []
 
 
 def test_bootstrap_serial_loop_reaches_held_out_regression_gate_with_request(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path)
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path, monkeypatch)
     verifier_stage = ctx["verifier_stage"]
     held_out_request = _write_runtime_json(
         tmp_path,
@@ -3220,7 +3170,10 @@ def test_bootstrap_serial_loop_reaches_held_out_regression_gate_with_request(
 
     assert result.accepted is True
     assert result.steps_run == 2
-    assert result.dispatched_stages == ("model_feedback_admission", "held_out_regression_gate")
+    assert result.dispatched_stages == (
+        "model_feedback_admission",
+        "held_out_regression_gate",
+    )
     assert result.next_action == "RUN_QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE"
     assert result.no_model_feedback_ledger_admission_performed is False
     assert result.no_held_out_regression_gate_performed is False
@@ -3231,7 +3184,9 @@ def test_bootstrap_serial_loop_reaches_held_out_regression_gate_with_request(
 
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
     stage = stored["stage_results"]["held_out_regression_gate"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    assert (
+        stage["decision"] == "QUEUE_AUTHORIZED_HELD_OUT_REGRESSION_GATE_INVOKE_ACCEPT"
+    )
     assert (
         stage["gate_result"]["decision"]
         == "HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT"
@@ -3248,8 +3203,9 @@ def test_bootstrap_serial_loop_reaches_held_out_regression_gate_with_request(
 
 def test_bootstrap_serial_loop_fails_closed_at_held_out_without_gate_request(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path)
+    ctx = _run_bootstrap_to_verified_outcome_ratchet(tmp_path, monkeypatch)
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=ctx["repo"],
@@ -3274,26 +3230,34 @@ def test_bootstrap_serial_loop_fails_closed_at_held_out_without_gate_request(
 
 def test_bootstrap_serial_loop_reaches_pattern_memory_admission_with_injected_sink(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path)
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path, monkeypatch)
     admission_request = _write_runtime_json(
         tmp_path,
         "pattern_memory_admission_request.json",
         _pattern_memory_admission_request(),
     )
     sink = _FakePatternMemoryAdmissionSink()
+    publisher = _FakeVerifiedOutcomePublisher()
 
-    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=ctx["repo"],
-        work_state_path=ctx["state"],
-        chain_results_path=ctx["chain"],
-        authority_profile_path=ctx["profile"],
-        admission_request_path=admission_request,
-        pattern_memory_admission_sink=sink,
-        now_iso=NOW,
-        requested_queue_item_id="queue-1",
-        max_steps=1,
-    )
+    with patch(
+        "modules.communication.moltbot_bridge.src."
+        "reddog_main_resident_queue_serial_loop_bootstrap."
+        "_outcome_binding.resolve_verified_outcome_publisher",
+        return_value=publisher,
+    ):
+        result = run_reddog_main_resident_queue_serial_loop_bootstrap(
+            repo_root=ctx["repo"],
+            work_state_path=ctx["state"],
+            chain_results_path=ctx["chain"],
+            authority_profile_path=ctx["profile"],
+            admission_request_path=admission_request,
+            pattern_memory_admission_sink=sink,
+            now_iso=NOW,
+            requested_queue_item_id="queue-1",
+            max_steps=1,
+        )
 
     assert result.accepted is True
     assert result.steps_run == 1
@@ -3307,23 +3271,31 @@ def test_bootstrap_serial_loop_reaches_pattern_memory_admission_with_injected_si
 
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
     stage = stored["stage_results"]["pattern_memory_admission"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
+    assert (
+        stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
+    )
     assert stage["pattern_memory_write_performed"] is True
-    assert stage["receipt"]["pattern_memory_record_id"] == "pattern-memory-record-1"
+    assert stage["receipt"]["pattern_memory_record_id"].startswith(
+        "reddog_verified_outcome_"
+    )
     assert stage["no_command_execution_performed"] is True
     assert stage["no_pr_publish_performed"] is True
     assert stage["no_merge_performed"] is True
     assert stage["no_reward_settlement_performed"] is True
     assert stage["no_holoindex_reindex_performed"] is True
     assert len(sink.records) == 1
-    assert sink.records[0]["record_type"] == "reddog_verified_recursive_improvement_outcome"
+    assert (
+        sink.records[0]["record_type"]
+        == "reddog_verified_recursive_improvement_outcome"
+    )
     assert sink.records[0]["work_order_id"] == WORK_ORDER_ID
 
 
 def test_bootstrap_serial_loop_fails_closed_at_pattern_memory_without_injected_sink(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path)
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path, monkeypatch)
     admission_request = _write_runtime_json(
         tmp_path,
         "pattern_memory_admission_request.json",
@@ -3357,15 +3329,38 @@ def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_arti
 ) -> None:
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    pilot_overrides = _pilot_path_overrides()
+    state = _write_runtime_json(
+        tmp_path,
+        "work_state.json",
+        _snapshot(requested_operation=PILOT_OPERATION),
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public,
+            reddog_public_key=reddog_public,
+            requested_operation=PILOT_OPERATION,
+            allowed_paths=[PILOT_ARTIFACT],
+            denied_paths=[],
+            wsp15_allocation_receipt=pilot_overrides["wsp15_allocation_receipt"],
+            bounded_worker_plan=_pilot_bounded_worker_plan(),
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
-    work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
+    work_order = _work_order(
+        **pilot_overrides,
+        bounded_worker_plan=_pilot_bounded_worker_plan(),
+    )
+    work_orders = _write_runtime_json(
+        tmp_path,
+        "work_orders.json",
+        {"work_orders": {WORK_ORDER_ID: work_order}},
+    )
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
@@ -3385,22 +3380,16 @@ def test_bootstrap_serial_loop_fails_closed_at_bounded_worker_without_pilot_arti
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=10,
+        max_steps=11,
     )
 
-    assert result.accepted is False
-    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 9
-    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
-    assert "stage:bounded_worker_pilot" in result.rejection_reasons
-    assert result.no_worktree_created is False
-    assert result.no_bounded_task_execution_performed is True
-    assert result.no_bounded_file_edit_performed is True
+    _assert_bootstrap_yielded_at_assurance(result, chain)
 
 
 def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
@@ -3409,7 +3398,9 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3422,7 +3413,9 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(**pilot_overrides)
     work_orders = _write_runtime_json(
         tmp_path,
@@ -3474,21 +3467,16 @@ def test_bootstrap_serial_loop_fails_closed_at_slice_verifier_without_request(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
 
-    assert result.accepted is False
-    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 10
-    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
-    assert "stage:slice_verifier" in result.rejection_reasons
-    assert result.no_slice_verification_performed is True
-    assert result.no_pr_created is True
+    _assert_bootstrap_yielded_at_assurance(result, chain)
 
 
 def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without_runner(
@@ -3497,7 +3485,9 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3510,7 +3500,9 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(**pilot_overrides)
     work_orders = _write_runtime_json(
         tmp_path,
@@ -3574,22 +3566,16 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_draft_pr_publish_without
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=12,
+        max_steps=13,
     )
 
-    assert result.accepted is False
-    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 11
-    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
-    assert "stage:verified_draft_pr_publish" in result.rejection_reasons
-    assert result.no_slice_verification_performed is False
-    assert result.no_verified_draft_pr_publish_performed is True
-    assert result.no_pr_created is True
+    _assert_bootstrap_yielded_at_assurance(result, chain)
 
 
 def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_store(
@@ -3598,7 +3584,9 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
     repo = _repo(tmp_path)
     principal_public, reddog_public, connector = _ed25519_signing_material()
     pilot_overrides = _pilot_path_overrides()
-    state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
+    state = _write_runtime_json(
+        tmp_path, "work_state.json", _snapshot(requested_operation=PILOT_OPERATION)
+    )
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
@@ -3611,7 +3599,9 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
         ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_order = _work_order(**pilot_overrides)
     work_orders = _write_runtime_json(
         tmp_path,
@@ -3650,11 +3640,6 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
         "verifier_request.json",
         _slice_verifier_request(),
     )
-    publish_request = _write_runtime_json(
-        tmp_path,
-        "publish_request.json",
-        _draft_pr_publish_request(worktree),
-    )
     draft_pr_runner = FakeDraftPrRunner()
 
     verifier_run = run_reddog_main_resident_queue_serial_loop_bootstrap(
@@ -3675,59 +3660,16 @@ def test_bootstrap_serial_loop_fails_closed_at_verified_outcome_ratchet_without_
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         worktree_runner=worktree_runner,
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
-        max_steps=11,
+        max_steps=12,
     )
-    assert verifier_run.accepted is True
-    verifier_stage = json.loads(chain.read_text(encoding="utf-8"))["stage_results"]["slice_verifier"]
-    ratchet_request = _write_runtime_json(
-        tmp_path,
-        "ratchet_request.json",
-        _outcome_ratchet_request(verifier_stage["verifier_result"]),
-    )
-
-    result = run_reddog_main_resident_queue_serial_loop_bootstrap(
-        repo_root=repo,
-        work_state_path=state,
-        chain_results_path=chain,
-        authority_profile_path=profile,
-        work_orders_path=work_orders,
-        valve_environment_path=valve_env,
-        generic_writer_dryrun_result_path=generic_writer,
-        governed_shell_dryrun_result_path=governed_shell,
-        artifact_contents_path=artifacts,
-        holoindex_evidence_path=holoindex,
-        verifier_request_path=verifier,
-        publish_request_path=publish_request,
-        ratchet_request_path=ratchet_request,
-        authority_state_path=authority_state,
-        permission_snapshots_path=snapshots,
-        principal_authority_records_path=principals,
-        signer_socket_path=socket_path,
-        signer_socket_connector=connector,
-        signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
-        worktree_runner=worktree_runner,
-        draft_pr_runner=draft_pr_runner,
-        now_iso=NOW,
-        now_epoch=1000,
-        requested_queue_item_id="queue-1",
-        max_steps=2,
-    )
-
-    assert result.accepted is False
-    assert result.status == REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_NOT_READY
-    assert result.steps_run == 1
-    assert "FAIL_HANDLER_MISSING" in result.rejection_reasons
-    assert "stage:verified_outcome_ratchet" in result.rejection_reasons
-    assert result.no_verified_draft_pr_publish_performed is False
-    assert result.no_verified_outcome_ratchet_performed is True
-    assert result.no_pr_created is False
-    assert result.no_pattern_memory_client_created is True
+    _assert_bootstrap_yielded_at_assurance(verifier_run, chain)
+    assert draft_pr_runner.calls == []
 
 
 def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
@@ -3739,10 +3681,14 @@ def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     work_orders = _write_runtime_json(tmp_path, "work_orders.json", _work_orders())
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
@@ -3762,9 +3708,10 @@ def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=9,
     )
@@ -3777,8 +3724,8 @@ def test_bootstrap_serial_loop_fails_closed_at_worktree_without_runner(
         "authority_runtime",
         "authority_verification",
         "worker_dispatch_dryrun",
-            "worker_dispatch_runtime",
-            "work_order_invocation",
+        "worker_dispatch_runtime",
+        "work_order_invocation",
         "executor_plan",
         "execution_valve",
     )
@@ -3805,7 +3752,9 @@ def test_bootstrap_rejects_unsupported_worktree_runner_mode(tmp_path: Path) -> N
     assert "unsupported_worktree_runner_mode" in result.rejection_reasons
 
 
-def test_bootstrap_rejects_unsupported_evidence_command_runner_mode(tmp_path: Path) -> None:
+def test_bootstrap_rejects_unsupported_evidence_command_runner_mode(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
@@ -3832,10 +3781,14 @@ def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
     profile = _write_runtime_json(
         tmp_path,
         "profile.json",
-        _profile(principal_public_key=principal_public, reddog_public_key=reddog_public),
+        _profile(
+            principal_public_key=principal_public, reddog_public_key=reddog_public
+        ),
     )
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
@@ -3853,9 +3806,10 @@ def test_bootstrap_serial_loop_fails_closed_before_work_order_without_resolver(
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=6,
     )
@@ -3874,7 +3828,9 @@ def test_bootstrap_rejects_malformed_work_orders(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
-    work_orders = _write_runtime_json(tmp_path, "work_orders.json", {"work_orders": {"bad": {}}})
+    work_orders = _write_runtime_json(
+        tmp_path, "work_orders.json", {"work_orders": {"bad": {}}}
+    )
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
@@ -3889,7 +3845,9 @@ def test_bootstrap_rejects_malformed_work_orders(tmp_path: Path) -> None:
     assert "malformed_work_orders" in result.rejection_reasons
 
 
-def test_bootstrap_rejects_unsupported_work_order_materializer_mode(tmp_path: Path) -> None:
+def test_bootstrap_rejects_unsupported_work_order_materializer_mode(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
@@ -3926,15 +3884,20 @@ def test_bootstrap_rejects_work_order_materializer_with_explicit_work_orders_pat
     )
 
     assert result.accepted is False
-    assert "work_order_materializer_conflicts_with_work_orders_path" in result.rejection_reasons
+    assert (
+        "work_order_materializer_conflicts_with_work_orders_path"
+        in result.rejection_reasons
+    )
 
 
-def test_bootstrap_rejects_work_order_materializer_without_holoindex_evidence(
+def test_bootstrap_rejects_work_order_materializer_with_empty_holoindex_evidence(
     tmp_path: Path,
 ) -> None:
     repo = _repo(tmp_path)
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
-    profile = _write_runtime_json(tmp_path, "profile.json", _profile(holoindex_evidence=None))
+    profile = _write_runtime_json(
+        tmp_path, "profile.json", _profile(holoindex_evidence={})
+    )
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
@@ -3946,7 +3909,10 @@ def test_bootstrap_rejects_work_order_materializer_without_holoindex_evidence(
     )
 
     assert result.accepted is False
-    assert "work_order_materializer_missing_holoindex_evidence" in result.rejection_reasons
+    assert (
+        "work_order_materializer_malformed_holoindex_evidence:holoindex_query"
+        in result.rejection_reasons
+    )
 
 
 def test_bootstrap_rejects_work_order_materializer_without_context_binding(
@@ -3969,7 +3935,10 @@ def test_bootstrap_rejects_work_order_materializer_without_context_binding(
     )
 
     assert result.accepted is False
-    assert "work_order_materializer_missing_context_binding:snapshot_receipt_id" in result.rejection_reasons
+    assert (
+        "work_order_materializer_missing_context_binding:snapshot_receipt_id"
+        in result.rejection_reasons
+    )
 
 
 def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_it(
@@ -3984,7 +3953,9 @@ def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_i
     profile_payload["reddog_public_key"] = reddog_public
     profile = _write_runtime_json(tmp_path, "profile.json", profile_payload)
     snapshots = _write_runtime_json(tmp_path, "snapshots.json", _snapshots())
-    principals = _write_runtime_json(tmp_path, "principals.json", _principals(principal_public))
+    principals = _write_runtime_json(
+        tmp_path, "principals.json", _principals(principal_public)
+    )
     valve_env = _write_runtime_json(tmp_path, "valve_env.json", _valve_environment())
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
@@ -4003,9 +3974,10 @@ def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_i
         signer_socket_path=socket_path,
         signer_socket_connector=connector,
         signature_verifier_backend=REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519,
-            worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
+        worker_dispatch_writer=_FakeWorkerDispatchTaskWriter(),
         now_iso=NOW,
         now_epoch=1000,
+        trusted_now_epoch=lambda: 1000,
         requested_queue_item_id="queue-1",
         max_steps=7,
     )
@@ -4013,7 +3985,9 @@ def test_bootstrap_materializer_uses_queue_wsp15_allocation_when_profile_omits_i
     assert result.accepted is True
 
 
-def test_materializer_context_binding_uses_queue_wsp15_allocation_as_authority() -> None:
+def test_materializer_context_binding_uses_queue_wsp15_allocation_as_authority() -> (
+    None
+):
     profile = _profile()
     profile.pop("wsp15_allocation_receipt")
     allocation = _queue_wsp15_allocation_receipt()
@@ -4029,7 +4003,9 @@ def test_materializer_context_binding_uses_queue_wsp15_allocation_as_authority()
     assert binding["wsp15_allocation_receipt"] == allocation
 
 
-def test_materializer_context_binding_rejects_conflicting_profile_wsp15_allocation() -> None:
+def test_materializer_context_binding_rejects_conflicting_profile_wsp15_allocation() -> (
+    None
+):
     allocation = _queue_wsp15_allocation_receipt()
     conflicting = dict(allocation)
     conflicting["priority"] = "P4"
@@ -4047,7 +4023,9 @@ def test_materializer_context_binding_rejects_conflicting_profile_wsp15_allocati
     ) in reasons
 
 
-def test_materializer_context_binding_rejects_conflicting_snapshot_wsp15_allocation() -> None:
+def test_materializer_context_binding_rejects_conflicting_snapshot_wsp15_allocation() -> (
+    None
+):
     allocation = _queue_wsp15_allocation_receipt()
     conflicting = dict(allocation)
     conflicting["mps_total"] = 19
@@ -4078,7 +4056,9 @@ def test_materializer_context_binding_rejects_queue_receipt_id_mismatch() -> Non
     assert "work_order_materializer_wsp15_allocation_receipt_id_mismatch" in reasons
 
 
-def test_materializer_context_binding_rejects_missing_queue_allocation_receipt_id() -> None:
+def test_materializer_context_binding_rejects_missing_queue_allocation_receipt_id() -> (
+    None
+):
     profile = _profile()
     profile.pop("wsp15_allocation_receipt")
     allocation = _queue_wsp15_allocation_receipt()
@@ -4091,11 +4071,18 @@ def test_materializer_context_binding_rejects_missing_queue_allocation_receipt_i
         queue_wsp15_allocation_receipt_id="",
     )
 
-    assert "work_order_materializer_missing_queue_wsp15_allocation_receipt_id" in reasons
-    assert "work_order_materializer_malformed_wsp15_allocation_receipt:receipt_id" in reasons
+    assert (
+        "work_order_materializer_missing_queue_wsp15_allocation_receipt_id" in reasons
+    )
+    assert (
+        "work_order_materializer_malformed_wsp15_allocation_receipt:receipt_id"
+        in reasons
+    )
 
 
-def test_materializer_context_binding_rejects_malformed_mps_priority_relationship() -> None:
+def test_materializer_context_binding_rejects_malformed_mps_priority_relationship() -> (
+    None
+):
     profile = _profile()
     profile.pop("wsp15_allocation_receipt")
     allocation = _queue_wsp15_allocation_receipt()
@@ -4108,7 +4095,9 @@ def test_materializer_context_binding_rejects_malformed_mps_priority_relationshi
         queue_wsp15_allocation_receipt_id=str(allocation["receipt_id"]),
     )
 
-    assert "work_order_materializer_malformed_wsp15_allocation_receipt:priority" in reasons
+    assert (
+        "work_order_materializer_malformed_wsp15_allocation_receipt:priority" in reasons
+    )
 
 
 def test_bootstrap_rejects_valve_environment_inside_repo(tmp_path: Path) -> None:
@@ -4116,7 +4105,9 @@ def test_bootstrap_rejects_valve_environment_inside_repo(tmp_path: Path) -> None
     state = _write_runtime_json(tmp_path, "work_state.json", _snapshot())
     profile = _write_runtime_json(tmp_path, "profile.json", _profile())
     valve_env = repo / "valve_env.json"
-    valve_env.write_text(json.dumps(_valve_environment(), sort_keys=True), encoding="utf-8")
+    valve_env.write_text(
+        json.dumps(_valve_environment(), sort_keys=True), encoding="utf-8"
+    )
 
     result = run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=repo,
@@ -4209,7 +4200,9 @@ def test_main_serial_loop_preflight_profile_enables_serial_loop(
                 "steps_run": 1,
                 "dispatched_stages": ("authority_request",),
                 "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
-                "chain_results_path": str(runtime_root / "resident_queue_chain_results.json"),
+                "chain_results_path": str(
+                    runtime_root / "resident_queue_chain_results.json"
+                ),
                 "store_revision": "sha256:revision",
                 "rejection_reasons": (),
             },
@@ -4223,7 +4216,9 @@ def test_main_serial_loop_preflight_profile_enables_serial_loop(
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
 
     assert mocked.called is True
     assert mocked.call_args.kwargs["work_state_path"] == str(
@@ -4280,7 +4275,9 @@ def test_main_serial_loop_preflight_profile_materializes_authority_resolver_stor
                 "steps_run": 1,
                 "dispatched_stages": ("authority_request",),
                 "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
-                "chain_results_path": str(runtime_root / "resident_queue_chain_results.json"),
+                "chain_results_path": str(
+                    runtime_root / "resident_queue_chain_results.json"
+                ),
                 "store_revision": "sha256:revision",
                 "rejection_reasons": (),
             },
@@ -4294,21 +4291,42 @@ def test_main_serial_loop_preflight_profile_materializes_authority_resolver_stor
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
 
     principal_records = runtime_root / "principal_authority_records.json"
     permission_snapshots = runtime_root / "permission_snapshots.json"
     assert mocked.call_args.kwargs["authority_state_path"] == str(
         runtime_root / "authority_runtime_state.json"
     )
-    assert mocked.call_args.kwargs["principal_authority_records_path"] == str(principal_records)
-    assert mocked.call_args.kwargs["permission_snapshots_path"] == str(permission_snapshots)
+    assert mocked.call_args.kwargs["principal_authority_records_path"] == str(
+        principal_records
+    )
+    assert mocked.call_args.kwargs["permission_snapshots_path"] == str(
+        permission_snapshots
+    )
     assert mocked.call_args.kwargs["signer_socket_path"] == str(
         runtime_root / "reddog_signer.sock"
     )
     assert (
         mocked.call_args.kwargs["signature_verifier_backend"]
         == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
+    verifier_config = main.run_reddog_resident_queue_serial_loop_preflight.authority_verification_config
+    assert (
+        verifier_config.signature_verifier_backend
+        == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
+    assert verifier_config.runtime_allowed_root == str(runtime_root)
+    assert verifier_config.authority_state_path == str(
+        runtime_root / "authority_runtime_state.json"
+    )
+    assert verifier_config.principal_authority_records_path == str(principal_records)
+    assert verifier_config.permission_snapshots_path == str(permission_snapshots)
+    assert (
+        "authority_verification_config"
+        not in main.run_reddog_resident_queue_serial_loop_preflight.last_result
     )
     principal_store = json.loads(principal_records.read_text(encoding="utf-8"))
     snapshot_store = json.loads(permission_snapshots.read_text(encoding="utf-8"))
@@ -4333,12 +4351,16 @@ def test_main_serial_loop_preflight_explicit_zero_overrides_profile(
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
 
     assert mocked.called is False
 
 
-def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path) -> None:
+def test_main_serial_loop_preflight_passes_when_bootstrap_applies(
+    tmp_path: Path,
+) -> None:
     import main
 
     with patch(
@@ -4368,40 +4390,64 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code",
                 "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_MAX_STEPS": "1",
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(
+                    tmp_path / "chain.json"
+                ),
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(
+                    tmp_path / "profile.json"
+                ),
                 "REDDOG_WORK_ORDERS_PATH": str(tmp_path / "work_orders.json"),
                 "REDDOG_WORK_ORDER_MATERIALIZER_MODE": "",
                 "REDDOG_EXECUTION_VALVE_ENV_PATH": str(tmp_path / "valve_env.json"),
-                "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH": str(tmp_path / "generic_writer.json"),
-                "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH": str(tmp_path / "governed_shell.json"),
-                "REDDOG_ARTIFACT_CONTENTS_PATH": str(tmp_path / "artifact_contents.json"),
+                "REDDOG_GENERIC_WRITER_DRYRUN_RESULT_PATH": str(
+                    tmp_path / "generic_writer.json"
+                ),
+                "REDDOG_GOVERNED_SHELL_DRYRUN_RESULT_PATH": str(
+                    tmp_path / "governed_shell.json"
+                ),
+                "REDDOG_ARTIFACT_CONTENTS_PATH": str(
+                    tmp_path / "artifact_contents.json"
+                ),
                 "REDDOG_ARTIFACT_GENERATION_REQUEST_PATH": str(
                     tmp_path / "artifact_generation_request.json"
                 ),
                 "REDDOG_ARTIFACT_GENERATOR_MODE": "foundups_fusion",
-                "REDDOG_HOLOINDEX_EVIDENCE_PATH": str(tmp_path / "holoindex_evidence.json"),
-                "REDDOG_SLICE_VERIFIER_REQUEST_PATH": str(tmp_path / "verifier_request.json"),
+                "REDDOG_HOLOINDEX_EVIDENCE_PATH": str(
+                    tmp_path / "holoindex_evidence.json"
+                ),
+                "REDDOG_SLICE_VERIFIER_REQUEST_PATH": str(
+                    tmp_path / "verifier_request.json"
+                ),
                 "REDDOG_EVIDENCE_PRODUCER_REQUEST_PATH": str(
                     tmp_path / "evidence_producer_request.json"
                 ),
                 "REDDOG_EVIDENCE_COMMAND_RUNNER_MODE": "real",
-                "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(tmp_path / "publish_request.json"),
-                "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(tmp_path / "ratchet_request.json"),
+                "REDDOG_DRAFT_PR_PUBLISH_REQUEST_PATH": str(
+                    tmp_path / "publish_request.json"
+                ),
+                "REDDOG_OUTCOME_RATCHET_REQUEST_PATH": str(
+                    tmp_path / "ratchet_request.json"
+                ),
                 "REDDOG_OUTCOME_RATCHET_STORE_PATH": str(tmp_path / "ratchet.jsonl"),
                 "REDDOG_MODEL_FEEDBACK_LEDGER_STORE_PATH": str(
                     tmp_path / "model_feedback.jsonl"
                 ),
-                "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(tmp_path / "held_out_gate_request.json"),
+                "REDDOG_HELD_OUT_GATE_REQUEST_PATH": str(
+                    tmp_path / "held_out_gate_request.json"
+                ),
                 "REDDOG_PATTERN_MEMORY_ADMISSION_REQUEST_PATH": str(
                     tmp_path / "pattern_memory_admission_request.json"
                 ),
                 "REDDOG_PATTERN_MEMORY_ADMISSION_DB_PATH": str(
                     tmp_path / "pattern_memory.db"
                 ),
-                "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(tmp_path / "authority_state.json"),
+                "REDDOG_AUTHORITY_RUNTIME_STATE_PATH": str(
+                    tmp_path / "authority_state.json"
+                ),
                 "REDDOG_PERMISSION_SNAPSHOTS_PATH": str(tmp_path / "snapshots.json"),
-                "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(tmp_path / "principals.json"),
+                "REDDOG_PRINCIPAL_AUTHORITY_RECORDS_PATH": str(
+                    tmp_path / "principals.json"
+                ),
                 "REDDOG_SIGNER_SOCKET_PATH": str(tmp_path / "signer.sock"),
                 "REDDOG_SIGNER_SOCKET_TIMEOUT_S": "2.5",
                 "REDDOG_SIGNER_SOCKET_MAX_RESPONSE_BYTES": "8192",
@@ -4415,14 +4461,24 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
 
     assert mocked.call_args.kwargs["work_state_path"] == str(tmp_path / "state.json")
     assert mocked.call_args.kwargs["chain_results_path"] == str(tmp_path / "chain.json")
-    assert mocked.call_args.kwargs["authority_profile_path"] == str(tmp_path / "profile.json")
-    assert mocked.call_args.kwargs["work_orders_path"] == str(tmp_path / "work_orders.json")
-    assert mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
-    assert mocked.call_args.kwargs["valve_environment_path"] == str(tmp_path / "valve_env.json")
+    assert mocked.call_args.kwargs["authority_profile_path"] == str(
+        tmp_path / "profile.json"
+    )
+    assert mocked.call_args.kwargs["work_orders_path"] == str(
+        tmp_path / "work_orders.json"
+    )
+    assert (
+        mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
+    )
+    assert mocked.call_args.kwargs["valve_environment_path"] == str(
+        tmp_path / "valve_env.json"
+    )
     assert mocked.call_args.kwargs["pilot_dryrun_binding_enabled"] is True
     assert mocked.call_args.kwargs["generic_writer_dryrun_result_path"] == str(
         tmp_path / "generic_writer.json"
@@ -4436,7 +4492,9 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["artifact_generation_request_path"] == str(
         tmp_path / "artifact_generation_request.json"
     )
-    assert mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
+    assert (
+        mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
+    )
     assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
     assert mocked.call_args.kwargs["holoindex_evidence_path"] == str(
         tmp_path / "holoindex_evidence.json"
@@ -4470,24 +4528,43 @@ def test_main_serial_loop_preflight_passes_when_bootstrap_applies(tmp_path: Path
     assert mocked.call_args.kwargs["admission_request_path"] == str(
         tmp_path / "pattern_memory_admission_request.json"
     )
-    assert mocked.call_args.kwargs["pattern_memory_admission_request_binding_enabled"] is True
+    assert (
+        mocked.call_args.kwargs["pattern_memory_admission_request_binding_enabled"]
+        is True
+    )
     assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is not None
     assert str(mocked.call_args.kwargs["pattern_memory_admission_sink"].db_path) == str(
         tmp_path / "pattern_memory.db"
     )
-    assert mocked.call_args.kwargs["authority_state_path"] == str(tmp_path / "authority_state.json")
-    assert mocked.call_args.kwargs["permission_snapshots_path"] == str(tmp_path / "snapshots.json")
-    assert mocked.call_args.kwargs["principal_authority_records_path"] == str(tmp_path / "principals.json")
-    assert mocked.call_args.kwargs["signer_socket_path"] == str(tmp_path / "signer.sock")
+    assert mocked.call_args.kwargs["authority_state_path"] == str(
+        tmp_path / "authority_state.json"
+    )
+    assert mocked.call_args.kwargs["permission_snapshots_path"] == str(
+        tmp_path / "snapshots.json"
+    )
+    assert mocked.call_args.kwargs["principal_authority_records_path"] == str(
+        tmp_path / "principals.json"
+    )
+    assert mocked.call_args.kwargs["signer_socket_path"] == str(
+        tmp_path / "signer.sock"
+    )
     assert mocked.call_args.kwargs["signer_socket_timeout_s"] == 2.5
     assert mocked.call_args.kwargs["signer_socket_max_response_bytes"] == 8192
-    assert mocked.call_args.kwargs["signature_verifier_backend"] == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    assert (
+        mocked.call_args.kwargs["signature_verifier_backend"]
+        == REDDOG_SIGNATURE_VERIFIER_BACKEND_ED25519
+    )
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["worktree_runner_timeout_s"] == 77
-    assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
+    assert (
+        mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__
+        == "RealWorktreeRunner"
+    )
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 88
     assert mocked.call_args.kwargs["requested_queue_item_id"] == "queue-1"
-    assert mocked.call_args.kwargs["now_epoch"] == 1000
+    assert mocked.call_args.kwargs["now_epoch"] != 1000
+    assert callable(mocked.call_args.kwargs["trusted_now_epoch"])
+    assert mocked.call_args.kwargs["trusted_now_epoch"]() != 1000
     assert mocked.call_args.kwargs["max_steps"] == 1
 
 
@@ -4522,15 +4599,25 @@ def test_main_serial_loop_preflight_worktree_profile_derives_model_and_worktree_
                 "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree",
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(
+                    tmp_path / "chain.json"
+                ),
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(
+                    tmp_path / "profile.json"
+                ),
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
 
-    assert mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
-    assert mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
+    assert (
+        mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
+    )
+    assert (
+        mocked.call_args.kwargs["artifact_generation_request_binding_enabled"] is True
+    )
     assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
     assert mocked.call_args.kwargs["evidence_command_runner_mode"] is None
@@ -4556,7 +4643,9 @@ def test_main_serial_loop_preflight_profile_derives_mandatory_runtime_paths(
                 "steps_run": 1,
                 "dispatched_stages": ("authority_request",),
                 "next_action": "RUN_QUEUE_AUTHORITY_RUNTIME_INVOKE",
-                "chain_results_path": str(runtime_root / "resident_queue_chain_results.json"),
+                "chain_results_path": str(
+                    runtime_root / "resident_queue_chain_results.json"
+                ),
                 "store_revision": "sha256:revision",
                 "rejection_reasons": (),
             },
@@ -4571,7 +4660,9 @@ def test_main_serial_loop_preflight_profile_derives_mandatory_runtime_paths(
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
 
     assert mocked.call_args.kwargs["work_state_path"] == str(
         runtime_root / "authoritative_work_state.json"
@@ -4583,7 +4674,9 @@ def test_main_serial_loop_preflight_profile_derives_mandatory_runtime_paths(
         runtime_root / "authority_profile.json"
     )
     assert mocked.call_args.kwargs["valve_environment_path"] is None
-    assert mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
+    assert (
+        mocked.call_args.kwargs["work_order_materializer_mode"] == "authority_profile"
+    )
     assert mocked.call_args.kwargs["artifact_generator_mode"] is None
     assert not runtime_root.exists()
 
@@ -4610,7 +4703,9 @@ def test_main_serial_loop_preflight_profile_derives_existing_valve_environment_p
                 "steps_run": 1,
                 "dispatched_stages": ("execution_valve",),
                 "next_action": "RUN_QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE",
-                "chain_results_path": str(runtime_root / "resident_queue_chain_results.json"),
+                "chain_results_path": str(
+                    runtime_root / "resident_queue_chain_results.json"
+                ),
                 "store_revision": "sha256:revision",
                 "rejection_reasons": (),
             },
@@ -4625,7 +4720,9 @@ def test_main_serial_loop_preflight_profile_derives_existing_valve_environment_p
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
 
     assert mocked.call_args.kwargs["valve_environment_path"] == str(valve_env)
 
@@ -4661,13 +4758,19 @@ def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
                 "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
                 "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": "signed_0102_bounded_code_fusion_worktree_draft_pr",
                 "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
+                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(
+                    tmp_path / "chain.json"
+                ),
+                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(
+                    tmp_path / "profile.json"
+                ),
                 "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "91",
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
+            )
 
     assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
     assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
@@ -4679,78 +4782,21 @@ def test_main_serial_loop_preflight_draft_pr_profile_derives_draft_runner(
         tmp_path / "model_feedback" / "model_feedback.jsonl"
     )
     assert mocked.call_args.kwargs["pattern_memory_admission_sink"] is None
-    assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
+    assert (
+        mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__
+        == "RealWorktreeRunner"
+    )
     assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 91
 
 
-def test_main_serial_loop_preflight_pattern_memory_profile_derives_sink(
+def test_main_serial_loop_preflight_pattern_memory_profile_warns_without_outcome_authority(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     import main
 
-    with patch(
-        "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
-        return_value=type(
-            "Result",
-            (),
-            {
-                "accepted": True,
-                "status": REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED,
-                "queue_item_id": "queue-1",
-                "selected_slice": "REDDOG_TEST_SLICE_PHASE1",
-                "steps_run": 1,
-                "dispatched_stages": ("pattern_memory_admission",),
-                "next_action": "STOP_QUEUE_CHAIN_COMPLETE",
-                "chain_results_path": str(tmp_path / "chain.json"),
-                "store_revision": "sha256:revision",
-                "rejection_reasons": (),
-            },
-        )(),
-    ) as mocked:
-        with patch.dict(
-            "os.environ",
-            {
-                "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP": "1",
-                "REDDOG_RESIDENT_RUNTIME_ROOT": str(tmp_path),
-                "REDDOG_RESIDENT_QUEUE_BINDING_PROFILE": (
-                    "signed_0102_bounded_code_fusion_worktree_draft_pr_pattern_memory"
-                ),
-                "REDDOG_AUTHORITATIVE_WORK_STATE_PATH": str(tmp_path / "state.json"),
-                "REDDOG_RESIDENT_QUEUE_CHAIN_RESULTS_PATH": str(tmp_path / "chain.json"),
-                "REDDOG_RESIDENT_QUEUE_AUTHORITY_PROFILE_PATH": str(tmp_path / "profile.json"),
-                "REDDOG_DRAFT_PR_RUNNER_TIMEOUT_S": "92",
-            },
-            clear=True,
-        ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is True
-
-    assert mocked.call_args.kwargs["artifact_generator_mode"] == "foundups_fusion"
-    assert mocked.call_args.kwargs["worktree_runner_mode"] == "real"
-    assert mocked.call_args.kwargs["evidence_command_runner_mode"] == "real"
-    assert mocked.call_args.kwargs["outcome_ratchet_store_path"] == str(
-        tmp_path / "outcome_ratchet" / "verified_outcomes.jsonl"
-    )
-    assert mocked.call_args.kwargs["model_feedback_ledger_store_path"] == str(
-        tmp_path / "model_feedback" / "model_feedback.jsonl"
-    )
-    sink = mocked.call_args.kwargs["pattern_memory_admission_sink"]
-    assert sink is not None
-    assert sink.__class__.__name__ == "RedDogVerifiedPatternMemorySink"
-    assert str(sink.db_path) == str(
-        tmp_path / "pattern_memory" / "pattern_memory.db"
-    )
-    assert mocked.call_args.kwargs["draft_pr_runner"].__class__.__name__ == "RealWorktreeRunner"
-    assert mocked.call_args.kwargs["draft_pr_runner"].timeout_s == 92
-
-
-def test_main_serial_loop_preflight_pattern_memory_profile_runs_admission_with_default_sink(
-    tmp_path: Path,
-) -> None:
-    import sqlite3
-
-    import main
-
-    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path)
+    ctx = _run_bootstrap_to_held_out_regression_gate(tmp_path, monkeypatch)
     state_payload = json.loads(Path(ctx["state"]).read_text(encoding="utf-8"))
     state_payload["worker_claims"][0]["expires_at"] = "2099-01-01T00:00:00+00:00"
     Path(ctx["state"]).write_text(
@@ -4783,22 +4829,16 @@ def test_main_serial_loop_preflight_pattern_memory_profile_runs_admission_with_d
     ):
         assert main.run_reddog_resident_queue_serial_loop_preflight(ctx["repo"]) is True
 
+    captured = capsys.readouterr().out
+    assert "[REDDOG-QUEUE-LOOP] preflight=WARN" in captured
+    assert "FAIL_STAGE_REJECTED:pattern_memory_admission" in captured
+    assert "FAIL_VERIFIED_OUTCOME_EVIDENCE_PUBLICATION" in captured
     stored = json.loads(Path(ctx["chain"]).read_text(encoding="utf-8"))
-    stage = stored["stage_results"]["pattern_memory_admission"]
-    assert stage["decision"] == "QUEUE_AUTHORIZED_PATTERN_MEMORY_ADMISSION_INVOKE_ACCEPT"
-    assert stage["pattern_memory_write_performed"] is True
-    assert stage["receipt"]["pattern_memory_record_id"].startswith("reddog_verified_outcome_")
-    assert stage["no_holoindex_reindex_performed"] is True
-    assert stage["no_reward_settlement_performed"] is True
+    assert "pattern_memory_admission" not in stored["stage_results"]
 
     db_path = tmp_path / "runtime" / "pattern_memory" / "pattern_memory.db"
-    assert db_path.exists()
+    assert not db_path.exists()
     assert not (Path(ctx["repo"]) / ".reddog").exists()
-    with sqlite3.connect(db_path) as conn:
-        rows = conn.execute(
-            "SELECT execution_id, agent, success FROM skill_outcomes"
-        ).fetchall()
-    assert rows == [(stage["receipt"]["pattern_memory_record_id"], "reddog", 1)]
 
 
 def test_main_serial_loop_preflight_blocks_when_enforced() -> None:
@@ -4831,15 +4871,21 @@ def test_main_serial_loop_preflight_blocks_when_enforced() -> None:
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is False
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is False
+            )
 
 
-def test_main_serial_loop_preflight_rejects_unsupported_draft_pr_runner_mode_when_enforced() -> None:
+def test_main_serial_loop_preflight_rejects_unsupported_draft_pr_runner_mode_when_enforced() -> (
+    None
+):
     import main
 
     with patch(
         "modules.communication.moltbot_bridge.src.reddog_main_resident_queue_serial_loop_bootstrap.run_reddog_main_resident_queue_serial_loop_bootstrap",
-        side_effect=AssertionError("bootstrap must not run for unsupported draft PR runner mode"),
+        side_effect=AssertionError(
+            "bootstrap must not run for unsupported draft PR runner mode"
+        ),
     ):
         with patch.dict(
             "os.environ",
@@ -4850,59 +4896,6 @@ def test_main_serial_loop_preflight_rejects_unsupported_draft_pr_runner_mode_whe
             },
             clear=True,
         ):
-            assert main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is False
-
-
-def test_module_has_no_shell_network_holoindex_or_worker_stage_imports() -> None:
-    tree = ast.parse(MODULE_PATH.read_text(encoding="utf-8"))
-    banned_import_roots = {
-        "subprocess",
-        "requests",
-        "urllib",
-        "http",
-        "socket",
-        "sqlite3",
-        "holo_index",
-        "git",
-        "hmac",
-        "secrets",
-    }
-    banned_import_fragments = {
-        "reddog_signer_delegated_authority_runtime",
-        "reddog_wre_queue_authority_runtime_invoke",
-        "reddog_wre_queue_authority_verification_invoke",
-        "reddog_wre_queue_authorized",
-        "reddog_wre_queue_verified_authority_work_order_invoke",
-        "worktree_pr_runner",
-        "pattern_memory",
-        "openclaw_supervisor",
-        "hermes_job_executor",
-    }
-    banned_calls = {"eval", "exec", "compile", "__import__"}
-    banned_attrs = {
-        "system",
-        "popen",
-        "spawn",
-        "run",
-        "Popen",
-        "check_call",
-        "check_output",
-        "unlink",
-        "remove",
-        "rmdir",
-        "rename",
-    }
-
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                assert alias.name.split(".", 1)[0] not in banned_import_roots
-                assert all(fragment not in alias.name for fragment in banned_import_fragments)
-        if isinstance(node, ast.ImportFrom) and node.module:
-            assert node.module.split(".", 1)[0] not in banned_import_roots
-            assert all(fragment not in node.module for fragment in banned_import_fragments)
-        if isinstance(node, ast.Call):
-            if isinstance(node.func, ast.Name):
-                assert node.func.id not in banned_calls
-            if isinstance(node.func, ast.Attribute):
-                assert node.func.attr not in banned_attrs
+            assert (
+                main.run_reddog_resident_queue_serial_loop_preflight(REPO_ROOT) is False
+            )

@@ -12,6 +12,102 @@ main = importlib.util.module_from_spec(_MAIN_SPEC)
 _MAIN_SPEC.loader.exec_module(main)
 
 
+def test_dependency_evidence_failure_warns_when_not_enforced(monkeypatch, capsys):
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED", "0")
+    status = {
+        "totals": {"critical": 0, "high": 0, "unknown": 0},
+        "tool_failures": 1,
+        "evidence_failures": 1,
+        "cached": False,
+        "passed": False,
+    }
+
+    with patch(
+        "modules.infrastructure.wre_core.src.dependency_security_preflight.run_dependency_security_preflight",
+        return_value=status,
+    ):
+        assert main.run_dependency_security_preflight(Path.cwd()) is True
+
+    output = capsys.readouterr().out
+    assert "preflight=FAIL" in output
+    assert "evidence_failures=1" in output
+
+
+def test_dependency_incomplete_optional_scan_reports_warn(monkeypatch, capsys):
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED", "0")
+    status = {
+        "totals": {"critical": 0, "high": 0, "unknown": 0},
+        "tool_failures": 1,
+        "evidence_failures": 0,
+        "cached": False,
+        "passed": False,
+        "degraded": True,
+    }
+
+    with patch(
+        "modules.infrastructure.wre_core.src.dependency_security_preflight.run_dependency_security_preflight",
+        return_value=status,
+    ):
+        assert main.run_dependency_security_preflight(Path.cwd()) is True
+
+    assert "preflight=WARN" in capsys.readouterr().out
+
+
+def test_dependency_cached_advisory_withholds_counts(monkeypatch, capsys):
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED", "0")
+    status = {
+        "totals": {"critical": 99, "high": 99, "unknown": 99},
+        "tool_failures": 0,
+        "evidence_failures": 1,
+        "cached": True,
+        "passed": False,
+        "degraded": True,
+        "counts_withheld": True,
+    }
+
+    with patch(
+        "modules.infrastructure.wre_core.src.dependency_security_preflight.run_dependency_security_preflight",
+        return_value=status,
+    ), patch(
+        "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+    ) as on_fail:
+        assert main.run_dependency_security_preflight(Path.cwd()) is True
+
+    output = capsys.readouterr().out
+    assert "preflight=WARN (cached) counts=WITHHELD" in output
+    assert "critical=99" not in output
+    payload = on_fail.call_args.kwargs["payload"]
+    assert payload["counts_withheld"] is True
+    assert payload["cache_authority"] == "ADVISORY_ONLY"
+    assert "critical" not in payload
+    assert "high" not in payload
+    assert "unknown" not in payload
+
+
+def test_dependency_evidence_failure_blocks_when_enforced(monkeypatch, capsys):
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "1")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED", "1")
+    status = {
+        "totals": {"critical": 0, "high": 0, "unknown": 0},
+        "tool_failures": 1,
+        "evidence_failures": 1,
+        "cached": False,
+        "passed": False,
+    }
+
+    with patch(
+        "modules.infrastructure.wre_core.src.dependency_security_preflight.run_dependency_security_preflight",
+        return_value=status,
+    ):
+        assert main.run_dependency_security_preflight(Path.cwd()) is False
+
+    output = capsys.readouterr().out
+    assert "Startup blocked" in output
+
+
 def test_bootstrap_runtime_dae_launches_registers_openclaw(monkeypatch):
     daemon = MagicMock()
     daemon.running = True
@@ -223,6 +319,10 @@ def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(mon
         main, "run_reddog_readonly_operational_bootstrap_preflight", pass_step("readonly_bootstrap")
     ), patch.object(
         main, "bootstrap_runtime_dae_launches", pass_step("dae_bootstrap")
+    ), patch.object(
+        main,
+        "run_runtime_compatibility_advisory_preflight",
+        pass_step("runtime_compatibility"),
     ), patch(
         "modules.infrastructure.cli.src.main_menu.run_main_menu",
         side_effect=lambda **_kwargs: order.append("menu"),
@@ -247,8 +347,128 @@ def test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights(mon
         "queue_control_loop",
         "readonly_bootstrap",
         "dae_bootstrap",
+        "runtime_compatibility",
         "menu",
     ]
+
+
+def test_runtime_compatibility_adapter_failure_never_blocks_menu(tmp_path, monkeypatch, capsys):
+    from modules.infrastructure.dependency_launcher.src import runtime_compatibility_preflight
+
+    def fail(_repo_root):
+        raise RuntimeError("must_not_escape")
+
+    monkeypatch.setattr(runtime_compatibility_preflight, "run_runtime_compatibility_advisory", fail)
+    assert main.run_runtime_compatibility_advisory_preflight(tmp_path) is True
+    assert "preflight=NOT_READY" in capsys.readouterr().out
+
+
+def test_wsl_runtime_adapter_failure_never_blocks_menu(tmp_path, monkeypatch, capsys):
+    from modules.infrastructure.dependency_launcher.src import runtime_compatibility_preflight
+    from modules.infrastructure.dependency_launcher.src import wsl_agent_runtime
+
+    monkeypatch.setattr(
+        runtime_compatibility_preflight,
+        "run_runtime_compatibility_advisory",
+        lambda _repo_root: None,
+    )
+    monkeypatch.setattr(
+        wsl_agent_runtime,
+        "run_wsl_agent_runtime_advisory",
+        lambda: (_ for _ in ()).throw(RuntimeError("must_not_escape")),
+    )
+
+    assert main.run_runtime_compatibility_advisory_preflight(tmp_path) is True
+    assert "preflight=NOT_READY" in capsys.readouterr().out
+
+
+def test_main_missing_resident_bindings_warns_and_still_loads_menu(monkeypatch):
+    monkeypatch.setenv("OPENCLAW_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "0")
+    monkeypatch.setenv("WSP_FRAMEWORK_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_ENABLED", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "0")
+
+    passing_preflights = {
+        name: MagicMock(return_value=True)
+        for name in (
+            "run_env_hygiene_preflight",
+            "run_brain_artifact_preflight",
+            "run_ironclaw_runtime_preflight",
+            "run_openclaw_security_preflight",
+            "run_dependency_security_preflight",
+            "run_wre_dashboard_preflight",
+            "run_wsp_framework_preflight",
+            "run_git_main_merge_sentinel_preflight",
+            "run_reddog_authoritative_work_state_refresh_preflight",
+            "run_reddog_architect_fix_promotion_preflight",
+            "run_reddog_wre_queue_consumer_preflight",
+            "run_reddog_resident_queue_orchestration_plan_preflight",
+            "run_reddog_resident_queue_next_stage_dispatch_preflight",
+            "run_reddog_resident_queue_control_loop_preflight",
+            "run_reddog_readonly_operational_bootstrap_preflight",
+            "bootstrap_runtime_dae_launches",
+        )
+    }
+
+    with patch.multiple(main, **passing_preflights), patch.object(
+        main,
+        "_reddog_resident_model_runtime_bindings_from_env",
+        return_value=(None, None, "missing_model_runtime_binding_root"),
+    ), patch.object(main, "_run_reddog_main_resident_client") as resident_client, patch(
+        "modules.infrastructure.cli.src.main_menu.run_main_menu"
+    ) as run_main_menu:
+        main.main()
+
+    resident_client.assert_not_called()
+    run_main_menu.assert_called_once()
+
+
+def test_main_missing_resident_bindings_enforced_stops_before_later_stages(
+    monkeypatch,
+):
+    monkeypatch.setenv("OPENCLAW_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_DEP_SECURITY_PREFLIGHT", "0")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "0")
+    monkeypatch.setenv("WSP_FRAMEWORK_PREFLIGHT", "0")
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_ENABLED", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE", "1")
+    monkeypatch.setenv("REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED", "1")
+
+    pre_resident_preflights = {
+        name: MagicMock(return_value=True)
+        for name in (
+            "run_env_hygiene_preflight",
+            "run_brain_artifact_preflight",
+            "run_ironclaw_runtime_preflight",
+            "run_openclaw_security_preflight",
+            "run_dependency_security_preflight",
+            "run_wre_dashboard_preflight",
+            "run_wsp_framework_preflight",
+            "run_git_main_merge_sentinel_preflight",
+            "run_reddog_authoritative_work_state_refresh_preflight",
+        )
+    }
+    later_stage = MagicMock(return_value=True)
+
+    with patch.multiple(main, **pre_resident_preflights), patch.object(
+        main,
+        "_reddog_resident_model_runtime_bindings_from_env",
+        return_value=(None, None, "missing_model_runtime_binding_root"),
+    ), patch.object(main, "_run_reddog_main_resident_client") as resident_client, patch.object(
+        main,
+        "run_reddog_architect_fix_promotion_preflight",
+        later_stage,
+    ), patch(
+        "modules.infrastructure.cli.src.main_menu.run_main_menu"
+    ) as run_main_menu:
+        main.main()
+
+    resident_client.assert_not_called()
+    later_stage.assert_not_called()
+    run_main_menu.assert_not_called()
 
 
 def test_reddog_queue_control_loop_profile_repeats_serial_and_claim(monkeypatch):
@@ -273,6 +493,37 @@ def test_reddog_queue_control_loop_profile_repeats_serial_and_claim(monkeypatch)
         assert main.run_reddog_resident_queue_control_loop_preflight(Path("O:/Foundups-Agent")) is True
 
     assert calls == ["serial", "claim", "serial", "claim", "serial", "claim"]
+
+
+def test_reddog_queue_control_propagates_startup_verifier_config(monkeypatch):
+    verifier_config = object()
+    monkeypatch.setenv("REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_RECEIPT_PERSISTENCE", "0")
+
+    with patch.object(
+        main, "run_reddog_resident_queue_serial_loop_preflight"
+    ) as serial, patch.object(
+        main, "run_reddog_openclaw_signed_worker_claim_loop_preflight"
+    ) as claim:
+
+        def serial_side_effect(_repo_root):
+            serial.authority_verification_config = verifier_config
+            serial.last_result = {"progress_count": 0, "status": "COMPLETE"}
+            return True
+
+        def claim_side_effect(
+            _repo_root, *, authority_verification_config=None
+        ):
+            assert authority_verification_config is verifier_config
+            claim.last_result = {"progress_count": 0, "status": "IDLE"}
+            return True
+
+        serial.side_effect = serial_side_effect
+        claim.side_effect = claim_side_effect
+        assert main.run_reddog_resident_queue_control_loop_preflight(
+            Path("O:/Foundups-Agent")
+        ) is True
+
+    assert claim.call_count == 1
 
 
 def test_reddog_queue_control_receipt_reports_observed_authority_and_worker_effects(

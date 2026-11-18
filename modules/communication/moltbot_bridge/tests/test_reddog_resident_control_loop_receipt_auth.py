@@ -45,6 +45,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor 
     InMemorySignerControlLoopAnchorStore,
 )
 from modules.communication.moltbot_bridge.src import openclaw_supervisor
+from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_outcomes import (
+    strict_child_outcomes,
+)
 
 
 def _claim_evidence(
@@ -180,6 +183,71 @@ def _result(**overrides: object) -> dict[str, object]:
     return result
 
 
+def test_child_outcomes_allow_unique_requeue_attempts_before_completion() -> None:
+    outcomes = []
+    for index, status in enumerate(("requeued", "requeued", "completed"), start=1):
+        outcomes.append(
+            {
+                "task_id": "task-progressive",
+                "status": status,
+                "receipt_id": f"child-receipt-{index}",
+                "evidence_digest": "sha256:" + str(index) * 64,
+                "worker_execution_performed": True,
+                "effect_evidence_complete": True,
+                "worker_process_spawn_count": 0,
+                "shell_command_count": 0,
+            }
+        )
+
+    assert strict_child_outcomes(outcomes) == tuple(outcomes)
+
+
+def test_openclaw_projects_requeue_then_completion_for_same_task() -> None:
+    requeued = _claim_evidence(
+        task_id="task-progressive",
+        status="requeued",
+        receipt_id="child-receipt-1",
+    )
+    completed = _claim_evidence(
+        task_id="task-progressive",
+        status="completed",
+        receipt_id="child-receipt-2",
+    )
+
+    outcomes = openclaw_supervisor._signed_worker_child_execution_outcomes(
+        results=(requeued, completed),
+        completed_task_ids=("task-progressive",),
+        requeued_task_ids=("task-progressive",),
+        failed_task_ids=(),
+    )
+
+    assert tuple(item["status"] for item in outcomes) == (
+        "requeued",
+        "completed",
+    )
+    assert strict_child_outcomes(outcomes) == outcomes
+
+
+def test_child_outcomes_reject_attempt_after_terminal_result() -> None:
+    outcomes = []
+    for index, status in enumerate(("completed", "requeued"), start=1):
+        outcomes.append(
+            {
+                "task_id": "task-replayed",
+                "status": status,
+                "receipt_id": f"child-receipt-{index}",
+                "evidence_digest": "sha256:" + str(index) * 64,
+                "worker_execution_performed": True,
+                "effect_evidence_complete": True,
+                "worker_process_spawn_count": 0,
+                "shell_command_count": 0,
+            }
+        )
+
+    with pytest.raises(ValueError, match="child_task_replay"):
+        strict_child_outcomes(outcomes)
+
+
 def test_signed_receipt_requires_valid_signature_and_expected_key(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -273,6 +341,59 @@ def test_authority_profile_source_receipt_is_signature_bound(tmp_path: Path) -> 
         verify_resident_control_loop_receipt(receipt, require_authenticated=True)
 
 
+def test_authenticated_receipt_io_preserves_exact_runtime_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / "nested" / "control.jsonl"
+    target.parent.mkdir()
+    target.write_text("", encoding="utf-8")
+    observed: list[tuple[str, Path | None]] = []
+
+    def read_bytes(path, *, allowed_root, max_bytes):
+        observed.append(("read", allowed_root))
+        return b"", 0
+
+    def append_text(
+        path,
+        text,
+        *,
+        repo_root,
+        allowed_root,
+        validate_existing,
+        max_existing_bytes,
+    ):
+        observed.append(("append", allowed_root))
+        validate_existing("")
+
+    monkeypatch.setattr(receipt_store, "secure_read_confined_bytes", read_bytes)
+    monkeypatch.setattr(receipt_store, "secure_append_runtime_text", append_text)
+
+    assert receipt_store._read_existing_chain(target, runtime) == ""
+    receipt = build_resident_control_loop_receipt(
+        result=_result(),
+        repo_root=repo,
+        created_at="2026-07-18T00:00:00Z",
+        cycle_id="cycle-root",
+        nonce="nonce-root",
+        signing_context=_SIGNING_CONTEXT,
+    )
+    receipt_store._append_receipt_once(
+        target,
+        receipt,
+        repo,
+        signing_context=_SIGNING_CONTEXT,
+        require_authentication=True,
+        runtime_root=runtime,
+    )
+
+    assert observed == [("read", runtime), ("append", runtime)]
+
+
 def test_chain_links_receipts_and_rejects_cycle_or_nonce_replay(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -285,7 +406,7 @@ def test_chain_links_receipts_and_rejects_cycle_or_nonce_replay(tmp_path: Path) 
         cycle_id="cycle-1",
         nonce="nonce-1",
         signing_context=_SIGNING_CONTEXT,
-        require_authentication=True,
+        require_authentication=True, runtime_root=path.parent,
     )
     second = append_resident_control_loop_receipt(
         path=path,
@@ -295,7 +416,7 @@ def test_chain_links_receipts_and_rejects_cycle_or_nonce_replay(tmp_path: Path) 
         cycle_id="cycle-2",
         nonce="nonce-2",
         signing_context=_SIGNING_CONTEXT,
-        require_authentication=True,
+        require_authentication=True, runtime_root=path.parent,
     )
 
     assert second.previous_receipt_id == first.receipt_id
@@ -308,7 +429,7 @@ def test_chain_links_receipts_and_rejects_cycle_or_nonce_replay(tmp_path: Path) 
             cycle_id="cycle-1",
             nonce="nonce-3",
             signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
         )
 
 
@@ -320,7 +441,7 @@ def test_child_receipt_and_evidence_reuse_is_rejected_across_cycles(tmp_path: Pa
         path=path, result=_result(), repo_root=repo,
         created_at="2026-07-18T00:00:00Z", cycle_id="cycle-1",
         nonce="nonce-1", signing_context=_SIGNING_CONTEXT,
-        require_authentication=True,
+        require_authentication=True, runtime_root=path.parent,
     )
 
     with pytest.raises(ValueError, match="child_(receipt|evidence)_replay"):
@@ -328,7 +449,7 @@ def test_child_receipt_and_evidence_reuse_is_rejected_across_cycles(tmp_path: Pa
             path=path, result=_result(), repo_root=repo,
             created_at="2026-07-18T00:00:01Z", cycle_id="cycle-2",
             nonce="nonce-2", signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
         )
 
 
@@ -354,14 +475,14 @@ def test_head_recovers_exact_signed_receipt_after_append_interruption(
             path=path, result=_result(), repo_root=repo,
             created_at="2026-07-18T00:00:00Z", cycle_id="cycle-1",
             nonce="nonce-1", signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
         )
 
     second = append_resident_control_loop_receipt(
         path=path, result=_result(receipt_ids=("child-receipt-2",)),
         repo_root=repo, created_at="2026-07-18T00:00:01Z",
         cycle_id="cycle-2", nonce="nonce-2", signing_context=_SIGNING_CONTEXT,
-        require_authentication=True,
+        require_authentication=True, runtime_root=path.parent,
     )
     payloads = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
     assert len(payloads) == 2
@@ -385,7 +506,7 @@ def test_retention_limit_rejects_before_advancing_high_water_head(
         cycle_id="cycle-capacity-1",
         nonce="nonce-capacity-1",
         signing_context=_SIGNING_CONTEXT,
-        require_authentication=True,
+        require_authentication=True, runtime_root=path.parent,
         head_state_path=state_path,
     )
     before = json.loads(state_path.read_text(encoding="utf-8"))
@@ -404,7 +525,7 @@ def test_retention_limit_rejects_before_advancing_high_water_head(
             cycle_id="cycle-capacity-2",
             nonce="nonce-capacity-2",
             signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
             head_state_path=state_path,
         )
 
@@ -428,7 +549,7 @@ def test_concurrent_same_cycle_allows_exactly_one_signed_append(tmp_path: Path) 
             cycle_id="same-cycle",
             nonce="same-nonce",
             signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
         )
         return receipt.receipt_id
 
@@ -459,7 +580,7 @@ def test_concurrent_distinct_signed_appends_are_serialized_without_loss(
             cycle_id=f"distinct-cycle-{index}",
             nonce=f"distinct-nonce-{index}",
             signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
         ).receipt_id
 
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -780,7 +901,7 @@ def test_authenticated_append_rejects_unsigned_v2_predecessor(tmp_path: Path) ->
             cycle_id="signed-cycle",
             nonce="signed-nonce",
             signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
         )
 
 
@@ -827,7 +948,7 @@ def test_authenticated_append_rejects_foreign_signed_v2_predecessor(
         cycle_id="foreign-cycle",
         nonce="foreign-nonce",
         signing_context=foreign_context,
-        require_authentication=True,
+        require_authentication=True, runtime_root=path.parent,
     )
 
     with pytest.raises(ValueError, match="signer_invalid"):
@@ -839,7 +960,7 @@ def test_authenticated_append_rejects_foreign_signed_v2_predecessor(
             cycle_id="local-cycle",
             nonce="local-nonce",
             signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
         )
 
 
@@ -858,7 +979,7 @@ def test_complete_chain_verifier_rejects_tamper_and_reorder(tmp_path: Path) -> N
             cycle_id=f"chain-cycle-{index}",
             nonce=f"chain-nonce-{index}",
             signing_context=_SIGNING_CONTEXT,
-            require_authentication=True,
+            require_authentication=True, runtime_root=path.parent,
         )
     payloads = tuple(
         json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()
@@ -921,7 +1042,7 @@ def test_first_v2_receipt_binds_validated_legacy_prefix(tmp_path: Path) -> None:
         cycle_id="cycle-current",
         nonce="nonce-current",
         signing_context=_SIGNING_CONTEXT,
-        require_authentication=True,
+        require_authentication=True, runtime_root=path.parent,
     )
 
     assert current.previous_receipt_id == legacy["receipt_id"]

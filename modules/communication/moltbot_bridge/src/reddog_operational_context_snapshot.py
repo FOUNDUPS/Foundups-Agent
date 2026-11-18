@@ -10,8 +10,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
-import subprocess
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -22,12 +22,19 @@ from holo_index.freshness_receipt import (
     HoloIndexFreshnessReceipt,
     evaluate_freshness_for_paths,
     load_freshness_receipt,
-    read_git_head_sha,
 )
 
 
 SNAPSHOT_SCHEMA_VERSION = "reddog_operational_context_snapshot.v1"
 CONTEXT_POLICY_VERSION = "reddog_context_view_policy.v1"
+REPO_STATE_RECEIPT_SCHEMA = "reddog_governed_git_repo_state.v2"
+GIT_READINESS_SCHEMA = "reddog_governed_git_readiness.v2"
+GIT_EXECUTABLE_SCHEMA = "reddog_governed_git_executable.v1"
+MAX_EXECUTABLE_BYTES = 256 * 1024 * 1024
+MAX_LINK_COUNT = 2**32 - 1
+WINDOWS_VERIFIER_RELATIVE_DIGEST = "sha256:" + hashlib.sha256(
+    b"System32/WindowsPowerShell/v1.0/powershell.exe"
+).hexdigest()
 
 SOURCE_REPO = "repo"
 SOURCE_WORK_STATE = "work_state"
@@ -182,20 +189,210 @@ def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def observe_repo_state(repo_root: Path | str) -> dict[str, Any]:
-    """Read repo HEAD and dirty/worktree metadata without mutating git state."""
+def observe_repo_state(
+    repo_root: Path | str,
+    governed_receipt: Mapping[str, Any] | None,
+) -> dict[str, Any]:
+    """Consume the extension's already-verified governed Git state receipt."""
 
-    root = Path(repo_root)
-    head_sha = read_git_head_sha(root)
-    dirty_paths = _git_readonly_lines(root, ("status", "--porcelain=v1"))
-    worktrees = _git_readonly_lines(root, ("worktree", "list", "--porcelain"))
+    receipt = _validated_repo_state_receipt(Path(repo_root).resolve(), governed_receipt)
     return {
-        "repo_root_digest": _digest({"repo_root": str(root.resolve())}),
-        "head_sha": head_sha,
-        "dirty_paths": tuple(_normalize_status_path(line) for line in dirty_paths if line.strip()),
-        "dirty_digest": _digest(tuple(dirty_paths)),
-        "worktree_digest": _digest(tuple(worktrees)),
+        "repo_root_digest": str(receipt["repo_root_digest"]),
+        "head_sha": str(receipt["head_sha"]),
+        "dirty_paths": tuple(str(value) for value in receipt["dirty_paths"]),
+        "dirty_digest": str(receipt["dirty_digest"]),
+        "worktree_digest": str(receipt["worktree_digest"]),
+        "governed_git_readiness": dict(receipt["governed_git_readiness"]),
     }
+
+
+def _validated_repo_state_receipt(
+    root: Path,
+    value: Mapping[str, Any] | None,
+) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise ValueError("governed_repo_state_receipt_missing")
+    _require_exact_mapping(
+        value,
+        {
+            "schema_version", "repo_root_digest", "head_sha", "dirty_paths",
+            "dirty_digest", "worktree_digest", "governed_git_readiness",
+            "content_digest",
+        },
+        "governed_repo_state_receipt_schema_invalid",
+    )
+    body = {str(key): value[key] for key in value if key != "content_digest"}
+    if value.get("schema_version") != REPO_STATE_RECEIPT_SCHEMA:
+        raise ValueError("governed_repo_state_receipt_schema_invalid")
+    if value.get("content_digest") != _digest(body):
+        raise ValueError("governed_repo_state_receipt_digest_invalid")
+    if value.get("repo_root_digest") != _digest({"repo_root": str(root)}):
+        raise ValueError("governed_repo_state_receipt_root_invalid")
+    _validate_repo_state_fields(value)
+    _validate_governed_git_readiness(value.get("governed_git_readiness"))
+    return value
+
+
+def _validate_repo_state_fields(value: Mapping[str, Any]) -> None:
+    if not _is_string_match(value.get("head_sha"), r"[a-f0-9]{40}|[a-f0-9]{64}"):
+        raise ValueError("governed_repo_state_head_invalid")
+    dirty_paths = value.get("dirty_paths")
+    if not isinstance(dirty_paths, list) or len(dirty_paths) > 5000:
+        raise ValueError("governed_repo_state_paths_invalid")
+    for item in dirty_paths:
+        if not isinstance(item, str) or not 0 < len(item) <= 4096:
+            raise ValueError("governed_repo_state_paths_invalid")
+        parts = item.split("/")
+        if Path(item).is_absolute() or ".." in parts or re.search(r"[\\\0\r\n]", item):
+            raise ValueError("governed_repo_state_paths_invalid")
+    if dirty_paths != sorted(set(dirty_paths)):
+        raise ValueError("governed_repo_state_paths_invalid")
+    for key in ("dirty_digest", "worktree_digest"):
+        if not _is_prefixed_digest(value.get(key)):
+            raise ValueError("governed_repo_state_digest_invalid")
+
+
+def _validate_governed_git_readiness(value: Any) -> None:
+    keys = {
+        "schema_version", "ready", "canonical_root_validated",
+        "git_metadata_validated", "ownership_mismatch_observed",
+        "safe_directory_override_applied", "safe_directory_scope",
+        "safe_directory_wildcard", "config_write_performed",
+        "git_executable_binding", "reason",
+    }
+    _require_exact_mapping(value, keys, "governed_git_readiness_invalid")
+    if value.get("schema_version") != GIT_READINESS_SCHEMA or value.get("ready") is not True:
+        raise ValueError("governed_git_readiness_invalid")
+    bool_keys = keys - {"schema_version", "safe_directory_scope", "reason",
+                        "git_executable_binding"}
+    if any(type(value.get(key)) is not bool for key in bool_keys):
+        raise ValueError("governed_git_readiness_invalid")
+    override = value.get("safe_directory_override_applied")
+    if value.get("canonical_root_validated") is not True or value.get("git_metadata_validated") is not True:
+        raise ValueError("governed_git_readiness_invalid")
+    if value.get("safe_directory_wildcard") or value.get("config_write_performed"):
+        raise ValueError("governed_git_readiness_invalid")
+    if override is not value.get("ownership_mismatch_observed"):
+        raise ValueError("governed_git_readiness_invalid")
+    if value.get("safe_directory_scope") != ("command" if override else "none"):
+        raise ValueError("governed_git_readiness_invalid")
+    if value.get("reason") != ("ownership_override_required" if override else "ready"):
+        raise ValueError("governed_git_readiness_invalid")
+    binding = value.get("git_executable_binding")
+    _validate_executable_binding(binding)
+
+
+def _validate_executable_binding(binding: Mapping[str, Any]) -> None:
+    keys = {"schema_version", "canonical_path_digest", "sha256", "size",
+            "start_identity", "final_identity", "signature"}
+    _require_exact_mapping(binding, keys, "governed_git_executable_binding_invalid")
+    if binding.get("schema_version") != GIT_EXECUTABLE_SCHEMA:
+        raise ValueError("governed_git_executable_binding_invalid")
+    if not _is_prefixed_digest(binding.get("canonical_path_digest")):
+        raise ValueError("governed_git_executable_binding_invalid")
+    if not _is_raw_digest(binding.get("sha256")):
+        raise ValueError("governed_git_executable_binding_invalid")
+    if not _is_bounded_int(binding.get("size"), 1, MAX_EXECUTABLE_BYTES):
+        raise ValueError("governed_git_executable_binding_invalid")
+    _validate_identity(binding.get("start_identity"))
+    _validate_identity(binding.get("final_identity"))
+    if binding.get("start_identity") != binding.get("final_identity"):
+        raise ValueError("governed_git_executable_binding_invalid")
+    _validate_executable_signature(binding.get("signature"))
+
+
+def _validate_identity(value: Any) -> None:
+    keys = {"portable", "native", "nlink"}
+    _require_exact_mapping(value, keys, "governed_git_executable_binding_invalid")
+    if not _is_prefixed_digest(value.get("portable")):
+        raise ValueError("governed_git_executable_binding_invalid")
+    native_keys = {"dev", "ino", "mode", "nlink", "birthtime_ns", "ctime_ns", "mtime_ns"}
+    native = _require_exact_mapping(
+        value.get("native"), native_keys, "governed_git_executable_binding_invalid"
+    )
+    if not _is_bounded_int(value.get("nlink"), 1, MAX_LINK_COUNT):
+        raise ValueError("governed_git_executable_binding_invalid")
+    if not _is_bounded_int(native.get("nlink"), 1, MAX_LINK_COUNT):
+        raise ValueError("governed_git_executable_binding_invalid")
+    if value.get("nlink") != native.get("nlink"):
+        raise ValueError("governed_git_executable_binding_invalid")
+    for key in native_keys - {"nlink"}:
+        if not _is_string_match(native.get(key), r"0|[1-9][0-9]{0,31}"):
+            raise ValueError("governed_git_executable_binding_invalid")
+
+
+def _validate_executable_signature(value: Any) -> None:
+    if _platform_name() != "nt":
+        _require_exact_mapping(
+            value, {"status"}, "governed_git_executable_binding_invalid"
+        )
+        if value.get("status") != "not_applicable":
+            raise ValueError("governed_git_executable_binding_invalid")
+        return
+    keys = {"status", "subject_digest", "thumbprint_digest", "verifier"}
+    _require_exact_mapping(value, keys, "governed_git_executable_binding_invalid")
+    if value.get("status") != "valid":
+        raise ValueError("governed_git_executable_binding_invalid")
+    if not _is_prefixed_digest(value.get("subject_digest")):
+        raise ValueError("governed_git_executable_binding_invalid")
+    if not _is_prefixed_digest(value.get("thumbprint_digest")):
+        raise ValueError("governed_git_executable_binding_invalid")
+    _validate_signature_verifier(value.get("verifier"))
+
+
+def _validate_signature_verifier(value: Any) -> None:
+    keys = {"canonical_path_digest", "sha256", "size", "start_identity",
+            "final_identity", "system_root_digest", "fixed_relative_path_digest",
+            "system_root_containment_proof"}
+    _require_exact_mapping(value, keys, "governed_git_executable_binding_invalid")
+    for key in ("canonical_path_digest", "system_root_digest",
+                "fixed_relative_path_digest", "system_root_containment_proof"):
+        if not _is_prefixed_digest(value.get(key)):
+            raise ValueError("governed_git_executable_binding_invalid")
+    if not _is_raw_digest(value.get("sha256")):
+        raise ValueError("governed_git_executable_binding_invalid")
+    if not _is_bounded_int(value.get("size"), 1, MAX_EXECUTABLE_BYTES):
+        raise ValueError("governed_git_executable_binding_invalid")
+    _validate_identity(value.get("start_identity"))
+    _validate_identity(value.get("final_identity"))
+    if value.get("start_identity") != value.get("final_identity"):
+        raise ValueError("governed_git_executable_binding_invalid")
+    if value.get("fixed_relative_path_digest") != WINDOWS_VERIFIER_RELATIVE_DIGEST:
+        raise ValueError("governed_git_executable_binding_invalid")
+    parts = (value["system_root_digest"], value["canonical_path_digest"],
+             value["fixed_relative_path_digest"])
+    if value.get("system_root_containment_proof") != _raw_digest("\0".join(parts)):
+        raise ValueError("governed_git_executable_binding_invalid")
+
+
+def _require_exact_mapping(value: Any, keys: set[str], reason: str) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping) or set(value) != keys:
+        raise ValueError(reason)
+    return value
+
+
+def _is_string_match(value: Any, pattern: str) -> bool:
+    return isinstance(value, str) and re.fullmatch(pattern, value) is not None
+
+
+def _is_prefixed_digest(value: Any) -> bool:
+    return _is_string_match(value, r"sha256:[a-f0-9]{64}")
+
+
+def _is_raw_digest(value: Any) -> bool:
+    return _is_string_match(value, r"[a-f0-9]{64}")
+
+
+def _is_bounded_int(value: Any, minimum: int, maximum: int) -> bool:
+    return type(value) is int and minimum <= value <= maximum
+
+
+def _raw_digest(value: str) -> str:
+    return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _platform_name() -> str:
+    return os.name
 
 
 def load_authoritative_work_state(path: Path | str) -> dict[str, Any]:
@@ -494,31 +691,6 @@ def validate_context_before_assignment(
     )
 
 
-def _git_readonly_lines(repo_root: Path, args: tuple[str, ...]) -> tuple[str, ...]:
-    allowed = {
-        ("status", "--porcelain=v1"),
-        ("worktree", "list", "--porcelain"),
-    }
-    if args not in allowed:
-        raise ValueError("unsupported_git_readonly_command")
-    completed = subprocess.run(
-        ("git", "-C", str(repo_root), *args),
-        check=False,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    if completed.returncode != 0:
-        return ()
-    return tuple(line for line in completed.stdout.splitlines() if line.strip())
-
-
-def _normalize_status_path(line: str) -> str:
-    text = line[3:] if len(line) > 3 else line
-    return text.replace("\\", "/").strip()
-
-
 def _normalize_repo_state(repo_state: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "head_sha": str(repo_state.get("head_sha", "unknown")),
@@ -724,6 +896,7 @@ __all__ = [
     "SNAPSHOT_ACCEPTED",
     "SNAPSHOT_REJECTED",
     "SNAPSHOT_SCHEMA_VERSION",
+    "REPO_STATE_RECEIPT_SCHEMA",
     "STALE",
     "UNKNOWN",
     "AssignmentContextCheck",

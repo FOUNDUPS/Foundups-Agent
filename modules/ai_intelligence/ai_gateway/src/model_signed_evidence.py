@@ -56,8 +56,7 @@ from .model_runtime_binding import (
     RedDogModelRuntimeBindingReceipt,
     RuntimeModelRoleBinding,
 )
-
-
+from . import model_evidence_authority_validation as authority
 SIGNED_EVIDENCE_SCHEMA_VERSION = "model_signed_evidence_receipt.v1"
 VERIFIED_PRODUCTION_EVIDENCE_SCHEMA_VERSION = "verified_model_production_evidence.v1"
 PREFIX_MODEL_SIGNED_EVIDENCE = "reddog-model-evidence.v1"
@@ -199,14 +198,15 @@ class ModelEvidenceKeyResolver(Protocol):
 class StaticModelEvidenceKeyResolver:
     """Deterministic test/runtime adapter for trusted public model-evidence keys."""
 
-    def __init__(self, trusted_public_keys: Mapping[tuple[str, str, str], str] | Mapping[str, str]):
-        self._trusted_public_keys = dict(trusted_public_keys)
+    def __init__(self, trusted_public_keys: Mapping[tuple[str, str, str], str]):
+        self._trusted_public_keys = authority.validated_trusted_model_evidence_keys(
+            trusted_public_keys
+        )
 
     def resolve(self, signer_role: str, signer_key_fingerprint: str, key_epoch: str) -> str | None:
-        exact = self._trusted_public_keys.get((signer_role, signer_key_fingerprint, key_epoch))
-        if exact:
-            return exact
-        return self._trusted_public_keys.get(signer_role)
+        return self._trusted_public_keys.get(
+            (signer_role, signer_key_fingerprint, key_epoch)
+        )
 
 
 class InMemoryEvidenceNonceStore:
@@ -575,7 +575,6 @@ def build_verified_model_production_evidence(
     leeway_s: int = 60,
 ) -> VerifiedModelProductionEvidence:
     """Verify one single-model production evidence chain and return typed evidence."""
-
     benchmark = (
         benchmark_receipt
         if isinstance(benchmark_receipt, ModelBenchmarkEvidenceReceipt)
@@ -605,6 +604,7 @@ def build_verified_model_production_evidence(
         benchmark_sig=benchmark_sig,
         promotion_sig=promotion_sig,
     )
+    authority.assert_independent_model_evidence_signers(benchmark_sig, promotion_sig)
     benchmark_result = verify_model_signed_evidence_receipt(
         benchmark_sig,
         expected_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,

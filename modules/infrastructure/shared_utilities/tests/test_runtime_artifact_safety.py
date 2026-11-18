@@ -3,19 +3,212 @@
 from __future__ import annotations
 
 import os
+import multiprocessing
 from pathlib import Path
 
 import pytest
 
 from modules.infrastructure.shared_utilities import runtime_artifact_safety
+from modules.infrastructure.shared_utilities.runtime_artifact_confined_byte_reader import (
+    confined_file_identity,
+    secure_digest_confined_file_impl,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    confined_runtime_operation_lock,
     redact_runtime_text,
     redact_runtime_value,
+    runtime_operation_lock,
     secure_append_runtime_text,
     secure_read_confined_bytes,
+    secure_read_confined_text,
     validate_runtime_artifact_path,
     validate_runtime_root_path,
 )
+from modules.infrastructure.shared_utilities.tests.runtime_lock_test_support import (
+    hold_runtime_lock,
+)
+
+
+def test_windows_runtime_mutex_uses_machine_global_namespace() -> None:
+    name = runtime_artifact_safety._windows_runtime_mutex_name("a" * 64)
+    assert name == "Global\\FoundupsRuntime-" + "a" * 64
+
+
+def test_runtime_operation_lock_timeout_is_cross_process() -> None:
+    context = multiprocessing.get_context("spawn")
+    ready = context.Event()
+    release = context.Event()
+    identity = "runtime-lock-cross-process-contract"
+    process = context.Process(
+        target=hold_runtime_lock, args=(identity, ready, release)
+    )
+    process.start()
+    try:
+        assert ready.wait(10)
+        with pytest.raises(TimeoutError, match="runtime_operation_lock_timeout"):
+            with runtime_operation_lock(identity, timeout_seconds=0.1):
+                raise AssertionError("unreachable")
+    finally:
+        release.set()
+        process.join(10)
+        if process.is_alive():
+            process.terminate()
+            process.join(5)
+    assert process.exitcode == 0
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows extended paths")
+def test_windows_containment_normalizes_extended_length_prefix() -> None:
+    extended = Path(r"\\?\C:\runtime-root\state.json")
+    ordinary = Path(r"C:\runtime-root")
+
+    assert runtime_artifact_safety._is_relative_to(extended, ordinary) is True
+
+
+@pytest.mark.parametrize("candidate,parent,expected", [
+    ("/runtime/item", "/runtime", True),
+    ("/runtime", "/runtime", True),
+    ("/runtime-other/item", "/runtime", False),
+    ("/runtime", "/runtime/item", False),
+    ("/runtime", ".", False),
+    ("runtime/item", ".", True),
+    (".", "runtime", False),
+    (".", ".", True),
+    ("runtime/item", "/runtime", False),
+    ("/runtime/item", "runtime", False),
+    ("runtime/../item", "runtime", True),
+    ("runtime/../item", "runtime/..", True),
+    ("runtime/item", "runtime/..", False),
+    ("/runtime/item", "/", True),
+])
+def test_containment_preserves_lexical_scope(candidate, parent, expected):
+    # Resolution and no-follow checks are separate; this predicate is lexical.
+    assert runtime_artifact_safety._is_relative_to(Path(candidate), Path(parent)) is expected
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows Unicode path comparison")
+@pytest.mark.parametrize("candidate,parent", [
+    ("\u0130", "i\u0307"),
+    ("i\u0307", "\u0130"),
+    ("C:/\u0130/a", "c:/i\u0307"),
+])
+@pytest.mark.parametrize("path_type", [str, Path])
+def test_containment_preserves_windows_unicode_case(candidate, parent, path_type):
+    assert runtime_artifact_safety._is_relative_to(
+        path_type(candidate), path_type(parent)
+    ) is True
+
+
+def test_descriptor_final_path_rejects_unsupported_posix_platform(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(runtime_artifact_safety.sys, "platform", "darwin")
+
+    with pytest.raises(OSError, match="unsupported_platform"):
+        runtime_artifact_safety._linux_descriptor_final_path(0)
+
+
+def test_confined_digest_binds_preopened_identity_and_content(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    source = root / "artifact.bin"
+    source.write_bytes(b"artifact")
+    expected = confined_file_identity(os.lstat(source))
+
+    proof = secure_digest_confined_file_impl(
+        source,
+        allowed_root=root,
+        expected_identity=expected,
+        max_bytes=64,
+    )
+
+    assert proof.identity == expected
+    assert proof.size == 8
+    assert proof.digest == "sha256:c7c5c1d70c5dec4416ab6158afd0b223ef40c29b1dc1f97ed9428b94d4cadb1c"
+
+
+def test_confined_digest_rejects_stale_identity_and_bounds(tmp_path: Path) -> None:
+    root = tmp_path / "root"
+    root.mkdir()
+    source = root / "artifact.bin"
+    source.write_bytes(b"first")
+    stale = confined_file_identity(os.lstat(source))
+    source.write_bytes(b"second")
+
+    with pytest.raises(ValueError, match="identity_mismatch"):
+        secure_digest_confined_file_impl(
+            source,
+            allowed_root=root,
+            expected_identity=stale,
+            max_bytes=64,
+        )
+    current = confined_file_identity(os.lstat(source))
+    with pytest.raises(ValueError, match="bound_exceeded"):
+        secure_digest_confined_file_impl(
+            source,
+            allowed_root=root,
+            expected_identity=current,
+            max_bytes=3,
+        )
+
+
+def test_confined_runtime_operation_lock_uses_canonical_runtime_file(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    repo.mkdir()
+    lock_path = runtime / "authority.transaction.lock"
+
+    with confined_runtime_operation_lock(
+        lock_path,
+        repo_root=repo,
+        allowed_root=runtime,
+    ):
+        assert lock_path.is_file()
+
+    assert lock_path.read_bytes() == b"\0"
+
+
+def test_confined_runtime_operation_lock_persists_and_recovers_after_failure(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    runtime = tmp_path / "runtime"
+    repo.mkdir()
+    lock_path = runtime / "authority.transaction.lock"
+
+    with pytest.raises(RuntimeError, match="injected"):
+        with confined_runtime_operation_lock(
+            lock_path,
+            repo_root=repo,
+            allowed_root=runtime,
+        ):
+            raise RuntimeError("injected")
+
+    assert lock_path.is_file()
+    with confined_runtime_operation_lock(
+        lock_path,
+        repo_root=repo,
+        allowed_root=runtime,
+    ):
+        assert lock_path.is_file()
+    assert lock_path.read_bytes() == b"\0"
+
+
+def test_confined_runtime_operation_lock_rejects_repository_path(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    with pytest.raises(ValueError, match="inside_repo"):
+        with confined_runtime_operation_lock(
+            repo / "authority.transaction.lock",
+            repo_root=repo,
+            allowed_root=repo,
+        ):
+            raise AssertionError("unreachable")
 
 
 def test_runtime_artifact_path_rejects_source_and_runtime_root_escape(tmp_path: Path) -> None:
@@ -40,6 +233,26 @@ def test_runtime_artifact_path_rejects_source_and_runtime_root_escape(tmp_path: 
     ) == (runtime / "receipt.jsonl").resolve()
 
 
+@pytest.mark.skipif(os.name != "nt", reason="Windows paths are case-insensitive")
+def test_runtime_artifact_path_accepts_mixed_case_nonexistent_runtime_root(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    allowed_root = tmp_path / "RuntimeRoot"
+    candidate = tmp_path / "rUNTIMErOOT" / "state.json"
+
+    result = validate_runtime_artifact_path(
+        candidate,
+        repo_root=repo,
+        allowed_root=allowed_root,
+    )
+
+    assert os.path.normcase(str(result)) == os.path.normcase(
+        str(candidate.resolve())
+    )
+
+
 @pytest.mark.parametrize("path", [r"\\?\C:\repo\receipt.jsonl", r"\\.\C:\device"])
 def test_runtime_artifact_path_rejects_windows_device_prefix(
     tmp_path: Path,
@@ -51,7 +264,7 @@ def test_runtime_artifact_path_rejects_windows_device_prefix(
         validate_runtime_artifact_path(path, repo_root=repo)
 
 
-def test_runtime_artifact_path_resolves_symlink_before_confinement(tmp_path: Path) -> None:
+def test_runtime_artifact_path_rejects_symlink_before_confinement(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     runtime = tmp_path / "runtime"
     outside = tmp_path / "outside"
@@ -64,7 +277,7 @@ def test_runtime_artifact_path_resolves_symlink_before_confinement(tmp_path: Pat
     except OSError:
         pytest.skip("symlink creation is unavailable")
 
-    with pytest.raises(ValueError, match="outside_runtime_root"):
+    with pytest.raises(ValueError, match="^runtime_artifact_path_link_rejected$"):
         validate_runtime_artifact_path(
             link / "receipt.jsonl",
             repo_root=repo,
@@ -266,3 +479,103 @@ def test_confined_read_rejects_descriptor_final_path_outside_root(
 
     with pytest.raises(ValueError, match="outside_root"):
         secure_read_confined_bytes(source, allowed_root=repo)
+
+
+def test_confined_bytes_read_honors_bound_above_one_megabyte(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "large.bin"
+    payload = b"a" * (1024 * 1024) + b"tail-evidence"
+    source.write_bytes(payload)
+
+    actual, offset = secure_read_confined_bytes(
+        source, allowed_root=tmp_path, max_bytes=len(payload)
+    )
+
+    assert actual == payload
+    assert offset == len(payload)
+
+
+def test_confined_text_read_uses_one_descriptor_and_enforces_size_limit(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "runtime"
+    root.mkdir()
+    source = root / "events.jsonl"
+    source.write_text("bounded payload", encoding="utf-8")
+    real_open = runtime_artifact_safety.os.open
+    open_calls: list[Path] = []
+
+    def counted_open(path, flags, *args):
+        open_calls.append(Path(path))
+        return real_open(path, flags, *args)
+
+    monkeypatch.setattr(runtime_artifact_safety.os, "open", counted_open)
+
+    assert secure_read_confined_text(
+        source,
+        allowed_root=root,
+        max_bytes=64,
+    ) == "bounded payload"
+    assert open_calls == [source.resolve()]
+    with pytest.raises(ValueError, match="size_limit"):
+        secure_read_confined_text(
+            source,
+            allowed_root=root,
+            max_bytes=4,
+        )
+
+
+def test_confined_text_read_rejects_descriptor_metadata_change(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "runtime"
+    root.mkdir()
+    source = root / "events.jsonl"
+    source.write_text("stable", encoding="utf-8")
+    real_reader = runtime_artifact_safety._read_descriptor_text
+
+    def mutate_timestamp(descriptor: int, size: int) -> str:
+        payload = real_reader(descriptor, size)
+        current = source.stat()
+        os.utime(
+            source,
+            ns=(
+                current.st_atime_ns,
+                current.st_mtime_ns + 1_000_000_000,
+            ),
+        )
+        return payload
+
+    monkeypatch.setattr(
+        runtime_artifact_safety,
+        "_read_descriptor_text",
+        mutate_timestamp,
+    )
+
+    with pytest.raises(ValueError, match="target_changed"):
+        secure_read_confined_text(source, allowed_root=root)
+
+
+def test_confined_text_read_rejects_descriptor_final_path_outside_root(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "runtime"
+    outside = tmp_path / "outside"
+    root.mkdir()
+    outside.mkdir()
+    source = root / "events.jsonl"
+    source.write_text("safe", encoding="utf-8")
+    outside_source = outside / "events.jsonl"
+    outside_source.write_text("outside-marker", encoding="utf-8")
+    monkeypatch.setattr(
+        runtime_artifact_safety,
+        "_descriptor_final_path",
+        lambda _descriptor: outside_source,
+    )
+
+    with pytest.raises(ValueError, match="outside_root"):
+        secure_read_confined_text(source, allowed_root=root)

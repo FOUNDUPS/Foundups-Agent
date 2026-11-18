@@ -1,0 +1,422 @@
+{
+  "projection": {
+    "schema": "foundups.pc-reconciliation.historical-projection.v1",
+    "record_kind": "historical_projection_not_current_acceptance",
+    "source_path": "docs/plans/research/2026-10-21-blockchain-read-manifest.json",
+    "original_pc_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "source_full_file_sha256": "d2560236715816a16489750cf07dd26baa9e11b3f7ab5e8d6c541e605c68f476",
+    "preserved_record_sha256": "d2560236715816a16489750cf07dd26baa9e11b3f7ab5e8d6c541e605c68f476",
+    "projection_created_at_utc": "2026-10-30T02:00:12.626831+00:00",
+    "projection_timestamp_is_not_an_observation": true,
+    "comparison_reference": "cbef41fbae1ba1105398183e42b008f2e7dfd3dc",
+    "disposition": "Publish the historical read manifest in an envelope retaining its original repository_head, file hashes and scope. Its read coverage belongs to that old revision, not cbef or the mixed PC tree; no research completion claim is refreshed.",
+    "current_owners": [
+      "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md"
+    ],
+    "original_observation_timestamps": "Retained in historical content; no observation is rerun or redated.",
+    "publication_status": "Proposed, pending independent auditor acceptance; not published by this worker.",
+    "runtime_and_commenting": "UNVERIFIED"
+  },
+  "historical_record": {
+    "schema_version": "foundups-research-read-manifest-v1",
+    "date": "2026-10-21",
+    "lane": "blockchain_architecture",
+    "role": "reviewer",
+    "origin": "internal_handoff",
+    "repository_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "scope": "canonical WSP 40-79 plus framework/INIT/Prometheus annex; hashes bind read file bytes, not comprehension or policy authority",
+    "file_count": 43,
+    "total_bytes": 531036,
+    "total_lines": 11957,
+    "total_words": 61634,
+    "files": [
+      {
+        "path": "WSP_framework/src/WSP_40_Architectural_Coherence_Protocol.md",
+        "wsp_number": 40,
+        "sha256": "e0a068f358cd26d179e49c47e2c5a6745b26a9b5828f5db2459bce562c50c2ad",
+        "bytes": 7758,
+        "lines": 144,
+        "words": 975,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_41_WRE_Simulation_Protocol.md",
+        "wsp_number": 41,
+        "sha256": "3d2542cf559ed861ba3273da098ae8e1aa541a8dd93569400449dee6d2a6162a",
+        "bytes": 3997,
+        "lines": 53,
+        "words": 567,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_42_Universal_Platform_Protocol.md",
+        "wsp_number": 42,
+        "sha256": "54f7373405ba3409a04f5420ca1b797fa6803117e4ae77cf3cc8d43554d15243",
+        "bytes": 3156,
+        "lines": 80,
+        "words": 401,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_43_Agentic_Emergence_Protocol.md",
+        "wsp_number": 43,
+        "sha256": "7e9cee5d3f3ed62fb431fabe84a0759851a01cd9dbcadd912f6606dd67d73454",
+        "bytes": 4035,
+        "lines": 84,
+        "words": 483,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_44_Semantic_State_Engine_Protocol.md",
+        "wsp_number": 44,
+        "sha256": "ef86ab3592de901e422aeb7da19a0f4ca63ac7e11499884c96d394558ca594df",
+        "bytes": 12509,
+        "lines": 291,
+        "words": 1180,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_45_Behavioral_Coherence_Protocol.md",
+        "wsp_number": 45,
+        "sha256": "c6f6518f5e827a962f684e11a6c1a282108b523b08756bbeb178c9ffa78c8950",
+        "bytes": 4244,
+        "lines": 47,
+        "words": 605,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_46_Windsurf_Recursive_Engine_Protocol.md",
+        "wsp_number": 46,
+        "sha256": "eede6846e18ff7f55a749628995d8d89178fd6fc40237abafe34a1464f2fb0e4",
+        "bytes": 22456,
+        "lines": 337,
+        "words": 2850,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_47_Module_Violation_Tracking_Protocol.md",
+        "wsp_number": 47,
+        "sha256": "29bf496a2a087ef64328f74afbcc2621df6b12ca29e7942a39b072965ed697c4",
+        "bytes": 7422,
+        "lines": 160,
+        "words": 928,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md",
+        "wsp_number": 48,
+        "sha256": "d7a39e6d2bec460c3ccf53ca39fb7d3208916c17b76a5e8cfc9e8d782c9d100d",
+        "bytes": 28307,
+        "lines": 657,
+        "words": 3365,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_49_Module_Directory_Structure_Standardization_Protocol.md",
+        "wsp_number": 49,
+        "sha256": "64d28cc86f924c215ed6c28a3c1619bba9ffc532b107dac80ff55348cb0edceb",
+        "bytes": 14462,
+        "lines": 299,
+        "words": 1598,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+        "wsp_number": 50,
+        "sha256": "3a7a915f3c416484ee593962e3210aac39d21467c3877c9917d081697c81993a",
+        "bytes": 36120,
+        "lines": 909,
+        "words": 4074,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_51_WRE_CHRONICLE.md",
+        "wsp_number": 51,
+        "sha256": "fb4e42f7a7dcf3c0e6b69f0f3592cb53d9eef5ad07a8fd93b4d59817bc8069d4",
+        "bytes": 5875,
+        "lines": 129,
+        "words": 734,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_52_The_Agentic_Collaboration_Journal.md",
+        "wsp_number": 52,
+        "sha256": "d7512fc3f32d17a11fbf6743371c849505a8c1f4d37f06419e6fea419e11ac4c",
+        "bytes": 2082,
+        "lines": 32,
+        "words": 282,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_53_Symbiotic_Environment_Integration_Protocol.md",
+        "wsp_number": 53,
+        "sha256": "9eaf030722e081e8c146494c77a89c0167fc5ff94a10607ec4b04e372bcbcdb1",
+        "bytes": 8154,
+        "lines": 218,
+        "words": 805,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_54_WRE_Agent_Duties_Specification.md",
+        "wsp_number": 54,
+        "sha256": "2a8b7d356d9c3277903e8aa1d8bcea78a14ece958803223f7ef6d302e1418df9",
+        "bytes": 11750,
+        "lines": 253,
+        "words": 1253,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_55_Module_Creation_Automation.md",
+        "wsp_number": 55,
+        "sha256": "e7a5636811a2e777e30f351e3029148233ceb1f4271226ce5e7a505447945ce9",
+        "bytes": 3387,
+        "lines": 63,
+        "words": 408,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_56_Artifact_State_Coherence_Protocol.md",
+        "wsp_number": 56,
+        "sha256": "bc0c2b19fa293ac420001871a0f623b69e12c479f5246ff8f3f4579688e51de2",
+        "bytes": 2473,
+        "lines": 37,
+        "words": 340,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_57_System_Wide_Naming_Coherence_Protocol.md",
+        "wsp_number": 57,
+        "sha256": "430bca5a768f5aa231d8c0398af4cc6fb0ddbfc7a94c9286b048d60c1847d288",
+        "bytes": 16469,
+        "lines": 443,
+        "words": 2049,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_58_FoundUp_IP_Lifecycle_and_Tokenization_Protocol.md",
+        "wsp_number": 58,
+        "sha256": "23961b29dcd451b5d92b9f008ee7365460f55ffe17f6062d20526f1591a0c24c",
+        "bytes": 5549,
+        "lines": 198,
+        "words": 775,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_59_Distributed_Development_Architecture.md",
+        "wsp_number": 59,
+        "sha256": "ec965b0d2379f9a2a9c3743b2a6161d33836bffed9809f381dafa03fad93bffc",
+        "bytes": 7711,
+        "lines": 192,
+        "words": 881,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_60_Module_Memory_Architecture.md",
+        "wsp_number": 60,
+        "sha256": "361483b91bfc23500ff4cac9b07d903f540b67ba2bd312e62c9cf3a0f6e52e43",
+        "bytes": 20988,
+        "lines": 441,
+        "words": 2474,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_61_Theoretical_Physics_Foundation_Protocol.md",
+        "wsp_number": 61,
+        "sha256": "552b4fb5772fc3fb8e0c8ff05e64e2bb66bf757098f95fa619f46680e36035f2",
+        "bytes": 9370,
+        "lines": 211,
+        "words": 1099,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+        "wsp_number": 62,
+        "sha256": "4e0cf9f0c31515345b0e826d029df3a753ef0e1e1e0eeebd73eee15f5fdb6920",
+        "bytes": 19750,
+        "lines": 443,
+        "words": 2357,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_63_Component_Directory_Organization_Scaling_Protocol.md",
+        "wsp_number": 63,
+        "sha256": "5a2332dbff94955d5c04fed303bdbdcff715eadfe598bb58d916999c94b043a5",
+        "bytes": 20919,
+        "lines": 539,
+        "words": 2137,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_64_Violation_Prevention_Protocol.md",
+        "wsp_number": 64,
+        "sha256": "8800402496a7dde05dc7ec617996933b90961877e2a6a66ff2e9a8726226217a",
+        "bytes": 22317,
+        "lines": 549,
+        "words": 2529,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_65_Component_Consolidation_Protocol.md",
+        "wsp_number": 65,
+        "sha256": "8817dd43b0bf7a42f0c65c2c64b622e1a58320c2dcedebbd9a0cde61e1aa0bd4",
+        "bytes": 17370,
+        "lines": 457,
+        "words": 1699,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_66_Proactive_Enterprise_Modularization_Protocol.md",
+        "wsp_number": 66,
+        "sha256": "245310464999a0a145fd259857caf2eea67ec1176d4ce15472599fd316cc72da",
+        "bytes": 17886,
+        "lines": 423,
+        "words": 1886,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_67_Recursive_Anticipation_Protocol.md",
+        "wsp_number": 67,
+        "sha256": "f21a96361b83339d711f029f53ac8276421bb1537d51860e0b0b2a450ed93361",
+        "bytes": 9479,
+        "lines": 212,
+        "words": 1126,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_68_Enterprise_Build_Scalability_Protocol.md",
+        "wsp_number": 68,
+        "sha256": "3e7ac02aacaee8d70e9ec0d96e4445edfa2593f737cc47590aad28a6deb44dad",
+        "bytes": 11900,
+        "lines": 230,
+        "words": 1367,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_69_Zen_Coding_Prediction_Integration.md",
+        "wsp_number": 69,
+        "sha256": "c29a12a690f93acc63d02ffa50fa8ebeb903eea7e23de8c43637828aec3f2dfb",
+        "bytes": 13475,
+        "lines": 255,
+        "words": 1530,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_70_System_Status_Reporting_Protocol.md",
+        "wsp_number": 70,
+        "sha256": "a2f672ac14cbba9a966ec372e424b95d5170e0b6932b944d43ea6949bbf22007",
+        "bytes": 9404,
+        "lines": 209,
+        "words": 1140,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_71_Secrets_Management_Protocol.md",
+        "wsp_number": 71,
+        "sha256": "83727ee6b87435343ce78d587154ebf84ce0698bc8d4d632780d207d8f4c1897",
+        "bytes": 17631,
+        "lines": 425,
+        "words": 2176,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_72_Block_Independence_Interactive_Protocol.md",
+        "wsp_number": 72,
+        "sha256": "7776d069d565da626a4de674d0e678ea7e6b3c7043dcfe75ad6e311fb7707983",
+        "bytes": 11669,
+        "lines": 260,
+        "words": 1245,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md",
+        "wsp_number": 73,
+        "sha256": "adb4583f018939be0590bd94155729e19b2680d5533ce8478c8186244e23b47a",
+        "bytes": 11752,
+        "lines": 243,
+        "words": 1530,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_74_Agentic_Enhancement_Protocol.md",
+        "wsp_number": 74,
+        "sha256": "d0d58366238bc6a608d55b9f0da31f9f1e0d5f2cab47b570d6c80e34007e7ac8",
+        "bytes": 12184,
+        "lines": 170,
+        "words": 1323,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_75_Token_Based_Development_Output_Protocol.md",
+        "wsp_number": 75,
+        "sha256": "592c3f785b29d8341843d72fff23c5fcdfe7dd786d1ef718e8ceeb08371684d0",
+        "bytes": 6682,
+        "lines": 183,
+        "words": 897,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_76_Multi_Agent_Awakening_Protocol.md",
+        "wsp_number": 76,
+        "sha256": "d8b38e6b2778e7210e9d2fac7464c1d7dfafbb32c388916af626173f96ec25b7",
+        "bytes": 18679,
+        "lines": 395,
+        "words": 1834,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_77_Agent_Coordination_Protocol.md",
+        "wsp_number": 77,
+        "sha256": "65743b55e0d6b6b343332a4d97a2227ab97c0dbec9bfe44e3e03156a0a77e041",
+        "bytes": 10741,
+        "lines": 305,
+        "words": 1321,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_78_Database_Architecture_Scaling_Protocol.md",
+        "wsp_number": 78,
+        "sha256": "91f90e2e93f02ef468d46c2068cd50b4925f51becacb02aadee5657ab7879ef9",
+        "bytes": 5049,
+        "lines": 128,
+        "words": 684,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_79_Module_SWOT_Analysis_Protocol.md",
+        "wsp_number": 79,
+        "sha256": "0238b8b25f8d86d6d88a212533c159cfaf20bca10ead8fdd5d5abc22d8ebef8f",
+        "bytes": 4775,
+        "lines": 170,
+        "words": 701,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_framework.md",
+        "wsp_number": null,
+        "sha256": "f091a78a03e3bb8db6f782db2219118664892bd0fc51c162ed15aada8d4f782d",
+        "bytes": 27530,
+        "lines": 501,
+        "words": 3162,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/WSP_INIT.md",
+        "wsp_number": null,
+        "sha256": "8c923122239e08d30a4229f2793a785f15cec9f27d7fb371c1fdd3b1432ee744",
+        "bytes": 21874,
+        "lines": 537,
+        "words": 2629,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      },
+      {
+        "path": "WSP_framework/src/ANNEX_PROMETHEUS_RECURSION.md",
+        "wsp_number": null,
+        "sha256": "b85507f7bdb18c42c4502294562bdd54d1ac2d77c5e37b968619888976293f45",
+        "bytes": 1696,
+        "lines": 45,
+        "words": 235,
+        "read_mode": "full_context_chunked; display-only Unicode-marker normalization; truncated spans reread"
+      }
+    ]
+  }
+}

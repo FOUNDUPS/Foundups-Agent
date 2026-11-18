@@ -31,7 +31,8 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(_
 sys.path.insert(0, project_root)
 
 try:
-    from holo_index.cli import HoloIndex, QwenAdvisor
+    from holo_index.core.holo_index import HoloIndex
+    from holo_index.cli import QwenAdvisor
 except ImportError:
     # Skip tests if dependencies not available
     import pytest
@@ -44,27 +45,30 @@ class TestHoloIndexCLI(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.test_data_dir = tempfile.mkdtemp()
+        self._readonly_query_env = os.environ.pop("HOLOINDEX_QUERY_READONLY", None)
 
     def tearDown(self):
         """Clean up test fixtures."""
         import shutil
         shutil.rmtree(self.test_data_dir, ignore_errors=True)
+        if self._readonly_query_env is not None:
+            os.environ["HOLOINDEX_QUERY_READONLY"] = self._readonly_query_env
 
     @patch("holo_index.core.holo_index.SentenceTransformer")
-    @patch("holo_index.core.holo_index.chromadb.PersistentClient")
-    def test_holoindex_initialization(self, mock_client, mock_model):
+    @patch("holo_index.core.holo_index._require_chromadb")
+    def test_holoindex_initialization(self, mock_require_chromadb, mock_model):
         """Test HoloIndex can be initialized."""
-        mock_client.return_value = MagicMock()
+        mock_require_chromadb.return_value.PersistentClient.return_value = MagicMock()
         mock_model.return_value = MagicMock()
 
         holo = HoloIndex(ssd_path=self.test_data_dir)
         self.assertIsNotNone(holo)
 
     @patch('holo_index.core.holo_index.SentenceTransformer')
-    @patch('holo_index.core.holo_index.chromadb.PersistentClient')
-    def test_check_module_exists_recognizes_ric_dae(self, mock_client, mock_model):
+    @patch('holo_index.core.holo_index._require_chromadb')
+    def test_check_module_exists_recognizes_ric_dae(self, mock_require_chromadb, mock_model):
         """Ensure HoloIndex reports new ricDAE module as compliant."""
-        mock_client.return_value = MagicMock()
+        mock_require_chromadb.return_value.PersistentClient.return_value = MagicMock()
         mock_model.return_value = MagicMock()
 
         from holo_index.core.holo_index import HoloIndex as CoreHoloIndex

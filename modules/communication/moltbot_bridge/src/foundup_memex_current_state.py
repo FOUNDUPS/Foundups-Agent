@@ -40,7 +40,7 @@ def assemble_foundup_memex_current_state(
     snapshot: OperationalContextSnapshot,
     identity: Mapping[str, Any],
     roadmap_state: Mapping[str, Any] | None = None,
-    verified_outcomes: Sequence[Mapping[str, Any]] = (),
+    verified_outcomes: Sequence[Any] = (),
     now_iso: str | None = None,
     resident_mode: bool = True,
     legacy_single_foundup_compatibility: bool = False,

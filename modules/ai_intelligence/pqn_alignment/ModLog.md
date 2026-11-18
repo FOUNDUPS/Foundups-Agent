@@ -2,6 +2,13 @@
 
 ## **Change Log**
 
+### 2026-10-29 — Legacy Python syntax repair
+
+Keep the stage descriptions inside determine_entanglement_stage's existing
+docstring and align ProcessingDifference's class docstring with its fields.
+Both files now pass byte-source AST inspection. No PQN experiment, model,
+quantum-state claim or runtime acceptance follows from parsing. WSP 22/50/97.
+
 ### **External Math Intake Backlog + MS STT Artifact Cross-Link**
 - **Date**: 2026-03-15
 - **Operating As**: 0102 CTO / Architect

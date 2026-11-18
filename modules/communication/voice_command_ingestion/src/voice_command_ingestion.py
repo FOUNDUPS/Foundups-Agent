@@ -32,6 +32,7 @@ class STTEvent:
     start_ms: int
     end_ms: int
     confidence: float = 1.0
+    language: str = "unknown"
 
 
 @dataclass(frozen=True)
@@ -62,6 +63,7 @@ class FasterWhisperSTT:
         compute_type: str = "int8",
         use_vad_filter: bool = True,
         vad_min_silence_ms: int = 250,
+        language: Optional[str] = "en",
     ) -> None:
         """Initialize faster-whisper model.
 
@@ -71,10 +73,16 @@ class FasterWhisperSTT:
             compute_type: Computation type (int8, float16, float32)
             use_vad_filter: Whether to apply Whisper VAD filtering.
             vad_min_silence_ms: Minimum silence for VAD segmentation.
+            language: Whisper language code, or None for automatic detection.
         """
         self.model_size = model_size
         self.device = device
         self.compute_type = compute_type
+        if language is not None and not re.fullmatch(r"[a-z]{2,3}", language):
+            raise ValueError("language must be a Whisper language code or None")
+        if model_size.endswith(".en") and language != "en":
+            raise ValueError("English-only Whisper models cannot transcribe Japanese or auto-detect")
+        self.language = language
         self.use_vad_filter = bool(use_vad_filter)
         self.vad_min_silence_ms = int(max(50, vad_min_silence_ms))
         self._model = None
@@ -124,7 +132,7 @@ class FasterWhisperSTT:
             # Transcribe
             transcribe_kwargs = {
                 "beam_size": 5,
-                "language": "en",
+                "language": self.language,
                 "vad_filter": self.use_vad_filter,
             }
             if self.use_vad_filter:
@@ -160,7 +168,8 @@ class FasterWhisperSTT:
                 is_final=True,
                 start_ms=start_ms,
                 end_ms=end_ms,
-                confidence=confidence
+                confidence=confidence,
+                language=getattr(info, "language", None) or self.language or "unknown",
             )
 
         except Exception as e:
@@ -248,6 +257,7 @@ class VoiceCommandIngestion:
         command_window_seconds: int = 5,
         model_size: str = "base",
         device: str = "cpu",
+        language: Optional[str] = "en",
     ) -> None:
         """Initialize voice command ingestion.
 
@@ -263,7 +273,7 @@ class VoiceCommandIngestion:
         self.command_window_seconds = command_window_seconds
 
         # Initialize components
-        self._stt = FasterWhisperSTT(model_size=model_size, device=device)
+        self._stt = FasterWhisperSTT(model_size=model_size, device=device, language=language)
         self._trigger_detector = TriggerDetector(trigger_token)
 
         # State for command accumulation
@@ -396,13 +406,15 @@ class VoiceCommandIngestion:
 def get_voice_ingestion(
     trigger_token: str = "0102",
     model_size: str = "base",
-    device: str = "cpu"
+    device: str = "cpu",
+    language: Optional[str] = "en",
 ) -> VoiceCommandIngestion:
     """Get a configured voice command ingestion instance."""
     return VoiceCommandIngestion(
         trigger_token=trigger_token,
         model_size=model_size,
-        device=device
+        device=device,
+        language=language,
     )
 
 
@@ -420,6 +432,7 @@ class TranscriptSegment:
     text: str
     confidence: float
     url: str  # Deep link URL with timestamp
+    language: str = "unknown"
 
 
 class BatchTranscriber:
@@ -437,7 +450,8 @@ class BatchTranscriber:
         self,
         model_size: str = "base",
         device: str = "cpu",
-        output_dir: Optional[str] = None
+        output_dir: Optional[str] = None,
+        language: Optional[str] = "en",
     ) -> None:
         """Initialize batch transcriber.
 
@@ -445,9 +459,10 @@ class BatchTranscriber:
             model_size: Whisper model size (tiny, base, small, medium, large-v3)
             device: Device for inference (cpu, cuda)
             output_dir: Directory for transcript JSONL files (default: memory/transcripts)
+            language: Whisper language code, or None for automatic detection.
         """
         from pathlib import Path
-        self._stt = FasterWhisperSTT(model_size=model_size, device=device)
+        self._stt = FasterWhisperSTT(model_size=model_size, device=device, language=language)
         self.output_dir = Path(output_dir) if output_dir else Path("memory/transcripts")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self._progress: Dict[str, dict] = {}
@@ -493,7 +508,8 @@ class BatchTranscriber:
                 end_sec=end_sec,
                 text=event.text.strip(),
                 confidence=event.confidence,
-                url=url
+                url=url,
+                language=event.language,
             )
 
     def transcribe_channel(
@@ -594,11 +610,13 @@ class BatchTranscriber:
 def get_batch_transcriber(
     model_size: str = "base",
     device: str = "cpu",
-    output_dir: Optional[str] = None
+    output_dir: Optional[str] = None,
+    language: Optional[str] = "en",
 ) -> BatchTranscriber:
     """Get a configured batch transcriber instance."""
     return BatchTranscriber(
         model_size=model_size,
         device=device,
-        output_dir=output_dir
+        output_dir=output_dir,
+        language=language,
     )

@@ -1,0 +1,54 @@
+{
+  "foundup_id": "hpc",
+  "name": "Hasan Piker Coalition",
+  "tagline": "Independent political commentary and satire",
+  "description": "A curated political-media FoundUp starting with the SchumerOUT collection of Move2Japan Shorts.",
+  "category": "media",
+  "requested_by": "012",
+  "lifecycle_stage": "incubating",
+  "binding_state": "discoverable_only",
+  "external_repo_requested": false,
+  "acceptance_criteria": [
+    {
+      "observable": "HPC opens the shared Mall in a signed-out browser",
+      "method": "Open the registered PoC route on a mobile viewport",
+      "oracle": "Shared tile field and player",
+      "pass_condition": "The SchumerOUT Shorts load and the member gate and global discovery controls are absent"
+    },
+    {
+      "observable": "Source and civic context survive navigation",
+      "method": "Open a Short and the Vote contact resource and return",
+      "oracle": "Canonical video source and Mall scroll state",
+      "pass_condition": "The original Short and publication date are available and Back restores the same scroll position"
+    },
+    {
+      "observable": "Global discovery and protected handoff remain separate",
+      "method": "Load the public portfolio and tenant app path",
+      "oracle": "Registry projection and existing member gate",
+      "pass_condition": "HPC appears in discovery and the app handoff retains the member gate"
+    }
+  ],
+  "truth_state_map": [
+    {
+      "feature": "HPC scoped Mall and Move2Japan Shorts",
+      "marker": "SPECIFIED",
+      "evidence": "docs/intake/POC_SCOPE.md"
+    },
+    {
+      "feature": "HPC nominations and community preferences",
+      "marker": "FUTURE_PHASE",
+      "evidence": "docs/intake/PROTOTYPE_GATE.md"
+    }
+  ],
+  "holo_recall_results": [],
+  "prior_art": [
+    "modules/foundups/pfmall",
+    "modules/foundups/voteballots",
+    "modules/foundups/move2japan"
+  ],
+  "created_at": 1794323218,
+  "created_by": "0102",
+  "notes": "Genesis snapshot. Semantic owner freshness unavailable; clean lexical and direct owner evidence recorded in docs/intake/INTAKE_SOURCE.md.",
+  "is_valid": true,
+  "validation_errors": []
+}

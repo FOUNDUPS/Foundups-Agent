@@ -7,9 +7,13 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
+import pytest
+
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import (
+    StubAuthoritativeUseLease,
+    allow_stub_authoritative_use_lease,
 )
+from modules.communication.moltbot_bridge.src import reddog_extension_wre_operational_spine_invoke as spine_module
 
 from modules.communication.moltbot_bridge.src.reddog_extension_wre_operational_spine_invoke import (
     EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT,
@@ -17,6 +21,8 @@ from modules.communication.moltbot_bridge.src.reddog_extension_wre_operational_s
     ExtensionWREOperationalSpineInvokeReason,
     invoke_reddog_extension_wre_operational_spine_explicit_valve,
 )
+
+
 from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_selection import (
     AUTHORITY_SIGNED_VALVE_REQUIRED,
     WARDROBE_ARCHITECT_AUDIT,
@@ -25,6 +31,11 @@ from modules.communication.moltbot_bridge.src.reddog_operator_loop_wardrobe_sele
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     ExecutionValveEnvironment,
 )
+
+
+@pytest.fixture(autouse=True)
+def _allow_stub_lease(monkeypatch) -> None:
+    allow_stub_authoritative_use_lease(monkeypatch, spine_module)
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 MODULE_PATH = (
@@ -156,6 +167,13 @@ def _accepted_signature(order):
     }
 
 
+def _queue_receipt():
+    return {
+        "queue_item_id": "queue-extension-wre-spine-001",
+        "slice_id": "REDDOG_EXTENSION_WRE_SPINE_TEST_PHASE1",
+    }
+
+
 def _open_worktree_env():
     return ExecutionValveEnvironment(
         valve_worktree_create_enabled=True,
@@ -167,7 +185,7 @@ def test_accepts_only_explicit_sovereign_worktree_selection_and_calls_runner(tmp
     fixed = datetime(2026, 7, 12, 12, 0, 0, tzinfo=timezone.utc)
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
-    order = _base_order(fixed)
+    order = _base_order(fixed, queue_consumer_receipt=_queue_receipt())
     runner = FakeRunner()
 
     result = invoke_reddog_extension_wre_operational_spine_explicit_valve(
@@ -181,7 +199,7 @@ def test_accepts_only_explicit_sovereign_worktree_selection_and_calls_runner(tmp
         repo_root=repo_root,
         now=fixed,
         locks=set(),
-        authoritative_use_lease=AuthoritativeUseLease(
+        authoritative_use_lease=StubAuthoritativeUseLease(
             lambda: True,
             expires_at_epoch=2_000_000_000,
             trusted_now_epoch=lambda: int(fixed.timestamp()),
@@ -226,6 +244,39 @@ def test_serialized_sovereign_selection_without_lease_cannot_call_runner(
 
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_REJECT
     assert "authoritative_worktree_admission_missing" in result.rejection_reasons
+    assert runner.calls == []
+
+
+def test_foundup_work_order_without_backend_target_receipt_rejects_before_runner(
+    tmp_path: Path,
+) -> None:
+    fixed = datetime(2026, 7, 12, 12, 1, 0, tzinfo=timezone.utc)
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    target_id = "sha256:" + "a" * 64
+    order = _base_order(
+        fixed,
+        foundup_id="trade",
+        registered_foundup_target_receipt_id=target_id,
+    )
+    runner = FakeRunner()
+    result = invoke_reddog_extension_wre_operational_spine_explicit_valve(
+        order,
+        explicit_wre_operational_spine_requested=True,
+        selection_receipt=_selection_receipt(
+            foundup_id="trade",
+            registered_foundup_target_receipt_id=target_id,
+        ),
+        valve_environment=_open_worktree_env(),
+        signature_verification_result=_accepted_signature(order),
+        runner=runner,
+        repo_root=repo_root,
+        now=fixed,
+        locks=set(),
+    )
+    assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_REJECT
+    assert ExtensionWREOperationalSpineInvokeReason.FOUNDUP_TARGET_INVALID in result.rejection_reasons
+    assert "registered_foundup_target_receipt_missing" in result.rejection_reasons
     assert runner.calls == []
 
 
@@ -386,7 +437,11 @@ def test_sovereign_token_is_not_emitted(tmp_path: Path) -> None:
     fixed = datetime(2026, 7, 12, 12, 35, 0, tzinfo=timezone.utc)
     repo_root = tmp_path / "repo"
     repo_root.mkdir()
-    order = _base_order(fixed, nonce="nonce-extension-wre-spine-token")
+    order = _base_order(
+        fixed,
+        nonce="nonce-extension-wre-spine-token",
+        queue_consumer_receipt=_queue_receipt(),
+    )
 
     result = invoke_reddog_extension_wre_operational_spine_explicit_valve(
         order,
@@ -399,7 +454,7 @@ def test_sovereign_token_is_not_emitted(tmp_path: Path) -> None:
         repo_root=repo_root,
         now=fixed,
         locks=set(),
-        authoritative_use_lease=AuthoritativeUseLease(
+        authoritative_use_lease=StubAuthoritativeUseLease(
             lambda: True,
             expires_at_epoch=2_000_000_000,
             trusted_now_epoch=lambda: int(fixed.timestamp()),

@@ -2,6 +2,49 @@
  * Shared contract-test fixtures. Reuse in verify_extension_contract.js and future
  * RedDog slices Edo not duplicate prompt strings across test files.
  */
+const fs = require('fs');
+const path = require('path');
+
+function createFixtureCleanup(root) {
+  let cleaned = false;
+  return () => {
+    if (cleaned) return;
+    cleaned = true;
+    fs.rmSync(root, { recursive: true, force: true });
+  };
+}
+
+function createRepoDeepDiveFallbackFixture(repoRoot) {
+  const parent = path.join(repoRoot, '.reddog_test_tmp');
+  fs.mkdirSync(parent, { recursive: true });
+  const root = fs.mkdtempSync(path.join(parent, 'rdd-fallback-'));
+  const files = {
+    'main.py': 'def main(): pass\n',
+    'docs/README.md': '# Repository documentation\n',
+    'WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md': '# WSP 97\n',
+    'modules/foundups/pfmall/http_api.py': 'def route(): pass\n',
+    'modules/foundups/pfmall/tests/test_http_api.py': 'def test_route(): pass\n',
+    'modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md': '# p.fMALL route\n',
+    'modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py': '# p.fMALL runtime router\n',
+    'public/member/js/shell-bridge-interceptor.js': '// generic runtime architecture semantic decoy\n',
+    '.claude/CLAUDE.md': '# tracked repository guidance\n',
+    '.claude/worktrees/local-copy/noise.py': 'raise RuntimeError\n',
+    '.worktrees/local-copy/noise.py': 'raise RuntimeError\n',
+    '.cache/noise.json': '{}\n',
+    '.next/server/noise.js': 'throw new Error();\n',
+    'foundups-mcp-env/Lib/site-packages/noise.py': 'raise RuntimeError\n'
+  };
+  for (const [relative, content] of Object.entries(files)) {
+    const target = path.join(root, ...relative.split('/'));
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, content, 'utf8');
+  }
+  return {
+    root,
+    cleanup: createFixtureCleanup(root)
+  };
+}
+
 const EXT_ACC_001_PROMPT = 'Review extensions/reddog/extension.js for WSP_97 truth-label compliance. List OBSERVED vs INFERRED claims, missing evidence, and smallest valid fixes. Include WSP_15 priority for each fix.';
 
 const EXT_ACC_001_TARGET_PATH = 'extensions/reddog/extension.js';
@@ -216,6 +259,7 @@ const WORK_FOCUS_DIR_PATH_M2M_PROMPT = [
 ].join('\n');
 
 module.exports = {
+  createRepoDeepDiveFallbackFixture,
   EXT_ACC_001_PROMPT,
   EXT_ACC_001_TARGET_PATH,
   BUILD_COPY_MARKDOWN_PROMPT,

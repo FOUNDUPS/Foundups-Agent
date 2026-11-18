@@ -48,7 +48,10 @@ def test_fast_search_summary_output(capsys):
     }
     _render_fast_search_summary(payload, limit=3)
     captured = capsys.readouterr().out
-    assert "[OK] Analysis complete: 3 hits (code=2, wsp=1)" in captured
+    assert (
+        "[OK] Analysis complete: 3 hits "
+        "(code=2, wsp=1, docs=0, knowledge=0)" in captured
+    )
     assert "[CODE] modules/foundups/agent_market/src/orchestrator.py" in captured
     assert "[WSP] modules/foundups/agent_market/INTERFACE.md" in captured
 

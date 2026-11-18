@@ -1,5 +1,14 @@
 # Idle Automation Module Roadmap
 
+## Current internal-audit layer — 2026-10-07
+
+Existing audit/maintenance paths executed on the PC without model calls.
+Self-research status propagation is locally qualified (140connected tests).
+Next resolve one current finding to a verified module/file scope before worker
+admission. Historical log findings, deterministic maintenance and authenticated
+Hermes readiness are not autonomous code improvement or retained RSI benefit.
+See ModLog and root ROADMAP for evidence and system sequencing.
+
 ## [U+1F300] Windsurf Protocol (WSP) Recursive Prompt
 
 **0102 Directive**:
@@ -29,19 +38,52 @@ wsp_cycle(input="idle_automation", log=True)
 - **Daily OpenRouter Catalog Refresh POC**: Exact daily claim, default-off final
   boundary, trusted external evidence root, replay-protected six-key adapter
   projection, and fail-closed exact-token finalization
+- **Exact-SHA HoloIndex Post-Merge Maintenance**: Non-blocking OpenClaw
+  observation, one durable task per `origin/main` SHA, CAS worker claim,
+  cross-process authority/SSD leases, non-rewind checkout update, atomic
+  completion, and canonical receipt rehydration. The split-lease automatic
+  replica activation ordering passed a real broker-managed OpenClaw replay at
+  exact main `cfd1e0051`, including atomic AgentDB completion and immutable
+  post-query revalidation. The incident contract now also admits the
+  independently verified pre-owner `REPO_HEAD_MISMATCH`. Exact main
+  `09e98fff` live-accepted that ingress through the real OpenClaw/WRE task at
+  generation `sha256:7869f238...`; a fresh owner query was CURRENT/no-gap/
+  no-reindex on attempt one and all 33 replica artifacts reverified unchanged.
+  Runtime exact closure, A-grade, retrieval RSI, and scale remain open.
+- **Linked-control dependency-runtime resolution**: The post-merge executor now
+  resolves the existing same-repository primary runtime root before entering
+  the authority transaction. This preserves a clean control checkout and clean
+  indexed authority checkout while reusing the canonical primary `.venv` only
+  for dependencies. Focused tests are complete; a future stale-main event must
+  provide the next live OpenClaw repair replay.
+
+### Exact-main Holo route replay gate (P0, completed at `cfd1e0051`)
+
+- Historical manual evidence at `a7302344` proved generation
+  `sha256:d654414a...`; the automatic successor transaction completed at
+  `cfd1e0051` on generation `sha256:60d06274...`.
+- The predecessor OpenClaw task failed twice because owner admission ran before
+  a current route existed and then self-contended under the outer authority
+  lease.
+- Accepted order is first lease/refresh -> release -> activate/query -> second
+  lease/final proof -> atomic AgentDB completion.
+- AgentDB records the `cfd1e0051` task completed by `openclaw_supervisor`; a
+  fresh owner query returned CURRENT/no-gap/no-reindex and full immutable
+  revalidation preserved all 33 artifacts. The historical a730 task remains
+  truthful failure evidence and is not rewritten. Later HEADs require their
+  own exact-SHA transaction.
 
 ### WSP 62 Near-Term Remediation
 
 - `tests/test_scheduled_routines_integration.py` is 1,057 physical lines:
-  above the 1,000-line remediation trigger but below the 1,200-line
-  OK/guideline boundary. Add no further provider-schedule cases there. The next
+  inherited critical-window WSP_62 debt. `no_growth: true`; the next
   provider-schedule test change must extract those cases into
   `tests/test_openrouter_catalog_schedule_integration.py`, targeting roughly
   500 lines in each resulting test module.
-- `src/idle_automation_dae.py` is 1,444 physical lines, within the 1,200-1,500
-  DAE guideline window. Extract remaining scheduled-claim orchestration and
-  configuration before any further feature growth and before the file reaches
-  1,500 lines.
+- `src/idle_automation_dae.py` is 1,444 physical lines: inherited mandatory-
+  review WSP_62 debt above the 1,425-line DAE review trigger. `no_growth: true`;
+  extract remaining scheduled-claim orchestration and configuration before any
+  further feature change.
 
 ## Development Phases
 

@@ -48,7 +48,7 @@ class TestMallRedDogConcierge:
         html = INDEX_PAGE.read_text(encoding="utf-8")
         assert "reddog-concierge-guidance" in html
         assert "Tap a tile to play" in html
-        assert "Double-tap to enter" in html
+        assert "Use the Enter button to visit a FoundUp" in html
 
     def test_identity_section_present(self):
         """Account identity section exists in the plane."""

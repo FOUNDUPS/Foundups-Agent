@@ -10,12 +10,19 @@ from typing import Callable
 
 import pytest
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import (
+    StubAuthoritativeUseLease,
+    allow_stub_authoritative_use_lease,
 )
+from modules.communication.moltbot_bridge.src import reddog_worktree_admission_capability as admission_module
 from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
     InMemoryWorktreeAdmissionRegistry,
 )
+
+
+@pytest.fixture(autouse=True)
+def _allow_stub_lease(monkeypatch) -> None:
+    allow_stub_authoritative_use_lease(monkeypatch, admission_module)
 
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
     QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
@@ -222,7 +229,7 @@ def _admission_registry(
         executor_plan_result=queue_executor,
         valve_decision=queue_valve["valve_decision"],
         signed_authority_reverified=True,
-        authoritative_use_lease=AuthoritativeUseLease(
+        authoritative_use_lease=StubAuthoritativeUseLease(
             consume,
             expires_at_epoch=expires_at_epoch,
             trusted_now_epoch=trusted_now_epoch,

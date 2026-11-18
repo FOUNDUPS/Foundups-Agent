@@ -71,6 +71,9 @@ class ResidentQueueNextStageDispatchResult:
     plan: Optional[ResidentQueueOrchestrationPlan] = None
     record_result: Optional[ResidentQueueChainResultRecordResult] = None
     stage_handler_invoked: bool = False
+    deferred: bool = False
+    defer_reason: Optional[str] = None
+    retry_at: Optional[str] = None
     no_default_handler_used: bool = True
     no_authority_issued_by_dispatcher: bool = True
     no_worker_spawned_by_dispatcher: bool = True
@@ -94,6 +97,9 @@ class ResidentQueueNextStageDispatchResult:
             "plan": self.plan.to_dict() if self.plan else None,
             "record_result": self.record_result.to_dict() if self.record_result else None,
             "stage_handler_invoked": self.stage_handler_invoked,
+            "deferred": self.deferred,
+            "defer_reason": self.defer_reason,
+            "retry_at": self.retry_at,
             "no_default_handler_used": self.no_default_handler_used,
             "no_authority_issued_by_dispatcher": self.no_authority_issued_by_dispatcher,
             "no_worker_spawned_by_dispatcher": self.no_worker_spawned_by_dispatcher,
@@ -216,6 +222,24 @@ def invoke_reddog_resident_queue_next_stage_dispatch(
             next_action=plan.next_action,
             stage_handler_invoked=True,
         )
+    if stage_result.get("queue_chain_requeue_required") is True:
+        return ResidentQueueNextStageDispatchResult(
+            accepted=True,
+            decision=RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT,
+            rejection_reasons=[],
+            dispatched_stage=plan.current_stage,
+            next_action=plan.next_action,
+            plan=plan,
+            record_result=None,
+            stage_handler_invoked=True,
+            deferred=True,
+            defer_reason=str(
+                stage_result.get("status")
+                or stage_result.get("decision")
+                or "QUEUE_STAGE_DEFERRED"
+            ),
+            retry_at=str(stage_result.get("retry_at") or "") or None,
+        )
 
     record = record_resident_queue_stage_result(
         work_state_snapshot=work_state_snapshot,
@@ -233,6 +257,24 @@ def invoke_reddog_resident_queue_next_stage_dispatch(
             next_action=plan.next_action,
             stage_handler_invoked=True,
             record_result=record,
+        )
+    if stage_result.get("queue_chain_yield_required") is True:
+        return ResidentQueueNextStageDispatchResult(
+            accepted=True,
+            decision=RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT,
+            rejection_reasons=[],
+            dispatched_stage=plan.current_stage,
+            next_action=plan.next_action,
+            plan=plan,
+            record_result=record,
+            stage_handler_invoked=True,
+            deferred=True,
+            defer_reason=str(
+                stage_result.get("status")
+                or stage_result.get("decision")
+                or "QUEUE_STAGE_YIELDED"
+            ),
+            retry_at=str(stage_result.get("retry_at") or "") or None,
         )
 
     return ResidentQueueNextStageDispatchResult(

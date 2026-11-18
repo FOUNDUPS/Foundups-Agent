@@ -6,8 +6,10 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import pytest
@@ -15,9 +17,6 @@ import pytest
 from modules.infrastructure.wre_core.src.daemon_self_audit_loop import (
     DaemonSelfAuditLoop,
 )
-
-POPEN_TARGET = "modules.infrastructure.wre_core.src.daemon_self_audit_loop.subprocess.Popen"
-
 
 def _read_jsonl(path: Path):
     rows = []
@@ -76,17 +75,40 @@ def test_self_audit_auto_fix_requires_legacy_opt_in(tmp_path: Path, monkeypatch)
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen:
-        events = loop.scan_once()
+    events = loop.scan_once()
 
     assert events == 1
-    assert mock_popen.call_count == 0
     rows = _read_jsonl(loop.task_log_path)
     assert rows[0]["auto_fix_attempted"] is False
     assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
 
 
-def test_self_audit_legacy_policy_fix_dispatches_with_dual_opt_in(
+def test_direct_start_primitive_requires_master_process_gate(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "1")
+    monkeypatch.delenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", raising=False)
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+
+    attempted, result = loop._dispatch_start_command("echo start")
+
+    assert attempted is False
+    assert result == "legacy_process_dispatch_disabled"
+
+
+def test_direct_escalation_primitive_requires_master_process_gate(
+    tmp_path: Path, monkeypatch
+):
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_ESCALATION_DISPATCH", "1")
+    monkeypatch.delenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", raising=False)
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+
+    attempted, result = loop._dispatch_escalation_command("echo escalate")
+
+    assert attempted is False
+    assert result == "legacy_process_dispatch_disabled"
+
+
+def test_self_audit_legacy_policy_fix_remains_disabled_with_dual_opt_in(
     tmp_path: Path, monkeypatch
 ):
     logs = tmp_path / "logs"
@@ -100,19 +122,18 @@ def test_self_audit_legacy_policy_fix_dispatches_with_dual_opt_in(
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
     monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen:
-        events = loop.scan_once()
+    events = loop.scan_once()
 
     assert events == 1
-    assert mock_popen.call_count == 1
     rows = _read_jsonl(loop.task_log_path)
-    assert rows[0]["auto_fix_attempted"] is True
-    assert rows[0]["auto_fix_result"] == "start_command_dispatched"
+    assert rows[0]["auto_fix_attempted"] is False
+    assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
 
 
 def test_ironclaw_retry_reports_attempted_but_unhealthy(tmp_path: Path, monkeypatch):
@@ -128,13 +149,14 @@ def test_ironclaw_retry_reports_attempted_but_unhealthy(tmp_path: Path, monkeypa
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
     monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "2")
     monkeypatch.setenv("IRONCLAW_START_RETRY_DELAY_SEC", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen, patch.object(
+    with patch.object(
         DaemonSelfAuditLoop,
         "_verify_ironclaw_health",
         return_value=(False, "health_error:URLError"),
@@ -142,13 +164,9 @@ def test_ironclaw_retry_reports_attempted_but_unhealthy(tmp_path: Path, monkeypa
         events = loop.scan_once()
 
     assert events == 1
-    assert mock_popen.call_count == 1
     rows = _read_jsonl(loop.task_log_path)
-    # Dispatch ran -> attempted=True, even though health never came up.
-    assert rows[0]["auto_fix_attempted"] is True
-    result = rows[0]["auto_fix_result"]
-    assert result.startswith("attempted_but_unhealthy_after_2_attempt(s):")
-    assert "start_command_dispatched" not in result  # classified as failure
+    assert rows[0]["auto_fix_attempted"] is False
+    assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
 
 
 def test_ironclaw_retry_reports_healthy_when_health_endpoint_responds(tmp_path: Path, monkeypatch):
@@ -164,13 +182,14 @@ def test_ironclaw_retry_reports_healthy_when_health_endpoint_responds(tmp_path: 
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
     monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
     monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "3")
     monkeypatch.setenv("IRONCLAW_START_RETRY_DELAY_SEC", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen, patch.object(
+    with patch.object(
         DaemonSelfAuditLoop,
         "_verify_ironclaw_health",
         return_value=(True, "health_ok:200"),
@@ -178,12 +197,9 @@ def test_ironclaw_retry_reports_healthy_when_health_endpoint_responds(tmp_path: 
         events = loop.scan_once()
 
     assert events == 1
-    assert mock_popen.call_count == 1
     rows = _read_jsonl(loop.task_log_path)
-    assert rows[0]["auto_fix_attempted"] is True
-    result = rows[0]["auto_fix_result"]
-    assert result.startswith("healthy_after_1_attempt(s):")
-    assert "start_command_dispatched" in result  # classified as success
+    assert rows[0]["auto_fix_attempted"] is False
+    assert rows[0]["auto_fix_result"].startswith("improvement_job_proposed:")
 
 
 def test_self_audit_verifies_event_store_when_sequence_error_seen(tmp_path: Path, monkeypatch):
@@ -298,25 +314,23 @@ def test_self_audit_escalation_command_requires_legacy_dispatch_flag(
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ESCALATE_CMD", "echo escalate")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen:
-        loop.scan_once()
-        with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-        loop._seen.clear()
-        loop.scan_once()
-        with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-        loop._seen.clear()
-        loop.scan_once()
+    loop.scan_once()
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    loop._seen.clear()
+    loop.scan_once()
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    loop._seen.clear()
+    loop.scan_once()
 
-    assert mock_popen.call_count == 0
     escalations = _read_jsonl(loop.escalation_log_path)
     assert len(escalations) == 1
     assert escalations[0]["dispatch_attempted"] is False
     assert escalations[0]["dispatch_result"] == "legacy_escalation_dispatch_disabled"
 
 
-def test_self_audit_legacy_escalation_dispatches_configured_command(
+def test_self_audit_legacy_escalation_remains_disabled_with_flags(
     tmp_path: Path, monkeypatch
 ):
     logs = tmp_path / "logs"
@@ -332,24 +346,23 @@ def test_self_audit_legacy_escalation_dispatches_configured_command(
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ESCALATION_COOLDOWN_SEC", "600")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ESCALATE_CMD", "echo escalate")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_ESCALATION_DISPATCH", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOW_LEGACY_PROCESS_DISPATCH", "1")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
-    with patch(POPEN_TARGET) as mock_popen:
-        loop.scan_once()
-        with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-        loop._seen.clear()
-        loop.scan_once()
-        with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-        loop._seen.clear()
-        loop.scan_once()
+    loop.scan_once()
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    loop._seen.clear()
+    loop.scan_once()
+    with log_file.open("a", encoding="utf-8") as handle:
+        handle.write(line)
+    loop._seen.clear()
+    loop.scan_once()
 
-    assert mock_popen.call_count == 1
     escalations = _read_jsonl(loop.escalation_log_path)
     assert len(escalations) == 1
-    assert escalations[0]["dispatch_attempted"] is True
-    assert "dispatch" in escalations[0]["dispatch_result"]
+    assert escalations[0]["dispatch_attempted"] is False
+    assert escalations[0]["dispatch_result"] == "legacy_escalation_dispatch_disabled"
 
 
 def test_self_audit_filters_noise_signatures(tmp_path: Path, monkeypatch):
@@ -544,3 +557,194 @@ def test_self_audit_serializes_scans_across_loop_instances(
 
     assert sum(counts) == 1
     assert len(_read_jsonl(loops[0].task_log_path)) == 1
+
+
+class _OwnedCounterMemory:
+    def __init__(self, original, controls):
+        self.owner = threading.get_ident()
+        self.memory = original(db_path=controls.db_path)
+        self.controls = controls
+        self.close_threads = []
+        self.closed = False
+        controls.handles.append(self)
+
+    def increment_counter(self, name, delta):
+        if self.controls.before_increment:
+            self.controls.before_increment()
+        if self.controls.increment_error:
+            raise self.controls.increment_error
+        return self.memory.increment_counter(name, delta)
+
+    def close(self):
+        self.close_threads.append(threading.get_ident())
+        self.memory.close()
+        self.closed = True
+        if self.controls.close_error:
+            raise self.controls.close_error
+
+
+def _cleanup_owned_counter_handles(controls):
+    for handle in controls.handles:
+        if handle.owner == threading.get_ident() and not handle.closed:
+            handle.memory.close()
+            handle.closed = True
+
+
+@pytest.fixture
+def counter_memory(tmp_path: Path, monkeypatch):
+    from modules.infrastructure.wre_core.src import pattern_memory
+
+    repo = tmp_path / "repo"
+    (repo / "logs").mkdir(parents=True)
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_RUNTIME_ROOT", str(tmp_path / "runtime"))
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_TELEMETRY", "1")
+    original = pattern_memory.PatternMemory
+    controls = SimpleNamespace(
+        db_path=tmp_path / "counter.db", handles=[], factory_calls=0,
+        factory_error=None, increment_error=None, close_error=None,
+        before_increment=None, loop=DaemonSelfAuditLoop(repo),
+        log_file=repo / "logs" / "daemon.log",
+    )
+
+    def factory():
+        controls.factory_calls += 1
+        if controls.factory_error:
+            raise controls.factory_error
+        return _OwnedCounterMemory(original, controls)
+
+    monkeypatch.setattr(pattern_memory, "PatternMemory", factory)
+    try:
+        yield controls
+    finally:
+        _cleanup_owned_counter_handles(controls)
+
+
+def _stored_counter(controls, name="owned_counter"):
+    connection = sqlite3.connect(str(controls.db_path))
+    try:
+        row = connection.execute(
+            "SELECT counter_value FROM telemetry_counters WHERE counter_name = ?", (name,)
+        ).fetchone()
+        return row[0] if row else 0
+    finally:
+        connection.close()
+
+
+def test_counter_operations_use_separate_closed_handles(counter_memory):
+    state = counter_memory
+    state.loop._increment_counter("owned_counter")
+    state.loop._increment_counter("owned_counter", 2)
+
+    assert _stored_counter(state) == 3
+    assert state.factory_calls == len(state.handles) == 2
+    for handle in state.handles:
+        assert handle.close_threads == [handle.owner] == [threading.get_ident()]
+        with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+            handle.memory.get_counter("owned_counter")
+
+
+@pytest.mark.parametrize("failure", (
+    "factory", "increment", "close", "both", "interrupt", "interrupt_close",
+))
+def test_counter_failure_cleanup_and_propagation(counter_memory, failure):
+    state = counter_memory
+    if failure == "factory":
+        state.factory_error = RuntimeError("factory failure")
+    if failure in {"increment", "both"}:
+        state.increment_error = RuntimeError("increment failure")
+    if failure.startswith("interrupt"):
+        state.increment_error = KeyboardInterrupt("increment interrupted")
+    if failure in {"close", "both", "interrupt_close"}:
+        state.close_error = RuntimeError("close failure")
+
+    if failure.startswith("interrupt"):
+        with pytest.raises(KeyboardInterrupt) as caught:
+            state.loop._increment_counter("owned_counter")
+        assert caught.value is state.increment_error
+    else:
+        state.loop._increment_counter("owned_counter")
+    assert state.factory_calls == 1
+    assert len(state.handles) == (0 if failure == "factory" else 1)
+    for handle in state.handles:
+        assert handle.close_threads == [handle.owner] == [threading.get_ident()]
+        assert handle.closed
+    if state.handles:
+        assert _stored_counter(state) == (1 if failure == "close" else 0)
+
+
+def test_counter_disabled_telemetry_never_constructs_memory(counter_memory):
+    state = counter_memory
+    state.loop.enable_telemetry = False
+    state.factory_error = AssertionError("disabled telemetry constructed memory")
+    state.loop._increment_counter("owned_counter")
+    assert state.factory_calls == 0
+    assert not state.db_path.exists()
+
+
+def test_distinct_live_scan_threads_persist_both_event_counters(counter_memory):
+    state = counter_memory
+    ready, release = threading.Event(), threading.Event()
+    state.log_file.write_text("[ERROR] lifecycle alpha failure\n", encoding="utf-8")
+
+    def background_scan():
+        try:
+            count = state.loop.scan_once()
+            ready.set()
+            assert release.wait(5)
+            return count
+        finally:
+            _cleanup_owned_counter_handles(state)
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(background_scan)
+        try:
+            assert ready.wait(5)
+            assert future.running()
+            assert state.handles[0].owner != threading.get_ident()
+            with state.log_file.open("a", encoding="utf-8") as handle:
+                handle.write("[ERROR] lifecycle beta failure\n")
+            assert state.loop.scan_once() == 1
+        finally:
+            release.set()
+        assert future.result(timeout=5) == 1
+    assert _stored_counter(state, "self_audit_events_total") == 2
+    rows = _read_jsonl(state.loop.task_log_path)
+    assert len(rows) == len({row["signature"] for row in rows}) == 2
+    assert len(state.handles) == len({handle.owner for handle in state.handles}) == 2
+    assert all(handle.close_threads == [handle.owner] for handle in state.handles)
+
+
+def test_stop_timeout_does_not_close_active_foreign_counter(counter_memory):
+    state = counter_memory
+    entered, release = threading.Event(), threading.Event()
+
+    def pause_increment():
+        state.loop._thread = threading.current_thread()
+        entered.set()
+        assert release.wait(5)
+
+    def background_counter():
+        try:
+            state.loop._increment_counter("owned_counter")
+        finally:
+            _cleanup_owned_counter_handles(state)
+
+    state.before_increment = pause_increment
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(background_counter)
+        try:
+            assert entered.wait(5)
+            state.loop.stop(timeout_sec=0.01)
+            assert future.running()
+            assert state.loop._stop.is_set()
+            assert state.handles[0].close_threads == []
+            assert not state.handles[0].closed
+        finally:
+            release.set()
+        future.result(timeout=5)
+    handle = state.handles[0]
+    assert handle.owner != threading.get_ident()
+    assert handle.close_threads == [handle.owner]
+    assert _stored_counter(state) == 1

@@ -2,9 +2,9 @@
 
 The resolver re-reads caller-owned runtime artifacts, re-verifies the signed
 delegated work authority, and reconstructs canonical valve bindings immediately
-before evaluation.  It deliberately fails closed until a signed immutable
-runtime-artifact manifest producer exists; unsigned JSON files never authorize
-execution by attesting to one another.
+before evaluation. The immutable manifest producer exists, but execution remains
+closed until selection, replay, current-generation, and peer-handshake controls
+are independently verified.
 """
 
 from __future__ import annotations
@@ -12,8 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import threading
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
@@ -26,6 +25,12 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment_supply import (
     resolve_reddog_execution_valve_expected_bindings,
 )
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_runtime,
+)
+from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
+    AuthoritativeUseLease,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     AUTHORITY_ISSUED,
 )
@@ -36,6 +41,9 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_full_work_order_digest,
     canonical_work_order_base_ref,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    work_authority_digest_matches,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import (
     GovernedExecutionValveEnvironment,
@@ -49,15 +57,31 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verific
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     plan_reddog_wre_queue_consumer_dry_run,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_use_time_gate import (
+    collect_signer_current_generation_use_time_evidence,
+)
 
 
-SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING = (
-    "canonical_signed_runtime_artifact_manifest_producer_missing"
+AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING = (
+    "canonical_signed_runtime_artifact_manifest_selection_verifier_missing"
+)
+DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING = (
+    "canonical_runtime_artifact_manifest_replay_high_water_missing"
+)
+CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING = (
+    "canonical_runtime_artifact_manifest_current_generation_verifier_missing"
+)
+CURRENT_GENERATION_TRUST_ANCHOR_REASONS = (
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+    DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING,
+    CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING,
 )
 AUTHORITY_RUNTIME_STAGE_KEY = "authority_runtime"
 AUTHORITY_VERIFICATION_STAGE_KEY = "authority_verification"
 INCOMPLETE_TRUST_ANCHOR_REASONS = (
-    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
+    DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING,
+    CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING,
     "canonical_consensus_receipt_verifier_missing",
     "canonical_sovereign_authorization_verifier_missing",
     "canonical_principal_subject_key_attestation_missing",
@@ -77,35 +101,9 @@ class GovernedValveUseTimeResolution:
     rejection_reasons: tuple[str, ...]
     signed_authority_reverified: bool
     authoritative_use_lease: Optional["AuthoritativeUseLease"] = None
-
-
-class AuthoritativeUseLease:
-    """Opaque one-shot verifier callback consumed only at the side-effect boundary."""
-
-    def __init__(
-        self,
-        consumer: Callable[[], bool],
-        *,
-        expires_at_epoch: int,
-        trusted_now_epoch: Callable[[], int],
-    ) -> None:
-        self._consumer = consumer
-        self.expires_at_epoch = int(expires_at_epoch)
-        self._trusted_now_epoch = trusted_now_epoch
-        self._lock = threading.Lock()
-        self._used = False
-
-    def consume(self) -> bool:
-        with self._lock:
-            if self._used:
-                return False
-            self._used = True
-        try:
-            if int(self._trusted_now_epoch()) >= self.expires_at_epoch:
-                return False
-        except Exception:
-            return False
-        return self._consumer() is True
+    signer_generation_binding_receipt_id: Optional[str] = None
+    signer_peer_binding_receipt_id: Optional[str] = None
+    signer_model_binding_receipt_id: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -128,6 +126,8 @@ class GovernedValveUseTimeAuthorityResolver:
     forbidden_operations: tuple[str, ...] = ()
     revoked_key_epochs: tuple[str, ...] = ()
     leeway_s: int = 60
+    signer_peer_secret_access_grant_supplier: Any = None
+    parent_consensus_authority: Any = None
 
     def resolve(
         self,
@@ -137,10 +137,23 @@ class GovernedValveUseTimeAuthorityResolver:
         queue_item_id: Optional[str],
         selected_slice: Optional[str],
     ) -> GovernedValveUseTimeResolution:
+        try:
+            now = self.trusted_now_epoch()
+            if type(now) is not int or now < self.now_epoch:
+                raise ValueError("trusted_clock_invalid")
+        except Exception:
+            return GovernedValveUseTimeResolution(
+                environment=None, expected_bindings={}, permission_ttl_seconds=0,
+                permission_expires_at="", rejection_reasons=("canonical_trusted_clock_invalid",),
+                signed_authority_reverified=False)
+        return replace(self, now_epoch=now)._resolve_current(
+            chain_state=chain_state, work_order=work_order,
+            queue_item_id=queue_item_id, selected_slice=selected_slice)
+
+    def _resolve_current(self, *, chain_state, work_order, queue_item_id, selected_slice):
         reasons: list[str] = []
         if not _chain_snapshot_is_canonical(chain_state):
             reasons.append("canonical_chain_results_revision_invalid")
-
         artifacts, read_reasons = _read_runtime_artifacts(self)
         reasons.extend(read_reasons)
         environment = _governed_environment(artifacts.get("valve_environment"), reasons)
@@ -157,27 +170,35 @@ class GovernedValveUseTimeAuthorityResolver:
             reasons=reasons,
         )
 
-        # No producer for this trust anchor exists in the current codebase.  This
-        # hard blocker must remain until an independently signed immutable manifest
-        # and trusted peer-handshake receipt can be verified here.
-        reasons.extend(INCOMPLETE_TRUST_ANCHOR_REASONS)
-
-        authoritative_use_lease = None
-        if reverified and not reasons:
-            authoritative_use_lease = AuthoritativeUseLease(
-                lambda: self._consume_authoritative_nonce(
-                    identity=identity,
-                    work_authority=work_authority,
-                ),
-                expires_at_epoch=_integer(work_authority.get("expires_at")) or 0,
-                trusted_now_epoch=self.trusted_now_epoch,
+        generation_evidence = collect_signer_current_generation_use_time_evidence(
+            reverified and not reasons, self.repo_root, self.runtime_allowed_root, self.trusted_now_epoch,
+            principal_identity=identity, principal_work_authority=work_authority,
+            peer_secret_access_grant_supplier=self.signer_peer_secret_access_grant_supplier,
+            model_work_order=work_order,
+            retained_proposal_inputs=artifacts.get("authority_profile", {}).get("proposal_verification_inputs"),
+            revoked_key_epochs=frozenset(self.revoked_key_epochs),
+            parent_consensus_authority=self.parent_consensus_authority,
+        )
+        generation_binding_receipt_id = generation_evidence.receipt_id
+        reasons.extend(
+            generation_evidence.remaining_reasons(
+                INCOMPLETE_TRUST_ANCHOR_REASONS,
+                CURRENT_GENERATION_TRUST_ANCHOR_REASONS
+                + generation_evidence.bound_identity_reasons(identity, work_authority, work_order,
+                    artifacts.get("authority_profile", {}).get("proposal_verification_inputs")),
             )
+        )
 
+        # Current-generation evidence is not effect authority. The external
+        # signer peer remains the only future issuer for a live use lease.
+        authoritative_use_lease = None
         expiry_epoch = _integer(work_authority.get("expires_at")) or self.now_epoch
         ttl = max(1, min(3600, expiry_epoch - self.now_epoch))
-        expires = datetime.fromtimestamp(expiry_epoch, tz=timezone.utc).replace(
-            microsecond=0
-        ).isoformat()
+        expires = (
+            datetime.fromtimestamp(expiry_epoch, tz=timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+        )
         return GovernedValveUseTimeResolution(
             environment=environment,
             expected_bindings=expected,
@@ -186,6 +207,9 @@ class GovernedValveUseTimeAuthorityResolver:
             rejection_reasons=tuple(_dedupe(reasons)),
             signed_authority_reverified=reverified,
             authoritative_use_lease=authoritative_use_lease,
+            signer_generation_binding_receipt_id=generation_binding_receipt_id,
+            signer_peer_binding_receipt_id=generation_evidence.peer_receipt_id,
+            signer_model_binding_receipt_id=(generation_binding_receipt_id if generation_evidence.model_matches(work_order) else None),
         )
 
     def _reverify_and_bind(
@@ -308,7 +332,9 @@ class GovernedValveUseTimeAuthorityResolver:
             principal_authority_records=artifacts["principal_authority_records"],
             queue_item_id=str(queue_item_id),
         )
-        reasons.extend(f"canonical_use_time_binding:{reason}" for reason in binding_reasons)
+        reasons.extend(
+            f"canonical_use_time_binding:{reason}" for reason in binding_reasons
+        )
         return expected or {}
 
 
@@ -333,9 +359,14 @@ def _read_runtime_artifacts(
     ]
     if changed:
         return {}, [
-            f"canonical_use_time_artifact_snapshot_changed:{name}"
-            for name in changed
+            f"canonical_use_time_artifact_snapshot_changed:{name}" for name in changed
         ]
+    try:
+        payloads["authority_profile"] = rehydrate_authority_profile_runtime(
+            payloads["authority_profile"]
+        )
+    except (KeyError, TypeError, ValueError):
+        return {}, ["canonical_use_time_authority_profile_invalid"]
     return payloads, []
 
 
@@ -369,7 +400,10 @@ def _read_json_no_follow(
     try:
         with runtime_operation_lock(str(candidate) + ".operation"):
             resolved_for_repo_check = candidate.resolve(strict=True)
-            if resolved_for_repo_check == root or root in resolved_for_repo_check.parents:
+            if (
+                resolved_for_repo_check == root
+                or root in resolved_for_repo_check.parents
+            ):
                 return None, "inside_repo"
             raw, _ = secure_read_confined_bytes(
                 candidate,
@@ -379,7 +413,9 @@ def _read_json_no_follow(
         if len(raw) >= 1024 * 1024:
             return None, "not_bounded_regular_file"
         payload = json.loads(raw.decode("utf-8"))
-        return (payload, None) if isinstance(payload, Mapping) else (None, "not_mapping")
+        return (
+            (payload, None) if isinstance(payload, Mapping) else (None, "not_mapping")
+        )
     except (OSError, ValueError, UnicodeError, json.JSONDecodeError):
         return None, "unreadable"
 
@@ -422,13 +458,17 @@ def _validate_recorded_authority(
         or checked.get("accepted") is not True
     ):
         reasons.append("canonical_recorded_authority_verification_not_accepted")
-    if checked.get("work_order_id") != _mapping(authority_result.get("work_authority")).get(
-        "work_order_id"
-    ):
+    if checked.get("work_order_id") != _mapping(
+        authority_result.get("work_authority")
+    ).get("work_order_id"):
         reasons.append("canonical_recorded_authority_work_order_mismatch")
     required_receipt_fields = {
-        "receipt_id", "status", "work_order_id", "identity_digest",
-        "work_authority_digest", "generated_at",
+        "receipt_id",
+        "status",
+        "work_order_id",
+        "identity_digest",
+        "work_authority_digest",
+        "generated_at",
     }
     if not required_receipt_fields.issubset(receipt) or any(
         receipt.get(field) in (None, "") for field in required_receipt_fields
@@ -438,7 +478,9 @@ def _validate_recorded_authority(
         reasons.append("canonical_authority_receipt_work_order_mismatch")
     if identity and receipt.get("identity_digest") != _digest(identity):
         reasons.append("canonical_identity_receipt_digest_mismatch")
-    if work_authority and receipt.get("work_authority_digest") != _digest(work_authority):
+    if work_authority and not work_authority_digest_matches(
+        work_authority, receipt.get("work_authority_digest")
+    ):
         reasons.append("canonical_work_authority_receipt_digest_mismatch")
     identity_bindings = {
         "principal_id": identity.get("principal_id"),
@@ -489,7 +531,9 @@ def _signed_binding_reasons(
         "wsp15_reasoning_tier": work_order.get("wsp15_reasoning_tier"),
         "model_selection_receipt_id": work_order.get("model_selection_receipt_id"),
         "model_selection_digest": work_order.get("model_selection_digest"),
-        "model_runtime_binding_receipt_id": work_order.get("model_runtime_binding_receipt_id"),
+        "model_runtime_binding_receipt_id": work_order.get(
+            "model_runtime_binding_receipt_id"
+        ),
         "model_runtime_binding_digest": work_order.get("model_runtime_binding_digest"),
         "memex_supply_receipt_id": work_order.get("memex_supply_receipt_id"),
         "memex_supply_digest": work_order.get("memex_supply_digest"),
@@ -525,28 +569,57 @@ def _signed_binding_reasons(
     return reasons
 
 
-def _queue_receipt_binding_reasons(
+def _queue_current_truth_checks(
     receipt: Mapping[str, Any],
     authority: Mapping[str, Any],
     work_order: Mapping[str, Any],
     selected_slice: Optional[str],
-) -> list[str]:
-    if not receipt:
-        return ["canonical_queue_consumer_receipt_missing"]
-    checks = {
-        "work_order_id": (authority.get("work_order_id"), work_order.get("work_order_id")),
-        "slice_id": (receipt.get("slice_id"), selected_slice),
+) -> dict[str, tuple[Any, Any]]:
+    return {
+        "queue_consumer_receipt_digest": (
+            _canonical_queue_receipt_digest(receipt),
+            authority.get("queue_consumer_receipt_digest"),
+        ),
+        "work_order_id": (
+            authority.get("work_order_id"),
+            work_order.get("work_order_id"),
+        ),
+        "slice_id": (receipt.get("slice_id"), authority.get("selected_slice")),
+        "selected_slice": (selected_slice, authority.get("selected_slice")),
+        "progressive_policy_stage_receipt_id": (
+            receipt.get("progressive_policy_stage_receipt_id"),
+            authority.get("progressive_policy_stage_receipt_id"),
+        ),
+        "progressive_policy_stage_digest": (
+            receipt.get("progressive_policy_stage_digest"),
+            authority.get("progressive_policy_stage_digest"),
+        ),
+    }
+
+
+def _queue_optional_binding_checks(
+    receipt: Mapping[str, Any], authority: Mapping[str, Any]
+) -> dict[str, tuple[Any, Any]]:
+    return {
         "wsp15_allocation_receipt_id": (
             receipt.get("wsp15_allocation_receipt_id"),
             authority.get("wsp15_allocation_receipt_id"),
         ),
         "wsp15_allocation_digest": (
-            receipt.get("wsp15_allocation_digest"), authority.get("wsp15_allocation_digest")
+            receipt.get("wsp15_allocation_digest"),
+            authority.get("wsp15_allocation_digest"),
         ),
-        "wsp15_priority": (receipt.get("wsp15_priority"), authority.get("wsp15_priority")),
-        "wsp15_mps_total": (receipt.get("wsp15_mps_total"), authority.get("wsp15_mps_total")),
+        "wsp15_priority": (
+            receipt.get("wsp15_priority"),
+            authority.get("wsp15_priority"),
+        ),
+        "wsp15_mps_total": (
+            receipt.get("wsp15_mps_total"),
+            authority.get("wsp15_mps_total"),
+        ),
         "wsp15_reasoning_tier": (
-            receipt.get("reasoning_tier"), authority.get("wsp15_reasoning_tier")
+            receipt.get("reasoning_tier"),
+            authority.get("wsp15_reasoning_tier"),
         ),
         "model_runtime_binding_receipt_id": (
             receipt.get("model_runtime_binding_receipt_id"),
@@ -561,20 +634,42 @@ def _queue_receipt_binding_reasons(
             authority.get("model_selection_receipt_id"),
         ),
         "model_selection_digest": (
-            receipt.get("model_selection_digest"), authority.get("model_selection_digest")
+            receipt.get("model_selection_digest"),
+            authority.get("model_selection_digest"),
         ),
         "memex_supply_receipt_id": (
-            receipt.get("memex_supply_receipt_id"), authority.get("memex_supply_receipt_id")
+            receipt.get("memex_supply_receipt_id"),
+            authority.get("memex_supply_receipt_id"),
         ),
         "memex_supply_digest": (
-            receipt.get("memex_supply_digest"), authority.get("memex_supply_digest")
+            receipt.get("memex_supply_digest"),
+            authority.get("memex_supply_digest"),
         ),
     }
+
+
+def _queue_receipt_binding_reasons(
+    receipt: Mapping[str, Any],
+    authority: Mapping[str, Any],
+    work_order: Mapping[str, Any],
+    selected_slice: Optional[str],
+) -> list[str]:
+    if not receipt:
+        return ["canonical_queue_consumer_receipt_missing"]
+    checks = _queue_current_truth_checks(receipt, authority, work_order, selected_slice)
+    checks.update(_queue_optional_binding_checks(receipt, authority))
     return [
         f"canonical_queue_authority_binding_mismatch:{field}"
         for field, (left, right) in checks.items()
         if left != right
     ]
+
+
+def _canonical_queue_receipt_digest(receipt: Mapping[str, Any]) -> Optional[str]:
+    try:
+        return canonical_full_work_order_digest(receipt)
+    except (TypeError, ValueError):
+        return None
 
 
 def _stage_results(state: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
@@ -602,7 +697,11 @@ def _select(values: Any, field: str, expected: Any) -> Mapping[str, Any]:
     if not isinstance(values, list):
         return {}
     return next(
-        (item for item in values if isinstance(item, Mapping) and item.get(field) == expected),
+        (
+            item
+            for item in values
+            if isinstance(item, Mapping) and item.get(field) == expected
+        ),
         {},
     )
 
@@ -637,8 +736,10 @@ def _dedupe(values: list[str]) -> list[str]:
 
 
 __all__ = [
+    "AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING",
     "AuthoritativeUseLease",
+    "CURRENT_RUNTIME_ARTIFACT_GENERATION_VERIFIER_MISSING",
+    "DURABLE_RUNTIME_ARTIFACT_MANIFEST_REPLAY_STATE_MISSING",
     "GovernedValveUseTimeAuthorityResolver",
     "GovernedValveUseTimeResolution",
-    "SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING",
 ]

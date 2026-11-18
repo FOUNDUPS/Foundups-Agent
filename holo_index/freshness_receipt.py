@@ -25,6 +25,7 @@ from holo_index.verified_collection_carry_forward import (
 
 SCHEMA_VERSION = "holoindex_freshness_receipt.v2"
 COLLECTION_SCHEMA_VERSION = "holoindex_collection_freshness.v2"
+SNAPSHOT_PAGE_SIZE = 500
 FRESHNESS_RECEIPT_FILENAME = "holoindex_freshness_receipt.json"
 
 COLLECTION_ATTRS: dict[str, str] = {
@@ -235,6 +236,35 @@ def _canonical_snapshot_value(value: Any) -> Any:
     raise TypeError(f"unsupported_snapshot_value:{type(value).__name__}")
 
 
+def _paged_collection_snapshot(collection: Any, *, count: int) -> dict[str, list[Any]]:
+    combined = {
+        "ids": [],
+        "documents": [],
+        "metadatas": [],
+        "embeddings": [],
+    }
+    include = ["documents", "metadatas", "embeddings"]
+    for offset in range(0, count, SNAPSHOT_PAGE_SIZE):
+        try:
+            page = collection.get(
+                include=include,
+                limit=min(SNAPSHOT_PAGE_SIZE, count - offset),
+                offset=offset,
+            )
+        except TypeError:
+            if count > SNAPSHOT_PAGE_SIZE or offset:
+                raise
+            page = collection.get(include=include)
+        for key in combined:
+            combined[key].extend(_snapshot_list(page, key))
+    return combined
+
+
+def paged_collection_snapshot(collection: Any, *, count: int) -> dict[str, list[Any]]:
+    """Return the bounded complete collection payload used by receipt/export proof."""
+    return _paged_collection_snapshot(collection, count=count)
+
+
 def _collection_snapshot_manifest(
     collection: Any,
     *,
@@ -253,7 +283,7 @@ def _collection_snapshot_manifest(
         return _empty_snapshot_manifest(name)
 
     try:
-        snapshot = collection.get(include=["documents", "metadatas", "embeddings"])
+        snapshot = _paged_collection_snapshot(collection, count=count)
     except Exception:
         return _unavailable_snapshot_manifest("UNVERIFIED")
 
@@ -384,7 +414,7 @@ def read_git_head_sha(repo_root: Path | str) -> str:
     return "unknown"
 
 
-def _receipt_from_mapping(value: Mapping[str, Any]) -> HoloIndexFreshnessReceipt:
+def freshness_receipt_from_mapping(value: Mapping[str, Any]) -> HoloIndexFreshnessReceipt:
     return HoloIndexFreshnessReceipt(
         schema_version=str(value.get("schema_version", "")),
         generated_at=str(value.get("generated_at", "")),
@@ -615,7 +645,7 @@ def _coerce_build_base_receipt(
     if not isinstance(base_receipt, Mapping):
         return base_receipt
     try:
-        return _receipt_from_mapping(base_receipt)
+        return freshness_receipt_from_mapping(base_receipt)
     except (TypeError, ValueError):
         return None
 
@@ -796,7 +826,7 @@ def _coerce_base_receipt(
         receipt = value
     elif isinstance(value, Mapping):
         try:
-            receipt = _receipt_from_mapping(value)
+            receipt = freshness_receipt_from_mapping(value)
         except (TypeError, ValueError) as exc:
             raise ValueError("malformed base freshness receipt") from exc
     else:
@@ -1064,7 +1094,7 @@ def _evaluation_receipt(
     if not isinstance(value, Mapping):
         return None
     try:
-        return _receipt_from_mapping(value)
+        return freshness_receipt_from_mapping(value)
     except Exception:
         return None
 
@@ -1248,7 +1278,9 @@ __all__ = [
     "evaluate_freshness_for_paths",
     "freshness_receipt_path",
     "freshness_receipt_integrity_ok",
+    "freshness_receipt_from_mapping",
     "load_freshness_receipt",
+    "paged_collection_snapshot",
     "publish_maintenance_invalidation",
     "read_git_head_sha",
     "write_freshness_receipt",

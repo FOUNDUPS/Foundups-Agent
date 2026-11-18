@@ -100,7 +100,6 @@ async def process_message(
         commander=intent.is_authorized_commander,
         extracted_task=intent.extracted_task or "",
     )
-
     if intent.category in (
         dae.IntentCategory.COMMAND,
         dae.IntentCategory.SYSTEM,
@@ -112,29 +111,30 @@ async def process_message(
     ):
         if dae._is_turn_cancelled("pre_skill_safety"):
             return dae._turn_cancelled_response()
-        if not dae._ensure_skill_safety():
+        skill_allowed, skill_message = dae._ensure_skill_safety(details=True)
+        if type(skill_allowed) is not bool or not isinstance(skill_message, str):
+            raise ValueError("invalid skill safety result")
+        if not skill_allowed:
             logger.warning(
                 "[OPENCLAW-DAE] Skill safety gate blocked %s route: %s",
                 intent.category.value,
-                dae._skill_scan_message,
+                skill_message,
             )
             dae._report_daemon_action(
                 "skill_safety_gate",
                 target=intent.category.value,
                 result="blocked",
-                reason=dae._skill_scan_message,
+                reason=skill_message,
             )
-            
             # WSP 95 / WSP 00: Deterministic block and fail-closed for mutating intents.
-            return f"[SECURITY BLOCK] Execution prevented by Skill Safety Guard: {dae._skill_scan_message}"
+            return f"[SECURITY BLOCK] Execution prevented by Skill Safety Guard: {skill_message}"
         else:
             dae._report_daemon_action(
                 "skill_safety_gate",
                 target=intent.category.value,
                 result="passed",
-                policy=dae._skill_scan_message,
+                policy=skill_message,
             )
-
     if dae._is_turn_cancelled("pre_preflight"):
         return dae._turn_cancelled_response()
 
@@ -142,12 +142,14 @@ async def process_message(
     dae._report_daemon_action(
         "wsp_preflight",
         target=intent.category.value,
-        result="passed" if preflight_ok else "downgraded",
+        result="passed" if preflight_ok else "blocked",
         target_domain=intent.target_domain or "none",
     )
     if not preflight_ok:
-        intent.category = dae.IntentCategory.CONVERSATION
-        intent.target_domain = "digital_twin"
+        return (
+            "[SECURITY BLOCK] Execution prevented by WSP preflight: "
+            f"{intent.category.value} intent is not authorized or its required runtime is unavailable."
+        )
 
     if dae._is_turn_cancelled("pre_permission_gate"):
         return dae._turn_cancelled_response()
