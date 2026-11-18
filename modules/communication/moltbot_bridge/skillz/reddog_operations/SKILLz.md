@@ -45,8 +45,9 @@ retirement_date: null
   claims. Refute the proposed direction before acting.
 - Apply WSP_15 to choose the highest-value bounded task that current authority
   and compute can safely complete.
-- Search before creating. Emit a receipt-bound REUSE, EXTEND, or CREATE
-  decision using current checkout evidence.
+- Search before creating. Complete the pre-build audit below before proposing
+  a work order, selecting a worker, or building; bind its decision to the
+  existing operational snapshot and evidence receipts.
 - Treat constitutional WSP and signed operational state as authoritative.
   Current repository/direct-read evidence outranks verified external research,
   approved Memex, Breadcrumb continuity, Brain history, and model recollection.
@@ -85,7 +86,8 @@ or conflicting role receipt blocks the stage.
 ## Operating Loop
 
 1. Freeze the authoritative work snapshot and evidence generations.
-2. Evaluate retrieval coverage, noise, staleness, and duplicate-work risk.
+2. Complete the pre-build audit and comparison; evaluate retrieval coverage,
+   noise, staleness, and duplicate-work risk before proposing work.
 3. Run bounded repository, research, freshness, skill-gap, and security lanes
    selected by WSP_15.
 4. Require evidence-bearing reports and independent refutation.
@@ -97,6 +99,88 @@ or conflicting role receipt blocks the stage.
 9. After merge, route Holo maintenance through WRE and verify the new
    generation before recording the outcome.
 10. Admit only independently verified outcomes to PatternMemory.
+
+## Pre-build audit and decision
+
+Apply WSP 3, WSP 50, WSP 84 and WSP 97 before work-order creation and again
+before dependent writes when the head, owner, holds or evidence change. Reuse
+a source-bound parent inventory for the assigned slice; do not start competing
+repository-wide audits. On cold resume, memory history is context, not the
+current queue or authority: retrieve fresh exact-head evidence from its owner.
+
+1. Recover the objective, authorization, current owner/session, task/work-order
+   reference, unfinished obligations and holds. Inspect accessible local
+   `.agents/skills`, relevant host memories and existing task/receipt links.
+   Missing owner evidence is UNKNOWN; inaccessible sources are unavailable,
+   never an empty queue or permission to dispatch new workers.
+2. Inspect the selected checkout's exact HEAD, dirty/untracked state and
+   worktree/branch inventory, current main, and related open/merged PRs.
+   Record source/head and observation time with timezone for each observation;
+   distinguish local overlays, preview revisions, main and production.
+   Preserve unknown or concurrently owned work. Use WSP 97 section 1.2A for
+   stale-PR classification and WSP 110's handoff fields as draft guidance;
+   neither a shared identity nor a branch name transfers a write lease.
+3. Retrieve the owning module's interfaces, current code, newest relevant
+   evidence, tests/README, tests/TestModLog and closest existing tests/fixtures
+   before choosing implementation or test work (WSP 97 section 1.2B). Record
+   accepted invariants, exact test IDs/results and their source/environment;
+   separate historical passes, unrun checks and current failures.
+4. Compare viable alternatives by invariant coverage, unique valid deltas,
+   authority, tests, evidence freshness and live/preview/main differences.
+   Newer is not automatically better: a newer failing candidate cannot
+   displace an older qualified invariant without comparison and acceptance.
+   Identify overlap between proposed work orders as well as existing work.
+   Reuse the owner or reconcile the deltas; unresolved overlap blocks
+   dependent writes rather than dispatching duplicate writers.
+5. Trace relevant Brain, Breadcrumb and Memex inputs through their existing
+   source receipts and operational snapshot. For build, ticket, PR, swarm,
+   WRE and RSI claims, inspect the actual caller/consumer and acceptance
+   evidence. Label documentation guidance, implemented source/test behavior
+   and observed runtime integration separately using WSP 97 truth labels.
+   A simulated swarm or queue scaffold is not admitted execution; preview
+   playback or merged source does not establish production completion.
+6. Record one compact decision in the existing work record, bound to the
+   snapshot/assignment and source receipts. This planning record is not a new
+   signed receipt schema, queue, memory store, dispatcher or authority:
+
+   ```text
+   decision: REUSE | EXTEND | RECONCILE | CREATE | BLOCKED
+   scope_and_snapshot: objective, assignment/snapshot and evidence references
+   sources: known/unavailable, source class, exact source/head, observed_at+timezone
+   ownership: owner/session, task/work-order, holds; UNKNOWN where unresolved
+   overlap_and_preservation: candidates, unique deltas, retained owner/work
+   comparison: alternatives, accepted invariants, tests/results/environment, rationale
+   authorization_and_next_action: allowed effects, blocker/recheck, next bounded action
+   ```
+
+   REUSE consumes qualified existing work; EXTEND changes its canonical owner;
+   RECONCILE preserves and composes valid deltas under resolved ownership.
+   CREATE requires bounded searches showing no reusable owner, with coverage
+   gaps explicit; unavailable evidence cannot justify creation. BLOCKED names
+   the affected action and recovery condition, leaving unrelated authorized
+   work eligible. Do not overwrite failed or historical evidence with a new
+   summary. Carry accepted invariants and tests into any authorized handoff.
+
+The existing skill loader binds these instructions into the model prompt and
+revalidates content/registry receipts at submit/resume. That enforces byte and
+receipt integrity, not automatic completion of this audit or runtime admission.
+Signed work orders, authentication, independent verification, CI, ownership and
+promotion gates remain required. Start Operations remains read-only.
+
+### Existing memory and execution owners
+
+WSP 60 (`WSP_60_Module_Memory_Architecture.md`) and its existing
+`WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md` own the memory map;
+`docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md` maps composition.
+Use `reddog_operational_context_snapshot.py` for separate source receipts and
+the existing Brain/Memex current-state and Breadcrumb query owners for context.
+Use `agent_market/src/task_pipeline.py` for ticket lifecycle and WRE's
+`git_lifecycle_inventory.py` for repository evidence. Follow
+`docs/operations/WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md` for execution
+and independent verification, and WSP 48 for RSI qualification. Paths here are
+discovery pointers, not proof that any path ran. PatternMemory admission still
+requires the existing independent gates; staged outcomes outside recall or an
+unready activation sink cannot establish an accepted improvement.
 
 ## Registered FoundUp Work
 

@@ -87,6 +87,7 @@ def test_prompt_binds_skill_receipt_without_granting_authority() -> None:
 
     assert skill.receipt["receipt_id"] in prompt
     assert skill.receipt["content_digest"] in prompt
+    assert skill.content in prompt
     assert "Inspect current work." in prompt
     assert "grants no source mutation" in prompt
 
@@ -107,6 +108,29 @@ def test_persisted_intent_must_match_complete_use_time_receipt() -> None:
         "operations_skill_content_digest": "sha256:" + "0" * 64,
     }
     assert not operations_skill_receipt_matches(tampered, receipt)
+
+
+def test_updated_skill_rejects_persisted_previous_content_receipt(tmp_path: Path) -> None:
+    for relative in (REGISTRY_PATH.relative_to(REPO_ROOT), Path(SKILL_RELATIVE_PATH)):
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((REPO_ROOT / relative).read_bytes())
+    before = load_reddog_operations_skill(tmp_path)
+    receipt = skill_receipt_dict(before)
+    intent = {
+        "operations_skill_receipt": receipt,
+        "operations_skill_receipt_id": receipt["receipt_id"],
+        "operations_skill_content_digest": receipt["content_digest"],
+        "operations_skill_registry_entry_digest": receipt["registry_entry_digest"],
+    }
+    target = tmp_path / SKILL_RELATIVE_PATH
+    target.write_text(before.content + "\nUpdated audit evidence requirement.\n", encoding="utf-8")
+    current = load_reddog_operations_skill(tmp_path)
+
+    assert operations_skill_receipt_matches(intent, receipt)
+    assert current.receipt["content_digest"] != receipt["content_digest"]
+    assert current.receipt["registry_entry_digest"] == receipt["registry_entry_digest"]
+    assert not operations_skill_receipt_matches(intent, skill_receipt_dict(current))
 
 
 @pytest.mark.parametrize(

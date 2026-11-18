@@ -300,7 +300,7 @@ def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
         'modules/infrastructure/idle_automation/src/resident_reconcile_schedule_adapter.py',
     ):
         assert resident_member in generated['required_runtime_files']
-    assert digest == "cb7f5970b56ed261b92e4df2775ab30961da80187b351833f356f5ad7bb55aa4"
+    assert digest == "916bbfb60bbb3c089457670fde29b117d29c4eaa999f29ac1480379c91e5d6b5"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

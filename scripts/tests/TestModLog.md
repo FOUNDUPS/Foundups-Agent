@@ -1,3 +1,18 @@
+## 2026-11-18 - Operations Skillz content binding
+
+Refreshed the existing canonical manifest digest pin alongside the extension
+constant after the pre-build guidance changed the operations Skillz bytes.
+The generated closure retains all 1,494 members and every other source digest;
+only the existing Skillz content digest changes. Scanner rules, source/index
+assertions, registry membership and authority remain unchanged. The sibling
+Skillz manifest already had a stale digest on the main baseline; rebound its
+single existing entry to the same normalized content without adding members.
+The existing 8 manifest/index cases passed within the combined 58-case run.
+Node contract and blocked-request recovery commands passed; broad preflight
+first exceeded 45 seconds, then its 120-second rerun failed at the existing
+Windows symlink fixture with `EPERM`. This environment result does not waive
+the fixture or establish a passing broad preflight.
+
 ## 2026-11-16 — Reconciled UI-TARS coordinate-profile backend digest pin
 
 Updated the expected canonical manifest digest pin in
