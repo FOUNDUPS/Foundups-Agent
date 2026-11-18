@@ -30,15 +30,15 @@ Use the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/s
 
 | Surface | Required behavior | Acceptance boundary |
 | --- | --- | --- |
-| PC / monitor | Centered main video above a continuous horizontal thumbnail strip. Search sits **between the main video and the bottom tiles**. The main player is not forced browser fullscreen. | Desktop screenshots and browser interaction tests must show this composition; oversized three-column posters or an extra player inserted below a selected row do not satisfy it. |
+| PC / monitor | Centered main video, then a horizontal thumbnail queue, then **one viewport-bottom floating search dock below the thumbnails**. The dock remains reachable while content scrolls; the main player is not forced browser fullscreen. | Desktop screenshots and browser interaction tests must show this order and bottom anchoring; oversized three-column posters, search above the queue, or a duplicate dock do not satisfy it. See H1F. |
 | Desktop startup / queue | Request playback of the first eligible clip on entry, then advance through the queue. Preserve one active player and deliberate sound controls. | Test actual provider state and advancing time. Where the browser blocks startup, show a truthful user-activation recovery; never claim guaranteed audible autoplay. No duplicate or hidden players. |
-| Search | Center a compact search bar beneath the desktop video. Typing filters the scoped queue. Submit plays the next match or the first available match. The phone search submits a grid filter and offers local dictation where available. | Search uses existing HPC catalog metadata. Test stable IDs, selection, no results, return state and the phone keyboard. Cross-FoundUp discovery remains a later permissioned expansion. |
+| Search | Reuse one floating bottom dock: left plus/options, editable scoped search, dictation mic, and right Red Dog action. Typing filters the scoped desktop queue; submit plays the next match or first available match. Phone search submits its grid filter. | Test exactly one visible and focusable search surface per active view, preserved query/selection, safe areas, keyboard clearance, no results, and return state. Dictation and Red Dog retain their actual capabilities; placement does not admit resident speech. |
 | Phone | Compact three-column portrait grid, fixed header, thumb-accessible bottom controls, vertical browsing through eligible clips. The selected tile becomes the shared player across its original row and nearby tiles reflow. Close restores the tile, scroll and focus. | Check the original row top, all three columns, one iframe, provider minimum size, explicit expand or supported pinch, and return. |
 | Breakpoint / rotation | Change presentation without duplicating the media session or losing video identity, queue, query and browsing position. | Test desktop, phone portrait/landscape, resizing and keyboard access independently. Do not classify all large tablets by pointer alone without testing. |
 | Entry and membership | Guests browse on `hpc.foundups.com`. `foundups.com/members` leads to the existing member gate. Admitted members can select HPC from the Mall or return to the same selection after sign-in. | Guest, uninvited and admitted browser cases. The `/f/hpc` landing links to the dedicated host. `/f/hpc/app` retains its protected handoff. |
 | Shared-regression guard | Preserve ordinary Mall channel expansion, other FoundUp projections, guest/member boundaries, provider diagnostics, save/history and return navigation. | Reuse the existing tests and fixtures for the shared grid, player and account boot. |
 
-This request supersedes earlier hidden-search wording only for **HPC-scoped bottom search**. The master-Mall logo link and independent-site disclosure remain. The latest clarification places search above the bottom desktop strip, not below it.
+This request supersedes earlier hidden-search wording only for **HPC-scoped bottom search**. The master-Mall logo link and independent-site disclosure remain. **012's latest floating-bottom clarification in H1F supersedes the previous search-above-thumbnails order.** It is a requested acceptance change, not evidence that production already renders it.
 
 ### H1C · Evidence and recovery before implementation
 
@@ -82,6 +82,44 @@ identity, admission and capture owners. Verify consent, cancellation,
 supported device models and return context before exposing actions.
 Seven-level preferences, community nominations, comics/story panels and
 whole-Mall discovery keep their existing stages.
+
+### H1F · Single floating bottom dock — 012 clarification, 2026-11-18
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED by this documentation slice.**
+The requested composition is **main video -> video thumbnails/queue -> one
+floating bottom dock**. Floating means anchored to the visible app viewport,
+with a small edge gap and safe-area clearance, not a search row that scrolls
+away or sits above the videos. Browse and WikiTube viewer reuse the same shared
+dock owner; switching view transfers query, focus and selection without leaving
+two visible or keyboard-focusable search bars.
+
+- Put `+` on the left, scoped search in the middle, and microphone/Red Dog on
+  the right in the same floating item. Reuse current options, dictation and dog
+  behavior; do not turn a display change into a claim of resident-agent execution.
+- Keep the dock reachable during browsing and playback. While focused, editing,
+  dictating or using options, it must not auto-hide. Longer input grows upward;
+  its controls remain at the bottom. Reconcile any prior scroll-hide behavior
+  through the existing controller rather than adding competing timers.
+- When the phone keyboard opens, keep the dock and its active input above it;
+  restore the normal safe-area position on dismissal. Preserve accessible touch
+  targets, keyboard navigation, reduced motion and usable portrait/landscape views.
+- Reserve scroll clearance for the dock so the last tile and its title can be
+  brought fully into view. Do not cover native player controls or reduce the
+  active provider below its required visible dimensions. The plus menu opens
+  upward within the available viewport. Choose layering in the existing shell,
+  below modal dialogs, rather than an arbitrary global z-index override.
+- Extend existing dock/browser fixtures: one visible dock, bottom anchoring at
+  top/middle/end of scroll, thumbnails above it, keyboard open/close, expanded
+  input, option dismissal, rotation, Back and preserved one-player continuity.
+  Desktop and physical-iPhone acceptance remain separate from emulation.
+
+HPC is the first preview consumer of this shared refinement, followed by
+qualified Mall promotion; no standalone HPC runtime or security bypass is
+introduced. Preserve the separately owned top-anchored phone-player work on
+`feat/hpc-floating-wikitube-v20`; this dock correction must not revert it to an
+older row-player contract during reconciliation. Refresh that owner and current
+main before implementation. Keep #2405 diagnostics and #2411 Vote navigation
+separate. This documentation changes neither their branches nor deployed UI.
 
 ## 2026-11-11 reconciliation receipt
 
