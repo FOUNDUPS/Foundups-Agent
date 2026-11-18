@@ -1,0 +1,98 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "architect",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "ORCH",
+  "S": {
+    "owner": "modules/foundups/memory_horizon",
+    "read": [
+      "modules/foundups/memory_horizon",
+      "modules/foundups/foundup_registry.json",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+      "WSP_framework/src/WSP_99_M2M_Prompting.md",
+      "WSP_framework/src/WSP_102_FoundUps_Web_Design_Protocol.md",
+      "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md",
+      "docs/operations/RSI_SWARM_DISPATCH.md"
+    ],
+    "write": []
+  },
+  "M": "plan",
+  "T": "MH-RSI-01",
+  "A": "VALIDATE current-source ownership, runtime admission and disjoint build scopes",
+  "R": [
+    0,
+    15,
+    22,
+    33,
+    46,
+    48,
+    50,
+    60,
+    71,
+    95,
+    97,
+    99,
+    102,
+    104,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "no_duplicate_foundup": true,
+    "source_retrieval_before_claim": true,
+    "no_live_dispatch_claim": true,
+    "public_route_owner_must_be_verified": true,
+    "openrouter_requires_runtime_binding": true,
+    "effect_boundary": "Read-only preflight; no source/runtime/public mutation."
+  },
+  "O": [
+    "current-source preflight with exact base/head and owner evidence",
+    "dependency-ready/blocked classification for MH-RSI-02..10",
+    "verified non-overlapping write-scope plan",
+    "runtime/provider/admission gaps",
+    "work_orders/results/MH-RSI-01.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "ready_for_admission_check",
+    "depends_on": [],
+    "objective": "Prove the current repository and runtime can safely admit the Memory Horizon experiment without duplicating owners or bypassing gates.",
+    "steps": [
+      "Re-run WSP 97 retrieval against current main, open PRs/issues and module contracts.",
+      "Confirm memory_horizon identity/module/manifest/registry state and no duplicate scaffold.",
+      "Inspect current WRE/OpenClaw/Hermes/AI Gateway authority and model-binding state.",
+      "Verify G1 write scopes are disjoint and identify any shared files reserved to coordinator.",
+      "Return admitted, blocked or repair-required disposition for each downstream ticket."
+    ],
+    "wsp15": {
+      "complexity": 3,
+      "importance": 5,
+      "deferability": 5,
+      "impact": 5,
+      "total": 18,
+      "priority": "P0"
+    },
+    "requirements": {
+      "compute_class": "HIGH",
+      "reasoning_depth": "DEEP",
+      "tools": [
+        "repository_read"
+      ],
+      "verification_class": "ARCHITECTURE_AUTHORITY"
+    },
+    "acceptance": [
+      "No downstream ticket is marked ready without current evidence.",
+      "No duplicate FoundUp/scaffold/route is proposed.",
+      "Every blocker names an existing owner or exact missing authority."
+    ],
+    "rollback": "Read-only; preserve evidence and issue narrow repair ticket on failure."
+  }
+}
