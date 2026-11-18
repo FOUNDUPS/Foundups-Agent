@@ -72,6 +72,20 @@ The native Google Docs write-path guard above applies **equally to both** the ca
 - After one bounded native Docs failure, leave one pending learning-log delta; do not create a parallel log or replay the underlying Gmail/CRM transaction. Reconcile the pending delta against the live private Doc before a later authorized retry.
 - Keep the private log's incident details private; never publish recipient addresses, BCC lists, complete message bodies or sensitive telemetry to public Git or the campaign Moshpit.
 
+## Compact activity receipts and scope
+
+For any project/case Moshpit, write a short dated action, verified result or
+explicit pending state, and a permitted source link. Keep manuscripts, full
+correspondence and detailed case analysis in their existing authorized private
+owners; link rather than duplicating them into the activity stream. Check the
+actual destination audience before including a link or identifier. A private
+source does not become shareable merely because its existence is logged.
+
+The newest-first rule applies to project/case activity and the private 0102
+learning log. It does not reverse generic Red Dog conversation history; that
+surface retains its own conversation-order contract. This Skillz is an operator
+contract, not evidence of a running Docs writer or authorized runtime source.
+
 ## Event classification
 
 Write to **YUMORI.me Moshpit** when the event materially answers “what happened in the campaign?” Examples:
@@ -145,8 +159,8 @@ Material external replies and procedural outcomes stay in YUMORI.me Moshpit beca
 
 Before editing:
 
-1. Read the current top of YUMORI.me Moshpit.
-2. Locate today’s date anchor.
+1. Read the current top of the resolved destination Moshpit and the event's relevant day block.
+2. Locate the event's Asia/Tokyo date anchor, not automatically today's anchor.
 3. Classify the event as CAMPAIGN, AGENT_INTERNAL, or BOTH.
 4. Compute effective event time.
 5. Check for an existing equivalent entry to avoid duplication.
@@ -169,7 +183,7 @@ For a current-day write, verify the whole current-day block after mutation, not 
 
 ## 0102 learning promotion
 
-If the write reveals a structural weakness, append one concise entry to the private `0102 Moshpit — Agent Learning & Action Log` with root cause, generalized rule, concrete prompt/skill/code change, next test, and RED DOG CANDIDATE when repeated or structural.
+If the write reveals a structural weakness, insert one concise entry at its evidence-based newest-first position in the private `0102 Moshpit — Agent Learning & Action Log` with root cause, generalized rule, concrete prompt/skill/code change, next test, and RED DOG CANDIDATE when repeated or structural.
 
 ## Scheduled correspondence integration
 
