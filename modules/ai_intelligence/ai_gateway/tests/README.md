@@ -1,5 +1,17 @@
 # AI Gateway Tests
 
+## Lego scaffolding benchmark protocol controls — 2026-11-18
+
+`test_lego_scaffolding_benchmark_protocol.py` covers 7 offline mock-only contract
+cases: balanced `8 dev (2x4)` / `12 held_out_a (3x4)` / `12 held_out_b (3x4)`
+stratification and skew/overlap rejection, sealed `AuthorVisibleTaskSpec`
+delivery and reserved `verifier` role rejection, `MatchedAggregateBudget` swarm
+token/invocation ceiling enforcement, single-axis `validate_controlled_ablation`
+confound rejection, separate `provider_billed_usd` vs `subscription_quota_delta_pct`
+and `None` zero-acceptance cost accounting, cold `evaluate_fresh_session_transfer`
+and exact-byte `verify_rollback_restore` gates with `HYPOTHESIS_UNDER_TEST`
+pinning, plus deterministic receipt digests and static import confinement.
+
 ## Independent repair verifier controls — 2026-11-16
 
 `test_independent_repair_verifier.py` covers 5 offline contract cases for Issue
