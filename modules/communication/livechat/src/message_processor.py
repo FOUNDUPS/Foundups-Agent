@@ -161,28 +161,10 @@ class MessageProcessor:
         self.emoji_limiter = EmojiResponseLimiter() if EmojiResponseLimiter else None
         self.agentic_improvement = AgenticSelfImprovement() if AgenticSelfImprovement else None
         
-        # Initialize Grok and consciousness handlers FIRST
-        # Try to get LLMConnector for Grok, otherwise use simple fact checker
-        try:
-            from modules.ai_intelligence.rESP_o1o2.src.llm_connector import LLMConnector
-            # Check for Grok/xAI API key
-            if os.environ.get("GROK_API_KEY") or os.environ.get("XAI_API_KEY"):
-                # Use Grok 3 - latest flagship model with enhanced consciousness capabilities
-                llm_connector = LLMConnector(model="grok-3")  
-                self.grok = GrokIntegration(llm_connector)
-                logger.info("[OK] Grok 3 LLM integration initialized - 0102 consciousness online!")
-            else:
-                logger.warning("No Grok API key found, using SimpleFactChecker fallback")
-                from modules.communication.livechat.src.simple_fact_checker import SimpleFactChecker
-                self.simple_fact_checker = SimpleFactChecker(self.memory_dir)
-                self.grok = None
-        except Exception as e:
-            logger.warning(f"Could not initialize Grok LLM: {e}, using SimpleFactChecker")
-            # Fallback to simple fact checker
-            from modules.communication.livechat.src.simple_fact_checker import SimpleFactChecker
-            self.simple_fact_checker = SimpleFactChecker(self.memory_dir)
-            self.grok = None
-            
+        # Legacy consciousness adapter delegates to the bound, reviewed consumer.
+        # It never constructs a provider client or accepts provider credentials.
+        self.grok = GrokIntegration(self.intelligent_reply)
+
         self.sentiment_engine = AgenticSentiment0102()
         self.consciousness = ConsciousnessHandler(self.sentiment_engine, self.grok)
 
@@ -240,6 +222,8 @@ class MessageProcessor:
             bot_channel_id=bot_channel_id,
             stream_title=stream_title,
         )
+        if getattr(self, 'grok', None) is not None:
+            self.grok.reply_generator = self.intelligent_reply
 
     def process_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -357,6 +341,7 @@ class MessageProcessor:
             
             # Check for consciousness commands with rate limiting
             has_consciousness = False
+            emoji_rate_denied = False
             if self.consciousness.has_consciousness_emojis(message_text):
                 # Check rate limits if emoji limiter is available
                 if self.emoji_limiter:
@@ -368,6 +353,7 @@ class MessageProcessor:
                         # Record that we'll respond
                         self.emoji_limiter.record_emoji_response(author_id, author_name)
                     else:
+                        emoji_rate_denied = True
                         logger.info(f"[FORBIDDEN] Emoji response blocked for {author_name}: {reason}")
                         # Learn from this
                         if self.agentic_improvement:
@@ -411,6 +397,7 @@ class MessageProcessor:
                 "has_trigger": has_trigger,
                 "is_rate_limited": is_rate_limited,
                 "has_consciousness": has_consciousness,
+                "emoji_rate_denied": emoji_rate_denied,
                 "has_factcheck": has_factcheck,
                 "has_shorts_command": has_shorts_command,
                 "has_m2j_command": has_m2j_command,
@@ -511,6 +498,17 @@ class MessageProcessor:
         
         # Determine role
         role = 'OWNER' if is_owner else 'MOD' if is_mod else 'USER'
+
+        # Conversation is available to every stakeholder. Platform command
+        # permissions stay on their existing path; badges are not reply priority.
+        request_text = re.sub(r'[✊👊✋🖐][\ufe0f\U0001F3FB-\U0001F3FF]*', '', message_text).strip()
+        quiz = re.fullmatch(r'\s*✊[\ufe0f\U0001F3FB-\U0001F3FF]*✋[\ufe0f\U0001F3FB-\U0001F3FF]*🖐[\ufe0f\U0001F3FB-\U0001F3FF]*\s*[1-4]\s*', message_text)
+        code_command = processed_message.get('has_consciousness') and re.match(
+            r'^(holoindex|search code|find code)\b', request_text, re.I)
+        if not (processed_message.get('has_whack_command') or processed_message.get('has_factcheck')
+                or processed_message.get('has_shorts_command') or processed_message.get('has_m2j_command')
+                or self._check_pqn_command(message_text) or quiz or code_command):
+            return await self._conversation_response(processed_message, role)
         
         # WSP 48: Self-improvement through observation
         if role in ['MOD', 'OWNER']:
@@ -628,15 +626,44 @@ class MessageProcessor:
 
                 if can_use_consciousness:
                     # QUIZ ANSWER: Check if ✊✋🖐 is followed by a number (1-4)
-                    quiz_answer_match = re.search(r'✊✋🖐\s*([1-4])', message_text)
+                    quiz_answer_match = re.fullmatch(
+                        r'\s*✊[\ufe0f\U0001F3FB-\U0001F3FF]*'
+                        r'✋[\ufe0f\U0001F3FB-\U0001F3FF]*'
+                        r'🖐[\ufe0f\U0001F3FB-\U0001F3FF]*\s*([1-4])\s*', message_text)
                     if quiz_answer_match:
                         answer_num = quiz_answer_match.group(1)
                         logger.info(f"[BOOKS] Quiz answer: ✊✋🖐{answer_num} from {author_name}")
                         quiz_response = self.command_handler.handle_whack_command(
                             f"/quiz {answer_num}", author_name, author_id, role
                         )
-                        if quiz_response:
-                            return quiz_response
+                        return quiz_response
+
+                    # Emoji + substantive text is a request, not a successful
+                    # canned acknowledgment. Preserve the whole question and
+                    # the reviewed reply object through the existing call owner.
+                    request_text = re.sub(
+                        r'[✊👊✋🖐][\ufe0f\U0001F3FB-\U0001F3FF]*', '', message_text
+                    ).strip()
+                    is_code_command = re.match(r'^(holoindex|search code|find code)\b', request_text, re.I)
+                    if request_text and not is_code_command:
+                        if (processed_message.get('is_rate_limited')
+                                or not _env_truthy('YT_COMMENT_REPLY_ENABLED', 'true')):
+                            return None
+                        from modules.communication.livechat.src.llm_integration import model_reply_request
+                        request = model_reply_request(
+                            self.intelligent_reply, message_text, author_name, author_id, role)
+                        if request is None:
+                            return None
+                        self._update_trigger_time(author_id)
+                        response = await self._resolve_model_command(request)
+                        if response is None:
+                            return None  # No unreviewed/canned fallback for a question.
+                        if self.intelligent_throttle:
+                            allowed, _ = self.intelligent_throttle.check_message_diversity(response, 'consciousness')
+                            if not allowed:
+                                return None
+                        processed_message['response_type'] = 'consciousness'
+                        return response
 
                     logger.info("[BOT][AI] [QWEN-DAE-DECISION] EXECUTE consciousness_response (confidence: 0.85)")
                     # Generate agentic response based on chat history
@@ -671,6 +698,9 @@ class MessageProcessor:
                     response = self.consciousness.process_consciousness_command(
                         message_text, author_id, author_name, role
                     )
+                    from modules.communication.livechat.src.llm_integration import ModelReplyRequest
+                    if isinstance(response, ModelReplyRequest):
+                        return await self._resolve_model_command(response)
                     if response:
                         logger.info(f"✊✋🖐 Consciousness command response for {author_name}")
                         # Mark this as a consciousness response
@@ -738,6 +768,9 @@ class MessageProcessor:
                     logger.warning(f"[AI][GAME] QUIZ DETECTED IN MESSAGE_PROCESSOR! Sending to handle_whack_command")
                 is_member = processed_message.get("is_member", False)
                 response = self._handle_whack_command(message_text, author_name, author_id, role, is_member)
+                from modules.communication.livechat.src.llm_integration import ModelReplyRequest
+                if isinstance(response, ModelReplyRequest):
+                    return await self._resolve_model_command(response)
                 if response:
                     # Handle list responses (e.g., /help returns multiple messages)
                     if isinstance(response, list):
@@ -756,210 +789,125 @@ class MessageProcessor:
                 else:
                     logger.error(f"[GAME][FAIL] No response from handle_whack_command for '{message_text}'")
 
-            # Priority 4.5: Troll callout - mock known trolls when they first message this stream
-            # Only callout once per stream (tracked in announced_joins)
-            if author_id not in self.announced_joins:
-                try:
-                    # Use magadoom_scores.db (the REAL whack data source)
-                    from modules.gamification.whack_a_magat.src.whack import get_profile_store
-                    profile_store = get_profile_store()
-                    whack_count = profile_store.get_whack_count_for_user(author_id)
-
-                    if whack_count >= 3:  # Confirmed troll (3+ whacks)
-                        callout = self.greeting_generator.generate_troll_callout(author_name, whack_count)
-                        if callout:
-                            self.announced_joins.add(author_id)  # Don't callout again this stream
-
-                            # Check intelligent throttle to prevent spam
-                            if self.intelligent_throttle:
-                                allowed, reason = self.intelligent_throttle.check_message_diversity(callout, 'callout')
-                                if not allowed:
-                                    logger.debug(f"[TROLL] Callout blocked by throttle: {reason}")
-                                else:
-                                    logger.info(f"💀 [TROLL-CALLOUT] @{author_name} ({whack_count} whacks) - calling them out!")
-                                    return callout
-                            else:
-                                logger.info(f"💀 [TROLL-CALLOUT] @{author_name} ({whack_count} whacks) - calling them out!")
-                                return callout
-                except Exception as e:
-                    logger.debug(f"[TROLL] Callout check failed: {e}")
-
-            # Priority 4.6: Top whacker/mod welcome - greet significant players on first message
-            # Only greet once per stream (tracked in announced_joins)
-            if author_id not in self.announced_joins:
-                try:
-                    whacker_greeting = self.greeting_generator.generate_whacker_greeting(author_name, author_id, role)
-                    if whacker_greeting:
-                        self.announced_joins.add(author_id)  # Don't greet again this stream
-
-                        # Check intelligent throttle to prevent spam
-                        if self.intelligent_throttle:
-                            allowed, reason = self.intelligent_throttle.check_message_diversity(whacker_greeting, 'greeting')
-                            if not allowed:
-                                logger.debug(f"[WHACKER] Greeting blocked by throttle: {reason}")
-                            else:
-                                logger.info(f"🎯 [WHACKER-GREETING] Welcoming top whacker @{author_name}!")
-                                return whacker_greeting
-                        else:
-                            logger.info(f"🎯 [WHACKER-GREETING] Welcoming top whacker @{author_name}!")
-                            return whacker_greeting
-                except Exception as e:
-                    logger.debug(f"[WHACKER] Greeting check failed: {e}")
-
-            # Priority 5: Handle MAGA content - just respond with witty comebacks
-            # Bot doesn't execute timeouts, only announces them when mods/owner do them
-            if processed_message.get("has_maga"):
-                logger.info("[BOT][AI] [QWEN-DAE-DECISION] EXECUTE maga_troll_response (confidence: 0.75)")
-
-                # Check GLOBAL MAGA rate limiting FIRST to prevent spam
-                current_time = time.time()
-                if current_time - self.last_global_maga_time < self.global_maga_cooldown:
-                    remaining = self.global_maga_cooldown - (current_time - self.last_global_maga_time)
-                    logger.debug(f"🛡️ GLOBAL: Skipping MAGA response - global cooldown active ({remaining:.0f}s remaining)")
-                    return None
-
-                # Check per-user MAGA rate limiting
-                if self._is_maga_rate_limited(author_id):
-                    logger.debug(f"🛡️ Skipping MAGA response to {author_name} - user rate limited (10 min cooldown)")
-                    return None
-
-                # Also check intelligent throttle for MAGA responses - only for moderators
-                if self.intelligent_throttle and role == 'MOD':
-                    allowed, block_msg = self.intelligent_throttle.check_moderator_command_allowed(author_id, author_name, role, message_text)
-                    if not allowed:
-                        logger.info(f"🛡️ Intelligent throttle blocked MAGA response to {author_name}: {block_msg}")
-                        return None
-
-                # Reuse the MAGA response generated during classification to prevent duplicates
-                response = processed_message.get("maga_response")
-                if response:
-                    # Only send if we can @mention properly
-                    if self._is_valid_mention(author_name):
-                        # Personalize with username
-                        response = f"@{author_name} {response}"
-                        logger.info(f"[TARGET] MAGA troll response for @{author_name}")
-                        # Update MAGA response times to prevent spam
-                        self._update_maga_time(author_id)
-                        self.last_global_maga_time = time.time()  # Update global cooldown
-                        return response
-                    else:
-                        logger.debug(f"[U+26A0]️ DELETING MAGA response - cannot @mention '{author_name}'")
-                        return None  # Explicitly return None - no message sent
-
-            # Priority 6: Handle regular emoji triggers
-            if processed_message.get("has_trigger"):
-                logger.info("[BOT][AI] [QWEN-DAE-DECISION] EXECUTE emoji_trigger_handler (confidence: 0.70)")
-                if processed_message.get("is_rate_limited"):
-                    logger.debug(f"⏳ User {author_name} is rate limited")
-                    logger.info("[BOT][AI] [QWEN-DAE-DECISION] SKIP rate_limited_user (confidence: 0.95)")
-                    return None
-                
-                # Update trigger time for rate limiting
-                self._update_trigger_time(author_id)
-                
-                # Try intelligent reply generator (Grok-powered with patterns)
-                # NOTE: _env_truthy is defined at module level (line 67) - do NOT import here
-                # Importing inside the function creates a local variable scoping issue
-                if self.intelligent_reply and _env_truthy("YT_COMMENT_REPLY_ENABLED", "true"):
-                    is_member = processed_message.get("is_member", False)  # Blue badge
-                    response = self.intelligent_reply.generate_reply(
-                        message=message_text,
-                        username=author_name,
-                        user_id=author_id,
-                        role=role,
-                        is_member=is_member
-                    )
-                    if response:
-                        member_tag = " [ANTIMA]" if is_member else ""
-                        logger.info(f"[GROK] Intelligent reply for {author_name}{member_tag}")
-                        return response
-                
-                # Fallback: Try banter engine
-                response = await self._generate_banter_response(message_text, author_name)
-                
-                if response:
-                    logger.info(f"[U+1F3AD] Generated banter response for {author_name}")
-                    return response
-                
-                # Fallback to LLM bypass engine
-                response = await self._generate_fallback_response(message_text, author_name)
-                
-                if response:
-                    logger.info(f"[REFRESH] Generated fallback response for {author_name}")
-                    return response
-            
-            # Priority 7: Proactive engagement (REDUCED - too spammy)
-            # Only engage proactively with mods/owner ONCE per stream
-            import random
-            if role in ['MOD', 'OWNER'] and author_id not in self.proactive_engaged:
-                if random.random() < 0.3:  # 30% chance for mods/owner
-                    if self.agentic_engine.should_engage(message_text, author_name, role):
-                        proactive_response = self.agentic_engine.generate_agentic_response(
-                            author_name, message_text, role
-                        )
-                        if proactive_response:
-                            # CRITICAL: Validate the ENTIRE response can be sent properly
-                            # Check if response contains @mentions that might fail
-                            if '@' in proactive_response:
-                                # Extract username from @mention in response
-                                mention_match = re.search(r'@(\S+)', proactive_response)
-                                if mention_match:
-                                    mentioned_user = mention_match.group(1)
-                                    if not self._is_valid_mention(mentioned_user):
-                                        logger.warning(f"[U+26A0]️ DELETING proactive response - cannot @mention '{mentioned_user}' in response")
-                                        self.proactive_engaged.add(author_id)
-                                        return None
-
-                            # Qwen Message Diversity Check - Prevent repetitive engagement messages
-                            if self.intelligent_throttle:
-                                allowed, reason = self.intelligent_throttle.check_message_diversity(proactive_response, 'engagement')
-                                if not allowed:
-                                    logger.info(f"[BOT][AI] [QWEN-DIVERSITY] Blocking repetitive engagement response: {reason}")
-                                    self.proactive_engaged.add(author_id)  # Still mark as engaged to prevent retry
-                                    return None
-
-                            # Response is valid, send it
-                            if _env_truthy("YT_CONTEXTUAL_FOLLOWUP_ENABLED", "true"):
-                                followup = self._build_followup_question(author_name, message_text)
-                                if followup:
-                                    proactive_response = f"{proactive_response} {followup}"
-                            self.proactive_engaged.add(author_id)
-                            logger.info(f"💬 Proactive engagement with {author_name} (once per stream)")
-                            return proactive_response
-                        else:
-                            logger.debug(f"No proactive response generated for {author_name}")
-
-            # Priority 8: Check for stream greeting (only ONCE per stream session)
-            # Send ONE greeting per stream, not per user, to avoid spam
-            if not hasattr(self, 'stream_greeting_sent') or not self.stream_greeting_sent:
-                # Generate a general stream greeting, not user-specific
-                persona_greeting = get_persona_greeting(
-                    persona_key=self.persona_key,
-                    stream_title=self.stream_title,
-                    channel_name=self.channel_name,
-                    channel_id=self.channel_id,
-                    bot_channel_id=self.bot_channel_id,
-                )
-                greeting = persona_greeting or self.greeting_generator.generate_greeting()
-                if greeting:
-                    # Qwen Message Diversity Check - Prevent repetitive greeting messages
-                    if self.intelligent_throttle:
-                        allowed, reason = self.intelligent_throttle.check_message_diversity(greeting, 'greeting')
-                        if not allowed:
-                            logger.info(f"[BOT][AI] [QWEN-DIVERSITY] Blocking repetitive greeting: {reason}")
-                            self.stream_greeting_sent = True  # Mark as sent to prevent future greetings
-                            return None
-
-                    self.stream_greeting_sent = True  # Mark stream greeting as sent
-                    logger.info(f"🌞 Stream greeting sent (once per stream)")
-                    return greeting
-            
+            # Handled commands with no output stay quiet.
             return None
-            
+
         except Exception as e:
             logger.error(f"[FAIL] Error generating response for {author_name}: {e}")
             return None
     
+    async def _conversation_response(self, data, role):
+        """Observe by default; bounded candidates use the reviewed router only."""
+        from datetime import datetime, timezone
+        from modules.communication.livechat.src.operator_command_queue import load_active_theme
+        text = data.get('text', '')
+        author = data.get('author_id', '')
+        if (data.get('skip') or data.get('is_rate_limited') or data.get('emoji_rate_denied') or not author
+                or not getattr(self, 'intelligent_reply', None)
+                or not _env_truthy('YT_COMMENT_REPLY_ENABLED', 'true')):
+            return None
+        try:
+            published = datetime.fromisoformat(data.get('published_at', '').replace('Z', '+00:00'))
+            age = (datetime.now(timezone.utc) - published).total_seconds()
+            if not 0 <= age <= 120:
+                return None
+        except (ValueError, TypeError, AttributeError):
+            return None
+        substantive = re.sub(r'[✊👊✋🖐][\ufe0f\U0001F3FB-\U0001F3FF]*', '', text).strip()
+        bot_name = self.persona_config.get('display_name', '')
+        directed = bool((bot_name and re.search(r'@' + re.escape(bot_name) + r'(?!\w)', text, re.I))
+                        or re.search(r'\b0102\b', text)
+                        or (substantive and substantive != text.strip()))
+        question = bool(re.search(r'[?？]|\b(what|why|how|where|when|which|can you|could you)\b', text, re.I))
+        problem = bool(re.search(r'\b(dns|broken|error|not working|doesn.t work|unavailable)\b', text, re.I))
+        if not substantive or not (directed or question or problem):
+            return None
+        now = time.monotonic()
+        attempts = [(at, identity) for at, identity in getattr(self, '_conversation_attempts', []) if now - at < 600]
+        if (len(attempts) >= 3 or any(now - at < 120 or identity == author for at, identity in attempts)):
+            logger.debug('[CONVERSATION] observe: attempt cooldown')
+            return None
+        manager = getattr(self, 'memory_manager', None)
+        if manager is None:
+            return None
+        try:
+            context = manager.get_conversation_context(author)
+        except Exception as exc:
+            logger.warning('[CONVERSATION] History unavailable: %s', type(exc).__name__)
+            return None
+        if (not isinstance(context, dict) or context.get('participant_id') != author
+                or context.get('session_id') != getattr(manager, 'current_session', None)):
+            logger.info('[CONVERSATION] observe: scoped history unavailable')
+            return None
+        generator = self.intelligent_reply
+        binding = (getattr(self, 'channel_id', None), getattr(self, 'stream_title', None), manager.current_session)
+        if (not binding[0] or getattr(generator, 'channel_id', None) != binding[0]
+                or getattr(generator, 'stream_title', None) != binding[1]):
+            return None
+        # Reserve before awaiting, including rejection/timeouts. No retry timer.
+        self._conversation_attempts = attempts + [(now, author)]
+        context = {**context, 'directed_request': directed}
+        response = await self._await_intelligent_reply(
+            theme_snapshot=load_active_theme('livechat'), message=text,
+            username=_sanitize_username(data.get('author_name', '')), user_id=author,
+            role=role, is_member=data.get('is_member', False), conversation_context=context)
+        if (response is None or self.intelligent_reply is not generator
+                or binding != (getattr(self, 'channel_id', None), getattr(self, 'stream_title', None), manager.current_session)
+                or getattr(generator, 'channel_id', None) != binding[0]
+                or getattr(generator, 'stream_title', None) != binding[1]):
+            logger.info('[CONVERSATION] observe: assessment/review unavailable or declined')
+            return None
+        if self.intelligent_throttle:
+            allowed, _ = self.intelligent_throttle.check_message_diversity(response, 'conversation')
+            if not allowed:
+                return None
+        data['response_type'] = 'conversation'
+        return response
+
+    async def _resolve_model_command(self, request):
+        """Keep command inference inside the existing bounded thread/cancel owner."""
+        from modules.communication.livechat.src.llm_integration import ModelReplyRequest
+        from modules.communication.livechat.src.operator_command_queue import load_active_theme
+        if not isinstance(request, ModelReplyRequest):
+            return request
+        def current():
+            generator = self.intelligent_reply
+            return (getattr(self, 'channel_id', None) == request.receiving_channel_id
+                    and getattr(self, 'stream_title', None) == request.stream_title
+                    and getattr(generator, 'channel_id', None) == request.receiving_channel_id
+                    and getattr(generator, 'stream_title', None) == request.stream_title)
+        if not current():
+            return None
+        response = await self._await_intelligent_reply(
+            theme_snapshot=load_active_theme('livechat'), message=request.message,
+            username=request.username, user_id=request.user_id, role=request.role)
+        return response if current() else None
+
+    async def _await_intelligent_reply(self, *, theme_snapshot=None, **kwargs):
+        """Keep polling responsive and invalidate queued/late work after the bounded wait."""
+        import asyncio
+        from copy import deepcopy
+        from threading import Event
+        from modules.communication.livechat.src.intelligent_livechat_reply import ReviewedLivechatReply
+        cancel = Event()
+        snapshot = deepcopy(theme_snapshot)
+        try:
+            response = await asyncio.wait_for(asyncio.to_thread(
+                self.intelligent_reply.generate_reply, **kwargs, cancel_event=cancel,
+                expected_theme_snapshot=snapshot), timeout=10.0)
+            if (not isinstance(response, ReviewedLivechatReply)
+                    or response.theme_snapshot != snapshot or response.reviewed_text != str(response)):
+                return None
+            return response
+        except asyncio.TimeoutError:
+            logger.warning('[LIVECHAT-REPLY] Generation timed out; late result discarded')
+            return None
+        except Exception as exc:
+            logger.warning('[LIVECHAT-REPLY] Generation failed: %s', type(exc).__name__)
+            return None
+        finally:
+            cancel.set()
+
     async def _generate_banter_response(self, message_text: str, author_name: str) -> Optional[str]:
         """Generate response using the banter engine."""
         if not self.banter_enabled or not self.banter_engine:
@@ -1298,7 +1246,7 @@ class MessageProcessor:
                 else:
                     logger.info(f"[SEARCH] [FULL FC] Analyzing ALL comments from @{target}")
 
-                return self.grok.fact_check(target, role, emoji_seq)
+                return await self._resolve_model_command(self.grok.fact_check(target, role, emoji_seq))
             elif hasattr(self, 'simple_fact_checker'):
                 return self.simple_fact_checker.fact_check(target, requester, role, emoji_seq)
             else:
@@ -1353,6 +1301,7 @@ class MessageProcessor:
                         all_messages[username].append({
                             'username': username,
                             'message': message_text,
+                            'channel_id': (msg.get('author_id') or msg.get('user_id') or msg.get('channel_id')) if isinstance(msg, dict) else None,
                             'timestamp': ''  # String format doesn't include timestamp
                         })
 
@@ -1371,6 +1320,7 @@ class MessageProcessor:
                             all_messages[username].append({
                                 'username': username,
                                 'message': message_text,
+                                'channel_id': (msg.get('author_id') or msg.get('user_id') or msg.get('channel_id')) if isinstance(msg, dict) else None,
                                 'timestamp': ''
                             })
 
@@ -1477,7 +1427,8 @@ class MessageProcessor:
             "last_global_maga_response": self.last_global_maga_time,
             "trigger_emojis": self.trigger_emojis,
             "memory_dir": self.memory_dir,
-            "grok_enabled": self.grok is not None,
+            "grok_enabled": False,  # Legacy status key; no direct xAI client.
+            "model_router_enabled": self.grok is not None,
             "consciousness_enabled": self.consciousness is not None,
             "pqn_enabled": self.pqn_orchestrator is not None
         }

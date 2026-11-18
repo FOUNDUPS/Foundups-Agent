@@ -332,11 +332,20 @@ class VideoContentIndex:
                 self.model = None
         return self.model
     
-    def _get_embedding(self, text: str) -> List[float]:
-        """Generate embedding for text."""
-        model = self._get_model()
+    def _get_embedding(self, text: str, *, allow_cold_init: bool = True,
+                       cancel_event=None) -> Optional[List[float]]:
+        """Embed with an existing model when cold initialization is forbidden."""
+        if cancel_event is not None and cancel_event.is_set():
+            return None
+        model = self._get_model() if allow_cold_init else getattr(self, 'model', None)
+        if cancel_event is not None and cancel_event.is_set():
+            return None
         if model:
-            return model.encode(text, show_progress_bar=False).tolist()
+            embedding = model.encode(text, show_progress_bar=False).tolist()
+            return None if cancel_event is not None and cancel_event.is_set() else embedding
+        if not allow_cold_init:
+            logger.debug('[VIDEO-INDEX] Cold optional embedding model skipped (ready-only)')
+            return None
         # Fallback: 384-dim zero vector (matches all-MiniLM-L6-v2)
         return [0.0] * 384
     
@@ -467,6 +476,9 @@ class VideoContentIndex:
         query: str,
         k: int = 5,
         channel: Optional[str] = None,
+        *,
+        allow_cold_init: bool = True,
+        cancel_event=None,
     ) -> List[VideoMatch]:
         """
         Search for video segments matching query.
@@ -475,15 +487,30 @@ class VideoContentIndex:
             query: Search query text
             k: Maximum number of results
             channel: Optional channel filter
+            allow_cold_init: False forbids lazy embedding-model initialization.
+            cancel_event: Optional cooperative cancellation between stages.
             
         Returns:
             List of VideoMatch objects with deep links
         """
+        if cancel_event is not None and cancel_event.is_set():
+            return []
+        if not allow_cold_init and getattr(self, 'model', None) is None:
+            logger.debug('[VIDEO-INDEX] Cold optional embedding model skipped (ready-only)')
+            return []
         if self.collection.count() == 0:
             logger.warning("[VIDEO-INDEX] No videos indexed yet")
             return []
         
-        embedding = self._get_embedding(query)
+        if cancel_event is not None and cancel_event.is_set():
+            return []
+        if allow_cold_init and cancel_event is None:
+            embedding = self._get_embedding(query)
+        else:
+            embedding = self._get_embedding(query, allow_cold_init=allow_cold_init,
+                                            cancel_event=cancel_event)
+        if embedding is None or (cancel_event is not None and cancel_event.is_set()):
+            return []
         
         # Build filter if channel specified
         where_filter = None
@@ -499,6 +526,8 @@ class VideoContentIndex:
             )
         except Exception as e:
             logger.error(f"[VIDEO-INDEX] Search failed: {e}")
+            return []
+        if cancel_event is not None and cancel_event.is_set():
             return []
         
         matches = []
@@ -529,6 +558,8 @@ class VideoContentIndex:
                 url=url,
             ))
         
+        if cancel_event is not None and cancel_event.is_set():
+            return []
         logger.info(f"[VIDEO-INDEX] Found {len(matches)} matches for '{query[:30]}...'")
         return matches
     

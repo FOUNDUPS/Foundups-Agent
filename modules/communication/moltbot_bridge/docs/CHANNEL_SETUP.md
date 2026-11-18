@@ -151,7 +151,7 @@ openclaw start
 ```json
 {
   "agent": {
-    "model": "ollama/qwen2.5-coder:7b"
+    "model": "ollama/qwen-overseer:latest"
   },
   "agents": {
     "defaults": {

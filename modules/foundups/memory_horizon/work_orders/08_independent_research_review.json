@@ -90,7 +90,7 @@
       "verification_class": "RESEARCH_PRIVACY_SENTINEL"
     },
     "acceptance": [
-      "Every user-facing metric has raw-data lineage.",
+      "Every participant-facing metric has raw-data lineage.",
       "No unsupported clinical/scientific claim.",
       "Privacy behavior matches documented boundary.",
       "Public POC recommendation is explicit accept/reject/blocked."

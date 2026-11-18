@@ -2,6 +2,170 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-16] — Whole HPC banner return and distinct Play Mall link
+
+- Extended existing `test_public_sw.mjs`: both pages retain one native whole-banner
+  HPC anchor and separate Mall anchor without nested controls; portrait motion
+  starts only while visible; v10 caches the four exact same-origin assets and
+  excludes both external destinations. Existing contact and coalition suites
+  remain unchanged. Combined Node result: **129 passed, 0 failed**.
+- Independent headless Chromium/WebKit fixture: **132 checks passed, 0 failed**
+  in 16.137 seconds. Both pages exercised actual text/image/padding navigation
+  to controlled destination routes, keyboard Enter, Mall navigation and history
+  return; 320/390/844/1366px layouts, local images, comfortable targets, existing
+  navigation/contact controls, JavaScript-disabled links and reduced motion.
+  Hidden-page motion stopping used an explicitly synthetic visibility event.
+- Browser fixture preserved the candidate CSP and blocked unrelated network.
+  Controlled HPC/Mall destination pages verify requested navigation URLs, not
+  real destination rendering, DNS/TLS, deployment, installed PWA or physical iPhone.
+  Native full Tab traversal remains unqualified; focused-link Enter was tested.
+- First browser harness iteration reported 82 passes/4 failures: two baseline
+  duplicate-CTA count assumptions and WebKit Tab-link focus policy assumptions.
+  Exact prior-page preservation was independently verified; the harness corrected
+  those assumptions without relaxing banner, destination, touch/layout or CSP gates.
+  An initial Node fixture omitted the unchanged Oversight worker; restoring that
+  source dependency yielded the complete 129-pass run.
+- Independent source review found no blocker and verified both page originals
+  unchanged outside new navigation/imports; service worker changed only v9 -> v10
+  plus four exact local assets. No native owner worktree edits or production deploy.
+
+## [2026-11-13] — Vote cover editorial and phone layout
+
+Extend the worker fixture to cover v8 retirement. Exercise the six panels,
+phone and tablet layouts, installability and offline navigation in browsers.
+
+## [2026-11-13] — Vote funding banner crop
+
+Verify the v8 worker retires v7 and keeps the existing local artwork available
+offline. Browser checks cover the supplied two-line banner at desktop and
+phone widths.
+
+## [2026-11-12] — Vote radio and supplied funding artwork
+
+Extend the existing worker fixture to cover v6 retirement and exclude the
+external radio stream from the offline shell. Browser checks exercise playback
+under both autoplay policies, the station links and the cropped supplied artwork.
+
+## [2026-11-12] — Vote cover install and layout
+
+Extend the existing public cache fixture to verify v5 retirement. Browser
+checks cover manifest installability, the shared install prompt, width-based
+panel reflow, outbound links, legibility and the offline cover.
+
+## [2026-11-12] — Vote bottom ticker
+
+Extend the existing worker fixture to check retirement of the v4 cache while
+preserving the existing offline shell and guide fragment checks. Browser
+verification covers ticker movement, pause and resume, reduced motion, static
+fallback and layout at desktop and phone widths.
+
+## [2026-11-12] — Vote cover and legacy guide migration
+
+Extend the public worker regression to cover the v4 exact-path precache,
+WebP MIME, old cache removal, offline comic assets and the legacy guide HTML
+alias. Exercise all original guide IDs through the cover's fragment handoff
+with query preservation, encoded fragments and an invalid-fragment control.
+
+## [2026-11-07] — Interactive oversight maps
+
+The release projection checks mirrored map routes, graph node and connector
+screens, reachability, the separate outcome choices and the fictional money
+trace. The worker regression covers offline fragment navigation and scoped
+machine records. Independent browser checks cover phone and desktop drill-down.
+
+## [2026-11-07] — Oversight landing and DOJ bottleneck
+
+The release test checks the three landing sections in order and links the
+verified leadership and referral sources to the machine-readable index. The
+worker regression follows the new shell version for offline navigation.
+
+## [2026-11-07] — Oversight legislative roadmap and contact
+
+Expanded existing release and worker tests for the two new routes, exact shared
+directory assets, mirrored and legacy paths, and scoped offline manual lookup.
+Contact tests cover Census boundary suggestion limits alongside roster and
+telephone validation. Browser holdout exercises state confirmation, fallback
+and desktop and phone layouts without dialing.
+
+## [2026-11-07] — Standalone Oversight publication
+
+Reused the existing release and worker tests to check the reviewed inventory,
+retired resource exclusion, local link resolution, transitions, and scoped
+offline navigation. The untouched archive remains verified before staging.
+
+## [2026-11-07] — Accountability release and public interaction boundaries
+
+The cycle hint regression reproduced six failures across thirteen focused
+cases before repair. A separate call-spy probe went from 7/15 to 15/15.
+`test_oversight_public_release.py` verifies the overlay contract without
+changing the historical archive. `test_public_evidence.py` validates exact
+source locators offline and supports an explicit primary-filing replay.
+Node tests cover directory validation, manual queue behavior, canonical
+offline fallback and denial of redirected or mislabeled install responses.
+Independent browser, primary-source and exact-release checks are recorded in
+the [release accounting](../docs/RELEASE_ACCOUNTING.md#accountability-integration).
+
+## [2026-11-07] — Independent local Coalition draft contract
+
+New Node `test_coalition_draft.mjs` covers a distinct browser-export boundary;
+the existing Python funding/shell tests do not exercise it. The verifier froze
+107 cases before reading implementation. Exact 11,914-byte prefix SHA256:
+`8459db930f24ef51ed2e596c8f12d652ecbf215e7834a486cacb93288c9678b8`.
+Initial 93 pass / 14 fail: export included out-of-contract `joined`/`reviewed`
+fields. Separate probes reproduced deceptive raw authority and encoded-control
+URLs. Seven appended cases preserve the original prefix and include a valid
+default-port control. The final test SHA256 is
+`4fc02770e67f29305e15e90c7b4f958e585c1a774154ff197fc2cd0b91c8631f`.
+Final 114 pass, no skips. Cases cover fixed unverified/unsubmitted status,
+strict consent, bounds, literal JSON text and URL confusion without a network
+call or authority grant. CI runs the Node suite in `wre-verification-contracts`.
+The unchanged Python Vote suite separately passes 398 tests.
+
+## [2026-11-01] — Aggregate and displayed-confidence closure
+
+Independent aggregate oracle29: baseline25 passed/4 failed; coordinator repair29
+passed. Integration test SHA256 remains
+`527c92634c47605a630886b6d3e983e5e938c0104acad9bb843fd8b4f651115f`.
+One local worker proposed unchanged source in an invalid envelope and was rejected
+without materialization. The original full scorer-only replay351 passed, but four
+independent display probes exposed incorrect VERIFIED total wording/metadata.
+
+Separate consumer oracle47 was frozen before consumer repair: baseline3 passed/
+44 failed; repaired47 passed. Frozen quick-answer test SHA256
+`a970c19c05a840a0a98f46ed555a634e368c1798270a38338c1633c68ee84223`.
+All three formats and actual shell propagation are covered, including missing,
+duplicate and invalid-label claims, lower/UNKNOWN and approved direct controls.
+Two historical fixtures lacked their stated aggregate claims; add explicit claims
+without changing assertions. Final quick-answer test SHA256
+`96d7d8f30c2d4e3f0b0989c67cde17368116852ea70657b7554ddb792626576e`.
+Independent final replay: frozen29/47 and full398 pass (overlapping scopes),
+0.59s/0.30s/1.71s. No skips. Use the existing CI-equivalent command below.
+This is source/test review, not native independent acceptance or retained RSI.
+
+
+## [2026-11-01] — Production source provenance micro oracle
+
+Extended `test_confidence_scoring_integration.py`:19 added cases and one tightened
+missing-reference test. Three indirect types,12 lower/UNKNOWN controls, three
+approved direct types and verified-facts consumption. Synthetic references only.
+Frozen20: baseline16 passed/4 failed; local worker candidate13 passed/7 failed;
+coordinator repair20 passed. Frozen test SHA256:
+`898327ec40945318140abdea6ad547609ec325d4c6de42733dc1b7353e43a3f6`.
+Independent full replay322 passed in1.77s, plus21 separately executed synthetic
+probes (noncanonical types, repeated calls, mixed labels, input preservation).
+Do not add overlapping scopes or equate legacy stub tests with production proof.
+After that comparison, the indirect assertion was strengthened to exact HIGH and
+`downgraded_from_verified_due_to_indirect_source`, both specified before inference.
+Strengthened20 passed in0.60s; final test SHA256:
+`1f3a6cc94bf1100eacfc6a2a4a237738df45e2facbaebccb51d1d214ed8f22f5`.
+The independent reviewer reproduced two aggregate total_raised counterexamples;
+that distinct pre-existing gap remains open in the module roadmap.
+
+Reproduce the CI-equivalent module closure from root:
+`python -B -m pytest -q --tb=short -c /dev/null --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/foundups/voteballots/tests`
+Use `NUL` on Windows; set `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` and
+`PYTHONDONTWRITEBYTECODE=1`. No network, API key or model call is needed.
+
 ## [2026-08-26] — Canonical Test Inventory Reconciliation
 
 **Purpose**: Make the existing VOTE test surface visible before any worker creates or modifies tests.

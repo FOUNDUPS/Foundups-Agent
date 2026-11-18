@@ -11,6 +11,7 @@ No UPS is minted here. This module only routes existing UPS.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 
 DEFAULT_RELEASE_RATE = 0.02
@@ -50,13 +51,31 @@ def route_cabr_ups_flow(inputs: CABRFlowInputs) -> CABRFlowResult:
     Math:
       epoch_budget = min(requested_ups, treasury_ups_available * release_rate)
       routed_ups = epoch_budget * cabr_pipe_size, if valve open, else 0
+
+    Requires finite built-in numeric inputs and an exact boolean PoB decision.
+    This calculation does not authenticate the decision or consume Treasury funds.
     """
+
+    if type(inputs.pob_validated) is not bool:
+        raise ValueError("PoB validation must be a boolean")
+    # Preserve the existing signed finite clamps; the nonnegative token helper
+    # intentionally has a different admission contract.
+    for value in (inputs.treasury_ups_available, inputs.cabr_pipe_size,
+                  inputs.requested_ups, inputs.release_rate):
+        if type(value) not in (int, float):
+            raise ValueError("CABR inputs must be finite built-in numbers")
+        try:
+            finite = math.isfinite(value)
+        except OverflowError:
+            finite = False
+        if not finite:
+            raise ValueError("CABR inputs must be finite built-in numbers")
 
     treasury_before = max(0.0, float(inputs.treasury_ups_available))
     pipe_size = _clamp(float(inputs.cabr_pipe_size), 0.0, 1.0)
     release_rate = _clamp(float(inputs.release_rate), 0.0, 1.0)
     requested = max(0.0, float(inputs.requested_ups))
-    valve_open = bool(inputs.pob_validated)
+    valve_open = inputs.pob_validated
 
     epoch_budget = min(requested, treasury_before * release_rate)
     routed = epoch_budget * pipe_size if valve_open else 0.0

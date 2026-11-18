@@ -202,6 +202,9 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     signer_socket_connector: Optional[SignerSocketConnector] = None,
     signature_verifier_backend: str | None = None,
     elevated_consensus_capability_supplier: Any = None,
+    worktree_lease_issuer: Any = None,
+    signer_peer_secret_access_grant_supplier: Any = None,
+    parent_consensus_authority: Any = None,
     worktree_runner: Any = None,
     pilot_dryrun_binding_enabled: bool = False,
     worktree_runner_mode: str | None = None,
@@ -538,6 +541,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             now_epoch=int(dependency_bundle.now_epoch or 0),
             required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
             trusted_now_epoch=authority_clock,
+            signer_peer_secret_access_grant_supplier=signer_peer_secret_access_grant_supplier,
+            parent_consensus_authority=parent_consensus_authority,
         )
     store = AtomicJsonResidentQueueChainResultsStore(
         chain_path,
@@ -564,6 +569,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=root,
         valve_environment=governed_environment,
         governed_use_time_authority_resolver=governed_authority_resolver,
+        worktree_lease_issuer=worktree_lease_issuer,
         worktree_runner=resolved_worktree_runner,
         pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
         generic_writer_dryrun_result=generic_writer_dryrun_result,

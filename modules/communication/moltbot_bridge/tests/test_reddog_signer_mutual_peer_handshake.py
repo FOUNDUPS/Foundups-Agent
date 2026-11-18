@@ -48,6 +48,8 @@ from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshak
 NOW = 2_000_000_000
 CHALLENGE = "a" * 64
 WSP62_SLICE_FILES = (
+    "src/_reddog_unix_socket_identity.py",
+    "tests/reddog_unix_socket_test_support.py",
     "src/reddog_external_signer_lifecycle_admission.py",
     "src/reddog_external_signer_os_observer.py",
     "src/reddog_atomic_signer_runtime_generation_high_water.py",

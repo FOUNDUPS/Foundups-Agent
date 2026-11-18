@@ -86,7 +86,7 @@ jsPsych is a JavaScript framework for behavioral experiments in web browsers. It
 **MIT Media Lab — MemPal: Wearable Memory Assistant for Aging Population**  
 https://www.media.mit.edu/projects/mempal/overview/
 
-MemPal is the closest direct comparator to the proposed Companion. It uses a wearable camera plus AI to log actions in real time without storing image data, supports voice retrieval of misplaced objects (including the published example "where is my phone?"), provides contextual reminders, and was tested in the homes of 15 adults aged 65+. The reported study found improved object-finding performance with audio assistance and positive user perceptions.
+MemPal is the closest direct comparator to the proposed Companion. It uses a wearable camera plus AI to log actions in real time without storing image data, supports voice retrieval of misplaced objects (including the published example "where is my phone?"), provides contextual reminders, and was tested in the homes of 15 adults aged 65+. The reported study found improved object-finding performance with audio assistance and positive participant perceptions.
 
 Implication: Memory Horizon must not claim novelty for a wearable that logs actions and answers object-location questions. Our differentiation target is the shared measurement/assistance event model, event-to-retrieval-failure timing, graded cueing, transparent provenance/confidence and contamination-aware longitudinal research.
 
@@ -152,5 +152,5 @@ The unvalidated hypothesis is that **one event model can support both controlled
 6. How much do device, distraction and sleep/backgrounding affect timing and results?
 7. Does the resulting curve correlate with validated instruments or outcomes in any target population?
 8. Can real-world event extraction reach useful accuracy without retaining raw audio/video?
-9. What graded cue restores function while preserving user agency and minimizing false-memory risk?
+9. What graded cue restores function while preserving participant agency and minimizing false-memory risk?
 10. Which retrieval failures can be detected safely beyond explicit voice queries?

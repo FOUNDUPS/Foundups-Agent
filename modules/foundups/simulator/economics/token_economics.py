@@ -18,7 +18,14 @@ import logging
 import math
 from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import Dict, List, Optional, Tuple
+
+from ._token_numeric import (
+    _AdoptionValues, _WorkValues, _adoption_values, _allocation_values, _checked_add,
+    _discount_rate, _mint_values, _remaining_value, _require_numbers,
+    _stake_values, _unstake_record_values, _unstake_values, _wallet_values,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +78,27 @@ def adoption_curve(adoption_score: float, steepness: float = 12.0) -> float:
     max_val = sigmoid(1.0, k=steepness, x0=0.5)
 
     return (raw - min_val) / (max_val - min_val)
+
+
+def _prepare_work_values(wallet, pool, owner, foundup_id, cost, reward, internal_rate):
+    """Calculate the complete work result without mutation or logging."""
+    spend = _wallet_values(cost, wallet.ups_balance, wallet.total_spent, internal_rate)
+    if not spend.success:
+        return None
+    adoption = _AdoptionValues(
+        pool.total_users, pool.total_revenue_ups, pool.total_work_completed,
+        pool.milestones_achieved, pool.adoption_score,
+    )
+    if reward > 0:
+        adoption = _adoption_values(adoption, work=reward)
+    available = pool.total_supply * adoption_curve(adoption.score, pool.curve_steepness)
+    mint = _mint_values(reward, available, pool.minted, adoption.work)
+    current_fi = owner.foundup_tokens.get(foundup_id, 0.0) if owner else 0.0
+    owner_fi = _checked_add(current_fi, mint.received)
+    return _WorkValues(
+        spend.balance, spend.spent, adoption.score, mint.work,
+        mint.minted, mint.received, owner_fi,
+    )
 
 
 class TokenType(Enum):
@@ -265,6 +293,32 @@ SUBSCRIPTION_TIERS: Dict[SubscriptionTier, SubscriptionConfig] = {
 }
 
 
+def _wallet_policy_snapshot(policy: Dict) -> Dict:
+    """Validate plain policy data before effects; retain no caller-owned containers."""
+    if type(policy) is not dict:
+        raise ValueError("Wallet policy must be a plain dict")
+    if any(type(key) is not str for key in policy):
+        raise ValueError("Wallet policy keys must be plain strings")
+    if any(key not in ("allowed_ops", "max_per_task") for key in policy):
+        raise ValueError("Unknown wallet policy field")
+    snapshot = {}
+    if "allowed_ops" in policy:
+        operations = policy["allowed_ops"]
+        if type(operations) not in (list, tuple):
+            raise ValueError("allowed_ops must be a plain list or tuple")
+        if any(type(operation) is not str or not operation for operation in operations):
+            raise ValueError("allowed_ops entries must be nonempty plain strings")
+        snapshot["allowed_ops"] = tuple(operations)
+    if "max_per_task" in policy:
+        limit = policy["max_per_task"]
+        if type(limit) not in (int, float):
+            raise ValueError("max_per_task must be a plain number")
+        if limit < 0 or (type(limit) is float and not math.isfinite(limit)):
+            raise ValueError("max_per_task must be finite and nonnegative")
+        snapshot["max_per_task"] = limit
+    return snapshot
+
+
 @dataclass
 class AgentExecutionWallet:
     """Agent wallet for holding allocated UPS budgets.
@@ -280,12 +334,26 @@ class AgentExecutionWallet:
     total_spent: float = 0.0
     policy_gates: Dict = field(default_factory=dict)
 
+    def __setattr__(self, name, value):
+        if name == "policy_gates":
+            value = _wallet_policy_snapshot(value)
+        object.__setattr__(self, name, value)
+
+    def __getattribute__(self, name):
+        value = object.__getattribute__(self, name)
+        if name == "policy_gates":
+            # Keep detached plain state for existing numeric snapshot/deepcopy users.
+            # This public view is not a sandbox against arbitrary same-process code.
+            return MappingProxyType(value)
+        return value
+
     def receive_allocation(self, amount: float, policy: Optional[Dict] = None) -> None:
         """Human allocates UPS to agent for task execution."""
-        self.ups_balance += amount
-        self.total_allocated += amount
-        if policy:
-            self.policy_gates = policy
+        prepared_policy = _wallet_policy_snapshot(policy) if policy is not None else None
+        balance, allocated = _checked_add(self.ups_balance, amount), _checked_add(self.total_allocated, amount)
+        self.ups_balance, self.total_allocated = balance, allocated
+        if prepared_policy:
+            self.policy_gates = prepared_policy
         logger.info(f"[Wallet:{self.agent_id}] Received {amount:.2f} UPS from {self.allocator_id}")
 
     def spend(self, amount: float, operation: str) -> Tuple[bool, float]:
@@ -294,23 +362,20 @@ class AgentExecutionWallet:
         Returns:
             (success, fee_paid) tuple
         """
+        values = _wallet_values(
+            amount, self.ups_balance, self.total_spent, FeeConfig().internal_spend_fee,
+        )
         if not self._policy_allows(operation, amount):
             logger.warning(f"[Wallet:{self.agent_id}] Policy denied: {operation} for {amount:.2f}")
             return (False, 0.0)
 
-        if amount > self.ups_balance:
+        if not values.success:
             logger.warning(f"[Wallet:{self.agent_id}] Insufficient balance: {amount:.2f} > {self.ups_balance:.2f}")
             return (False, 0.0)
 
-        # Very low internal fee to encourage activity
-        fee = amount * FeeConfig().internal_spend_fee
-        total_debit = amount + fee
-
-        if total_debit > self.ups_balance:
-            return (False, 0.0)
-
-        self.ups_balance -= total_debit
-        self.total_spent += amount
+        fee = values.fee
+        self.ups_balance = values.balance
+        self.total_spent = values.spent
         logger.info(f"[Wallet:{self.agent_id}] Spent {amount:.2f} UPS on {operation} (fee: {fee:.4f})")
         return (True, fee)
 
@@ -381,17 +446,16 @@ class HumanUPSAccount:
     def receive_fi(self, foundup_id: str, amount: float) -> None:
         """Human receives F_i tokens earned by their agent."""
         current = self.foundup_tokens.get(foundup_id, 0.0)
-        self.foundup_tokens[foundup_id] = current + amount
+        self.foundup_tokens[foundup_id] = _checked_add(current, amount)
         logger.info(f"[Human:{self.human_id}] Received {amount:.2f} F_{foundup_id}")
 
     def allocate_to_agent(self, amount: float, agent_wallet: AgentExecutionWallet) -> bool:
         """Human allocates UPS budget to agent."""
-        if amount > self.ups_balance:
+        values = _allocation_values(amount, self.ups_balance, agent_wallet.ups_balance, agent_wallet.total_allocated)
+        if values is None:
             logger.warning(f"[Human:{self.human_id}] Insufficient UPS for allocation")
             return False
-
-        self.ups_balance -= amount
-        agent_wallet.receive_allocation(amount)
+        self.ups_balance, agent_wallet.ups_balance, agent_wallet.total_allocated = values
         return True
 
     def convert_mined_fi_to_ups(
@@ -557,19 +621,19 @@ class HumanUPSAccount:
     def get_staking_fee_with_discount(self, base_fee: float) -> float:
         """Apply subscription tier discount to staking fee."""
         config = self.get_subscription_config()
-        return base_fee * (1.0 - config.staking_fee_discount)
+        return _discount_rate(base_fee, config.staking_fee_discount)
 
     def record_stake(self, foundup_id: str, ups_amount: float, fi_received: float) -> None:
-        """Record a staking action (called after FoundUpTokenPool.stake_ups).
+        """Record pre-fee UPS spent and post-fee F_i received for this FoundUp.
 
-        Args:
-            foundup_id: FoundUp staked into
-            ups_amount: UPS spent (before fee)
-            fi_received: F_i tokens received
+        Called after the pool stake. Reject unsupported inputs or totals before
+        changing either the position or lifetime UPS staked.
         """
         current = self.staked_positions.get(foundup_id, 0.0)
-        self.staked_positions[foundup_id] = current + fi_received
-        self.total_ups_staked += ups_amount
+        position = _checked_add(current, fi_received)
+        total = _checked_add(self.total_ups_staked, ups_amount)
+        self.staked_positions[foundup_id] = position
+        self.total_ups_staked = total
         logger.info(
             f"[Human:{self.human_id}] STAKED: {ups_amount:.2f} UPS -> {fi_received:.2f} F_i "
             f"in {foundup_id} (total staked positions: {len(self.staked_positions)})"
@@ -584,8 +648,8 @@ class HumanUPSAccount:
             ups_received: UPS received (after fee)
         """
         current = self.staked_positions.get(foundup_id, 0.0)
-        self.staked_positions[foundup_id] = max(0.0, current - fi_amount)
-        self.ups_balance += ups_received
+        values = _unstake_record_values(current, self.ups_balance, fi_amount, ups_received)
+        self.staked_positions[foundup_id], self.ups_balance = values
 
         if self.staked_positions[foundup_id] == 0:
             del self.staked_positions[foundup_id]
@@ -718,7 +782,7 @@ class FoundUpTokenPool:
     @property
     def remaining_mintable(self) -> float:
         """Tokens that can still be minted at current adoption."""
-        return max(0.0, self.available_supply - self.minted)
+        return _remaining_value(self.available_supply, self.minted)
 
     def update_adoption(
         self,
@@ -738,38 +802,17 @@ class FoundUpTokenPool:
         Returns:
             New adoption score (0.0 to 1.0)
         """
-        if users is not None:
-            self.total_users = users
-        if revenue_ups is not None:
-            self.total_revenue_ups += revenue_ups
-        if work_completed is not None:
-            self.total_work_completed += work_completed
-        if milestone:
-            self.milestones_achieved += 1
-
-        # Calculate adoption score from metrics
-        # This is a simplified model - can be tuned
         old_score = self.adoption_score
-
-        # User factor: log scale, 1000 users = 0.5, 10000 = ~0.67
-        user_factor = math.log10(max(1, self.total_users) + 1) / 5.0
-
-        # Revenue factor: $10K = 0.25, $100K = 0.5, $1M = 0.75
-        revenue_factor = math.log10(max(1, self.total_revenue_ups) + 1) / 8.0
-
-        # Work factor: 10K tasks = 0.25, 100K = 0.5
-        work_factor = math.log10(max(1, self.total_work_completed) + 1) / 6.0
-
-        # Milestone factor: each milestone = 0.05 bonus
-        milestone_factor = min(0.2, self.milestones_achieved * 0.05)
-
-        # Combined (weighted average)
-        self.adoption_score = min(1.0, max(0.0,
-            user_factor * 0.35 +
-            revenue_factor * 0.30 +
-            work_factor * 0.25 +
-            milestone_factor
-        ))
+        current = _AdoptionValues(
+            self.total_users, self.total_revenue_ups, self.total_work_completed,
+            self.milestones_achieved, old_score,
+        )
+        values = _adoption_values(current, users, revenue_ups, work_completed, milestone)
+        self.total_users = values.users
+        self.total_revenue_ups = values.revenue
+        self.total_work_completed = values.work
+        self.milestones_achieved = values.milestones
+        self.adoption_score = values.score
 
         if self.adoption_score > old_score:
             new_tokens = (self.release_percentage - adoption_curve(old_score, self.curve_steepness)) * self.total_supply
@@ -789,7 +832,8 @@ class FoundUpTokenPool:
         Returns:
             Actual amount minted (may be less if supply exhausted at current adoption)
         """
-        mintable = min(amount, self.remaining_mintable)
+        values = _mint_values(amount, self.available_supply, self.minted, self.total_work_completed)
+        mintable = values.received
         if mintable <= 0:
             logger.warning(
                 f"[Pool:{self.foundup_id}] No tokens available "
@@ -797,9 +841,8 @@ class FoundUpTokenPool:
             )
             return 0.0
 
-        self.minted += mintable
-        # Work contributes to adoption
-        self.total_work_completed += mintable
+        self.minted = values.minted
+        self.total_work_completed = values.work
         logger.info(f"[Pool:{self.foundup_id}] Minted {mintable:.2f} F_i for {agent_id}")
         return mintable
 
@@ -845,16 +888,10 @@ class FoundUpTokenPool:
         Returns:
             (fi_received, fee_paid) tuple
         """
-        # Calculate fee
-        fee = ups_amount * staking_fee_rate
-        ups_after_fee = ups_amount - fee
-
-        # F_i received = UPS after fee (1:1 backing)
-        fi_tokens = ups_after_fee
-
-        # Add to treasury (this backs the F_i)
-        self.ups_treasury += ups_after_fee
-        self.staked_fi_outstanding += fi_tokens
+        values = _stake_values(ups_amount, staking_fee_rate, self.ups_treasury, self.staked_fi_outstanding)
+        fi_tokens, fee = values.received, values.fee
+        self.ups_treasury = values.treasury
+        self.staked_fi_outstanding = values.outstanding
 
         logger.info(
             f"[Pool:{self.foundup_id}] STAKE: {staker_id} staked {ups_amount:.2f} UPS "
@@ -884,30 +921,15 @@ class FoundUpTokenPool:
         Returns:
             (ups_received, fee_paid) tuple
         """
-        if fi_amount > self.staked_fi_outstanding:
+        values = _unstake_values(fi_amount, unstaking_fee_rate, self.ups_treasury, self.staked_fi_outstanding)
+        if fi_amount > 0 and values.received == 0:
             logger.warning(
-                f"[Pool:{self.foundup_id}] Cannot unstake {fi_amount:.2f} F_i "
-                f"(only {self.staked_fi_outstanding:.2f} outstanding)"
+                f"[Pool:{self.foundup_id}] Insufficient treasury/outstanding for {fi_amount:.2f} F_i"
             )
             return (0.0, 0.0)
-
-        # F_i is backed 1:1 by UPS in treasury
-        ups_backing = fi_amount  # 1:1 ratio
-
-        if ups_backing > self.ups_treasury:
-            logger.warning(
-                f"[Pool:{self.foundup_id}] Treasury insufficient: "
-                f"{ups_backing:.2f} > {self.ups_treasury:.2f}"
-            )
-            return (0.0, 0.0)
-
-        # Calculate fee
-        fee = ups_backing * unstaking_fee_rate
-        ups_after_fee = ups_backing - fee
-
-        # Remove from treasury and outstanding
-        self.ups_treasury -= ups_backing
-        self.staked_fi_outstanding -= fi_amount
+        ups_after_fee, fee = values.received, values.fee
+        self.ups_treasury = values.treasury
+        self.staked_fi_outstanding = values.outstanding
 
         logger.info(
             f"[Pool:{self.foundup_id}] UNSTAKE: {staker_id} unstaked {fi_amount:.2f} F_i "
@@ -1031,9 +1053,10 @@ class TokenEconomicsEngine:
             logger.warning(f"Human {human_id} is not the allocator for agent {agent_id}")
             return False
 
+        prepared_policy = _wallet_policy_snapshot(policy) if policy is not None else None
         success = account.allocate_to_agent(amount, wallet)
-        if success and policy:
-            wallet.policy_gates = policy
+        if success and prepared_policy:
+            wallet.policy_gates = prepared_policy
 
         return success
 
@@ -1044,43 +1067,40 @@ class TokenEconomicsEngine:
         task_cost_ups: float,
         work_reward_fi: float,
     ) -> Tuple[bool, float]:
-        """Agent completes task: spends UPS budget, earns F_i for owner.
+        """Spend UPS and reward the owner after complete numeric preflight.
 
-        Returns:
-            (success, fi_earned) tuple
+        Invalid quantities/results raise ValueError before registration or gas.
+        Returns (success, fi_earned); existing insufficient funds return False.
         """
+        _require_numbers(task_cost_ups, work_reward_fi)
+        task_cost = float(task_cost_ups)
+        work_reward = float(work_reward_fi)
         wallet = self.agent_wallets.get(agent_id)
         if wallet is None:
-            wallet = self.register_agent(agent_id, allocator_id=agent_id)
+            wallet = AgentExecutionWallet(agent_id, allocator_id=agent_id)
         pool = self.foundup_pools.get(foundup_id)
         if pool is None:
-            pool = self.register_foundup(foundup_id)
-
-        # Agent spends UPS budget
-        task_cost = max(0.0, float(task_cost_ups))
-        if task_cost > 0:
-            success, _fee = wallet.spend(task_cost, f"task:{foundup_id}")
-            if not success:
-                return (False, 0.0)
-
-        work_reward = max(0.0, float(work_reward_fi))
-        if work_reward > 0:
-            # Work itself should improve adoption so mint capacity can unlock over time.
-            pool.update_adoption(work_completed=work_reward)
-
-        # Agent earns F_i (goes to human owner)
-        fi_minted = pool.mint_for_work(work_reward, agent_id)
-        if fi_minted <= 0:
-            return (True, 0.0)  # Task completed but no tokens available
-
-        # Transfer F_i to human owner
-        owner_id = wallet.allocator_id
-        owner = self.human_accounts.get(owner_id)
-        if owner is None:
-            owner = self.register_human(owner_id, initial_ups=0.0)
-        owner.receive_fi(foundup_id, fi_minted)
-
-        return (True, fi_minted)
+            pool = FoundUpTokenPool(foundup_id)
+        owner = self.human_accounts.get(wallet.allocator_id)
+        values = _prepare_work_values(
+            wallet, pool, owner, foundup_id, task_cost, work_reward,
+            FeeConfig().internal_spend_fee,
+        )
+        if values is None or (task_cost > 0 and not wallet._policy_allows(f"task:{foundup_id}", task_cost)):
+            return (False, 0.0)
+        wallet.ups_balance, wallet.total_spent = values.wallet_balance, values.wallet_spent
+        pool.adoption_score = values.adoption_score
+        pool.total_work_completed, pool.minted = values.total_work, values.minted
+        if values.earned > 0:
+            if owner is None:
+                owner = HumanUPSAccount(wallet.allocator_id)
+                self.human_accounts[wallet.allocator_id] = owner
+            owner.foundup_tokens[foundup_id] = values.owner_fi
+        self.agent_wallets.setdefault(agent_id, wallet)
+        self.foundup_pools.setdefault(foundup_id, pool)
+        logger.info("[Engine] Work committed: %s on %s, cost=%s UPS, reward=%s F_i",
+                    agent_id, foundup_id, task_cost, values.earned)
+        return (True, values.earned)
 
     def distribute_operational_profit(
         self,
@@ -1260,39 +1280,35 @@ class TokenEconomicsEngine:
         foundup_id: str,
         ups_amount: float,
     ) -> Tuple[float, float]:
-        """Human stakes UPS into a FoundUp, receives STAKED F_i (3% entry fee).
+        """Stake UPS for treasury-backed F_i (3% default entry fee).
 
-        STAKED F_i is value-backed:
-        - The UPS goes into FoundUp treasury (1:1 backing)
-        - User gets F_i representing their claim
-        - Unstaking returns UPS (minus 5% exit fee)
-        - Total round-trip: 8% (vs 11% for mined extraction)
-
-        Returns:
-            (fi_received, fee_paid) tuple
+        Validate all pool/owner results before either changes. Invalid numeric
+        arguments raise ValueError; insufficient UPS retains the zero tuple.
+        Returns (fi_received, fee_paid); existing subscription discounts apply.
         """
+        _require_numbers(ups_amount)
+        _require_numbers(self.fee_config.staked_fi_entry_fee, rate=True)
         account = self.human_accounts.get(human_id)
         pool = self.foundup_pools.get(foundup_id)
 
         if not account or not pool:
             return (0.0, 0.0)
 
+        effective_fee = account.get_staking_fee_with_discount(self.fee_config.staked_fi_entry_fee)
+        values = _stake_values(ups_amount, effective_fee, pool.ups_treasury, pool.staked_fi_outstanding)
         if ups_amount > account.ups_balance:
             logger.warning(f"[Engine] Insufficient UPS for staking: {ups_amount:.2f}")
             return (0.0, 0.0)
 
-        # Apply subscription tier discount to staking fee
-        base_fee = self.fee_config.staked_fi_entry_fee
-        effective_fee = account.get_staking_fee_with_discount(base_fee)
-
-        # Stake into pool
-        fi_received, fee_paid = pool.stake_ups(ups_amount, human_id, effective_fee)
-
+        fi_received, fee_paid = values.received, values.fee
         if fi_received > 0:
-            # Debit UPS from human, record stake
-            account.ups_balance -= ups_amount
-            account.record_stake(foundup_id, ups_amount, fi_received)
-
+            position = _checked_add(account.staked_positions.get(foundup_id, 0.0), fi_received)
+            total = _checked_add(account.total_ups_staked, ups_amount)
+            balance = account.ups_balance - ups_amount
+            _require_numbers(balance)
+            pool.ups_treasury, pool.staked_fi_outstanding = values.treasury, values.outstanding
+            account.ups_balance = balance
+            account.staked_positions[foundup_id], account.total_ups_staked = position, total
             logger.info(
                 f"[Engine] STAKED: {human_id} staked {ups_amount:.2f} UPS -> "
                 f"{fi_received:.2f} STAKED F_i (entry fee: {fee_paid:.2f})"
@@ -1306,23 +1322,22 @@ class TokenEconomicsEngine:
         foundup_id: str,
         fi_amount: float,
     ) -> Tuple[float, float]:
-        """Human unstakes STAKED F_i, receives backed UPS (5% exit fee).
+        """Unstake treasury-backed F_i for UPS (5% default exit fee).
 
-        VALUE PRESERVATION:
-        - STAKED F_i is backed 1:1 by UPS in treasury
-        - Unstaking returns the UPS (minus 5% exit fee)
-        - This is much better than 11% extraction fee for MINED F_i
-
-        Returns:
-            (ups_received, fee_paid) tuple
+        Validate all pool/owner results before either changes. Invalid numeric
+        arguments raise ValueError; insufficient positions retain the zero tuple.
+        Returns (ups_received, fee_paid).
         """
+        _require_numbers(fi_amount)
+        _require_numbers(self.fee_config.staked_fi_exit_fee, rate=True)
         account = self.human_accounts.get(human_id)
         pool = self.foundup_pools.get(foundup_id)
 
         if not account or not pool:
             return (0.0, 0.0)
 
-        # Check staked position
+        exit_fee = self.fee_config.staked_fi_exit_fee
+        values = _unstake_values(fi_amount, exit_fee, pool.ups_treasury, pool.staked_fi_outstanding)
         staked = account.staked_positions.get(foundup_id, 0.0)
         if fi_amount > staked:
             logger.warning(
@@ -1331,13 +1346,15 @@ class TokenEconomicsEngine:
             )
             return (0.0, 0.0)
 
-        # Unstake from pool
-        exit_fee = self.fee_config.staked_fi_exit_fee
-        ups_received, fee_paid = pool.unstake_fi(fi_amount, human_id, exit_fee)
-
+        ups_received, fee_paid = values.received, values.fee
         if ups_received > 0:
-            account.record_unstake(foundup_id, fi_amount, ups_received)
-
+            position, balance = _unstake_record_values(staked, account.ups_balance, fi_amount, ups_received)
+            pool.ups_treasury, pool.staked_fi_outstanding = values.treasury, values.outstanding
+            account.ups_balance = balance
+            if position == 0:
+                account.staked_positions.pop(foundup_id, None)
+            else:
+                account.staked_positions[foundup_id] = position
             logger.info(
                 f"[Engine] UNSTAKED: {human_id} unstaked {fi_amount:.2f} STAKED F_i -> "
                 f"{ups_received:.2f} UPS (exit fee: {fee_paid:.2f})"

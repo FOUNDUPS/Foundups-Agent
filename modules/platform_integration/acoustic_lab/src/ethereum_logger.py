@@ -12,7 +12,7 @@ import time
 from typing import Dict, Any, Optional
 try:
     from web3 import Web3
-    from web3.middleware import geth_poa_middleware
+    from web3.middleware import ExtraDataToPOAMiddleware
     WEB3_AVAILABLE = True
 except ImportError:
     WEB3_AVAILABLE = False
@@ -49,7 +49,7 @@ class EthereumLogger:
         """Initialize Web3 connection to Ethereum testnet."""
         try:
             self.web3 = Web3(Web3.HTTPProvider(self.testnet_url))
-            self.web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+            self.web3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
 
             if not self.web3.is_connected():
                 print("[U+26A0]️  Ethereum connection failed - simulating logging")

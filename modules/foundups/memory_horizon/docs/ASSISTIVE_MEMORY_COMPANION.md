@@ -54,7 +54,7 @@ CAPTURE
   -> RETRIEVAL FAILURE / QUERY
   -> RETRIEVE
   -> MINIMAL CUE
-  -> USER RESPONSE
+  -> PARTICIPANT RESPONSE
   -> OUTCOME RECEIPT
   -> optional longitudinal measurement
 ```
@@ -85,7 +85,7 @@ The exact term **Memic** remains `UNRESOLVED_TERM_MEMIC`: no canonical repositor
 
 ### P0 - phone/headset
 
-Use microphone, device motion and explicit user markers. Lowest hardware burden, but many physical actions cannot be reliably inferred from audio alone.
+Use microphone, device motion and explicit participant markers. Lowest hardware burden, but many physical actions cannot be reliably inferred from audio alone.
 
 ### P1 - camera + audio wearable
 
@@ -139,7 +139,7 @@ Later research may consider implicit triggers such as repeated searching or repe
 
 ## Graded cueing
 
-Do not jump directly to the complete answer when a weaker prompt could restore the user's own memory.
+Do not jump directly to the complete answer when a weaker prompt could restore the participant's own memory.
 
 Suggested sequence:
 1. context cue
@@ -160,7 +160,7 @@ Potential differentiators:
 - explicit event-to-retrieval-failure timing
 - graded cueing rather than only answer retrieval
 - contamination-aware longitudinal memory measurement
-- provenance/confidence exposed to the user/researcher
+- provenance/confidence exposed to the participant/researcher
 - integration with FoundUps-style Breadcrumb/Brain/Memex concepts
 - local-first/open research implementation target
 
@@ -170,7 +170,7 @@ SenseCam research provides evidence that wearable-captured images can cue autobi
 
 ### General AI wearables
 
-Products that record/summarize conversations establish hardware/user demand for ambient memory, but conversation transcription alone does not reliably model physical actions, event provenance or retrieval failure.
+Products that record/summarize conversations establish hardware/participant demand for ambient memory, but conversation transcription alone does not reliably model physical actions, event provenance or retrieval failure.
 
 ## Privacy invariants
 

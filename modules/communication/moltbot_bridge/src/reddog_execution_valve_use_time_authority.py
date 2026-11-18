@@ -12,7 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
@@ -102,6 +102,8 @@ class GovernedValveUseTimeResolution:
     signed_authority_reverified: bool
     authoritative_use_lease: Optional["AuthoritativeUseLease"] = None
     signer_generation_binding_receipt_id: Optional[str] = None
+    signer_peer_binding_receipt_id: Optional[str] = None
+    signer_model_binding_receipt_id: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -124,6 +126,8 @@ class GovernedValveUseTimeAuthorityResolver:
     forbidden_operations: tuple[str, ...] = ()
     revoked_key_epochs: tuple[str, ...] = ()
     leeway_s: int = 60
+    signer_peer_secret_access_grant_supplier: Any = None
+    parent_consensus_authority: Any = None
 
     def resolve(
         self,
@@ -133,10 +137,23 @@ class GovernedValveUseTimeAuthorityResolver:
         queue_item_id: Optional[str],
         selected_slice: Optional[str],
     ) -> GovernedValveUseTimeResolution:
+        try:
+            now = self.trusted_now_epoch()
+            if type(now) is not int or now < self.now_epoch:
+                raise ValueError("trusted_clock_invalid")
+        except Exception:
+            return GovernedValveUseTimeResolution(
+                environment=None, expected_bindings={}, permission_ttl_seconds=0,
+                permission_expires_at="", rejection_reasons=("canonical_trusted_clock_invalid",),
+                signed_authority_reverified=False)
+        return replace(self, now_epoch=now)._resolve_current(
+            chain_state=chain_state, work_order=work_order,
+            queue_item_id=queue_item_id, selected_slice=selected_slice)
+
+    def _resolve_current(self, *, chain_state, work_order, queue_item_id, selected_slice):
         reasons: list[str] = []
         if not _chain_snapshot_is_canonical(chain_state):
             reasons.append("canonical_chain_results_revision_invalid")
-
         artifacts, read_reasons = _read_runtime_artifacts(self)
         reasons.extend(read_reasons)
         environment = _governed_environment(artifacts.get("valve_environment"), reasons)
@@ -154,23 +171,27 @@ class GovernedValveUseTimeAuthorityResolver:
         )
 
         generation_evidence = collect_signer_current_generation_use_time_evidence(
-            reverified,
-            self.repo_root,
-            self.runtime_allowed_root,
-            self.trusted_now_epoch,
+            reverified and not reasons, self.repo_root, self.runtime_allowed_root, self.trusted_now_epoch,
+            principal_identity=identity, principal_work_authority=work_authority,
+            peer_secret_access_grant_supplier=self.signer_peer_secret_access_grant_supplier,
+            model_work_order=work_order,
+            retained_proposal_inputs=artifacts.get("authority_profile", {}).get("proposal_verification_inputs"),
+            revoked_key_epochs=frozenset(self.revoked_key_epochs),
+            parent_consensus_authority=self.parent_consensus_authority,
         )
         generation_binding_receipt_id = generation_evidence.receipt_id
         reasons.extend(
             generation_evidence.remaining_reasons(
                 INCOMPLETE_TRUST_ANCHOR_REASONS,
-                CURRENT_GENERATION_TRUST_ANCHOR_REASONS,
+                CURRENT_GENERATION_TRUST_ANCHOR_REASONS
+                + generation_evidence.bound_identity_reasons(identity, work_authority, work_order,
+                    artifacts.get("authority_profile", {}).get("proposal_verification_inputs")),
             )
         )
 
         # Current-generation evidence is not effect authority. The external
         # signer peer remains the only future issuer for a live use lease.
         authoritative_use_lease = None
-
         expiry_epoch = _integer(work_authority.get("expires_at")) or self.now_epoch
         ttl = max(1, min(3600, expiry_epoch - self.now_epoch))
         expires = (
@@ -187,6 +208,8 @@ class GovernedValveUseTimeAuthorityResolver:
             signed_authority_reverified=reverified,
             authoritative_use_lease=authoritative_use_lease,
             signer_generation_binding_receipt_id=generation_binding_receipt_id,
+            signer_peer_binding_receipt_id=generation_evidence.peer_receipt_id,
+            signer_model_binding_receipt_id=(generation_binding_receipt_id if generation_evidence.model_matches(work_order) else None),
         )
 
     def _reverify_and_bind(

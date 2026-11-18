@@ -1,5 +1,29 @@
 # WSP Module Violations Log
 
+## Moltbot interface historical size debt — 2026-10-15 (OPEN)
+
+- Owner: MoltbotBridge documentation maintainers / RSI coordinator; remediation in the existing module ROADMAP documentation-maintenance work.
+- Exact base: `57d5cd8e8c9db2179e2761ae59f74a2912b8d168`. README remains1306 lines; INTERFACE decreases3310 to3305 through verbatim active-contract moves into the existing key-provider contract, retaining navigation.
+- The unchanged legacy root-revocation hardening test still requires INTERFACE<=1511; its failure is inherited and is not claimed as a pass. Canonical WSP62 section3.1 attributes debt differentially; no threshold, exemption or authority gate is changed.
+- Runtime-materializer debt is reduced296 to197 by coherent startup composition extraction (new owner119), preserving API and behavior. All code/function caps in that gate now pass.
+- Remediation: continue focused interface navigation/consolidation under the existing module documentation owner before further nonhistorical documentation growth; preserve active contracts and historical receipts.
+
+## Central event-store class review debt — 2026-09-22 (OPEN)
+
+- Owner: dae_daemon maintainers / R18-R23 coordinator. Base `9103ec35d50495fd37690e48e442025372fac6e5`.
+- `modules/infrastructure/dae_daemon/src/event_store.py`:332→333lines; cohesive class310→311, above200-line review threshold; retry method31→32, below50. Existing observer tests106→288; all new functions below50.
+- Small bounded retry removes proven lock recursion without changing store ownership or splitting unrelated code. The +1line class growth is explicit inherited debt, not an exemption or resolved compliance.
+- Remediation before further store growth: qualify authoritative persistence/recovery and query ownership under the existing daemon architecture map; then separately evaluate cohesive extraction. Do not duplicate the store or compress unrelated code to hide size.
+
+## FAM persistent initiation size debt — 2026-09-22 (OPEN)
+
+- Owner: FoundUps Agent Market maintainers / R24 coordinator.
+- Exact base: `e8240466814de0727efaea892f41e376f7d5cc13`; source candidate: `854e9c7f470434213a8f2d4eb897da5f0c2928a1`.
+- `modules/foundups/agent_market/src/persistence/sqlite_adapter.py`: 1154→1330 lines (+176); class875→816. Pipeline446→400/class405→359; largest new function40. Existing oversized classes/functions remain debt.
+- The proposed1154-line no-growth task budget was not met and is explicitly revised to1330. Complete historical-scope and immutable replay checks account for the growth; this is not a protocol exemption or resolved compliance.
+- Remediation: no further adapter growth before separately scoped cohesion/decomposition review under the existing FAM ROADMAP persistent reward correctness section. Preserve critical-window review; avoid unrelated CRUD compression or a duplicate module to hide growth.
+
+
 ## Purpose
 This document tracks module-specific violations that are deferred during WSP compliance work per WSP 47 protocol. These are module evolution issues that do not block framework compliance.
 

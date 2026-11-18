@@ -13,10 +13,15 @@ import os
 import re
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+from modules.infrastructure.wre_core.src.git_lifecycle import (
+    lifecycle_environment,
+    reconcile_git_lifecycle,
+)
 
 CommandRunner = Callable[..., subprocess.CompletedProcess[str]]
 
@@ -256,6 +261,21 @@ def handle_session_start(
     *,
     runner: CommandRunner = _run,
 ) -> dict[str, Any]:
+    deadline = time.monotonic() + 112
+
+    def within_budget(args, *, cwd, timeout=30, env=None):
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise subprocess.TimeoutExpired(args, 112)
+        return runner(args, cwd=cwd, timeout=min(timeout, remaining), env=env)
+
+    try:
+        return _handle_session_start(event, runner=within_budget)
+    except (OSError, subprocess.SubprocessError):
+        return _session_stop("FoundUps startup gate could not finish within the hook budget.")
+
+
+def _handle_session_start(event: Mapping[str, Any], *, runner: CommandRunner) -> dict[str, Any]:
     cwd = event.get("cwd", os.getcwd())
     context = resolve_repo_context(str(cwd), runner=runner)
     if context is None:
@@ -294,11 +314,27 @@ def handle_session_start(
     if tracker_result.returncode != 0 or not gate or not gate.get("is_zen_compliant"):
         return _session_stop("FoundUps strict WSP_00 compliance gate failed; repository work is halted.")
 
+    def lifecycle_runner(args, *, cwd, timeout):
+        return runner(
+            args, cwd=cwd, timeout=timeout,
+            env=lifecycle_environment(child_env),
+        )
+
+    lifecycle = reconcile_git_lifecycle(
+        context.root, synchronize_pc=True, runner=lifecycle_runner,
+    )
+    lifecycle_context = (
+        f" Git lifecycle coverage={lifecycle['coverage']}. "
+        f"PC={lifecycle['pc']['status']}. "
+        f"Pending PRs={len(lifecycle['pending_prs'])}. "
+        "Use the WRE Git lifecycle receipt to resume pending work."
+    )
     additional_context = (
         "FoundUps lifecycle gate passed. "
         "WSP_00 is_zen_compliant=true. "
         "Apply WSP_97 retrieval and evidence gates before edits. "
-        "Never expose credential files or mutate shared main."
+        "Never expose credential files or directly push to GitHub main."
+        + lifecycle_context
     )
     return {
         "continue": True,

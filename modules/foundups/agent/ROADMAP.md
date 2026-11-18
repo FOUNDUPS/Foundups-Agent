@@ -100,11 +100,29 @@
   - DRY-RUN ONLY: `dry_run=True` / `real_execution_performed=False`; no
     real build / subprocess / Hermes real delegation / executor sink;
     `HERMES_DELEGATE_ENABLED` never set (real delegation stays BLOCKED)
-  - STANDALONE: NOT plumbed into the live OpenClaw/WRE loop; runtime
-    wiring deferred to a Phase-2 slice
+  - Return-value-only component; current WRE consumer now attaches its result
+    on the existing SIMULATED/no-real-execution/disabled-delegation branch
   - No producer / validator / source_authority / WSP / manifest mutation
-  - Deferred: `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_RUNTIME_WIRING_PHASE2`
-    (plumb the consumer into the #774 WRE consumer dispatch seam)
+  - [x] `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_RUNTIME_WIRING_PHASE2`: existing
+    `_attach_context_bundle_dry_run` and its focused wiring suite are present.
+    This closes preview attachment only, not live authoring or runtime admission.
+
+### Existing-module build route qualification — 2026-09-21
+
+At main `1571ec55`, WRE `FoundUpJobConsumer` dispatches to the WRE
+`HermesJobExecutor`, not this module's older extraction-mapping executor.
+The fresh WRE singleton defaults to dry-run; guard-admitted dry/disabled paths
+simulate, while unqualified build/extract can block first. Enabled non-dry
+execution still blocks live delegation. Controlled adapter mode describes an interface without
+calling a live worker. `OpenClawFoundUpOrchestrator.build_foundup` returns genesis
+readiness; the separate commander path queues jobs and grants no execution.
+
+The existing AmIBot [package](../detect_ai/docs/launch/AMIBOT_AUTONOMOUS_BUILD_PACKAGE.md#existing-module-build-route--2026-09-21)
+records actual owners and remaining gates. Build/extract model requirements remain
+unspecified and consumer projection admission is validation-only. Qualify the
+consumer dry-run promise against warmed process-global executor reuse before any
+live build bridge; the mocked singleton test does not establish that promise.
+No runtime source, feature flag or acceptance gate changes in this qualification.
 
 ### Phase 1: Core State Machine (v0.2.0)
 

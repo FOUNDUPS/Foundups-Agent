@@ -26,7 +26,10 @@ from holo_index.freshness_receipt import (
 )
 from holo_index.storage_contract import storage_path_identity
 from holo_index.persisted_vector_segment_probe import unqueryable_vector_segments
-from holo_index.vector_segment_durability import non_durable_vector_segments
+from holo_index.vector_segment_durability import (
+    UnsafeCollectionSettingsError, non_durable_vector_segments,
+    validate_collection_raw_settings,
+)
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_sealed_holo_runtime import (
     scrub_holo_child_environment,
 )
@@ -167,6 +170,13 @@ def open_persisted_collection_view(
                 name,
                 embedding_function=None,
             )
+            validate_collection_raw_settings(attributes[attr_name])
+        except UnsafeCollectionSettingsError:
+            try:
+                finalize_chroma_client(client)
+            except Exception:
+                pass
+            raise
         except Exception:
             attributes[attr_name] = None
     metadata = getattr(attributes.get("code_collection"), "metadata", None)

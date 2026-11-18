@@ -24,8 +24,6 @@ import random
 from pathlib import Path
 from typing import Optional, Dict, Any
 import googleapiclient.errors
-from modules.communication.livechat.src.greeting_generator import GrokGreetingGenerator
-from modules.communication.livechat.src.persona_registry import get_persona_greeting
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +64,7 @@ class SessionManager:
         self.channel_id = channel_id
         self.bot_channel_id = bot_channel_id
         # WSP 84 compliant: Use existing greeting generator
-        self.greeting_generator = GrokGreetingGenerator()
+        self.greeting_generator = None  # No provider work merely to announce startup.
         self.greeting_message = None  # Will be generated dynamically
         self.greeting_sent = False  # Track if greeting already sent for this session
         self.update_broadcast_sent = False  # Track if update broadcast already sent for this session
@@ -224,18 +222,10 @@ class SessionManager:
             # NO-QUOTA mode - continue without chat ID
             logger.info("NO-QUOTA mode: Continuing without chat ID for social media posting")
         
-        # Generate dynamic greeting based on stream title and persona
-        if self.stream_title:
-            self.greeting_generator.stream_title = self.stream_title
-        persona_greeting = get_persona_greeting(
-            persona_key=self.persona_key,
-            stream_title=self.stream_title,
-            channel_name=self.channel_title if hasattr(self, "channel_title") else self.channel_name,
-            channel_id=self.channel_id,
-            bot_channel_id=self.bot_channel_id,
-        )
-        self.greeting_message = persona_greeting or self.greeting_generator.generate_greeting()
-        
+        # Starting observation does not warrant an unsolicited announcement.
+        # Explicit operator announcements retain their existing queue owner.
+        self.greeting_message = None
+
         logger.info(f"Session initialized successfully for: {self.stream_title_short}")
         return True
     
@@ -249,6 +239,9 @@ class SessionManager:
         Returns:
             True if greeting sent successfully
         """
+        if not self.greeting_message:
+            return False
+
         # FIRST PRINCIPLES: Only send greeting once per session to prevent spam
         if self.greeting_sent:
             logger.info("Greeting already sent for this session - skipping")

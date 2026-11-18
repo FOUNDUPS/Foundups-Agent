@@ -1,4 +1,404 @@
+## Scientific repair operation, baseline verifier & canary orchestrator — 2026-11-16
+
+`src/repair_operation_contract.py` defines `ScientificRepairOperation`,
+`RepairOperationState` (`OBSERVED`, `REPRODUCING`, `NON_REPRODUCIBLE`,
+`REPRODUCED`, `BASELINED`, `RESEARCHING`, `HYPOTHESIS_DEFINED`,
+`ADMISSION_PENDING`, `ADMITTED`, `SANDBOX_PREPARING`, `EXPERIMENTING`,
+`DETERMINISTIC_VERIFY`, `INDEPENDENT_VERIFY`, `FUSION_REVIEW`, `ACCEPTED`,
+`REVERTED`, `ABANDONED`, `ESCALATED`, `LEARNED`), `VALID_STATE_TRANSITIONS`,
+`BaselineReceipt` (`verify_integrity()`), `ResearchQuarantineArtifact`,
+`CounterexampleReceipt`, and `ExperimentBudget`:
+
+- `ScientificRepairOperation.transition_to(new_state, reason="")` enforces
+  `VALID_STATE_TRANSITIONS` fail-closed (raising `ValueError` on illegal jumps)
+  and appends every visited state to `state_history` (serialized in `to_dict()`).
+- `record_counterexample(...)` appends structured objections and increments
+  `consumed_iterations` against `budget_exhausted()`.
+
+`src/repair_baseline_verifier.py` exposes
+`attempt_failure_reproduction(*, repo_root, failure_id, reproduction_command, failing_invariant, relevant_tests=(), timeout_seconds=60.0, authority_declaration="TIER_1_INTERNAL_MODULE") -> tuple[bool, BaselineReceipt | None, NonReproducibleClassification | None, str]`,
+parsing string commands via `shlex.split` and executing with `shell=False`.
+Exit code `0` (`ALREADY_RESOLVED`) or missing `failing_invariant` (`OBSERVER_DEFECT`)
+returns `reproduced=False` without sealing a `BaselineReceipt`.
+
+`src/scientific_repair_canary_orchestrator.py` exposes
+`ScientificRepairCanaryOrchestrator(repo_root, *, builder_model="qwen-coder-7b", verifier_model="gemma-270m", scaffold="openclaw", pattern_memory=None)`
+and `run_autonomous_repair_cycle(...) -> tuple[ScientificRepairOperation, CanaryExecutionReceipt]`,
+composing reproduction -> baseline -> quarantined research -> hypothesis ->
+`ExperimentBudget` admission -> sandbox patch -> deterministic verification ->
+`ModelIndependencePolicy.evaluate_independence` ->
+`VerifierContextFirewall.project_evidence_packet` -> `IndependentVerifierReceipt` ->
+`PatternMemory.store_outcome` (`SkillOutcome`), while leaving protected 19/P0
+custody gates (`promote_variation`, `RedDogDirector.advance_to_execution`,
+`RedDogVerifiedPatternMemorySink`) untouched.
+
+## Fail-closed `measurement_evidence` in `RecursiveLearningEngine` — 2026-11-16
+
+`recursive_improvement/src/learning.py` extends
+`RecursiveLearningEngine.apply_improvement(improvement, *, verification_evidence=None, target_applicator=None, measurement_evidence=None) -> bool`
+and `rollback_improvement(improvement) -> bool`:
+
+- Omitted `measurement_evidence` preserves `improvement.tokens_saved = None` and
+  `improvement.metrics["token_reduction_measured"] = False`.
+- Provided `measurement_evidence` validates fail-closed **before** calling
+  `target_applicator` (requiring a `Mapping` with non-empty
+  `measurement_receipt_id`, non-self-authored `evaluator_id != worker_id`,
+  matching `work_order_id`, non-negative non-bool integer `baseline_tokens` and
+  `candidate_tokens` with `candidate_tokens <= baseline_tokens`, and optional
+  `before_state_digest` / `after_state_digest` SHA-256 verification, plus
+  post-applicator `after_digest` verification with automatic `rollback_fn()` on
+  mismatch). Any failure records `application_status = "blocked_measurement_rejected"`
+  and returns `False` without retaining target mutation.
+- Valid measured apply records `improvement.tokens_saved = baseline_tokens - candidate_tokens`,
+  `token_reduction_measured = True`, receipt/evaluator/token/latency metadata,
+  and increments `engine.metrics["total_tokens_saved"]`.
+- `rollback_improvement()` subtracts measured `improvement.tokens_saved` from
+  `engine.metrics["total_tokens_saved"]` (clamped `>= 0`), records
+  `rolled_back_tokens_saved`, and resets `tokens_saved = None` and
+  `token_reduction_measured = False`.
+
+## Readiness evidence and admission — 2026-11-06
+
+`PatternMemory(db_path=None, *, read_only=False)` retains writable defaults.
+Read-only callers open an existing SQLite database without schema migration or
+false-positive seeding. Dashboard-owned readers close their connections;
+injected memory retains its caller-owned lifecycle. Missing default storage is
+reported as `storage_state=not_created`, without creating directories or files.
+
+`get_telemetry_dashboard()` returns `None` for unmeasured rates and averages,
+preserving measured zero. `metric_evidence` carries each threshold's sample count
+and recorded times; `telemetry_scope=database_lifetime` prevents an inference of
+current-run qualification. Retrieval excludes unscored rows from its denominator
+and reports observation dates and distinct skill count. Counter times are last
+updates, not sample-window dates. Variation completion time is not recorded.
+
+`check_dashboard_health()` evaluates one snapshot and adds `status` and
+`unknown_metrics`. `healthy` requires known evidence and no alerts. A missing or
+undersampled metric cannot suppress a different metric's sampled critical.
+`WRE_DASHBOARD_UNKNOWN_MODE=0` permits evaluation of smaller measured samples;
+it never manufactures evidence for a missing denominator.
+
+`dae_preflight.dashboard_readiness(health, *, in_watch, interactive_menu=False)`
+is shared by both Connect WRE owners and startup/action checks. UNKNOWN retains
+the existing cold-start admission policy after security, but is not PASS/READY.
+Checker errors are UNKNOWN and refused under enforcement. Known criticals block
+when enforcement applies. Explicit environment overrides remain authoritative.
+Interactive menu startup defaults advisory; actions default AUTO enforcement.
+This intentionally aligns noninteractive root startup with DAE action defaults,
+even without `OPENCLAW_24X7`. Security checks and their strict-runtime defaults
+are unchanged. Diagnostics do not grant protected worker admission or prove RSI.
+Headless startup additionally requires an enabled check with READY or legitimate
+coverage-only UNKNOWN. Disabled checks, DEGRADED warnings (including mixed
+unknown/warning), and malformed/failed checker results are not admitted. The
+disabled and mixed-warning cases intentionally tighten the older root command's
+inconsistent behavior; ordinary DAE cold-start admission remains separate.
+
+## Risk-verification preflight contract — 2026-10-28
+
+`wre_test_differential_runtime.validate_test_impact_policy_binding(request)`
+returns `(differential_requested, rejection_reasons)` without executing commands
+or authenticating authority. It reuses the existing v1 policy schema, scope
+resolver and `required_test_suite_kind` policy function.
+
+Absence and the resident adapter's empty mapping retain ordinary-check
+compatibility. Explicit null/nonmapping policies reject. When a work order is
+bound, its policy cannot be omitted, introduced or substituted downstream.
+Stale dependency, protected authority, release and periodic-audit signals require
+a full-scope plan. An incompatible plan rejects; the verifier never rewrites
+the admitted policy to make it pass.
+
+`execute_independent_test_evidence` validates the entire bounded check list
+before any command: allowed argv, policy, scope, exactly one differential
+pytest request and matching selection. Invalid plans produce no check records
+or command/differential calls. Runtime check failures still prevent differential
+execution. The final slice verifier separately rejects missing, empty or
+malformed differential evidence when the policy requires it.
+
+No schema version changes. One-use capability, exact-source binding,
+self-verification, security/held-out closure and local-only authority rejection
+remain in force. Neither this helper nor serialization grants execution,
+merge or retention authority.
+
+## Skill-feedback source binding — 2026-10-22
+
+For non-telemetry dispatched outcomes, the coordinator owns `_skill_binding`
+in both `result` and the existing `SkillOutcome.output_result` JSON. Its v1
+fields are `schema_version=wre_skill_execution_binding.v1`, `execution_id`,
+`loaded_skill_sha256` (`sha256:` plus SHA-256 of the complete loaded text encoded
+as UTF-8), and `scanner_admission_fingerprint` (the separate admission receipt's
+64-character lowercase hex digest, or null if unavailable/invalid). Any
+producer-supplied value at this key is replaced without mutating that producer's
+object. Nonserializable payloads retain `record_unavailable=non_json_value` plus
+the coordinator binding; legacy serializable result fields remain top-level.
+
+`evolve_skill()` derives variation `parent_version` from the same exact loaded
+text supplied to it. Historical rows with `current` remain historical/ambiguous;
+no migration invents their source. These hashes identify content, not provenance,
+correctness, scanner-to-loaded-text equivalence, activation or independent
+verification. The direct compatibility method supplies no scanner claim.
+
+Telemetry stays outside skill outcomes/variations. Failure recall and evolution
+thresholds remain unchanged. Moshpit ingestion, cross-version history filtering,
+authenticated evaluation, activation/rollback and later-use benefit remain open.
+
+## Security scan coverage contract (2026-10-10)
+
+The `security_scan` executor distinguishes `completed`, `partial`, `error`, and
+`tool_unavailable`. Aggregate `partial` means some evidence completed or findings
+were retained but requested coverage is incomplete; all attempted tools failing
+without findings is `error`. CLI exits: 0 complete/no gate, 1 complete/012 gate,
+2 incomplete coverage (including unavailable tools). Findings remain available
+for policy escalation even in partial reports, with type and source location.
+
+SEC9 status includes `scans_completed`, `scans_partial`, and `scans_failed`; live errors cannot
+become `completed`. Dry-run/report-only calls remain proposals and never execute.
+SEC4 proposes scans for website/application/test source and modern lockfiles;
+these changes do not enroll any scheduler or runtime.
+
+## Measured-zero fidelity — P15 contract
+
+`PatternMemory.get_skill_fidelity_stats(skill_name, days=30) -> dict` keeps its
+existing fields, queries, time windows and rounding. Measured zero is retained
+for overall, recent and older means. Only `None` means absence: overall uses 0.5;
+an empty temporal window uses the overall mean. `success_rate` still counts
+fidelity >= 0.7, independently of execution-success flags. Ranking weights and
+`SkillSelector` are unchanged. These values describe structural fidelity,
+not authenticated effects or model fitness. Nine frozen and 42 disjoint controls
+pass locally. PR2062 is merged/main-verified; separate retained/control/recovery
+observations confirm positive → zero control → positive on unchanged saved rows.
+This is retained consumer behavior, not worker learning or effect authority.
+
+## Named registry-scope telemetry — P14 contract
+
+Source-qualified contract with independently reviewed actual scanner,
+projection and private-persistence observation; PR2061 is merged/main-verified. Existing `auto_test_registry_audit` v2.3 supports the
+named `operation="project_scope"` with a `request` containing `base_sha`,
+`head_sha`, `expected_changed_paths` and `projection_input`. Only existing
+reserved `parent_continuity_context` is additionally accepted. Caller roots,
+commands, results, receipts, `skill_name` and `agent` do not authorize dispatch.
+The adjacent executor derives its own checkout and delegates once to existing
+`produce_registry_scope_projection`; temporary commit materialization remains
+inside that owner. It does not regenerate the canonical registry or run tests.
+
+`normalize_registry_scope_projection(value, *, request) -> dict | None` in
+`src/skill_execution_truth.py` validates bounded builtin report data, request
+bindings, non-execution flags and the canonical projection ID, then detaches
+accepted data. This is validation, not authentication or independent scope proof.
+The public named result separates `telemetry_completed`, `telemetry_status`,
+`projection` and `observation_persisted` from false `success`,
+`execution_success` and `_effect_evidence`. Persistence failure preserves the
+projection and returns a stable `observation_error`; it does not retry.
+
+Registry/frontmatter, scanner, bundle, load and A/B gates remain. The named
+single/ReAct path stops before fallback, fidelity evaluation, `SkillOutcome`,
+evolution, variation and AgentDB breadcrumbs. Existing scanner counters remain;
+one `PatternMemory.record_learning_event(event_type="telemetry_projection")`
+records only execution/projection identifiers, base/head, status and bounded
+reasons. It supplies no quality, learning, permit or native admission evidence.
+Other effect/proposal paths and the manual registry CLI retain their contracts.
+
+The [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint) binds the accepted design and
+qualification evidence. Shapes/digest types and identity-only builtin traversal
+are covered by39 additive controls; original75 criteria remain unchanged.
+Stable connected validation passes306 with two Windows link skips. The initial
+source-drifted run remains historical. The separate PC observation produces
+a155-shard-per-side projection and persists one projected event, with false effect success.
+Two earlier rejected attempts remain recorded; isolated scanner2.2.0 and short
+owned TEMP qualify this environment, not native authority or automatic updates.
+
+## Prototype CodeAct file containment — 2026-10-04
+
+The existing read-file action checks resolved Path components before reading.
+Sibling directories sharing the repository's name prefix are outside. Nested,
+normalized within-root and missing-file behavior remains. A denied read returns
+an error and existing orchestration stops later actions while retaining earlier
+successful outputs. This is not atomic symlink-race protection, an OS sandbox,
+or public WRE CodeAct admission; that prototype boundary remains blocked.
+
+## Local proposal framing — 2026-10-04
+
+The existing local proposal wrapper asks for a proposal using the skill's required
+output format. It no longer adds an execution directive or an unconditional
+structured-response instruction. Exact skill text, ordinary JSON context and
+reserved continuity omission remain unchanged. This affects raw/native caller
+prompt framing only; profile, limits, cleanup and quarantine are unchanged.
+Model format adherence and semantic correctness still require verification.
+
+## Prototype CodeAct shell result — 2026-10-04
+
+Direct `CodeActExecutor` shell actions return an error containing the numeric
+status on every nonzero subprocess exit, without raw failure stdout/stderr or
+capture. Existing pre/main/post orchestration stops at that error, retains
+earlier outputs and does not count the failed action as completed. Zero exits
+retain stripped stdout capture; stderr warnings alone do not cause failure.
+This does not admit the prototype through `WREMasterOrchestrator`.
+
+## Explicit local-model ownership — 2026-10-01
+
+`QwenInferenceEngine.close() -> None` detaches its model and clears initialized
+state before invoking the captured model's `close()`. No model is a safe no-op;
+an owned model is closed even when initialized is false. Repeated/reentrant
+explicit close does not retry the captured resource, including after failure.
+Native cleanup `Exception` logs only its type and raises stable
+`RuntimeError("Qwen model cleanup failed")` with suppressed exception context.
+Generation itself retains the engine for direct callers; those callers own
+explicit close. Concurrent ownership and native partial-constructor cleanup
+are not qualified by this contract.
+
+The existing WRE local adapter closes every successfully constructed per-call
+engine in `finally`, in raw and native-chat modes. Rejected configuration or
+construction creates no ownership. Cleanup `Exception` invalidates a proposal
+as `local_model_unavailable`; primary failures keep their existing result.
+A primary interruption propagates while cleanup is attempted. A `BaseException`
+raised by cleanup itself is not normalized. Generated text remains
+`success=False`, `_effect_evidence=False`; cleanup confers no execution authority.
+
+## Opt-in local native-chat proposals
+
+`WREMasterOrchestrator(*, local_proposal_mode="raw",
+local_native_chat_profile=None)` validates configuration before constructing
+collaborators. `execute_local_skill_inference` accepts corresponding keyword-only
+`proposal_mode` and `native_chat_profile` arguments. Raw mode requires no profile.
+Native mode requires exactly `runtime_version="0.3.20"` and `template_sha256`
+(64 lowercase hexadecimal characters). Configuration is copied, never taken
+from skill text or input context, and does not confer runtime authority.
+
+The engine's `generate_chat_response(prompt, system_prompt=None, *,
+runtime_version, template_sha256)` checks observed runtime, required formatter
+capabilities and actual model template digest. It renders system/user messages
+once with `enable_thinking=False`, then verifies positive integer limits and
+`input_tokens + max_tokens <= min(actual_context, configured_context)`.
+The per-call handler uses that same rendering and the qualified formatter's
+EOS text/token criteria, with an empty caller stop list (`stop=[]`). Markdown
+`###` content is not a native stop delimiter. The output cap remains in force;
+the default raw route keeps its existing stop list. The call does not replace
+persistent model handlers. This is a qualified optional
+profile, not a promise for every GGUF/template or the declared0.2.72 runtime.
+
+Master configuration errors raise a stable `ValueError` before collaborators;
+adapter failures preserve existing structured failure output. Engine exceptions
+return `Error: Qwen chat response generation failed` and log only exception type.
+Text remains `success=False`, `_effect_evidence=False`: admission, execution,
+acceptance and retention remain separate existing gates. No automatic activation.
+
+## Git lifecycle reconciliation
+
+`reconcile_git_lifecycle(repo_root, synchronize_pc=False, tracked_prs=())`
+returns paginated inventory coverage, current GitHub main and required-check
+evidence, PR dispositions, branch dispositions and PC synchronization state. It stores the latest
+receipt in `foundups-git-lifecycle.json` under the shared Git directory. The
+existing runtime lock serializes callers on that Git directory. Partial source
+coverage and tracked obligations remain explicit.
+
+The Git config `foundups.lifecyclePCWorktree` selects an absolute checkout
+belonging to the same Git directory and using the same origin. Without a
+selection the current primary checkout may serve when it is on main.
+`synchronize_pc=True` enables a clean, checked main worktree to fast-forward.
+Git rechecks the target, local branch, ancestry and working-tree status before
+and after updating. Dirty, diverged and unverified work retains its own lane.
+
+For a known merged PR, completion requires successful required checks on its
+merge SHA and current main, merge ancestry in main and a clean PC checkout
+at the verified current SHA. Closed unmerged and unreadable PRs retain a
+follow-up disposition. Repository merge authority and branch retirement
+remain separate from this receipt.
+
+`branch_dispositions` classifies observed GitHub branches read-only against the
+current PR inventory and persisted completed PRs using strict same-repository
+case-insensitive `head_repository` matching and exact `sha == head_sha` tip
+matching. Each item exposes `{ref, sha, protected, pr_number, pr_numbers, stage,
+next_action}` where `pr_numbers` preserves all sorted known same-repository PR
+numbers for `ref`. Stages are `MAIN_BRANCH` (`main` only),
+`PROTECTED_BRANCH` (protected non-`main` refs without an active open PR),
+`BRANCH_OPEN_PR` (open PR at exact `sha`), `BRANCH_OPEN_PR_HEAD_MOVED` (open PR
+on `ref` whose `head_sha != sha`), `BRANCH_MERGED_PR_RETAINED`,
+`BRANCH_CLOSED_PR_UNMERGED`, `BRANCH_PR_OBSERVATION_INCOMPLETE` (when PR
+coverage is incomplete or partial), `BRANCH_PR_HEAD_MISMATCH` (complete PR
+observation with prior same-repo PR history on `ref` at another SHA) and
+`BRANCH_UNTRACKED` (complete PR observation with zero same-repo PRs on `ref`).
+Every retained branch still requires full-diff assessment before retirement.
+
+`run_main_merge_sentinel(repo_root, force=False)` keeps the legacy result
+shape. Enablement and enforcement apply to observation coverage. The legacy
+`merged` field is false because promotion is handled by its own authority.
+
+`get_git_inventory(repo_root, request_id, *, section=None, offset=0,
+runner=run_command)` emits read-only `foundups_git_inventory.v1` receipts capped
+at `262144` bytes (`_MAX_RECEIPT`) with `20`-row pages (`_PAGE_SIZE`). Valid
+`section` values are `None`, `"summary"`, `"branches"`, `"worktrees"`, and
+`"stashes"` (`offset=0` is required when `section` is `None` or `"summary"`).
+Local observation captures branches, worktrees, and SHA-only `refs/stash`
+reflog entries (`[{"sha": ...}]` via `rev-list --walk-reflogs refs/stash`, never
+stash messages, subjects, or filenames) before and after GitHub `ls-remote`,
+blocking with `"pc_state_changed_during_observation"` if any local branch,
+worktree, status, or stash changes during observation. After stability checks, it
+probes local `github_main` commit presence via `git cat-file -t` (without
+failing when absent) to emit `github_main_present_on_pc`, `pc_backlog_summary`
+(`local_head_count`, `attached_worktree_branch_count`,
+`merged_into_github_main_count`, `unmerged_unattached_head_count`,
+`stash_count`), `worktree_summary` (`total`, `attached`, `detached`, `bare`,
+`locked`, `prunable`), and paged `stash_count`.
+`verify_git_inventory_receipt(result, request_id, *, now=None)` enforces
+request ID, age (`-5` to `120` seconds), canonical `sha256`, SHA-only
+`stashes`, `github_main_present_on_pc`, `pc_backlog_summary`, and
+`worktree_summary`.
+
 # WRE Core Interface
+
+## Advisory AutoResearcher startup display
+
+`read_research_report_summary(report_path, expected_baseline_sha256, *,
+max_age_seconds=86400)` in `src/dashboard_alerts.py` reads one explicitly selected
+local `invocation-*/report.json`. The expected lowercase SHA-256 identifies the
+baseline text selected by the caller; it is not authenticated producer/oracle
+identity. No directory scan or implicit latest-report selection occurs.
+
+The reader rejects relative/UNC/device paths, nonregular final files, oversized
+input (actual read capped at 1 MiB + 1), duplicate JSON fields, invalid schema,
+source/path/invocation mismatch, incomplete/aborted/cleanup-failed reports,
+inconsistent counters/history, nonfinite metrics and impossible gain accounting.
+Valid zero-attempt runs and completed runs containing failed attempts remain
+diagnostics. Positive gain requires an accepted attempt and vice versa.
+
+The age limit must be a finite positive number, excluding bool. Future/expired
+file mtime gives `unknown`; current mtime is only **file age**, never authenticated
+execution freshness. A caller must supply a trusted local regular-file location;
+mapped/network storage, ancestor links and hostile path replacement are not
+confined by this helper, and synchronous filesystem latency has no hard bound.
+
+Output is `unknown` with a fixed reason, or `unverified_diagnostic` with attempts,
+outcome counts, reported fitness delta, verification-signal class and file age.
+The reader now requires a consistent `wre_rsi_measurements.v1` bundle and
+classifies this producer as `execution_feedback`; it rejects stronger
+self-asserted classes, independent/held-out claims, production-RSI eligibility,
+or non-null verification/retention/resource/rollback/generation evidence.
+Independent verification, retained improvements and actual resource usage remain
+`None`. This checks displayed accounting and RSI truth labels, not economic
+validity or the complete report/proposal/program provenance.
+
+Mixed slash network-style prefixes (`/\\` and `\\/`) are rejected lexically on
+all hosts, before filesystem access.
+
+Measurement scalar hardening (2026-09-29): nested counters require integers,
+policy flags require Booleans, and fitness/gain numbers exclude Booleans.
+Finite integer/float fitness representations remain interoperable. Absolute
+gain is `best - baseline` in simulator fitness units (higher is better);
+relative gain is the dimensionless fraction `gain / abs(baseline)`, not a
+percentage. A zero baseline requires explicit `null`; negative baselines use
+their magnitude. Nonfinite derived relative gain rejects as `unknown`.
+The five unavailable verification/resource/rollback/retention fields must also
+be present as `null`. Complete PR #1903 v1 reports already provide these fields;
+partial bundles reject rather than silently gaining the same status. These
+checks validate diagnostic accounting, not authentication or economic validity.
+
+`print_research_report_summary()` reads `WRE_RESEARCH_REPORT_PATH` and
+`WRE_RESEARCH_BASELINE_SHA256`, then prints sanitized advisory output without raw
+paths/content/errors. `main.py:run_wre_dashboard_preflight` invokes it when that
+preflight is enabled, preserving existing health enforcement. Unconfigured or
+bad reports remain unknown; reading never constructs a researcher, model,
+PatternMemory, queue or resolution event, and writes no report. Existing health
+checks may still initialize memory and dispatch events under their own contract.
+No campaign, retention, queue admission, scheduled cycle or promotion is enabled.
 
 **Version:** 0.8.0
 **Status:** Execution-truth hardening implemented; production RSI incomplete
@@ -38,6 +438,10 @@ and exact `verification_digest`. Test counts must be positive integers and the
 failure count must be the integer zero; malformed values cannot imply a pass. Its v2 identity binds
 the full input evidence. Old minimal hand-written fixtures must supply the
 fields already produced by the real recorder; missing fields fail closed.
+Current receipts serialize `identity_version=2` and `evidence_digest`, the exact
+fields already used in their gate ID. Memex reconstructs that ID without changing
+it. Historical unversioned receipts preserve their exact serialized shape and
+legacy ID; partial, malformed, unsupported or downgraded identities reject.
 
 The existing bridge `invoke_reddog_wre_queue_authorized_pattern_memory_admission(...)`
 also isolates sink input and rejects empty/non-string acknowledgments through
@@ -49,13 +453,16 @@ receipt versions as historical evidence; do not rewrite them in place.
 ## ROC research evaluator and dry-run producer
 
 `src/wre_research_evaluator.py` exposes `load_target_config_from_source(source)`,
-`load_target_config(path)` and `evaluate_target(path)`. The loader uses AST literal
+`load_target_config(path)`, `snapshot_cost_catalog(cost_catalog=None)`,
+`snapshot_comparison_basis()` and
+`evaluate_target(path, *, cost_catalog=None, comparison_basis=None)`. The loader uses AST literal
 evaluation; it does not import or execute the target. Metric dictionaries accept
 finite integers/floats with string keys, excluding booleans. Unusable numeric
 maps return empty dictionaries through the existing loader contract.
 
 Before simulation, `evaluate_target` rejects missing/invalid maps, agent names
-outside `AGENT_INFRASTRUCTURE_COSTS`, allocation fractions outside `[0, 1]`,
+outside the captured cost catalog (default: `AGENT_INFRASTRUCTURE_COSTS`),
+allocation fractions outside `[0, 1]`,
 totals not equal to one within absolute `1e-9` (zero relative tolerance), and
 multipliers outside `[1, 5]`. These input guards return an `error`, finite
 negative `fitness`, and false compute/ROI flags. Valid known-agent subsets,
@@ -119,12 +526,77 @@ available an aborted mapping is published before propagation.
 | `baseline`, `optimized`, `improvement` | Available metrics and local difference; no valid best means `None` for optimized/improvement |
 | `baseline_input_sha256` | SHA-256 of the invocation's captured baseline text encoded as UTF-8; constructor reads normalize newlines. Describes prepared input even on abort before evaluation; not raw source bytes, program/oracle identity or authenticated provenance |
 | `proposal_inputs` | Per-invocation ordered list of `{iteration, proposal_input_sha256}` for nonempty text reaching candidate preparation. SHA-256 covers returned Unicode content encoded as UTF-8 before scratch write/diff; no raw proposal content is added to this field |
+| `program_inputs` | Ordered local attempted-call records: `{iteration, call_ordinal, program_input_sha256, identity_error}`; ordinal starts at one per invocation. Digest covers the rendered instruction text used in that call, encoded as UTF-8 |
 | `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence from this producer |
+| `rsi_measurements` | `wre_rsi_measurements.v1`: verification class, baseline/best fitness, absolute/relative gain, candidate/outcome counts and explicit unknowns for independent verification, resource usage, activation rollback and successive-generation gain. Current AutoResearcher class is `execution_feedback`, not formal verification; `production_rsi_eligible=false`. |
 
 Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
 `crashed`. History/TSV record missing proposals with blank metric cells. `crashed`
 may include evaluation or later acceptance/logging failures. Best metrics advance
 only after acceptance recording succeeds; accepted info names previous fitness.
+
+Cost comparability repair, 2026-09-23: each invocation captures immutable numeric
+unit totals and catalog names after mode/report preparation, before baseline
+evaluation. Baseline and candidates consume the same captured values; replacement,
+in-place cost mutation and membership changes cannot alter this cost basis.
+Capture failure aborts in `cost_capture` with zero evaluator entries, preserving
+the existing terminal report and cleanup path. Later invocations refresh costs;
+separate instances do not share a snapshot. Same-instance concurrency remains
+unsupported, and capture is not atomic against concurrent mutation of globals.
+
+`snapshot_cost_catalog(None)` reads current catalog totals; an explicit mapping
+is copied and never falls back to globals through truthiness. Nonempty string-key
+mappings with finite nonnegative integer/float totals are accepted; booleans,
+non-numeric, negative, nonfinite and float-overflow values raise `ValueError`
+before simulation. Zero cost remains valid and still records performed tasks.
+Only aggregate totals are validated, not their five source components. The
+calculator accepts the same keyword and owns a copied immutable mapping. Valid
+one-argument evaluator calls still capture current costs independently.
+
+PR1895 preserves historical cost-only false acceptance; PR1896 freezes those
+consumed cost values. PR1897 preserves eight historical profile-only false gains
+of five points with unchanged candidate text. The current guard rejects persistent
+profile changes in those cases without changing their metrics or acceptance oracle.
+
+Profile drift guard, 2026-09-24: `snapshot_comparison_basis()` returns an immutable
+JSON string of primitive values. It describes ordered effective tier distribution,
+tier presence/prices, subscription margin, angel subscription/OPO inputs and average
+stake default, DEX fee, consumed activity defaults, inherited constructor burn and
+SATS_PER_USD bookkeeping. The basis uses the values imported by the actual consumer
+and definition-bound method defaults. Explicitly overridden subscriber/angel/task
+defaults, unused agent mix/compute margin and unused constructor BTC price are not
+dependencies. A nonempty bound distribution takes precedence over the live global;
+an empty/None default uses the current fallback. Missing tiers differ from zero
+prices, distribution order is preserved, and integer precision is not discarded.
+
+Numeric profile values must be finite integers/floats excluding booleans. This
+validates comparability, not economic bounds or model correctness. Even a finite
+SATS change conservatively rejects bookkeeping drift although the eight returned
+scores may be equal. Missing/invalid profile inputs fail capture. No global values
+are overwritten and no shared economic method is changed.
+
+An invocation captures costs in `cost_capture`, then the profile in
+`comparison_capture`, before incrementing `baseline_evaluations`. Profile capture
+failure aborts with zero evaluator entries through normal report/cleanup handling.
+The same captured string is checked before each evaluator call performs simulation
+and after it returns metrics. A persistent change raises `ValueError` containing
+`comparison basis`; candidate failure records the existing `crashed` outcome,
+blank TSV metrics, unchanged best metrics and scratch rollback. If simulation
+raises, the existing exception path already prevents acceptance. Later invocations
+recapture; separate nested instances do not share a basis.
+
+Only omitted/None `comparison_basis` opts out for legacy direct calls. Explicit
+empty strings, other types or a mismatching string raise; they do not silently
+recapture or disable checks. The string is a local comparison value, not an
+authenticated hash, report receipt or stable public serialization contract.
+Frozen cost values remain a separate input and are not re-read by this guard.
+
+Before/after sampling is not atomic and does not make simulation consume an
+immutable profile. A value changed and restored inside simulation can evade checks;
+the fixed ABA control documents that remaining false gain. Same-instance concurrency
+is unsupported; no broader concurrency, source/oracle authentication, economic
+validity, runtime admission, promotion or retained-learning claim follows. The
+report schema and its independent-verification/retention fields are unchanged.
 
 `proposal_inputs` is separate from finished `history`: a subsequent preparation,
 diff or evaluation interruption can leave an input record without an outcome.
@@ -136,6 +608,20 @@ built-in UTF-8 encoder rather than an overridden `encode` method. Encoding failu
 produces no record. Mode rejection before preparation also produces no record,
 even if a backend returned text. Digests do not identify raw model wire, normalized
 scratch bytes or the later evaluator input, and do not authenticate a proposal.
+
+`program_inputs` records the locally rendered instruction string immediately
+before invoking the resolved backend method. Rendering preserves the original
+empty-format semantics once, including custom format results, and the same text
+supplies prompt and digest. Backend failures/interruption and later mode rejection
+retain the entry. Formatting or backend-lookup failure before invocation has no
+entry. Multiple backend calls within one proposal have distinct invocation-wide
+ordinals. Heuristic, zero-attempt and overridden proposal paths that bypass the
+LLM method leave an empty list. Direct calls outside `run()` have no collector.
+The scoped collector restores its prior value or absence on every Python exit.
+An unencodable instruction records null digest and `UnicodeEncodeError`, without
+suppressing the backend call; otherwise `identity_error` is null. This describes
+an attempted local call, not provider receipt, raw program bytes, the full prompt,
+model/oracle/environment identity, authenticated provenance or retained learning.
 
 Each sequential call reserves a distinct subdirectory, stages complete JSON in
 `report.tmp`, then replaces `report.json` in that directory after cleanup settles.
@@ -357,6 +843,12 @@ Unsupported agent: `unsupported_local_agent`.
 Unavailable/import/init/generation failure: `local_model_unavailable`.
 Generated proposal: `unverified_model_proposal`.
 
+Local proposal and master reflection prompt builders omit only the reserved
+`parent_continuity_context` key from JSON. The original mapping/object is not
+modified; lineage consumption remains separate. No `default=str` coercion or
+generic serializer is added. Ordinary task values keep their prior encoding;
+unrelated nonserializable values remain errors.
+
 ## PatternMemory
 
 Every `PatternMemory(db_path=None)` or explicit-path instance owns a separate
@@ -381,6 +873,22 @@ independently bound transaction participant.
 `PatternMemory.store_outcome()` records actual post-dispatch execution
 success and structural fidelity. `outcome_quality` remains `0.0` until an
 independent authenticated evaluator supplies quality evidence.
+
+`recall_failure_patterns()` returns only explicitly unsuccessful outcomes
+(`success = 0`) at or below its inclusive `max_fidelity` threshold. Structural
+fidelity alone does not classify an execution as failed. Skill filtering,
+ascending fidelity/descending timestamp ordering and the result limit remain
+unchanged; high-fidelity failures require a correspondingly higher cutoff.
+
+Both `recall_successful_patterns()` and `recall_failure_patterns()` accept an
+optional `parent_version: Optional[str] = None`. When supplied, recall filters
+outcomes in SQL (before `LIMIT`) to rows whose `output_result` JSON contains a
+valid `$._skill_binding` record (`schema_version =
+"wre_skill_execution_binding.v1"` and `loaded_skill_sha256 == parent_version`);
+non-string or blank `parent_version` values fail closed to `[]`.
+`WREMasterOrchestrator.evolve_skill()` binds variation recall and
+`store_variation(..., parent_version=...)` to `loaded_skill_digest(skill_content)`
+so unrelated historical skill versions do not pollute candidate evolution.
 
 `stage_variation_candidate(variation_id)` sets a non-production
 `candidate_ready` state. `promote_variation()` is a fail-closed compatibility
@@ -427,8 +935,8 @@ location resolver only; it is not production admission.
 
 `PatternMemory` retains these callable groups:
 
-- outcomes: `store_outcome()`, `recall_successful_patterns()`,
-  `recall_failure_patterns()`, `get_skill_metrics()`;
+- outcomes: `store_outcome()`, `recall_successful_patterns(..., parent_version=None)`,
+  `recall_failure_patterns(..., parent_version=None)`, `get_skill_metrics()`;
 - false-positive records: `record_false_positive()`, `is_false_positive()`,
   `get_false_positive_reason()`;
 - evolution and continuity: `store_variation()`, `record_learning_event()`,
@@ -557,7 +1065,37 @@ See the focused source interfaces and tests for:
 - `src/foundup_job_model_capability_projection.py`
 - `src/wre_autonomous_slice_verifier_runtime.py`
 
+### Consumer force-dry boundary
+
+`execute_foundup_job(job, *, force_dry_run=False)` preserves the existing
+one-argument singleton path. The keyword must be a literal boolean; invalid types
+raise `TypeError` before selecting or constructing an executor. True constructs
+`HermesJobExecutor(dry_run=True)` with ordinary safe defaults for that call.
+It neither mutates nor copies the warmed global executor's tools, custom root,
+custom validator, controlled-harness or adapter flags. False grants no live authority.
+
+`FoundUpJobConsumer.consume_one` snapshots its mode before job lookup, routing and
+binding callbacks, then uses that value for model admission and Hermes dispatch.
+Original job flags remain independent validation/action-guard input. Default
+capability-validator identity and nonce history are shared across fresh executors;
+the warmed singleton and any custom validator retain their state.
+
+Normal workspace discovery applies to the fresh executor; bind an owned root for
+tests. Dry-run evidence can write files. Validation, model admission, token/action
+guards and live-delegation blocks remain active, so not every job reaches simulation.
+Constructor cost is unmeasured. This is configuration isolation, not an OS sandbox
+or runtime admission. The [roadmap](ROADMAP.md#consumer-dry-run-isolation-qualification--2026-09-21)
+records the baseline witness, repair and verification limits.
+
 ## Test differential and independent verification
+
+Test source may declare `WRE_TEST_MODE = "scaffold"` or `"manual"` (ordinary or
+annotated assignment). Both remain noncollectable in the canonical registry;
+scaffolds carry `unimplemented_test_scaffold`, manual programs carry
+`manual_test_program`. Other/nonliteral declarations carry `invalid_test_mode`.
+These declarations cannot hide external-effect reasons or grant execution.
+They do not authorize importing arbitrary test modules. Generated scaffolds
+are SPECIFIED_NOT_IMPLEMENTED and never count as behavioral coverage.
 
 `load_canonical_test_registry()`, `collect_registered_test_shards()`,
 `make_test_impact_plan()`, `make_test_run_snapshot()`, and
@@ -574,6 +1112,68 @@ allocation, and terminal receipt must agree. The independently recorded
 `trusted_work_authority_digest` cannot be copied from the author request.
 Verifier, CI, CodeQL, and red-team evidence do not independently publish or
 promote an artifact.
+
+## Self-audit scan observations
+
+`DaemonSelfAuditLoop.scan_once() -> int` retains the synchronous count and
+exception contract. `scan_once_with_status() -> dict` adds a detached result for
+that exact attempt; ordinary scan exceptions become failed results, while
+interrupts still propagate. `get_scan_status() -> dict` reads detached diagnostic
+state and does not initiate scanning. The constructor accepts a keyword-only
+`monotonic_clock` for deterministic age validation.
+
+An attempt reports its process-local `attempt_id`, `outcome`, `coverage`,
+`event_count`, bounded `error_codes`, start/completion monotonic timestamps,
+`sampled_at_monotonic`, `clock_valid`, `last_success`, and `last_success_age_sec`. Outcomes distinguish
+`never_scanned`, `running`, `completed`, `partial`, and `failed`. Raised or
+unfinished scans have an unknown count; a returned partial scan keeps the count
+actually observed. Error metadata contains no raw exception or log payload.
+
+Coverage is `unknown`, `bounded`, `known_partial`, or `no_inputs`. Completed
+bounded scanning includes a successful zero-findings pass; it never proves full
+repository coverage. Failed/partial attempts and empty input discovery do not
+refresh the last successful bounded-input scan. Invalid, nonfinite, negative or
+backward start/completion readings prevent that attempt from replacing success;
+a later valid sample can still report the prior success age. An invalid sampling
+reading makes age unknown without erasing an already qualified completion.
+The clock tracks a high-water mark across failed attempts too. No TTL or
+categorical healthy/fresh/stale verdict is supplied: such policy belongs to the
+consuming owner. Monotonic values and attempt IDs are not durable identifiers.
+
+`observe_self_audit_status(loop, enabled=...)` supplies the OpenClaw compatibility
+projection. OpenClaw consumes the returned attempt directly, preserving its
+existing integer metric. Disabled, absent, failed and legacy status-unavailable
+owners remain distinct. Malformed additive results never trigger a second scan;
+legacy integer-only owners retain their compatibility path. These observations
+do not grant remediation, dispatch, promotion or reward authority. See the
+[monitor contract](../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
+and focused scan-status tests for qualification boundaries.
+
+## Self-audit diagnostic outcomes
+
+The opt-in `verify_dae_event_store` policy checks SQLite structure; its existing
+`(True, "event_store_verified")` return and `dae_event_store_health.json` report
+are preserved. Neither establishes repair of a failed write or JSONL parity.
+
+Eligible invocations use `self_audit_diagnostic_attempts`, including calls that
+return cooldown or missing-store results. Only the exact verification action,
+literal True flag and exact `event_store_verified` result add
+`self_audit_diagnostic_success` and feedback `diagnostic_successes`. A False flag
+does not identify whether verification ran or completed; no diagnostic failure
+count is inferred. Last-result observation remains available.
+
+Every outcome for that action stays outside repair attempt/success/failure
+counters and feedback. Historical repair counts and their score are preserved;
+they are not retrospectively corrected. A diagnostic result cannot suppress
+repeated-fault escalation, even if it contains another legacy success marker.
+Existing thresholds, cooldown and disabled process-dispatch gates still apply.
+Other legacy policy outcomes retain their prior behavior, except the SQLite
+marker alone no longer earns repair success for an unrelated action. The existing
+microphone/start markers are compatibility behavior, not proof of causal repair.
+
+The focused diagnostic tests use inert collaborators and disposable SQLite
+fixtures. They establish local accounting and escalation behavior, not live
+monitoring, authenticated verification, retained learning or native RSI readiness.
 
 ## Configuration
 

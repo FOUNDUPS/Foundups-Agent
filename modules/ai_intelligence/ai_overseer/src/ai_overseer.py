@@ -216,7 +216,7 @@ class AIIntelligenceOverseer:
         }
     )
 
-    def __init__(self, repo_root: Path):
+    def __init__(self, repo_root: Path, *, initialize_models: bool = True):
         self.repo_root = Path(repo_root)
         self._m2m_sentinel = None
         # WSP 60: Persist overseer patterns under module-local memory
@@ -242,12 +242,13 @@ class AIIntelligenceOverseer:
             except Exception:
                 pass
 
-        # Initialize Holo Qwen/Gemma orchestrator
-        if HOLO_AVAILABLE:
+        # Deterministic startup checks do not require inference engines. The
+        # operational constructor retains its existing model initialization.
+        self.orchestrator = None
+        if HOLO_AVAILABLE and initialize_models:
             self.orchestrator = AutonomousRefactoringOrchestrator(repo_root)
             logger.info("[AI-OVERSEER] Holo Qwen/Gemma orchestrator initialized")
-        else:
-            self.orchestrator = None
+        elif not HOLO_AVAILABLE:
             logger.warning("[AI-OVERSEER] Running without Holo orchestrator")
 
         # Initialize HoloAdapter (deterministic facade)
@@ -276,7 +277,7 @@ class AIIntelligenceOverseer:
 
         # AutoGate Initialization
         self.auto_gate = None
-        if AUTOGATE_AVAILABLE and self.holo_adapter:
+        if initialize_models and AUTOGATE_AVAILABLE and self.holo_adapter:
             try:
                 self.auto_gate = AutoGate(self.repo_root, self.holo_adapter)
                 logger.info("[AI-OVERSEER] AutoGate initialized")

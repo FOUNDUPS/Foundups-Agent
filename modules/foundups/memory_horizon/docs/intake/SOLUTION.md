@@ -53,7 +53,7 @@ Example:
 
 Browser-first PWA-compatible implementation. Prefer ordinary TypeScript/JavaScript; use jsPsych where its trial/timeline/data model reduces custom experiment plumbing. Keep game state and measurement state separate.
 
-POC can run entirely client-side with a deterministic seed and local export. A backend is not required until multi-user research, secure study management or synchronized clinician dashboards exist.
+POC can run entirely client-side with a deterministic seed and local export. A backend is not required until multi-participant research, secure study management or synchronized clinician dashboards exist.
 
 ## POC -> Prototype -> MVP
 

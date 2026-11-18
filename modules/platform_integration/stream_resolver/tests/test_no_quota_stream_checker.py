@@ -13,7 +13,86 @@ import time
 import sys
 import os
 
-from modules.platform_integration.stream_resolver.src.no_quota_stream_checker import NoQuotaStreamChecker
+import importlib.util
+from pathlib import Path
+from types import ModuleType
+
+
+# Load the whole checker and real config, without the package initializer that
+# eagerly imports OAuth/social posting. Only external effect boundaries are fake.
+# Module substitutions are scoped to this suite and restored by tearDownModule.
+NoQuotaStreamChecker = None
+_module_restore = {}
+_effect_guards = []
+_environment_patch = None
+
+
+def setUpModule():
+    global NoQuotaStreamChecker, _environment_patch
+    source_dir = Path(__file__).resolve().parents[1] / "src"
+    names = (
+        "_quota_checker_under_test",
+        "_quota_checker_under_test.config",
+        "_quota_checker_under_test.stream_db",
+        "_quota_checker_under_test.no_quota_stream_checker",
+        "modules.platform_integration.youtube_auth.src.youtube_auth",
+        "modules.platform_integration.social_media_orchestrator.src.core.live_status_verifier",
+    )
+    for name in names:
+        _module_restore[name] = (name in sys.modules, sys.modules.get(name))
+    try:
+        _environment_patch = patch.dict(os.environ, {
+            "PYTHONDONTWRITEBYTECODE": "1", "PYTHON_DOTENV_DISABLED": "1",
+            "YOUTUBE_API_ENABLED": "false", "YT_STREAM_API_VERIFY": "true",
+            "YT_STREAM_SCRAPING_ENABLED": "true",
+        }, clear=True)
+        _environment_patch.start()
+        for target in ("requests.sessions.Session.request", "socket.socket.connect",
+                       "socket.socket.connect_ex", "sqlite3.connect", "subprocess.Popen"):
+            guard = patch(target, side_effect=AssertionError("external effect forbidden in checker unit suite"))
+            _effect_guards.append((guard, guard.start()))
+        package = ModuleType(names[0])
+        package.__path__ = [str(source_dir)]
+        sys.modules[names[0]] = package
+        database = ModuleType(names[2])
+        database.StreamResolverDB = MagicMock(name="offline_database")
+        sys.modules[names[2]] = database
+        auth = ModuleType(names[4])
+        auth.get_authenticated_service = MagicMock(side_effect=AssertionError("unmocked authentication"))
+        sys.modules[names[4]] = auth
+        verifier = ModuleType(names[5])
+        verifier.LiveStatusVerifier = MagicMock(name="offline_verifier")
+        sys.modules[names[5]] = verifier
+        for name, filename in ((names[1], "config.py"), (names[3], "no_quota_stream_checker.py")):
+            spec = importlib.util.spec_from_file_location(name, source_dir / filename)
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[name] = module
+            setattr(package, name.rsplit(".", 1)[1], module)
+            spec.loader.exec_module(module)
+        NoQuotaStreamChecker = sys.modules[names[3]].NoQuotaStreamChecker
+    except BaseException:
+        tearDownModule()
+        raise
+
+
+def tearDownModule():
+    global NoQuotaStreamChecker, _environment_patch
+    attempted = sum(mock.call_count for _, mock in _effect_guards)
+    for guard, _ in reversed(_effect_guards):
+        guard.stop()
+    _effect_guards.clear()
+    if _environment_patch is not None:
+        _environment_patch.stop()
+        _environment_patch = None
+    for name, (existed, previous) in _module_restore.items():
+        if existed:
+            sys.modules[name] = previous
+        else:
+            sys.modules.pop(name, None)
+    _module_restore.clear()
+    NoQuotaStreamChecker = None
+    if attempted:
+        raise AssertionError(f"checker suite attempted {attempted} forbidden external effect(s)")
 
 
 class TestNoQuotaStreamChecker(unittest.TestCase):
@@ -21,6 +100,30 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
+        # Keep this existing suite independent of host toggles and runtime DB files.
+        env_patch = patch.dict(os.environ, {
+            "YOUTUBE_API_ENABLED": "false",
+            "YT_STREAM_API_VERIFY": "true",
+            "YT_STREAM_SCRAPING_ENABLED": "true",
+        })
+        env_patch.start()
+        self.addCleanup(env_patch.stop)
+        db_patch = patch(
+            '_quota_checker_under_test.no_quota_stream_checker.StreamResolverDB'
+        )
+        db_patch.start()
+        self.addCleanup(db_patch.stop)
+        auth = sys.modules["modules.platform_integration.youtube_auth.src.youtube_auth"]
+        auth_patch = patch.object(auth, "get_authenticated_service", side_effect=AssertionError("unmocked authentication"))
+        self.auth_factory = auth_patch.start()
+        self.addCleanup(auth_patch.stop)
+        verifier = sys.modules["modules.platform_integration.social_media_orchestrator.src.core.live_status_verifier"]
+        verifier_patch = patch.object(verifier, "LiveStatusVerifier")
+        self.verifier_factory = verifier_patch.start()
+        self.addCleanup(verifier_patch.stop)
+        sleep_patch = patch("_quota_checker_under_test.no_quota_stream_checker.time.sleep")
+        self.sleep_mock = sleep_patch.start()
+        self.addCleanup(sleep_patch.stop)
         self.checker = NoQuotaStreamChecker()
         self.test_video_id = "dQw4w9WgXcQ"
         self.test_channel_id = "UCBR8-60-B28hp2BmDPdVsXQ"
@@ -59,7 +162,7 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         self.assertFalse(result.get('live', True))
 
     @patch('requests.Session.get')
-    @patch.object(NoQuotaStreamChecker, "check_video_is_live")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker.check_video_is_live")
     def test_check_channel_for_live_success(self, mock_check_video, mock_get):
         """Test successful channel live check."""
         # Mock /live redirect to a watch URL (do not follow redirects in implementation)
@@ -82,8 +185,8 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         self.assertFalse(mock_get.call_args[1].get("allow_redirects", True))
 
     @patch('requests.Session.get')
-    @patch.object(NoQuotaStreamChecker, "_anti_detection_delay")
-    @patch.object(NoQuotaStreamChecker, "check_video_is_live")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker._anti_detection_delay")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker.check_video_is_live")
     def test_check_channel_no_api_trusts_live_indicators(self, mock_check_video, mock_delay, mock_get):
         """Test no-API mode trusts strong /live indicators."""
         os.environ["YT_STREAM_API_VERIFY"] = "false"
@@ -104,8 +207,8 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         mock_check_video.assert_not_called()
 
     @patch('requests.Session.get')
-    @patch.object(NoQuotaStreamChecker, "_anti_detection_delay")
-    @patch.object(NoQuotaStreamChecker, "check_video_is_live")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker._anti_detection_delay")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker.check_video_is_live")
     def test_check_channel_streams_fallback_when_live_quiet(self, mock_check_video, mock_delay, mock_get):
         """Test /streams fallback when /live has no strong indicators."""
         live_response = MagicMock()
@@ -140,12 +243,11 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
 
     def test_anti_detection_delay(self):
         """Test anti-detection delay functionality."""
-        start_time = time.time()
         self.checker._anti_detection_delay(min_delay=0.1, max_delay=0.2)
-        end_time = time.time()
-
-        # Should have delayed for at least 0.1 seconds
-        self.assertGreater(end_time - start_time, 0.05)
+        self.sleep_mock.assert_called_once()
+        delay = self.sleep_mock.call_args.args[0]
+        self.assertGreaterEqual(delay, 0.1)
+        self.assertLessEqual(delay, 0.2)
 
     def test_is_channel_rate_limited_not_limited(self):
         """Test channel rate limit check when not limited."""
@@ -169,7 +271,7 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         is_limited, _ = self.checker._is_channel_rate_limited(self.test_channel_id)
         self.assertTrue(is_limited)
 
-    @patch('modules.platform_integration.stream_resolver.src.no_quota_stream_checker.LIVE_STATUS_VERIFIER_AVAILABLE', False)
+    @patch('_quota_checker_under_test.no_quota_stream_checker.LIVE_STATUS_VERIFIER_AVAILABLE', False)
     @patch('requests.Session.get')
     def test_fallback_behavior(self, mock_get):
         """Test fallback behavior when LiveStatusVerifier is unavailable."""
@@ -185,22 +287,25 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         self.assertIsInstance(result, dict)
 
     @patch('requests.Session.get')
-    @patch('modules.platform_integration.youtube_auth.src.youtube_auth.get_authenticated_service')
-    def test_request_timeout_handling(self, mock_auth, mock_get):
+    def test_request_timeout_handling(self, mock_get):
         """Test handling of request timeouts."""
         from requests.exceptions import Timeout
 
         mock_get.side_effect = Timeout("Request timed out")
-        mock_auth.side_effect = RuntimeError("auth unavailable in unit test")
+        self.auth_factory.side_effect = RuntimeError("auth unavailable in unit test")
 
         result = self.checker.check_video_is_live(self.test_video_id)
 
         self.assertIsInstance(result, dict)
         self.assertFalse(result.get('live', True))
 
-    @patch('modules.platform_integration.youtube_auth.src.youtube_auth.get_authenticated_service')
-    def test_api_verification_reuses_cached_service(self, mock_auth):
-        """API verification should not rebuild the YouTube service per video check."""
+    @patch.dict(os.environ, {"YOUTUBE_API_ENABLED": "true"})
+    def test_api_verification_reuses_cached_service(self):
+        """API verification should not rebuild the YouTube service per video check.
+
+        PR#184 quota-gate fix: API verification now requires the global
+        YOUTUBE_API_ENABLED toggle, so this API-path test opts in explicitly.
+        """
         mock_service = MagicMock()
         mock_service._credential_set = 10
         mock_service.videos.return_value.list.return_value.execute.return_value = {
@@ -214,6 +319,8 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
                 }
             ]
         }
+        mock_auth = self.auth_factory
+        mock_auth.side_effect = None
         mock_auth.return_value = mock_service
 
         first = self.checker.check_video_is_live(self.test_video_id, scraping_prefilter=False)
@@ -223,11 +330,15 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         self.assertFalse(second.get("live"))
         mock_auth.assert_called_once()
 
+    @patch.dict(os.environ, {"YOUTUBE_API_ENABLED": "true"})
     @patch('requests.Session.get')
-    @patch.object(NoQuotaStreamChecker, "_anti_detection_delay")
-    @patch.object(NoQuotaStreamChecker, "check_video_is_live")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker._anti_detection_delay")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker.check_video_is_live")
     def test_channel_mismatch_is_recommended_debug_not_warning(self, mock_check_video, mock_delay, mock_get):
-        """Recommended streams from other channels are expected, not warnings."""
+        """Recommended streams from other channels are expected, not warnings.
+
+        Opts into the API path (PR#184 quota-gate fix made no-API the default).
+        """
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.url = f"https://www.youtube.com/channel/{self.test_channel_id}/live"
@@ -241,8 +352,8 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
             "channel_id": "UCOTHERCHANNEL1234567890",
         }
 
-        with patch('modules.platform_integration.stream_resolver.src.no_quota_stream_checker.logger.warning') as mock_warning, \
-             patch('modules.platform_integration.stream_resolver.src.no_quota_stream_checker.logger.debug') as mock_debug:
+        with patch('_quota_checker_under_test.no_quota_stream_checker.logger.warning') as mock_warning, \
+             patch('_quota_checker_under_test.no_quota_stream_checker.logger.debug') as mock_debug:
             result = self.checker.check_channel_for_live(self.test_channel_id)
 
         self.assertIsInstance(result, dict)
@@ -250,11 +361,15 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         mock_warning.assert_not_called()
         self.assertTrue(any("[RECOMMENDED]" in str(call) for call in mock_debug.call_args_list))
 
+    @patch.dict(os.environ, {"YOUTUBE_API_ENABLED": "true"})
     @patch('requests.Session.get')
-    @patch.object(NoQuotaStreamChecker, "_anti_detection_delay")
-    @patch.object(NoQuotaStreamChecker, "check_video_is_live")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker._anti_detection_delay")
+    @patch("_quota_checker_under_test.no_quota_stream_checker.NoQuotaStreamChecker.check_video_is_live")
     def test_stale_indicator_returned_when_live_dom_has_no_verified_stream(self, mock_check_video, mock_delay, mock_get):
-        """Live-looking DOM without verified live videos is reported as stale, not live."""
+        """Live-looking DOM without verified live videos is reported as stale, not live.
+
+        Opts into the API path (PR#184 quota-gate fix made no-API the default).
+        """
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.url = f"https://www.youtube.com/channel/{self.test_channel_id}/live"
@@ -292,6 +407,8 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
 
         # Should be the same object (cached)
         self.assertIs(verifier1, verifier2)
+        self.assertIs(verifier1, self.verifier_factory.return_value)
+        self.verifier_factory.assert_called_once_with()
 
     def test_timeout_env_parsing_invalid_falls_back(self):
         """Malformed YT_STREAM_REQUEST_TIMEOUT_SEC falls back to 30."""
@@ -341,6 +458,19 @@ class TestNoQuotaStreamCheckerIntegration(unittest.TestCase):
 
     def setUp(self):
         """Set up integration test fixtures."""
+        # Keep this existing suite independent of host toggles and runtime DB files.
+        env_patch = patch.dict(os.environ, {
+            "YOUTUBE_API_ENABLED": "false",
+            "YT_STREAM_API_VERIFY": "true",
+            "YT_STREAM_SCRAPING_ENABLED": "true",
+        })
+        env_patch.start()
+        self.addCleanup(env_patch.stop)
+        db_patch = patch(
+            '_quota_checker_under_test.no_quota_stream_checker.StreamResolverDB'
+        )
+        db_patch.start()
+        self.addCleanup(db_patch.stop)
         self.checker = NoQuotaStreamChecker()
 
     def test_initialization(self):
@@ -355,6 +485,120 @@ class TestNoQuotaStreamCheckerIntegration(unittest.TestCase):
         # The actual retry logic is tested in HTTP adapter
         self.assertIsNotNone(self.checker.session)
         self.assertTrue(hasattr(self.checker.session, 'mount'))
+
+
+class TestApiVerificationQuotaGate(unittest.TestCase):
+    """PR#184 consistency fix: YOUTUBE_API_ENABLED (global quota toggle) must
+    gate API verification; YT_STREAM_API_VERIFY alone cannot bypass it.
+    Global-off beats local-on."""
+
+    @staticmethod
+    def _enabled(env):
+        mod = sys.modules["_quota_checker_under_test.no_quota_stream_checker"]
+        cleared = {k: "" for k in ("YOUTUBE_API_ENABLED", "YT_STREAM_API_VERIFY")}
+        cleared.update(env)
+        with patch.dict(os.environ, cleared):
+            # Empty string == unset for these toggles (getenv default applies
+            # only on missing keys, so pop the empties explicitly).
+            for key, value in cleared.items():
+                if value == "":
+                    os.environ.pop(key, None)
+            return mod._api_verification_enabled()
+
+    def test_defaults_are_quota_protected(self):
+        """Both unset: global default false -> no API verification."""
+        self.assertFalse(self._enabled({}))
+
+    def test_global_off_beats_local_on(self):
+        """The PR#184 defect case: verify=true must NOT bypass global off."""
+        self.assertFalse(self._enabled({
+            "YOUTUBE_API_ENABLED": "false",
+            "YT_STREAM_API_VERIFY": "true",
+        }))
+
+    def test_global_on_local_on(self):
+        self.assertTrue(self._enabled({
+            "YOUTUBE_API_ENABLED": "true",
+            "YT_STREAM_API_VERIFY": "true",
+        }))
+
+    def test_global_on_local_off(self):
+        """Stream-specific opt-out still respected when API is enabled."""
+        self.assertFalse(self._enabled({
+            "YOUTUBE_API_ENABLED": "true",
+            "YT_STREAM_API_VERIFY": "false",
+        }))
+
+    def test_global_on_local_unset_defaults_to_verify(self):
+        self.assertTrue(self._enabled({"YOUTUBE_API_ENABLED": "true"}))
+
+    def test_global_unset_local_off(self):
+        self.assertFalse(self._enabled({"YT_STREAM_API_VERIFY": "false"}))
+
+
+    @staticmethod
+    def _boundary_cases():
+        return (
+            ("defaults", {}, False),
+            ("global_unset_local_on", {"YT_STREAM_API_VERIFY": "true"}, False),
+            ("global_off_local_on", {"YOUTUBE_API_ENABLED": "false", "YT_STREAM_API_VERIFY": "true"}, False),
+            ("both_on", {"YOUTUBE_API_ENABLED": "true", "YT_STREAM_API_VERIFY": "true"}, True),
+            ("local_off", {"YOUTUBE_API_ENABLED": "true", "YT_STREAM_API_VERIFY": "false"}, False),
+            ("local_unset", {"YOUTUBE_API_ENABLED": "true"}, True),
+            ("global_unset_local_off", {"YT_STREAM_API_VERIFY": "false"}, False),
+        )
+
+    def _assert_entrypoint_api_boundary(self, entrypoint):
+        # Exercise both production entrypoints without constructors, databases,
+        # provider credentials, HTTP, sleeps, or optional model initialization.
+        for label, values, enabled in self._boundary_cases():
+            with self.subTest(entrypoint=entrypoint, case=label), patch.dict(os.environ, {}):
+                for key in ("YOUTUBE_API_ENABLED", "YT_STREAM_API_VERIFY"):
+                    os.environ.pop(key, None)
+                os.environ.update(values)
+                os.environ["YT_STREAM_SCRAPING_ENABLED"] = "true"
+                os.environ["STREAM_VERBOSE_LOGS"] = "false"
+                checker = NoQuotaStreamChecker.__new__(NoQuotaStreamChecker)
+                checker._is_in_captcha_cooldown = MagicMock(return_value=(False, 0))
+                checker._is_channel_rate_limited = MagicMock(return_value=(False, 0))
+                checker._anti_detection_delay = MagicMock()
+                checker._get_random_headers = MagicMock(return_value={})
+                checker.request_timeout_sec = 5
+                checker.max_videos_to_check = 1
+                checker.qwen_intelligence = None
+                checker.session = MagicMock()
+                response = checker.session.get.return_value
+                response.status_code = 200
+                response.url = "https://www.youtube.com/channel/UC_SYNTHETIC/live"
+                response.headers = {}
+                response.text = '"isLiveNow":true "videoId":"abc123def45"'
+                service = MagicMock()
+                service.videos.return_value.list.return_value.execute.return_value = {
+                    "items": [{"snippet": {"liveBroadcastContent": "live", "channelId": "UC_SYNTHETIC"},
+                               "liveStreamingDetails": {}}]
+                }
+                checker._get_authenticated_youtube_service = MagicMock(return_value=service)
+                if entrypoint == "video":
+                    result = checker.check_video_is_live("abc123def45", scraping_prefilter=False)
+                    checker.session.get.assert_not_called()
+                else:
+                    result = checker.check_channel_for_live("UC_SYNTHETIC")
+                    checker.session.get.assert_called_once()
+                    self.assertTrue(result["live"])
+                self.assertEqual(checker._get_authenticated_youtube_service.call_count, int(enabled))
+                self.assertEqual(service.videos.return_value.list.return_value.execute.call_count, int(enabled))
+                if enabled:
+                    self.assertEqual(result["method"], "api")
+                elif entrypoint == "video":
+                    self.assertEqual(result["method"], "scraping_no_api")
+                else:
+                    self.assertEqual(result["source"], "no_api_indicator_trust")
+
+    def test_video_entrypoint_enforces_quota_gate(self):
+        self._assert_entrypoint_api_boundary("video")
+
+    def test_channel_entrypoint_enforces_quota_gate(self):
+        self._assert_entrypoint_api_boundary("channel")
 
 
 if __name__ == '__main__':

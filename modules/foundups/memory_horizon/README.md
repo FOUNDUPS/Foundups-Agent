@@ -48,9 +48,35 @@ Deferred assistive track: [issue #1823](https://github.com/FOUNDUPS/Foundups-Age
 
 Proposed future host: `memory.foundups.com`. Not configured or reserved by this intake.
 
-## WSP references
+## Route Namespace
 
-WSP 00, 15, 22, 49, 50, 60, 95, 97, 109. Follow the existing FoundUp onboarding protocol before runtime/public promotion.
+| Field | Declared value; not deployed |
+| --- | --- |
+| foundup_id | `memory_horizon` |
+| routing_prefix / landing | `/f/memory_horizon` |
+| app root | `/f/memory_horizon/app` |
+
+Routes are declared only; no live `/f/memory_horizon` or `memory.foundups.com` deployment is active.
+
+## App Mount
+
+Planned mount: `/f/memory_horizon/app`. Current slice is `SPECIFIED_NOT_IMPLEMENTED` (`NO_RUNTIME`); no runtime shell mount is activated yet.
+
+## AI Capability Hooks
+
+All Memory Horizon capability hooks remain specified/unimplemented and conform to [FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md](../docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md). Candidate episodic probes and Companion retrieval remain gated (`dispatchable=false`).
+
+## DAEmon Outputs
+
+No autonomous worker is dispatched (`PLANNING_NOT_DISPATCHED`). Future DAEmon integration must expose health, status, next action, and tenant-scoped telemetry per WSP 91 without exposing raw private memories or clinical claims.
+
+## Data / Telemetry Namespace
+
+`foundup_id=memory_horizon`; `data_namespace=idb_memory_horizon`. Client-side synthetic sessions remain isolated from shared agent memory or clinical storage.
+
+## WSP References
+
+WSP 00, 15, 22, 49, 50, 60, WSP 91, 95, 97, WSP 104, 109; canonical surface contract [FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md](../docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md). Follow the existing FoundUp onboarding protocol before runtime/public promotion.
 
 ## Terminology gate
 

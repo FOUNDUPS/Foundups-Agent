@@ -216,8 +216,16 @@ class WSPFrameworkSentinel:
         if missing_rows:
             issues.append("master_index missing rows for: " + ", ".join(f"WSP {n:02d}" for n in missing_rows))
 
-        if not re.search(r"Next Available Number\*\*:\s*WSP\s*99\b", text):
-            issues.append("master_index next available number is not WSP 99")
+        # Allocation grows over time; an indexed reservation also owns its
+        # number even when a canonical protocol file has not landed yet.
+        expected_next = max(file_numbers | index_numbers, default=0) + 1
+        declarations = [line.strip() for line in text.splitlines()
+                        if "Next Available Number" in line]
+        declaration = (re.fullmatch(r"(?:-\s+)?\*\*Next Available Number\*\*:\s*WSP\s+(\d{1,3})",
+                                    declarations[0])
+                       if len(declarations) == 1 else None)
+        if declaration is None or int(declaration.group(1)) != expected_next:
+            issues.append(f"master_index next available number must uniquely declare WSP {expected_next}")
 
         return issues
 

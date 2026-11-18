@@ -165,6 +165,16 @@ def _progress(stage: str, text: str, *, role: str = "", model: str = "") -> None
     sys.stderr.flush()
 
 
+class _NoOpenRouterRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        # Credentials and request data belong only to the fixed provider route.
+        return None
+
+
+def _openrouter_urlopen(request, *, timeout):
+    return urllib.request.build_opener(_NoOpenRouterRedirect()).open(request, timeout=timeout)
+
+
 def _post_openrouter(api_key: str, body: dict[str, Any], timeout: int) -> tuple[dict[str, Any], dict[str, Any]]:
     retry_meta: dict[str, Any] = {"retry_count": 0, "final_retry_reason": None}
     last_exc: urllib.error.HTTPError | None = None
@@ -181,7 +191,7 @@ def _post_openrouter(api_key: str, body: dict[str, Any], timeout: int) -> tuple[
             },
         )
         try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
+            with _openrouter_urlopen(request, timeout=timeout) as response:
                 data = json.loads(response.read().decode("utf-8"))
                 headers = getattr(response, "headers", None)
                 generation_id = headers.get("X-Generation-Id", "") if headers is not None else ""
@@ -211,20 +221,9 @@ def _post_openrouter(api_key: str, body: dict[str, Any], timeout: int) -> tuple[
 
 
 def _http_error_detail(exc: urllib.error.HTTPError) -> dict[str, Any]:
-    detail = ""
-    try:
-        body = exc.read().decode("utf-8", errors="replace")
-        data = json.loads(body)
-        error = data.get("error") if isinstance(data, dict) else None
-        if isinstance(error, dict):
-            message = error.get("message") or error.get("code") or error.get("type")
-            if isinstance(message, str):
-                detail = message
-        if not detail:
-            detail = body
-    except Exception:
-        detail = ""
-    return {"status": getattr(exc, "code", None), "detail": detail[:500]}
+    # Upstream bodies/reasons can echo headers or private input. Do not read or
+    # copy them into extension output, review packets, or worker receipts.
+    return {"status": getattr(exc, "code", None), "detail": "Provider response withheld."}
 
 
 def _http_failure_reason(exc: urllib.error.HTTPError, retry_meta: dict[str, Any] | None = None) -> dict[str, Any]:

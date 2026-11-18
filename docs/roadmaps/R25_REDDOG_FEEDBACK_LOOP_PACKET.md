@@ -115,6 +115,50 @@ blobs and the replay predicates/hashes; it did not rerun the replay or authorize
 source implementation. Source/test ownership has no inspected peer overlap;
 shared bridge `INTERFACE.md` overlaps PR1751/1645 and remains untouched here.
 
+## R25-A approval-owner qualification — 2026-09-20
+
+**Result: conditional record design qualified; source implementation blocked by
+an exact host/consumer dependency.** This13/P1 planning action is complete.
+It neither issues consent nor qualifies a source packet. Source/test hashes and
+independent review are bound in the existing system backlog observation.
+
+| Existing boundary | Current evidence | Required extension before implementation |
+|---|---|---|
+| Resident transport and admission | Closed v1 envelope exposes zero-authority TURN/STATUS/CANCEL. README explicitly leaves existing/new/first-turn aggregates host-unwired. | The separately owned host must define an authenticated explicit approve/withdraw action for one presented canonical summary. Generic text, a signed session or an approval boolean is insufficient. |
+| Signed conversation record | v4 exact fields and typed continuity items; schema_version is immutable under ordinary CAS. HMAC/E0 protect integrity, not new-purpose permission. | Prefer an explicit feedback-capable version within existing record owners. Qualify creation identity or a specific version transition; never silently upgrade v4 or overload accepted_decisions. |
+| Source identity | Current record retains latest content and digest receipts. Summary sanitization redacts/trims/truncates; learning text normalizes NFKC and trims. | Minimize/canonicalize before approval. Bind selected item IDs/kinds and an already observed source revision/digest; do not hash an approval into its own source identity. Specify current-source and historical-content availability rules. |
+| Projection consumer | Learning v1 has three structural source classes and no R25 permission consumer. Work promotion targets FIX; Principal Memex stays resident_architect_context. | Verify exact approval and current source/session/revocation before copying summary into the existing learning boundary. Do not reuse other purposes or create a disconnected verifier. |
+| Retry and recovery | Learning IDs include timestamps; E0 recovery and one-use work handles solve different identities. | Declare one logical proposal version/window/key and exact prior-result or rejection rule. Material approval time/expiry/version fields must remain bound; a timestamp-only repeat cannot count another participant. |
+
+The conditional assertion binds authenticated principal/provider/conversation and
+session, same-FoundUp destination, selected source item IDs/kinds and prior record
+revision/digest, exact permitted summary bytes/digest, feedback purpose, logical
+proposal version/window, issue/expiry and current revocation/supersession reference.
+Source class remains separate from preference, observation, inference, verified
+fact and formal authorization. Any material summary, scope, purpose or version
+change requires a new approval binding. Dissent remains evidence, not a failure.
+
+Compare three options: explicit-version record assertion is the preferred storage
+seam; generic authenticated TURN is not an approval issuer; a standalone scoped
+receipt has no current issuer/consumer and would duplicate authority machinery.
+The external durable-adapter owner must supply the typed host handoff and current
+revocation/retry linearization. Missing live012permission does not prevent local
+design; the blocker is the absent engineering contract. Preserve that ownership.
+
+Extend the existing compatibility matrix with: unchanged v4 record/sign/recovery
+bytes and v1 learning IDs; unsupported version/migration rejection; normalized or
+redacted text changed after approval; stale source content despite valid signature;
+approval/revocation races; and exact retry after expiry/revocation. Use one synthetic
+principal/FoundUp/item only after a source packet is qualified. Existing fixtures
+for scope authentication/HMAC persistence, pending promotion, principal admission
+and learning candidates are test owners, not proof of this missing positive path.
+No tests or behavior probes ran during this qualification.
+
+No work admission, technical verification, retention, reward, federation or outreach
+authority follows. Resume R25 source qualification when the exact existing host
+issuer, version transition and pre-projection current-state consumer are independently
+bound; until then do not add fields, schemas, endpoints or a generic consent engine.
+
 ## R25-A compatibility decision — 2026-09-20
 
 **Result: representation choices qualified; permission issuance/consumption remains
@@ -174,7 +218,7 @@ version. They are not an R25 authority adapter. No import connecting them to
 the inspected bridge/digital-twin/FAM owners was found; this is a reuse decision,
 not a claim of an exposed production vulnerability or an instruction to delete them.
 
-The smallest prerequisite is to choose and specify an explicit approval assertion
+The approval-owner qualification above selects a conditional record seam. Its unresolved prerequisite is the exact authenticated host handoff and current-state consumer for that approval assertion
 and its issuer/consumer under the **existing authenticated conversation/record
 owners**, including source-record signing/revision, permitted summary bytes,
 purpose/target/version, expiry, revocation and retry semantics. Verify this before

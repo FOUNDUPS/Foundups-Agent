@@ -1,178 +1,98 @@
 rules_version = '2';
-
-/**
- * Firestore Security Rules - GotJunk FoundUp
- * WSP 98: FoundUps Mesh-Native Architecture Protocol - Layer 2 (Global Index)
- *
- * Authentication Strategy:
- * - Anonymous Auth: Auto sign-in (zero friction)
- * - Google Sign-In: Cross-device sync (same Google account = same UID)
- *
- * Security Model:
- * - Reads: Public (anyone can browse items)
- * - Writes: Authenticated users only
- * - Ownership: Users can only modify their own items (ownerUid == auth.uid)
- * - Moderation: Community voting allowed (see community moderation rules)
- *
- * Collections:
- * - gotjunk_items: Item metadata (classification, price, location, etc.)
- * - gotjunk_blobs: Base64 encoded blobs (for small images <500KB)
- * - gotjunk_messages: Wave-style message threads (Sprint M2)
- *
- * Future:
- * - Add role-based access for trusted moderators
- * - Add rate limiting to prevent spam
- * - Add geofencing rules (restrict writes to nearby locations)
- */
-
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // ============================================================================
-    // HELPER FUNCTIONS
-    // ============================================================================
-
-    /**
-     * Check if user is authenticated (anonymous or Google sign-in)
-     */
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    /**
-     * Check if user owns the document
-     */
-    function isOwner(ownerUid) {
-      return isAuthenticated() && request.auth.uid == ownerUid;
-    }
-
-    /**
-     * Validate item data structure
-     */
-    function isValidItem() {
-      let data = request.resource.data;
+    function signedIn() { return request.auth != null; }
+    function owner() { return signedIn() && resource.data.ownerUid == request.auth.uid; }
+    function validItem(data) {
       return data.keys().hasAll(['id', 'ownerUid', 'status', 'createdAt', 'updatedAt'])
         && data.ownerUid is string
         && data.status in ['draft', 'listed', 'browsing', 'in_cart', 'skipped', 'purchased']
-        && data.createdAt is timestamp
-        && data.updatedAt is timestamp;
+        && data.createdAt is timestamp && data.updatedAt is timestamp;
     }
-
-    /**
-     * Validate moderation update
-     */
-    function isValidModerationUpdate() {
-      let data = request.resource.data;
-      // Only allow updating moderation fields, not ownership or core data
-      return data.diff(resource.data).affectedKeys().hasOnly([
-        'reportCount',
-        'moderationVotes',
-        'moderationStatus',
-        'reportedBy',
-        'updatedAt'
-      ]);
+    function validVote() {
+      let before = resource.data.get('moderationVotes', {'keep': [], 'remove': []});
+      let after = request.resource.data.moderationVotes;
+      let uid = request.auth.uid;
+      let beforeKeep = before.get('keep', []);
+      let beforeRemove = before.get('remove', []);
+      let afterKeep = after.get('keep', []);
+      let afterRemove = after.get('remove', []);
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['moderationVotes', 'updatedAt'])
+        && after.keys().hasOnly(['keep', 'remove'])
+        && beforeKeep is list && beforeRemove is list
+        && afterKeep is list && afterRemove is list
+        && !(uid in beforeKeep) && !(uid in beforeRemove)
+        && afterKeep.size() + afterRemove.size() <= 1000
+        && ((afterKeep == beforeKeep.concat([uid]) && afterRemove == beforeRemove)
+          || (afterRemove == beforeRemove.concat([uid]) && afterKeep == beforeKeep));
     }
-
-    /**
-     * Validate cart reservation update (5-min timeout system)
-     */
-    function isValidReservationUpdate() {
-      let data = request.resource.data;
-      // Only allow updating cart reservation and updatedAt
-      return data.diff(resource.data).affectedKeys().hasOnly([
-        'cartReservation',
-        'updatedAt'
-      ]);
+    function validReservation() {
+      let before = resource.data.get('cartReservation', null);
+      let after = request.resource.data.get('cartReservation', null);
+      let now = request.time.toMillis();
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['cartReservation', 'updatedAt'])
+        && (before == null || before.reservedBy == request.auth.uid || before.expiresAt <= now)
+        && (after == null || (after is map
+          && after.keys().hasOnly(['reservedBy', 'reservedAt', 'expiresAt'])
+          && after.reservedBy == request.auth.uid
+          && after.reservedAt is number && after.expiresAt is number
+          && after.reservedAt >= now - 60000 && after.reservedAt <= now + 10000
+          && after.expiresAt > now && after.expiresAt <= now + 300000
+          && after.expiresAt <= after.reservedAt + 300000));
     }
-
-    // ============================================================================
-    // ITEMS COLLECTION: gotjunk_items
-    // ============================================================================
-
     match /gotjunk_items/{itemId} {
-
-      // READ: Public (anyone can browse items)
-      // Future: Add geofencing (only show items within 50km of user)
       allow read: if true;
-
-      // CREATE: Authenticated users only
-      // Must set ownerUid to their own UID
-      allow create: if isAuthenticated()
-        && isValidItem()
-        && request.resource.data.ownerUid == request.auth.uid;
-
-      // UPDATE: Owner only OR community moderation OR cart reservation
-      allow update: if isOwner(resource.data.ownerUid)
-        || (isAuthenticated() && isValidModerationUpdate())
-        || (isAuthenticated() && isValidReservationUpdate());
-
-      // DELETE: Owner only
-      allow delete: if isOwner(resource.data.ownerUid);
+      allow create: if signedIn() && validItem(request.resource.data)
+        && request.resource.data.id == itemId
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.get('cartReservation', null) == null
+        && !request.resource.data.keys().hasAny(['moderationVotes', 'moderationStatus', 'reportCount', 'reportedBy']);
+      allow update: if signedIn() && validItem(request.resource.data)
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.createdAt == resource.data.createdAt
+        && ((owner() && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'cartReservation', 'moderationVotes', 'moderationStatus', 'reportCount', 'reportedBy']))
+          || validVote() || validReservation());
+      allow delete: if owner();
     }
-
-    // ============================================================================
-    // BLOBS COLLECTION: gotjunk_blobs (for small images <500KB)
-    // ============================================================================
-
     match /gotjunk_blobs/{blobId} {
-
-      // READ: Public
       allow read: if true;
-
-      // WRITE: Authenticated users only
-      // Match blob ID to item ID for ownership verification
-      allow write: if isAuthenticated()
+      allow write: if signedIn()
         && exists(/databases/$(database)/documents/gotjunk_items/$(blobId))
         && get(/databases/$(database)/documents/gotjunk_items/$(blobId)).data.ownerUid == request.auth.uid;
     }
-
-    // ============================================================================
-    // MESSAGES COLLECTION: gotjunk_messages (Sprint M2 + WSP AUDIT FIX)
-    // Wave-style messaging threads per item/alert
-    // ============================================================================
-
+    function validMessage(message) {
+      return message.keys().hasAll(['id', 'authorId', 'text', 'createdAt'])
+        && message.keys().hasOnly(['id', 'authorId', 'authorDisplayName', 'text', 'createdAt', 'parentId', 'ttlMs', 'expiresAt'])
+        && message.id is string && message.id.size() <= 128
+        && message.authorId == request.auth.uid
+        && message.text is string && message.text.size() > 0 && message.text.size() <= 4000
+        && message.createdAt is number;
+    }
+    function appendMessage() {
+      let before = resource.data.messages;
+      let after = request.resource.data.messages;
+      return resource.data.status == 'active'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['messages', 'updatedAt'])
+        && after is list && after.size() == before.size() + 1 && after.size() <= 500
+        && validMessage(after[after.size() - 1])
+        && after == before.concat([after[after.size() - 1]]);
+    }
     match /gotjunk_messages/{threadKey} {
-
-      // READ: Public (anyone can read message threads)
+      // These are public item discussion threads, not private messages.
       allow read: if true;
-
-      // CREATE: Authenticated users only
-      // WSP AUDIT: Must set ownerUid to their own UID
-      allow create: if isAuthenticated()
-        && request.resource.data.ownerUid == request.auth.uid;
-
-      // UPDATE: Any authenticated user can add messages
-      // WSP AUDIT: ownerUid cannot be changed after creation
-      allow update: if isAuthenticated()
-        && request.resource.data.ownerUid == resource.data.ownerUid;
-
-      // DELETE: Owner only (for thread cleanup)
-      // WSP AUDIT: Only thread owner can delete
-      allow delete: if isOwner(resource.data.ownerUid);
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.threadKey == threadKey
+        && request.resource.data.status == 'active'
+        && request.resource.data.messages is list && request.resource.data.messages.size() == 1
+        && validMessage(request.resource.data.messages[0]);
+      allow update: if signedIn() && request.resource.data.ownerUid == resource.data.ownerUid
+        && (appendMessage() || (owner()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'closedAt', 'closedReason', 'updatedAt'])
+          && request.resource.data.status in ['active', 'closed', 'locked']));
+      allow delete: if owner();
     }
-
-    // ============================================================================
-    // FUTURE COLLECTIONS
-    // ============================================================================
-
-    // Users collection (for profiles, reputation, etc.)
-    // match /gotjunk_users/{userId} {
-    //   allow read: if true;
-    //   allow write: if isAuthenticated() && request.auth.uid == userId;
-    // }
-
-    // Transactions collection (for purchase history)
-    // match /gotjunk_transactions/{transactionId} {
-    //   allow read: if isAuthenticated()
-    //     && (request.auth.uid == resource.data.buyerUid
-    //         || request.auth.uid == resource.data.sellerUid);
-    //   allow create: if isAuthenticated()
-    //     && request.resource.data.buyerUid == request.auth.uid;
-    // }
-
-    // Block all other collections
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

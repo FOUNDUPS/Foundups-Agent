@@ -29,7 +29,7 @@ The POC creates unique events, interleaves delayed episodic probes, adapts subse
 
 ## Excluded
 
-Diagnosis, medical advice, return-to-play decisions, normative impairment thresholds, user accounts, cloud patient records, tokens, rewards, multiplayer, ads, public leaderboards, voice/video, biometrics, AI diagnosis and automatic hospital integration.
+Diagnosis, medical advice, return-to-play decisions, normative impairment thresholds, participant accounts, cloud patient records, tokens, rewards, multiplayer, ads, public leaderboards, voice/video, biometrics, AI diagnosis and automatic hospital integration.
 
 ## POC acceptance
 

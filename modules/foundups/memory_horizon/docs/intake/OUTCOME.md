@@ -1,6 +1,6 @@
 # Memory Horizon - Outcome Definition
 
-## User outcome
+## Participant outcome
 
 A person or researcher can see, in time rather than vague impression, how reliably newly experienced events are being retained: what was remembered after 30 seconds, 2 minutes, 5 minutes, 10 minutes, and so on.
 

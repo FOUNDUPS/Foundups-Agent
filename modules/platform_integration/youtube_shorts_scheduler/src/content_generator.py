@@ -8,6 +8,68 @@ FFCPLN (Fake F*** Christian Pedo-Lovin' Nazi) playlist promotion.
 import random
 from typing import Optional, List, Dict, Any
 
+def validated_video_evidence(index: Dict[str, Any], video_id: str) -> Optional[dict]:
+    if not isinstance(index, dict) or not video_id or index.get("video_id") != video_id:
+        return None
+    if index.get("success") is False or index.get("error") or index.get("errors"):
+        return None
+    metadata = index.get("metadata")
+    if not isinstance(metadata, dict) or metadata.get("retrieval_eligible") is not True:
+        return None
+    if not index.get("indexed_at"):
+        return None
+    if index.get("transcript_source") in {"whisper", "faster_whisper", "stt", "whisper_transcript", "youtube_transcript", "youtube", "stacked"}:
+        audio = index.get("audio") or {}
+        if not isinstance(audio, dict):
+            return None
+        segments = index.get("youtube_transcript") or index.get("whisper_transcript") or audio.get("segments")
+        if not isinstance(segments, list) or not segments:
+            return None
+        valid = []
+        for segment in segments:
+            if not isinstance(segment, dict):
+                return None
+            start, end, text = segment.get("start"), segment.get("end"), segment.get("text")
+            if (type(start) not in (int, float) or type(end) not in (int, float)
+                    or not 0 <= start < end or not isinstance(text, str) or not text.strip()):
+                return None
+            valid.append(text.strip())
+        return {"text": " ".join(valid), "source": index["transcript_source"],
+                "modality": "speech_transcript", "video_id": video_id,
+                "indexed_at": index["indexed_at"], "coverage": "provided_segments_only",
+                "training_eligible": False}
+    if index.get("transcript_source") != "gemini_summary":
+        return None
+    provenance = metadata.get("provenance") or {}
+    if not isinstance(provenance, dict):
+        return None
+    if provenance.get("provider") == "youtube_studio_ask":
+        if (provenance.get("identity_verified") is not True
+                or provenance.get("requested_video_id") != video_id
+                or provenance.get("response_video_id") != video_id
+                or not provenance.get("response_sha256")):
+            return None
+        source = "youtube_studio_ask_summary"
+    elif index.get("indexer") == "gemini" and index.get("model"):
+        source = "gemini_video_summary"
+    else:
+        return None
+    audio = index.get("audio") or {}
+    visual = index.get("visual") or {}
+    if not isinstance(audio, dict) or not isinstance(visual, dict):
+        return None
+    transcript = audio.get("transcript_summary")
+    visual_text = visual.get("description")
+    # Do not fall back to title, topics, key_points, category, duration or a stub.
+    text = transcript if isinstance(transcript, str) and transcript.strip() else visual_text
+    if not isinstance(text, str) or not text.strip():
+        return None
+    modality = "audio_summary" if isinstance(transcript, str) and transcript.strip() else "visual_summary"
+    return {"text": " ".join(text.split()), "source": source, "modality": modality,
+            "video_id": video_id, "indexed_at": index["indexed_at"],
+            "coverage": "not_established", "training_eligible": False}
+
+
 # Title templates for FFCPLN music shorts
 # FFCPLN = "Fake F*** Christian Pedo-Lovin' Nazi" - describes MAGA, NOT versus MAGA
 TITLE_TEMPLATES = [
@@ -442,47 +504,20 @@ def extract_title_hint_from_index(index_json: Dict[str, Any], fallback_title: Op
 
 
 def generate_clickbait_title_from_index(
-    *,
-    original_title: str,
-    index_json: Dict[str, Any],
+    *, original_title: str, index_json: Dict[str, Any], video_id: str = "",
 ) -> str:
+    """Use matched analyzer content; preserve the title without evidence.
+
+    Historical function name retained for callers. No random hooks, invented
+    topics or title-derived fallback are used in this path.
     """
-    Generate a clickbait title where the index artifact informs the hint.
-
-    Content-type aware: uses different templates for music vs speech vs news.
-    Uses 3-tier agentic classification (title heuristics → metadata → audio).
-    """
-    import logging
-    logger = logging.getLogger(__name__)
-
-    hint = extract_title_hint_from_index(index_json, fallback_title=original_title)
-    # Pass original_title for Tier 1 title-based detection (works even with stub index)
-    content_type = detect_content_type(index_json, title_hint=original_title)
-    logger.info(f"[CONTENT-GEN] Detected content_type={content_type} for '{original_title[:40]}...'")
-
-    # Select template set based on content type
-    if content_type == "news":
-        templates = NEWS_TITLE_TEMPLATES
-        logger.debug("[CONTENT-GEN] Using NEWS_TITLE_TEMPLATES")
-    elif content_type == "speech":
-        templates = SPEECH_TITLE_TEMPLATES
-    else:  # music or default
-        templates = MUSIC_TITLE_TEMPLATES
-
-    # If we have a meaningful hint, use content-aware templates
-    if hint and len(hint) > 5 and hint.lower() not in {"ffcpln", "music", "shorts"}:
-        emoji = random.choice(EMOJI_PREFIXES)
-        template = random.choice(templates)
-        title = f"{emoji} {template.replace('{hint}', hint)}"
-
-        # Ensure under 100 chars
-        if len(title) > 100:
-            title = title[:97] + "..."
-
-        return title
-
-    # Fallback to generic FFCPLN templates
-    return generate_clickbait_title(original_title=original_title, song_hint=hint or None)
+    evidence = validated_video_evidence(index_json, video_id)
+    if evidence is None:
+        return original_title
+    text = evidence["text"]
+    if len(text) <= 100:
+        return text
+    return text[:97].rsplit(" ", 1)[0].rstrip(".,;:") + "..."
 
 
 def get_ai_driven_template(
