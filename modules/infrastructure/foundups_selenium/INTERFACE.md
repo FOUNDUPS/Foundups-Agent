@@ -325,3 +325,44 @@ pytest modules/infrastructure/foundups_selenium/tests/
 
 **Last Updated**: 2025-10-16
 **Token Budget**: ~10K tokens used for initial implementation
+## WRE visual verification evidence
+
+`WREVisualTestRunner.step(name, action, verify_prompt, wait_after_action=2.0,
+max_retries=2, dom_verify=None) -> bool` executes the action **once**. The existing
+`max_retries` argument now limits read-only observations, never action replay.
+An action exception or explicit `False` result stops the step with uncertain
+outcome; inspect it before any separately authorized action. Callers must stop
+dependent steps when the returned value is false.
+
+With `dom_verify`, only that explicit read-only callback's literal `True` passes,
+and the evidence method is `dom`. Without it, UI-TARS receives the actual driver
+and performs **visual target localization** (`visual_localization`). Its current
+bridge locates a described element; coordinate detection does not prove arbitrary
+field values, publication, media playback or task completion. Use target
+descriptions for localization and explicit assertions for values. `use_uitars=False`
+does not supply a DOM assertion. Missing/disabled vision returns `unavailable`;
+exceptions return `error`, never an assumed pass. The synchronous vision path
+refuses an already running event loop without constructing an unused coroutine.
+
+Step summaries and existing PatternMemory output retain method, status
+(`passed`, `failed`, `unavailable`, `error`), requested assertion, UTC observation/
+attempt time, URL scheme/host/path (query, fragment and userinfo omitted), available
+browser/OS environment and error. Missing provenance is null/absent, not invented.
+The compatibility `failed` count includes every unsuccessful step; inspect status
+to distinguish a negative assertion from missing evidence. Screenshot capture must
+produce a file. The runner's saved screenshot supports the step record; the bridge
+captures its own model input, so these are not guaranteed to be the same frame.
+Memory storage does not admit a skill, prove learning or authorize production.
+
+Before reporting visibility unavailable, inspect the current host's available
+browser/vision tools and authorized delegation under existing routing/admission.
+Return URL, time, environment, observed assertions, blocked attempts and remaining
+unknowns. DOM checks, rendered observations and worker reports are distinct evidence.
+Retain authentication, permission, human-verification and anti-bot gates.
+
+Static audit at base `e62e9eb`: the tracked runner consumer is the manual Shorts
+`test_layer3_schedule.py --wre-tars` harness. No direct runner/vision import was
+found in the scoped `moltbot_bridge/src` or `extensions/reddog` search. The existing
+`browser_actions/src/action_router.py` owns DOM/vision routing; the managed
+`foundups-wsp` workspace skill supplies guidance, not an execution router.
+This correction does not establish installed Red Dog wiring or live vision use.

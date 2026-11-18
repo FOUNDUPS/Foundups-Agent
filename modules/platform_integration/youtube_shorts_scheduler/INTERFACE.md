@@ -1,5 +1,53 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Bounded unlisted preview (2026-11-16, development only)
+
+`src.reschedule_planner.plan_bounded_unlisted_batch(...)` is a pure planning
+seam in the existing planner, separate from its unchanged rebalance API. It is
+not registered in the CLI/manifest and its result is **not** a writer input,
+approval, reservation, saved schedule or qualified provider observation.
+
+Required keyword inputs:
+- Native `channel_id`; `allowed_video_ids`; ordered `candidates` with exactly
+  `channel_id`, `video_id`, `visibility`, aware `source_at`, `topic`,
+  `evidence_ref`, Boolean `content_verified` and Boolean `held`.
+- Explicit aware `source_start`/`source_end` and finite ordered `windows` of
+  `(start, end)` pairs. Both use half-open bounds. Supply each authorized night
+  (for example 20:00 JST to next-day 04:00 JST); no dates or recurrence are inferred.
+- `timezone` (observed Studio IANA zone), `occupied` rows with exactly
+  `channel_id`, `video_id`, aware `publish_at`, and status
+  `scheduled|reserved|unknown`; `inventory_complete` Boolean.
+- Injected aware `now`, `observed_at`, `live_state` (`not_live|live|unknown`),
+  and Boolean `operator_editing`. These describe one reconciled snapshot.
+  A snapshot older than 60 seconds, future observation, incomplete inventory,
+  active/unknown live state or operator editing blocks all proposals.
+
+Optional `minimum_spacing_minutes` defaults to 240 (minimum 240);
+`minute_offsets` defaults to deterministic `(7,19,31)` (at least two distinct
+integer offsets 0..59); `max_per_day` can lower but not raise the existing
+channel cap; `audience_timezone` defaults to America/New_York. Windows are
+bounded to 31 explicit intervals spanning at most 31 days, each at most 24 hours.
+Malformed/conflicting inputs raise `ValueError`, never a partial executable plan.
+
+Selection alternates top/bottom traversal of eligible IDs, scanning from that
+end for a different verified topic when available. Position/title are not topic
+evidence. Identical duplicates collapse; conflicting duplicates refuse the plan.
+Held, scheduled/reserved, non-unlisted, outside-scope, future-source and
+evidence-missing candidates stay excluded. Missing allowed IDs are reported.
+Offsets cannot cross a window end or violate minimum UTC spacing; collisions
+skip a proposed slot. Existing occupied IDs count toward Studio-local daily
+caps across midnight. Ambiguous destination DST wall times are not offered.
+
+Result: `status=preview_only|blocked`, `planned`, `excluded`, `unplaced`,
+`effects_disabled=True`, `execution_authorized=False`, `scheduling_verified=False`.
+Planned entries retain evidence references and full UTC/Studio/audience instants.
+Input flags/references are caller assertions, not cryptographic/provider proof.
+No stale snapshot, malicious content or returned plan grants execution authority.
+Future publication still needs independently qualified live-state checks; this
+preview cannot guarantee that a future stream will not overlap a release.
+Existing detail audit, holds, calendar claims and independent readback gates
+remain unchanged. Native integration and live qualification are separate work.
+
 ## Recorded-stream first-test entry (2026-11-10)
 
 `cli --request-id <id> --browser chrome|edge --inspect-request` reads only an

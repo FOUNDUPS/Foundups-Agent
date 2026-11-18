@@ -1,5 +1,23 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-16 - Pure bounded unlisted batch preview
+
+Added an explicit finite-window/top-bottom/topic-diversity preview seam to the
+existing reschedule planner. Reuses channel daily caps; validates observed
+scope/freshness, exact IDs, evidence/holds and timezone-aware occupied instants.
+Deterministic minute offsets retain minimum spacing, midnight caps and window
+bounds. Invalid inputs fail closed; absent evidence/live state returns no plan.
+No native CLI, manifest, browser, writer, reservation or resident service wiring
+changed. Output explicitly denies execution authority and schedule verification.
+Focused offline regression cases extend the existing planner suite; provider
+state, runtime activation and actual publication are not established. WSP 22/50/84/97.
+
+Validation: 55 planner cases passed; planner + calendar reservations + peak-window
+selection passed 102 cases. The seven adjacent long-form timezone cases failed
+with empty allocation both with this change and with the original base planner
+restored for comparison. They remain an existing unqualified fixture/path, not
+a passing regression claim; no assertions or execution gates were weakened.
+
 ## 2026-11-16 - Live-aware audience timing correction
 
 Latest 012 correction: avoid releases during active livestreams, use named U.S.
@@ -22,6 +40,23 @@ remain outside source control. Documentation only; no video effects, runtime
 activation, native allocator changes or model training from this update.
 WSP 22/50/84/95/97. Validation is scoped to document diff and contract/link checks;
 no application test or deployment pass is claimed.
+
+## 2026-11-15 - Stop the manual visual harness after unverified outcomes
+
+The existing Layer 3 `--wre-tars` caller now returns its summary immediately after
+an unverified visibility or Schedule step, so later UI edits cannot continue from
+that failure. Prompts describe visual localization targets; exact date/time values
+use explicit read-only DOM checks with the existing selectors. The CLI converts
+absent, empty, failed or inconsistent summaries to exit 1. Three offline cases
+exercise failure stops, matching/mismatched/missing readback and exit status. No live browser,
+model, saved schedule, publication, deployment or activation is implied. WSP22/50/97.
+
+Hosted bounded CI exposed an eager DOM-owner import that pulled the full scheduler
+and unavailable `pytz` into collection. Defer that constructor to the manual path;
+do not add runtime dependencies to the offline suite. A fourth same-file test uses
+the native import guard to reject the scheduler parent, `pytz` and model imports,
+while loading the actual harness. Four focused tests pass locally; live behavior
+and corrected hosted acceptance remain separate checks.
 
 ## 2026-11-10 — Native inventory diagnosis without scheduling effects
 

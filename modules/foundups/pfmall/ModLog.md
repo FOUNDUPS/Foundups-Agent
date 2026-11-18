@@ -1,3 +1,8 @@
+## 2026-11-16 · Isolated HPC iPhone official YouTube baseline probe extension
+
+- Extended `tests/fixtures/hpc_iphone_playback_probe.js` and `tests/fixtures/hpc_iphone_playback_reference.html` (kept outside `public/` in git) with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts), allowlisted `?host=youtube|nocookie` (`https://www.youtube.com` vs `https://www.youtube-nocookie.com`), `Mall <-> official embed` selection retention, sanitized `deployment.json` + `SW controller` provenance receipt, and distinct `101/150` vs `LOGIN_REQUIRED` vs `autoplay-blocked` reporting, with all controls outside `#hpc-probe-embed`.
+- Added deterministic Node VM regression `tests/fixtures/hpc_iphone_playback_probe_vm.mjs` wired into `public/member/tests/test_mall_product_state.py`. WSP 22, 50, 97, 99, and 104 apply.
+
 ## 2026-11-16 · Manifest schema closure, infrastructure category, and Build v19 catalog reconciliation
 
 - **Manifest Discovery & Boot Closure (`shell_core.py`, `modules/foundups/{detect_ai,eduit,shield,holoindex_prod_01}/foundup_manifest.json`)**:

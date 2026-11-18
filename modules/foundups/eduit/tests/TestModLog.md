@@ -278,3 +278,14 @@ still refuses missing provenance. Full Node suite70/70 after that fixture repair
 Existing renderer/engine/film/foley bytes unchanged. Five static stages are saved
 in outputs/storytime-video-leg-20261101. Actual browser/native review remains held
 pending closure of the previously reported Save As; no browser PASS inferred.
+
+## 2026-10-08 — specification inventory (EDuIT Discovery)
+
+No educational discovery runtime tests are introduced in this specification slice;
+existing Storytime tests above remain separate. Reuse owners inspected:
+`modules/foundups/tests/test_foundup_registry_schema.py` (schema and
+stage/token/portfolio constraints) and
+`modules/foundups/tests/test_foundup_ai_hooks_daemon_contract_compliance.py`
+(required README headings and WSP 91/104 references). Local verification covers
+`schemas/learning_event.schema.json` against `examples/learning_event.json`,
+README contract compliance for `eduit`, and documentation link integrity.

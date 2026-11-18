@@ -119,3 +119,27 @@ result for a completed browser round.
   replacing local CSS, reload with fresh assets and verify the loaded stylesheet;
   a cached original rule is not evidence about the candidate. This is browser
   layout/handler evidence, not physical mobile touch or acoustic acceptance.
+
+---
+
+## 2026-10-08 — EDuIT Discovery specification verification plan
+
+The EDuIT Discovery specification adds JSON Schema validation boundaries without
+replacing the adjacent canonical schema/loader/README validators or Storytime tests:
+
+```bash
+python -m pytest modules/foundups/tests/test_foundup_registry_schema.py -q
+python -m pytest modules/foundups/tests/test_foundup_ai_hooks_daemon_contract_compliance.py -k eduit -q
+```
+
+Local schema checks cover JSON syntax, the closed `schemas/learning_event.schema.json`
+schema, synthetic valid/invalid cases (`examples/learning_event.json`), documentation
+links, README headings, namespace agreement and preservation of baseline registry
+entries. They do not prove HoloIndex freshness, learning benefit, child safety,
+fairness, deployment or talent detection.
+
+Future Discovery test categories (deferred until runtime slices exist): seeded replay;
+scoring correctness; adaptation bounds; identical logical results across input
+modalities; pause/skip; interrupted/offline continuation; malformed/untrusted content;
+no undeclared data egress; consent, tenant/role denial, export/deletion, sync
+conflicts, referrals and release authorization.
