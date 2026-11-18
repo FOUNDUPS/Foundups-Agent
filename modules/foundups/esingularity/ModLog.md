@@ -39,6 +39,38 @@ social content contract for evidence, limits and remaining owner work.
   dated `jhr/PUBLICATION_AUDIT_20261116.md` and manifest retain scope and gaps.
   WSP00/10/15/22/34/50/84/97/99; WSP110 read as draft guidance.
 
+## 2026-11-15 — Partner qualification Skillz candidate
+
+- Extend the existing prototype `yumori_work_orchestrator` to distinguish
+  operators, demand customers and collaborators; qualify responsible-person
+  responses and concrete next exchanges rather than name/send counts.
+- Keep organizational survey interest separate from personal membership and
+  formal co-proposer/name-use consent. Reuse existing correspondence/Contacts/
+  Action Queue owners; preserve specific holds, follow-up counts and provider
+  receipts when diagnosing nonresponse or choosing a different action.
+- Compare demand-led existing-hosting/small-pilot options with school/onsen
+  reuse; retain unknown economics, data-control and funding inputs. Public-benefit
+  compute is a goal, not a funded service promise or blanket foreign-training claim.
+- Add partner-outcome baseline/alternative and regression-case requirements to
+  the existing independent review, promotion, rollback and later-cycle RSI gates.
+  This is a proposed prototype revision, not runtime activation or measured RSI.
+- Retrieval used GitHub at base `e2ac080f6cdbc6aa7d291f425c6feb0c878fdfdb`;
+  current module docs and related open PRs were inspected. No orchestrator overlap
+  was found in the bounded PR search; shared ModLog history is preserved.
+  A separate isolated branch avoids touching existing local worktrees.
+- Validation: existing resident-RSI source-contract function passed in isolation;
+  initial prefix/suffix check preserved the prior skill; final readback matches
+  the candidate. Independent source review found no authority weakening; its
+  campaign-wide-hold clarification and five frozen semantic review cases were
+  incorporated. Those cases are documented expectations, not executed tests.
+  Full checkout tests, WSP_00 runtime bootstrap, HoloIndex freshness and native
+  WRE evaluation were not run. Missing memory/README.md was recorded rather than
+  replaced. Exact-head hosted checks and independent review remain merge gates.
+- WSP 00/15/22/50/95/97: docs-candidate execution plane, no provider/runtime effects.
+  WSP15 C2/I4/D3/Impact4 = 13/P1. Smallest alternative was ledger-only guidance;
+  the existing skill is preferred for reusable retrieval, without another skill
+  framework, CRM or scheduler. No frontend, survey, FIN or recipient-state edit.
+
 ## 2026-11-15 — Align React 19.3.1 dependency cohort (PR #2351 resolution)
 
 - Dependabot PR #2351 (`53fb430ae893`) bumped only `react-server-dom-webpack` from `19.2.8` to `19.3.1` while leaving `react` and `react-dom` pinned at `19.2.8`, causing `Validate eSingularity` `npm ci` to fail with `ERESOLVE` (`react-server-dom-webpack@19.3.1` requires peer `react@"^19.3.1"` and `react-dom@"^19.3.1"`).
