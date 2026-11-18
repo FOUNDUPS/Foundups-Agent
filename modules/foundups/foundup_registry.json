@@ -874,7 +874,9 @@
       "token_symbol": null,
       "evidence_docs": [
         "modules/foundups/eduit/README.md",
-        "modules/foundups/eduit/ROADMAP.md"
+        "modules/foundups/eduit/ROADMAP.md",
+        "modules/foundups/eduit/docs/HISTORY.md",
+        "modules/foundups/eduit/docs/FOUNDUP_INTEGRATION.md"
       ],
       "next_slice": "PLAY_EDUIT_SYNTHETIC_GAME_CONTRACT_PHASE1",
       "public_url_or_route": null,
