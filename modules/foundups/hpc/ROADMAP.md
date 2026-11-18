@@ -33,17 +33,17 @@ Use the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/s
 | PC / monitor | Centered main video, then a horizontal thumbnail queue, then **one viewport-bottom floating search dock below the thumbnails**. The dock remains reachable while content scrolls; the main player is not forced browser fullscreen. | Desktop screenshots and browser interaction tests must show this order and bottom anchoring; oversized three-column posters, search above the queue, or a duplicate dock do not satisfy it. See H1F. |
 | Desktop startup / queue | Request playback of the first eligible clip on entry, then advance through the queue. Preserve one active player and deliberate sound controls. | Test actual provider state and advancing time. Where the browser blocks startup, show a truthful user-activation recovery; never claim guaranteed audible autoplay. No duplicate or hidden players. |
 | Search | Reuse one floating bottom dock: left plus/options, editable scoped search, dictation mic, and right Red Dog action. Typing filters the scoped desktop queue; submit plays the next match or first available match. Phone search submits its grid filter. | Test exactly one visible and focusable search surface per active view, preserved query/selection, safe areas, keyboard clearance, no results, and return state. Dictation and Red Dog retain their actual capabilities; placement does not admit resident speech. |
-| Phone | Compact three-column portrait grid, fixed header, thumb-accessible bottom controls, vertical browsing through eligible clips. The selected tile becomes the shared player across its original row and nearby tiles reflow. Close restores the tile, scroll and focus. | Check the original row top, all three columns, one iframe, provider minimum size, explicit expand or supported pinch, and return. |
+| Phone | Compact portrait grid below one shared, top-anchored floating player. One deliberate tile tap requests playback in that existing player; the grid scrolls independently beneath it. Preserve video identity, WikiTube transitions and queue, query, scroll, focus and close/back recovery. | Verify one iframe/audio session, advancing media time, provider minimum size, unobscured provider controls, repeated selection, rotation and return. Provide truthful recovery when autoplay or the provider blocks playback; one tap is not a bypass guarantee. |
 | Breakpoint / rotation | Change presentation without duplicating the media session or losing video identity, queue, query and browsing position. | Test desktop, phone portrait/landscape, resizing and keyboard access independently. Do not classify all large tablets by pointer alone without testing. |
 | Entry and membership | Guests browse on `hpc.foundups.com`. `foundups.com/members` leads to the existing member gate. Admitted members can select HPC from the Mall or return to the same selection after sign-in. | Guest, uninvited and admitted browser cases. The `/f/hpc` landing links to the dedicated host. `/f/hpc/app` retains its protected handoff. |
 | Shared-regression guard | Preserve ordinary Mall channel expansion, other FoundUp projections, guest/member boundaries, provider diagnostics, save/history and return navigation. | Reuse the existing tests and fixtures for the shared grid, player and account boot. |
 
-This request supersedes earlier hidden-search wording only for **HPC-scoped bottom search**. The master-Mall logo link and independent-site disclosure remain. **012's latest floating-bottom clarification in H1F supersedes the previous search-above-thumbnails order.** It is a requested acceptance change, not evidence that production already renders it.
+This request supersedes earlier hidden-search wording only for **HPC-scoped bottom search**. The master-Mall logo link and independent-site disclosure remain. The 2026-11-16 navigation matrix below now defines portrait/HPC and Red Dog/Mall destinations explicitly. **012's latest floating-bottom clarification in H1F supersedes the previous search-above-thumbnails order.** It is a requested acceptance change, not evidence that production already renders it.
 
 ### H1C · Evidence and recovery before implementation
 
 - Revalidate current main, related heads and deployed assets separately. PR #2357 introduced a hard-coded three-column scoped grid and `openScopedVideo()` inserts `.mall-inline-player-slot` after a calculated row. The reported desktop result is a regression candidate, not a fully reproduced cause of every playback failure.
-- The original #2359 draft changed desktop density alone. Browser reproduction showed that six CSS columns still used three-column JavaScript row placement. #2359 and #2364 restored the shared desktop theater and search. 012's 2026-11-12 correction changes phone acceptance from a player below the row to playback in place of the selected tile.
+- The original #2359 draft changed desktop density alone. Browser reproduction showed that six CSS columns still used three-column JavaScript row placement. #2359 and #2364 restored the shared desktop theater and search. The 2026-11-12 selected-tile phone decision is historical: 012's 2026-11-16 top-anchored player requirement explicitly supersedes that placement acceptance. The inspected runtime still needs reconciliation; documentation is not an implemented player change.
 - Retrieve actual WikiTube TV / WikiTubeTV source and history through available repositories or the PC before copying/rebuilding. Earlier search found no direct current integration; this is a retrieval gap, not proof that source does not exist. No historical deployment URL is accepted without source evidence.
 - Reuse `public/member/` field, player, query and state APIs. Investigate the existing fullscreen queue/theater composition before introducing markup. Keep provider errors, unavailable media, autoplay blocking and bot/session challenges distinct in the [existing incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
 - A full revert of #2357 would also discard catalog and diagnostic work. Prefer the smallest validated responsive correction; retain a known-base recovery path and compare its complete diff before any authorized revert.
@@ -73,7 +73,9 @@ FITS_POC for the 012 phone follow-up on 2026-11-12. HPC supplies the install
 name and the portrait cropped from 012's supplied satire artwork. The shared
 Mall supplies the phone header and thumb dock. The dock gives direct access to
 scoped search, a separate device dictation input, an upward options sheet and
-the existing public Red Dog briefing. Check iPhone standalone installation
+the public Red Dog briefing in the inspected runtime. The November 16
+adjacent-surface navigation requirement supplies a distinct Mall return icon;
+retain internal Mall concierge behavior. Check iPhone standalone installation
 and keyboard dictation against a hosted build before accepting that device.
 
 Prototype work includes an admitted device-compatible agent selector, Red
@@ -120,6 +122,26 @@ introduced. Preserve the separately owned top-anchored phone-player work on
 older row-player contract during reconciliation. Refresh that owner and current
 main before implementation. Keep #2405 diagnostics and #2411 Vote navigation
 separate. This documentation changes neither their branches nor deployed UI.
+
+## 2026-11-16 — Return navigation, concise HPC identity and changed phone acceptance
+
+Source: 012's latest direction. **CHANGES_POC_ACCEPTANCE** for the top-anchored phone player and return navigation; the larger shared floating dock is **LATER_STAGE**. The previous selected-tile/original-row phone placement is superseded, with desktop and ordinary Mall behavior retained. These requirements are specified, not an implementation or deployment receipt.
+
+The functional Vote/Contact return links now have a source candidate on existing draft PR #2411, with fixture tests recorded in [Vote's TestModLog](../voteballots/tests/TestModLog.md). Hosted release and physical-phone acceptance remain open; this does not implement the separate phone-player placement or new portrait artwork.
+
+Immediate owner slice: reuse the existing HPC projection, Vote landing and Contact Congress page. Keep the existing PWA/tile shell and sole Mall implementation owner (`pfmall-truth-author`; existing probe draft [#2405](https://github.com/FOUNDUPS/Foundups-Agent/pull/2405)). Coordinate adjacent Vote source and its existing Sites mirror; do not create another page, tenant, Voice shell or implementation swarm. Contact Congress is an existing manual resource; independently admitted Voice remains later work.
+
+Use the [cross-surface navigation matrix](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#47-hpc-vote-and-contact-congress-return-navigation--012-request-2026-11-16). The **entire HPC banner at the top of both Vote and Call Your Congressperson** must be one coherent accessible link to `https://hpc.foundups.com`. Put the small top-corner animated Hasan/HPC portrait inside that anchor; this supersedes an icon-only tap target. Do not nest another link or conflicting button in the banner. Retain the existing Vote/Contact navigation, forms, install controls and independent-site disclosure.
+
+Use concise **HPC** for the banner, scoped heading and install identity. Reuse `public/member/hpc-icon-{180,192,512}.png` and the illustrated character supplied by 012: laughing, curly-haired, bespectacled and bearded at a microphone. The desired crown of thorns and optional halo are a satirical adaptation, not present in the inspected portrait. Materialize 012's supplied placement screenshot and illustrated poster through the supported Library flow and inspect actual pixels before image-dependent work. Do not recreate the full poster inside a small icon or substitute an unrelated face; no endorsement by Hasan or referenced organizations is implied.
+
+A subtle attention-drawing wiggle must respect `prefers-reduced-motion`, remain static when reduced motion is requested, and stop while the document is hidden. Provide a meaningful accessible name for the single banner link, visible keyboard focus and a comfortable touch target (at least 44 CSS px); do not obscure navigation. The distinct existing Red Dog navigation icon (`public/logo-dog.png`) returns to `https://play.foundups.com`. Preserve the Mall's internal Red Dog concierge semantics.
+
+Source audit at main `72a3182c70974f0523be91d5ce4bd32808d824bc`: HPC's Voice CTA already targets `https://vote.mtrout.com/contact`; its scoped Red Dog path is `/f/hpc#red-dog` and its portrait header targets `https://foundups.com/member/`. Both Vote `web/index.html` and `web/contact.html` lack the new banner. These are implementation gaps. Vote's same-origin image CSP requires reusing/deploying local asset copies through its existing owner, not weakening CSP to hotlink imagery.
+
+Acceptance remains open until tests show HPC -> Vote/Contact -> whole-banner HPC return on **both** surfaces, plus the distinct Red Dog -> Mall route, keyboard activation, header fit, reduced-motion/hidden behavior and preserved form/install/admission flows. Source, staging navigation, physical-phone results and production release are separate states. No production deployment is authorized by this record.
+
+Deferred roadmap: one shared floating Red Dog and bottom FoundUps search dock across the existing PWA surfaces. Reuse current anchors, state and search rather than duplicate controls or shells. `https://play.foundups.com` is the intended public Mall entry; existing admission remains in force. **144 FoundUps is a product target, not a verified current inventory.** This deferred dock must not block the immediate return links or absorb the existing playback slice.
 
 ## 2026-11-11 reconciliation receipt
 

@@ -1,3 +1,11 @@
+## 2026-11-16 — HPC return banners and changed phone acceptance (documentation candidate)
+
+- Record 012's entire top HPC banner on both existing Vote and Call Your Congressperson pages as one accessible return link to `https://hpc.foundups.com`; distinct existing Red Dog navigation identity returns to `https://play.foundups.com`.
+- Reconcile HPC/pfMALL roadmaps and navigation contract: top-anchored shared phone player above independently scrolling tiles explicitly supersedes selected-tile/original-row acceptance. Preserve desktop, queue/transitions, state, PWA shell and provider evidence boundaries.
+- Record concise HPC identity, reuse of existing illustrated portrait/Red Dog assets, requested satire adaptation, single-link accessibility and reduced-motion/hidden animation behavior. Larger shared floating dog/search dock is deferred; 144 FoundUps is a target, not inventory.
+- Inspected main `72a3182c70974f0523be91d5ce4bd32808d824bc` and preserved separate draft probe PR #2405 at `313d8168205178cf5387e1912bd5e462d1dafaa9`. No implementation-branch mutation, runtime code, image creation, build, production deployment or merge in this documentation slice. Native WSP bootstrap/Holo/WRE execution and device acceptance were not performed; document reads do not establish runtime compliance.
+- Validation: exact-source reconciliation, relevant asset inspection, static diff/link review and independent documentation review. Hosted exact-head checks and owner acceptance remain separate. Stopped native UI was not resumed; no Antigravity delivery or receipt is inferred from saved GitHub documentation.
+
 # HPC ModLog
 
 ## 2026-11-18 · One viewport-bottom floating search dock

@@ -33,6 +33,18 @@ in INTERFACE distinct from this planned acceptance change; reconcile them with
 the actual implementation. Existing WSP 15 scoped-search planning remains 13/P1;
 implementation and verification cost must be revalidated in its owned slice.
 
+## HPC return navigation and deferred shared dock — 012 direction 2026-11-16
+
+**Vote/Contact navigation source candidate in PR #2411; release/device acceptance open.** The separate player-layout and new-artwork requirements remain specified. Reconcile [HPC H1](../hpc/ROADMAP.md#2026-11-16--return-navigation-concise-hpc-identity-and-changed-phone-acceptance) and the [navigation matrix](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#47-hpc-vote-and-contact-congress-return-navigation--012-request-2026-11-16) before the next owner slice. Main source inspected: `72a3182c70974f0523be91d5ce4bd32808d824bc`; existing probe draft [#2405](https://github.com/FOUNDUPS/Foundups-Agent/pull/2405) remains a separate playback baseline, not implementation of this navigation.
+
+- Immediate: preserve the HPC -> existing Vote/Contact routes and add one whole top HPC banner link on **both** Vote and Call Your Congressperson returning to `https://hpc.foundups.com`. The animated portrait sits inside the same accessible anchor; no nested links. Distinct existing Red Dog navigation icons return to `https://play.foundups.com`.
+- Reuse the existing illustrated Hasan portrait and Red Dog asset. Keep concise HPC identity, satire/non-affiliation disclosure, comfortable touch targets, keyboard focus, reduced-motion static fallback and no motion while hidden. Crown of thorns/optional halo adaptation requires actual reference inspection; it is not a completed asset.
+- Preserve existing PWA/tile architecture, Vote/Contact source and Sites mirror owners, admission, forms and service-worker behavior. No conventional replacement page or Voice tenant. Extend existing route/browser fixtures for both complete return loops; source links alone do not verify live navigation.
+- Existing playback slice: one shared top-anchored floating phone video above an independently scrolling grid, one deliberate selection tap, WikiTube transitions/queue and truthful provider failure states. This explicitly changes the earlier selected-tile placement acceptance without rebuilding the shell.
+- Deferred: shared floating Red Dog and bottom FoundUps search dock across existing surfaces. Reuse the existing anchors/search/state owner, keep current controls usable, and avoid duplicate search or concierge controls. `https://play.foundups.com` is the intended public Mall; **144 FoundUps is a product target, not a measured current catalog**.
+
+No production deployment, security change or merge authority is created by this specification. Owner delivery, source implementation, automated checks, staging/device navigation and release require separate receipts.
+
 ## Manifest & Catalog Truth Reconciliation (Build v19) — 2026-11-16
 
 - Repaired all four previously invalid `foundup_manifest.json` declarations (`detect_ai`, `eduit`, `shield`, `holoindex_prod_01`), added `"infrastructure"` to `VALID_CATEGORIES`, and hardened null-coalescing in `load_manifest()` so `PfmallShell().boot()` loads 12/12 workspace manifests with zero warnings.
@@ -271,9 +283,12 @@ not reprioritization of unrelated system work.
 - Desktop requests first-video startup playback and sequential queue advancement.
   Preserve provider controls, one active player, and truthful blocked-autoplay
   recovery. A thumbnail, iframe load or API availability flag is not playback.
-- Phone tap replaces the selected tile with the shared player in its original
-  row. Nearby tiles reflow and the original tile returns on close. Measure
-  the provider viewport and keep controls clear of the iframe.
+- CHANGES_POC_ACCEPTANCE (012, 2026-11-16): phone tile selection requests playback
+  in one top-anchored floating player above the independently scrolling grid.
+  This supersedes selected-tile/original-row placement. Preserve the existing
+  media session, WikiTube transitions/queue, query, scroll, focus and close/back
+  recovery; measure actual media-time advancement and keep controls outside the
+  provider rectangle. Current selected-tile runtime is not acceptance of this target.
 - Scoped search repopulates the existing queue/field. It supersedes hidden-search
   presentation only within the active permitted catalog; global/remote search is
   later work and never bypasses authorization.
@@ -283,7 +298,7 @@ not reprioritization of unrelated system work.
 | Slice | Stage / work | Promotion evidence |
 | --- | --- | --- |
 | PFWD-0 | Reconcile current owners, source history and acceptance | Roadmap/contract references, source SHAs, existing-test inventory and bounded recovery plan; documentation is not runtime success. |
-| PFWD-1A | PoC: desktop theater plus preserved phone grid | PC and phone composition, correct click target/player, one iframe/audio session, original-ID return, resize/rotation and other-FoundUp regressions. |
+| PFWD-1A | PoC: desktop theater plus top-anchored phone player/grid | Correct desktop and revised phone composition, one-tap selection into one iframe/audio session, independently scrolling grid, advancing media time, WikiTube queue/transitions, close/back/original-ID return, resize/rotation and other-FoundUp regressions. |
 | PFWD-1B | PoC: single floating bottom search dock | Main video, thumbnails, then one viewport-bottom dock; phone thumb access, scoped install identity and optional local dictation. Verify exactly one visible/focusable dock, bottom anchoring on scroll, keyboard/safe-area clearance, query retention, no results, queue advancement and standalone launch. |
 | PFWD-1C | PoC entry and membership | Dedicated public HPC host, invited FoundUps member access and scoped sign-in return. Verify each entry independently. |
 | PFWD-2 | Prototype: resident speech and agent controls | Red Dog hold-to-talk via authenticated resident ingress, admitted device-compatible selection, cancellation, permission denial and bounded action receipts. |
@@ -298,7 +313,9 @@ expansion, protected operations and other projections.
 HPC is the first scoped phone dock consumer. The left `+` opens Home,
 disclosure and device-model availability. The search mic supports local
 recognition when available or opens the input for keyboard dictation. The
-right Red Dog button opens the public briefing. Resident hold-to-talk and
+right Red Dog button opens the public briefing in the inspected runtime. The
+2026-11-16 adjacent-surface return icon instead targets the Mall; do not change
+ordinary Mall concierge semantics globally. Resident hold-to-talk and
 actual model loading belong to PFWD-2. AutoPost capture belongs to PFWD-3.
 
 The existing [media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) owns provider-error,

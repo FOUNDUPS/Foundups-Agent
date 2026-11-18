@@ -1,3 +1,25 @@
+## 2026-11-16 — Whole HPC return banners on existing Vote and Contact pages
+
+- Continue existing draft PR #2411 under 012's functional-navigation direction.
+  Read-only native player/probe worktree checks found no overlapping Vote edits;
+  native worktrees and Mall/player source stay untouched. No exclusive future
+  ownership or native Antigravity acknowledgment is inferred.
+- Add one whole top HPC banner anchor to each existing page, including portrait,
+  text and padding, plus a distinct Red Dog -> Play Mall anchor. Preserve all
+  prior page bytes outside those additions and their shared CSS/script tags.
+- Reuse canonical same-origin portrait/dog copies. Subtle portrait motion respects
+  reduced motion and hidden-page state; links work without JavaScript. Keep
+  independent/non-affiliation disclosures, forms, install behavior and CSP intact.
+- Extend the existing exact public-worker cache to v10 for four local assets and
+  its existing regression harness. No external navigation destination is cached.
+- Crown/halo image adaptation remains blocked on supplied-reference materialization;
+  existing satirical portrait is reused for functional navigation.
+- Node regression result: 129 passed across public-worker, manual-contact and
+  coalition-draft suites. Browser navigation/layout evidence is recorded in the
+  existing TestModLog and PR. No production deployment or merge was performed.
+- WSP 22/50/84/97: source reuse, bounded existing-branch scope and exact-head review.
+  Native bootstrap/Holo/WRE admission was not executed by this connector surface.
+
 # Vote/Ballots FoundUp — Module Log
 
 ## 2026-11-13 — Vote cover editorial and phone layout
