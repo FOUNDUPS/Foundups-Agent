@@ -1,5 +1,15 @@
 # p.fMALL Roadmap
 
+## Fractal tile graph and agent work navigation
+
+**Specified, 2026-11-19.** The website build cube is the visual entrance to a FoundUp's work. The Mall, Simulator and 0102 share tile identity across spatial, catalog and conversational views. The [master architecture](../docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work) owns identity and scope. The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation) owns drill-down and return behavior.
+
+1. **Audit.** Pin main, the Mall v22 overlay and the JHR audit source. Inventory ventures, modules, artifacts, open sockets and publications. Reconcile the opus baseline. Produce the dated tile graph and WSP_15 report in the existing ignored audit directory. Verify coverage, permissions, unique IDs and tree integrity before isolated implementation.
+2. **Build.** Freeze schemas and fixtures. Inventory lanes feed the compiler. The Mall frontend develops against the same fixtures. Project public and architect catalogs with scoped references and ETags. Support co-build, HPC community, investor/licensing, Akiya market and continuous WikiTube playback on one engine.
+3. **Rank.** Use canonical [WSP_15](../../../WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md) for module and approved-work priority. Store lifecycle, completeness and the separate 20–100 Mall rescue score independently. Require publication evidence for an opus item and verified wiring for a module.
+4. **Co-build.** Route approved roadmap additions, socket links, renames and evidence-backed promotions through an authenticated server patch with actor scope, patch ID and base revision. Commit an accepted edit and its receipt together. Verify concurrent writes, idempotent retry, tenant isolation and persistence after regeneration.
+5. **Qualify.** Run Simulator and JHR pilots. In one pilot bind a real or explicitly labelled fixture work record to a component, select the builder, enter the model, open a revision-bound source or test leaf and return to the same builder. Verify voice/text and 2D/3D target parity, direct entry, HPC → AutoPost → Back, WikiTube continuity and stale or restricted evidence. Record observed, fixture-only and blocked results separately.
+
 ## Single floating bottom dock — 012 clarification, 2026-11-18
 
 **CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED by this documentation slice.**
