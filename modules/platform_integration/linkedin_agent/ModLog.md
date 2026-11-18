@@ -1,4 +1,126 @@
+## 2026-09-28: RSI contact-diligence contract and CI repair
+
+- WSP00/15/22/50/95/97; C1/I3/D3/Impact3 = 10/P2. Fresh main inspection found the new offline contract failing despite green PR1927 checks; the CI workflow did not invoke this suite.
+- Align the existing skill's anti-accusation sentence with the unchanged assertion and shared review contract. Add the existing eight-case stdlib suite to CI; no test oracle, suite, runtime API or platform action is added.
+- Baseline seven pass/one fail; candidate eight pass locally. Independent review, exact-head/main CI and owned cleanup are receipt-bound in the canonical RSI backlog. This is instruction validation, not R25 consent, retained RSI learning or autonomous LinkedIn admission.
+
+## 2026-09-28: Consequential-contact professional diligence skill
+
+- WSP 00/15/22/50/95/97; added `linkedin_contact_diligence` as an instruction-only AUDIT child under the existing LinkedIn master rather than extending the title/photo profile evaluator into financial trust decisions.
+- Trigger scope covers consequential investment, family-office, project-finance, government/institutional, infrastructure and sensitive-partnership contacts from connection requests, existing connections or inbox threads.
+- Evidence is separated as VERIFIED / CLAIMED / UNVERIFIED / CONFLICTING; missing public footprint is explicitly not proof of fraud. The skill produces no legitimacy score and does not auto-accept, auto-reject, send, or authorize disclosure.
+- Capital-contact diligence asks for entity/mandate, check size, geography, instrument/project stage, fee model, comparable transactions and relevant regulatory status before non-public financial disclosure. Default disclosure state is PUBLIC_OVERVIEW_ONLY.
+- Routed from the master activity map, engagement master and shared review workflow; extended the existing offline contract owner so the new child/link/privacy/authority boundary is testable. No LinkedIn live action, contact dossier, private message body, runtime executor or autonomous background job is added.
+
+## 2026-09-24: Browser owner honors manager admission
+
+- WSP 00/15/22/34/50/62/84/97; C3/I3/D4/Impact3 = 13/P1. The existing action owner now requires no prior pending/connected target, the actual PENDING enum, a matching target and identity with the currently stored pending object before Connect. Rejections return `connection_request_not_admitted` without invitation UI or success credit. Existing policy denials, previews, navigation failures and manager bookkeeping are preserved.
+- Frozen acceptance: baseline 11 fail/25 pass; repaired and independent runs each pass the same 36 unique cases. All 23 earlier compatibility cases remain; four legacy constructor cases are deselected and two known plugin warnings remain. Seven malformed/state controls supplement the six manager outcomes. File/class/method shrink; no new module or skill.
+- Backend binding changes one source digest among 1401 unchanged members and updates two existing pins. Eight manifest tests, the 67-file package and unchanged 1659-file test registry pass. Two premature manifest preparations each yielded 1 fail/7 pass: an old loaded pin, then a partially staged index. Both are preserved; the completed, coherently staged candidate passes the sequential rerun.
+- Evidence: `O:/Foundups-Agent-audits/20260924-rsi-manager-guard`; exact publication/closure is recorded there and in the canonical system backlog. This proves a local admission guard, not live delivery, bookkeeping rollback, quota repair, concurrent exactly-once execution, OS confinement or retained native RSI.
+
+## 2026-09-24: Remove credential-shaped instruction examples
+
+- WSP 00/15/22/50/97; C1/I4/D5/Impact3 = 13/P1. Replaced exactly two configuration assignments in the existing module CLAUDE.md with inert placeholders and added the existing memory-boundary rule for documentation, logs and worker packets.
+- Static validation preserves all other instruction text, all 42 ranked task identities and all 26 planning packets. No runtime, API, tests, registry or manifest changes; no new skill or module. Independent review and exact publication/closure evidence are bound in the system backlog.
+- This is current-source redaction only. Credential validity and rotation remain unknown; earlier Git history is unchanged. No values reproduced in receipts, no credential use or account action.
+
+## 2026-09-24: Manager-result to UI admission qualification
+
+- WSP00/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Extended the existing policy test owner with six fixed current-behavior cases; all23 prior cases and original test AST/fixtures preserved. Production source, backend manifest and registry remain unchanged.
+- Same29 cases pass locally and independently, four legacy constructor cases deselected, two known config warnings. Quota WITHDRAWN, already CONNECTED, prior PENDING and simulator-failure WITHDRAWN still reach fake Connect/Send and gain credit; freshPENDING and policyBLOCKED controls distinguish admission.
+- Returned/stored object identity is checked: under the fixed test clock, exception fallback shares the storedPENDING request_id but is a different object; priorPENDING reuses the exact existing object. Canonical workflow records a prospective13/P1 fresh-work guard, not a completed repair. No live delivery, rollback, concurrent exactly-once or retained-RSI claim.
+- Test inventory reconciled against six actual files; established required canonical tests/TestModLog. Source-only instruction hygiene was separately discovered/scored13/P1 without reproducing or using credential-shaped values. Exact evidence/closure and next selection are in the system backlog.
+
+## 2026-09-22 — Live newsletter archive reconciliation
+
+- Reconciled the three editorial lanes against live LinkedIn and public article read-back: JHR series 7505133867079536640 with two editions, personal ROC series 7448137996484182016 with nine editions, and Foundups - Eat the Startup series 7376428210558808065.
+- Updated each child skill with its verified continuity anchor while retaining fresh verification before editing or publishing. ROC source papers on personal and FOUNDUPS® surfaces remain distinct from ROC newsletter editions.
+- Recorded the Eat the Startup discrepancy between the series-page edition list and individual article newsletter badges rather than forcing one surface to overwrite the other.
+- Updated the existing editorial audit and contract test. No private Google Doc identity, manuscript, message, draft, schedule or subscriber count entered public Git; no LinkedIn content was edited, scheduled or published.
+
+## 2026-09-23 — Lane-specific research and verification
+
+Added one stable newest-first Google Docs master moshpit per editorial lane, manuscript backlinks and history/session reconciliation. Private operational Doc identities remain outside public Git.
+
+- WSP 97 / WSP 15 C2/I4/D4/Impact4=14/P1, instruction plane: current-main and lexical Holo retrieval (UNKNOWN freshness/index gap retained); reused newsletter and video-index/Digital Twin owners, no runtime changes.
+- Added claim ledger, source/paper/video verification, current Japanese JHR coverage, ROC ownership/cost research, GitHub/RSI FoundUps scope and operational group evidence. Gemini is a discovery aid, not independent proof; owned-channel Studio access is not arbitrary-video access.
+- Preserved 012's JHR/ROC/group/FoundUps order; evidence admission precedes section scoring. Added contextual disclosed project links, Google Docs manuscript/read-back, private correction records and separate dataset/training gates.
+- Champion originals researched and routed primarily to ROC; no adoption/partnership/COGDC equivalence claim. JHR leads retain retrieval limits. Separate authorized Docs work is recorded in private continuity; this instruction change runs no indexer or training and publishes nothing.
+- Repaired an earlier editorial ModLog insertion that split the pre-existing requested-note entry; all content preserved.
+
+## 2026-09-22 — Editorial orchestration and reusable newsletter templates
+
+- WSP 97 / WSP 15 C2/I4/D3/Impact4=13/P1: audited current main and all LinkedIn instruction nodes; retained existing master, three newsletter children and group news owner.
+- Added scoped Red Dog/0102 work packet and return receipt, audit/develop/revise/create-series routes, issue brief and child-skill template. Separated editorial progress from delivery so missing ROC series identity does not block a local draft.
+- Connected public group intelligence to the newsletter lanes, with revision, privacy and duplicate controls. Recorded repository-only editorial backlog; live LinkedIn NOT_CHECKED_LIVE. No newsletter or group post published, no runtime dispatcher added.
+
+## 2026-09-23: Requested-note ordering and acknowledgment repair
+
+- WSP00/10/15/22/34/50/62/84/97; C3/I3/D3/Impact3=12/P2. Existing LinkedIn owner prepares requested notes before one explicit Send; failed Add/typing suppress Send and success credit. Unattempted Send is None. Preserve no-message fallback and manager/policy/preview behavior.
+- Frozen 23 cases: baseline 4 fail/19 pass, candidate 23 pass and independent same 23 pass; 17 compatibility controls/four legacy constructor definitions preserved, four deselected, two known warnings per run. Same-file bounded helpers reduce inherited size debt; no live delivery/browser/OS-isolation proof.
+- One backend digest and two pins refreshed; 1401 members unchanged. Eight manifest tests, 67-file package and canonical registry verified. Existing backlog records the separately scored next qualification; no native RSI or automatic runtime-upgrade claim.
+
+## 2026-09-23: LinkedIn invitation acknowledgment qualification
+
+- WSP00/15/22/34/50/62/84/97; C2/I3/D3/Impact3=11/P2. Seven new finite acknowledgment cases reuse the existing inert fixture; existing17 compatibility cases and four legacy constructor definitions are preserved. Production source and backend manifest unchanged.
+- Same24 cases pass locally and independently, four legacy deselected, two known config warnings per run. Initial Send precedes requested note entry; type failure can still report success; no-message missing Send remains ambiguous. No live delivery, browser or OS-isolation claim.
+- Existing workflow/backlog records the separate message-path ordering/acknowledgment repair contract12/P2; required direct-connect UI and bookkeeping boundaries remain explicit.
+
+## 2026-09-22: Connection policy-only preview repair
+
+- WSP00/10/15/22/50/62/84/97;12/P2. Reuse policy evaluation before request mutation; both allow/deny previews preserve bookkeeping and omit request status. Browser access remains separate.
+- Frozen17 cases: baseline12fail/5pass; repaired and independent17pass. Four original constructor tests unchanged/excluded, two known warnings per run; fake-live controls preserved.
+- Same-file result projection reduces method194→171, class2718→2695, file2827→2826. No new module. Backend digest/pins refreshed without adding runtime members or updating services.
+
+## 2026-09-22: Connection dry-run state qualification
+
+- WSP00/15/22/50/62/84/97; 12/P2. Ten fixed current-behavior cases pass locally and independently; four original tests remain unchanged/deselected. Production source unchanged; inert routing, constructor bypass and patched sleep only.
+- Preview currently calls the manager before its guard: pending/history mutation, blocked-history quota and simulation are observable. Existing policy evaluation supports a narrow future no-bookkeeping-mutation preview; browser access remains separate.
+- [Current evidence and prospective repair](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-qualification--2026-09-22). No live action, runtime update or retained-learning claim.
+
+## 2026-09-22: LinkedIn session configuration preview
+
+- WSP00/10/15/22/50/62/84/97;13/P1. Extend existing direct adapter helper: session dry-run validates configuration and returns before browser import/construction; fake-live controls preserve parsing/results/cleanup.
+- Fixed77 cases: baseline15fail/62pass; candidate and independent replay each pass77. Existing54 definitions and18 legacy tests preserved;18deselected/two warnings. No live execution or broader safety claim.
+- Dispatch313→304, adapter670 lines; focused session test owner reuses the existing inert fixture. Manifest/pins and canonical test registry updated. Current backlog closes PR1867 and selects connection policy/history qualification12/P2.
+
+## 2026-09-22: Dominant dry-run flags and early direct-like previews
+
+- WSP00/15/22/50/62/97;14/P1. Reuse existing wrapper/adapter; outer default/true overrides nested false without caller mutation. Direct-like previews precede browser import/construction and preserve declared parsing, agentic routing and live error/close semantics.
+- Fixed54 cases: baseline29fail/25pass; candidate54pass, independent54pass (same cases). Original18 unchanged/deselected; two configuration warnings per run. Tests use inert collaborators only.
+- Executor97→33 and adapter dispatch343→313 via same-file helpers; inherited remaining debt stays explicit. Current API/review docs and root backlog record scope, manifest binding and next engagement-session13/P1 gap. No live authority or runtime readiness claim.
+
+## 2026-09-22: RSI dry-run qualification and repair contract
+
+- WSP00/15/22/50/62/97; reconcile merged instruction owners PR1863/1865 before extending the existing review workflow. Fake-only qualification13/P1 does not change the executor or admit social actions.
+- Wrapper outer default/true can preserve nested false; direct like routes can invoke writes despite dry-run. Constructor effects remain separate from write suppression. Tests live in the existing bridge adapter test owner.
+- [Review contract](docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-dry-run-boundary-qualification--2026-09-22) fixes the next14/P1 wrapper/direct-preview repair and same-file decomposition requirement. Canonical root backlog records exact validation/closure; broader routes are not certified.
+
 ﻿# LinkedIn Agent - Module Change Log
+
+## 2026-09-22 — Dedicated FoundUps, ROC and JHR newsletter skills
+
+- Split the combined newsletter editorial contract into three owned instruction skills while retaining `linkedin_newsletters` as the master newsletter router.
+- FoundUps / Eat the Startup now grounds editions in verified Foundups-Agent implementation and normalizes a contextually clear “BoundUps” request without inventing a brand or series.
+- ROC now retrieves PR #202 and current economic sources, requires fresh evidence for volatile claims, and fails closed because the publishing map does not identify a verified ROC newsletter series.
+- JHR now binds LinkedIn work to the canonical eSingularity JHR source/provenance and significance gate, including a valid `NO_REPORT` outcome.
+- Added explicit routes from the LinkedIn master. Instruction-only change; no newsletter created, renamed, published or scheduled.
+
+## 2026-09-22 — Master LinkedIn activity routing and scoped child contracts
+
+- Reused `linkedin_engagement` as master; added instruction-only inbox, connections, notifications, newsletters, publishing, outreach and continuity children. Full cycle and narrow commands have distinct scope.
+- Carried forward the previously unmerged message-first membership and Good/Bad/Ugly contracts rather than creating duplicate owners.
+- Added immediate composer-history recheck, unchanged-approval execution, duplicate holds and read-back-before-retry; no private message bodies or applicant dossiers recorded here.
+- Separated WSP 15 priority from authority, three newsletter stages, current domain identities and verified schedule/live outcomes. Legacy helpers now point to current authority and readiness boundaries.
+- Added offline documentation-contract tests. No runtime guards, autonomous send capability, scheduler or background login claimed; known executor gaps remain separate work.
+
+## 2026-09-15 — Message-first membership and automation discussion skills
+
+- Added `docs/LINKEDIN_REVIEW_WORKFLOW.md` as a compact operating-source and ownership index, linked from README and existing skill entrypoints.
+- Updated existing moderation skill to require prior-thread/profile research, message verification, separate human membership decisions and automatic-approval preflight. Removed photo/title shortcuts, fear-based outreach and automatic connections.
+- Reused `openclaw_group_news` for researched Good/Bad/Ugly automation discussion, sourced vendor claims, a testable AGI/schema hypothesis and exact post approval. Removed standing daily-post authorization and stale embedded queues/selectors.
+- Private member/message content excluded. Documentation only; legacy executors not certified or launched, no scheduler created. Validation covers skill metadata and local links, not live runtime safety.
 
 ## Latest Changes
 

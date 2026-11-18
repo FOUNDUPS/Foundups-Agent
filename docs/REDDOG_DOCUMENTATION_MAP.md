@@ -1,0 +1,100 @@
+# RedDog Documentation Map
+
+**System planning parent:** [Root RSI roadmap](../ROADMAP.md). [Dispatch and model-cost runbook](operations/RSI_SWARM_DISPATCH.md). These sequence cross-system work; the product and runtime authorities below retain their scope.
+
+Status: canonical navigation entry point
+
+Use this map before broad text search. A 2026-08-30 inventory found 376
+Markdown/JSON/YAML files containing `RedDog` or `reddog`; that count includes
+tests, receipts, audits, generated manifests, and historical evidence. It does
+not mean RedDog has 376 canonical specifications.
+
+## Read order
+
+| Need | Canonical entry | Authority |
+|---|---|---|
+| What RedDog is becoming | `docs/REDDOG_OUTCOME_VISION.md` | Product North Star; future statements are not implementation claims |
+| RedDog identity boundary | `extensions/reddog/ARCHITECTURE.md` | Canonical invariant: RedDog fast surface != 0102 deep Digital Twin |
+| Fast RedDog + deep 0102 cognition split | `docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md` | Cross-domain architecture vision; not implementation truth |
+| Hybrid tickets, bounded teams and active-012 feedback into 3V | [Hybrid architecture decision](architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md), [R24](roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md), [R25](roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) | Cross-domain implementation plan; not live federation or voting authority |
+| Current extension/runtime truth | `extensions/reddog/README.md` | Current product/runtime status |
+| Public extension contract | `extensions/reddog/INTERFACE.md` | Supported interface and authority boundary |
+| Browser outcome verification evidence | [Selenium verification contract](../modules/infrastructure/foundups_selenium/INTERFACE.md#wre-visual-verification-evidence), `modules/communication/moltbot_bridge/workspace/skills/foundups-wsp/SKILL.md` | Existing runner and operator guidance; source presence does not prove live RedDog wiring or a visual PASS |
+| Delivery sequence and gaps | `extensions/reddog/ROADMAP.md` | Planned and completed product work |
+| Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric request-continuity PoC implemented, not deployed; continuous human presence, mutual verification, and media provenance specified, not implemented |
+| Continuous Lick / Gemini evaluation | `docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md` | Source-grounded audit; separates presence, continuity, media, affect, semantic state, and authority; no anti-deepfake deployment claim |
+| Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |
+| Public host and AutoPost/site integration work order | `extensions/reddog/docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` | Remaining implementation/activation gates; never completion evidence |
+| Host-recovery salvage and stranded PR closure | [2026-10-06 reconciliation](audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md) | Exact-base audit, owned scope and validation; not resident activation |
+| Contact/relationship memory | `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md` | Architecture vision; specified, not implemented |
+| Moshpit activity and conversation projection | `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing projection inputs; unified renderer unmounted; pins, long-press actions, scoped search, Muzzle/controls and AutoPost handoff specified only |
+| Memex projection emitter | `extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` | Product contract; specified, not implemented |
+| Memex emitter implementation work order | `extensions/reddog/docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` | Work order; never completion evidence |
+| FoundUps/second-brain architecture | `docs/architecture/REDDOG_FOUNDUPS_SECOND_BRAIN_ARCHITECTURE.md` | Architecture decision context |
+| Phase-1 alignment findings | `docs/audits/architecture/REDDOG_CANONICAL_ARCHITECTURE_ALIGNMENT_PHASE1.md` | Evidence audit, not runtime authority |
+| Current-main WSP 15 / WSP 97 audit and ranked queue | `docs/audits/architecture/REDDOG_CURRENT_MAIN_WSP15_WSP97_AUDIT_20260914.md` | Point-in-time evidence and PR disposition; not runtime authority |
+| Lick/Gemini/rESP findings | `docs/audits/architecture/REDDOG_LICK_HANDSHAKE_AUDIT_PHASE1.md` | Historical evidence audit, not runtime or patent-status authority |
+| Public member digital-twin contract | `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` | Public-surface contract |
+| FoundUps domain integration | `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` | FoundUps domain navigation |
+| Sensitive evidence/secret boundary | `WSP_framework/src/WSP_71_Secrets_Management_Protocol.md` §2.3 | Security requirements that reference, but do not redefine, the Lick |
+| Protocol-level digital-twin authority | `WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md` | WSP authority; product handshakes do not belong here |
+
+## Ownership boundaries
+
+- `extensions/reddog/` owns the RedDog product, interface, roadmap, product
+  handshakes, and extension-local verification evidence.
+- `docs/architecture/` owns cross-domain architectural decisions.
+- `docs/audits/` owns point-in-time evidence and correction reports.
+- `modules/foundups/` owns the FoundUps domain model and monorepo integration
+  references.
+- `public/member/` owns the public member-facing contract surface.
+- `WSP_framework/` owns protocols only. A feature, product handshake, use case,
+  or feasibility study is not a WSP merely because RedDog uses it.
+- `WSP_knowledge/` may retain papers, patent material, evidence, and historical
+  memory; those records are not current product implementation truth.
+
+## RedDog operating chain
+
+The canonical division of responsibility is:
+
+`0102 Hub develops -> pfMALL presents -> AutoPost captures/routes -> RedDog operates`
+
+Within RedDog operation, the intended cognition split is:
+
+`012 <-> fast RedDog interaction/exchange surface -> deep 0102 cognition/orchestration -> governed workers`
+
+RedDog and 0102 are not the same component and are not competing assistants.
+They form one continuous principal-scoped conversational relationship across
+two latency and responsibility layers. See
+`extensions/reddog/ARCHITECTURE.md` and
+`docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md`.
+
+The Lick runs at the RedDog engagement boundary. AutoPost can supply a
+permissioned capture event, but it does not decide identity or grant authority.
+
+## Historical and generated material
+
+Treat these as evidence, not entry points:
+
+- `WSP_knowledge/red_dog_external_state/` — external-state shelf and historical
+  continuity material;
+- `docs/audits/` — truthful at the audited base commit, potentially superseded;
+- `extensions/reddog/docs/acceptance/` and test receipts — bounded verification
+  evidence;
+- generated manifests and index files — machine navigation/integrity data; and
+- `archive/` and `_archive/` — retained history.
+
+Do not move or concatenate these files merely to reduce search results. Link
+them from the owning canonical document when they materially support a current
+claim.
+
+## Search fallback
+
+When canonical semantic retrieval is unavailable, use scoped literal search:
+
+```bash
+rg -n -i "RedDog|reddog" extensions/reddog docs modules/foundups public/member WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md
+```
+
+Confirm status labels and base commits before treating an audit or receipt as
+current truth.

@@ -1,0 +1,13 @@
+# Token Efficiency Module Dependencies
+# Contract: No new dependencies in P1-P3
+# WSP: WSP_97
+
+# P1 (Bypass Classifier): stdlib only
+# - re (stdlib)
+# - dataclasses (stdlib)
+# - enum (stdlib)
+# - hashlib (stdlib)
+# - datetime (stdlib)
+
+# Testing
+pytest>=7.0.0

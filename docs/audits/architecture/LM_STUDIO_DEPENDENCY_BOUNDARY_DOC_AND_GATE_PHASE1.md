@@ -1,8 +1,16 @@
 # LM_STUDIO_DEPENDENCY_BOUNDARY_DOC_AND_GATE_PHASE1
 
+> **Superseded in part on 2026-08-22:** the non-launch boundary remains valid,
+> but OpenAI-compatible `/v1/models` presence is not residency proof when LM
+> Studio JIT loading is enabled. Exact current behavior is governed by
+> `REDDOG_LM_STUDIO_MODEL_LIFECYCLE_HARDENING_PHASE1.md` and native
+> `/api/v1/models` `loaded_instances` evidence.
+
 **Slice**: `fix/lm-studio-dependency-boundary-doc-and-gate-phase1`
 **Operating protocols**: WSP_00 (Zen State), WSP_97 (Truthful state distinction)
-**Internal Review Verdict**: READY
+**Internal Review Verdict**: READY for the original dependency-boundary slice;
+the lifecycle audit named above is now authoritative for residency and managed
+execution behavior.
 
 ---
 
@@ -72,7 +80,7 @@ Grep confirmed the launch site is unique: `launch_lm_studio` /
 | Qwen reasoning (`resolve_qwen_backend` / `get_qwen_engine`) | Probe LM Studio; if reachable + model loaded → `LMStudioBackend`; else llama.cpp GGUF | **OPTIONAL** | `LlamaCppBackend` via `model_path` (GGUF) | None if reachable; else provide GGUF `model_path` or start LM Studio via launcher |
 | Gemma pattern matching (`resolve_gemma_backend` / `get_gemma_engine`) | Same as Qwen (CPU-only GGUF fallback) | **OPTIONAL** | `LlamaCppBackend` via `resolve_triage_model_path` | Same as Qwen |
 | UI-TARS vision (`auto_moderator_dae` Phase -2 → `ensure_dependencies(require_lm_studio=True)`) | Explicit launch via `dae_dependencies.launch_lm_studio`; absent → DOM-only mode | **OPTIONAL (no GGUF fallback)** — degrades to DOM-only, not a hard failure | Vision-less DOM-only engagement | Start LM Studio via dependency launcher / load UI-TARS model |
-| `is_lm_studio_available()` probe (`local_llm_backends`) | 2s HTTP GET to `localhost:1234/v1/models` | N/A (pure probe) | N/A | N/A |
+| `is_lm_studio_available()` probe (`local_llm_backends`) | Bounded native HTTP GET to the normalized loopback endpoint `/api/v1/models`; requires exact native inventory evidence | N/A (pure probe) | N/A | N/A |
 | Dependency launcher (`dae_dependencies.launch_lm_studio`) | `subprocess.Popen` LM Studio, waits ≤120s, then `load_all_models()` | This **is** the launch path (explicit, operator/DAE-initiated) | N/A | This is the sanctioned launch entry point |
 | `main.py` menu boot | No LM Studio probe or launch | **NO** | N/A | N/A |
 
@@ -99,7 +107,7 @@ All additions are in `local_llm_resolver.py` and are **probe-only / additive**
 
 | New symbol | Purpose | Launches LM Studio? |
 |------------|---------|---------------------|
-| `LocalLLMAvailability` (Enum) | Named states: `LM_STUDIO_READY` / `FALLBACK_LLAMA_CPP` / `UNAVAILABLE` | No |
+| `LocalLLMAvailability` (Enum) | Named states: `LM_STUDIO_SERVER_REACHABLE` / `FALLBACK_LLAMA_CPP` / `UNAVAILABLE`; reachability is not model residency | No |
 | `probe_backend_availability(model_path=None)` | Probe-only classifier (HTTP probe + GGUF filesystem check) | No |
 | `operator_action_for(status)` | Operator-actionable guidance string per state | No |
 | `LMStudioUnavailableError` | Named error for paths that strictly require LM Studio | No |
@@ -111,8 +119,11 @@ Resolver messaging upgraded:
 - LM Studio absent + no fallback → **WARNING** with operator remedy (start via
   launcher or provide `model_path`).
 
-Happy path (LM Studio reachable → `LMStudioBackend`; otherwise → `LlamaCppBackend`)
-is byte-for-byte unchanged in behavior.
+The original happy/fallback selection remains, but its LM Studio evidence is
+now deliberately stronger: the probe uses native inventory, propagates the
+configured base URL and token, and distinguishes server reachability from
+exact model residency. Managed RedDog calls additionally use the separately
+documented lifecycle authority.
 
 ---
 
@@ -146,29 +157,30 @@ File: `modules/infrastructure/shared_utilities/tests/test_lm_studio_dependency_b
 
 **Run**:
 `python -m pytest modules/infrastructure/shared_utilities/tests/test_lm_studio_dependency_boundary.py modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py -v`
-**Result**: `33 passed` (16 new + 17 existing regression-guard).
+**Current result (2026-08-22)**: `46 passed in 1.67s`.
 
 ---
 
 ## 9. Internal Review Verdict
 
-**READY.** Smallest viable gate: additive named states + probe-only classifier +
-named required-path error, plus clearer resolver messaging. No model behavior
-change, no launch added to the probe layer, launch boundary intact, `main.py`
-untouched.
+**READY for its original scope.** The named states, probe-only classifier,
+required-path error, non-launch boundary, and `main.py` boundary remain valid.
+Native inventory/authentication and managed model behavior are now governed by
+`REDDOG_LM_STUDIO_MODEL_LIFECYCLE_HARDENING_PHASE1.md`.
 
 ---
 
 ## 10. WSP_97 Truth Boundary Checklist
 
-20 items declared, 20 rows present.
+The 20 rows below record the original dependency-boundary slice. They are not
+a substitute for the current lifecycle-hardening checklist and release gate.
 
 | # | Truth Boundary Checklist Item | Status | Evidence |
 |---|-------------------------------|--------|----------|
 | 1 | LM_STUDIO_DEPENDENCY_BOUNDARY_ONLY | PASS | Only resolver gate + tests + docs changed; matrix scoped to LM Studio dependency. |
 | 2 | NO_AUTO_LAUNCH_LM_STUDIO | PASS | No `subprocess`/launch in resolver; `subprocess.Popen` patched and asserted never called. |
 | 3 | LOCAL_LLM_RESOLVER_PROBES_ONLY | PASS | `probe_backend_availability` does HTTP probe + filesystem check only; resolver imports no launch symbols (`test_resolver_does_not_import_launch_symbols`). |
-| 4 | NO_MODEL_BEHAVIOR_CHANGE | PASS | Happy/fallback selection unchanged; only logging + additive helpers. Existing 17 backend tests still pass. |
+| 4 | NO_MODEL_BEHAVIOR_CHANGE | SUPERSEDED | True for the original slice. The later lifecycle-hardening slice intentionally strengthened native inventory, authentication, capacity, lease, and managed unload behavior; see its authoritative audit. |
 | 5 | NO_HOLOINDEX_TIMEOUT_CHANGE | PASS | No edit to `holo_index/core/*`; timeout defaults from #730 untouched. |
 | 6 | NO_OBS_BOUNDARY_CHANGE | PASS | `dae_dependencies.launch_obs` / OBS paths from #720/#721 untouched. |
 | 7 | NO_MAIN_MENU_STARTUP_REGRESSION | PASS | `main.py` not touched; grep confirms it never probes/launches LM Studio. |

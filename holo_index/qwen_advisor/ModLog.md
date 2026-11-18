@@ -1,8 +1,47 @@
+## 2026-09-29: Bound Qwen package imports for RSI qualification
+
+- WSP00/15/22/48/50/62/84/97; existing operational14/P1, import component12/P2. Defer the existing20 Qwen exports until requested; preserve original8 owners, identities, version, dir/from/star imports and dependency failures.
+- Same8 independently reviewed controls: baseline0/8, candidate8/8 locally. Actual package/engine imports remain free of coordinator/native model loads; synthetic owners qualify dispatch only. No model evaluation, retained RSI gain or native execution readiness is claimed.
+- Regenerate the existing backend manifest/digest pins and test registry; add the focused CI invocation. The canonical backlog binds exact local evidence and pending hosted/main/owned-closure receipts. Prior PR1948/main1a8cc62 is independently closed.
+- Next after fresh rescoring: qualify resolver/native version provenance and an enforceable tokenizer-only boundary, then the unchanged12 prompt counts. No environment update, WRE admission or AmIBot launch occurs in this slice.
+
 ﻿# HoloIndex Qwen Advisor - Module Modification Log
 
 ## Purpose (WSP 22 Compliance)
 This ModLog tracks all changes to the `holo_index/qwen_advisor/` module.
 Each entry must include WSP protocol references and impact analysis.
+
+## [2026-08-26] - LOCAL_PROPOSAL_ERROR_REDACTION
+**Agent**: 0102 (Codex)
+**Type**: Execution-truth security repair
+**WSP Compliance**: WSP 22, WSP 50, WSP 95, WSP 97
+
+- Replaced raw model-load and generation exception text in logs and return
+  values with stable type-only diagnostics. This prevents a local WRE proposal
+  failure from persisting exception material in PatternMemory.
+- No Holo query, index, maintenance, freshness, or routing behavior changed.
+
+## [2026-07-16] - HOLOINDEX_RESIDENT_DAE_RUNTIME_CONSOLIDATION_PHASE1
+**Agent**: 0102 (Codex)
+**Type**: Runtime consolidation repair
+**WSP Compliance**: WSP 00, WSP 15, WSP 50, WSP 80, WSP 97
+
+### Changes Implemented
+- Fixed `HoloDAECoordinator` initialization order so `_scan_for_gates()` cannot
+  log before `self.logger` and telemetry are initialized.
+- Added compatibility accessors for `monitoring_active`,
+  `last_monitoring_result`, and `run_monitoring_cycle()` while keeping the
+  monitoring loop as the state owner.
+- Updated request work-context derivation so HoloIndex returned files drive the
+  current work context before Qwen internal analysis files.
+- Synchronized coordinator, formatter, and monitoring-loop work context after
+  request handling and manual monitoring cycles.
+
+### Boundary
+- No re-index, no automatic HoloDAE launch, no semantic-store writes, no WRE
+  enqueue, and no RedDog runtime authority change.
+
+---
 
 ## [2025-11-30] - MAJOR: WSP 62 Coordinator Refactoring (Sprints H1-H6)
 **Agent**: 0102

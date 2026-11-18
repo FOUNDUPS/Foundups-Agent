@@ -1,6 +1,55 @@
 # FMAS Test Suite
 
+## Repository-scoped external audits — 2026-10-29
+
+`test_external_audit.py` and `test_tracked_audit.py` add 72 acceptance cases.
+All external scanner responses are synthetic/injected; one real isolated Python
+child verifies exit-1 JSON through the existing bounded process runner. Temporary
+Git repositories cover tracked-only discovery, untracked documentation, missing
+sources, environment components, stage conflicts, inventory truncation/duplicates,
+root mismatch, submodules, redirect rejection, source/manifest/output limits,
+explicit Bandit targets/cleanup and no process-global cwd change. A later
+regression against the first candidate reproduces data-only folders being counted
+as modules; it now follows existing Holo evidence rules and retains unresolved
+containers as ownership warnings.
+
+Six desired old-entrypoint cases fail against main77b. Integration intentionally
+changes the injected process boundary from subprocess.run to the existing bounded
+WRE runner and passes explicit roots; the expected outcomes are preserved, not
+claimed as a byte-identical red/green harness. The final eight-owner audit selection
+passes 245 tests plus 28 subtests. Exact-base Mode 2 remains at 0 errors, 127
+warnings and 306 advisories. No live pip-audit/Bandit/npm network audit, package
+installation, global collection or security-clearance claim is part of this proof.
+
+## Tracked secret hints and final status — 2026-10-29
+
+`test_secret_scan.py` uses temporary Git repositories and synthetic strings.
+It covers expression false positives, retained literal hints, tracked test
+fixtures, untracked-file exclusion, environment filenames without content reads,
+missing Git inventory, unreadable/invalid/oversized/redirected sources, unchanged
+files and accurate warning/advisory/baseline-difference summaries. It neither
+scans real credentials nor invokes Mode 1's external scanners.
+
+On main `01b87f0ea`, the new acceptance cases report 19 failures and 11 passing
+controls. The candidate's five-owner CI selection passes 134 tests plus
+28 subtests. This is bounded scanner validation, not whole-repository security
+clearance. See [the scanner scope](../README.md).
+
 This folder contains tests for the Foundups Modular Audit System (FMAS). These tests verify functionality related to module structure checking, test existence verification, and baseline comparison.
+
+Historical expiry coverage binds both baseline policy mirrors, tests all four
+quarter boundaries, malformed/current/future review dates, existing/null expiry,
+ownership and nested type changes, candidate-only policy, ordinary source growth,
+and archive-transition bypass attempts. Completed metadata remains expired debt.
+The audit/Mode 2/health-triage/interface CI selection passes 103 tests plus
+28 subtests locally on 2026-10-29. Unrelated expired-exemption tests still fail
+and are tracked in the active slice ledger; no dates are extended to hide them.
+
+`test_modular_audit.py` also checks Python source-encoding parity: valid UTF-8
+BOM and declared Latin-1 sources produce function spans, while conflicting
+encoding declarations, malformed syntax and null bytes still reject. The
+2026-10-29 local run passed 65 tests and five subtests; two valid-encoding
+controls failed against the former UTF-8-text parser before its byte-source fix.
 
 | Test File                 | Description (Auto-generated - May Need Refinement) |
 |----------------------------|-----------------------------------------------------|
@@ -21,4 +70,4 @@ This folder contains tests for the Foundups Modular Audit System (FMAS). These t
 **Important:**  
 - Agents must read this README before creating a new test
 - If a similar test already exists, extend it instead of creating a duplicate
-- When adding new tests, update this README with appropriate descriptions 
+- When adding new tests, update this README with appropriate descriptions

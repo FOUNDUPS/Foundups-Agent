@@ -11,20 +11,16 @@
 wsl --install -d Ubuntu-24.04
 ```
 
-### 2. Node.js 22+ INSIDE WSL
+### 2. Supported Node.js INSIDE WSL
 
 > [!CAUTION]
 > **Critical**: Node.js must be installed **inside WSL**, not just on Windows.
 > Using Windows npm causes `node: not found` errors when running OpenClaw.
 
 ```bash
-# Inside WSL terminal
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Verify
-node --version   # Should show v22.x.x
-npm --version
+# Current supported floors: Node 22.22.3+, 24.15+, or 25.9+.
+# The official local-prefix installer provisions a compatible runtime.
+curl -fsSL https://openclaw.ai/install-cli.sh | bash -s -- --no-onboard
 ```
 
 ---
@@ -32,9 +28,21 @@ npm --version
 ## Installation
 
 ```bash
-# Inside WSL
-npm install -g openclaw
-openclaw onboard
+# Inside WSL; onboarding is a separate operator/configuration step.
+~/.openclaw/bin/openclaw --version
+~/.openclaw/bin/openclaw onboard
+
+# Stable executable used by the Foundups-Agent advisory probe
+sudo ln -sfn "$HOME/.openclaw/bin/openclaw" /usr/local/bin/openclaw
+```
+
+Install Hermes with its official installer, verify it, and expose the stable
+probe path without granting it Foundups-Agent execution authority:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+~/.hermes/hermes-agent/venv/bin/hermes --version
+sudo ln -sfn "$HOME/.hermes/hermes-agent/venv/bin/hermes" /usr/local/bin/hermes
 ```
 
 ### Onboarding Wizard

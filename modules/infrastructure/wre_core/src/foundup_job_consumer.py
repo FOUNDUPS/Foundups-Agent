@@ -1,37 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-WRE FoundUpJob Consumer — Phase 1B Consumer Seam with Receipt Binding
-
-Drains FoundUpJobs through the WRE routing pipeline without making
-OpenClaw call Hermes directly. All dispatch goes through RouteEnvelope.
-
-Architecture:
-  OpenClaw -> FoundUpJob (QUEUED) -> WRE Router -> RouteEnvelope
-           -> This Consumer -> Hermes Executor (if routed)
-           -> Terminal Job -> Receipt Emitter -> pAVS Verification
-           -> ConsumerResult (contains entire closed-loop evidence)
-
-Phase 1B Enhancement:
-  - ConsumerResult now carries receipt emission and pAVS verification
-  - One ConsumerResult contains the complete closed-loop evidence chain
-  - No need for callers to manually call receipt/pAVS APIs
-
-WSP Compliance:
-  WSP 11  : Interface contract (typed dispatch)
-  WSP 50  : Pre-Action Verification (route_foundup_job validates first)
-  WSP 77  : Agent Coordination (WRE controls dispatch, not OpenClaw)
-  WSP 97  : System Execution Prompting (dry_run=True default, no overclaims)
-
-NAVIGATION:
-  -> Uses: foundup_job_router.py (route_foundup_job, RouteEnvelope)
-  -> Uses: hermes_foundup_job_executor.py (execute_foundup_job)
-  -> Uses: receipt_emitter.py (emit_receipt_for_terminal_job)
-  -> Uses: openclaw_foundup_orchestrator.py (get_job_queue, clear_job_queue)
-  -> Called by: WRE gateway, manual drain commands
-"""
-
+"""WRE FoundUpJob consumer with truthful routed dry-run evidence."""
 from __future__ import annotations
 
+import copy
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -43,6 +14,17 @@ from .foundup_job_router import (
     TargetBackend,
     route_foundup_job,
 )
+from .foundup_job_model_capability_consumer import (
+    attach_model_capability_projection as attach_projection,
+    no_trusted_model_runtime_binding,
+    prepare_validate_model_capability_admission,
+)
+from .foundup_scaffold_adapter import (
+    CreateFoundUpDryRunScaffoldAdapter,
+    ScaffoldAdapter,
+)
+from .foundup_scaffold_dispatch import dispatch_create_scaffold
+from .foundup_scaffold_route_contract import canonical_json_copy
 
 if TYPE_CHECKING:
     from modules.communication.moltbot_bridge.src.receipt_emitter import (
@@ -83,16 +65,20 @@ class DrainResult:
     cleared_count: int = 0
     """Number of jobs cleared."""
 
-    retained_count: int = 0
-    """Number of jobs retained."""
+    retained_count: int = 0  # Number of jobs retained.
+    def __post_init__(self) -> None:
+        self.results = copy.deepcopy(list(self.results))
+        self.cleared_job_ids = list(canonical_json_copy(self.cleared_job_ids))
+        self.retained_job_ids = list(canonical_json_copy(self.retained_job_ids))
+        self.retention_reasons = canonical_json_copy(self.retention_reasons)
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict for logging/JSON."""
         return {
-            "results": [r.to_dict() for r in self.results],
-            "cleared_job_ids": self.cleared_job_ids,
-            "retained_job_ids": self.retained_job_ids,
-            "retention_reasons": self.retention_reasons,
+            "results": canonical_json_copy([r.to_dict() for r in self.results]),
+            "cleared_job_ids": canonical_json_copy(self.cleared_job_ids),
+            "retained_job_ids": canonical_json_copy(self.retained_job_ids),
+            "retention_reasons": canonical_json_copy(self.retention_reasons),
             "cleared_count": self.cleared_count,
             "retained_count": self.retained_count,
         }
@@ -138,7 +124,7 @@ class ConsumerResult:
     """Job identifier."""
 
     dispatched: bool
-    """True if job was dispatched to Hermes."""
+    """True if job was dispatched to its routed backend adapter."""
 
     route_status: RouteStatus
     """Routing decision status."""
@@ -151,6 +137,9 @@ class ConsumerResult:
 
     hermes_result: Optional[Any] = None
     """HermesDelegationResult if dispatched via WRE executor, else None."""
+
+    scaffold_result: Optional[Dict[str, Any]] = None
+    """Verified create_foundup dry-run plan result, otherwise None."""
 
     envelope: Optional[RouteEnvelope] = None
     """RouteEnvelope from routing decision."""
@@ -202,8 +191,19 @@ class ConsumerResult:
     re-check (never pass-state), and readiness flags all False.
     """
 
+    model_capability_projection: Optional[Dict[str, Any]] = None
+
     consumed_at: datetime = field(default_factory=_utc_now)
     """Timestamp when consumption completed."""
+
+    def __post_init__(self) -> None:
+        """Detach nested JSON evidence from adapter and caller-owned objects."""
+        if self.scaffold_result is not None:
+            self.scaffold_result = canonical_json_copy(self.scaffold_result)
+        for field_name in ("context_bundle_dry_run", "model_capability_projection"):
+            value = getattr(self, field_name)
+            if value is not None:
+                setattr(self, field_name, canonical_json_copy(value))
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict for logging/JSON."""
@@ -213,6 +213,11 @@ class ConsumerResult:
             "route_status": self.route_status.value,
             "target_backend": self.target_backend.value,
             "reason": self.reason,
+            "scaffold_result": (
+                canonical_json_copy(self.scaffold_result)
+                if self.scaffold_result is not None
+                else None
+            ),
             "consumed_at": self.consumed_at.isoformat(),
             "receipt_emitted": self.receipt_emission is not None and self.receipt_emission.success,
             # Phase 1C Checkpoint Protocol Fields
@@ -223,7 +228,15 @@ class ConsumerResult:
             "evidence_path": self.evidence_path,
             "real_execution_performed": self.real_execution_performed,
             # WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2 evidence (dry-run only)
-            "context_bundle_dry_run": self.context_bundle_dry_run,
+            "context_bundle_dry_run": (
+                canonical_json_copy(self.context_bundle_dry_run)
+                if self.context_bundle_dry_run is not None
+                else None
+            ),
+            "model_capability_projection": (
+                canonical_json_copy(self.model_capability_projection)
+                if self.model_capability_projection is not None else None
+            ),
             # WSP 97 truth fields (always present via properties)
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,
@@ -244,6 +257,9 @@ class ConsumerResult:
         Legacy support for old HermesJobExecutionResult:
           - job.status.value in (succeeded, failed, blocked)
         """
+        if self.scaffold_result is not None:
+            return self.scaffold_result.get("ok") is True
+
         if self.hermes_result is None:
             return False
 
@@ -275,7 +291,7 @@ class ConsumerResult:
         True if job completed successfully and should be cleared from queue.
 
         Criteria for clearing (all must be true):
-          - Dispatched to Hermes
+          - Dispatched to its routed backend adapter
           - Reached terminal state (succeeded/failed/blocked)
           - Receipt emitted successfully
 
@@ -351,21 +367,34 @@ class FoundUpJobConsumer:
 
     WSP 97 truth boundaries:
       - dry_run=True by default (no production execution)
-      - Only ROUTED jobs dispatch to Hermes
+      - Only ROUTED jobs dispatch to a backend adapter
       - QUEUED/BLOCKED/UNSUPPORTED do not execute
 
     Attributes:
         dry_run: If True, force dry-run mode for all Hermes dispatches.
     """
 
-    def __init__(self, dry_run: bool = True):
+    def __init__(
+        self,
+        dry_run: bool = True,
+        scaffold_adapter: Optional[ScaffoldAdapter] = None,
+        model_runtime_binding_resolver: Any = None,
+    ):
         """
         Initialize consumer.
 
         Args:
             dry_run: Force dry-run mode for Hermes dispatches. Default True.
+            scaffold_adapter: Injected create_foundup dry-run planning boundary.
+            model_runtime_binding_resolver: Trusted persisted-artifact lookup.
         """
         self.dry_run = dry_run
+        self.scaffold_adapter = (
+            scaffold_adapter or CreateFoundUpDryRunScaffoldAdapter()
+        )
+        self.model_runtime_binding_resolver = model_runtime_binding_resolver
+        if self.model_runtime_binding_resolver is None:
+            self.model_runtime_binding_resolver = no_trusted_model_runtime_binding
 
     def consume_one(self, job: Any) -> ConsumerResult:
         """
@@ -373,7 +402,8 @@ class FoundUpJobConsumer:
 
         Steps:
           1. Route via route_foundup_job(job)
-          2. If ROUTED to HERMES_*, dispatch to execute_foundup_job
+          2. Dispatch HERMES_SCAFFOLD to the dry-run adapter; other HERMES_*
+             backends use execute_foundup_job
           3. Return ConsumerResult with outcome
 
         Args:
@@ -382,8 +412,8 @@ class FoundUpJobConsumer:
         Returns:
             ConsumerResult with dispatch outcome.
         """
+        force_dry_run = self.dry_run
         job_id = getattr(job, "job_id", "") or ""
-
         # Step 1: Route
         try:
             envelope = route_foundup_job(job)
@@ -397,13 +427,26 @@ class FoundUpJobConsumer:
                 reason=f"Routing exception: {e}",
             )
 
+        execution_job, admission = prepare_validate_model_capability_admission(
+            job=job,
+            route_envelope=envelope,
+            dry_run_mode=force_dry_run,
+            binding_resolver=self.model_runtime_binding_resolver,
+        )
+        if admission.blocked and envelope.route_status == RouteStatus.ROUTED:
+            return ConsumerResult(**admission.rejection_result_fields(job_id, envelope))
+
         # Step 2: Dispatch based on target_backend
         if envelope.route_status == RouteStatus.ROUTED:
+            if envelope.target_backend == TargetBackend.HERMES_SCAFFOLD:
+                return attach_projection(self._dispatch_to_scaffold(envelope), admission)
             if envelope.target_backend in (
                 TargetBackend.HERMES_BUILDER,
                 TargetBackend.HERMES_VALIDATOR,
             ):
-                return self._dispatch_to_hermes(job, envelope)
+                return attach_projection(
+                    self._dispatch_to_hermes(execution_job, envelope, force_dry_run), admission
+                )
 
         # Step 3: Not dispatched (QUEUED, BLOCKED, UNSUPPORTED, FAILED, etc.)
         logger.info(
@@ -412,27 +455,71 @@ class FoundUpJobConsumer:
             envelope.route_status.value,
             envelope.target_backend.value,
         )
+        return attach_projection(
+            ConsumerResult(
+                job_id=job_id,
+                dispatched=False,
+                route_status=envelope.route_status,
+                target_backend=envelope.target_backend,
+                reason=envelope.reason_human,
+                envelope=envelope,
+            ),
+            admission,
+        )
+
+    def _dispatch_to_scaffold(
+        self,
+        envelope: RouteEnvelope,
+    ) -> ConsumerResult:
+        """Dispatch only the immutable request snapshot carried by the route."""
+        request = envelope.scaffold_request
+        if request is None:
+            return ConsumerResult(
+                job_id=envelope.job_id,
+                dispatched=False,
+                route_status=RouteStatus.BLOCKED,
+                target_backend=envelope.target_backend,
+                reason="create_foundup route omitted its frozen request",
+                envelope=envelope,
+                checkpoint_state="BLOCKED",
+                checkpoint_blocker="FAIL_SCAFFOLD_ROUTE_REQUEST",
+            )
+
+        outcome = dispatch_create_scaffold(
+            self.scaffold_adapter,
+            request,
+            dry_run=self.dry_run,
+        )
         return ConsumerResult(
-            job_id=job_id,
-            dispatched=False,
-            route_status=envelope.route_status,
+            job_id=envelope.job_id,
+            dispatched=outcome.dispatched,
+            route_status=(
+                envelope.route_status
+                if outcome.dispatched
+                else RouteStatus.BLOCKED
+            ),
             target_backend=envelope.target_backend,
-            reason=envelope.reason_human,
+            reason=outcome.reason_human,
             envelope=envelope,
+            scaffold_result=outcome.scaffold_result,
+            checkpoint_state=outcome.checkpoint_state,
+            checkpoint_result=outcome.checkpoint_result,
+            checkpoint_blocker=outcome.checkpoint_blocker,
+            real_execution_performed=False,
         )
 
     def _dispatch_to_hermes(
-        self, job: Any, envelope: RouteEnvelope
+        self, job: Any, envelope: RouteEnvelope, force_dry_run: bool
     ) -> ConsumerResult:
         """
         Dispatch job to WRE Hermes executor dry-run seam.
 
-        Phase 1C: Uses WRE HermesJobExecutor for checkpoint/evidence artifacts.
-        Real execution is blocked in Phase 1 - all jobs return SIMULATED status.
+        Existing validation and action gates may block before simulation.
 
         Args:
             job: FoundUpJob to execute.
             envelope: RouteEnvelope from routing.
+            force_dry_run: Mode captured before routing and binding callbacks.
 
         Returns:
             ConsumerResult with Hermes execution outcome and checkpoint fields.
@@ -444,18 +531,17 @@ class FoundUpJobConsumer:
             from modules.infrastructure.wre_core.src.hermes_job_executor import (
                 execute_foundup_job,
                 HermesDelegationResult,
-                HermesExecutionStatus,
             )
 
             logger.info(
                 "[CONSUMER] Dispatching job %s to WRE executor (dry_run=%s)",
                 job_id,
-                self.dry_run,
+                force_dry_run,
             )
 
-            # WRE executor respects dry_run via constructor, not per-call param
-            # For Phase 1C, we always use dry_run=True (set in consumer init)
-            hermes_result: HermesDelegationResult = execute_foundup_job(job)
+            hermes_result: HermesDelegationResult = execute_foundup_job(
+                job, force_dry_run=force_dry_run
+            )
 
             dispatched = True
             exec_status = hermes_result.status.value
@@ -728,7 +814,6 @@ class FoundUpJobConsumer:
         try:
             from modules.communication.moltbot_bridge.src.receipt_emitter import (
                 emit_receipt_for_terminal_job,
-                ReceiptEmissionResult,
             )
         except ImportError as e:
             logger.error("[CONSUMER] Receipt emitter not available: %s", e)

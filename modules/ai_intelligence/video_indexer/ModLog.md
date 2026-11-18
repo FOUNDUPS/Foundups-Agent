@@ -1,6 +1,871 @@
 # Video Indexer Module - Modification Log
 
+## 2026-11-07 — Remove unattended API enrichment; preserve shared-router boundary
+
+WSP00/22/50/77/97. Independently read the key-presence-triggered direct Gemini
+enrichment in the Studio indexing cycle at baseline `fa7d487f3`. Remove that
+paid pass while preserving browser Studio Ask output and the compatible empty
+`gemini_analysis` field. The scoped offline selection passes 32; the new
+key-presence control fails on old source (one failure, one pass). Merge and
+deployment remain pending. The broader shared-router migration
+audit remains SPECIFIED_NOT_IMPLEMENTED. Current YouTube gateway surfaces and
+stages do not include video analysis. Link the existing scheduler repair list
+instead of creating another tracker. No model, provider or browser execution.
+
+See [test scope and evidence limits](tests/TestModLog.md#2026-11-07--no-unattended-paid-enrichment-after-studio-indexing).
+
+## 2026-10-29 — Reconcile preserved YUMORI evidence work order (#1667)
+
+Preserve the original proposal/history, campaign dates and all three JSON/flow
+blocks. Use canonical Moshpit terminology and filename; correct the obsolete
+architecture path and unwired-action descriptions against current action_surface.
+Single-video, channel, registry/browser-grouped portfolio and default-one-cycle
+daemon routes already exist. Reuse current JSON persistence and its SQLite
+metadata catalog; no duplicate route or memory store is introduced.
+
+The YUMORI extractor/projection remains SPECIFIED_NOT_IMPLEMENTED. Current source
+wiring does not qualify live Studio operation or the still-unimplemented unified
+Moshpit renderer. Authenticated visibility is separate from disclosure authority;
+generated/source text is untrusted data, and OBSERVED requires source/timestamp
+support. The proposed live test is explicitly future acceptance, not a dispatch.
+
+Validation: source/text/hash review preserves all original campaign-date counts
+and schema/flow blocks; all five existing owner paths and the canonical relative
+architecture link resolve. The accepted current-main Holo bundle identified the
+actual action/test owners; unrelated shorts/public-member hits were reranked.
+Required artifacts exist; optional planning/memory/runbook artifacts are absent.
+Affected module/CLI/architecture trees are unchanged between retrieval main45aa
+and integration mainc2d4. No executable code, test assertions, runtime metadata,
+browser/provider action or installed-runtime claim. Hosted and resulting-main/
+Holo checks remain separate gates. WSP 11/22/50/60/84/87/97.
+
+
+## 2026-10-22 - Retain omitted-language compatibility for English-only models
+
+A private omission sentinel distinguishes legacy callers from explicit `None`
+auto-detection. Omitted language resolves to `en` for `.en` models and to
+auto-detection for multilingual models; explicit values still reach the existing
+batch factory's validation unchanged. This preserves callers using
+`VIDEO_INDEXER_WHISPER_MODEL=base.en` without weakening the English-only guard.
+Real factory construction with temporary output directories reproduced two
+omitted-language failures before the fix. The focused analyzer/voice language
+selection now passes 21 tests, including all prior language and offset cases.
+No models loaded, external requests or native-worker validation. WSP00/5/11/22/77/84/97.
+
+## 2026-09-21 - Preserve Japanese transcript language and chunk positions
+
+AudioAnalyzer now passes explicit/automatic language and output directory to
+the existing batch transcriber, and language to local-file Whisper. Result
+language comes from evidence instead of a hard-coded English label. Converted
+segments use the actual `timestamp_sec` field, correcting later chunks that
+previously started at zero. Offline fakes cover Japanese/mixed/unknown labels,
+factory forwarding and offsets; real clip ASR remains unverified. WSP 11/22/84/97.
+
 **WSP Compliance**: WSP 22 (ModLog Updates)
+
+## 2026-09-22 - Pre-merge integrity audit
+
+- CI integration closure: registered the new integrity test and regenerated the
+  RedDog backend manifest plus its digest pins. Lazy imports are now explicit
+  static imports inside `__getattr__`, preserving deferred loading while letting
+  the existing dependency-closure generator enumerate every provider. Runtime
+  closure remains 1401 files; backend compatibility contract passes.
+
+- Rebased the isolated indexing branch onto current main without the concurrent
+  paperwork or RSI changes.
+- Applied duplicate-response protection to single-video persistence as well as
+  channel batches; propagate nested pass errors and skipped cycles as failures.
+- Exclude older Gemini-labelled artifacts from training and preserve legacy
+  list transcript support.
+- Updated browser fixtures to deliver the new answer after prompt input, so
+  successful-path tests exercise the retained-answer guard instead of supplying
+  the final answer before submission. Pinned registry inputs in pass-routing
+  tests and corrected the old malformed-JSON success expectation.
+- Validation: isolated pytest dependencies; video-indexer suite **142 passed,
+  13 skipped**. Live browser backfill is still unverified. WSP00 detector lacked
+  torch; tracker fallback passed. Holo lexical bundle had UNKNOWN freshness and
+  an index gap; direct module source was used for the audit.
+
+## V0.31.0 - Resumable portfolio indexing and per-video integrity (2026-09-21)
+
+**By:** 0102
+**WSP References:** WSP 11, WSP 22, WSP 50, WSP 72, WSP 84, WSP 91, WSP 96
+
+### Why
+
+The Studio Ask loop could scrape the still-visible answer from the preceding
+video and persist it under the next video ID. Bounded reruns also sliced the
+oldest rows before excluding existing manifests, so they could revisit the same
+batch forever. Channel/daemon IDs existed but were not runnable through the
+shared action surface. Gemini API enrichment additionally used the default
+`undaodu` save path for every channel and overwrote the canonical manifest.
+
+### Changed
+
+- Snapshots the pre-submit Ask answer and ignores it until a new response
+  appears; prompts now request `source_video_id`, mismatches fail closed, and a
+  response SHA-256 prevents the same answer being assigned to two video IDs.
+- Filters existing manifests before the batch limit and scrolls the virtualized
+  Studio list to find pending rows, making repeated bounded runs resumable.
+- Implements typed Studio Ask channel, three-channel portfolio, and bounded
+  daemon actions. The CLI now exposes `--portfolio`, `--daemon`, and `--cycles`.
+- Corrects Gemini enrichment to the owning channel and merges it without
+  replacing Studio provenance.
+- Marks Studio/Gemini summaries retrieval-only and rejects them in
+  `DatasetBuilder`; only YouTube/Whisper verbatim segments are preferred for
+  training.
+- Makes package exports lazy and optional dotenv loading graceful so lightweight
+  action/index helpers do not require every media/SDK dependency.
+- Replaces the stale watch-page/full-transcript Skillz executor with an adapter
+  to the canonical action surface.
+
+### Validation
+
+- Added mock regressions for retained-answer rejection, response identity/hash,
+  duplicate detection, portfolio browser grouping, training exclusion, and
+  enrichment merge preservation.
+- Direct Python integrity harness and module compilation passed locally.
+- Full pytest execution was unavailable in this environment because `pytest`
+  is not installed; CI remains the full-suite gate.
+
+## V0.30.0 - Index Shorts as well as long-form (add videos/short pass) (INDEXER_SHORTS_PASS_PHASE1) (2026-06-19)
+
+**By:** 0102 (Worker-Lane INDEX-SHORTS)
+**Slice:** INDEXER_SHORTS_PASS_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (existing-flag gated, no new public mutation), WSP 84 (Code Reuse: ask_about_video + VideoIndexStore.save_index), WSP 91 (per-pass observability)
+
+### Why (the gap)
+`index_channel_videos` navigated ONLY the long-form list
+(`https://studio.youtube.com/channel/{id}/videos/upload`, src:2304) and EXPLICITLY
+skipped short rows (`if "short" in row_text or "#short" in row_text: continue`,
+src:2380). Result: SHORTS were NEVER indexed, even for channels whose registry
+`content_types` are shorts-only (foundups/antifafm = `["short"]`). 012 wants both
+shorts AND long-form indexed.
+
+### What changed (minimal, read-mostly, no new public mutation)
+- `src/studio_ask_indexer.py`:
+  - `index_channel_videos(..., content_type="upload")`: navigation now targets
+    `videos/{content_type}`; the short-row skip is gated `if not is_shorts_pass`
+    so the `videos/upload` pass STILL skips shorts while the new `videos/short`
+    pass KEEPS short rows and indexes them via the SAME `ask_about_video` +
+    `save_index` path. Summary now carries `content_type`.
+  - `_ask_result_to_index_data(..., content_type="upload")`: records
+    `metadata.content_type` (`"short"`|`"upload"`) so shorts vs long-form
+    artifacts are distinguishable downstream.
+  - `run_video_indexing_cycle`: for each channel runs the passes from the
+    registry `content_types` via new helper `_resolve_index_passes` (foundups/
+    antifafm `["short"]` -> shorts only; move2japan/undaodu `["short","upload"]`
+    -> both; unknown/absent -> both). Per-pass try/except isolates a failing pass;
+    `_merge_pass_results` sums per-channel totals and keeps a per-pass breakdown
+    (`passes`, `pass_errors`).
+  - Gated by the EXISTING `YT_VIDEO_INDEXING_ENABLED` (no new flag, no scheduling
+    change). Indexing remains read-mostly JSON persistence.
+- `tests/test_shorts_indexing_pass.py` (NEW, mock-only, no live browser):
+  shorts pass indexes short rows with `content_type=short`; upload pass skips
+  shorts; `_resolve_index_passes` short-only/both/default; cycle runs the right
+  passes per channel; one failing pass does not abort the sibling. All 7 FAIL on
+  pre-change source (shorts never indexed) and PASS after the change.
+
+### Scope (OUT)
+No scheduling change, no rotation fix, no private/detector work. Touched only
+`studio_ask_indexer.py` (+ `run_video_indexing_cycle`) + the new test + this ModLog.
+
+## V0.29.0 - OBSERVE-mode acoustic music/talk label in PHASE 2 indexing (SHORTS_MUSIC_LABEL_OBSERVE_PHASE1) (2026-06-19)
+
+**By:** 0102 (Worker-Lane MUSIC-OBSERVE)
+**Slice:** SHORTS_MUSIC_LABEL_OBSERVE_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (flag-gated default-off), WSP 84 (Code Reuse: VideoArchiveExtractor + audio_content_classifier.classify_content), WSP 91 (Observability breadcrumb)
+
+### Why
+012's rule: everything runs from the daemon, no manual script; 012 observes. The
+acoustic music-vs-talk detector (`audio_content_classifier`, R&D PoC) existed but
+was NOT wired into any autonomous flow. This slice wires it into the daemon's
+PHASE 2 video-indexing loop in OBSERVE mode so 012 can compare the acoustic
+`audio_label` against the LLM-derived `content_category` on real indexed videos --
+WITHOUT changing any behavior. Flag-gated default-OFF because it adds an audio
+DOWNLOAD per video in PHASE 2.
+
+### What changed (minimal, OBSERVE-only, default-off, fail-safe)
+- `src/studio_ask_indexer.py`:
+  - NEW module helper `_observe_audio_label(video_id)` (flag `YT_AUDIO_LABEL_OBSERVE`,
+    default OFF). When ON: lazy-imports `VideoArchiveExtractor.extract_audio`
+    (youtube_live_audio:405) -> persists the float32 array to a temp WAV via stdlib
+    `wave` (NO soundfile dep) -> runs `audio_content_classifier.classify_content`
+    (audio_content_classifier:294) -> returns `{audio_label, audio_label_confidence}`
+    or None. HARD CONTRACT: never raises, never hangs; on ANY failure (flag off,
+    missing dep, download None, classifier `method=='unavailable'`, exception) returns
+    None. Helpers `_array_to_temp_wav` + `_audio_label_observe_enabled` added.
+  - PHASE 2 per-video loop (`index_channel_videos`, ~:2434): after building IndexData
+    and BEFORE `save_index`, calls the helper; if a label is returned, writes
+    `audio_label` + `audio_label_confidence` as a SIBLING of `content_category` in
+    `IndexData.metadata` (content_category UNTOUCHED) and emits the `[MUSIC-OBSERVE]`
+    compare-breadcrumb `{video_id, audio_label, confidence, content_category}`.
+  - DEFAULT-OFF => zero audio work, zero artifact change. Indexing is NEVER gated or
+    broken by the observe path.
+
+### Tests (mock-only, NON-VACUOUS, no live audio/browser/models)
+- `tests/test_audio_label_observe.py` (9 tests): flag-on computes+returns label
+  (classifier asserted called); talk path; flag-off pure no-op (extractor/classifier
+  asserted NOT called); download-None / classify-raises / `unavailable`-method all
+  return None with no exception; label written as sibling of an UNTOUCHED
+  content_category and persisted to JSON; no field when observe returns None; the
+  `[MUSIC-OBSERVE]` compare-breadcrumb content is asserted.
+- Heavy deps avoided by injecting fake source modules into `sys.modules` so the lazy
+  imports resolve to doubles (the real youtube_live_audio has a top-level numpy import).
+
+### Live gap
+Real audio download (yt-dlp/ffmpeg) + librosa classification are NEVER exercised in
+pytest (mock-only). End-to-end on a live (unlisted) channel video is observed by 012
+when running the daemon with `YT_AUDIO_LABEL_OBSERVE=1`.
+
+## V0.28.0 - Ask Studio: pin ytcp-icon-button#action-button as PRIMARY send selector (STUDIO_ASK_SEND_ACTION_BUTTON_SELECTOR_PHASE1) (2026-06-18)
+
+### Why
+012 live-grounded the real Ask Studio prompt-box send control as
+`ytcp-icon-button#action-button` (ytcp-ask-studio-input-view-model ->
+...ActionButton). The `send_button` list led with the aria-label variants only;
+the action button is the more reliable primary click target. This selector was
+validated during the live Studio Ask proof but left uncommitted; this slice lands
+it with coverage.
+
+### Changed
+- `ASK_STUDIO_SELECTORS["send_button"]`: prepend `"ytcp-icon-button#action-button"`
+  as index 0 (primary). The aria-label variants and the Enter fallback
+  (`_submit_prompt`) are unchanged and remain as fallbacks. Submit path, action ID,
+  and output schema untouched.
+
+### Tests
+- `test_action_button_pinned_first_in_send_button_list`: pins the selector + its
+  index-0 ordering (guard against silent drop/reorder).
+- `test_action_button_preferred_over_aria_label`: with BOTH the action button and
+  an aria-label Send button present, submit clicks the action button (primary) and
+  never the aria-label one. Non-vacuity proven by removal-injection (both fail when
+  the selector is removed).
+
+### WSP Compliance
+- WSP 22 (ModLog), WSP 50 (verify), WSP 84 (extend existing selector list, no new
+  mechanism), WSP 97 (Truth Boundary: selector + tests only).
+
+## V0.21.1 - Gate live-browser tests behind --run-live (VIDEO_INDEXER_LIVE_TEST_GATING_PHASE1) (2026-06-17)
+
+### Why
+Automated/default pytest runs were attaching to the operator's REAL signed-in
+Chrome on port 9222 and navigating to a hardcoded video (8_DUQaqY6Tc), opening
+tabs in the operator's browser. These showed up as the "pre-existing failures"
+and drove the live operator session. Test runs must never touch the operator's
+browser by default.
+
+### Added
+- NEW `tests/conftest.py`:
+  - Registers the `live_browser` marker (`pytest_configure` /
+    `addinivalue_line`).
+  - Adds a `--run-live` command-line option (default `False`).
+  - `pytest_collection_modifyitems` auto-SKIPS every `live_browser` item unless
+    `--run-live` is passed (reason: "live-browser test: needs a signed-in Chrome
+    on 9222; pass --run-live to run").
+
+### Changed
+- Marked 4 real live-browser test classes with `@pytest.mark.live_browser`
+  (these attach to Chrome 9222 via `debuggerAddress` and call `driver.get(...)`,
+  or run the real VideoIndexer pipeline against the hardcoded video):
+  - `tests/test_integration_oldest_video.py::TestUnDaoDuOldestVideo`
+  - `tests/test_stage2_batch_navigation.py::TestStage2BatchNavigation`
+  - `tests/test_stage3_video_indexing.py::TestStage3VideoIndexing`
+  - `tests/test_stage3b_hybrid_indexing.py::TestStage3bHybridIndexing`
+- NOT gated (mock-only; patch/FakeDriver the driver, no live attach):
+  `tests/test_action_surface.py`, `tests/test_studio_ask_header.py`,
+  `tests/test_studio_ask_indexer_*.py`. Also NOT gated: `test_stage4_validation.py`
+  (reads index JSON from disk only) and `test_selenium_navigation.py` (no pytest
+  items; runnable only via `__main__`).
+
+### Result
+- Default `pytest tests/`: the 8 live-browser tests are now SKIPPED, not run
+  (84s -> 0.18s for the candidate files; no browser driven).
+- `pytest tests/ -m live_browser --run-live --collect-only` still collects all 8.
+- OUT OF SCOPE (unchanged here): the 4 remaining
+  `test_gemini_video_analyzer.py` failures - 2 are the pre-existing
+  `GeminiVideoAnalyzer._pattern_memory` bug in `src/gemini_video_analyzer.py`,
+  2 are Gemini-API-key failures. None drive the operator's Chrome session.
+
+### WSP Compliance
+- WSP 5 (gate, do not delete coverage), WSP 22 (ModLog), WSP 50 (verify
+  before edit), WSP 84 (standard pytest marker + skip pattern), WSP 97 (Truth
+  Boundary: tests/ + conftest only; no src/ or production code touched).
+## V0.27.0 - Ask Studio: heartbeat + hard no-hang runtime budget + content_category normalize/preserve (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1) [updates #836] (2026-06-17)
+
+Final polish before merge (Worker-Lane SSREADY-POLISH). Two focused additions on
+top of #836; #825/#827/#833/#836 behavior intact; no action-id/schema change
+beyond a new field + a new error string; no UI-TARS/coordinate code; no
+scheduler/dom_automation/dependency_launcher touch.
+
+### (1) HEARTBEAT + HARD NO-HANG RUNTIME BUDGET (WRE "no hang actions")
+- NEW module/class constants `ASK_TOTAL_RUNTIME_BUDGET_SECONDS = 180.0` and
+  `ASK_HEARTBEAT_INTERVAL_SECONDS = 8.0` (class-attribute mirrors so tests can
+  monkeypatch a tiny budget).
+- NEW `_maybe_heartbeat(phase, start_monotonic, last_beat)`: emits a periodic
+  "[STUDIO-ASK] heartbeat: waiting for <readiness|answer> t+Ns/<budget>s" log once
+  the interval elapses; returns the advanced last-beat timestamp. Wired into BOTH
+  the readiness-wait loop (`_wait_for_gemini_ready`) and the answer-capture loop
+  (`_scrape_ask_response`). Uses `time.monotonic()` (NEVER wall-clock).
+- HARD TOTAL-RUNTIME BUDGET over the whole `ask_about_video` flow, measured from
+  the start with `time.monotonic()`: `total_deadline = start + budget`, plumbed
+  into `_open_ask_studio_ready` and `_scrape_ask_response`. If the budget is
+  exceeded the flow ABORTS and returns `success=False, error="ask_studio_timeout"`
+  and persists NOTHING (`save_index` not called). The existing per-loop timeouts
+  (readiness gate, response stabilization) stay; this is the single
+  guaranteed-terminating OUTER guard. Three guard points: top of the readiness
+  retry loop, immediately after readiness returns, and after answer capture
+  (so a budget-exhausted no-answer reports `ask_studio_timeout`, not the generic
+  `ask_studio_no_answer`). The answer-capture loop also caps its own deadline at
+  `min(RESPONSE_TIMEOUT_SECONDS, total_deadline)`.
+
+### (2) CONTENT_CATEGORY NORMALIZE + PRESERVE
+- NEW `AskResult.content_category_raw: Optional[str]` (default None) + persisted in
+  the saved index `metadata["content_category_raw"]` (so the rich Gemini label is
+  never lost).
+- NEW enum `CONTENT_CATEGORY_ENUM` + `_normalize_content_category(raw)`: an exact
+  enum value passes through unchanged; a non-enum label is keyword-mapped to the
+  closest enum ("educat"->educational; "vlog"/"personal"/"daily"/"diary"->
+  personal_vlog; "ice"/"immigration"/"politic"/"activist"/"news"->ice_remix;
+  "music"/"instrumental"/"visualizer"->ffcpln_music; else other).
+- `_parse_ask_response` now routes JSON-block + legacy-match paths through
+  `_apply_category_normalization`, which sets the normalized `content_category` AND
+  preserves `content_category_raw` (the original Gemini string, or None when no
+  string category was present). `ask_about_video` surfaces both on the success
+  `AskResult`; `_ask_result_to_index_data` persists both in metadata.
+
+### Tests (mock only - NO live browser; NON-VACUOUS) - test_studio_ask_readiness_polish.py
+- (a) heartbeat emitted during a multi-tick answer wait (caplog asserts a
+  "heartbeat" line carrying the phase + budget readout); plus a pure-helper proof
+  that `_maybe_heartbeat` is interval-gated.
+- (b) a tiny injected total-budget with a never-arriving answer ->
+  `success=False`, `error="ask_studio_timeout"`, `save_index` call_count == 0
+  (both the readiness-phase and the answer-capture-phase budget paths); plus a
+  happy-path sanity test (ample budget still succeeds + persists).
+- (c) content_category "Educational Philosophy & Future Trends" ->
+  `content_category=="educational"` AND `content_category_raw=="Educational
+  Philosophy & Future Trends"`; an enum value "personal_vlog" passes through; a
+  nonsense category -> "other" with raw preserved; per-bucket keyword map proof;
+  end-to-end proof that the raw label surfaces on the AskResult AND the persisted
+  index metadata.
+- All prior #836 tests still pass (18/18 readiness; 107/107 across all studio_ask
+  test files incl. the 11 new polish tests).
+- Full video_indexer suite: 122 passed, 2 skipped, 5 pre-existing unrelated
+  failures (4x gemini_video_analyzer.py `_pattern_memory` AttributeError; 1x
+  stage2_batch_navigation live-browser test). None touch studio_ask_indexer.py.
+
+### WSP_97 Truth Boundary Checklist
+- NO_REGISTRY_MUTATION: no registry mutation; only new timing constants, a new
+  enum tuple, and a new optional dataclass field + metadata key.
+- NO_ACTION_ID_CHANGE: action-id + output schema unchanged. Additive only: one new
+  AskResult field (`content_category_raw`), one new metadata key, and one new error
+  string (`ask_studio_timeout`). No existing field/behavior changed.
+- FAIL_CLOSED_PRESERVED: budget exceeded -> success=False, error
+  ask_studio_timeout, save_index NOT called (proven by test (b) call_count==0);
+  the existing no-answer/refusal/gemini_did_not_load fail-closed paths are intact.
+- MONOTONIC_CLOCK: the budget + heartbeat math use time.monotonic() exclusively
+  (no wall-clock that a test could mock away).
+- SCOPE_GUARD: edits confined to studio_ask_indexer.py + the new polish test file;
+  no scheduler/dom_automation/dependency_launcher; no UI-TARS/coordinate code.
+- #836/#833/#827/#825 BEHAVIOR INTACT: 107/107 studio_ask tests green.
+
+### HONEST LIVE GAP
+The total-runtime budget abort + heartbeat cadence are exercised with a MOCK
+driver + injected tiny budgets / zeroed intervals; the live 180s ceiling and the
+~8s operator heartbeat cadence are validated by 0102's live re-test. Updates #836
+(PR stays OPEN).
+
+## V0.26.0 - Ask Studio: wait for the REAL answer + catch the zero-state SUGGESTION variant false-success (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1) [updates #836] (2026-06-17)
+
+### Why (LIVE-PROVEN by 0102 running the real action)
+After submit, the capture STABILIZED ON THE ZERO-STATE at +6s and saved 106 chars
+"A/B Testing Guide / Hello, UnDaoDu / Suggest new video ideas / Summarize my
+channel performance / More suggestions" with topics=[] category=other -> FALSE
+SUCCESS. The real JSON index (the full content_category/topics/segments block)
+streams ~30s LATER. The #836 zero-state/no-answer guard MISSED this SUGGESTION
+variant: its ZERO_STATE_MARKERS ("how can ask studio help" / "summarize comments")
+did NOT contain the suggestion-chip phrases, so _strip_boilerplate kept the chips
+and _extract_answer returned them as a "substantial" answer that immediately
+stabilized (the zero-state is stable at +6s; the real answer is not there yet).
+Result: a false success that persisted a non-answer.
+
+### Changed (src/studio_ask_indexer.py)
+- ZERO_STATE_MARKERS: EXTENDED to also catch the live suggestion-chip variant +
+  the channel greeting: "suggest new video ideas", "summarize my channel
+  performance", "more suggestions", "a/b testing", "hello,". A stream that is ONLY
+  these (no JSON block / no substantial answer) is now recognized as the
+  zero-state (so _is_zero_state, _strip_boilerplate, and the readiness
+  _is_gemini_ready all see it as zero-state, NOT an answer).
+- NEW MIN_SUBSTANTIAL_PROSE_CHARS = 400 + NEW _is_real_answer(extracted)
+  capture/persist GATE: an extracted block counts as a REAL answer only if it is a
+  JSON INDEX block (balanced {...} with topics/content_category) OR substantial
+  non-boilerplate prose (>= 400 chars). A short zero-state remainder (suggestion
+  chips that slip past the marker set) is NOT a real answer.
+- _scrape_ask_response: now STABILIZES ONLY ON A REAL ANSWER (_is_real_answer),
+  NOT on the immediately-stable zero-state. A short zero-state remainder never
+  stabilizes, so the loop keeps WAITING for the JSON index / substantial prose
+  that streams ~30s later. Returns "" if none materializes -> caller fails closed
+  ask_studio_no_answer (NO persist; save_index not called).
+- RESPONSE_TIMEOUT_SECONDS: 30s -> 60s so the wait OUTLASTS the +6s zero-state and
+  reaches the ~30s real answer (timeouts are mock-overridden in tests).
+- _extract_answer is UNCHANGED for prose (it stays a faithful "non-boilerplate
+  body" extractor); the substantial-vs-short decision lives in the new
+  _is_real_answer gate used by _scrape_ask_response. This preserves #836's
+  prose-extraction proofs.
+- KEEPS everything in #836/#833/#827/#825 intact: readiness gate, new-tab retry,
+  video-id-naming prompt, human_type single submit, shadow finder, fail-closed.
+  NO action-id/output-schema change beyond the existing error strings. NO
+  UI-TARS/coordinate code. No scheduler/dom_automation/dependency_launcher touch.
+
+### Tests (mock only - NO live browser; NON-VACUOUS)
+- (a) zero-state suggestion variant for the first 3 polls THEN the JSON answer ->
+  capture returns the JSON answer (content_category=educational, topics
+  alpha/beta), NOT the zero-state chips
+  (test_zero_state_then_json_answer_captures_json_not_zero_state).
+- (b) the EXACT 106-char suggestion stream for the WHOLE timeout -> fail closed
+  ask_studio_no_answer, save_index call_count == 0
+  (test_zero_state_suggestion_only_whole_timeout_fails_closed_no_persist).
+- Marker + gate proofs: test_zero_state_markers_cover_suggestion_variant,
+  test_is_real_answer_gate_json_vs_short_prose.
+- (c) the prior #836 readiness/retry/strip tests still pass (18/18 in
+  test_studio_ask_gemini_readiness.py; 75/75 across all studio_ask test files).
+- Full video_indexer suite: 111 passed, 2 skipped, 5 pre-existing unrelated
+  failures (4x gemini_video_analyzer.py _pattern_memory AttributeError; 1x
+  stage2_batch_navigation live-browser test). None touch studio_ask_indexer.py.
+
+### WSP_97 Truth Boundary Checklist
+- NO_REGISTRY_MUTATION: no registry/schema changes; only marker strings + a
+  prose-length constant added.
+- NO_ACTION_ID_CHANGE: action-id + output schema unchanged; only existing error
+  string ask_studio_no_answer is (re)used (no new error strings).
+- FAIL_CLOSED_PRESERVED: no-real-answer -> success=False, error
+  ask_studio_no_answer, save_index NOT called (proven by test (b) call_count==0).
+- SCOPE_GUARD: edits confined to studio_ask_indexer.py + the readiness test file;
+  no scheduler/dom_automation/dependency_launcher; no UI-TARS/coordinate code.
+- #836/#833/#827/#825 BEHAVIOR INTACT: 75/75 studio_ask tests green.
+
+### HONEST LIVE GAP
+The +6s-zero-state / ~30s-real-answer timing is reproduced in a MOCK
+polling-stream; the combined live happy path (submit -> wait past zero-state ->
+real JSON captured) is validated by 0102's live re-test. Updates #836 (PR stays
+OPEN).
+
+## V0.25.0 - Ask Studio Gemini readiness gate + new-tab retry + real-answer capture (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1) [stacked on #833] (2026-06-17)
+
+### Why
+ROOT CAUSE (live-proven by 0102): the Ask Studio GEMINI CHAT loads
+INTERMITTENTLY-BLANK under automation - the dialog opens but Gemini never
+initializes (no greeting, only a disclaimer placeholder). The prior code typed
+into the not-yet-loaded panel and scraped the disclaimer ("AI can make
+mistakes...") as a FALSE success. It ALSO zeroed the whole stream whenever the
+persistent greeting was present (the greeting-zeroing scraper bug). LIVE-PROVEN
+FIX: poll for the Gemini-ready greeting ("how can i help") BEFORE typing; on a
+blank panel open a FRESH tab and retry (closing the old blank tab) -> Gemini
+loads (0102 saw attempt1=BLANK, attempt2(new tab)=LOADED); then a video-NAMING
+JSON ask streams a real JSON index (a real 1894-char answer was captured live).
+
+### Changed
+- `src/studio_ask_indexer.py`:
+  - STEALTH (`_register_stealth`): registers a CDP `Page.addScriptToEvaluateOnNewDocument`
+    pre-load script that strips `cdc_`/`$cdc` props + sets `navigator.webdriver=undefined`.
+    WSP 84 REUSE of `undetected_browser._inject_stealth_js` (webdriver hide +
+    plugin/chrome spoof) layered with the cdc_ strip. Re-registered per new tab.
+  - GEMINI-READINESS GATE (`_wait_for_gemini_ready` / `_is_gemini_ready`): polls
+    `#PAcreator_chat_streaming` for the greeting (or an already-extractable
+    answer) up to `GEMINI_READY_TIMEOUT_SECONDS` before typing. Never types into
+    a blank panel.
+  - NEW-TAB RETRY (`_open_ask_studio_ready`): on a blank panel opens a fresh tab
+    (`switch_to.new_window('tab')`), re-registers stealth, re-navigates to the
+    video edit page, reopens Ask Studio, re-gates, and CLOSES the old blank tab;
+    up to `GEMINI_MAX_LOAD_ATTEMPTS=5`. Distinguishes header-found-but-blank
+    (fail closed `gemini_did_not_load`, no ask, no persist) from header-never-found
+    (falls through to the legacy fallback). Tabs THIS flow opens are tracked and
+    cleaned up at end-of-flow (`_cleanup_created_tabs`) WITHOUT closing the active
+    answer tab or the operator's pre-existing tabs.
+  - PROMPT (`_build_video_prompt`): the PRIMARY path now NAMES the exact video
+    (title + video id + studio URL) and requests a clean JSON index. LIVE-PROVEN
+    correctness: a query WITHOUT the id made Gemini analyze a DIFFERENT video.
+  - REAL-ANSWER CAPTURE (`_extract_answer` / `_extract_json_block` /
+    `_strip_boilerplate`): extracts the answer (last balanced `{...}` with
+    topics/content_category, else boilerplate-stripped prose) from the stream
+    WITHOUT zeroing on the persistent greeting; strips the disclaimer footer +
+    processing lines ("Reviewing your request", "Looking through your content").
+    `_scrape_ask_response` stabilizes on the EXTRACTED answer. Fail closed
+    `ask_studio_no_answer` (no persist) ONLY when no answer block ever renders.
+  - PARSE (`_parse_ask_response`): parses the JSON index block FIRST, prose
+    fallback (strict JSON not required).
+- KEEPS #825 input behavior (human_type, single clean submit), #827
+  target/channel fail-closed, and #833 shadow-DOM deep finder EXACTLY. NO
+  action-id/output-schema change. NO UI-TARS/coordinate code.
+
+### Tests (mock only - NO live browser; NON-VACUOUS)
+- NEW `tests/test_studio_ask_gemini_readiness.py` (14 tests): readiness gate
+  blocks typing on a blank panel; new-tab retry opens new + closes old blank +
+  proceeds on attempt 2; never-loads -> `gemini_did_not_load`, no persist;
+  capture strips disclaimer/processing/echo end-to-end (greeting present, answer
+  captured); fail-closed on boilerplate-only -> `ask_studio_no_answer`, no
+  persist; stealth CDP hook registered (and per new tab); JSON-block extraction
+  picks the LAST qualifying block; tab cleanup keeps only the active tab.
+- Updated 3 prior assertions to the new contract: `test_response_timeout_fails_closed`
+  -> `gemini_did_not_load`; `test_zero_state_not_scraped_as_answer` ->
+  `ask_studio_no_answer`; `test_channel_prompt_threaded_into_ask` ->
+  `test_primary_prompt_names_the_specific_video`.
+- Full video_indexer suite: 107 passed, 2 skipped, 5 pre-existing failures
+  (gemini_video_analyzer `_pattern_memory`, stage2_batch_navigation) NOT in this
+  slice's scope.
+
+### HONEST LIVE GAP
+The retry/readiness/timing constants are mock-tested; the combined live happy
+path (new-tab retry -> Gemini loads -> real answer captured) is validated by
+0102's live re-test AFTER this lands. STACKED on #833 -> #827 -> #825; none merge
+until the live happy path is reliable.
+
+## V0.24.0 - Ask Studio shadow-DOM traversal: deep finder + live-grounded selectors (STUDIO_ASK_SHADOW_DOM_SELECTORS_PHASE1) [stacked on #827] (2026-06-17)
+
+### Why
+ROOT CAUSE (live-confirmed): YouTube Studio's DOM is SHADOW-ROOTED. Flat
+Selenium `find_element("css selector", ...)` does NOT pierce shadow roots, so the
+indexer's selectors silently failed on the live page even when the element
+existed. #817 fixed selector NAMES but not the TRAVERSAL model. Proven live: the
+flat `input#title-field` returns nothing but a shadow walk finds
+`ytcp-social-suggestions-textbox#title-textarea`; the old Ask-button selector
+`aria-label="Ask Studio"` does NOT exist - the real entry is the creator-chat
+"spark" trigger (`ytcp-creator-chat-trigger` -> `ytcp-icon-button`).
+
+### Changed
+- NEW `modules/infrastructure/foundups_selenium/src/shadow_dom_finder.py`:
+  `find_deep` / `shadow_query` / `first_deep` return REAL WebElements by having
+  `execute_script` RETURN the matched node (so `human_type` + `.click()` keep
+  working). WSP 84 REUSE: the recursive `findInShadow` traversal is the SAME
+  algorithm already used by the YT comment-reply path (`reply_executor.findInShadow`);
+  the only change is the return contract (node, not text/boolean). Exported via
+  `foundups_selenium/src/__init__.py`.
+- `src/studio_ask_indexer.py`: `_first_element` now does shadow-DOM deep find
+  PRIMARY (css strings + cross-shadow chains) with a flat fallback. PINNED
+  live-grounded selectors: title `ytcp-social-suggestions-textbox#title-textarea`;
+  Ask button spark chain `ytcp-creator-chat-trigger -> ytcp-icon-button` (aria-label
+  demoted to fallback); prompt
+  `div.ytcpCreatorChatEntityAttachmentInlineFlowPromptBox[contenteditable="true"][aria-label="Ask something"]`;
+  dialog `tp-yt-paper-dialog#dialog`; stream
+  `ytcp-engagement-panel-section-list-renderer#PAcreator_chat_streaming`. Dialog
+  OPEN is confirmed via the prompt box + stream (CHILDREN), never the dialog
+  host (live-observed host computes visible:false). NEW `_is_zero_state` guard:
+  the zero-state suggestion list ("How can Ask Studio help me? / Summarize
+  comments ...") is never scraped/persisted as the answer.
+- KEEPS #825 input behavior (human_type, single clean submit) and #827
+  target/channel fail-closed EXACTLY (all 44 prior tests green via the flat
+  fallback). NO action-id/output-schema change (no UI-TARS/coordinate code).
+
+### Tests
+- NEW `tests/test_studio_ask_shadow_dom.py` (10 mock tests, NO live browser):
+  flat-fails/shadow-finds (title + Ask button), full primary path over a
+  shadow-only DOM, dialog-open via children, zero-state-not-scraped, wrong/error
+  page still fails closed (#827), no-persist-on-failure, #825 single-submit
+  preserved over the shadow path.
+- NEW `modules/infrastructure/foundups_selenium/tests/test_shadow_dom_finder.py`
+  (7 tests for the helper).
+- NON-VACUITY proven: with the deep finder disabled (pre-slice flat-only model)
+  both shadow-rooted title + Ask button resolve to None/False.
+
+### Honest live gap
+Selectors are LIVE-GROUNDED (012 captured them; resolve via shadow find + Ask
+Studio opens). Mock tests + grounded selectors only; the COMBINED live happy
+path (submit -> stream -> scrape) is validated by 0102's live re-test AFTER this.
+STACKED on #827 -> do not merge before #825/#827; final order #825 -> #827 -> this.
+
+## V0.23.0 - Ask Studio single-video: select Studio TARGET + owning-channel CONTEXT, fail-closed on mismatch (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1) [stacked on #825] (2026-06-16)
+
+### Security (CodeQL py/incomplete-url-substring-sanitization, high) - 2026-06-17
+- STEP0 studio-target detection used `low.startswith("https://studio.youtube.com")`,
+  which a look-alike host (`https://studio.youtube.com.evil.com`) would satisfy.
+  Replaced with `_is_studio_youtube_url()` (host-anchored: `urlparse().hostname ==
+  "studio.youtube.com"`). Added regression test
+  `test_is_studio_youtube_url_is_host_anchored` (accepts real Studio hosts; rejects
+  `*.evil.com`, userinfo `@evil.com`, and `notstudio.youtube.com`).
+
+### Why
+012 live-observed TWO defects on the Studio Ask single-video path:
+1. WRONG BROWSER TARGET: Selenium attached to a Chrome SIDE-PANEL target first
+   (chrome://glic / the gemini.google.com glic panel) even with a Studio edit
+   tab open, so the action "asked" inside a Gemini side panel.
+2. WRONG CHANNEL CONTEXT: `ask_about_video` navigated straight to the
+   channel-AGNOSTIC `studio.youtube.com/video/{id}/edit` and never switched the
+   active channel (channel_id was used only for prompt + save path). With
+   Move2Japan active and an UnDaoDu video, Ask Studio could not access it ->
+   metadata-only guess. The BATCH path was already channel-scoped
+   (`index_channel_videos` `studio.youtube.com/channel/{id}/videos/upload`); the
+   single-video path did not use that pattern.
+
+### Changed (`src/studio_ask_indexer.py`)
+- NEW `_select_studio_target()` (STEP 0): before ANY channel nav, iterate the
+  EXISTING driver's `window_handles` (same idiom as
+  `foundups_selenium/devtools_mcp_adapter.list_pages`), `switch_to.window` the
+  first YouTube-Studio / normal-web target, and REJECT chrome://glic /
+  chrome-untrusted://glic / `gemini.google.com/glic` / RotateCookiesPage. If
+  every handle is a side panel, open a NORMAL tab via the existing driver
+  (`window.open`); never open a NEW browser. Fail closed -> typed error
+  `studio_target_unavailable`.
+- NEW `_set_channel_context(channel_id)` (STEP 1): navigate the CHANNEL-SCOPED
+  Studio URL (mirrors the batch path) to make the owner the active channel
+  BEFORE `/video/{id}/edit`.
+- NEW `_verify_channel_context(video_id)` (STEP 2): OBSERVABLE (NOT URL-only)
+  owner verification - no permission/not-found/sign-in/account-switch/Oops
+  signal in the page title/body AND the edit surface (title field) present
+  within the timeout; else fail closed -> typed error `wrong_channel_context`.
+- `ask_about_video(...)` now ORDERS: STEP 3 channel_id-required check ->
+  STEP 0 target -> STEP 1 context -> /video/{id}/edit -> STEP 2 verify -> Ask.
+  channel_id is REQUIRED (resolved from the new backward-compatible
+  `channel_id` kwarg, else the passed `channel_entry["id"]`); missing/blank/
+  unknown (not registry-known via `get_channel_by_id`) -> typed error
+  `channel_unresolved`. NO guessing from body/path/video URL. An explicitly
+  passed `channel_entry` is preserved for PROMPT selection (ownership comes
+  from channel_id).
+- WSP 84 REUSE: the existing `youtube_channel_registry.get_channel_by_id` (NOT
+  a 2nd map) and the standard Selenium window-handle idiom. The avatar/
+  account-switcher DOM flow (`studio_account_switcher.py`) is deliberately NOT
+  used (Phase 2 / STOP condition if the channel-scoped URL proves insufficient
+  live).
+
+### Changed (`src/action_surface.py`)
+- `run_studio_ask_single_video` now passes the EXISTING `inp.channel_id`
+  through to `ask_about_video` so the worker can set owner context + fail
+  closed. NO new public action arg, NO #819 action-id change, NO output-schema
+  field change (only new typed error VALUES in the existing `error` field).
+
+### Persistence guard (STEP 4)
+- `save_index` is NEVER reached on `channel_unresolved`,
+  `studio_target_unavailable`, `wrong_channel_context`, or any success=False
+  (the existing index/action persistence guards only save on result.success).
+
+### Tests (mock only - NO live browser; NON-VACUOUS)
+- NEW `tests/test_studio_ask_channel_context.py` (+18): target-selection
+  (glic-first -> Studio), target fail-closed, target-before-context,
+  context-before-ask, observable-verify fail-closed (permission page + absent
+  edit surface) + proceed, channel_id required (blank/unknown/no-URL-guess),
+  no-persist on each failure, registry reuse, action-id/schema preservation,
+  and TWO explicit BEHAVIORAL non-vacuity proofs (using only the pre-existing
+  `channel_entry` signature) that FAIL with an AssertionError - not a
+  TypeError - on the pre-fix code.
+- Updated `tests/test_studio_ask_header.py` + `tests/test_studio_ask_human_input.py`
+  to supply the now-required owning channel context (channel_id) and assert the
+  channel-scoped URL precedes the edit URL.
+- Module pytest: 2 pre-existing failures only
+  (`gemini_video_analyzer._pattern_memory @ :475`) + the 4 known live-browser
+  integration tests (no account in CI); all studio-ask + new context tests pass.
+
+### Live gap (HONEST)
+- Selector / target-selection / channel-switch behavior is MOCK-validated
+  ONLY (#817 KNOWN-GAP class). The REAL proof is 012's live re-test on the
+  COMBINED stacked branch (#825 + this). See the PR's operator live-test
+  checklist. If the channel-scoped URL proves insufficient live (requires the
+  avatar/account-switcher DOM), that is Phase 2 - STOP, do NOT build here.
+
+### WSP
+- WSP 5/6 (tests), WSP 22 (this), WSP 50/84/87 (reuse + pre-action), WSP 72
+  (module independence), WSP 97 (Truth Boundary). Stacked on #825 (shared
+  `ask_about_video`); merge #825 FIRST, then rebase this onto main + re-verify.
+
+## V0.22.0 - Ask Studio human-input behavior: single clean submission, no newline-spam (STUDIO_ASK_HUMAN_INPUT_BEHAVIOR_PHASE1) (2026-06-16)
+
+### Why
+012 live-observed the Studio Ask single-video action SPAM + CANCEL its own
+response ~7x, then submit a malformed fragment. ROOT CAUSE (code-proven):
+`studio_ask_indexer.py` did `prompt_box.send_keys(ask_prompt)` where `ask_prompt`
+is the MULTI-LINE template (`ASK_PROMPT`, `CHANNEL_PROMPTS`). In a submit-on-Enter
+contenteditable, EVERY internal `\n` fires ENTER == a submit; each new submit
+cancels the prior streaming answer ("You canceled this response." x newlines).
+The legacy fallback path (`ask_input.send_keys(ask_prompt)`) had the same defect.
+
+### Changed (`src/studio_ask_indexer.py`)
+- WSP 84 REUSE: import + lazily attach `get_human_behavior` (the SAME proven
+  "012 input behavior" used by YT comment replies in
+  `tars_like_heart_reply/src/reply_executor.py`; init mirrors
+  `comment_engagement_dae.py:673`). NOT reinvented.
+- NEW `_type_prompt_human(box, prompt)`: NEWLINE-SAFE entry. Splits the prompt on
+  `\n`, types each line via the reused human cadence (`HumanBehavior.human_type`),
+  and converts internal newlines to Shift+Enter SOFT newlines
+  (`_soft_newline`: ActionChains SHIFT-down -> ENTER -> SHIFT-up; falls back to
+  `send_keys(SHIFT, ENTER)`). NO bare `\n` ever reaches the box.
+- NEW `_submit_ask_prompt(box)`: submit EXACTLY ONCE. Prefers locating + CLICKING
+  an Ask Studio send/submit button (new `send_button` selectors, mirroring
+  reply_executor's button-click submit); else EXACTLY ONE `Keys.ENTER`.
+- BOTH paths fixed: primary Ask Studio dialog (~:516-534) and the legacy fallback
+  (~:625) now route through `_type_prompt_human` + `_submit_ask_prompt`.
+- `_scrape_ask_response` now WAITS FOR COMPLETION: polls the response container
+  and returns only once the text STABILIZES (stops growing for
+  `RESPONSE_STABLE_POLLS=3` consecutive polls) or the timeout elapses - no longer
+  captures the first partial/streaming/canceled fragment.
+- FAIL-CLOSED on refusal: `_is_refusal` + `REFUSAL_MARKERS`. A stabilized refusal
+  ("I'm not quite sure what you're asking", "Query unsuccessful", "transcript is
+  unavailable", "You canceled this response.", ...) returns `success=False` with
+  typed error `ask_studio_no_answer` and persists NOTHING (never stored as
+  `transcript_summary`).
+
+### Tests (mock only - NO live browser)
+- NEW `tests/test_studio_ask_human_input.py` (14 tests). NON-VACUOUS:
+  - SINGLE-SUBMIT regression: a contenteditable mock that models submit-on-Enter
+    asserts EXACTLY 1 submit on a multi-line prompt. Proven to FAIL on old code:
+    the old `send_keys(ASK_PROMPT)` + Enter yields 16 submits (15 newlines + 1).
+  - `human_type` reuse asserted; Shift+Enter soft newlines never submit.
+  - WAIT-FOR-COMPLETION: a growing-then-stable response -> scraper returns the
+    STABILIZED full text, not the first partial.
+  - FAIL-CLOSED REFUSAL (parametrized): success=False, error=ask_studio_no_answer,
+    nothing persisted (save_index spy never called).
+  - Fallback path single-submit covered.
+- Updated `tests/test_studio_ask_header.py`: the two #817 assertions that encoded
+  the OLD whole-string `send_keys` now assert the new char-by-char content (helper
+  `_typed_text`). 12/12 still pass.
+
+### HONEST LIVE GAP (#817 KNOWN-GAP class)
+Selectors, the real Ask Studio send-button presence, and streaming-completion
+timing are MOCK-validated ONLY. NOT live-verified. 012 must live-re-test on the
+correct channel (UnDaoDu) to confirm the spam is gone and a real answer is
+captured. Do not treat as live-verified.
+
+### OUT OF SCOPE (follow-ups)
+Channel-context switch/verify; redesigning the JSON prompt into a conversational
+prompt + prose parser; #819 action-surface signature; dom_automation; scheduler.
+
+## V0.21.0 - Typed SKILLz/ACTION SURFACE + bounded Studio Ask single-video action (VIDEO_INDEXING_SKILLZ_ACTION_SURFACE_PHASE1) (2026-06-16)
+
+### Why
+Predecessor audit #818 found the indexing menu mislabels providers and there is
+NO bounded single-video Studio-Ask test entrypoint. Callers (menu, OpenClaw/WRE,
+Hermes/Kanban, any 0102 agent) reached indexing via a one-off menu helper rather
+than a shared, governed capability. This phase introduces a typed action surface
+so all callers invoke the SAME governed capability by action ID.
+
+Model: SKILLz = capability contract; DAE = executor; menu = operator trigger;
+heartbeat = observability; scheduler = artifact CONSUMER (NOT owner of indexing).
+
+### Changed
+- NEW `src/action_surface.py`:
+  - Typed action IDs (`VideoIndexAction`):
+    - IMPLEMENTED: `video_index.studio_ask.single_video`.
+    - REGISTERED ONLY (NOT wired -> 'not_implemented'; no Gemini/scheduler
+      import): `video_index.studio_ask.channel_cycle`,
+      `video_index.studio_ask.daemon_cycle`,
+      `video_index.gemini_api.single_video`,
+      `video_index.whisper.local_transcript`,
+      `shorts_scheduler.consume_video_index`.
+  - Typed `StudioAskSingleVideoInput` (video_id raw-ID-or-URL, browser, optional
+    channel_id, persist) + `StudioAskSingleVideoOutput` (success, video_id,
+    browser, provider='studio_ask', response_text_length, topics_count,
+    saved_path, error).
+  - `run_studio_ask_single_video(inp)`: attaches to the governed browser
+    (chrome->9222 / edge->9223 via existing dae_dependencies connect helpers;
+    attach only, NO credentials), calls `StudioAskIndexer.ask_about_video`, and
+    (if persist AND success) writes
+    `memory/video_index/{channel}/{video_id}.json` via the EXISTING
+    `VideoIndexStore` + `StudioAskIndexer._ask_result_to_index_data` (no new
+    store invented). Fail-closed on any error.
+  - `run_action(action_id, **kwargs)` dispatcher routes by ID.
+  - BOUNDARY: never imports/calls `GeminiVideoAnalyzer`, the Shorts Scheduler,
+    or any publish/schedule/metadata-mutation path. Lazy module-specific imports
+    (not the package `__init__`) keep the path Gemini-free. NOT added to
+    `src/__init__.py` (avoids pulling Gemini into the surface import).
+- `modules/infrastructure/cli/src/indexing_menu.py`:
+  - Relabeled per #818 audit: option 1 "[GEMINI] Gemini AI Indexing" ->
+    "[STUDIO ASK] Browser Studio Ask Indexing" (it runs the browser Studio Ask
+    cycle, not the API); option 4 "[TEST] Test Video Indexing (single video)" ->
+    "[GEMINI API] Gemini Video Analyzer (single video)" (it runs
+    GeminiVideoAnalyzer). Underlying Gemini/whisper behavior UNCHANGED.
+  - Added option 8 "[TEST] Studio Ask Single Video (bounded action surface)" ->
+    prompts for video id/URL + browser (chrome|edge) + optional channel, then
+    `run_action('video_index.studio_ask.single_video', ...)` and prints the
+    typed output (no secrets).
+- `skillz/transcript_ask/SKILLz.md`: documented the action-surface binding +
+  the #817 Ask-Studio header selector model; KEPT `promotion_state: prototype`
+  and `evals: []` (graduation blocked pending operator live-DOM proof, #818
+  Appendix A). ASCII-clean.
+- `INTERFACE.md`: added the Action Surface exports section.
+
+### Tests
+- NEW `tests/test_action_surface.py` (21): action-ID registry (impl vs
+  registered-only; consume_video_index is a SEPARATE registered ID); URL->bare
+  ID parse; browser->port (chrome 9222 / edge 9223); single_video calls
+  ask_about_video + returns typed output; fail-closed (ask fail / no driver);
+  persists to memory/video_index/{channel}/{video_id}.json ONLY when persist=True
+  AND success (mocked store; path shape asserted); does NOT call
+  GeminiVideoAnalyzer (patched raise-if-called, asserted not called); does NOT
+  call the Shorts Scheduler / mutate metadata (patched edit_title /
+  edit_description / schedule_video on YouTubeStudioDOM raise-if-called, asserted
+  not called); dispatcher routing.
+- NO live browser: StudioAskIndexer / driver / ask_about_video and the connect
+  helpers are mocked. pytest: 21 passed. Related suite re-run (header /
+  persistence / scheduler-order): 15 passed. No skip/xfail.
+
+### HoloIndex Retrieval Report
+- Q1 "video indexer studio ask action surface skill executor" -> HIGH
+  (transcript_ask/executor.py, studio_ask_indexer.py, WSP_95 wardrobe).
+- Q2 "StudioAskIndexer ask_about_video single video" -> HIGH
+  (studio_ask_indexer.py top hit; confirmed signature
+  `ask_about_video(video_id, prompt=None, channel_entry=None) -> AskResult`).
+- Q3 "indexing_menu studio ask gemini option handler" -> HIGH
+  (indexing_menu.py + studio_ask_indexer.py; confirmed option 1 routes to
+  run_video_indexing_cycle, option 4 routes to GeminiVideoAnalyzer).
+- Retrieval evaluation: low noise, correct ordering, no missing artifacts;
+  staleness low (files re-read directly from worktree). Direct-reads:
+  studio_ask_indexer.py, video_index_store.py, indexing_menu.py,
+  transcript_ask/{SKILLz.md,executor.py}, dae_dependencies.py connect helpers.
+
+### Attention flags
+- StudioAskIndexer ctor takes a `driver` (NOT a browser/port). The 9222/9223
+  port mapping lives in dae_dependencies connect helpers; the action surface
+  constructs the driver via those and passes it in. BROWSER_PORTS is documented
+  for callers but the ctor itself is driver-based.
+- `save_video` is NOT a method on the scheduler DOM class; the mutation methods
+  that DO exist on `YouTubeStudioDOM` are edit_title/edit_description/
+  schedule_video (all patched + asserted-not-called).
+- This is runtime CODE (browser-driving). The action surface is bounded and
+  governed; live execution requires an already-authenticated session. PR left
+  OPEN for the sovereign gate. transcript_ask stays prototype (evals []).
+
+## V0.20.0 - Ask Studio Header PRIMARY path (STUDIO_ASK_STUDIO_HEADER_PHASE1) (2026-06-15)
+
+### Why
+The watch-page "Ask" button and the old Studio popup menu selectors were stale.
+The current YouTube Studio video-edit page exposes an "Ask Studio" entry in the
+page header. Phase 1 makes that the canonical (PRIMARY) indexing path.
+
+### Changed
+- `src/studio_ask_indexer.py`:
+  - Added `ASK_STUDIO_SELECTORS` (header button, dialog, contenteditable prompt,
+    streaming/response containers) as PRIMARY.
+  - Demoted (kept, not deleted) the watch-page Ask + Studio popup selectors to
+    labelled FALLBACK. `USE_WATCH_PAGE` flipped to `False`.
+  - Rewrote `ask_about_video`: Studio edit page -> Ask Studio header -> dialog ->
+    focus contenteditable prompt -> type -> Enter -> DOM-scraped response
+    (`_open_ask_studio`, `_scrape_ask_response`, `_first_element` helpers).
+  - Added `RESPONSE_TIMEOUT_SECONDS` (30s) — response scrape **fails closed**
+    (no DOM text => `success=False`, nothing stored).
+  - Added `CHANNEL_PROMPTS` + `_prompt_for_channel()` keyed off the existing
+    registry `shorts.description_template` (undaodu / foundups / ffcpln-music
+    lighter / generic fallback). Threaded `channel_entry` through
+    `index_channel_videos` -> `ask_about_video`.
+- Reused existing writer `VideoIndexStore.save_index` ->
+  `memory/video_index/{channel}/{video_id}.json` (NO new storage invented).
+- **No clipboard. No publish/schedule mutation. No Skillz/WRE promotion.**
+- Scheduler order unchanged — already `comments -> index -> schedule` in
+  `auto_moderator_dae.py` (re-ordering deferred to Phase 3).
+
+### Tests
+- `tests/test_studio_ask_header.py` (12): selector presence, PRIMARY path success,
+  Ask Studio succeeds when watch-page Ask missing, response timeout fails closed,
+  no-clipboard guard, channel prompt selection (undaodu != foundups,
+  ffcpln lighter, unknown -> generic), channel prompt threaded into ask.
+- `tests/test_indexer_scheduler_order.py` (2): locks comments->index->schedule.
+- Mock DOM only; no live YouTube. No skip/xfail.
+
+### Phase notes
+- `STUDIO_ASK_SKILL_PROMOTE_PHASE2`: promote selectors into `ask_studio_index`
+  Skillz + WRE registration (later).
+- `INDEX_BEFORE_SHORTS_SCHEDULE_PHASE3`: revisit scheduler ordering after stable.
+
+### WSP
+- WSP 22 (ModLog), WSP 84 (reused VideoIndexStore + registry), WSP 72 (independence)
+
+---
 
 ## V0.19.3 - LIVE Video Prioritization + Daemon Mode (2026-03-18)
 

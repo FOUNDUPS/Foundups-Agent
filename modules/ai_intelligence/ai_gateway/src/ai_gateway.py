@@ -22,22 +22,23 @@ Usage:
 import os
 import time
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass, field
 import requests
-import json
 
 # Import model registry for centralized model management
 from .model_registry import (
     RECOMMENDED_MODELS,
     classify_task,
-    get_current_models,
-    check_model_status,
 )
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+KIMI_K3_MODEL = 'moonshotai/kimi-k3'
+KIMI_K3_MIN_COMPLETION_TOKENS = 4096
+KIMI_K3_MAX_COMPLETION_TOKENS = 131072
 
 
 @dataclass
@@ -55,12 +56,36 @@ class GatewayResult:
 class ProviderConfig:
     """Configuration for AI provider"""
     name: str
-    api_key: Optional[str]
+    api_key: Optional[str] = field(repr=False)
     base_url: str
     models: Dict[str, str]  # task_type -> model_name
     cost_per_token: float
     rate_limit: int  # requests per minute
     timeout: int = 30
+    output_cost_per_token: float = 0.0
+    automatic_routing_enabled: bool = True
+
+
+def _post_openai_request(provider: ProviderConfig, headers: dict, data: dict):
+    """Keep OpenRouter credentials and upstream diagnostics at this transport."""
+    try:
+        response = requests.post(
+            f"{provider.base_url}/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=provider.timeout,
+            **({'allow_redirects': False} if provider.name == 'openrouter' else {}),
+        )
+        if provider.name == 'openrouter' and 300 <= getattr(response, 'status_code', 200) < 400:
+            raise requests.HTTPError('openrouter_redirect_rejected')
+        response.raise_for_status()
+        return response
+    except requests.RequestException as exc:
+        if provider.name != 'openrouter':
+            raise
+        # Preserve timeout classification without retaining raw request details.
+        error_type = requests.Timeout if isinstance(exc, requests.Timeout) else requests.RequestException
+        raise error_type('openrouter_request_failed') from None
 
 
 class AIGateway:
@@ -68,7 +93,8 @@ class AIGateway:
     AI Gateway for unified access to multiple AI providers.
 
     Provides intelligent routing, automatic fallback, and cost optimization
-    across OpenAI, Anthropic, Grok, and Google Gemini.
+    across OpenAI, Anthropic, Grok, Google Gemini, and explicitly selected
+    OpenRouter models used by governed AutoResearch campaigns.
     """
 
     def __init__(self, gateway_key: Optional[str] = None):
@@ -92,6 +118,17 @@ class AIGateway:
         }
 
         logger.info(f"[AI-GATEWAY] Initialized with {len([p for p in self.providers.values() if p.api_key])} active providers")
+
+    def call_youtube_task(self, *, system_prompt: str, prompt: str, stage: str,
+                          surface: str = 'comments', max_tokens: int = 400,
+                          response_format: Optional[dict] = None, cancel_event=None):
+        """Use the shared, task-scoped YouTube route; never generic fallback."""
+        from .youtube_model_routing import call_youtube_task
+        return call_youtube_task(
+            self, system_prompt=system_prompt, prompt=prompt, stage=stage,
+            surface=surface, max_tokens=max_tokens,
+            response_format=response_format, cancel_event=cancel_event,
+        )
 
     def _get_env_int(self, name: str, default: int) -> int:
         """Read an int from env with a safe fallback."""
@@ -132,6 +169,22 @@ class AIGateway:
         if os.getenv("TEMPERATURE"):
             return self._get_env_float("TEMPERATURE", default)
         return self._get_env_float("LLM_TEMPERATURE", default)
+
+    @staticmethod
+    def _bounded_exact_completion_tokens(value: object) -> int:
+        """Validate an explicit per-call completion cap without env fallback."""
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError("invalid_max_completion_tokens")
+        if value <= 0 or value > 1_000_000:
+            raise ValueError("invalid_max_completion_tokens")
+        return value
+
+    @staticmethod
+    def _bounded_exact_reasoning_effort(value: object) -> str:
+        """Validate an explicit catalog-admitted reasoning effort."""
+        if not isinstance(value, str) or value not in {"low", "medium", "high", "xhigh", "max"}:
+            raise ValueError("invalid_reasoning_effort")
+        return value
 
     def _setup_providers(self) -> Dict[str, ProviderConfig]:
         """Set up AI provider configurations"""
@@ -211,6 +264,30 @@ class AIGateway:
                 },
                 cost_per_token=0.0005,
                 rate_limit=60
+            ),
+
+            # OpenRouter is intentionally absent from the ordinary fallback
+            # order. It is available for exact provider/model assignments from
+            # the governed AutoResearch configured-gateway runner.
+            'openrouter': ProviderConfig(
+                name='openrouter',
+                api_key=os.getenv('OPENROUTER_API_KEY'),
+                base_url='https://openrouter.ai/api/v1',
+                models={
+                    'coding': 'moonshotai/kimi-k3',
+                    'code_review': 'moonshotai/kimi-k3',
+                    'math': 'moonshotai/kimi-k3',
+                    'reasoning': 'moonshotai/kimi-k3',
+                    'research': 'moonshotai/kimi-k3',
+                    'analysis': 'moonshotai/kimi-k3',
+                    'creative': 'moonshotai/kimi-k3',
+                    'quick': 'moonshotai/kimi-k3',
+                },
+                cost_per_token=0.000003,
+                rate_limit=30,
+                timeout=120,
+                output_cost_per_token=0.000015,
+                automatic_routing_enabled=False,
             )
         }
 
@@ -290,7 +367,7 @@ class AIGateway:
         # Sort providers by cost for this task
         available_providers = [
             (name, config) for name, config in self.providers.items()
-            if config.api_key
+            if config.api_key and config.automatic_routing_enabled
         ]
 
         # Sort by cost_per_token ascending (cheapest first)
@@ -379,26 +456,77 @@ class AIGateway:
 
         return task_routing.get(task_type, ['anthropic', 'openai', 'gemini', 'grok'])
 
-    def _call_provider(self, provider: ProviderConfig, prompt: str, task_type: str) -> str:
+    def _call_provider(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        task_type: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+        reasoning_effort: Optional[str] = None,
+    ) -> str:
         """Call specific AI provider"""
 
         model = provider.models.get(task_type, provider.models.get('quick', 'default'))
 
-        if provider.name == 'openai':
-            return self._call_openai(provider, prompt, model)
+        if provider.name in {'openai', 'openrouter'}:
+            return self._call_openai(
+                provider,
+                prompt,
+                model,
+                max_completion_tokens=max_completion_tokens,
+                reasoning_effort=reasoning_effort,
+            )
         elif provider.name == 'anthropic':
-            return self._call_anthropic(provider, prompt, model)
+            return self._call_anthropic(
+                provider, prompt, model, max_completion_tokens=max_completion_tokens
+            )
         elif provider.name == 'grok':
-            return self._call_grok(provider, prompt, model)
+            return self._call_grok(
+                provider, prompt, model, max_completion_tokens=max_completion_tokens
+            )
         elif provider.name == 'gemini':
-            return self._call_gemini(provider, prompt, model)
+            return self._call_gemini(
+                provider, prompt, model, max_completion_tokens=max_completion_tokens
+            )
         else:
             raise ValueError(f"Unknown provider: {provider.name}")
 
-    def _call_openai(self, provider: ProviderConfig, prompt: str, model: str) -> str:
+    def _openai_completion_tokens(
+        self,
+        provider: ProviderConfig,
+        model: str,
+        explicit: Optional[int],
+    ) -> int:
+        """Resolve a completion budget and enforce the exact K3 endpoint caps."""
+
+        is_kimi_k3 = provider.name == 'openrouter' and model == KIMI_K3_MODEL
+        default = KIMI_K3_MIN_COMPLETION_TOKENS if is_kimi_k3 else 1000
+        requested = (
+            self._bounded_exact_completion_tokens(explicit)
+            if explicit is not None
+            else self._get_provider_max_tokens(provider.name, default)
+        )
+        if not is_kimi_k3:
+            return requested
+        if not 1 <= requested <= KIMI_K3_MAX_COMPLETION_TOKENS:
+            raise ValueError("invalid max_completion_tokens")
+        return max(requested, KIMI_K3_MIN_COMPLETION_TOKENS)
+
+    def _call_openai(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        model: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+        reasoning_effort: Optional[str] = None,
+    ) -> str:
         """Call OpenAI API"""
-        max_tokens = self._get_provider_max_tokens(provider.name, 1000)
-        temperature = self._get_provider_temperature(provider.name, 0.7)
+        is_kimi_k3 = provider.name == 'openrouter' and model == KIMI_K3_MODEL
+        max_tokens = self._openai_completion_tokens(
+            provider, model, max_completion_tokens
+        )
         headers = {
             'Authorization': f'Bearer {provider.api_key}',
             'Content-Type': 'application/json'
@@ -408,23 +536,35 @@ class AIGateway:
             'model': model,
             'messages': [{'role': 'user', 'content': prompt}],
             'max_tokens': max_tokens,
-            'temperature': temperature
         }
+        if is_kimi_k3:
+            data['reasoning'] = {'effort': 'max'}
+        elif provider.name == 'openrouter' and reasoning_effort is not None:
+            data['reasoning'] = {
+                'effort': self._bounded_exact_reasoning_effort(reasoning_effort)
+            }
+        else:
+            data['temperature'] = self._get_provider_temperature(provider.name, 0.7)
 
-        response = requests.post(
-            f"{provider.base_url}/chat/completions",
-            headers=headers,
-            json=data,
-            timeout=provider.timeout
-        )
-        response.raise_for_status()
+        response = _post_openai_request(provider, headers, data)
 
         result = response.json()
         return result['choices'][0]['message']['content'].strip()
 
-    def _call_anthropic(self, provider: ProviderConfig, prompt: str, model: str) -> str:
+    def _call_anthropic(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        model: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+    ) -> str:
         """Call Anthropic API"""
-        max_tokens = self._get_provider_max_tokens(provider.name, 1000)
+        max_tokens = (
+            self._bounded_exact_completion_tokens(max_completion_tokens)
+            if max_completion_tokens is not None
+            else self._get_provider_max_tokens(provider.name, 1000)
+        )
         temperature = self._get_provider_temperature(provider.name, 0.7)
         headers = {
             'x-api-key': provider.api_key,
@@ -450,9 +590,20 @@ class AIGateway:
         result = response.json()
         return result['content'][0]['text'].strip()
 
-    def _call_grok(self, provider: ProviderConfig, prompt: str, model: str) -> str:
+    def _call_grok(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        model: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+    ) -> str:
         """Call Grok API"""
-        max_tokens = self._get_provider_max_tokens(provider.name, 1000)
+        max_tokens = (
+            self._bounded_exact_completion_tokens(max_completion_tokens)
+            if max_completion_tokens is not None
+            else self._get_provider_max_tokens(provider.name, 1000)
+        )
         temperature = self._get_provider_temperature(provider.name, 0.7)
         headers = {
             'Authorization': f'Bearer {provider.api_key}',
@@ -477,9 +628,20 @@ class AIGateway:
         result = response.json()
         return result['choices'][0]['message']['content'].strip()
 
-    def _call_gemini(self, provider: ProviderConfig, prompt: str, model: str) -> str:
+    def _call_gemini(
+        self,
+        provider: ProviderConfig,
+        prompt: str,
+        model: str,
+        *,
+        max_completion_tokens: Optional[int] = None,
+    ) -> str:
         """Call Google Gemini API"""
-        max_tokens = self._get_provider_max_tokens(provider.name, 1000)
+        max_tokens = (
+            self._bounded_exact_completion_tokens(max_completion_tokens)
+            if max_completion_tokens is not None
+            else self._get_provider_max_tokens(provider.name, 1000)
+        )
         temperature = self._get_provider_temperature(provider.name, 0.7)
         data = {
             'contents': [{

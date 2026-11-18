@@ -1,5 +1,258 @@
 # Agent Module TestModLog
 
+## 2026-07-23 - Create planner canonical-schema repair tests
+
+- Updated all planner/writer happy-path registry fixtures to satisfy the
+  canonical schema and added a direct fixture/schema assertion.
+- Added a 75-line planner entrypoint regression. Planner plus adjacent
+  scaffold writers: 83 passed; canonical registry schema suite: 46 passed.
+
+## 2026-07-23 - Create planner registry/determinism repair tests
+
+- Proved missing, unreadable, malformed, and schema-invalid registries fail
+  closed with the same redacted `FAIL_REGISTRY_UNAVAILABLE` result.
+- Proved repeated planning is byte-equivalent when legacy genesis input omits
+  `created_at`.
+- Planner plus adjacent scaffold-writer suites: 80 passed.
+
+## 2026-07-19 - Transport-neutral Hermes grounding tests
+
+- Proved plain-text v2 requests use host identity/scope and submit a verified grounded intent to the canonical resident client.
+- Proved identity, FoundUp scope, and caller-supplied grounding substitutions fail before the cycle runner.
+- Proved the default repo-target route succeeds and external research fails closed without an approved adapter.
+- Proved the bridge requires both authenticated principal and authorized FoundUp scope.
+- Full agent regression: 1145 tests passed.
+
+## 2026-07-19 - Resident RedDog Hermes thin-client tests
+
+- Proved Hermes submit uses the canonical resident client and does not invoke the Hermes model/builder path.
+- Proved reconnect, cancel, and resume use the persisted intent and reject replacement-intent substitution.
+- Proved payload identity text, wrong schema, and unsupported operations fail before the cycle runner.
+- Proved the one-shot bridge requires a host-authenticated principal and contains no shell or Hermes model imports.
+- Proved unset host paths are omitted rather than forwarded as empty runtime overrides.
+- Full `modules/foundups/agent/tests` validation: 1140 passed.
+
+## 2026-06-20 - Package __init__ lazy-import boundary tests (FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1)
+
+**Commands** (PYTHONIOENCODING=utf-8):
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_package_init_lazy_import.py -q
+python -m pytest modules/foundups/agent -q                              # CI mode
+AI_OVERSEER_HEAVY_TESTS=1 python -m pytest modules/foundups/agent -q    # heavy mode
+```
+
+**Result**: PASS
+
+**Summary**:
+- `test_package_init_lazy_import.py`: 8 passed (new file). Full agent suite: **1024 passed** in BOTH
+  CI and heavy mode (was 1016 + 8 new = 1024). No skip/xfail, no regression.
+
+**New coverage (closes the no-vendor boundary at the IMPORT boundary -- decision B)**:
+1. `test_leaf_adapter_import_no_vendor_pullin` -- FRESH child interpreter: importing
+   `kanban_plugin_contract` leaves none of
+   `hermes_adapter`/`hermes_model_router`/`subprocess`/`sqlite3`/`urllib` in child `sys.modules`.
+   (The publish adapter is parked in a different worktree; the #807 contract leaf is the present
+   AST-clean adapter-side leaf.)
+2. `test_leaf_contract_import_no_vendor_pullin` -- same proof for a 2nd independent AST-clean leaf
+   (`source_authority`).
+3. `test_all_public_exports_still_resolve` -- `__all__` unchanged (8 names); each resolves lazily,
+   non-None, correct type, identity-stable on 2nd access.
+4. `test_lazy_access_loads_hermes_only_on_demand` -- fresh child: `hermes_adapter` ABSENT until a
+   public name is accessed, then PRESENT.
+5. `test_lazy_access_resolves_value_identical_to_source` -- package names ARE the same objects as
+   `hermes_adapter`/`hermes_model_router` exports (no behavior change).
+6. `test_no_circular_import` -- package + both leaves + both hermes modules import in 3 orders
+   (incl. reverse) with returncode 0.
+7. `test_unknown_attribute_raises_AttributeError` -- bogus attr -> AttributeError (not ImportError).
+8. `test_dir_includes_public_names` -- `__dir__` surfaces the lazy public names.
+
+**Test method note**: proofs 1/2/4/6 run in a FRESH child interpreter via
+`subprocess.run([sys.executable, "-c", SNIPPET])` because pytest may already have imported
+subprocess/sqlite3/urllib in THIS process. The `subprocess` used in the test file is the HARNESS that
+spawns the child; the boundary assertion is about the CHILD's clean `sys.modules`.
+
+## 2026-06-20 - Kanban Contract dict-key redaction + token-precise command tests (FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1)
+
+**Commands** (PYTHONIOENCODING=utf-8):
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_kanban_plugin_contract.py -q
+AI_OVERSEER_HEAVY_TESTS=1 python -m pytest modules/foundups/agent -q   # heavy
+python -m pytest modules/foundups/agent -q                            # CI mode
+```
+
+**Result**: PASS
+
+**Summary**:
+- `test_kanban_plugin_contract.py`: 319 passed (was 251; +68 net new). Full agent suite:
+  **1016 passed** in BOTH heavy and CI mode. No skip/xfail, no regression.
+
+**New coverage (this slice -- closes the parked-adapter RE-REVIEW findings)**:
+1. **Fix 1 -- dict-KEY redaction** (`_redact_deep`): a secret used as a string dict KEY (and as a
+   value) is redacted; a secret-as-KEY nested several levels deep is redacted; non-string keys
+   (int/tuple) pass through unchanged; `_redact_deep` does NOT mutate the input mapping (a NEW
+   structure is built); through `KanbanCardSpec.to_dict()` a secret hidden as a dict KEY inside a
+   list field appears in NEITHER keys NOR values of the serialized body, and the instance is not
+   mutated.
+2. **Fix 2 -- token-precise command-key match** (`_key_is_command`):
+   - true command keys (command/cmd/shell/script/exec/argv + run_command/runCmd/exec_now/
+     shell_command/run_cmd) are detected;
+   - legit substring fields (description/transcript/subscription/executive/scripted/prescription/
+     descriptor/executive_summary/scripted_notes/subscription_id/transcription) are NOT command keys;
+   - direct contrast test: `script` is a command key, `description`/`transcript` are not.
+3. **Must-catch / must-not-catch through the validator**: a bare string under any TRUE command key
+   (incl. multi-token forms) is REJECTED; `command: "rm -rf /"` rejected; a valid all-safe argv list
+   under a true command key is ACCEPTED; description/transcript with an ordinary string value are
+   ACCEPTED.
+4. **Two-directional parity batteries**:
+   - `_FALSE_POSITIVE_BATTERY` (NEW invariant #843 lacked): a corpus of legit field names that
+     CONTAIN a command-marker substring, carrying ordinary string values, are ALL ACCEPTED;
+     `test_false_positive_battery_zero_falsely_rejected_summary` asserts ZERO falsely rejected.
+   - `test_authority_detection_not_weakened_by_token_match`: the whole `_ORIGIN_REJECTED_CARDS`
+     AUTHORITY corpus stays rejected (0 newly accepted) -- the command-KEY change does not weaken
+     authority detection.
+   - `test_command_marker_set_is_single_token`: the marker set is single-token by construction.
+- Imports extended: `_redact_deep`, `_key_is_command`, `_COMMAND_KEY_MARKERS`.
+- ASCII-clean: the synthetic secret is built via `chr()` (0 non-ASCII bytes).
+- AUDIT cross-check (NOT a committed test): origin/main module vs HEAD over the corpus confirmed
+  0 authority weakening, true-command-keys still reject bare strings, and description/transcript/...
+  flip REJECTED(origin)->ACCEPTED(HEAD); secret-as-key survives origin `to_dict()` but not HEAD.
+
+---
+
+## 2026-06-19 - Kanban Contract card-redaction + command-argv tests (FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1)
+
+**Commands** (PYTHONIOENCODING=utf-8):
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_kanban_plugin_contract.py -q
+AI_OVERSEER_HEAVY_TESTS=1 python -m pytest modules/foundups/agent -q   # heavy
+python -m pytest modules/foundups/agent -q                            # CI mode
+```
+
+**Result**: PASS
+
+**Summary**:
+- `test_kanban_plugin_contract.py`: 251 passed (was 135; +116 net new). Full agent suite:
+  948 passed in BOTH heavy and CI mode (was 832; +116 from the new contract tests). No
+  skip/xfail, no regression.
+
+### SENTINEL re-audit addendum (empty argv-list strengthening)
+
+`_command_value_is_argv_or_null` accepted an EMPTY argv list `[]` (`all([])` is True),
+contradicting its "NON-EMPTY argv LIST" docstring. The code was aligned to the contract so `[]`
+is now REJECTED (strictly a strengthening; 0 newly-accepted, parity preserved). New tests:
+- `test_command_empty_argv_list_rejected` (parametrized over command/cmd/argv/shell/exec/run_cmd/script):
+  `{"<cmd_key>": []}` is REJECTED.
+- `test_command_empty_argv_rejection_no_raw_echo`: the empty-list rejection names the rule class only.
+- `test_command_null_and_nonempty_argv_still_accepted`: null/absent command and a NON-EMPTY all-safe
+  argv list are STILL accepted.
+- Added 7 empty-argv-list cases (one per command key) to `_NEW_REJECTED_BARE_COMMANDS` so the
+  no-weakening battery + `test_no_weakening_zero_newly_accepted_summary` cover the strengthening
+  (still 0 origin-rejected payloads newly accepted).
+
+**New coverage (this slice)**:
+1. **Finding A -- card `to_dict()` redaction**: a raw secret in a scalar free-text field (branch)
+   and in a nested list field (expected_evidence / required_gates) does NOT appear in `to_dict()`
+   ([REDACTED] present); redaction is deterministic and does NOT mutate the instance.
+2. **CARD_ID_FROM_REDACTED_CANONICAL_BODY**: a sha256 digest over `to_dict()` is stable across two
+   cards differing ONLY in a secret's raw bytes (both collapse to the same redacted canonical body).
+3. **"adapter would now serialize safely"**: the exact property the parked publish adapter relies on
+   -- a card carrying a secret yields a `to_dict()` with no raw secret.
+4. **Finding B -- command argv-or-null**: bare metachar-free command strings (command/cmd/argv/
+   shell/exec/run_cmd/script, incl. nested) REJECTED; argv LIST accepted ONLY if every element is a
+   safe string (shell-metachar / authority / absolute / traversal / non-string element -> rejected);
+   null/None command accepted; dict command rejected. No raw command echoed in any message.
+5. **No-weakening behavioral parity battery** (REPLACES the prior AST-skeleton baseline test, which
+   no longer applies to a logic change): a self-contained, checked-in corpus of origin-rejected
+   inputs (authority markers + ~13 normalized evasions + source_authority promotion + verified=true
+   + ~10 authority-by-value + path-hygiene + shell-metachar command cases) re-asserted REJECTED by
+   HEAD; the NEW bare/unsafe command inputs asserted REJECTED; clean valid inputs asserted ACCEPTED;
+   a summary guard asserts ZERO origin-rejected payloads are newly accepted. NO runtime git-show in
+   the committed tests (the #830 shallow-CI lesson).
+
+**Updated (outcome preserved, OLD pinned text refreshed)**:
+- `test_scanner_shell_command_no_raw_echo`: pinned message updated to the new argv-or-null phrasing;
+  added `test_scanner_bare_metachar_free_command_no_raw_echo`.
+- `test_safe_message_locality_preserved`: command family phrase updated to the new message.
+- REMOVED `test_authority_logic_skeleton_matches_origin_baseline` +
+  `test_skeleton_blanking_is_message_insensitive_self_check` (AST-skeleton-identical does not apply
+  to a logic change); replaced by the behavioral battery above.
+
+## 2026-06-18 - Kanban Contract no-raw-echo + authority-parity tests (FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1)
+
+**Commands**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_kanban_plugin_contract.py -q
+python -m pytest modules/foundups/agent -q                         # full agent suite
+# launch-intake affected packages (both modes):
+AI_OVERSEER_HEAVY_TESTS=1 python -m pytest modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py \
+  modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py \
+  modules/ai_intelligence/ai_overseer/tests/test_intake_auth_provider.py \
+  modules/ai_intelligence/ai_overseer/tests/test_intake_transport.py -q
+```
+
+**Result**: PASS
+
+**Summary**:
+- `test_kanban_plugin_contract.py`: 135 passed (was 71; +64 new). Full agent suite: 832 passed
+  (heavy and CI mode), no regression.
+- launch-intake affected packages: 592 passed (heavy and CI mode). intake_transport alone: 188 passed.
+
+**New coverage (this slice)**:
+1. No-raw-echo scanner battery: every `_scan_authority` + `_check_path` + `validate_card_spec`
+   rejection names the rule (+ fixed marker class) and NEVER echoes the raw key/value/repr/nested
+   trail or a control byte. Sentinel leak tokens seeded into keys, trails, values, paths.
+2. Addendum-A NAMED-category authority-detection parity: ~42 fixtures across the #807 corpus, each
+   mapped to its expected violation class BY INPUT DESIGN (never message-derived); asserts rejection
+   so a weakened detector fails even though the message text changed. Plus a coverage test that every
+   named category appears in the battery.
+3. Addendum-B message-locality: distinct safe rule families are present (not collapsed to one bland
+   phrase) and the `{m}`/`{carried}` class token is from the fixed `_AUTHORITY_MARKERS` taxonomy.
+4. AST-skeleton self-contained backstop: blanked control-flow skeleton SHA-256 == frozen origin/main
+   baseline (no `git show` at runtime); a self-consistency check proves the skeleton is sensitive to
+   LOGIC, not message text.
+5. Downstream validate_* parity (outcome-only) + a `test_intake_transport.py` caller-regression
+   (3 tests, incl. real `SQLiteNonceStore` + spy): authority-bearing body -> rejected,
+   `reason == "invalid_request"`, no raw key/value/trail leak, valid invite NOT consumed.
+6. Updated 4 `test_foundup_launch_request.py` assertions/helpers that pinned the #830-DEFERRED old
+   #807 echo text (text-only; outcome assertions kept).
+
+## 2026-06-13 - Kanban Plugin Contract Tests (HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1)
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_kanban_plugin_contract.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 71 passed. Full agent suite: 768 passed (no regression/collision).
+
+**Coverage**:
+1. Clean CardSpec / WorkerTaskSpec / WreEvidencePacket validate.
+2. verified advisory-only: defaults False; construct verified=True raises; dict verified=true rejected;
+   nested verified=true rejected; serialized verified is False.
+3. Forbidden authority keys rejected (14 parametrized: gate_passed/all_gates_passed/merge_approved/
+   merge_token/can_merge/land_approved/dao_approved/payout_ready/cabr_ready/create_repo/
+   external_repo_requested/real_execution/source_authority promotion/lifecycle_stage mvp).
+4. Public code/shell field rejected; shell-string command rejected.
+5. Normalized authority evasion rejected (13 parametrized incl. gatePassed, gate-passed, gate.passed,
+   GATE_PASSED, fullwidth gate_passed, mergeApproved, externalRepoRequested, canMerge, landApproved,
+   camelCase sourceAuthority promotion).
+6. Authority by semantic VALUE rejected (10 parametrized free-text values).
+7. Path/ref hygiene: absolute/drive/UNC/traversal/shell-metachar rejected; two distinct foundup paths ok.
+8. Value-level redaction: 10 secret shapes in free-text + structured-field redaction (pr_url/head_sha/tests_run) per the SENTINEL hardening observation; 11 secret shapes (sk-/ghp_/Bearer/access_token/refresh_token/client_secret/
+   AIza/1// /ya29./env *_TOKEN=) absent from serialized to_dict.
+9. Serialization deterministic + json-safe; no forbidden keys/values in the blob.
+10. AST: no banned imports (os/sys/subprocess/socket/urllib/...); no runtime executor/consumer import; no
+    banned builtin/attr calls; no second-orchestrator symbols (drain/queue/dispatch/spawn/scheduler/kanban.db).
+
+No skips, no xfail.
+
 ## 2026-06-12 - WRE ContextBundle Dry-Run Consumer Phase 1 Tests
 
 **Command**:

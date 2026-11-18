@@ -1,0 +1,18 @@
+"""Truthful commit-state vocabulary for RedDog effect boundaries."""
+
+from __future__ import annotations
+
+EFFECT_NOT_COMMITTED = "NOT_COMMITTED"
+EFFECT_COMMITTED = "COMMITTED"
+EFFECT_INDETERMINATE = "INDETERMINATE"
+
+VALID_EFFECT_COMMIT_STATES = frozenset(
+    {EFFECT_NOT_COMMITTED, EFFECT_COMMITTED, EFFECT_INDETERMINATE}
+)
+
+__all__ = [
+    "EFFECT_COMMITTED",
+    "EFFECT_INDETERMINATE",
+    "EFFECT_NOT_COMMITTED",
+    "VALID_EFFECT_COMMIT_STATES",
+]

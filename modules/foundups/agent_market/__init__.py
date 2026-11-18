@@ -1,1 +1,1 @@
-﻿"""FoundUps Agent Market module."""
+"""FoundUps Agent Market module."""

@@ -9,6 +9,7 @@
 - **Security-First Design**: Pattern-based filtering blocks sensitive data (passwords, keys, tokens)
 - **Controlled Access**: Whitelist approach for allowed environment variables
 - **.env File Support**: Secure reading of environment configuration files
+- **WSP 71 op:// Resolution**: Optional 1Password CLI-backed runtime resolver for `op://vault/item/field` references
 - **Zero Token Cost**: Local processing prevents expensive AI calls
 - **WSP Compliance**: Follows WSP 77 (Agent Coordination) and WSP 90 (UTF-8 Enforcement)
 
@@ -60,7 +61,48 @@ The server integrates with the Qwen/Gemma intelligent routing system:
 4. **read_env_file**: Read .env files with security filtering
 5. **get_project_env_info**: Get project environment setup information
 
+### WSP 71 Vault Resolver
+
+`OpCliSecretResolver` resolves `op://` secret references at runtime through the
+1Password CLI:
+
+```python
+from modules.infrastructure.secrets_mcp.src.op_cli_secret_resolver import OpCliSecretResolver
+
+resolver = OpCliSecretResolver()
+result = resolver.resolve("op://foundups-secrets/reddog-signing/private", "signer:reddog")
+secret = result.get_value() if result.success else None
+```
+
+The resolver calls `op read <reference> --no-newline` as a shell-free argv list.
+It records only audit-safe hashes/status metadata. It does not store secrets,
+print secret stdout/stderr, mutate the repository, invoke OpenClaw/Hermes, or
+re-index HoloIndex.
+
 ## Integration Points
+
+### Explicit systemd credential custody
+
+`src/systemd_credential_secret_resolver.py` implements
+`SystemdCredentialSecretResolver` for a separately authenticated
+`SystemdCredentialBinding`. It reads only allowlisted
+`systemd-creds://<credential-id>` references inside the explicitly selected
+`/run/credentials/<unit>.service` directory. It does not discover paths from
+environment variables, provision credentials, decrypt files, or mint permission.
+
+The caller must establish current owner/generation, secrets permission and process
+isolation before resolving. The provider checks nonroot UID/GID, root-owned
+descriptor-relative paths, the selected systemd ACL custody shape, read-only
+credential storage, bounded UTF-8 content and both wall/monotonic lifetime bounds.
+It reads afresh and checks again after reading and after the audit callback.
+Less than one second remaining fails conservatively. No secret is cached by the
+resolver; Python buffer erasure and physical credential revocation are not claimed.
+
+`credential_pre_delivery_validation` audit events describe validation before the
+callback. Only the final `ResolveResult.success` reports delivery. A slow/failing
+callback can cause delivery to fail even after a positive validation event.
+The existing bridge factory can explicitly select this provider; authenticated
+public startup supply and native worker admission remain separate unfinished gates.
 
 ### MCP Manager
 - **Menu Integration**: Available through MCP Services Gateway

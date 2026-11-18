@@ -225,6 +225,30 @@ class TestSelectMaintenanceTask:
         assert result.selected_task.family == "grant_review"
         assert result.selected_task.is_safe() is True
 
+    def test_postmerge_selection_does_not_recursively_query_holoindex(self):
+        from modules.communication.moltbot_bridge.src.openclaw_maintenance_selector import (
+            select_maintenance_task,
+        )
+
+        task = {
+            "task_id": "holoindex_postmerge_refresh:" + ("a" * 40),
+            "description": "Refresh exact SHA HoloIndex authority",
+            "context": {"source": "holoindex_postmerge_coordinator"},
+            "required_skills": ["holo-search"],
+        }
+        with patch(
+            "modules.communication.moltbot_bridge.src.openclaw_execution_bundle.build_execution_bundle"
+        ) as build_bundle:
+            result = select_maintenance_task(
+                pending_tasks=[task], observation={}, repo_root=Path("."),
+            )
+
+        assert result.selected_task is not None
+        assert result.selected_task.family == "holoindex_postmerge"
+        assert result.selected_task.bundle_confidence == 0.0
+        assert result.bundle_used is False
+        build_bundle.assert_not_called()
+
 
 class TestWriteMaintenanceReport:
     """Test maintenance report artifact generation."""

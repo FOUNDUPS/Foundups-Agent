@@ -1,0 +1,195 @@
+"""Current-generation provider for independently signed secret grants."""
+from __future__ import annotations
+import secrets
+import time
+from contextlib import contextmanager
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any, Callable, Iterator, Mapping
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    SigningRequest,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_grant_binding import (
+    build_secret_grant_authority_policy,
+    resolve_secret_grant_target_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_independent_grant_authority_binding import (
+    IndependentGrantAuthorityBinding,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_grant_verification import (
+    require_final_secret_grant,
+    require_secret_grant_signer_response,
+    issue_effect_secret_grant,
+    lease_independent_secret_grant,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_selection import (
+    lease_validated_owner_e0_current_admission,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import (
+    ResolvePerSignBinding,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant_contract import (
+    GRANT_SCHEMA,
+    MAX_GRANT_TTL_SECONDS,
+    signer_secret_access_grant_id,
+    signer_secret_access_request_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_nonce_store import (
+    DurableSignerSecretGrantNonceStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_issuance import (
+    build_secret_grant_signing_request,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authority_policy import (
+    SignerSecretGrantAuthorityPolicy,
+)
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
+    VerifiedElevatedAuthoritySigningPermit,
+)
+from .reddog_effect_consensus_proof import SCHEMA as EFFECT_PROOF_SCHEMA, SCHEMA_V2 as EFFECT_PROOF_SCHEMA_V2, VerifiedEffectSigningPermit
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_client import (
+    ElevatedConsensusGrantProviderIdentity,
+    admit_secret_grant_consensus,
+)
+@dataclass(frozen=True, slots=True)
+class IndependentSignerSecretGrantProvider:
+    """Issue grants with current-owner checks; LOW/effect RPC releases its fence."""
+    repo_root: Path
+    owner_config_path: Path
+    owner_policy: Mapping[str, Any]
+    replay_store: DurableSignerSecretGrantNonceStore
+    grant_authority: IndependentGrantAuthorityBinding
+    clock: Callable[[], int] = lambda: int(time.time())
+    nonce_factory: Callable[[], str] = lambda: secrets.token_hex(32)
+    ttl_seconds: int = 30
+    def elevated_consensus_provider_identity(self):
+        authority = self.grant_authority
+        return ElevatedConsensusGrantProviderIdentity(
+            authority.principal_id, authority.principal_provider,
+            authority.public_key, authority.key_epoch,
+            str(self.owner_config_path.resolve()),
+        )
+    def issue_grant(self, request: SigningRequest, *, elevated_consensus_signing_permit=None) -> Mapping[str, Any]:
+        """Return a verified grant only after issuance admission exits cleanly."""
+        if type(elevated_consensus_signing_permit) is VerifiedEffectSigningPermit:
+            return issue_effect_secret_grant(self, request, elevated_consensus_signing_permit)
+        with self.lease(
+            request, elevated_consensus_signing_permit=elevated_consensus_signing_permit
+        ) as grant:
+            issued = grant
+        return issued
+    @contextmanager
+    def lease(
+        self,
+        request: SigningRequest,
+        *,
+        elevated_consensus_signing_permit: VerifiedElevatedAuthoritySigningPermit | VerifiedEffectSigningPermit
+        | None = None,
+    ) -> Iterator[Mapping[str, Any]]:
+        """Keep E0 current-generation admission pinned through target use."""
+        if type(request) is not SigningRequest:
+            raise ValueError("secret_grant_request_invalid")
+        if type(elevated_consensus_signing_permit) is VerifiedEffectSigningPermit:
+            raise ValueError("effect_grant_requires_unfenced_issue")
+        consensus_proof, approval_expires = admit_secret_grant_consensus(
+            request, elevated_consensus_signing_permit, now=self._now(), include_expiry=True
+        )
+        with lease_independent_secret_grant(self, request, consensus_proof, approval_expires=approval_expires) as grant:
+            yield grant
+    def _issue(self, request: SigningRequest, owner: Any, consensus_proof: Mapping[str, Any] | None) -> Mapping[str, Any]:
+        grant, sign_request, binding = self._prepare_issue(request, owner, consensus_proof)
+        signed = self._sign_grant(grant, sign_request)
+        require_final_secret_grant(signed, request, binding, owner.resolver, now_epoch=self._now())
+        return signed
+    def _prepare_issue(self, request, owner, consensus_proof, approval_expires=None):
+        now = self._now()
+        binding = self._resolve_binding(owner)
+        policy = self._authority_policy(owner, binding)
+        grant = self._unsigned_grant(request, binding, owner.policy, now, approval_expires)
+        sign_request = build_secret_grant_signing_request(
+            grant,
+            policy=policy,
+            consensus_receipt_digest=(consensus_proof["consensus_receipt"]["receipt_id"]
+                if consensus_proof is not None and consensus_proof.get("schema_version") in {EFFECT_PROOF_SCHEMA, EFFECT_PROOF_SCHEMA_V2}
+                else request.consensus_receipt_digest),
+            elevated_consensus_proof=consensus_proof,
+        )
+        return grant, sign_request, binding
+    def _sign_grant(self, grant, sign_request):
+        response = self.grant_authority.client.sign(sign_request)
+        require_secret_grant_signer_response(
+            response,
+            sign_request,
+            authority_public_key=self.grant_authority.public_key,
+            authority_key_epoch=self.grant_authority.key_epoch,
+        )
+        return {**grant, "signature": response.signature}
+    def _resolve_binding(self, owner: Any) -> ResolvePerSignBinding:
+        return resolve_secret_grant_target_binding(owner.policy, self.replay_store)
+    def _authority_policy(
+        self, owner: Any, binding: ResolvePerSignBinding
+    ) -> SignerSecretGrantAuthorityPolicy:
+        policy = owner.policy
+        authority = self.grant_authority
+        return build_secret_grant_authority_policy(
+            policy,
+            binding,
+            self.replay_store,
+            authority_principal_id=authority.principal_id,
+            authority_principal_provider=authority.principal_provider,
+            authority_public_key=authority.public_key,
+            authority_key_epoch=authority.key_epoch,
+            requester_principal_id=authority.requester_principal_id,
+        )
+    def _unsigned_grant(
+        self,
+        request: SigningRequest,
+        binding: ResolvePerSignBinding,
+        owner_policy: Mapping[str, Any],
+        now: int, approval_expires: int | None = None,
+    ) -> dict[str, Any]:
+        nonce = self._nonce()
+        expires = min(
+            now + self._ttl(),
+            int(owner_policy["expires_at"]),
+            approval_expires if approval_expires is not None else int(owner_policy["expires_at"]),
+        )
+        if expires <= now:
+            raise ValueError("secret_grant_expired")
+        grant = {
+            "schema_version": GRANT_SCHEMA,
+            **asdict(binding),
+            "signing_request_digest": signer_secret_access_request_digest(
+                request.to_dict()
+            ),
+            "requested_operation": request.requested_operation,
+            "authority_tier": request.authority_tier,
+            "attested_peer_principal_id": request.requester_principal_id,
+            "nonce": nonce,
+            "issued_at": now,
+            "expires_at": expires,
+            "grant_id": "",
+            "signature": "pending-signature",
+        }
+        grant["grant_id"] = signer_secret_access_grant_id(grant)
+        return grant
+    def _now(self) -> int:
+        value = self.clock()
+        if type(value) is not int or value < 0:
+            raise ValueError("secret_grant_clock_invalid")
+        return value
+    def _ttl(self) -> int:
+        if type(self.ttl_seconds) is not int or not 0 < self.ttl_seconds <= MAX_GRANT_TTL_SECONDS:
+            raise ValueError("secret_grant_ttl_invalid")
+        return self.ttl_seconds
+    def _nonce(self) -> str:
+        value = self.nonce_factory()
+        if (
+            type(value) is not str
+            or not 16 <= len(value) <= 128
+            or not value.isascii()
+            or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._:-" for char in value)
+        ):
+            raise ValueError("secret_grant_nonce_invalid")
+        return value
+__all__ = ["IndependentGrantAuthorityBinding", "IndependentSignerSecretGrantProvider"]

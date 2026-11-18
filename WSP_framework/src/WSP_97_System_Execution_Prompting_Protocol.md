@@ -1,9 +1,28 @@
 # WSP 97: System Execution Prompting Protocol
 
 **Status**: ACTIVE
-**Version**: 1.3
-**Date**: 2026-03-29
+**Version**: 1.10
+**Date**: 2026-10-28
 **Author**: 0102 (System Execution Architect)
+
+---
+
+## System roadmap navigation
+
+After bootstrap, read [the root system roadmap](../../ROADMAP.md#authority-and-fast-start) for completion gates, current planning priorities and the selected work packet. Follow its module and evidence links on demand. The roadmap owns cross-system sequencing; it does not redefine this protocol, certify completion, grant authority or replace a current signed work order. Historical plans are listed in the roadmap archive register.
+
+## Mandatory Outcome Verification and Completion Gate (v1.10, 2026-10-28)
+
+**Universal invariant:** Execution success is not task completion. A worker MUST distinguish attempted execution, produced artifact, independently verified result, and (for WSP 48) demonstrated transferable improvement. A tool success, passing self-review, PR merge, document update, or memory entry alone is not acceptance.
+
+1. **Freeze acceptance before execution.** Identify the affected scope, authoritative owner, required checks, independent verifier, observable postcondition, and rollback or recovery path. A changed acceptance rule requires separate review; never relax tests merely to make a change pass.
+2. **Validate before mutation/promotion.** Run relevant deterministic tests and contract/security checks, inspect changed output, and obtain independent verification when required by the governing owner. No self-issued receipt may impersonate independent verification.
+3. **For repository changes:** create a traceable PR; run and inspect applicable checks on its exact head SHA; squash merge only within authorized repository policy; then obtain the resulting default-branch SHA and verify applicable CI/checks **on that SHA**. An empty status list, pending checks, unavailable CI, or a passing PR-head check alone means UNKNOWN, never PASS. Repository policy may block merging until checks pass; this protocol does not itself change branch protection.
+4. **For other work:** verify the actual task-specific postcondition (e.g. deployed endpoint and TLS, rendered/listened media, independently sourced research, or authorized worker outcome). A build or upload receipt does not prove live deployment or quality.
+5. **On failure or missing evidence:** mark the task BLOCKED/UNVERIFIED; inspect the failing evidence, repair in a bounded new change or revert under existing authority, rerun checks and verify the resulting state. Do not report completion while validation is pending. Preserve incident and correction evidence in the existing work record; route reusable lessons through existing WRE Pattern Memory only when admitted.
+6. **Close with a receipt:** record source/head SHA, PR and squash SHA when applicable, verifier and check identifiers/results, observed postcondition, exclusions, and remaining blockers. Report merge, main CI, live output, deployment, and WSP 48 RSI transfer as separate states. A validated one-off correction does not establish recursive self-improvement until reuse is independently measured.
+
+**Ownership:** WSP 97 defines the general completion gate; WSP 48 governs RSI qualification; WRE/admission components enforce execution authority; existing evidence/memory systems retain outcomes. HoloIndex, Brain and Memex are retrieval/continuity surfaces, not substitute authorities. This written rule does not claim automatic runtime enforcement or an always-on CI watcher.
 
 ---
 
@@ -85,14 +104,16 @@ WSP 97 assumes the agent should activate in a disciplined way once enough eviden
 HoloIndex -> Research -> Hard Think -> Dialectic Sweep -> First Principles -> Build -> Follow WSP
 ```
 
-**Definition**: Every agent operation follows this 7-step cycle:
+**Definition**: Every agent operation follows this 7-stage mantra:
 - **HoloIndex**: Query knowledge base for context and patterns
 - **Research**: Gather relevant information and precedents
-- **Hard Think**: Apply critical analysis and first principles
+- **Hard Think**: Apply critical analysis to the retrieved evidence
 - **Dialectic Sweep**: Challenge assumptions, compare alternatives, search for the better move
 - **First Principles**: Break down to fundamental truths (Occam's Razor)
 - **Build**: Execute with minimal complexity
 - **Follow WSP**: Ensure protocol compliance throughout
+
+The stage count and operator-action count are intentionally different. The mantra has **7 stages**. The default operator sequence in Section 1.2 expands retrieval, research, and scope analysis into **9 auditable actions**; it is not a separate 9-stage mantra.
 
 ### 1.1 CoT/CoR Verification Gates (v1.3)
 
@@ -196,6 +217,101 @@ Use this sequence unless a narrower protocol overrides it:
 8. Reduce to first principles / simplest valid move
 9. Execute inside the correct plane
 
+### 1.2A Main-Convergence / PR Closure Gate
+
+Repository work is not complete when a branch or pull request merely exists. For every mutation slice whose intended destination is `main`, WSP 97 requires a terminal convergence state.
+
+Canonical closure loop:
+
+```text
+bounded work
+  -> validate branch
+  -> specialized PR
+  -> inspect mergeability + checks + overlap
+  -> squash merge when qualified
+  -> read back main
+  -> reconcile/close superseded PRs
+  -> classify remaining dirty/open work
+```
+
+Required rules:
+
+1. **Specialized PRs:** keep one coherent concern per PR. Do not accumulate unrelated cleanup, product, WSP, dependency, or historical work merely to reduce PR count.
+2. **Merge is the default completion path:** when the authorized slice is validated, mergeable, has no required failing/pending gate, and does not conflict with newer authoritative work, squash-merge it rather than leaving completed work parked on a branch.
+3. **Verify main after merge:** read back the affected main-branch artifact(s) or resulting commit. A successful PR API response alone is not sufficient evidence that the intended contract survived convergence.
+4. **No blind stale merges:** an old/diverged PR must be compared with current main. Classify it as `SUPERSEDED`, `PARTIALLY_SUPERSEDED`, `NEEDS_REBASE`, `BLOCKED`, or `STILL_CURRENT` before mutation.
+5. **Preserve unique work:** never close/delete a stale PR solely because it is old or non-mergeable. If it contains unique valid delta, preserve that delta and route it through a fresh bounded reconciliation slice or explicit rebase/update.
+6. **Close superseded work:** if current main demonstrably contains the intended behavior and the old PR has no unique valid delta, close it with a reconciliation note rather than leaving repository entropy.
+7. **Dirty-tree safety:** "clean" never means discard unknown state. Classify dirty/untracked work by owner and intent before cleanup. Unknown or concurrent work is preserved and reported, not reset/stashed/deleted by assumption.
+8. **Open-PR hygiene:** before declaring a work cycle complete, inspect related open PRs for overlap. Completed work should not leave a second stale PR claiming the same outcome.
+9. **No false global-clean claim:** connector-visible PR/branch state does not prove a developer's local worktree is clean. Report local cleanliness only from direct worktree evidence.
+10. **Terminal receipt:** record one of `MERGED_VERIFIED_MAIN`, `SUPERSEDED_CLOSED`, `PRESERVED_NEEDS_REBASE`, `BLOCKED_REQUIRED_GATE`, or `ACTIVE_OWNED_WORK`. "PR created" is not a terminal receipt.
+
+This gate governs convergence, not authorization. It never bypasses review requirements, branch protection, CI, security, ownership, or a narrower WSP.
+
+### 1.2B Test Inventory / Reuse Gate
+
+When a task may create, modify, replace, or expand tests, WSP 97 MUST apply the WSP 22 TestModLog pattern before test authoring.
+
+**Required pre-test retrieval**:
+1. Query HoloIndex using the target module, behavior/contract under test, and likely test vocabulary.
+2. Read the target module's `tests/TestModLog.md` when present.
+3. Read the target module's `tests/README.md` when present.
+4. Inspect the closest existing test file(s), fixtures, and helpers surfaced by retrieval.
+
+**Reuse decision**:
+```text
+need test coverage
+  -> retrieve TestModLog + tests README + nearest tests
+  -> same behavior/contract? REUSE or EXTEND existing test
+  -> same pipeline/fixture, new edge case? ADD CASE to existing test file
+  -> materially distinct subsystem/contract? CREATE new test file
+```
+
+A worker MUST NOT create a new test file merely because doing so is easier than understanding the current suite. Existing tests, fixtures, parametrizations, and assertions are reusable architecture.
+
+If a module has active tests but no `tests/TestModLog.md`, the worker MUST first inventory the actual current test files and create or refresh the TestModLog before adding a new test file. The inventory must describe what each existing test file covers well enough for a future worker to decide whether to reuse it without opening every test file.
+
+After tests are added, removed, renamed, or materially expanded, update `tests/TestModLog.md` in the same work slice. Update `tests/README.md` when execution conventions or suite organization change.
+
+**Work-order requirement**: worker prompts that request test creation or modification SHOULD include concrete HoloIndex search parameters for the target behavior and test surface so retrieval is reproducible and not replaced by vibe-based file creation.
+
+**Failure conditions**:
+- new test file created without TestModLog/README/nearest-test retrieval when those artifacts exist;
+- duplicate coverage created where an existing test could be cleanly extended;
+- active test inventory materially diverges from `tests/TestModLog.md` after the slice;
+- a historical aggregate pass count is reported as a fresh test run without fresh execution evidence.
+
+**Relationships**: WSP 22 owns the TestModLog artifact; WSP 50 owns pre-action verification; WSP 84 supplies code/test memory discipline; WSP 6 governs verification depth. WSP 97 makes retrieval/reuse part of the execution gate.
+
+### 1.2.1 WSP 15 Economy and Verification Binding
+
+Before an implementation or autonomous improvement enters execution, WSP 97
+MUST consume one canonical WSP 15 allocation receipt. The operator asks:
+
+1. **Do I need it?** -> Importance and Impact.
+2. **Can I afford it?** -> Complexity, compute, time, and verification cost.
+3. **Can I live without it now?** -> Deferability and current blockers.
+
+These questions are a plain-language projection of WSP 15, not a second
+scoring system. WSP 15 remains authoritative for the values and priority. WSP
+97 binds the resulting receipt to the work order, selected execution plane,
+and the tiered verification plan required by WSP 6.
+
+The verification plan MUST start with focused/module evidence and expand to
+dependency, security, held-out, or full-repository scope according to observed
+impact. A stale or incomplete dependency/retrieval result requires escalation,
+not optimistic test omission. Reusable parent-baseline evidence MUST be bound
+to the exact parent SHA and execution environment; differential acceptance is
+based on test identifiers rather than matching aggregate failure counts.
+
+**Implementation truth**: `SPECIFIED_NOT_IMPLEMENTED` for end-to-end runtime
+enforcement. The current WRE differential component performs pure integrity
+and exact-ID analysis only. It does not authenticate a WSP 15 allocation,
+prove Git ancestry or collection completeness, execute tests, or authorize
+promotion. Those claims require independently verified work-order, lineage,
+collection-manifest, and evidence receipts at the WRE integration boundary.
+
 ### 1.3 Scope Discipline
 
 WSP 97 forbids false narrowness.
@@ -212,12 +328,21 @@ This is the default micro/macro rhythm:
 3. **Out-of-the-box**: what adjacent path or existing mechanism makes the better move possible?
 4. **Compression**: what is the smallest change that respects the larger truth?
 
+### 1.4 Cross-Module Concatenation
+
+When a slice crosses module boundaries, classify its launch, ingress, continuity, durable-state, execution, and supervision contracts before adding wiring. The derived operational checklist is `WSP_framework/docs/annexes/MODULE_CONCATENATION_GATE.md`. WSP 97 remains canonical; the annex is a non-protocol quick reference and does not create a new execution plane or memory authority.
+
 ### 2. Agent-Specific Execution Profiles
+
+These are role-behavior templates, not model bindings. Model name, version,
+context budget, and availability come from runtime configuration and require a
+runtime binding receipt before execution may claim them.
 
 #### 0102 Profile (Strategic Orchestrator)
 ```
 EXECUTION_PROFILE = {
-    "context_window": "unlimited",
+    "context_window": "runtime_configured",
+    "model_binding": "runtime_receipt_required",
     "output_mode": "verbose_strategic",
     "specialization": "oversight_validation",
     "mantra_emphasis": "Hard Think + Dialectic Sweep + Follow WSP"
@@ -233,7 +358,8 @@ EXECUTION_PROFILE = {
 #### Qwen Profile (Operational Coordinator)
 ```
 EXECUTION_PROFILE = {
-    "context_window": "32K_tokens",
+    "context_window": "runtime_configured",
+    "model_binding": "runtime_receipt_required",
     "output_mode": "structured_json",
     "specialization": "planning_coordination",
     "mantra_emphasis": "Research + CoT retrieval + Build"
@@ -249,7 +375,8 @@ EXECUTION_PROFILE = {
 #### Gemma Profile (Focused Executor)
 ```
 EXECUTION_PROFILE = {
-    "context_window": "8K_tokens",
+    "context_window": "runtime_configured",
+    "model_binding": "runtime_receipt_required",
     "output_mode": "binary_validation",
     "specialization": "validation_execution",
     "mantra_emphasis": "First Principles + validation after CoR sweep"
@@ -292,6 +419,7 @@ MCP_RUBIK_INTEGRATION = {
         "HoloIndex: Query current MCP integration status",
         "Research: Analyze existing manifest and agent capabilities",
         "Hard Think: Apply Occam's Razor to collaboration patterns",
+        "Dialectic Sweep: Compare alternatives and challenge assumptions",
         "First Principles: Minimal viable MCP integration per Rubik",
         "Build: Implement gateway policies and server mappings",
         "Follow WSP: Ensure WSP 77/80/96 compliance"
@@ -306,6 +434,10 @@ MCP_RUBIK_INTEGRATION = {
     "mantra_integration": "Full cycle execution with emphasis on First Principles"
 }
 ```
+
+Mission-template success criteria are desired acceptance conditions. Their
+presence does not prove runtime availability or completion; each satisfied
+criterion requires resolvable evidence in the execution receipt.
 
 ---
 
@@ -330,7 +462,7 @@ Mission template: {CURRENT_MISSION_TEMPLATE}
 ```python
 def detect_and_route_mission(query: str) -> dict:
     """
-    FIRST PRINCIPLES: Automatic mission detection and agent routing
+    FIRST PRINCIPLES: Mission detection and coordination-plan selection
     """
     mission_type = detect_mission_type(query)
     agent_profile = get_agent_profile()
@@ -345,21 +477,102 @@ def detect_and_route_mission(query: str) -> dict:
     }
 ```
 
-### 3. Recursive Execution Validation
+This function shape selects a plan. It does not invoke a model, dispatch a
+worker, or prove execution; WSP 77 owns the governed handoff boundary.
 
-```python
-def validate_execution_compliance(execution_result: dict) -> bool:
-    """
-    Ensure execution follows WSP 97 mantra
-    """
-    required_steps = ["holoindex_query", "research_gathering",
-                     "hard_think_analysis", "first_principles",
-                     "build_execution", "wsp_compliance"]
+### 3. Recursive Execution Validation Contract
 
-    completed_steps = execution_result.get("execution_steps", [])
+The active repository-evidence validator is
+`tools/wsp97_execution_validator.py`. Default admission requires the explicit
+schema string `wsp97_execution_receipt.v1.1` and these fields:
 
-    return all(step in completed_steps for step in required_steps)
+- `repository_context.base_commit`: an exact 40-character Git commit bound to
+  the invoking repository;
+- `execution_id`: stable slice/run identity;
+- `execution_plane`: the classified local, docs, WRE, or runtime plane;
+- `outcome`: `completed`, `blocked`, or `failed`;
+- `action_evidence`: non-empty evidence-reference lists for all 9 canonical
+  operator actions;
+- `wsps_applied`: a non-empty list that includes `WSP_97`;
+- `compliance_evidence`: non-empty references supporting the WSP declaration.
+
+Only `action_evidence.retrieve_wsps` is repository-resolved. Every item MUST be
+an exact POSIX repository-relative tracked file under
+`WSP_framework/src/WSP_<id>_*.md`. Prose, URLs, absolute/drive/UNC paths,
+backslashes, traversal, fragments, directories, untracked paths, wrong Git
+case, and paths crossing a symlink, junction, or reparse point fail admission.
+Every `wsps_applied` identifier MUST have a corresponding retrieved canonical
+path. Additional retrieved WSP precedents are permitted.
+
+All other action evidence and compliance evidence remain opaque strings. The
+validator never opens their paths, fetches their URLs, or treats their content
+as authenticated.
+
+Run it with an explicit repository root and, when the caller owns the expected
+task base, an independent base assertion:
+
+```bash
+python tools/wsp97_execution_validator.py <receipt.json> \
+  --repo-root . --expected-base <40-character-commit> --pretty
 ```
+
+The root MUST be the exact-case Git top-level. The receipt base MUST exist as a
+commit, be an ancestor of the current worktree `HEAD`, and equal
+`--expected-base` when supplied. This binds the receipt to the validating
+worktree and base ancestry; it does not authenticate an immutable final
+snapshot or prove that the declared work occurred.
+
+Before root resolution, the receipt gate MUST validate the exact
+`repository_context` mapping and lowercase 40-character `base_commit`, caller
+`expected_base` syntax and equality, retrieved-WSP count/path syntax and case,
+and exact `WSP_<digits>` identifiers. Receipt defects and a syntactically valid
+base mismatch exit `1` without Git. A malformed caller `expected_base` is an
+operational invocation error and exits `2` without Git. Missing repository
+context is not structurally complete.
+
+Root inspection MUST `lstat` every supplied path component before any
+existence, directory, resolution, or Git operation. A symlink, junction, or
+reparse component is an operational failure and no Git process may start.
+
+The v1.1 validator is resource-bounded:
+
+| Resource | Maximum |
+|---|---:|
+| Receipt bytes before JSON parsing | 262,144 |
+| Receipt mapping items | 32 |
+| Repository-context mapping items | 8 |
+| Action-evidence mapping items | 32 |
+| Items in one evidence list | 128 |
+| UTF-8 bytes in one evidence string | 4,096 |
+| UTF-8 bytes in one retrieved-WSP path | 512 |
+| Retrieved WSPs | 64 |
+| Aggregate evidence UTF-8 bytes | 131,072 |
+| Git calls per validation | 72 |
+| Seconds per Git subprocess | 5 |
+| Post-run accepted bytes per Git tempfile stream | 65,536 |
+
+Container, item, string, path, count, or aggregate evidence violations stop
+before repository subprocesses and are receipt non-compliance. Exact literal
+`git ls-files` queries validate each WSP path; the validator MUST NOT scan the
+full tracked-file catalog to diagnose case mismatches. Git budget exhaustion,
+timeout, process-start failure, excessive post-run tempfile output, unreadable
+root components, or inability to establish the exact Git root are operational
+errors. Git stdout/stderr are redirected to temporary files, avoiding RAM
+amplification. The 65,536-byte rule is an accepted-output check after process
+exit, not a write-time tempfile cap; the 5-second timeout bounds process
+duration and the tempfiles are discarded after inspection.
+
+Exit code `0` means v1.1 repository-evidence compliant, `1` means
+non-compliant, and `2` means JSON, contract, or repository setup could not be
+read or established. `--legacy-structural` is a separately labeled
+`legacy_structural_non_admitting` diagnostic: it always exits `1`, even when
+the legacy shape is structurally complete. Missing schema and v1.0 receipts are
+never admitted by the default path.
+
+**Truth boundary**: receipt v1.1 proves structural completeness plus the narrow
+repository truth of canonical retrieved WSP files and base ancestry. It does
+not prove reasoning quality, resolve non-WSP evidence, authenticate evidence
+claims, prove runtime side effects, or fetch network resources.
 
 ---
 
@@ -402,7 +615,8 @@ EXECUTION PATTERN:
 3. Create detailed coordination and implementation plans
 4. Provide structured, actionable execution guidance
 
-Always reference WSP 97 in your coordination and optimize output for 32K context window.
+Always reference WSP 97 in your coordination and stay within the context budget
+supplied by the validated runtime binding.
 ```
 
 ### Gemma System Prompt Integration
@@ -420,7 +634,7 @@ EXECUTION PATTERN:
 1. Perform binary classification and pattern matching
 2. Execute focused validation and quality checks
 3. Provide clear success/failure signals
-4. Maintain operational efficiency within 8K context
+4. Stay within the context budget supplied by the validated runtime binding
 
 Always reference WSP 97 in your validation tasks and optimize for minimal, precise output.
 ```
@@ -434,17 +648,24 @@ Always reference WSP 97 in your validation tasks and optimize for minimal, preci
 | WSP | Integration Point | Status |
 |-----|------------------|--------|
 | **WSP 21** | Prompt Engineering Foundation | [OK] Enhanced |
+| **WSP 22** | ModLog/TestModLog operational memory | [OK] Enhanced |
 | **WSP 35** | HoloIndex Coordination | [OK] Enhanced |
+| **WSP 50** | Pre-action verification | [OK] Enhanced |
 | **WSP 77** | Agent Coordination | [OK] Enhanced |
 | **WSP 80** | Cube-Level Orchestration | [OK] Enhanced |
+| **WSP 84** | Existing code/test memory discipline | [OK] Enhanced |
 | **WSP 96** | MCP Governance | [OK] Enhanced |
 
 ### Testing & Validation
 
-- **Mantra Compliance**: All agent outputs must demonstrate the 6-step execution cycle
-- **Profile Adherence**: Agents must stay within their defined capabilities and output modes
-- **Mission Success**: All mission templates must achieve defined success criteria
-- **Recursive Validation**: Agents validate their own compliance with WSP 97
+- **Test Inventory Reuse**: Before authoring tests, retrieve `tests/TestModLog.md`, `tests/README.md`, and nearest existing tests; reuse/extend before creating new test files.
+- **Mantra Compliance**: Execution receipts must index evidence for all 7 mantra stages
+- **Profile Adherence**: Runtime receipts must identify the actual model binding
+  and budget used; role labels alone are not evidence
+- **Mission Success**: Template criteria are targets and count as satisfied only
+  when resolvable execution evidence proves them
+- **Recursive Validation**: Agents may emit repository-bound v1.1 receipts, but
+  self-issued receipts do not authenticate their opaque claims or execution
 
 ### Operational CLI Hook: Connect WRE
 
@@ -471,7 +692,7 @@ to confirm WRE preflight state and current enforcement behavior.
 ### 1. Consistent Execution Quality
 - **Standardized Approach**: All agents follow the same fundamental process
 - **Quality Assurance**: Built-in validation at each step
-- **Predictable Outcomes**: Consistent execution patterns across missions
+- **Comparable Evidence**: Consistent receipt structure across missions
 
 ### 2. Agent Optimization
 - **Context Efficiency**: Optimized output for each agent's capabilities
@@ -504,7 +725,8 @@ to confirm WRE preflight state and current enforcement behavior.
 
 ---
 
-**Protocol Status**: ACTIVE - Ready for agent integration
+**Protocol Status**: ACTIVE - execution/receipt contract; runtime readiness and
+model availability remain evidence-dependent
 
 **Next Step**: Integrate WSP 97 references into all agent system prompts
 

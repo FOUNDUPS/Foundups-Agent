@@ -259,6 +259,214 @@ def test_main_py_wre_dashboard_insufficient_data_calls_dispatcher():
     assert call_kwargs["payload"]["automation_candidate"] is True
 
 
+def test_main_py_wre_dashboard_critical_alert_warns_by_default_for_menu_startup():
+    """Interactive menu startup should keep dashboard signal but not auto-block by default."""
+    import main
+
+    fake_health = {
+        "insufficient_data": False,
+        "total_executions": 36,
+        "min_samples": 25,
+        "healthy": False,
+        "alerts": [{"severity": "critical", "message": "critical sample"}],
+    }
+    with patch(
+        "modules.infrastructure.wre_core.src.dashboard_alerts.check_dashboard_health",
+        return_value=fake_health,
+    ):
+        with patch(
+            "modules.infrastructure.wre_core.src.dashboard_alerts.DashboardAlertMonitor"
+        ) as mock_monitor:
+            mock_monitor.return_value.is_in_watch_period.return_value = False
+            with patch("builtins.print") as mock_print:
+                with patch.dict(
+                    "os.environ",
+                    {
+                        "WRE_DASHBOARD_PREFLIGHT": "1",
+                        "OPENCLAW_24X7": "0",
+                    },
+                    clear=True,
+                ):
+                    result = main.run_wre_dashboard_preflight(Path("."))
+
+    assert result is True
+    printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
+    assert "preflight=FAIL (STABLE)" in printed
+    assert "Startup blocked" not in printed
+
+
+def test_main_py_wre_dashboard_critical_alert_warns_for_menu_even_with_ambient_24x7():
+    """Ambient 24x7 env must not prevent the interactive menu from loading."""
+    import main
+
+    fake_health = {
+        "insufficient_data": False,
+        "total_executions": 36,
+        "min_samples": 25,
+        "healthy": False,
+        "alerts": [{"severity": "critical", "message": "critical sample"}],
+    }
+    with patch(
+        "modules.infrastructure.wre_core.src.dashboard_alerts.check_dashboard_health",
+        return_value=fake_health,
+    ):
+        with patch(
+            "modules.infrastructure.wre_core.src.dashboard_alerts.DashboardAlertMonitor"
+        ) as mock_monitor:
+            mock_monitor.return_value.is_in_watch_period.return_value = False
+            with patch("builtins.print") as mock_print:
+                with patch.dict(
+                    "os.environ",
+                    {
+                        "WRE_DASHBOARD_PREFLIGHT": "1",
+                        "OPENCLAW_24X7": "1",
+                    },
+                    clear=True,
+                ):
+                    result = main.run_wre_dashboard_preflight(Path("."))
+
+    assert result is True
+    printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
+    assert "preflight=FAIL (STABLE)" in printed
+    assert "Startup blocked" not in printed
+
+
+def test_main_py_wre_dashboard_critical_alert_blocks_for_explicit_menu_enforcement():
+    """Explicit dashboard enforcement remains available for interactive startup."""
+    import main
+
+    fake_health = {
+        "insufficient_data": False,
+        "total_executions": 36,
+        "min_samples": 25,
+        "healthy": False,
+        "alerts": [{"severity": "critical", "message": "critical sample"}],
+    }
+    with patch(
+        "modules.infrastructure.wre_core.src.dashboard_alerts.check_dashboard_health",
+        return_value=fake_health,
+    ):
+        with patch(
+            "modules.infrastructure.wre_core.src.dashboard_alerts.DashboardAlertMonitor"
+        ) as mock_monitor:
+            mock_monitor.return_value.is_in_watch_period.return_value = False
+            with patch("builtins.print") as mock_print:
+                with patch(
+                    "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+                ) as mock_dispatch:
+                    with patch.dict(
+                        "os.environ",
+                        {
+                            "WRE_DASHBOARD_PREFLIGHT": "1",
+                            "WRE_DASHBOARD_AUTO_ENFORCE": "1",
+                        },
+                        clear=True,
+                    ):
+                        result = main.run_wre_dashboard_preflight(Path("."))
+
+    assert result is False
+    mock_dispatch.assert_called_once()
+    assert mock_dispatch.call_args.kwargs["component"] == "wre_dashboard"
+    assert mock_dispatch.call_args.kwargs["severity"] == "critical"
+    assert mock_dispatch.call_args.kwargs["payload"]["automation_candidate"] is True
+    printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
+    assert "preflight=FAIL (STABLE, ENFORCED)" in printed
+    assert "Startup blocked by AUTO enforcement" in printed
+
+
+def test_main_py_wre_dashboard_critical_alert_blocks_for_autonomous_24x7_runtime():
+    """Autonomous 24x7 runtime preserves the fail-closed dashboard gate."""
+    import main
+
+    fake_health = {
+        "insufficient_data": False,
+        "total_executions": 36,
+        "min_samples": 25,
+        "healthy": False,
+        "alerts": [{"severity": "critical", "message": "critical sample"}],
+    }
+    with patch(
+        "modules.infrastructure.wre_core.src.dashboard_alerts.check_dashboard_health",
+        return_value=fake_health,
+    ):
+        with patch(
+            "modules.infrastructure.wre_core.src.dashboard_alerts.DashboardAlertMonitor"
+        ) as mock_monitor:
+            mock_monitor.return_value.is_in_watch_period.return_value = False
+            with patch("builtins.print") as mock_print:
+                with patch(
+                    "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+                ) as mock_dispatch:
+                    with patch.dict(
+                        "os.environ",
+                        {
+                            "WRE_DASHBOARD_PREFLIGHT": "1",
+                            "OPENCLAW_24X7": "1",
+                        },
+                        clear=True,
+                    ):
+                        result = main.run_wre_dashboard_preflight(Path("."), interactive_menu=False)
+
+    assert result is False
+    mock_dispatch.assert_called_once()
+    assert mock_dispatch.call_args.kwargs["component"] == "wre_dashboard"
+    assert mock_dispatch.call_args.kwargs["severity"] == "critical"
+    assert mock_dispatch.call_args.kwargs["payload"]["automation_candidate"] is True
+    printed = "\n".join(str(call.args[0]) for call in mock_print.call_args_list)
+    assert "preflight=FAIL (STABLE, ENFORCED)" in printed
+    assert "Startup blocked by AUTO enforcement" in printed
+
+
+def test_main_wre_research_display_preserves_health_gate(monkeypatch, capsys):
+    import main
+    from modules.infrastructure.wre_core.src import dashboard_alerts as dashboard
+
+    calls = []
+    def reader(path, digest):
+        calls.append((path, digest))
+        return {"state": "unknown", "reason": "unavailable"}
+    monkeypatch.setattr(dashboard, "read_research_report_summary", reader)
+    monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", "explicit-selection")
+    monkeypatch.setenv("WRE_RESEARCH_BASELINE_SHA256", "a" * 64)
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
+    monkeypatch.setenv("WRE_DASHBOARD_AUTO_ENFORCE", "0")
+    health = {"healthy": False, "total_executions": 30, "min_samples": 25,
+              "alerts": [{"severity": "critical"}]}
+    monkeypatch.setattr(dashboard, "check_dashboard_health", lambda: health)
+    with patch.object(dashboard, "DashboardAlertMonitor") as monitor:
+        monitor.return_value.is_in_watch_period.return_value = False
+        with patch.object(pr, "on_preflight_fail") as dispatch:
+            monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0")
+            assert main.run_wre_dashboard_preflight(Path(".")) is True
+            dispatch.assert_not_called()
+            monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "1")
+            assert main.run_wre_dashboard_preflight(Path(".")) is False
+            dispatch.assert_called_once()
+    assert calls == [("explicit-selection", "a" * 64)] * 2
+    assert capsys.readouterr().out.count("[WRE-RESEARCH] unknown") == 2
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "0")
+    assert main.run_wre_dashboard_preflight(Path(".")) is True
+    assert len(calls) == 2
+
+
+def test_main_wre_research_reader_error_cannot_block_health(monkeypatch, capsys):
+    import main
+    from modules.infrastructure.wre_core.src import dashboard_alerts as dashboard
+
+    def failed(*args):
+        raise RuntimeError("private diagnostic detail")
+    monkeypatch.setattr(dashboard, "read_research_report_summary", failed)
+    monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", "explicit-selection")
+    monkeypatch.setenv("WRE_RESEARCH_BASELINE_SHA256", "a" * 64)
+    monkeypatch.setattr(dashboard, "check_dashboard_health", lambda: {"healthy": True})
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "1")
+    assert main.run_wre_dashboard_preflight(Path(".")) is True
+    output = capsys.readouterr().out
+    assert "[WRE-RESEARCH] unknown" in output
+    assert "private diagnostic detail" not in output
+
+
 # === DJ2-C OAuth preflight dispatch tests ===
 
 
@@ -273,7 +481,7 @@ def test_main_py_oauth_no_healthy_tokens_calls_dispatcher():
         fake_oauth_status = {
             "healthy": [],  # No healthy tokens
             "reauth_needed": False,  # Set False to skip interactive input prompt
-            "expired": ["set1", "set2"],
+            "expired": [1, 10],
         }
         with patch(
             "modules.platform_integration.youtube_auth.src.youtube_auth.preflight_oauth_check",
@@ -369,7 +577,7 @@ def test_main_py_oauth_healthy_does_not_dispatch():
         "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
     ) as mock_dispatch:
         fake_oauth_status = {
-            "healthy": ["set1", "set10"],  # Healthy tokens
+            "healthy": [1, 10],  # Healthy tokens
             "reauth_needed": False,
             "expired": [],
         }

@@ -8,6 +8,8 @@ Based on live DOM inspection of YouTube Studio pages.
 import asyncio
 import logging
 import os
+import re
+from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Tuple
@@ -16,7 +18,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, StaleElementReferenceException
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,6 @@ def _emit_oops_signal(signal_type: str, source_dae: str = "shorts_scheduler_dom"
 
 # Diagnostic screenshot directory
 DIAGNOSTIC_DIR = Path("modules/platform_integration/youtube_shorts_scheduler/memory/diagnostics")
-DIAGNOSTIC_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class DOMSelectors:
@@ -288,25 +289,76 @@ class DOMSelectors:
     ACCOUNT_ITEM_BY_NAME_TEMPLATE = "//ytd-account-item-renderer[.//yt-formatted-string[contains(text(),'{channel_name}')]]"
 
 
+# Filter dialog checkbox labels (Studio UI text — not always visibility.capitalize())
+VISIBILITY_CHECKBOX_LABELS: Dict[str, str] = {
+    "UNLISTED": "Unlisted",
+    "PRIVATE": "Private",
+    "PUBLIC": "Public",
+    "SCHEDULED": "Has schedule",
+    "DRAFT": "Draft",
+    "MEMBERS": "Members",
+}
+
+# Chip / URL markers used to detect which visibility filter is active
+VISIBILITY_CHIP_MARKERS: Dict[str, tuple] = {
+    "UNLISTED": ("unlisted",),
+    "SCHEDULED": ("scheduled", "has schedule"),
+    "PUBLIC": ("public",),
+    "PRIVATE": ("private",),
+    "DRAFT": ("draft",),
+}
+
+
+def classify_visibility_filter(chip_text: str, url: str = "") -> Optional[str]:
+    """
+    Infer active Studio list filter from chip text and/or URL filter param.
+
+    Returns:
+        UNLISTED, SCHEDULED, PUBLIC, PRIVATE, DRAFT, or None if unknown/no filter.
+    """
+    text = (chip_text or "").lower()
+    href = (url or "").lower()
+
+    if text:
+        for visibility, markers in VISIBILITY_CHIP_MARKERS.items():
+            if any(m in text for m in markers):
+                return visibility
+        if "visibility:" in text:
+            return "UNKNOWN"
+
+    if "filter=" in href:
+        for visibility, markers in VISIBILITY_CHIP_MARKERS.items():
+            if any(m in href for m in markers):
+                return visibility
+
+    return None
+
+
 class YouTubeStudioDOM:
     """
     DOM interaction layer for YouTube Studio automation.
     """
+    _policy_timezone = None
+    _policy_cycle_attempts = 0
+    _video_policy_edit = None
 
-    def __init__(self, driver):
+    def __init__(self, driver, *, capture_diagnostics: bool = True):
         """
         Initialize with Selenium WebDriver.
 
         Args:
             driver: Selenium WebDriver instance (Chrome or Edge)
+            capture_diagnostics: Allow diagnostic file writes; disabled for preview.
         """
         self.driver = driver
+        self.capture_diagnostics = capture_diagnostics
         self.wait = WebDriverWait(driver, 10)
         self.selectors = DOMSelectors()
         # 012 digital twin (Occam): slow + deterministic + stable.
         # No Bezier cursor paths, no jitter offsets, no mouse jumping.
         self._pre_click_delay = float(os.getenv("YT_SCHEDULER_PRE_CLICK_DELAY_SEC", "0.25"))
         self._post_click_delay = float(os.getenv("YT_SCHEDULER_POST_CLICK_DELAY_SEC", "0.25"))
+        self._last_shorts_channel_id: Optional[str] = None
 
     # =========================================
     # UTILITY METHODS
@@ -352,7 +404,10 @@ class YouTubeStudioDOM:
         Returns:
             Path to screenshot file, or None if capture failed
         """
+        if not self.capture_diagnostics:
+            return None
         try:
+            DIAGNOSTIC_DIR.mkdir(parents=True, exist_ok=True)
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"diag_{context}_{timestamp}.png"
             filepath = DIAGNOSTIC_DIR / filename
@@ -497,9 +552,14 @@ class YouTubeStudioDOM:
             "method": "dom",
             "needs_filter": True,
             "filter_applied": False,
+            "detected_filter": None,
         }
 
         try:
+            filter_state = self.read_visibility_filter_state()
+            result["detected_filter"] = filter_state.get("detected")
+            result["filter_applied"] = filter_state.get("detected") == "UNLISTED"
+
             # Quick DOM check first
             video_rows = self.driver.execute_script("""
                 const rows = document.querySelectorAll('ytcp-video-row');
@@ -507,7 +567,7 @@ class YouTubeStudioDOM:
                 let filterApplied = false;
                 for (let chip of filterChips) {
                     const text = (chip.textContent || '').trim().toLowerCase();
-                    if (text.includes('visibility:')) {
+                    if (text.includes('visibility:') && text.includes('unlisted')) {
                         filterApplied = true;
                         break;
                     }
@@ -525,7 +585,10 @@ class YouTubeStudioDOM:
                 result["shorts_visible"] = video_rows.get("hasTable", False) and result["count"] > 0
 
                 if result["shorts_visible"]:
-                    logger.info(f"[DOM] Shorts verified: {result['count']} videos visible, filter_applied={result['filter_applied']}")
+                    logger.info(
+                        f"[DOM] Shorts verified: {result['count']} videos visible, "
+                        f"filter={result.get('detected_filter')}, unlisted_chip={result['filter_applied']}"
+                    )
                     result["needs_filter"] = not result["filter_applied"]
                     return result
 
@@ -742,21 +805,29 @@ class YouTubeStudioDOM:
                         "arguments[0].scrollIntoView({block:'center', inline:'center'});",
                         element,
                     )
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
                 time.sleep(self._pre_click_delay)
                 element.click()
                 time.sleep(self._post_click_delay)
+        except VerificationHandoff:
+            raise
         except Exception:
             # Fallback order: ActionChains (often works on custom elements) -> JS click
             try:
                 time.sleep(self._pre_click_delay)
                 ActionChains(self.driver).move_to_element(element).click().perform()
                 time.sleep(self._post_click_delay)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     self.driver.execute_script("arguments[0].click();", element)
                     time.sleep(self._post_click_delay)
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     raise
 
@@ -1077,6 +1148,266 @@ class YouTubeStudioDOM:
     # PAGE 1: SHORTS LIST METHODS
     # =========================================
 
+    def _visibility_checkbox_label(self, visibility: str) -> str:
+        """Studio checkbox label for a visibility filter key (e.g. SCHEDULED -> Has schedule)."""
+        key = (visibility or "UNLISTED").upper()
+        return VISIBILITY_CHECKBOX_LABELS.get(key, key.capitalize())
+
+    def read_visibility_filter_state(self) -> Dict[str, Any]:
+        """
+        Read current Shorts list visibility filter from chip text and URL.
+
+        Returns dict with keys: active, chip_texts, url, detected, wrong_for_unlisted.
+        """
+        from .schedule_inventory import FILTER_STATE_SCRIPT
+
+        try:
+            raw = self.driver.execute_script(FILTER_STATE_SCRIPT) or {}
+        except Exception as exc:
+            logger.warning(f"[DOM] Could not read visibility filter state: {exc}")
+            raw = {"chipTexts": [], "url": ""}
+
+        # The shared snapshot sees every filter chip. A title/search chip whose
+        # value happens to say Unlisted/Scheduled is not visibility authority.
+        bare_labels = {label.casefold() for label in VISIBILITY_CHECKBOX_LABELS.values()} | {"scheduled"}
+        chip_texts = [text for text in (raw.get("chipTexts") or []) if isinstance(text, str)
+                      and ((label := " ".join(text.casefold().split())).startswith(("visibility:", "visibility "))
+                           or label in bare_labels)]
+        url = raw.get("url") or ""
+        chip_blob = " | ".join(chip_texts)
+        detected = classify_visibility_filter(chip_blob, url)
+
+        return {
+            "active": bool(chip_texts) or ("UNLISTED" in url.upper() and "filter=" in url),
+            "chip_texts": chip_texts,
+            "url": url,
+            "detected": detected,
+            "wrong_for_unlisted": detected is not None and detected != "UNLISTED",
+        }
+
+    def verify_visibility_filter(self, visibility: str = "UNLISTED") -> bool:
+        """True only when the requested visibility filter is confirmed (chip or URL)."""
+        target = (visibility or "UNLISTED").upper()
+        state = self.read_visibility_filter_state()
+
+        # Reject wrong filter even if URL looks ambiguous
+        detected = state.get("detected")
+        if detected and detected != target and detected != "UNKNOWN":
+            return False
+
+        if detected == target:
+            return True
+
+        url = (state.get("url") or "").upper()
+        if "FILTER=" in url:
+            markers = VISIBILITY_CHIP_MARKERS.get(target, (target.lower(),))
+            if any(m.upper() in url for m in markers):
+                # URL says UNLISTED but chip says Scheduled — trust chip over URL
+                if target == "UNLISTED" and state.get("wrong_for_unlisted"):
+                    return False
+                return True
+        return False
+
+    def _clear_visibility_filter_chips(self) -> bool:
+        """Remove active visibility filter chips (e.g. Has schedule) before switching to Unlisted."""
+        import time
+        try:
+            cleared = self.driver.execute_script("""
+                let removed = 0;
+                const chips = document.querySelectorAll('ytcp-chip');
+                for (const chip of chips) {
+                    const text = (chip.textContent || '').trim().toLowerCase();
+                    if (!text.includes('visibility') && !text.includes('schedule') && !text.includes('unlisted')) {
+                        continue;
+                    }
+                    const close = chip.querySelector(
+                        'ytcp-icon-button, tp-yt-iron-icon, button[aria-label*="Remove"], ' +
+                        'button[aria-label*="Clear"], #remove-icon-button, [id*="remove"]'
+                    );
+                    if (close) {
+                        close.click();
+                        removed += 1;
+                    }
+                }
+                return removed;
+            """)
+            if cleared:
+                logger.info(f"[DOM] Cleared {cleared} visibility filter chip(s)")
+                time.sleep(1.0)
+            return bool(cleared)
+        except Exception as exc:
+            logger.warning(f"[DOM] Could not clear visibility chips: {exc}")
+            return False
+
+    def _uncheck_other_visibility_checkboxes(self, keep_label: str) -> None:
+        """In the filter dialog, uncheck visibility options other than keep_label."""
+        import time
+        try:
+            self.driver.execute_script(
+                """
+                const keep = (arguments[0] || '').toLowerCase();
+                const dialog = document.querySelector('ytcp-filter-dialog');
+                if (!dialog) return;
+                const labels = ['Unlisted', 'Has schedule', 'Public', 'Private', 'Draft', 'Members'];
+                for (const label of labels) {
+                    if (label.toLowerCase() === keep) continue;
+                    const spans = dialog.querySelectorAll('span');
+                    for (const span of spans) {
+                        if ((span.textContent || '').trim() !== label) continue;
+                        let current = span.parentElement;
+                        for (let i = 0; i < 10 && current; i++) {
+                            const cb = current.querySelector('ytcp-checkbox-lit');
+                            if (cb && (cb.hasAttribute('checked') || cb.checked === true)) {
+                                cb.click();
+                            }
+                            current = current.parentElement;
+                        }
+                    }
+                }
+                """,
+                keep_label,
+            )
+            time.sleep(0.5)
+        except Exception as exc:
+            logger.debug(f"[DOM] Uncheck other visibility filters skipped: {exc}")
+
+    def _visibility_chip_matches(self, visibility_label: str) -> bool:
+        """True if list page shows the expected visibility filter chip."""
+        label = (visibility_label or "Unlisted").lower()
+        try:
+            return bool(
+                self.driver.execute_script(
+                    """
+                    const want = (arguments[0] || '').toLowerCase();
+                    const chips = document.querySelectorAll('ytcp-chip');
+                    for (const chip of chips) {
+                        const text = (chip.textContent || '').trim().toLowerCase();
+                        if (!text) continue;
+                        if (text.includes('visibility') && text.includes(want)) return true;
+                        if (want === 'unlisted' && text.includes('unlisted')) return true;
+                        if (want === 'has schedule' && (text.includes('has schedule') || text.includes('scheduled'))) return true;
+                    }
+                    return false;
+                    """,
+                    visibility_label,
+                )
+            )
+        except Exception:
+            return False
+
+    def read_edit_page_visibility(self) -> str:
+        """
+        Read current video visibility on the Studio edit page.
+
+        Returns: unlisted, scheduled, public, private, draft, or unknown
+        """
+        try:
+            raw = (
+                self.driver.execute_script(
+                    """
+                    const selectors = [
+                        '#visibility-text',
+                        '#visibility-status-span',
+                        'ytcp-video-metadata-visibility #select-button',
+                        'button[aria-label="Edit video visibility status"]',
+                    ];
+                    for (const sel of selectors) {
+                        const el = document.querySelector(sel);
+                        if (el && el.textContent) return el.textContent.trim().toLowerCase();
+                    }
+                    return '';
+                    """
+                )
+                or ""
+            )
+        except Exception:
+            raw = ""
+
+        if "scheduled" in raw or "has schedule" in raw:
+            return "scheduled"
+        if "unlisted" in raw:
+            return "unlisted"
+        if "private" in raw:
+            return "private"
+        if "public" in raw:
+            return "public"
+        if "draft" in raw:
+            return "draft"
+        return "unknown"
+
+    def ensure_visibility_filter(self, visibility: str = "UNLISTED", channel_id: Optional[str] = None) -> bool:
+        """
+        Enforce list filter before scraping or scheduling.
+
+        When Scheduled (or any non-target filter) is active, unlisted rows are invisible
+        and F5 refresh does not fix it — must re-apply Unlisted explicitly.
+        """
+        target = (visibility or "UNLISTED").upper()
+        state = self.read_visibility_filter_state()
+
+        if self.verify_visibility_filter(target):
+            logger.info(f"[DOM] Visibility filter OK: {target} ({state.get('chip_texts') or 'URL param'})")
+            return True
+
+        if state.get("wrong_for_unlisted") or (
+            state.get("detected") and state.get("detected") != target
+        ):
+            logger.warning(
+                f"[DOM] Wrong visibility filter active: detected={state.get('detected')} "
+                f"chips={state.get('chip_texts')} — clearing and re-applying {target}"
+            )
+            self._clear_visibility_filter_chips()
+
+        cid = channel_id or self._last_shorts_channel_id
+        if cid:
+            if self._navigate_shorts_with_url_filter(cid, target):
+                if self.verify_visibility_filter(target):
+                    self.sort_by_date_oldest()
+                    return True
+
+        if cid:
+            return self.navigate_to_shorts_with_fallback(cid, target, use_ui_tars=False)
+
+        logger.error(f"[DOM] Cannot enforce {target} filter — channel_id unknown")
+        return False
+
+    def _navigate_shorts_with_url_filter(self, channel_id: str, visibility: str) -> bool:
+        """Navigate using encoded Studio URL filter (reliable reset from wrong filter state)."""
+        import time
+        from .channel_config import build_studio_url
+
+        target = (visibility or "UNLISTED").upper()
+        url = build_studio_url(channel_id, "short", target)
+        logger.info(f"[DOM] URL filter navigation → {target}: {url[:90]}...")
+        self.driver.get(url)
+
+        for attempt in range(3):
+            try:
+                self._wait_for_page_content(timeout=15, login_wait_timeout=120)
+            except Exception as exc:
+                logger.warning(f"[DOM] URL filter page not ready (attempt {attempt + 1}/3): {exc}")
+                if attempt < 2:
+                    self.driver.refresh()
+                    time.sleep(2)
+                continue
+
+            if self.verify_visibility_filter(target):
+                logger.info(f"[DOM] URL filter navigation confirmed: {target}")
+                return True
+
+            # Chip may lag behind URL on Edge — brief wait and re-check
+            time.sleep(1.5)
+            if self.verify_visibility_filter(target):
+                logger.info(f"[DOM] URL filter confirmed after chip lag: {target}")
+                return True
+
+        state = self.read_visibility_filter_state()
+        logger.warning(
+            f"[DOM] URL filter navigation did not confirm {target}: "
+            f"detected={state.get('detected')} chips={state.get('chip_texts')}"
+        )
+        return False
+
     def navigate_to_shorts(self, channel_id: str, visibility: Optional[str] = None):
         """
         Navigate to Shorts list with optional visibility filter.
@@ -1117,12 +1448,25 @@ class YouTubeStudioDOM:
         """
         import time
 
-        # Step 1: Navigate to shorts page (NO filter params - just the base page)
+        target = (visibility or "UNLISTED").upper()
+        self._last_shorts_channel_id = channel_id
+        visibility_label = self._visibility_checkbox_label(target)
+
+        # Step 1: URL filter first for UNLISTED — clears stale Scheduled/Has schedule views.
+        # Refresh (F5) on Scheduled does NOT expose unlisted rows; URL reset is required.
+        url_first = os.getenv("YT_SCHEDULER_URL_FILTER_FIRST", "true").lower() in ("1", "true", "yes")
+        if target == "UNLISTED" and url_first:
+            if self._navigate_shorts_with_url_filter(channel_id, target):
+                self.sort_by_date_oldest()
+                return True
+            logger.warning("[DOM] URL-first UNLISTED failed — falling back to base page + DOM clicks")
+
+        # Step 2: Navigate to base shorts page (DOM fallback)
         base_url = f"https://studio.youtube.com/channel/{channel_id}/videos/short"
         logger.info(f"[DOM] Step 1: Navigating to shorts page: {base_url[:60]}...")
         self.driver.get(base_url)
 
-        # Step 2: Wait for page to load (with login wait if needed)
+        # Step 3: Wait for page to load (with login wait if needed)
         page_ready = False
         for attempt in range(3):
             try:
@@ -1141,70 +1485,66 @@ class YouTubeStudioDOM:
             self.diagnose_failure("page_load_failed")
             return False
 
-        # Step 3: UI-TARS verify page loaded (optional)
+        # Step 4: Reject wrong filter (e.g. Scheduled on antifaFM) before proceeding
+        state = self.read_visibility_filter_state()
+        if target == "UNLISTED" and state.get("wrong_for_unlisted"):
+            logger.warning(
+                f"[DOM] Wrong filter on Shorts list: {state.get('detected')} "
+                f"chips={state.get('chip_texts')} — clearing chips + UNLISTED URL reset"
+            )
+            self._clear_visibility_filter_chips()
+            if self._navigate_shorts_with_url_filter(channel_id, target):
+                self.sort_by_date_oldest()
+                return True
+
+        # Step 5: UI-TARS verify page loaded (optional)
         if use_ui_tars:
             logger.info("[DOM] Step 2: UI-TARS verification - checking if page loaded...")
             verification = self.verify_shorts_listed(use_ui_tars=True)
             if not verification.get("shorts_visible") and verification.get("count", 0) == 0:
-                # Page loaded but no content - might be empty channel or wrong page
-                logger.warning(f"[DOM] UI-TARS: No shorts visible. Response: {verification.get('ui_tars_response', 'N/A')[:100]}")
-                # Continue anyway - might just need filter
+                logger.warning(
+                    f"[DOM] UI-TARS: No shorts visible. "
+                    f"filter={verification.get('detected_filter')} "
+                    f"Response: {verification.get('ui_tars_response', 'N/A')[:100]}"
+                )
 
-        # Step 4: Check if filter already applied
-        visibility_label = visibility.capitalize()  # "UNLISTED" -> "Unlisted"
-        filter_check = self.driver.execute_script(f"""
-            const chips = document.querySelectorAll('ytcp-chip');
-            for (let chip of chips) {{
-                const text = (chip.textContent || '').trim();
-                if (text.includes('Visibility:') && text.includes('{visibility_label}')) {{
-                    return {{applied: true, text: text}};
-                }}
-            }}
-            return {{applied: false}};
-        """)
-
-        if filter_check and filter_check.get("applied"):
-            logger.info(f"[DOM] Filter already applied: {filter_check.get('text')}")
-            # Step: Sort by date (oldest first) before returning
+        # Step 6: Check if correct filter already applied
+        if self.verify_visibility_filter(target):
+            chip_text = (state.get("chip_texts") or ["URL/param"])[0]
+            logger.info(f"[DOM] Filter already applied: {target} ({chip_text})")
             self.sort_by_date_oldest()
             return True
 
-        # Step 5: Apply filter via DOM clicking (like test_layer1_filter.py)
-        logger.info(f"[DOM] Step 3: Applying {visibility} filter via UI clicks...")
-        filter_applied = self._apply_filter_via_dom(visibility)
+        # Step 7: Apply filter via DOM clicking
+        logger.info(f"[DOM] Step 3: Applying {target} filter via UI clicks...")
+        filter_applied = self._apply_filter_via_dom(target)
 
         if not filter_applied:
-            logger.error(f"[DOM] Failed to apply {visibility} filter via UI")
+            logger.error(f"[DOM] Failed to apply {target} filter via UI")
             self.diagnose_failure("dom_filter_failed")
+            if target == "UNLISTED" and url_first:
+                logger.info("[DOM] DOM filter failed — retrying UNLISTED URL navigation")
+                if self._navigate_shorts_with_url_filter(channel_id, target):
+                    self.sort_by_date_oldest()
+                    return True
             return False
 
-        # Step 6: UI-TARS verify filter was applied (optional)
+        # Step 8: UI-TARS verify filter was applied (optional)
         if use_ui_tars:
             logger.info("[DOM] Step 4: UI-TARS verification - checking filter applied...")
-            time.sleep(1)  # Brief wait for filter to take effect
+            time.sleep(1)
 
-            # Check for filter chip again
-            final_check = self.driver.execute_script(f"""
-                const chips = document.querySelectorAll('ytcp-chip');
-                for (let chip of chips) {{
-                    const text = (chip.textContent || '').trim();
-                    if (text.includes('Visibility:') && text.includes('{visibility_label}')) {{
-                        return {{applied: true, text: text}};
-                    }}
-                }}
-                return {{applied: false}};
-            """)
-
-            if final_check and final_check.get("applied"):
-                logger.info(f"[DOM] UI-TARS verified: Filter applied successfully - {final_check.get('text')}")
+            if self.verify_visibility_filter(target):
+                logger.info(f"[DOM] UI-TARS verified: {target} filter applied")
+                self.sort_by_date_oldest()
                 return True
             else:
-                # Try UI-TARS visual check as final verification
                 import asyncio
                 try:
                     async def _verify_filter():
                         return await self.diagnose_with_ui_tars(
-                            f"Is there a filter chip showing 'Visibility: {visibility_label}' visible on this YouTube Studio page? Answer YES or NO."
+                            f"Is there a filter chip showing 'Visibility: {visibility_label}' "
+                            f"visible on this YouTube Studio page? Answer YES or NO."
                         )
 
                     loop = asyncio.get_event_loop()
@@ -1218,20 +1558,25 @@ class YouTubeStudioDOM:
                     if analysis and not analysis.get("error"):
                         response = (analysis.get("analysis") or "").lower()
                         if "yes" in response:
-                            logger.info(f"[DOM] UI-TARS confirmed filter applied")
-                            # Step: Sort by date (oldest first) before returning
+                            logger.info("[DOM] UI-TARS confirmed filter applied")
                             self.sort_by_date_oldest()
                             return True
-                        else:
-                            logger.warning(f"[DOM] UI-TARS says filter NOT applied: {response[:100]}")
+                        logger.warning(f"[DOM] UI-TARS says filter NOT applied: {response[:100]}")
                 except Exception as e:
                     logger.warning(f"[DOM] UI-TARS final verification failed: {e}")
 
-        # Return True if we got this far - filter was clicked even if verification unclear
-        # Step: Sort by date (oldest first) before returning
-        if filter_applied:
+        # Strict gate: must confirm target filter (never accept Scheduled when UNLISTED requested)
+        if self.verify_visibility_filter(target):
             self.sort_by_date_oldest()
-        return filter_applied
+            return True
+
+        wrong = self.read_visibility_filter_state()
+        logger.error(
+            f"[DOM] Filter verification failed for {target}: "
+            f"detected={wrong.get('detected')} chips={wrong.get('chip_texts')}"
+        )
+        self.diagnose_failure("wrong_visibility_filter")
+        return False
 
     def _click_viewport_point(self, x: int, y: int) -> None:
         """
@@ -1516,11 +1861,15 @@ class YouTubeStudioDOM:
                 return False
             time.sleep(0.5)
 
+            # Step 3b: When switching to Unlisted, clear Has schedule / other visibility filters first.
+            visibility_label = self._visibility_checkbox_label(visibility)
+            if visibility.upper() == "UNLISTED":
+                self._uncheck_other_visibility_checkboxes(visibility_label)
+
             # Step 4: Select checkbox — HARDENED for Edge (2026-01-30)
             # Edge needs longer for checkbox elements to become interactive after
             # dialog opens.  Retry up to 3 times with verification that the
             # checkbox state actually changed.
-            visibility_label = visibility.capitalize()
             CHECKBOX_MAX_RETRIES = 3
             CHECKBOX_WAIT_SECS = [1.0, 2.0, 3.0]
             checkbox_clicked = False
@@ -1694,30 +2043,33 @@ class YouTubeStudioDOM:
                 logger.info(f"[DOM] Step 6: Verifying filter chip (attempt {chip_attempt + 1}/{CHIP_MAX_RETRIES})...")
                 time.sleep(CHIP_WAIT_SECS[chip_attempt])
 
-                chip_ok = self.driver.execute_script(f"""
-                    const chips = document.querySelectorAll('ytcp-chip');
-                    for (let chip of chips) {{
-                        const text = (chip.textContent || '').trim();
-                        if (text.includes('Visibility:') && text.includes('{visibility_label}')) {{
-                            return true;
-                        }}
-                    }}
-                    return false;
-                """)
-
-                if chip_ok:
-                    logger.info(f"[DOM] Filter chip verified: Visibility: {visibility_label} (attempt {chip_attempt + 1})")
+                if self._visibility_chip_matches(visibility_label):
+                    logger.info(f"[DOM] Filter chip verified: {visibility_label} (attempt {chip_attempt + 1})")
                     return True
+
+                if self.verify_visibility_filter(visibility.upper()):
+                    logger.info(f"[DOM] Filter confirmed via URL/state (attempt {chip_attempt + 1})")
+                    return True
+
+                # Detect wrong filter chip (e.g. Scheduled when Unlisted requested)
+                wrong_state = self.read_visibility_filter_state()
+                if wrong_state.get("wrong_for_unlisted") and visibility.upper() == "UNLISTED":
+                    logger.error(
+                        f"[DOM] Wrong filter after Apply: detected={wrong_state.get('detected')} "
+                        f"chips={wrong_state.get('chip_texts')} (expected Unlisted)"
+                    )
+                    return False
 
                 logger.warning(f"[DOM] Chip not found yet (attempt {chip_attempt + 1})")
 
-            # Chip never appeared — still return True if Apply succeeded (UI may differ)
-            if apply_clicked:
-                logger.warning("[DOM] Filter chip not verified but Apply succeeded — accepting with warning")
-                self.diagnose_failure("filter_chip_not_verified")
-                return True
+            # Last resort: URL reset when DOM filter did not stick (Scheduled view persists)
+            if visibility.upper() == "UNLISTED" and self._last_shorts_channel_id:
+                logger.warning("[DOM] DOM filter failed — retrying UNLISTED via URL navigation")
+                if self._navigate_shorts_with_url_filter(self._last_shorts_channel_id, "UNLISTED"):
+                    if self.verify_visibility_filter("UNLISTED"):
+                        return True
 
-            logger.error("[DOM] Filter not applied — chip not verified and Apply may have failed")
+            logger.error("[DOM] Filter not applied — target chip not verified")
             self.diagnose_failure("filter_chip_not_verified")
             return False
 
@@ -2174,6 +2526,12 @@ class YouTubeStudioDOM:
 
         return videos
 
+    def read_scheduled_inventory(self, channel_id: str, *, max_pages: int = 100) -> Dict[str, Any]:
+        """Read qualified scheduled slots; legacy list methods are not completeness proof."""
+        from .schedule_inventory import collect_scheduled_inventory
+
+        return collect_scheduled_inventory(self, channel_id, max_pages=max_pages)
+
     def get_unlisted_videos(self) -> List[Dict[str, str]]:
         """
         Get all unlisted videos.
@@ -2181,24 +2539,68 @@ class YouTubeStudioDOM:
         Returns:
             List of dicts with video_id, title, href
         """
+        if not self.ensure_visibility_filter("UNLISTED"):
+            logger.error(
+                "[DOM] Refusing to scrape rows — UNLISTED filter not active "
+                "(list may be on Scheduled; refresh will not fix)"
+            )
+            return []
+
+        # Strict row scan — reject Scheduled rows (wrong filter / Has schedule still active)
+        try:
+            scraped = self.driver.execute_script("""
+                const rows = document.querySelectorAll('ytcp-video-row');
+                const out = [];
+                let skippedScheduled = 0;
+                for (const row of rows) {
+                    const text = (row.textContent || '').toLowerCase();
+                    const hasUnlisted = /\\bunlisted\\b/.test(text);
+                    const hasScheduled = /\\bscheduled\\b/.test(text) || text.includes('has schedule');
+                    if (!hasUnlisted) continue;
+                    if (hasScheduled && !hasUnlisted) {
+                        skippedScheduled += 1;
+                        continue;
+                    }
+                    const link = row.querySelector("a[href*='/video/']");
+                    if (!link) continue;
+                    const href = link.getAttribute('href') || '';
+                    const m = href.match(/\\/video\\/([^/?]+)/);
+                    if (!m) continue;
+                    out.push({
+                        video_id: m[1],
+                        title: (link.textContent || '').trim(),
+                        href: href,
+                        row_has_scheduled: hasScheduled,
+                    });
+                }
+                return { videos: out, skippedScheduled: skippedScheduled };
+            """) or {}
+        except Exception as exc:
+            logger.error(f"[DOM] Unlisted row scrape failed: {exc}")
+            return []
+
+        skipped = int(scraped.get("skippedScheduled") or 0)
+        if skipped:
+            logger.warning(f"[DOM] Skipped {skipped} row(s) that look Scheduled (wrong filter?)")
+
         videos = []
-        rows = self.driver.find_elements(By.XPATH, self.selectors.XPATH_UNLISTED_ROWS)
+        for item in scraped.get("videos") or []:
+            if item.get("row_has_scheduled"):
+                logger.warning(
+                    f"[DOM] Skip row {item.get('video_id')}: row shows Scheduled + Unlisted — not scheduling"
+                )
+                continue
+            videos.append({
+                "video_id": item.get("video_id"),
+                "title": item.get("title", ""),
+                "href": item.get("href", ""),
+            })
 
-        for row in rows:
-            try:
-                link = row.find_element(By.CSS_SELECTOR, self.selectors.VIDEO_TITLE_LINK)
-                href = link.get_attribute("href")
-                video_id = href.split("/video/")[1].split("/")[0]
-                title = link.text
-
-                videos.append({
-                    "video_id": video_id,
-                    "title": title,
-                    "href": href,
-                })
-            except Exception as e:
-                logger.warning(f"[DOM] Error parsing unlisted row: {e}")
-
+        state = self.read_visibility_filter_state()
+        logger.info(
+            f"[DOM] Unlisted scrape: {len(videos)} videos "
+            f"(filter={state.get('detected')}, chips={state.get('chip_texts')})"
+        )
         return videos
 
     def has_next_page(self) -> bool:
@@ -2209,12 +2611,44 @@ class YouTubeStudioDOM:
         except NoSuchElementException:
             return False
 
-    def click_next_page(self):
-        """Navigate to next page of results."""
-        btn = self.wait_for_clickable(self.selectors.NEXT_PAGE_BTN)
-        self.safe_click(btn)
-        import time
-        time.sleep(1)  # Wait for page load
+    def click_next_page(self, *, expected_page=None):
+        """Use the inventory's observed native control; wait for changed rows.
+
+        Studio can render #navigate-after inside an open shadow root rather
+        than the legacy labelled light-DOM button. One click only: a failure
+        must not advance a second time and silently omit a calendar page.
+        """
+        from .schedule_inventory import SCHEDULED_PAGE_SCRIPT
+        before = self.driver.execute_script(SCHEDULED_PAGE_SCRIPT, True)
+        if expected_page is not None and (not isinstance(expected_page, dict)
+                or not isinstance(before, dict) or any(before.get(key) != expected_page.get(key)
+                    for key in ('channel_id', 'url', 'chip_texts', 'search_text', 'rows'))):
+            raise RuntimeError('pagination_scope_changed')
+
+        def row_ids(snapshot):
+            rows = snapshot.get('rows') if isinstance(snapshot, dict) else None
+            if not isinstance(rows, list) or not rows or len(rows) > 1000:
+                return None
+            ids = [row.get('video_id') if isinstance(row, dict) else None for row in rows]
+            return tuple(ids) if all(isinstance(vid, str) and vid for vid in ids) else None
+
+        original = row_ids(before)
+        if (original is None or before.get('loading') is not False
+                or before.get('next_page') is not True or before.get('next_control') is None):
+            raise RuntimeError('pagination_control_unverified')
+        before['next_control'].click()
+
+        def advanced(_driver):
+            after = self.driver.execute_script(SCHEDULED_PAGE_SCRIPT)
+            if not isinstance(after, dict):
+                return False
+            if any(after.get(key) != before.get(key) for key in ('channel_id', 'chip_texts', 'search_text')):
+                raise RuntimeError('pagination_scope_changed')
+            current = row_ids(after)
+            return (after.get('loading') is False and after.get('previous_page') is True
+                    and current is not None and current != original)
+
+        WebDriverWait(self.driver, 10).until(advanced)
 
     # =========================================
     # PAGE 2: VIDEO EDIT METHODS
@@ -2222,6 +2656,7 @@ class YouTubeStudioDOM:
 
     def navigate_to_video(self, video_id: str):
         """Navigate to video edit page."""
+        self._video_policy_edit = None
         url = f"https://studio.youtube.com/video/{video_id}/edit"
         logger.info(f"[DOM] Navigating to video: {video_id}")
         self.driver.get(url)
@@ -2267,7 +2702,203 @@ class YouTubeStudioDOM:
         )
         logger.debug(f"[DOM] {field_name} set via JS ({len(text)} chars)")
 
+    def begin_policy_edit(self, channel_id=None, video_id=None, *, allow_metadata=True):
+        """Capture authoritative detail fields before this owner changes them."""
+        from .video_policy import EditSession, DETAIL_SNAPSHOT_SCRIPT
+        session = EditSession.capture(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT),
+                                      channel_id, video_id)
+        session.allow_metadata = allow_metadata
+        try:
+            session.window_handle = self.driver.current_window_handle
+        except Exception:
+            session.window_handle = None
+        self._video_policy_edit = session
+        return session
+
+    def begin_policy_cycle(self):
+        self._policy_cycle_attempts = 0
+        self._video_policy_edit = None
+
+    def _policy_edit(self):
+        session = getattr(self, "_video_policy_edit", None)
+        return session if session is not None else self.begin_policy_edit(
+            getattr(self, "_last_shorts_channel_id", None))
+
+    def _write_policy_fields(self, desired):
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, VideoPolicyBlocked
+        session = self._policy_edit()
+        for name, value in desired.items():
+            session.check(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT))
+            if value != session.staged[name]:
+                getattr(self, "_edit_" + name + "_unchecked")(value)
+                snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+                expected = dict(session.staged, **{name: value})
+                if any(snapshot.get(key) != text for key, text in expected.items()):
+                    raise VideoPolicyBlocked("draft_write_not_verified")
+                session.staged[name] = value
+
+    def _stage_policy_field(self, name, value):
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT
+        session = self._policy_edit()
+        proposed = dict(session.proposed, **{name: value})
+        desired = session.desired(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT), proposed)
+        self._write_policy_fields(desired)
+
     def edit_title(self, new_title: str):
+        self._stage_policy_field("title", new_title)
+
+    def edit_description(self, new_description: str):
+        self._stage_policy_field("description", new_description)
+
+    def prepare_schedule_audit(self):
+        """Repair incomplete metadata from existing evidence, then set the bound audience."""
+        from .video_policy import (DETAIL_SNAPSHOT_SCRIPT, PreSaveAuditBlocked,
+                                   metadata_audit_issues, audience_target, require_public_gate)
+        from .channel_config import CHANNELS
+        from .index_weave import build_index_metadata_context
+        session = self._policy_edit()
+        snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+        self._write_policy_fields(session.desired(snapshot))
+        snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+        session.check(snapshot)
+        issues = metadata_audit_issues(snapshot.get("title"), snapshot.get("description"))
+        if issues and session.allow_metadata:
+            keys = [key for key, value in CHANNELS.items() if value.get("id") == session.channel_id]
+            if len(keys) != 1:
+                raise PreSaveAuditBlocked("presave_audit:channel_config_unknown")
+            ctx = build_index_metadata_context(
+                channel_key=keys[0], video_id=session.video_id, original_title=snapshot["title"],
+                base_description="" if any(i.startswith("description_") for i in issues) else snapshot["description"],
+                inform_title=any(i.startswith("title_") for i in issues),
+                enhance_description=any(i.startswith("description_") for i in issues))
+            if ctx is not None:
+                self.edit_title(ctx.new_title)
+                self.edit_description(ctx.new_description)
+                snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+                session.check(snapshot)
+                issues = metadata_audit_issues(snapshot.get("title"), snapshot.get("description"))
+        if issues:
+            # The existing indexer owns Ask/Gemini. Do not start a competing
+            # analysis/browser session or invent a title from length/channel.
+            raise PreSaveAuditBlocked("presave_audit:" + ",".join(issues))
+        target = audience_target(session.channel_id)
+        if snapshot.get("audience_ready") is not True:
+            raise PreSaveAuditBlocked("presave_audit:audience_controls_unreadable")
+        if snapshot.get("made_for_kids") is not session.audience:
+            raise PreSaveAuditBlocked("presave_audit:audience_changed_by_other_owner")
+        if session.audience is not target:
+            name = "VIDEO_MADE_FOR_KIDS_MFK" if target else "VIDEO_MADE_FOR_KIDS_NOT_MFK"
+            choices = self.driver.find_elements(By.CSS_SELECTOR, f'tp-yt-paper-radio-button[name="{name}"]')
+            if len(choices) != 1 or not choices[0].is_displayed() or not choices[0].is_enabled():
+                raise PreSaveAuditBlocked("presave_audit:audience_control_ambiguous")
+            require_public_gate()
+            current = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+            session.check(current)
+            if current.get("made_for_kids") is not session.audience or current.get("audience_ready") is not True:
+                raise PreSaveAuditBlocked("presave_audit:audience_changed_before_selection")
+            self.safe_click(choices[0])
+            current = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+            session.check(current)
+            if current.get("made_for_kids") is not target or current.get("audience_ready") is not True:
+                raise PreSaveAuditBlocked("presave_audit:audience_selection_unverified")
+            session.audience = target
+
+    def _guard_policy_save(self):
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, scheduling_policy, VideoPolicyBlocked, audit_schedule
+        session = self._policy_edit()
+        desired = session.desired(self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT))
+        self._write_policy_fields(desired)
+        snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+        if session.desired(snapshot) != desired:
+            raise VideoPolicyBlocked("policy_changed_during_restore")
+        if getattr(self, "_policy_scheduling", False):
+            session.policies["scheduling"] = scheduling_policy(
+                session.channel_id, session.video_id, getattr(self, "_policy_cycle_attempts", 0))
+            audit_schedule(session, snapshot)
+        return session
+
+    def _submit_policy_save(self, callback):
+        from .video_policy import VideoPolicyBlocked, PreSaveAuditBlocked, require_public_gate, claim_save
+        session = self._guard_policy_save()
+        if (getattr(self, '_policy_scheduling', False) and getattr(self, '_policy_calendar_required', False)
+                and getattr(self, '_schedule_timezone_verified', False) is not True):
+            raise PreSaveAuditBlocked('presave_audit:studio_timezone_unverified')
+        if (getattr(self, '_policy_scheduling', False) and getattr(self, '_policy_calendar_required', False)
+                and getattr(self, '_schedule_picker_verified', None) != session.requested_schedule):
+            raise PreSaveAuditBlocked('presave_audit:studio_schedule_unverified')
+        require_public_gate()
+        if getattr(self, '_policy_scheduling', False) and getattr(self, '_policy_calendar_required', False):
+            reserve = getattr(self, '_policy_before_schedule_submit', None)
+            if not callable(reserve):
+                raise PreSaveAuditBlocked('presave_audit:calendar_reservation_owner_missing')
+            reserve(session)
+        claim_save(session)
+        session.submitted()
+        if getattr(self, "_policy_scheduling", False):
+            self._policy_cycle_attempts = getattr(self, "_policy_cycle_attempts", 0) + 1
+        try:
+            started = getattr(self, '_policy_on_schedule_submitting', None)
+            if getattr(self, '_policy_scheduling', False) and callable(started):
+                started(session)
+            return callback()
+        except VerificationHandoff:
+            raise
+        except Exception as exc:
+            raise VideoPolicyBlocked("submission_started_outcome_unknown") from exc
+
+    def schedule_editor_clean_after_submit(self):
+        """Read-only handoff condition; a clean draft is not saved-schedule proof."""
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, detail_identity
+        session = self._policy_edit()
+        try:
+            snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+            detail_identity(snapshot, session.channel_id, session.video_id)
+            return (session.submitting is True and bool(session.window_handle)
+                    and self.driver.current_window_handle == session.window_handle
+                    and snapshot.get('save_disabled') is True
+                    and snapshot.get('prompt_open') is False
+                    and all(snapshot.get(k) == v for k, v in session.staged.items()))
+        except VerificationHandoff:
+            raise
+        except Exception:
+            return False
+
+    def _readback_policy_save(self):
+        """Conditional same-tab clean reload; never discard a foreign draft/prompt."""
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT, detail_identity, verify_metadata_save
+        session = self._policy_edit()
+        try:
+            before = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+            detail_identity(before, session.channel_id, session.video_id)
+            if (not session.window_handle or self.driver.current_window_handle != session.window_handle
+                    or before.get("save_disabled") is not True or before.get("prompt_open") is not False
+                    or any(before.get(key) != value for key, value in session.staged.items())):
+                return False
+            old_document = self.driver.find_element(By.TAG_NAME, "html")
+            self.driver.refresh()
+            WebDriverWait(self.driver, 8).until(EC.staleness_of(old_document))
+            after = WebDriverWait(self.driver, 8).until(
+                lambda d: self._policy_reloaded_snapshot(session))
+            if (self.driver.current_window_handle != session.window_handle
+                    or after.get("save_disabled") is not True or after.get("prompt_open") is not False):
+                return False
+            return verify_metadata_save(session, after)
+        except VerificationHandoff:
+            raise
+        except Exception:
+            logger.warning("[DOM] Save readback unavailable; durable outcome remains unknown")
+            return False
+
+    def _policy_reloaded_snapshot(self, session):
+        from .video_policy import DETAIL_SNAPSHOT_SCRIPT
+        snapshot = self.driver.execute_script(DETAIL_SNAPSHOT_SCRIPT)
+        if (not isinstance(snapshot, dict) or snapshot.get("channel_id") != session.channel_id
+                or any(snapshot.get(key) != value for key, value in session.staged.items())
+                or snapshot.get("save_disabled") is not True or snapshot.get("prompt_open") is not False):
+            return False
+        return snapshot
+
+    def _edit_title_unchecked(self, new_title: str):
         """Edit video title."""
         import time
         title_input = self.wait_for_element(
@@ -2288,12 +2919,14 @@ class YouTubeStudioDOM:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
             time.sleep(self.human_delay(0.25, 0.15))
             title_input.send_keys(new_title)
+        except VerificationHandoff:
+            raise
         except Exception as e:
             # ChromeDriver may fail on non-BMP characters (emoji). Fallback to JS assignment.
             logger.debug(f"[DOM] Title send_keys failed ({type(e).__name__}), using JS fallback")
             self._set_text_via_js(title_input, new_title, "Title")
 
-    def edit_description(self, new_description: str):
+    def _edit_description_unchecked(self, new_description: str):
         """Edit video description."""
         import time
         desc_input = self.wait_for_element(
@@ -2313,6 +2946,8 @@ class YouTubeStudioDOM:
             ActionChains(self.driver).key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
             time.sleep(self.human_delay(0.25, 0.15))
             desc_input.send_keys(new_description)
+        except VerificationHandoff:
+            raise
         except Exception as e:
             # ChromeDriver may fail on non-BMP characters (emoji). Fallback to JS assignment.
             logger.debug(f"[DOM] Description send_keys failed ({type(e).__name__}), using JS fallback")
@@ -2331,6 +2966,8 @@ class YouTubeStudioDOM:
             WebDriverWait(self.driver, 6).until(
                 lambda d: not d.find_elements(By.CSS_SELECTOR, "tp-yt-paper-dialog#dialog")
             )
+        except VerificationHandoff:
+            raise
         except Exception:
             pass
 
@@ -2349,19 +2986,27 @@ class YouTubeStudioDOM:
                 el = self.wait_for_clickable(sel, by, timeout=5)
                 try:
                     self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
-                self.safe_click(el)
+                self._submit_policy_save(el.click)
                 time.sleep(2.0)
+                self._readback_policy_save()
                 return
+            except VerificationHandoff:
+                raise
             except Exception as exc:
+                from .video_policy import VideoPolicyBlocked
+                if isinstance(exc, VideoPolicyBlocked):
+                    raise
                 last_err = exc
                 continue
 
         # JS fallback: Studio sometimes renders Save as a custom element without stable ids,
         # or behind wrappers that Selenium "clickable" heuristics miss.
         try:
-            clicked = self.driver.execute_script(
+            clicked = self._submit_policy_save(lambda: self.driver.execute_script(
                 """
                 function isVisible(el) {
                   if (!el) return false;
@@ -2375,12 +3020,9 @@ class YouTubeStudioDOM:
                 function clickBest(el) {
                   if (!el) return false;
                   // Prefer inner <button> when present.
-                  try {
-                    const inner = el.querySelector && el.querySelector('button');
-                    if (inner && isVisible(inner)) { inner.click(); return true; }
-                  } catch (e) {}
-                  try { el.click(); return true; } catch (e) {}
-                  return false;
+                  const inner = el.querySelector && el.querySelector('button');
+                  const target = inner && isVisible(inner) ? inner : el;
+                  target.click(); return true;
                 }
 
                 const root = document;
@@ -2396,14 +3038,159 @@ class YouTubeStudioDOM:
 
                 return { clicked: false, found: saveLike.slice(0, 8).map(x => ({id:x.id, text:x.t})) };
                 """
-            )
+            ))
             if isinstance(clicked, dict) and clicked.get("clicked"):
                 time.sleep(2.0)
+                self._readback_policy_save()
                 return
+        except VerificationHandoff:
+            raise
         except Exception as exc:
+            from .video_policy import VideoPolicyBlocked
+            if isinstance(exc, VideoPolicyBlocked):
+                raise
             last_err = exc
 
         raise TimeoutException(f"Save button not found/clickable: {last_err}")
+
+    # =========================================
+    # RESCHEDULE (already-scheduled video) — edit-popup entry
+    # =========================================
+
+    def open_scheduled_edit_popup(self, video_id: Optional[str] = None) -> bool:
+        """Open the visibility-edit popup for an already-Scheduled list row.
+
+        Reschedule entry (Mode B Phase 2): on the videos/short *list* (filtered to
+        Scheduled / "Has schedule"), each row's visibility cell shows a "Scheduled"
+        ``span.label-span``. Clicking it opens ``ytcp-video-visibility-edit-popup
+        tp-yt-paper-dialog#dialog`` which exposes the SAME ``ytcp-datetime-picker``
+        date/time inputs the new-schedule flow uses — so the existing
+        ``set_schedule_date`` / ``set_schedule_time`` / ``click_done`` / ``click_save``
+        helpers drive it unchanged (WSP 84 reuse).
+
+        Args:
+            video_id: optional id to scope the click to a specific row (matches the
+                row's ``a[href*='/video/<id>']``). When None, the FIRST Scheduled
+                row's label is clicked.
+
+        Returns:
+            True if the edit popup opened (dialog present), False otherwise.
+
+        NOTE: shadow_dom_finder.first_deep pierces Studio's shadow roots; a flat
+        querySelector fallback covers light-DOM/mock drivers.
+        """
+        import time
+
+        try:
+            from modules.infrastructure.foundups_selenium.src.shadow_dom_finder import (
+                first_deep,
+            )
+        except Exception:  # pragma: no cover - defensive import
+            first_deep = None  # type: ignore
+
+        # 1) Click the row's "Scheduled" label. Prefer a video-scoped row when an id
+        #    is given so a batch never edits the wrong short.
+        clicked = False
+        if first_deep is not None:
+            try:
+                selectors: List[Any] = []
+                if video_id:
+                    # Row containing the id -> its visibility label span.
+                    selectors.append(
+                        [f"ytcp-video-row a[href*='/video/{video_id}']"],
+                    )
+                # Generic: any Scheduled label span on the list.
+                selectors.append(["ytcp-video-row span.label-span"])
+                anchor = first_deep(self.driver, selectors)
+                if anchor is not None:
+                    # If we matched the title link, hop to the row's label span.
+                    target = self.driver.execute_script(
+                        """
+                        const el = arguments[0];
+                        if (!el) return null;
+                        const row = el.closest ? el.closest('ytcp-video-row') : null;
+                        const scope = row || document;
+                        const spans = scope.querySelectorAll('span.label-span');
+                        for (const s of spans) {
+                          const t = (s.textContent || '').trim().toLowerCase();
+                          if (t.includes('scheduled')) return s;
+                        }
+                        return (scope.querySelector('span.label-span') || el);
+                        """,
+                        anchor,
+                    )
+                    self.safe_click(target or anchor)
+                    clicked = True
+            except Exception as exc:
+                logger.debug(f"[RESCHED] shadow label click failed: {exc}")
+
+        if not clicked:
+            # Flat fallback (light-DOM / mocks): click the first Scheduled label.
+            try:
+                clicked = bool(self.driver.execute_script(
+                    """
+                    const vid = arguments[0];
+                    let scope = document;
+                    if (vid) {
+                      const link = document.querySelector(
+                        "ytcp-video-row a[href*='/video/" + vid + "']");
+                      if (link && link.closest) scope = link.closest('ytcp-video-row') || document;
+                    }
+                    const spans = scope.querySelectorAll('span.label-span');
+                    for (const s of spans) {
+                      const t = (s.textContent || '').trim().toLowerCase();
+                      if (t.includes('scheduled')) { s.click(); return true; }
+                    }
+                    return false;
+                    """,
+                    video_id,
+                ))
+            except Exception as exc:
+                logger.warning(f"[RESCHED] flat label click failed: {exc}")
+                clicked = False
+
+        if not clicked:
+            logger.warning("[RESCHED] Could not click a 'Scheduled' label to open edit popup")
+            return False
+
+        time.sleep(0.6)
+
+        # 2) Confirm the edit popup dialog is present.
+        try:
+            WebDriverWait(self.driver, 8).until(lambda d: d.execute_script(
+                """
+                const popup = document.querySelector('ytcp-video-visibility-edit-popup');
+                const dlg = document.querySelector('ytcp-video-visibility-edit-popup tp-yt-paper-dialog#dialog')
+                          || document.querySelector('tp-yt-paper-dialog#dialog');
+                return !!(popup || dlg);
+                """
+            ))
+            return True
+        except Exception:
+            logger.warning("[RESCHED] Edit popup did not appear after clicking 'Scheduled'")
+            return False
+
+    def reschedule_open_set_save(self, date_str: str, time_str: str, video_id: Optional[str] = None) -> bool:
+        """Use the same guarded inline owner; no second page-level Save retry."""
+        from .content_page_scheduler import ContentPageScheduler
+        from .video_policy import inline_identity, VideoPolicyBlocked
+        try:
+            inline_identity(self.driver, video_id=video_id)
+            row = self.driver.execute_script("""
+                const wanted = '/video/' + arguments[0] + '/edit';
+                const rows = Array.from(document.querySelectorAll('ytcp-video-row')).filter(row =>
+                    Array.from(row.querySelectorAll('a[href*="/video/"]')).some(a =>
+                        new URL(a.href, location.href).pathname === wanted));
+                return rows.length === 1 ? rows[0] : null;
+            """, video_id)
+            if row is None:
+                return False
+            return ContentPageScheduler(self.driver, self).reschedule_row_inline(
+                row, date_str, time_str, video_id=video_id)
+        except VideoPolicyBlocked:
+            logger.warning("[RESCHED] Fresh policy or target binding refused inline save")
+            return False
+
 
     # =========================================
     # PAGE 3: SCHEDULING DIALOG METHODS
@@ -2422,6 +3209,8 @@ class YouTubeStudioDOM:
         # 1) Strict XPath for the known aria-label (button)
         try:
             vis_btn = self.wait_for_clickable(self.selectors.VISIBILITY_BTN_XPATH, By.XPATH, timeout=6)
+        except VerificationHandoff:
+            raise
         except Exception:
             vis_btn = None
 
@@ -2433,6 +3222,8 @@ class YouTubeStudioDOM:
                     By.CSS_SELECTOR,
                     timeout=6,
                 )
+            except VerificationHandoff:
+                raise
             except Exception:
                 vis_btn = None
 
@@ -2444,6 +3235,8 @@ class YouTubeStudioDOM:
                     By.XPATH,
                     timeout=6,
                 )
+            except VerificationHandoff:
+                raise
             except Exception:
                 vis_btn = None
 
@@ -2457,17 +3250,29 @@ class YouTubeStudioDOM:
         try:
             self.wait_for_element(self.selectors.VISIBILITY_DIALOG_XPATH, By.XPATH, timeout=8)
             return
+        except VerificationHandoff:
+            raise
         except Exception:
             pass
 
         # Fallback: if dialog selector changes, wait for schedule/date/time inputs to exist
-        WebDriverWait(self.driver, 8).until(lambda d: d.execute_script("""
+        WebDriverWait(self.driver, 8).until(self._visibility_controls_ready)
+
+    def _visibility_controls_ready(self, driver):
+        """Recognize the same visible native radio used by the next schedule step."""
+        for control in driver.find_elements(By.XPATH, self.selectors.SCHEDULE_RADIO_XPATH):
+            try:
+                if control.is_displayed():
+                    return True
+            except StaleElementReferenceException:
+                continue  # Re-rendered controls are not evidence of readiness.
+        return driver.execute_script("""
             const hasSchedule =
               !!document.querySelector('tp-yt-paper-radio-button[name=\"SCHEDULE\"], tp-yt-paper-radio-button[name=\"SCHEDULED\"], tp-yt-paper-radio-button[name=\"SCHEDULE\"]');
             const hasDate = !!document.querySelector('input[aria-label*=\"Date\"]');
             const hasTime = !!document.querySelector('input[aria-label*=\"Time\"], input[aria-label*=\"time\"]');
             return hasSchedule || (hasDate && hasTime);
-        """))
+        """)
 
     def select_schedule_option(self):
         """Select the 'Schedule' radio button in visibility dialog."""
@@ -2492,6 +3297,8 @@ class YouTubeStudioDOM:
                 self.safe_click(schedule_radio)
                 time.sleep(0.3)
                 break
+            except VerificationHandoff:
+                raise
             except Exception:
                 continue
 
@@ -2525,6 +3332,8 @@ class YouTubeStudioDOM:
                             "return arguments[0].getAttribute('aria-expanded');",
                             toggler,
                         )
+                    except VerificationHandoff:
+                        raise
                     except Exception:
                         state = None
 
@@ -2535,6 +3344,8 @@ class YouTubeStudioDOM:
                         self.safe_click(toggler)
                         time.sleep(0.5)
                         expanded = True
+        except VerificationHandoff:
+            raise
         except Exception:
             expanded = False
 
@@ -2545,6 +3356,8 @@ class YouTubeStudioDOM:
                 if expand_btn and expand_btn.is_displayed():
                     self.safe_click(expand_btn)
                     time.sleep(0.5)
+            except VerificationHandoff:
+                raise
             except Exception:
                 pass
 
@@ -2588,17 +3401,25 @@ class YouTubeStudioDOM:
             """
             try:
                 el.send_keys(Keys.ENTER)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
             time.sleep(pre_type_delay)
             try:
                 el.send_keys(Keys.TAB)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
             time.sleep(pre_type_delay)
@@ -2613,6 +3434,8 @@ class YouTubeStudioDOM:
                     """,
                     el,
                 )
+            except VerificationHandoff:
+                raise
             except Exception:
                 pass
             time.sleep(pre_type_delay)
@@ -2622,6 +3445,8 @@ class YouTubeStudioDOM:
         try:
             # Try an actual Date input first (when already expanded)
             date_input = self.wait_for_element(self.selectors.DATE_INPUT_XPATH, By.XPATH, timeout=3)
+        except VerificationHandoff:
+            raise
         except Exception:
             date_input = None
 
@@ -2640,6 +3465,8 @@ class YouTubeStudioDOM:
                 # Occam: deterministic click with slow delays.
                 self.safe_click(date_trigger)
                 time.sleep(pre_type_delay)
+            except VerificationHandoff:
+                raise
             except Exception:
                 # Fallback: click the visible date text inside the schedule container to activate the picker/input.
                 self.driver.execute_script("""
@@ -2674,6 +3501,8 @@ class YouTubeStudioDOM:
                         val = (picker_input.get_attribute("value") or "").strip()
                         if val and val.lower() == date_str.strip().lower():
                             return
+                    except VerificationHandoff:
+                        raise
                     except Exception:
                         pass
 
@@ -2682,12 +3511,16 @@ class YouTubeStudioDOM:
                         time.sleep(pre_type_delay)
                         continue
                     return
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     picker_input = None
 
             # Alternate variant: aria-labeled Date input exists after clicking trigger
             try:
                 date_input = self.wait_for_element(self.selectors.DATE_INPUT_XPATH, By.XPATH, timeout=3)
+            except VerificationHandoff:
+                raise
             except Exception:
                 date_input = None
 
@@ -2710,6 +3543,8 @@ class YouTubeStudioDOM:
             slow_type(date_input, date_str)
             time.sleep(0.15)
             commit_input(date_input)
+        except VerificationHandoff:
+            raise
         except Exception as exc:
             raise TimeoutException(f"Date input not found/usable: {exc}")
 
@@ -2737,17 +3572,25 @@ class YouTubeStudioDOM:
             """
             try:
                 el.send_keys(Keys.ENTER)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     ActionChains(self.driver).send_keys(Keys.ENTER).perform()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
             time.sleep(pre_type_delay)
             try:
                 el.send_keys(Keys.TAB)
+            except VerificationHandoff:
+                raise
             except Exception:
                 try:
                     ActionChains(self.driver).send_keys(Keys.TAB).perform()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
             time.sleep(pre_type_delay)
@@ -2762,6 +3605,8 @@ class YouTubeStudioDOM:
                     """,
                     el,
                 )
+            except VerificationHandoff:
+                raise
             except Exception:
                 pass
             time.sleep(pre_type_delay)
@@ -2776,6 +3621,8 @@ class YouTubeStudioDOM:
                 By.CSS_SELECTOR,
                 timeout=3,
             )
+        except VerificationHandoff:
+            raise
         except Exception:
             time_input = None
 
@@ -2785,6 +3632,8 @@ class YouTubeStudioDOM:
                 try:
                     time_input = self.wait_for_element(xp, By.XPATH, timeout=2)
                     break
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     time_input = None
 
@@ -2802,6 +3651,8 @@ class YouTubeStudioDOM:
                     }
                     return null;
                 """))
+            except VerificationHandoff:
+                raise
             except Exception:
                 time_input = None
 
@@ -2818,6 +3669,28 @@ class YouTubeStudioDOM:
     def click_done(self):
         """Click Done button to confirm scheduling."""
         import time
+        from .video_policy import PreSaveAuditBlocked
+
+        if getattr(self, '_policy_calendar_required', False):
+            # An unqualified dialog Save could itself publish. Only the explicit
+            # native Done staging control may precede the guarded Save boundary.
+            self._guard_policy_save()
+            self.verify_schedule_timezone()
+            self.verify_schedule_picker()
+            done = self.driver.execute_script("""
+                const visible = e => !!(e && (e.offsetWidth || e.offsetHeight || e.getClientRects().length));
+                const pickers = Array.from(document.querySelectorAll('ytcp-visibility-scheduler')).filter(visible);
+                if (pickers.length !== 1) return null;
+                const scope = pickers[0].closest('tp-yt-paper-dialog');
+                if (!scope) return null;
+                const buttons = Array.from(scope.querySelectorAll('ytcp-button#done-button button, button#done-button'))
+                    .filter(e => visible(e) && !e.disabled && (e.innerText || e.textContent || '').trim() === 'Done');
+                return buttons.length === 1 ? buttons[0] : null;
+            """)
+            if done is None:
+                raise PreSaveAuditBlocked('presave_audit:explicit_done_control_required')
+            self.safe_click(done)
+            return
 
         # YouTube Studio variants:
         # - native <button> with inner <span>Done</span>
@@ -2849,6 +3722,8 @@ class YouTubeStudioDOM:
                     )
                     if is_timezone:
                         continue
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
 
@@ -2857,22 +3732,34 @@ class YouTubeStudioDOM:
                     if (el.tag_name or "").lower() == "ytcp-button":
                         inner = el.find_element(By.CSS_SELECTOR, "button")
                         el = inner
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
 
                 try:
                     # Ensure it's in view (some Studio dialogs require scroll)
                     self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
+                if getattr(self, "_policy_scheduling", False):
+                    self._guard_policy_save()
                 self.safe_click(el)
                 time.sleep(1)
                 return
+            except PreSaveAuditBlocked:
+                raise
+            except VerificationHandoff:
+                raise
             except Exception:
                 continue
 
         # Last resort: JS click inside dialog (STRICT scope).
         try:
+            if getattr(self, "_policy_scheduling", False):
+                self._guard_policy_save()
             clicked = self.driver.execute_script(
                 """
                 const root = document.querySelector('tp-yt-paper-dialog#dialog') || document;
@@ -2890,12 +3777,118 @@ class YouTubeStudioDOM:
             if clicked:
                 time.sleep(1)
                 return
+        except PreSaveAuditBlocked:
+            raise
+        except VerificationHandoff:
+            raise
         except Exception:
             pass
 
         raise TimeoutException("Done/Save button not found/clickable")
 
     def schedule_video(self, date_str: str, time_str: str) -> bool:
+        from .video_policy import scheduling_policy, VideoPolicyBlocked, PreSaveAuditBlocked
+        self._policy_scheduling = True
+        self._schedule_timezone_verified = False
+        self._schedule_picker_verified = None
+        try:
+            session = self._policy_edit()
+            session.requested_schedule = {"date": date_str, "time": time_str,
+                "timezone": getattr(self, "_policy_timezone", None), "visibility": "scheduled"}
+            scheduling_policy(session.channel_id, session.video_id,
+                              getattr(self, "_policy_cycle_attempts", 0))
+            self.prepare_schedule_audit()
+            self._guard_policy_save()
+            return self._schedule_video_workflow(date_str, time_str)
+        except PreSaveAuditBlocked as exc:
+            self._last_presave_audit_issue = str(exc)
+            logger.warning("[PRESAVE-AUDIT] %s", exc)
+            return False
+        except VideoPolicyBlocked:
+            logger.warning("[DOM] Scheduling refused by fresh directive guard")
+            return False
+        finally:
+            self._policy_scheduling = False
+
+    def verify_schedule_timezone(self):
+        """Observe the existing timezone control; never change it to match config.
+
+        Only explicit IANA identity or these unambiguous Studio labels qualify.
+        Offset-only/localized/absent controls remain unknown, requiring owner review.
+        """
+        if not getattr(self, '_policy_calendar_required', False):
+            return
+        from .video_policy import PreSaveAuditBlocked
+        expected = getattr(self, '_policy_timezone', None)
+        aliases = {'Asia/Tokyo': {'Tokyo', 'Japan Standard Time'},
+                   'America/New_York': {'New York', 'Eastern Time (US & Canada)'}}
+        try:
+            values = self.driver.execute_script("""
+                const pickers = Array.from(document.querySelectorAll('ytcp-visibility-scheduler'))
+                    .filter(e => e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+                if (pickers.length !== 1) return [];
+                const controls = Array.from(pickers[0].querySelectorAll('#timezone-select-button'))
+                    .filter(e => e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+                return controls.map(e => (e.innerText || e.textContent || '').trim());
+            """)
+            if not isinstance(values, list) or len(values) != 1 or not isinstance(values[0], str):
+                raise ValueError('timezone_control_unverified')
+            label = values[0].strip()
+            # A numeric UTC offset alone is not a timezone or DST rule.
+            offset = re.match(r'^\(?(?:GMT|UTC)([+-])(\d{1,2}):?(\d{2})\)?\s*', label)
+            if offset:
+                minutes = (int(offset[2]) * 60 + int(offset[3])) * (1 if offset[1] == '+' else -1)
+                legal = {'Asia/Tokyo': {540}, 'America/New_York': {-240, -300}}
+                if int(offset[3]) >= 60 or minutes not in legal.get(expected, set()):
+                    raise ValueError('timezone_offset_contradiction')
+                label = label[offset.end():].strip()
+            if not expected or label not in {expected, *aliases.get(expected, set())}:
+                raise ValueError('timezone_identity_mismatch')
+            self._schedule_timezone_verified = True
+        except VerificationHandoff:
+            raise
+        except Exception as exc:
+            self._schedule_timezone_verified = False
+            raise PreSaveAuditBlocked('presave_audit:studio_timezone_unverified') from exc
+
+    def verify_schedule_picker(self):
+        """Observe committed picker values after typing, before any Done/Save."""
+        if not getattr(self, '_policy_calendar_required', False):
+            return
+        from .video_policy import PreSaveAuditBlocked
+        self._schedule_picker_verified = None
+        wanted = self._policy_edit().requested_schedule
+        try:
+            observed = self.driver.execute_script("""
+                const visible = e => !!(e && (e.offsetWidth || e.offsetHeight || e.getClientRects().length));
+                const pickers = Array.from(document.querySelectorAll('ytcp-visibility-scheduler')).filter(visible);
+                if (pickers.length !== 1) return null;
+                const picker = pickers[0];
+                const scope = picker.closest('ytcp-video-visibility-select, tp-yt-paper-dialog');
+                if (!scope) return null;
+                const radios = Array.from(scope.querySelectorAll('tp-yt-paper-radio-button[name="PUBLISH_FROM_PRIVATE"]')).filter(visible);
+                const dates = Array.from(picker.querySelectorAll('#datepicker-trigger div.left-container')).filter(visible);
+                const times = Array.from(picker.querySelectorAll('#time-of-day-container input')).filter(visible);
+                const invalid = Array.from(scope.querySelectorAll('[aria-invalid="true"], [invalid]')).some(visible);
+                if (radios.length !== 1 || dates.length !== 1 || times.length !== 1) return null;
+                return {selected: radios[0].checked === true || radios[0].getAttribute('aria-checked') === 'true',
+                        date: (dates[0].innerText || dates[0].textContent || '').trim(),
+                        time: (times[0].value || '').trim(), invalid};
+            """)
+            if (not isinstance(observed, dict) or observed.get('selected') is not True
+                    or observed.get('invalid') is not False or not isinstance(wanted, dict)):
+                raise ValueError('picker_unverified')
+            # Compare normalized wall values, never infer them from keystrokes.
+            for key, pattern in (('date', '%b %d, %Y'), ('time', '%I:%M %p')):
+                if datetime.strptime(observed[key], pattern) != datetime.strptime(wanted[key], pattern):
+                    raise ValueError('picker_value_mismatch')
+            self._schedule_picker_verified = dict(wanted)
+        except VerificationHandoff:
+            raise
+        except Exception as exc:
+            raise PreSaveAuditBlocked('presave_audit:studio_schedule_unverified') from exc
+
+    def _schedule_video_workflow(self, date_str: str, time_str: str) -> bool:
         """
         Full scheduling workflow for current video.
 
@@ -2915,6 +3908,8 @@ class YouTubeStudioDOM:
             ("select_schedule_option", lambda: self.select_schedule_option()),
             ("set_schedule_date", lambda: self.set_schedule_date(date_str)),
             ("set_schedule_time", lambda: self.set_schedule_time(time_str)),
+            ("verify_schedule_timezone", lambda: self.verify_schedule_timezone()),
+            ("verify_schedule_picker", lambda: self.verify_schedule_picker()),
             ("click_done", lambda: self.click_done()),
             ("click_save", lambda: self.click_save()),
         ]
@@ -2927,9 +3922,14 @@ class YouTubeStudioDOM:
                 elapsed = time_module.time() - step_start
                 step_times.append((step_name, elapsed))
                 logger.debug(f"[DOM] Step '{step_name}' completed in {elapsed:.1f}s")
+            except VerificationHandoff:
+                raise
             except Exception as e:
                 elapsed = time_module.time() - step_start
                 logger.error(f"[DOM] Scheduling failed at {step_name} ({elapsed:.1f}s): {type(e).__name__}: {e}")
+                from .video_policy import PreSaveAuditBlocked
+                if isinstance(e, PreSaveAuditBlocked) or getattr(self, '_policy_calendar_required', False):
+                    raise  # Retain the current draft for the owner; no Escape.
                 # Best-effort cleanup: close dialog so the next loop isn't blocked.
                 try:
                     ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()

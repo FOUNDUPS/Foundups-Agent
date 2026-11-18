@@ -1,5 +1,10 @@
 # WRE Phases 1-3 - Complete Status Summary
 
+> **Historical record — superseded and non-authoritative (2025-10-24).**
+> Completion percentages and capability claims below describe that session's
+> assessment, not current execution truth. Use the module `README.md`,
+> `INTERFACE.md`, `ROADMAP.md`, and WSP 95 v2.1 for current authority.
+
 **Date**: 2025-10-24
 **Auditor**: 0102
 **Session**: Full Phase 1-3 Audit + Re-Audits

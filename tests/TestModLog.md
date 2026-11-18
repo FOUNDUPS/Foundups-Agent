@@ -1,5 +1,51 @@
 # TestModLog - shared tests
 
+## 2026-08-26: WSP 97 v1.9 machine-contract declaration
+
+- Reused the existing canonical validator-contract test to bind protocol
+  version 1.9, the test-inventory/reuse applicability set, the active-suite
+  missing-TestModLog rule, and concrete HoloIndex work-order guidance.
+- Preserved receipt schema v1.1 and all repository-evidence resource limits;
+  this is a protocol-data alignment regression, not a validator behavior change.
+
+## 2026-08-08: Startup dependency-evidence enforcement
+
+- Proved malformed dependency scanner evidence remains visible in startup
+  telemetry and blocks when enforcement is active. Incomplete optional scans
+  are reported as `WARN`, never `PASS`; the 28-test startup matrix passes.
+
+## 2026-07-24: WSP 97 repository-evidence receipt v1.1
+
+- Files: `tests/test_wsp97_execution_validator.py`, `tests/test_wsp97_repository_evidence.py`
+- Slice: `WSP97_REPOSITORY_EVIDENCE_V11_PHASE1`
+- RED checkpoint: 31 failed, 2 passed, 1 skipped before implementation; the deterministic lstat seam separately failed collection until its helper existed.
+- Bounded-contract amendment RED: 15 failed, 38 passed, 1 capability-only skip.
+- Cheapest-first amendment RED: 16 failed, 56 passed, 1 capability-only skip.
+- Final GREEN: 74 passed, 1 capability-only real-symlink skip after the Holo P0 receipt migration; deterministic POSIX symlink and Windows junction/reparse seams passed.
+- Covers schema admission, base binding/ancestry, exact Git root/path/case, traversal and Windows drive/UNC/backslash denial, WSP declaration cross-checking, opaque non-WSP evidence, legacy non-admission, CLI exits, mirrors, and the four migrated base receipts.
+- POSIX symlink mode and Windows junction/reparse attributes are tested deterministically; a real symlink integration test remains capability-gated.
+- Covers root preflight ordering/no-Git-on-redirect, receipt pre-parse cap, mapping/list/item/string/path/count/aggregate limits, subprocess short-circuit, Git call/time/output bounds, and operational exit `2`.
+- Covers zero-Git rejection for missing/bad context, bad/mismatched bases, lexical path/case failures, invalid WSP IDs, and count/path limits.
+
+## 2026-07-17: WSP 97 structural execution receipt validator
+
+- File: `tests/test_wsp97_execution_validator.py`
+- Slice: `WSP97_EXECUTION_RECEIPT_VALIDATOR_PHASE1`
+- Covers complete seven-stage derivation, missing action evidence, invalid scalar evidence, blocked outcomes, WSP/compliance requirements, contract count drift, active validator metadata, and CLI non-compliance exit behavior.
+- Truth boundary: structural receipt validation only; tests do not claim thought inspection, evidence resolution, or runtime side effects.
+
+---
+
+## 2026-07-17: RedDog resident autonomous chain proof
+
+- File: `tests/test_main_runtime_bootstrap.py`
+- Slice: `REDDOG_MAIN_RESIDENT_AUTONOMOUS_CHAIN_PROOF_PHASE1`
+- New test:
+  - `test_main_resident_red_dog_chain_passes_profile_to_downstream_preflights` - asserts `main()` runs the resident RedDog preflights in order and carries `REDDOG_RESIDENT_FIX_PROMOTION_HANDOFF=1` plus `REDDOG_RESIDENT_QUEUE_BINDING_PROFILE=signed_0102_bounded_code_fusion_worktree_draft_pr` into FIX promotion, queue consumer, queue orchestration, queue dispatch, serial loop, and OpenClaw claim loop before menu start.
+- Scope: all runtime work mocked; no live model, OpenClaw, shell, worktree, PR, HoloIndex re-index, PatternMemory write, or menu interaction.
+
+---
+
 ## 2026-06-07: Headless bootstrap seam (WRE/OpenClaw/Hermes dry-run, W6)
 
 - File: `tests/test_main_runtime_bootstrap.py` (extended: 5 existing + 4 new = 9 tests)

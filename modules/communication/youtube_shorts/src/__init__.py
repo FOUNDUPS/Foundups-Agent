@@ -10,7 +10,7 @@ WSP Compliance: WSP 3, 49, 80, 54
 from .shorts_orchestrator import ShortsOrchestrator
 from .veo3_generator import Veo3Generator
 from .sora2_generator import Sora2Generator
-from .youtube_uploader import YouTubeShortsUploader
+from .youtube_uploader import YouTubePublishResult, YouTubeShortsUploader, YouTubeUploadError
 from .shorts_dae import ShortsDAE
 from .shorts_pipeline import (
     ShortsBuildResult,
@@ -26,6 +26,8 @@ __all__ = [
     'Veo3Generator',
     'Sora2Generator',
     'YouTubeShortsUploader',
+    'YouTubePublishResult',
+    'YouTubeUploadError',
     'ShortsDAE',
     'ShortsBuildResult',
     'ShortClipSelection',

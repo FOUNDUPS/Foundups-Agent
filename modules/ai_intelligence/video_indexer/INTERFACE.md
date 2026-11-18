@@ -8,6 +8,12 @@
 # Index all videos for a channel
 python -m modules.ai_intelligence.video_indexer.cli --channel undaodu
 
+# One resumable cycle across Move2Japan, UnDaoDu, and FoundUps
+python -m modules.ai_intelligence.video_indexer.cli --portfolio --batch-size 10
+
+# Run bounded daemon cycles for one channel
+python -m modules.ai_intelligence.video_indexer.cli --channel undaodu --daemon --cycles 3
+
 # Index specific video
 python -m modules.ai_intelligence.video_indexer.cli --channel move2japan --video-id abc123
 
@@ -26,6 +32,9 @@ python -m modules.ai_intelligence.video_indexer.cli --channel move2japan --reind
 | Argument | Type | Default | Description |
 |----------|------|---------|-------------|
 | `--channel`, `-c` | str | required | Channel: move2japan, undaodu, foundups, ravingantifa |
+| `--portfolio` | flag | - | Index Move2Japan, UnDaoDu, and FoundUps in browser-isolated batches |
+| `--daemon` | flag | - | Run bounded daemon cycles for `--channel` |
+| `--cycles` | int | 1 | Number of bounded daemon cycles |
 | `--video-id`, `-v` | str | - | Specific video ID to index |
 | `--batch-size`, `-b` | int | 10 | Videos per batch |
 | `--status`, `-s` | flag | - | Show indexing status |
@@ -87,6 +96,16 @@ class VideoIndexer:
 ```
 
 ### AudioAnalyzer
+
+When `AudioAnalyzer(..., language=...)` omits language, English-only `.en`
+models retain `"en"`; multilingual models use automatic detection. Explicit
+`None` requests detection, and `language="ja"` selects Japanese. The batch
+factory rejects explicit `None` or non-English language with `.en` models.
+This setting reaches both batch and local-file transcription. Video transcript
+labels come from batch evidence:
+one language code, `mixed` for multiple reported languages, or `unknown` when
+unavailable. Chunk `timestamp_sec` is retained as segment `start_time`.
+The batch factory also receives the configured output directory.
 
 ```python
 from modules.ai_intelligence.video_indexer.src.audio_analyzer import AudioAnalyzer
@@ -274,6 +293,108 @@ async def run_indexing_daemon(
 ) -> Dict[str, Any]:
     """Run continuous indexing cycles with STOP/REINDEX signals."""
 ```
+
+### Action Surface (typed SKILLz/ACTION SURFACE)
+
+A typed, reusable capability surface so the CLI menu, OpenClaw/WRE, Hermes, or
+any 0102 agent invoke the SAME governed indexing capability by action ID
+instead of a one-off helper.
+
+```python
+from modules.ai_intelligence.video_indexer.src.action_surface import (
+    VideoIndexAction,            # typed action IDs (string constants)
+    StudioAskSingleVideoInput,   # typed input dataclass
+    StudioAskSingleVideoOutput,  # typed output dataclass
+    run_action,                  # dispatcher: run_action(action_id, **kwargs)
+    run_studio_ask_single_video, # direct entry for the single_video action
+    parse_video_id,              # raw ID or URL -> bare video ID
+    port_for_browser,            # 'chrome'->9222, 'edge'->9223
+    BROWSER_PORTS,
+    ALL_ACTION_IDS,
+    IMPLEMENTED_ACTION_IDS,
+    REGISTERED_ONLY_ACTION_IDS,
+)
+
+# Action IDs
+#   IMPLEMENTED:
+#     VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO = "video_index.studio_ask.single_video"
+#     STUDIO_ASK_CHANNEL_CYCLE = "video_index.studio_ask.channel_cycle"
+#     STUDIO_ASK_DAEMON_CYCLE  = "video_index.studio_ask.daemon_cycle"
+#     STUDIO_ASK_PORTFOLIO_CYCLE = "video_index.studio_ask.portfolio_cycle"
+#   REGISTERED ONLY (returns 'not_implemented'):
+#     GEMINI_API_SINGLE_VIDEO  = "video_index.gemini_api.single_video"
+#     WHISPER_LOCAL_TRANSCRIPT = "video_index.whisper.local_transcript"
+#     SHORTS_SCHEDULER_CONSUME = "shorts_scheduler.consume_video_index"
+
+@dataclass
+class StudioAskSingleVideoInput:
+    video_id: str               # raw ID OR a URL (parsed to bare ID)
+    browser: str = "chrome"     # 'chrome' (9222) | 'edge' (9223)
+    channel_id: Optional[str] = None
+    persist: bool = True        # write memory/video_index/{channel}/{video_id}.json
+
+@dataclass
+class StudioAskSingleVideoOutput:
+    success: bool
+    video_id: str
+    browser: str
+    provider: str = "studio_ask"
+    response_text_length: int = 0
+    topics_count: int = 0
+    saved_path: Optional[str] = None
+    error: Optional[str] = None
+
+@dataclass
+class StudioAskChannelCycleInput:
+    channel_id: str
+    browser: str = "chrome"
+    max_videos: int = 10
+    force_reindex: bool = False
+
+@dataclass
+class StudioAskPortfolioCycleInput:
+    channel_keys: Optional[List[str]] = None  # defaults to the three primary channels
+    max_videos_per_channel: int = 10
+    force_reindex: bool = False
+
+async def run_studio_ask_single_video(
+    inp: StudioAskSingleVideoInput,
+) -> StudioAskSingleVideoOutput:
+    """Bounded single-video Studio Ask index. Routes ONLY to
+    StudioAskIndexer.ask_about_video (navigate + DOM scrape). NEVER calls the
+    Gemini API, the Shorts Scheduler, or any publish/schedule/metadata-mutation
+    path. Attaches to an already-authenticated browser session (no credentials).
+    Fail-closed on error.
+
+    STUDIO_ASK_CHANNEL_CONTEXT_PHASE1: the existing channel_id input is now
+    REQUIRED for the single-video path (the worker sets the OWNING-channel
+    context before asking). The action ID and the output schema are UNCHANGED;
+    only new typed error VALUES are added to the existing 'error' field:
+      - 'channel_unresolved'        - channel_id missing/blank/unknown
+      - 'studio_target_unavailable' - no usable Studio/normal browser target
+                                      (e.g. only a chrome://glic / Gemini side
+                                      panel was open and no normal tab could be
+                                      opened via the existing driver)
+      - 'wrong_channel_context'     - the owning-channel edit surface did not
+                                      load (permission/not-found/sign-in/Oops or
+                                      absent title field after the timeout)
+    On any of these the result is success=False and NOTHING is persisted."""
+
+async def run_action(action_id: str, **kwargs) -> Any:
+    """Route by typed action ID. Studio Ask single/channel/portfolio/daemon
+    IDs run real work; registered-only IDs return `not_implemented`."""
+```
+
+### Manifest integrity and training boundary
+
+- Every Studio Ask prompt carries the requested video ID. A mismatched returned
+  `source_video_id` fails closed and is not persisted.
+- A response hash is stored per manifest; the same Gemini response cannot be
+  persisted under two different video IDs in the same channel.
+- Gemini/Ask Studio segments are semantic retrieval data, not verified speech.
+  They are marked `training_eligible: false` and rejected by `DatasetBuilder`.
+- Weight-training data must come from `youtube_transcript` or
+  `whisper_transcript` (or a compatible legacy verbatim source).
 
 ## Data Classes
 

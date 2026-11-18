@@ -212,9 +212,15 @@ def save_indexing_artifact(result: Dict, video_id: str) -> str:
 # Test Cases
 # =============================================================================
 
+@pytest.mark.live_browser
 @pytest.mark.integration
 class TestStage3VideoIndexing:
-    """Stage 3: Single video indexing tests."""
+    """Stage 3: Single video indexing tests.
+
+    LIVE BROWSER: runs the real VideoIndexer pipeline against a hardcoded
+    video, which drives the signed-in Chrome session. Skipped by default;
+    pass --run-live to run.
+    """
 
     def test_index_short_video_audio_only(self):
         """Test: Index short video with audio layer only."""

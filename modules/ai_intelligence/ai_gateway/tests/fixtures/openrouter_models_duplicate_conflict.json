@@ -1,0 +1,7 @@
+{
+  "data": [
+    {"id": "publisher/model", "context_length": 4096},
+    {"id": "publisher/model", "context_length": 8192},
+    {"id": "safe/model", "context_length": 1024}
+  ]
+}

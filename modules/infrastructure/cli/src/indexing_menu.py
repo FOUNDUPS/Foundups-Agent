@@ -22,13 +22,16 @@ def handle_indexing_menu() -> None:
     print("Creates searchable knowledge base from 012's videos")
     print("Each video saved as JSON with transcripts, topics, timestamps")
     print("=" * 60)
-    print("1. [GEMINI] Gemini AI Indexing (fast, no download)")
+    # NOTE: labels corrected per #818 audit. Option 1 runs the BROWSER Studio
+    # Ask path (NOT the Gemini API); option 4 runs the Gemini Video Analyzer.
+    print("1. [STUDIO ASK] Browser Studio Ask Indexing (fast, no download)")
     print("2. [DAEMON] Continuous Indexing (24/7 daemon mode)")
     print("3. [LOCAL] Whisper Indexing (yt-dlp + faster-whisper)")
-    print("4. [TEST] Test Video Indexing (single video)")
+    print("4. [GEMINI API] Gemini Video Analyzer (single video)")
     print("5. [BATCH] Batch Index Channel (bulk process)")
     print("6. [ENHANCE] Batch Enhance Videos (AI Training Data)")
     print("7. [TRAIN] Extract Training Data (Gemma quality filter)")
+    print("8. [TEST] Studio Ask Single Video (bounded action surface)")
     print("0. Back")
     print("=" * 60)
 
@@ -48,13 +51,20 @@ def handle_indexing_menu() -> None:
         _handle_batch_enhancement()
     elif idx_choice == "7":
         _handle_training_data_extraction()
+    elif idx_choice == "8":
+        _handle_studio_ask_single_video()
     elif idx_choice == "0":
         pass  # Back to YT menu
 
 
 def _handle_gemini_indexing() -> None:
-    """Handle Gemini-based indexing - BROWSER-AWARE like commenting."""
-    print("\n[GEMINI] Autonomous Video Indexing")
+    """Handle browser Studio Ask indexing - BROWSER-AWARE like commenting.
+
+    NOTE: despite the legacy function name, this path uses the YouTube Studio
+    "Ask Studio" BROWSER feature (run_video_indexing_cycle), NOT the Gemini API.
+    Label corrected per #818 audit.
+    """
+    print("\n[STUDIO ASK] Autonomous Browser Video Indexing")
     print("=" * 60)
     print("Browser rotation (same as comment engagement):")
     groups = group_channels_by_browser(role="indexing")
@@ -227,8 +237,12 @@ def _handle_whisper_indexing() -> None:
 
 
 def _handle_test_video_indexing() -> None:
-    """Handle test single video indexing."""
-    print("\n[TEST] Single Video Indexing Test")
+    """Handle single-video indexing via the Gemini Video Analyzer (API).
+
+    Label corrected per #818 audit: this is the GEMINI API path
+    (GeminiVideoAnalyzer), distinct from the browser Studio Ask path.
+    """
+    print("\n[GEMINI API] Gemini Video Analyzer (single video)")
     video_id = input("Enter YouTube video ID: ").strip()
     if video_id:
         try:
@@ -267,6 +281,64 @@ def _handle_test_video_indexing() -> None:
             print(f"[ERROR] Test failed: {e}")
             import traceback
             traceback.print_exc()
+
+
+def _handle_studio_ask_single_video() -> None:
+    """Handle bounded single-video Studio Ask via the typed action surface.
+
+    Routes through run_action('video_index.studio_ask.single_video', ...) so the
+    menu, OpenClaw/WRE, and Hermes all invoke the SAME governed capability.
+    This path NEVER calls Gemini, the Shorts Scheduler, or any metadata-mutation
+    / publish / schedule path (see action_surface boundary).
+    """
+    print("\n[TEST] Studio Ask Single Video (bounded action surface)")
+    print("=" * 60)
+    print("Routes to video_index.studio_ask.single_video")
+    print("Attaches to an already-authenticated browser (chrome=9222/edge=9223).")
+    print("No Gemini API, no scheduler, no metadata mutation.")
+    print("=" * 60)
+
+    raw = input("Enter YouTube video ID or URL: ").strip()
+    if not raw:
+        print("[ERROR] No video id/URL provided")
+        return
+    browser = (input("Browser (chrome|edge) [chrome]: ").strip().lower() or "chrome")
+    if browser not in ("chrome", "edge"):
+        print(f"[ERROR] Invalid browser '{browser}' (expected chrome|edge)")
+        return
+    channel_id = input("Channel ID (optional, Enter to skip): ").strip() or None
+
+    try:
+        from modules.ai_intelligence.video_indexer.src.action_surface import (
+            VideoIndexAction,
+            run_action,
+        )
+
+        out = asyncio.run(run_action(
+            VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO,
+            video_id=raw,
+            browser=browser,
+            channel_id=channel_id,
+            persist=True,
+        ))
+
+        # Print the typed output (no secrets).
+        print("\n[RESULT] Studio Ask Single Video")
+        print(f"  success: {out.success}")
+        print(f"  video_id: {out.video_id}")
+        print(f"  browser: {out.browser}")
+        print(f"  provider: {out.provider}")
+        print(f"  response_text_length: {out.response_text_length}")
+        print(f"  topics_count: {out.topics_count}")
+        print(f"  saved_path: {out.saved_path}")
+        if out.error:
+            print(f"  error: {out.error}")
+    except ImportError as e:
+        print(f"[ERROR] action_surface not available: {e}")
+    except Exception as e:
+        print(f"[ERROR] Studio Ask single video failed: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def _handle_batch_indexing() -> None:

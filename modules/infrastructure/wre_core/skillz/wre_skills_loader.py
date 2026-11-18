@@ -6,12 +6,17 @@ WSP Compliance: WSP 77 (Agent Coordination), WSP 50 (Pre-Action Verification)
 """
 
 import json
+import hashlib
 import yaml
-from pathlib import Path
-from typing import Dict, List, Any, Optional
+from pathlib import Path, PurePosixPath, PureWindowsPath
+from typing import Dict, List, Any, Mapping, Optional, Sequence
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import logging
+
+from modules.infrastructure.wre_core.src.skill_path_security import (
+    has_link_or_reparse_component,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +35,7 @@ class SkillMetadata:
     category: str = "workflow"  # workflow | capability-uplift
     retirement_date: str = ""  # ISO date string or empty
     has_evals: bool = False  # True if evals field is present and non-empty
+    logical_roles: tuple[str, ...] = ()
 
 
 @dataclass
@@ -69,21 +75,37 @@ class WRESkillsLoader:
     - Caching (avoid repeated file reads)
     """
 
-    def __init__(self, registry_path: Optional[Path] = None):
+    def __init__(
+        self,
+        registry_path: Optional[Path] = None,
+        repo_root: Optional[Path] = None,
+    ):
         """
         Initialize skills loader
 
         Args:
             registry_path: Path to skills_registry.json
+            repo_root: Checkout root that owns every executable skill path
         """
+        self.repo_root = (
+            Path(repo_root).resolve()
+            if repo_root is not None
+            else Path(__file__).resolve().parents[4]
+        )
         if registry_path is None:
-            self.registry_path = Path(__file__).parent / "skills_registry_v2.json"
+            self.registry_path = Path(__file__).resolve().with_name(
+                "skills_registry_v2.json"
+            )
         else:
-            self.registry_path = Path(registry_path)
+            configured_registry = Path(registry_path)
+            self.registry_path = (
+                configured_registry
+                if configured_registry.is_absolute()
+                else self.repo_root / configured_registry
+            ).resolve()
 
-        self.repo_root = Path(__file__).parent.parent.parent.parent
         self.registry = self._load_registry()
-        self.skill_cache: Dict[str, str] = {}  # skill_name -> full_content
+        self.skill_cache: Dict[str, str] = {}  # source-digest-bound filtered content
 
     def _load_registry(self) -> Dict[str, Any]:
         """Load skills registry JSON"""
@@ -99,6 +121,7 @@ class WRESkillsLoader:
         agent_type: Optional[str] = None,
         promotion_state: Optional[str] = None,
         domain: Optional[str] = None,
+        logical_role: Optional[str] = None,
     ) -> List[str]:
         """
         Return registered skill names with optional lightweight filtering.
@@ -132,6 +155,9 @@ class WRESkillsLoader:
             if domain and skill_info.get("domain") != domain:
                 continue
 
+            if logical_role and logical_role not in self._logical_roles(skill_info):
+                continue
+
             names.append(skill_name)
 
         return sorted(names)
@@ -145,7 +171,8 @@ class WRESkillsLoader:
         self,
         agent_type: Optional[str] = None,
         intent_type: Optional[str] = None,
-        promotion_state: Optional[str] = None
+        promotion_state: Optional[str] = None,
+        logical_role: Optional[str] = None,
     ) -> List[SkillMetadata]:
         """
         Discover available skills (progressive disclosure - metadata only)
@@ -162,9 +189,18 @@ class WRESkillsLoader:
 
         for skill_name, skill_info in self.registry["skills"].items():
             # Apply filters
-            if agent_type and skill_info.get("primary_agent") != agent_type:
-                if skill_info.get("fallback_agent") != agent_type:
+            if agent_type:
+                agents = skill_info.get("agents") or ()
+                if (
+                    agent_type not in agents
+                    and skill_info.get("primary_agent") != agent_type
+                    and skill_info.get("fallback_agent") != agent_type
+                ):
                     continue
+
+            logical_roles = self._logical_roles(skill_info)
+            if logical_role and logical_role not in logical_roles:
+                continue
 
             if intent_type and intent_type not in skill_info.get("intent_type", ""):
                 continue
@@ -194,6 +230,7 @@ class WRESkillsLoader:
                     category=category,  # Keep empty for hygiene filter to detect
                     retirement_date=str(retirement_date) if retirement_date and retirement_date != "null" else "",
                     has_evals=has_evals,
+                    logical_roles=logical_roles,
                 ))
             except Exception as e:
                 logger.error(
@@ -209,7 +246,8 @@ class WRESkillsLoader:
         self,
         agent_type: Optional[str] = None,
         intent_type: Optional[str] = None,
-        promotion_state: Optional[str] = None
+        promotion_state: Optional[str] = None,
+        logical_role: Optional[str] = None,
     ) -> List[SkillMetadata]:
         """
         Discover available skills filtered by hygiene status.
@@ -226,7 +264,9 @@ class WRESkillsLoader:
         Returns:
             List of healthy skill metadata (NOT full content)
         """
-        all_skills = self.discover_skills(agent_type, intent_type, promotion_state)
+        all_skills = self.discover_skills(
+            agent_type, intent_type, promotion_state, logical_role
+        )
         healthy_skills = []
 
         for skill in all_skills:
@@ -270,12 +310,6 @@ class WRESkillsLoader:
         Raises:
             ValueError: If skill not found or fails hygiene check
         """
-        # Check cache first
-        cache_key = f"{skill_name}_{agent_type}"
-        if cache_key in self.skill_cache:
-            logger.debug(f"[WRE-LOADER] Cache hit: {cache_key}")
-            return self.skill_cache[cache_key]
-
         # Get skill info from registry
         skill_info = self.registry["skills"].get(skill_name)
         if not skill_info:
@@ -290,16 +324,22 @@ class WRESkillsLoader:
                     "Use enforce_hygiene=False to bypass."
                 )
             if not hygiene.is_healthy:
-                logger.warning(
-                    f"[WRE-LOADER] Skill '{skill_name}' has hygiene issues: {hygiene.issues}"
+                raise ValueError(
+                    f"Skill '{skill_name}' failed execution hygiene: "
+                    + "; ".join(hygiene.issues)
                 )
 
         skill_path = self.resolve_skill_file(skill_name)
         if not skill_path.exists():
             raise FileNotFoundError(f"Skill file not found: {skill_path}")
 
-        with open(skill_path, 'r', encoding='utf-8') as f:
-            skill_content = f.read()
+        skill_bytes = skill_path.read_bytes()
+        source_digest = hashlib.sha256(skill_bytes).hexdigest()
+        cache_key = f"{skill_name}_{agent_type}_{int(inject_context)}_{source_digest}"
+        if cache_key in self.skill_cache:
+            logger.debug(f"[WRE-LOADER] Digest-bound cache hit: {skill_name}_{agent_type}")
+            return self.skill_cache[cache_key]
+        skill_content = skill_bytes.decode("utf-8")
 
         # Filter for agent-specific sections
         filtered_content = self._filter_for_agent(skill_content, agent_type)
@@ -313,6 +353,14 @@ class WRESkillsLoader:
         self.skill_cache[cache_key] = filtered_content
         logger.info(f"[WRE-LOADER] Loaded skill: {skill_name} for {agent_type} ({len(filtered_content)} chars)")
         return filtered_content
+
+    @staticmethod
+    def _logical_roles(value: Mapping[str, Any]) -> tuple[str, ...]:
+        raw = value.get("logical_roles") or ()
+        if isinstance(raw, (str, bytes)) or not isinstance(raw, Sequence):
+            return ()
+        roles = tuple(str(role).strip() for role in raw)
+        return roles if all(roles) and len(set(roles)) == len(roles) else ()
 
     def resolve_skill_file(self, skill_name: str) -> Path:
         """
@@ -336,6 +384,10 @@ class WRESkillsLoader:
             + ", ".join(str(candidate) for candidate in candidates[:6])
         )
 
+    def get_skill_metadata(self, skill_name: str) -> Dict[str, Any]:
+        """Return parsed frontmatter for one registered checkout-local Skillz."""
+        return self._extract_metadata(self.resolve_skill_file(skill_name))
+
     def _candidate_skill_files(
         self,
         skill_name: str,
@@ -344,50 +396,61 @@ class WRESkillsLoader:
         """
         Build candidate SKILL file paths for a registry entry.
 
-        Some registry locations still point at legacy `skills/` directories while
-        the real implementation now lives in `skillz/`. Prefer the configured
-        location first, then scan common in-repo skill locations as a wiring
-        fallback instead of silently degrading to synthetic prompt content.
+        Registry locations are authoritative. Discovery of unregistered skills
+        is owned by WRESkillsDiscovery and cannot substitute executable content.
         """
         candidates: List[Path] = []
         seen: set[str] = set()
 
         def _append(path: Path) -> None:
-            path_str = str(path)
+            if has_link_or_reparse_component(self.repo_root, path):
+                raise ValueError("Skill registry location escapes or crosses a link/reparse point")
+            resolved = path.resolve()
+            try:
+                resolved.relative_to(self.repo_root)
+            except ValueError:
+                return
+            path_str = str(resolved)
             if path_str not in seen:
                 seen.add(path_str)
-                candidates.append(path)
+                candidates.append(resolved)
 
         if skill_info:
-            configured = Path(str(skill_info["location"]))
-            if not configured.is_absolute():
-                configured = self.repo_root / configured
+            configured = self._resolve_registered_location(
+                skill_info.get("location")
+            )
             _append(configured / "SKILLz.md")
             _append(configured / "SKILL.md")
 
-            configured_str = str(configured)
-            if "\\skills\\" in configured_str or "/skills/" in configured_str:
-                alt_dir = Path(
-                    configured_str.replace("\\skills\\", "\\skillz\\").replace("/skills/", "/skillz/")
-                )
-                _append(alt_dir / "SKILLz.md")
-                _append(alt_dir / "SKILL.md")
-
-        search_patterns = [
-            f"modules/*/*/skillz/{skill_name}/SKILLz.md",
-            f"modules/*/*/skillz/{skill_name}/SKILL.md",
-            f"modules/*/*/skills/{skill_name}/SKILLz.md",
-            f"modules/*/*/skills/{skill_name}/SKILL.md",
-            f".claude/skills/{skill_name}/SKILLz.md",
-            f".claude/skills/{skill_name}/SKILL.md",
-            f"holo_index/skills/{skill_name}/SKILLz.md",
-            f"holo_index/skills/{skill_name}/SKILL.md",
-        ]
-        for pattern in search_patterns:
-            for match in self.repo_root.glob(pattern):
-                _append(match)
-
         return candidates
+
+    def _resolve_registered_location(self, value: Any) -> Path:
+        """Resolve one portable registry location inside this exact checkout."""
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError("Skill registry location must be a relative path")
+        raw = value.strip()
+        windows_path = PureWindowsPath(raw)
+        normalized = raw.replace("\\", "/")
+        posix_path = PurePosixPath(normalized)
+        if (
+            windows_path.drive
+            or windows_path.is_absolute()
+            or posix_path.is_absolute()
+            or ".." in posix_path.parts
+            or normalized in {".", ""}
+        ):
+            raise ValueError("Skill registry location must stay checkout-relative")
+        candidate = self.repo_root / Path(*posix_path.parts)
+        if has_link_or_reparse_component(self.repo_root, candidate):
+            raise ValueError("Skill registry location escapes or crosses a link/reparse point")
+        resolved = candidate.resolve()
+        try:
+            resolved.relative_to(self.repo_root)
+        except ValueError as exc:
+            raise ValueError(
+                "Skill registry location escapes the active checkout"
+            ) from exc
+        return resolved
 
     def inject_skill_into_prompt(
         self,
@@ -424,7 +487,8 @@ class WRESkillsLoader:
             end_idx = content.find('\n---\n', 4)
             if end_idx != -1:
                 frontmatter = content[4:end_idx]
-                return yaml.safe_load(frontmatter)
+                metadata = yaml.safe_load(frontmatter)
+                return metadata if isinstance(metadata, dict) else {}
 
         return {}
 
@@ -524,6 +588,7 @@ class WRESkillsLoader:
         agent_type: Optional[str] = None,
         promotion_state: Optional[str] = None,
         domain: Optional[str] = None,
+        logical_role: Optional[str] = None,
     ) -> List[str]:
         """
         Return registered skill names filtered by hygiene status.
@@ -540,7 +605,9 @@ class WRESkillsLoader:
         Returns:
             List of healthy skill names
         """
-        all_skills = self.list_skills(agent_type, promotion_state, domain)
+        all_skills = self.list_skills(
+            agent_type, promotion_state, domain, logical_role
+        )
         healthy = []
 
         for skill_name in all_skills:

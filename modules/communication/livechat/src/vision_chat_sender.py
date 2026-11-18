@@ -53,6 +53,8 @@ class VisionChatSender:
             opts = Options()
             opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
             self.driver = webdriver.Chrome(options=opts)
+            from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+            install_youtube_verification_guard(self.driver, port)
             logger.info(f"[VISION-CHAT] Connected to Chrome: {self.driver.current_url[:40]}...")
             return True
         except Exception as e:

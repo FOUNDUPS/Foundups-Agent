@@ -28,10 +28,14 @@ _REGISTRY_PATH = Path(__file__).resolve().parent / "memory" / "youtube_channels.
 _CHROME_PORT = 9222
 _EDGE_PORT = 9223
 
-_DEFAULT_TIME_SLOTS = [
-    "12:00 AM", "3:00 AM", "6:00 AM", "9:00 AM",
-    "12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM",
-]
+# Canonical US-Eastern (ET) peak publish slots: morning / lunch / evening.
+# ALL shorts target the US audience, so optimum times are expressed in ET and
+# converted per-channel to the channel's Studio-account tz before typing.
+# The authoritative, env-configurable (SHORTS_PEAK_SLOTS_ET) definition and the
+# DST-aware conversion live in:
+#   modules/platform_integration/youtube_shorts_scheduler/src/peak_window.py
+# These literals are the inert default mirror (24h ET) persisted to the registry.
+_DEFAULT_TIME_SLOTS = ["08:00", "12:00", "20:00"]
 
 
 def _default_channels() -> List[Dict[str, Any]]:
@@ -51,7 +55,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "available_ports": [_CHROME_PORT, _EDGE_PORT],
                 "account_section": 0,
             },
-            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "ffcpln"},
+            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 3, "description_template": "ffcpln"},
             "social": {"linkedin_company": "move2japan", "x_account": "geozai", "enabled": True, "signature": "0102🦞"},
         },
         {
@@ -68,7 +72,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "available_ports": [_CHROME_PORT, _EDGE_PORT],
                 "account_section": 0,
             },
-            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "undaodu"},
+            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 3, "description_template": "undaodu"},
             "social": {"linkedin_company": "undaodu", "x_account": "undaodu", "enabled": True, "signature": "0102🦞012🖐️"},  # wsp01: 012 co-signs
         },
         {
@@ -78,14 +82,14 @@ def _default_channels() -> List[Dict[str, Any]]:
             "handle": "@FoundUps",
             "timezone": "America/New_York",
             "roles": {"live_check": True, "comments": True, "shorts": True, "indexing": True},
-            "content_types": ["short"],  # startup/pAVS content (NOT FFCPLN)
+            "content_types": ["short", "upload"],  # startup/pAVS content (NOT FFCPLN); long-form gated by YT_VIDEO_PROCESSING_ENABLED (default off)
             "browser": {
                 "comment_browser": "edge",
                 "preferred_port": _EDGE_PORT,
                 "available_ports": [_CHROME_PORT, _EDGE_PORT],
                 "account_section": 1,
             },
-            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "foundups"},
+            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 3, "description_template": "foundups"},
             "social": {"linkedin_company": "foundups", "x_account": "foundups", "enabled": True, "signature": "0102🦞"},
         },
         {
@@ -95,14 +99,14 @@ def _default_channels() -> List[Dict[str, Any]]:
             "handle": "@antifaFM",
             "timezone": "America/New_York",
             "roles": {"live_check": True, "comments": True, "shorts": True, "indexing": True},
-            "content_types": ["short"],  # music shorts only
+            "content_types": ["short", "upload"],  # music shorts + long-form; long-form gated by YT_VIDEO_PROCESSING_ENABLED (default off)
             "browser": {
                 "comment_browser": "edge",
                 "preferred_port": _EDGE_PORT,
                 "available_ports": [_CHROME_PORT, _EDGE_PORT],
                 "account_section": 1,
             },
-            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "ffcpln"},
+            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 3, "description_template": "ffcpln"},
             "social": {"linkedin_company": "move2japan", "x_account": "antifafm", "enabled": True, "signature": "0102🦞"},  # wsp01: antifaFM posts to move2japan
         },
     ]
@@ -142,8 +146,11 @@ def _normalize_channel(channel: Dict[str, Any]) -> Dict[str, Any]:
     shorts = normalized.get("shorts") or {}
     normalized["shorts"] = {
         "time_slots": list(shorts.get("time_slots") or _DEFAULT_TIME_SLOTS),
-        "max_per_day": int(shorts.get("max_per_day", 8)),
+        "max_per_day": int(shorts.get("max_per_day", 3)),
         "description_template": str(shorts.get("description_template", "ffcpln")),
+        # Preserve explicit policy, including malformed input for consumer refusal.
+        # Never coerce a string such as "false" to a truthy audience selection.
+        "made_for_kids": shorts.get("made_for_kids"),
     }
 
     # Content types: what this channel produces (short, upload)

@@ -82,11 +82,14 @@ class TestDocsArchitectureRouting:
 
     def test_docs_architecture_in_docs_paths(self):
         """docs/architecture/** should be indexed by index_docs_entries."""
+        from holo_index.canonical_source_manifest import _docs_source_files
         from holo_index.core.indexing_engine import index_docs_entries
         import inspect
-        source = inspect.getsource(index_docs_entries)
+        source = inspect.getsource(_docs_source_files)
+        index_source = inspect.getsource(index_docs_entries)
         # Verify docs path is included
         assert 'project_root / "docs"' in source or '"docs"' in source
+        assert "_docs_source_files(holo)" in index_source
 
     def test_docs_indexed_separately_from_wsp(self):
         """navigation_docs collection should be separate from navigation_wsp."""

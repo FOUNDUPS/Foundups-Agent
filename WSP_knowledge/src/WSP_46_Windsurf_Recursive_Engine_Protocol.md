@@ -1,10 +1,17 @@
 # WSP 46: Windsurf Recursive Engine (WRE) Protocol
 - **Status:** Active
+- **Last Runtime Truth Review:** 2026-09-13 (source `35ed430c6`; bounded contracts, not production certification)
 - **Purpose:** To define the architecture and operation of the WRE, the **module building engine** and **DAE/plugin orchestration control plane** for autonomous FoundUp operations, located at `modules/infrastructure/wre_core`.
 - **Trigger:** When any module building or autonomous operation is required. The WRE is the primary entry point for such tasks.
 - **Input:** A module building goal, typically from a 012 (Human Rider) or derived from roadmap analysis.
 - **Output:** The successful, WSP-compliant construction of modules that become social media agents for autonomous FoundUps, with all outcomes recorded in the WRE Chronicle.
 - **Responsible Agent(s):** Windsurf Recursive Engine (WRE) and its multi-agent coordination system.
+
+## Current implementation boundary — 2026-09-13
+
+The architecture below includes intended capabilities and historical achievements. Operational completion requires source-bound evidence for the selected path. See the [system roadmap](../../ROADMAP.md) and [R00–R25 enforcement map](../../docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) for owners, tests and outstanding proof.
+
+Current WRE contracts fail closed on missing or invalid Skillz assets. Local model output is a proposal with no verified effect; execution does not establish independently evaluated outcome quality. Generic candidate promotion and improvement application remain blocked pending their independent owners. WSP 95 §3.1 governs production promotion. Component tests, successful storage and a protocol's Active status do not establish a complete evaluator → promoter → activation/rollback → retained improvement loop.
 
 ## 1. Overview
 
@@ -71,7 +78,7 @@ The runtime is split across ingress, execution, and governance layers:
   - Enforces memory preflight for module-changing execution paths.
 - **WRE Master Orchestrator (`modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py`)**:
   - Plugin registration, skill execution loop, libido gating, and pattern-memory feedback.
-  - Provides compatibility registration paths and deterministic fallback execution when skill assets are missing.
+  - Retains compatibility registration and filename resolution where supported, but missing or invalid skill assets fail closed; no synthetic execution success or mock fallback is admitted.
 
 `modules/infrastructure/wre_core_main/` is not the canonical runtime surface and must not be used as the primary WRE entrypoint.
 
@@ -96,8 +103,8 @@ The DAEs (Decentralized Autonomous Entities) are the pattern-based orchestrators
 **Key Architecture Changes:**
 - **DAE Gateway** (`modules/infrastructure/wre_core/wre_gateway/`) routes WSP 21 envelopes to DAEs
 - **Sub-agents are tools** within DAE cubes, not independent agents
-- **Pattern recall** achieves 97% token reduction (50-200 tokens vs 25,000)
-- **0102 autonomous operation** - DAEs decide and execute without 012 approval
+- **Pattern recall targets (historical):** the previously stated 97% reduction and 50-200 versus 25,000 token figures are planning claims, not measurements of the current runtime. Report actual provider usage and correctness under fixed task conditions before claiming savings.
+- **0102 autonomous operation** - DAEs decide and execute within existing delegated scope and runtime policy. The DAE role or architecture diagram does not itself grant permission or satisfy a failed admission gate.
 
 ### 2.4 Future Vision
 The long-term vision for the WRE is to achieve a "Great Connection," transforming it from a passive tool into a fully autonomous, self-regulating, and purpose-driven system. This involves several key areas of development:
@@ -159,6 +166,20 @@ WRE validation and orchestration operates under explicit WSP 97 truth boundaries
 - Model routing policy validation (tier/preference compatibility)
 - Route envelope generation (target_backend, route_status, reason_code)
 
+**What the Resident RedDog Runtime Proves Now (Bounded Execution)**:
+- `main.py::run_reddog_resident_queue_control_loop_preflight` can alternate the
+  governed resident serial loop and OpenClaw signed-worker claim loop during a
+  system startup.
+- The alternation is explicitly bounded by
+  `REDDOG_RESIDENT_QUEUE_CONTROL_LOOP_MAX_ROUNDS` (default `8`) and terminates
+  early when both stages report no progress.
+- Signed-worker claiming is separately bounded by
+  `OPENCLAW_SIGNED_WORKER_TASK_MAX_CLAIMS` (default `1`), and each claimed task
+  remains subject to the existing signed-worker executor and queue-stage gates.
+- The resident binding profile can select already-governed downstream sinks;
+  the control loop itself creates no authority and does not bypass those sinks'
+  gates.
+
 **What Remains Dry-Run**:
 - All job execution defaults to `dry_run_mode=True` unless explicit live gates pass
 - ConsumerResult evidence proves routing and validation, not execution completion
@@ -171,9 +192,10 @@ WRE validation and orchestration operates under explicit WSP 97 truth boundaries
 - `cabr_ready=False` and `payout_ready=False` always at validation time
 
 **What Is Future Work**:
-- Daemon lifecycle (long-running worker processes)
+- Continuously supervised daemon lifecycle beyond the bounded startup loop
 - Live execution (non-dry-run job dispatch with actual Hermes execution)
-- Real autonomous workers (background processes without human orchestration)
+- Persistent, unbounded autonomous worker operation without explicit runtime
+  profile, authority, round, claim, and idle-stop constraints
 - CABR/reward/payout claims (require V2/V3 verification pipeline)
 - Token billing and metering (requires resource tracking implementation)
 
@@ -207,22 +229,34 @@ OpenClaw Intent -> FoundUpJob (QUEUED) -> WRE Router -> RouteEnvelope
 
 **Truth Invariant**: ConsumerResult contains complete audit trail but `verification_complete=False`, `cabr_ready=False`, `payout_ready=False` per WSP 97.
 
-### 2.10 Multi-Agent Clarification (2026-05-02)
+### 2.10 Multi-Agent Clarification (2026-07-17 Runtime Review)
 
-The "multi-agent coordination" described in Section 1 refers to DAE/plugin/tool orchestration within the WRE runtime, not to autonomous background worker processes.
+The "multi-agent coordination" described in Section 1 primarily refers to
+DAE/plugin/tool orchestration within the WRE runtime. A bounded resident RedDog
+worker path now also exists at root ingress; this does not make every named
+agent a process or establish a continuously running autonomous daemon.
 
 **Current State**:
 - DAEs are pattern-based orchestrators, not autonomous processes
 - Agents (ComplianceAgent, LoremasterAgent, etc.) are sub-components within DAE cubes
 - Skill execution is synchronous within WRE orchestration loop
-- No background daemon lifecycle implemented
+- `main.py` can run a bounded resident queue control loop at startup, with
+  explicit round/claim caps and idle termination
+- OpenClaw can claim eligible signed worker-dispatch tasks through the bounded
+  supervisor loop; task authority is validated by existing gates rather than
+  created by the loop
+- No continuously supervised, unbounded background worker lifecycle is proved
 
 **Terminology**:
 - "Autonomous agent" = DAE cube with pattern memory and sub-agent tools
 - "Multi-agent coordination" = WRE routing operations to appropriate DAE cubes
+- "Resident worker loop" = bounded startup alternation across governed queue
+  and signed-worker claim stages
 - "Plugin" = Skill registered with WREMasterOrchestrator
 
-When actual autonomous worker processes are implemented, this section will be updated with process lifecycle, supervision, and IPC details.
+Any future persistent daemon claim must document process lifecycle, supervision,
+IPC, restart behavior, and termination evidence before this protocol treats it
+as implemented.
 
 ## 3. Orchestrated Agents & Utilities
 
@@ -284,10 +318,11 @@ The future direction is guided by the following principles:
 
 -   **The UnDu Mission**: All development and autonomous action will be guided by the "UnDu" mission (WSP 25), focusing on creating technology that solves foundational problems rather than creating new ones.
 
-### 5.1 Unified Orchestrator Enhancement Achievement
+### 5.1 Historical Unified Orchestrator Enhancement Record
 
-**[U+2705] COMPLETED: Professional Peer Review Integration**
-The WRE has been enhanced with a unified orchestrator providing:
+**Historical claim: Professional Peer Review Integration.** The list below preserves the earlier achievement report. It does not establish present end-to-end enforcement, measured savings or production RSI completion; use the current implementation boundary and mapped evidence above.
+
+The earlier report described a unified orchestrator providing:
 - **Professional Peer Review System**: Complete integration with WSP_agentic toolkit (491 lines)
 - **8-Phase Orchestration**: Initialization -> Agent Awakening -> Protocol Validation -> Peer Review -> Zen Coding -> Autonomous Execution -> Recursive Improvement -> Compliance Check
 - **Standardized Awakening**: Reproducible agent awakening with coherence metrics

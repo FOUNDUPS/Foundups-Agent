@@ -116,5 +116,181 @@ class TestAudioLibrary(unittest.TestCase):
         np.testing.assert_array_almost_equal(fp1, fp2)
 
 
+class TestEthereumLoggerCompatibility(unittest.TestCase):
+    """Real Web3 middleware with an in-memory provider; run under the effect guard."""
+
+    def setUp(self):
+        from importlib.metadata import version
+        from web3 import Web3
+        from web3.middleware import ExtraDataToPOAMiddleware
+        from src import ethereum_logger
+
+        self.assertEqual(version('web3'), '7.15.0')
+        self.assertEqual(version('eth-account'), '0.13.6')
+        self.assertTrue(ethereum_logger.WEB3_AVAILABLE)
+        self.assertIs(ethereum_logger.Web3, Web3)
+        self.module = ethereum_logger
+        self.web3_class = Web3
+        self.poa = ExtraDataToPOAMiddleware
+        self.providers = []
+
+    def tearDown(self):
+        for provider in self.providers:
+            self.assertEqual(provider.unexpected, [])
+            self.assertEqual(provider.calls, provider.expected)
+
+    def _provider(self, replies):
+        from copy import deepcopy
+        from web3.providers.base import JSONBaseProvider
+
+        class ControlledProvider(JSONBaseProvider):
+            def __init__(self):
+                super().__init__()
+                self.calls = []
+                self.unexpected = []
+                self.expected = [(method, params) for method, params, _ in replies]
+
+            def make_request(self, method, params):
+                call = (str(method), list(params))
+                position = len(self.calls)
+                self.calls.append(call)
+                if position >= len(replies) or call != self.expected[position]:
+                    self.unexpected.append(call)
+                    raise AssertionError('Unexpected synthetic provider method/params')
+                response = replies[position][2]
+                if isinstance(response, Exception):
+                    raise response
+                return deepcopy(response)
+
+        provider = ControlledProvider()
+        self.providers.append(provider)
+        return provider
+
+    @staticmethod
+    def _response(result):
+        return {'jsonrpc': '2.0', 'id': 1, 'result': result}
+
+    def _logger(self, provider):
+        from unittest.mock import patch
+
+        url = 'https://acoustic-compatibility.invalid'
+        with patch.object(self.web3_class, 'HTTPProvider', return_value=provider) as factory:
+            logger = self.module.EthereumLogger(testnet_url=url)
+        factory.assert_called_once_with(url)
+        self.assertIsInstance(logger.web3, self.web3_class)
+        self.assertIs(logger.web3.provider, provider)
+        return logger
+
+    def test_actual_constructor_preserves_default_middleware(self):
+        provider = self._provider([
+            ('web3_clientVersion', [], self._response('synthetic-web3')),
+        ])
+        logger = self._logger(provider)
+        self.assertFalse(logger.simulate_only)
+        defaults = self.web3_class(provider).middleware_onion.as_tuple_of_middleware()
+        actual = logger.web3.middleware_onion.as_tuple_of_middleware()
+        self.assertEqual(actual[:-1], defaults)
+        self.assertIs(actual[-1], self.poa)
+
+    def test_actual_poa_block_transform_and_default_rejection(self):
+        from hexbytes import HexBytes
+        from web3.exceptions import ExtraDataLengthError
+
+        extra = '0x' + '11' * 33
+        result = {'number': '0x2a', 'extraData': extra}
+        identifiers = [('latest', 'eth_getBlockByNumber'),
+                       ('0x' + '22' * 32, 'eth_getBlockByHash')]
+        for identifier, method in identifiers:
+            with self.subTest(identifier=identifier):
+                provider = self._provider([
+                    ('web3_clientVersion', [], self._response('synthetic-web3')),
+                    (method, [identifier, False], self._response(result)),
+                ])
+                logger = self._logger(provider)
+                self.assertFalse(logger.simulate_only)
+                block = logger.web3.eth.get_block(identifier)
+                self.assertNotIn('extraData', block)
+                self.assertEqual(block['proofOfAuthorityData'], HexBytes(extra))
+                self.assertIsInstance(block['proofOfAuthorityData'], HexBytes)
+                self.assertEqual(block['number'], 42)
+                for outer_poa in (False, True):
+                    with self.subTest(outer_poa=outer_poa):
+                        control = self._provider([
+                            (method, [identifier, False], self._response(result)),
+                        ])
+                        web3 = self.web3_class(control)
+                        if outer_poa:
+                            web3.middleware_onion.add(self.poa)
+                        with self.assertRaises(ExtraDataLengthError):
+                            web3.eth.get_block(identifier)
+
+    def test_connection_failures_preserve_simulation_fallback(self):
+        failures = [
+            {'jsonrpc': '2.0', 'id': 1,
+             'error': {'code': -32000, 'message': 'synthetic unavailable'}},
+            OSError('synthetic unavailable'),
+            RuntimeError('synthetic initialization failure'),
+        ]
+        for response in failures:
+            with self.subTest(response_type=type(response).__name__):
+                provider = self._provider([('web3_clientVersion', [], response)])
+                logger = self._logger(provider)
+                self.assertTrue(logger.simulate_only)
+                self.assertEqual(logger.get_network_stats()['network'],
+                                 'Educational Simulation')
+
+    def test_actual_web3_network_stat_conversions(self):
+        provider = self._provider([
+            ('web3_clientVersion', [], self._response('synthetic-web3')),
+            ('eth_chainId', [], self._response('0xaa36a7')),
+            ('eth_blockNumber', [], self._response('0x2a')),
+            ('eth_gasPrice', [], self._response('0x7')),
+        ])
+        logger = self._logger(provider)
+        self.assertFalse(logger.simulate_only)
+        self.assertEqual(logger.get_network_stats(), {
+            'network': 11155111, 'latest_block': 42, 'gas_price': 7,
+            'educational_purpose': 'Real blockchain proof-of-existence',
+        })
+
+    def test_results_hash_is_canonical_and_ignores_ethereum_hash(self):
+        import hashlib
+
+        provider = self._provider([
+            ('web3_clientVersion', [], self._response('synthetic-web3')),
+        ])
+        logger = self._logger(provider)
+        expected = hashlib.sha256(b'{"confidence":0.5,"sound_type":"Tone A"}').hexdigest()
+        first = {'sound_type': 'Tone A', 'confidence': 0.5, 'ethereum_hash': 'old'}
+        reordered = {'ethereum_hash': 'new', 'confidence': 0.5, 'sound_type': 'Tone A'}
+        self.assertEqual(logger._create_results_hash(first), expected)
+        self.assertEqual(logger._create_results_hash(reordered), expected)
+        self.assertNotEqual(logger._create_results_hash({**first, 'confidence': 0.6}),
+                            expected)
+
+    def test_connected_logging_remains_simulated_without_provider_calls(self):
+        import hashlib
+        from unittest.mock import patch
+
+        provider = self._provider([
+            ('web3_clientVersion', [], self._response('synthetic-web3')),
+        ])
+        logger = self._logger(provider)
+        self.assertFalse(logger.simulate_only)
+        results = {'confidence': 0.5, 'sound_type': 'Tone A'}
+        digest = hashlib.sha256(b'{"confidence":0.5,"sound_type":"Tone A"}').hexdigest()
+        expected = 'simulated_' + hashlib.sha256(
+            f'{digest}:1700000000:acoustic_lab'.encode()).hexdigest()[:32]
+        with patch.object(self.module.time, 'time', return_value=1700000000):
+            identifier = logger.log_acoustic_analysis(results)
+            self.assertEqual(identifier, expected)
+            self.assertEqual(logger.verify_log(identifier), {
+                'verified': True, 'timestamp': 1700000000,
+                'block_number': 'simulated',
+                'educational_note': 'This demonstrates blockchain verification concepts',
+            })
+        self.assertIsNone(logger.verify_log('not-a-chain-receipt'))
+
+
 if __name__ == '__main__':
     unittest.main()

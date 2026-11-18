@@ -2,6 +2,42 @@
 
 Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, source-authority contract, validated module-path resolution, and the read-only ContextBundle dry-run consumer.
 
+## create_foundup Dry-Run Planner
+
+`plan_create_foundup_dry_run(envelope, actor_id, registry_path)` returns a
+side-effect-free scaffold plan. Registry inspection is authoritative and
+fail-closed: missing, unreadable, malformed, or schema-invalid data returns
+`FAIL_REGISTRY_UNAVAILABLE` with stable redacted text. Omitted legacy
+`created_at` values are normalized deterministically. Validation uses
+`Draft202012Validator` with the canonical
+`modules/foundups/foundup_registry.schema.json`; the planner does not define a
+second registry schema.
+
+## Hermes -> Resident RedDog Thin Client
+
+`hermes_reddog_resident_client_adapter.py` exposes Hermes as a transport to the
+single canonical resident RedDog AgentDB cycle. It accepts only
+`hermes_reddog_resident_request.v1` operations preserve the already-grounded
+`reddog_intent.v2` route. `hermes_reddog_resident_request.v2` accepts bounded
+natural-language `work_focus` plus an authorized `foundup_id`, then uses the
+transport-neutral backend grounding service to produce the same immutable v2
+intent. Status/cancel/resume load the persisted intent by ID and reject a
+replacement intent. The authenticated principal and allowed FoundUp scope are
+supplied by the host, not request prose.
+
+`scripts/hermes_reddog_resident_client_once.py` is the bounded JSON instrument
+bridge. The host must set `REDDOG_AUTHENTICATED_PRINCIPAL_ID` and the
+comma-separated `REDDOG_AUTHORIZED_FOUNDUP_IDS`. The bridge does
+not invoke a Hermes model or builder and grants no shell, repository-write,
+worktree, PR, merge, HoloIndex-indexing, or execution authority.
+
+`reddog_transport_neutral_grounding_service.py` classifies repository paths,
+semantic targets, external research URLs, and quoted reference blocks. Repo
+paths must resolve to governed in-repo files. Semantic targets require a
+CURRENT generation-bound HoloIndex owner response with supporting evidence.
+Quoted blocks remain context-only. External URLs fail closed until an approved
+research retriever is configured; this service never re-indexes HoloIndex.
+
 ## ContextBundle Dry-Run Consumer (WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1)
 
 First consumer wiring of the read-only #775 ContextBundle into the EXISTING
@@ -9,8 +45,13 @@ dry-run evidence path. STANDALONE and return-value-only: it consumes a
 ContextBundle as its TRUSTED input and RETURNS a typed `DryRunResult`
 describing what a FoundUp dry-run WOULD do. It performs NO live build, NO real
 execution, NO subprocess, NO Hermes real delegation, NO executor sink, NO FAM
-event, and NO file write. It is NOT plumbed into the live OpenClaw/WRE loop
-(runtime wiring is a separate Phase-2 slice).
+event, and NO file write. The return-value-only component is now called by
+`wre_core/src/foundup_job_consumer.py::_attach_context_bundle_dry_run` on the
+existing SIMULATED/no-real-execution/disabled-delegation branch. That attachment
+is implemented; live worker execution is not. The surrounding executor may write
+evidence artifacts, so invoking the whole consumer is not a read-only query.
+See `wre_core/tests/test_foundup_job_consumer_context_bundle_wiring.py`; its real
+seam positive fixture uses `validate_foundup`, not a completed product build.
 
 ```python
 # modules/foundups/agent/src/context_bundle_dry_run_consumer.py  (NEW)
@@ -991,3 +1032,21 @@ agent_ranked:   "founder_001 rank UP: 2→3 (Contributor)"
 agent_earned:   "founder_001 earned 50 F₁"
 agent_leaves:   "0xfound001... logs off (1250 F_i)"
 ```
+
+---
+
+## HermesFoundUpBuilder Environment Contract (HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1)
+
+`HermesFoundUpBuilder` (`src/hermes_adapter.py`) is **dry-run by default**. Real filesystem writes
+(e.g. `generate_adapters` adapter stubs) require an explicit **double opt-in**:
+
+| Env var | Default | Meaning |
+|---------|---------|---------|
+| `HERMES_BUILDER_ALLOW_REAL_WRITES` | `0` | Must be `1` to permit any real write |
+| `HERMES_BUILDER_DRY_RUN` | unset = dry-run | Must be explicitly `0` to permit any real write |
+
+`self.dry_run` is `False` **only** when `HERMES_BUILDER_ALLOW_REAL_WRITES=1` AND
+`HERMES_BUILDER_DRY_RUN=0`. Every other combination (including all-unset) is dry-run. `self.dry_run`
+is surfaced in `extract_foundup` / `build_foundup` / `generate_adapters` result dicts and written
+back to `FoundUpJob.policy_flags.dry_run_mode` by the executor. Callers that already force dry-run
+(`execute_foundup_job(..., force_dry_run=True)`, or `HERMES_BUILDER_DRY_RUN=1`) are unchanged.

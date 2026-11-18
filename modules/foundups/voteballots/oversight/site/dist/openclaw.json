@@ -1,0 +1,31 @@
+{
+  "agents": {
+    "defaults": {
+      "sandbox": {
+        "mode": "all",
+        "workspaceAccess": "ro"
+      }
+    }
+  },
+  "tools": {
+    "allow": ["read"],
+    "deny": [
+      "exec",
+      "process",
+      "write",
+      "edit",
+      "apply_patch",
+      "browser",
+      "gateway",
+      "nodes",
+      "cron",
+      "automations",
+      "message",
+      "sessions_spawn",
+      "sessions_send"
+    ],
+    "fs": {
+      "workspaceOnly": true
+    }
+  }
+}

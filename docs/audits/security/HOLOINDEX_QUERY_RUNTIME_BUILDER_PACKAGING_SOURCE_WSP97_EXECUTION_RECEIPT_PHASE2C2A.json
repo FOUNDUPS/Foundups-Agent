@@ -1,0 +1,129 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "329788414ca35ba593dfef91db3f80ff875928b6"
+  },
+  "execution_id": "HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_PHASE2C2A",
+  "execution_plane": "local_tools_and_wsp00_subagent_audit",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "phase2c2a_wheel_bound_inert_packaging_source",
+    "reviewed_wheel": "packaging-26.0-py3-none-any.whl",
+    "reviewed_wheel_bytes": 74366,
+    "reviewed_wheel_sha256": "b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529",
+    "source_generation": "implemented_and_falsified",
+    "dependency_materialization": "not_invoked_phase2c2b",
+    "builder_runtime_authenticated": false,
+    "candidate_activation": false,
+    "holoindex_a_grade": "blocked",
+    "retrieval_quality_rsi": "not_operational"
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:96381ff550ecfa496df2f464625208943f7737164eac41a807d054f292f91f15",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "persist and fully reprove one inert reviewed-wheel source generation before dependency composition"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 detector-backed awakening passed with 7/7 negative detector passes and coherence 0.707.",
+      "Governed Holo retrieval was CURRENT at exact base 329788414ca35ba593dfef91db3f80ff875928b6 with no gap, no reindex, and generation sha256:d108075504550c62ff83460f5ec5dab1aeba81793341a9a777b53e7f9f1d8389.",
+      "Module README, INTERFACE, ROADMAP, ModLog, tests README, TestModLog, Phase 2C1 wheel code, Windows lease primitives, generic dependency materializer, registry, and backend-manifest generator were inspected before closure.",
+      "Retrieval ranked the module README and INTERFACE first and was CURRENT without duplicate authoritative hits; lower code/WSP results contained unrelated web and generic protocol noise, while ROADMAP, ModLog, and test artifacts were missing from the top five and were therefore direct-read as required."
+    ],
+    "research": [
+      "The existing Phase 2C1 retained payload capability, Windows create-new file primitives, StoreProof, no-replace publisher, quarantine, and dependency-tree planner were reused.",
+      "No existing wheel-bound packaging-source generation was found; dependency composition was preserved as the independently allocated Phase 2C2b transaction.",
+      "Windows directory leases do not deny child creation, so retained file handles plus terminal complete-topology re-enumeration form the truthful verification boundary."
+    ],
+    "micro_pass": [
+      "Focused source and scale coverage passed 44 tests with one expected opt-in physical skip.",
+      "Source, scale, and Phase 2C1 wheel coverage passed 107 tests with one expected skip.",
+      "The exact physical O: wheel passed first publication plus 200 full reuses in 105.09 seconds under the unchanged 120-second ceiling, with bounded handle/RSS deltas and unchanged source SHA.",
+      "Contract, materializer, topology, verifier, writer, and wheel files are at most 500 lines and no inspected Python function exceeds 50 lines.",
+      "The focused Phase 2C2a interface was extracted under docs/clarity, restoring INTERFACE.md to its exact inherited 1,250-line boundary instead of adding documentation debt."
+    ],
+    "macro_pass": [
+      "The exact 15-file adjacent builder and dependency-runtime surface passed 227 tests with seven expected opt-in or host-capability skips in 39.87 seconds.",
+      "Registry and backend-manifest generator coverage passed 36 tests in 87.87 seconds; WSP 97 validator coverage passed 66 tests with one expected platform-capability skip in 8.15 seconds.",
+      "The WRE test registry is current at 1,635 tests and 268 quarantined entries.",
+      "The generated RedDog backend closure is 1,388 runtime files at ff0fb87a81bf5304688c138f79207789ffbf916a7be1181c956638f1340e60c6.",
+      "The extension compatibility and deterministic package-surface checks passed; the 67-file surface is 948,777 bytes at sha256:e0d580ab82d708401116c07fee4e8a1509fd6679b017ec2dd87ecc1d80f00359.",
+      "The extension pin changes only compatibility identity; it does not call the materializer or change owner, route, query, conversation, execution, or VSIX behavior.",
+      "The unrelated sites/ tree remained untracked and untouched."
+    ],
+    "hard_think": [
+      "Two finite full-byte passes alone left a tail mutation window, so every admitted child file and directory is retained across pass two and terminally reproved before release.",
+      "An unsigned persisted source-lease boolean cannot authenticate historical publication authority; durable verification now returns no lease authority.",
+      "The live materializer grants current-verification authority on publish and reuse, but publication-time authority only for a generation that call actually publishes."
+    ],
+    "dialectic_sweep": [
+      "A third unpinned verification pass was rejected because it recreates the same finite tail window.",
+      "Persistent destination write-denial and post-return immutability claims were rejected because the current store does not establish them.",
+      "Independent review reproduced both tail mutation and unsigned-authority laundering before their repairs were accepted.",
+      "Combining source and generic dependency materialization was rejected because it would blur lock ownership, failure preservation, and cross-store atomicity."
+    ],
+    "first_principles": [
+      "Phase 2C2a proves only exact inert wheel-and-tree persistence and bounded verification at one explicit proof boundary.",
+      "Durable bytes can prove the reviewed pin but cannot prove historical live-handle state without authenticated provenance.",
+      "No import, execution, builder authentication, loader closure, activation, A-grade, or retrieval-RSI property follows from source persistence."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_writer_windows.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_topology_windows.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_verifier.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_materializer.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging_source.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_packaging_source_scale.py",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_BUILDER_PACKAGING_SOURCE_INTERFACE_PHASE2C2A.md",
+      "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_ASSUMPTION_AUDIT_PHASE2C2A.md"
+    ]
+  },
+  "nonclaims": [
+    "The reviewed pin is a repository decision, not authenticated official provenance, a signature, or a transparency-log proof.",
+    "No network access, download, installation, import, child execution, dependency-runtime composition, route change, owner change, or activation is performed.",
+    "No builder authentication, loader/native/subprocess/exact-runtime closure, deterministic effects, persistent write denial, atomic filesystem snapshot, or post-return immutability is claimed.",
+    "The physical gate is bounded local repeatability and resource evidence, not production throughput or horizontal-scale proof.",
+    "HoloIndex A-grade and retrieval-quality RSI remain blocked by later independently falsified layers."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_WSP15_RECEIPT_PHASE2C2A.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_WSP97_EXECUTION_RECEIPT_PHASE2C2A.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_SOURCE_ASSUMPTION_AUDIT_PHASE2C2A.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_BUILDER_PACKAGING_SOURCE_INTERFACE_PHASE2C2A.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "WSP_knowledge/WSP_Test_Registry.json",
+    "scripts/reddog_backend_manifest.json"
+  ]
+}

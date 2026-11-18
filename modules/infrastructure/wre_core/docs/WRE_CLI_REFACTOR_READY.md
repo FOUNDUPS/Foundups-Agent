@@ -1,5 +1,10 @@
 # WRE CLI Refactoring - Ready for Autonomous Execution
 
+> **Historical work proposal — superseded and non-authoritative.**
+> “Ready” describes a 2025 planning state; this file grants no execution,
+> mutation, promotion, or model authority. Verify current work through the
+> module roadmap and governed WSP 95 v2.1 admission path.
+
 **Date**: 2025-10-25
 **Status**: READY FOR QWEN/GEMMA EXECUTION
 **Token Budget**: 1,300 tokens estimated

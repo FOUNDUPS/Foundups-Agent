@@ -6,6 +6,12 @@ Tests for dashboard snapshot export utility.
 
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import json
+import os
+
+import pytest
+
+from modules.infrastructure.wre_core.src import dashboard_alerts
 
 from modules.infrastructure.wre_core.src.dashboard_snapshot_export import (
     export_dashboard_snapshot,
@@ -36,6 +42,327 @@ def test_export_dashboard_snapshot_writes_files(tmp_path):
     assert result["healthy"] is True
     text = latest.read_text(encoding="utf-8")
     assert "\"source_of_truth\": \"sqlite\"" in text
+
+
+def _research_report(tmp_path, attempts=0):
+    path = tmp_path / "invocation-fixture" / "report.json"
+    path.parent.mkdir()
+    report = {
+        "schema": "wre_auto_research_report.v1", "invocation_id": path.parent.name,
+        "report_path": str(path), "status": "completed", "dry_run": True,
+        "stop_reason": "attempt_limit", "cleanup": "restored",
+        "failure": None, "cleanup_failure": None, "baseline_input_sha256": "a" * 64,
+        "attempts_requested": attempts, "attempts_started": attempts,
+        "attempts_finished": attempts, "iterations_run": attempts,
+        "baseline_evaluations": 1, "candidate_evaluations": attempts,
+        "baseline": {"fitness": 3.0}, "optimized": {"fitness": 3.0},
+        "improvement": 0.0, "history": [],
+        "outcome_counts": dict.fromkeys(
+            ("accepted", "rejected", "crashed", "failed_validation", "no_proposal"), 0),
+    }
+    _sync_rsi_measurements(report)
+    return path, report
+
+
+def _sync_rsi_measurements(report):
+    baseline = report["baseline"]["fitness"]
+    best = report["optimized"]["fitness"]
+    gain = report["improvement"]
+    counts = report["outcome_counts"]
+    report["rsi_measurements"] = {
+        "schema": "wre_rsi_measurements.v1",
+        "verification_signal_class": "execution_feedback",
+        "verification_hierarchy_weak_to_strong": [
+            "intrinsic_signal", "learned_judge", "execution_feedback", "formal_verifier"],
+        "research_direction_judgment": "human_not_substituted",
+        "verification_signal_independent": False,
+        "held_out_evaluation": False,
+        "baseline_fitness": baseline,
+        "best_fitness": best,
+        "absolute_gain": gain,
+        "relative_gain": gain / abs(baseline) if baseline != 0 else None,
+        "candidate_evaluations": report["candidate_evaluations"],
+        "accepted_candidates": counts["accepted"],
+        "rejected_candidates": counts["rejected"],
+        "invalid_candidates": counts["failed_validation"],
+        "crashed_candidates": counts["crashed"],
+        "no_proposal_attempts": counts["no_proposal"],
+        "independently_verified": None,
+        "retained_improvements": None,
+        "resource_usage": None,
+        "activation_rollback_verified": None,
+        "successive_generation_gain": None,
+        "production_rsi_eligible": False,
+    }
+
+
+def _write_research(path, report):
+    path.write_text(json.dumps(report), encoding="utf-8")
+
+
+@pytest.mark.parametrize("outcome", [None, "accepted", "crashed", "no_proposal"])
+def test_research_display_remains_unverified(tmp_path, outcome):
+    path, report = _research_report(tmp_path, int(outcome is not None))
+    if outcome:
+        report["history"] = [{"iteration": 1, "status": outcome}]
+        report["outcome_counts"][outcome] = 1
+    if outcome == "accepted":
+        report["optimized"]["fitness"], report["improvement"] = 5.0, 2.0
+    if outcome == "no_proposal":
+        report["candidate_evaluations"] = 0
+    _sync_rsi_measurements(report)
+    # A report cannot supply its own independent verification/retention authority.
+    report.update(independently_verified=True, retained_improvements=100,
+                  resource_usage={"tokens": 0})
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unverified_diagnostic"
+    assert result["attempts"] == int(outcome is not None)
+    assert result["outcome_counts"] == report["outcome_counts"]
+    assert result["improvement"] == report["improvement"]
+    assert result["verification_signal_class"] == "execution_feedback"
+    assert result["rsi_absolute_gain"] == report["improvement"]
+    assert result["production_rsi_eligible"] is False
+    assert all(result[k] is None for k in (
+        "independently_verified", "retained_improvements", "resource_usage"))
+    assert result["file_age_seconds"] >= 0
+
+
+@pytest.mark.parametrize("field,value", [
+    ("schema", "other"), ("status", "aborted"), ("status", "incomplete"),
+    ("dry_run", 1), ("cleanup", "failed"), ("failure", {"type": "Error"}),
+    ("cleanup_failure", {}), ("stop_reason", "interrupted"),
+    ("baseline_input_sha256", "b" * 64), ("report_path", r"\\server\share\report.json"),
+    ("invocation_id", "invocation-other"), ("attempts_started", True),
+    ("attempts_requested", -1), ("attempts_finished", 1), ("iterations_run", 1),
+    ("baseline_evaluations", 0), ("candidate_evaluations", 1),
+    ("improvement", float("nan")), ("improvement", float("inf")),
+    ("improvement", True), ("improvement", 2), ("baseline", {"fitness": True}),
+    ("optimized", {"fitness": float("inf")}), ("history", [{}]),
+    ("outcome_counts", {"accepted": 0}),
+])
+def test_research_display_invalid_reports_are_unknown(tmp_path, field, value):
+    path, report = _research_report(tmp_path)
+    report[field] = value
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unknown"
+    assert "improvement" not in result
+
+
+@pytest.mark.parametrize("field,value", [
+    ("verification_signal_class", "intrinsic_signal"),
+    ("verification_signal_independent", True),
+    ("held_out_evaluation", True),
+    ("production_rsi_eligible", True),
+    ("absolute_gain", 1.0),
+    ("candidate_evaluations", 99),
+    ("research_direction_judgment", "automated"),
+    ("verification_signal_independent", 0),
+    ("held_out_evaluation", 0.0),
+    ("production_rsi_eligible", 0),
+    ("absolute_gain", False),
+    ("relative_gain", False),
+    ("candidate_evaluations", False),
+    ("accepted_candidates", 0.0),
+    ("rejected_candidates", False),
+    ("invalid_candidates", False),
+    ("crashed_candidates", False),
+    ("no_proposal_attempts", False),
+    ("relative_gain", "0"),
+    ("relative_gain", float("nan")),
+    ("relative_gain", float("inf")),
+    ("independently_verified", True),
+    ("retained_improvements", 1),
+    ("resource_usage", {"tokens": 0}),
+    ("activation_rollback_verified", True),
+    ("successive_generation_gain", 1.0),
+])
+def test_research_display_rejects_inconsistent_rsi_measurements(tmp_path, field, value):
+    path, report = _research_report(tmp_path)
+    report["rsi_measurements"][field] = value
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unknown"
+
+
+@pytest.mark.parametrize("field", [
+    "relative_gain", "independently_verified", "retained_improvements",
+    "resource_usage", "activation_rollback_verified", "successive_generation_gain",
+])
+def test_research_display_requires_explicit_unknown_measurements(tmp_path, field):
+    path, report = _research_report(tmp_path)
+    report["baseline"]["fitness"] = report["optimized"]["fitness"] = 0
+    _sync_rsi_measurements(report)
+    del report["rsi_measurements"][field]
+    _write_research(path, report)
+    assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
+
+
+@pytest.mark.parametrize("baseline,best,expected", [
+    (0, 0.0, None), (0.0, 1, None), (-2, -1.0, 0.5),
+    (-2.0, 2, 2.0), (1, 2.0, 1.0), (1.0, 1, 0.0),
+])
+def test_research_display_numeric_gain_semantics(tmp_path, baseline, best, expected):
+    gain = best - baseline
+    path, report = _research_report(tmp_path, int(gain > 0))
+    report.update(baseline={"fitness": baseline}, optimized={"fitness": best}, improvement=gain)
+    if gain > 0:
+        report["history"] = [{"iteration": 1, "status": "accepted"}]
+        report["outcome_counts"]["accepted"] = 1
+    _sync_rsi_measurements(report)
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unverified_diagnostic"
+    assert result["rsi_relative_gain"] == expected
+    for field in ("baseline_fitness", "best_fitness", "absolute_gain", "relative_gain"):
+        if report["rsi_measurements"][field] in (0, 1):
+            malformed = json.loads(json.dumps(report))
+            malformed["rsi_measurements"][field] = bool(malformed["rsi_measurements"][field])
+            _write_research(path, malformed)
+            assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
+
+
+def test_research_display_rejects_overflowed_relative_gain(tmp_path):
+    path, report = _research_report(tmp_path, 1)
+    report.update(baseline={"fitness": 5e-324}, optimized={"fitness": 1.0}, improvement=1.0)
+    report["history"] = [{"iteration": 1, "status": "accepted"}]
+    report["outcome_counts"]["accepted"] = 1
+    _sync_rsi_measurements(report)
+    assert report["rsi_measurements"]["relative_gain"] == float("inf")
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unknown"
+    assert result["rsi_relative_gain"] is None
+
+
+@pytest.mark.parametrize("payload", ["{", "[]", "{\"status\":1,\"status\":2}",
+                                     "[" * 2000, " " * (1024 * 1024 + 1)],
+                         ids=["truncated", "array", "duplicate", "deep", "oversized"])
+def test_research_display_bad_files_are_unknown(tmp_path, payload):
+    path, _ = _research_report(tmp_path)
+    path.write_text(payload, encoding="utf-8")
+    assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
+
+
+@pytest.mark.parametrize("age", [-120, 90000])
+def test_research_display_file_age_is_not_execution_freshness(tmp_path, age):
+    path, report = _research_report(tmp_path)
+    _write_research(path, report)
+    timestamp = datetime.now(timezone.utc).timestamp() - age
+    os.utime(path, (timestamp, timestamp))
+    result = dashboard_alerts.read_research_report_summary(path, "a" * 64)
+    assert result["state"] == "unknown"
+    assert result["reason"] == "stale_file"
+
+
+@pytest.mark.parametrize("selection,digest", [
+    (None, "a" * 64), ("relative/report.json", "a" * 64),
+    (r"\\server\share\report.json", "a" * 64),
+    (r"\\?\C:\report.json", "a" * 64), ("/report.json", "invalid"),
+    (r"\/server/share/invocation-fixture/report.json", "a" * 64),
+    (r"/\server/share/invocation-fixture/report.json", "a" * 64),
+])
+def test_research_display_invalid_selection_does_not_open(monkeypatch, selection, digest):
+    def forbidden(*args, **kwargs):
+        pytest.fail("Invalid selection must not touch the filesystem")
+    with monkeypatch.context() as guard:
+        guard.setattr(Path, "open", forbidden)
+        guard.setattr(Path, "stat", forbidden)
+        result = dashboard_alerts.read_research_report_summary(selection, digest)
+    assert result["state"] == "unknown"
+
+
+def test_research_display_missing_or_directory_is_unknown(tmp_path):
+    path, _ = _research_report(tmp_path)
+    assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
+    path.mkdir()
+    assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
+
+
+def test_research_display_is_read_only_and_sanitized(tmp_path, monkeypatch, capsys):
+    path, report = _research_report(tmp_path)
+    report["ignored"] = "PRIVATE-CONTENT\n\x1b[31m"
+    _write_research(path, report)
+    before = path.read_bytes()
+    monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", str(path))
+    monkeypatch.setenv("WRE_RESEARCH_BASELINE_SHA256", "a" * 64)
+    def forbidden(*args, **kwargs):
+        pytest.fail("Research display must not initialize health/memory or write")
+    monkeypatch.setattr(dashboard_alerts, "check_dashboard_health", forbidden)
+    monkeypatch.setattr(dashboard_alerts, "DashboardAlertMonitor", forbidden)
+    monkeypatch.setattr(Path, "write_text", forbidden)
+    dashboard_alerts.print_research_report_summary()
+    output = capsys.readouterr().out
+    assert "unverified_diagnostic" in output
+    assert "signal=execution_feedback" in output
+    assert "production_rsi_eligible=false" in output
+    assert "retained=unknown" in output and "resource_usage=unknown" in output
+    assert "PRIVATE-CONTENT" not in output and str(path) not in output
+    assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize("change", ["bool_count", "negative_count", "wrong_history", "duplicate_key"])
+def test_research_display_rejects_ambiguous_accounting(tmp_path, change):
+    path, report = _research_report(tmp_path)
+    if change == "bool_count":
+        report["outcome_counts"]["accepted"] = False
+    elif change == "negative_count":
+        report["outcome_counts"]["crashed"] = -1
+    elif change == "wrong_history":
+        report["history"] = [{"iteration": 1, "status": "accepted"}]
+    _write_research(path, report)
+    if change == "duplicate_key":
+        path.write_text(path.read_text().replace('"dry_run": true',
+                        '"dry_run": false, "dry_run": true'), encoding="utf-8")
+    assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
+
+
+@pytest.mark.parametrize("age_limit", [0, -1, True, float("nan"), float("inf"), "86400"])
+def test_research_display_invalid_age_budget_is_unknown(tmp_path, age_limit):
+    path, report = _research_report(tmp_path)
+    _write_research(path, report)
+    result = dashboard_alerts.read_research_report_summary(
+        path, "a" * 64, max_age_seconds=age_limit)
+    assert result["state"] == "unknown"
+
+
+def test_main_dashboard_reads_actual_selected_report(tmp_path, monkeypatch, capsys):
+    # Exercise current function bodies without main's unrelated import-time
+    # model, environment and service effects (same scope as the local runner).
+    import ast
+    import logging
+    main_path = Path(__file__).resolve().parents[4] / "main.py"
+    tree = ast.parse(main_path.read_text(encoding="utf-8"))
+    functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)
+                 and node.name in ("run_wre_dashboard_preflight", "_wre_dashboard_auto_enforce_enabled")]
+    assert len(functions) == 2
+    namespace = {"os": os, "Path": Path, "logger": logging.getLogger("research-preflight-test")}
+    exec(compile(ast.Module(body=functions, type_ignores=[]), str(main_path), "exec"), namespace)
+    path, report = _research_report(tmp_path)
+    _write_research(path, report)
+    monkeypatch.setenv("WRE_RESEARCH_REPORT_PATH", str(path))
+    monkeypatch.setenv("WRE_RESEARCH_BASELINE_SHA256", "a" * 64)
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "1")
+    monkeypatch.setattr(dashboard_alerts, "check_dashboard_health", lambda: {"healthy": True})
+    assert namespace["run_wre_dashboard_preflight"](tmp_path) is True
+    output = capsys.readouterr().out
+    assert "[WRE-RESEARCH] unverified_diagnostic" in output
+    assert "attempts=0" in output and "retained=unknown" in output
+    assert "[WRE-DASHBOARD] preflight=PASS" in output
+
+
+@pytest.mark.parametrize("accepted", [False, True])
+def test_research_display_gain_requires_accepted_attempt(tmp_path, accepted):
+    path, report = _research_report(tmp_path, int(accepted))
+    if accepted:
+        report["history"] = [{"iteration": 1, "status": "accepted"}]
+        report["outcome_counts"]["accepted"] = 1
+    else:
+        report["optimized"]["fitness"], report["improvement"] = 5.0, 2.0
+    _write_research(path, report)
+    assert dashboard_alerts.read_research_report_summary(path, "a" * 64)["state"] == "unknown"
 
 
 def test_prune_old_snapshots_removes_aged_files(tmp_path):

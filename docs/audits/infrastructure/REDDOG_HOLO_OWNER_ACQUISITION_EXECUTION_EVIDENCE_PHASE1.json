@@ -1,0 +1,106 @@
+{
+  "schema_version": "reddog_holo_owner_acquisition_execution_evidence.v1",
+  "execution_id": "REDDOG_HOLO_OWNER_ACQUISITION_RELIABILITY_PHASE1",
+  "base_commit": "90e9eca19f810a03ffaacde0edfffbce2de9513b",
+  "artifact_policy": {
+    "task_artifacts_drive": "O:",
+    "secrets_recorded": false,
+    "environment_dump_recorded": false,
+    "holo_reindex_performed": false,
+    "authority_worktree_mutation_performed": false
+  },
+  "commands": [
+    "python -m pytest -q modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_owner_acquisition_reliability.py modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_owner_bootstrap.py modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_candidate_acceptance.py scripts/tests/test_reddog_holoindex_owner_query_once.py",
+    "python -m pytest -q modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_owner_acquisition_reliability.py --cov=modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition --cov-report=term-missing --cov-fail-under=90",
+    "python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check",
+    "python scripts/generate_reddog_backend_manifest.py --check",
+    "python -m pytest -q scripts/tests/test_generate_reddog_backend_manifest.py",
+    "cd extensions/reddog; npm run test:release",
+    "$env:TMP='O:\\RT\\r2'; $env:TEMP=$env:TMP; python -m pytest -q modules/infrastructure/foundups_mcp_bridge/tests",
+    "$payload='{\"query\":\"RedDog HoloIndex owner acquisition exact staged candidate live replay\",\"limit\":3}'; Start-Job twice with O:\\Foundups-Agent as the literal working directory; pipe $payload to python scripts/reddog_holoindex_owner_query_once.py; wait for both jobs; retain only the documented secret-free receipt and retry fields"
+  ],
+  "results": {
+    "focused_delta": {
+      "passed": 119,
+      "failed": 0,
+      "duration_seconds": 2.42
+    },
+    "acquisition_coverage": {
+      "passed": 21,
+      "statement_percent": 100.0,
+      "required_percent": 90.0
+    },
+    "test_registry": {
+      "status": "current",
+      "total_tests": 1588,
+      "quarantined_tests": 268
+    },
+    "backend_manifest": {
+      "status": "current",
+      "runtime_files": 1350,
+      "digest": "sha256:52cacf9a4cf29f44edf922f32d219b82a30b2aa1f56d617c96e8e6491f818d9b",
+      "acquisition_module_included": true,
+      "generator_tests_passed": 8
+    },
+    "extension_release": {
+      "version": "0.4.116",
+      "status": "PASS",
+      "groups_passed": 4,
+      "duration_ms": 166480,
+      "contract_shards": 18,
+      "contract_lines": 6929,
+      "contract_assertion_calls": 490,
+      "contract_digest": "sha256:69cbeda89fbb72962dabfbd5fe6b8965a75599634e57c09c81a433c664295d07",
+      "package_files": 67,
+      "package_raw_bytes": 945191,
+      "package_content_digest": "sha256:829981b2246a78f8778f86b05224163a11ff820b6f5f5ba1a41a75562138469d"
+    },
+    "bridge_macro_discovery": {
+      "status": "invalid_as_acceptance",
+      "passed": 1116,
+      "failed": 1,
+      "skipped": 10,
+      "duration_seconds": 515.11,
+      "cause": "Windows path budget exceeded by the long O:-local test temp prefix",
+      "targeted_reproduction_with_short_o_root_passed": true
+    },
+    "bridge_macro_authoritative": {
+      "status": "PASS",
+      "passed": 1117,
+      "failed": 0,
+      "skipped": 10,
+      "warnings": 18,
+      "duration_seconds": 515.45,
+      "temp_root": "O:\\RT\\r2"
+    },
+    "simultaneous_plain_queries": {
+      "status": "PASS",
+      "elapsed_seconds": 38.04,
+      "authority_repo_head_sha": "90e9eca19f810a03ffaacde0edfffbce2de9513b",
+      "generation": "sha256:c8b976504b55fb6f2502c73a42ceffdae83e4031141510d03751864d801ad21e",
+      "freshness_receipt_digest": "sha256:09894f3d2f7513cd9683d1783b409082a6a277a83435344551ff1ae591c6bbb8",
+      "callers": [
+        {
+          "query_receipt_id": "sha256:e04548367b446344d9c9ca5fd7e899e20ebe0356ccbc91664aef054fdc53e4b1",
+          "freshness": "CURRENT",
+          "index_gap_detected": false,
+          "no_reindex": true,
+          "owner_attempts": 1
+        },
+        {
+          "query_receipt_id": "sha256:232e3d47ce8a1c0417f33cf113883bf8b7926e1facb1d9c62b7a2799ac25ddc2",
+          "freshness": "CURRENT",
+          "index_gap_detected": false,
+          "no_reindex": true,
+          "owner_attempts": 1
+        }
+      ]
+    }
+  },
+  "remaining_promotion_gates": [
+    "focused PR checks and independent delta audit",
+    "squash merge",
+    "exact-merged-main Holo activation and immutable verification",
+    "final merge-commit-bound VSIX build and archive audit"
+  ]
+}

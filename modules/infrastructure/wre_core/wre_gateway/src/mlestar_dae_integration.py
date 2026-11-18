@@ -32,6 +32,7 @@ WSP Protocols:
 
 import json
 import asyncio
+import math
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from pathlib import Path
@@ -56,14 +57,58 @@ if True:  # Always use stub since MLE-STAR was removed
         async def execute_inner_loop(self, spec):
             return type('obj', (object,), {
                 'performance_improvement': {},
-                'convergence_achieved': True,
-                'final_implementation': "pattern"
+                'convergence_achieved': False,
+                'final_implementation': None
             })()
     
     MLESTARPhase = None
     OptimizationTarget = None
 
 logger = logging.getLogger(__name__)
+
+_POB_STRING_FIELDS = (
+    "job_id", "dataset_hash", "model_hash", "code_commit", "ii_tx_ref"
+)
+
+
+def _pob_receipt_errors(receipt: Any) -> List[str]:
+    """Return stable structural errors; this does not verify signatures."""
+    if not isinstance(receipt, dict):
+        return ["receipt"]
+    errors = [
+        name for name in _POB_STRING_FIELDS
+        if not isinstance(receipt.get(name), str) or not receipt[name].strip()
+    ]
+    for name in ("energy_kwh", "carbon_est"):
+        value = receipt.get(name)
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or value < 0
+        ):
+            errors.append(name)
+    scores = receipt.get("eval_scores")
+    if not isinstance(scores, dict) or not scores or any(
+        not isinstance(key, str)
+        or isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        for key, value in scores.items()
+    ):
+        errors.append("eval_scores")
+    if receipt.get("openness_level") not in {"public", "restricted"}:
+        errors.append("openness_level")
+    verifiers = receipt.get("verifiers")
+    signatures = receipt.get("signatures")
+    for name, values in (("verifiers", verifiers), ("signatures", signatures)):
+        if not isinstance(values, list) or not values or any(
+            not isinstance(value, str) or not value.strip() for value in values
+        ):
+            errors.append(name)
+    if isinstance(verifiers, list) and isinstance(signatures, list) and len(verifiers) != len(signatures):
+        errors.append("verifier_signature_cardinality")
+    return sorted(set(errors))
 
 
 @dataclass
@@ -125,8 +170,7 @@ class MLESTARDAE:
             "cabr_computed": 0,
             "compute_validated": 0,
             "ablations_performed": 0,
-            "refinements_completed": 0,
-            "tokens_saved": 0
+            "refinements_completed": 0
         }
         
         logger.info(f"MLE-STAR DAE initialized - State: {self.state}, Tokens: {self.config.token_budget}")
@@ -150,48 +194,31 @@ class MLESTARDAE:
             "ii_tx_ref": "..."
         }
         """
-        # Pattern recall for instant verification (50 tokens)
-        pattern_key = f"{receipt.get('model_hash', '')}:{receipt.get('dataset_hash', '')}"
-        
-        if pattern_key in self.pob_patterns:
-            # Instant recall from 0201
-            self.metrics["tokens_saved"] += 4950  # Saved vs computation
-            return self.pob_patterns[pattern_key]
-        
-        # Verify receipt components
-        verification = {
-            "receipt_id": receipt.get("job_id"),
-            "valid": True,
-            "pob_components": {}
+        errors = _pob_receipt_errors(receipt)
+        if errors:
+            return {
+                "receipt_id": receipt.get("job_id") if isinstance(receipt, dict) else None,
+                "valid": False,
+                "structurally_valid": False,
+                "signature_verified": False,
+                "missing_or_invalid_fields": errors,
+                "reason": "pob_receipt_invalid",
+                "pob_components": {},
+            }
+        components = {
+            "env": self._compute_env_benefit(receipt["energy_kwh"], receipt["carbon_est"]),
+            "soc": 1.0 if receipt["openness_level"] == "public" else 0.5,
+            "part": min(len(receipt["verifiers"]) / 10.0, 1.0),
+            "comp": self._compute_comp_benefit(receipt["eval_scores"]),
         }
-        
-        # Environmental benefit
-        if "energy_kwh" in receipt and "carbon_est" in receipt:
-            verification["pob_components"]["env"] = self._compute_env_benefit(
-                receipt["energy_kwh"], 
-                receipt["carbon_est"]
-            )
-        
-        # Social benefit (openness)
-        if receipt.get("openness_level") == "public":
-            verification["pob_components"]["soc"] = 1.0
-        else:
-            verification["pob_components"]["soc"] = 0.5
-        
-        # Participation benefit
-        verification["pob_components"]["part"] = len(receipt.get("verifiers", [])) / 10.0
-        
-        # Compute benefit (optional per WSP 77)
-        if "eval_scores" in receipt:
-            verification["pob_components"]["comp"] = self._compute_comp_benefit(
-                receipt["eval_scores"]
-            )
-        
-        # Store pattern for future recall
-        self.pob_patterns[pattern_key] = verification
-        self.metrics["pob_verified"] += 1
-        
-        return verification
+        return {
+            "receipt_id": receipt["job_id"],
+            "valid": False,
+            "structurally_valid": True,
+            "signature_verified": False,
+            "reason": "pob_signature_verifier_unimplemented",
+            "pob_components": components,
+        }
     
     async def compute_cabr_score(self, pob_components: Dict[str, float]) -> float:
         """
@@ -229,12 +256,13 @@ class MLESTARDAE:
         
         results = await self.mlestar.execute_outer_loop(ablation_spec)
         
-        self.metrics["ablations_performed"] += 1
-        
         return {
+            "success": False,
+            "proposal_only": True,
             "critical_components": results.critical_components,
             "optimization_priorities": results.optimization_priorities,
-            "recommendations": results.architecture_recommendations
+            "recommendations": results.architecture_recommendations,
+            "effect_receipt": None,
         }
     
     async def refine_component(self, component: str, target_metric: str) -> Dict[str, Any]:
@@ -252,13 +280,14 @@ class MLESTARDAE:
         
         results = await self.mlestar.execute_inner_loop(refinement_spec)
         
-        self.metrics["refinements_completed"] += 1
-        
         return {
+            "success": False,
+            "proposal_only": True,
             "component": component,
             "improvement": results.performance_improvement,
             "convergence": results.convergence_achieved,
-            "final_implementation": results.final_implementation
+            "final_implementation": results.final_implementation,
+            "effect_receipt": None,
         }
     
     def _compute_env_benefit(self, energy_kwh: float, carbon_est: float) -> float:
@@ -322,7 +351,8 @@ class MLESTARDAE:
                     "ii_orchestration"
                 ],
                 "wsp_compliance": ["WSP 77", "WSP 29", "WSP 80"],
-                "tokens_used": 50  # Pattern recall
+                "configured_token_budget": self.config.token_budget,
+                "token_usage_measured": False,
             }
     
     def get_metrics(self) -> Dict[str, Any]:
@@ -339,8 +369,9 @@ class MLESTARDAE:
                 "compute_patterns": len(self.compute_patterns)
             },
             "efficiency": {
-                "tokens_saved": self.metrics["tokens_saved"],
-                "avg_tokens_per_op": 50  # Pattern recall
+                "tokens_saved": None,
+                "avg_tokens_per_op": None,
+                "token_reduction_measured": False,
             }
         }
 

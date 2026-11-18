@@ -15,8 +15,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
-import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -49,9 +47,16 @@ ALLOWED_TASK_FAMILIES = {
     "startup_maintenance": {
         "description": "Startup maintenance gate tasks",
         "risk": "low",
-        "sources": ["startup_maintenance_gate"],  # Maps to run_task.py dispatch path 4
+        "sources": ["startup_maintenance_gate"],
         "required_skills": [],
         "executor": "startup_maintenance_dispatch",
+    },
+    "holoindex_postmerge": {
+        "description": "Exact-SHA post-merge HoloIndex authority maintenance",
+        "risk": "low",
+        "sources": ["holoindex_postmerge_coordinator"],
+        "required_skills": ["holo-search"],
+        "executor": "holoindex_postmerge_dispatch",
     },
 }
 
@@ -121,6 +126,30 @@ class MaintenanceSelectionResult:
         }
 
 
+def _execution_bundle_direction(
+    *, description: str, family: str, task_id: str,
+) -> tuple[float, list[str], bool]:
+    """Retrieve direction except for the self-hosting Holo maintenance family."""
+
+    if family == "holoindex_postmerge":
+        return 0.0, [], False
+    try:
+        from .openclaw_execution_bundle import build_execution_bundle
+
+        bundle = build_execution_bundle(
+            query=description, route=family, limit=3,
+            include_patterns=True, include_docs=True,
+        )
+        logger.debug(
+            "[MAINTENANCE] Bundle for %s: conf=%.2f candidates=%d",
+            task_id, bundle.confidence, len(bundle.candidate_paths),
+        )
+        return bundle.confidence, bundle.verification_hints[:3], True
+    except Exception as exc:
+        logger.debug("[MAINTENANCE] Bundle build failed: %s", exc)
+        return 0.0, [], False
+
+
 def select_maintenance_task(
     pending_tasks: List[Dict[str, Any]],
     observation: Dict[str, Any],
@@ -166,31 +195,10 @@ def select_maintenance_task(
 
         family_config = ALLOWED_TASK_FAMILIES[family]
 
-        # Build HoloIndex execution bundle for direction
-        bundle_confidence = 0.0
-        execution_hints = []
-        try:
-            from .openclaw_execution_bundle import build_execution_bundle
-
-            bundle = build_execution_bundle(
-                query=description,
-                route=family,
-                limit=3,
-                include_patterns=True,
-                include_docs=True,
-            )
-            bundle_confidence = bundle.confidence
-            execution_hints = bundle.verification_hints[:3]
-            bundle_used = True
-
-            logger.debug(
-                "[MAINTENANCE] Bundle for %s: conf=%.2f candidates=%d",
-                task_id,
-                bundle_confidence,
-                len(bundle.candidate_paths),
-            )
-        except Exception as exc:
-            logger.debug("[MAINTENANCE] Bundle build failed: %s", exc)
+        bundle_confidence, execution_hints, used = _execution_bundle_direction(
+            description=description, family=family, task_id=task_id,
+        )
+        bundle_used = bundle_used or used
 
         # Check for blocked patterns in description
         escalation_reason = _check_blocked_patterns(description, required_skills)
@@ -315,6 +323,7 @@ def _get_verification_method(family: str) -> str:
         "self_audit_fix": "check_audit_event_resolved",
         "grant_review": "check_task_completed_in_agentdb",
         "startup_maintenance": "check_task_completed_in_agentdb",
+        "holoindex_postmerge": "check_exact_sha_completion_receipt",
     }
     return verification_methods.get(family, "check_task_completed")
 

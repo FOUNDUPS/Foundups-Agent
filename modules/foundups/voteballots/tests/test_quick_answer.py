@@ -23,6 +23,8 @@ Builds on:
 
 from __future__ import annotations
 
+from dataclasses import asdict
+
 import pytest
 from typing import List
 
@@ -46,6 +48,7 @@ from modules.foundups.voteballots.src.funding_summary import (
 )
 from modules.foundups.voteballots.src.confidence_scoring import (
     ConfidenceLabel,
+    ConfidenceScoredClaim,
     ConfidenceScoredFundingSummary,
     ConfidenceScoredFundingSource,
     ConfidenceScoringStatus,
@@ -64,6 +67,7 @@ from modules.foundups.voteballots.src.quick_answer import (
     get_answer_confidence_summary,
     MAX_LINES,
 )
+from modules.foundups.voteballots.src.shell_integration import build_vote_shell_payload
 
 
 # =============================================================================
@@ -98,6 +102,12 @@ def verified_fact_summary() -> ConfidenceScoredFundingSummary:
         candidate_name="Test Candidate",
         total_raised=1500000.0,
         total_contributions=5000,
+        summary_claims=[ConfidenceScoredClaim(
+            claim_text="Candidate raised $1,500,000.00", claim_type="total_raised",
+            confidence_label=ConfidenceLabel.VERIFIED_FACT,
+            original_confidence=ConfidenceLevel.VERIFIED_FACT,
+            source_reference=FECSource(source_type="fec_filing"),
+        )],
         scored_sources=[
             ConfidenceScoredFundingSource(
                 source_name="ActBlue",
@@ -135,6 +145,11 @@ def low_confidence_summary() -> ConfidenceScoredFundingSummary:
         candidate_name="Unknown Candidate",
         total_raised=50000.0,
         total_contributions=100,
+        summary_claims=[ConfidenceScoredClaim(
+            claim_text="Candidate raised $50,000.00", claim_type="total_raised",
+            confidence_label=ConfidenceLabel.LOW_CONFIDENCE_INFERENCE,
+            original_confidence=ConfidenceLevel.LOW_CONFIDENCE_INFERENCE,
+        )],
         scored_sources=[
             ConfidenceScoredFundingSource(
                 source_name="Unknown PAC",
@@ -247,6 +262,88 @@ def trail_terminated_summary() -> ConfidenceScoredFundingSummary:
 # =============================================================================
 # Core Generation Tests
 # =============================================================================
+
+
+def _aggregate_consumer_summary(source_type, confidence):
+    reference = None if source_type is None else FECSource(source_type=source_type)
+    summary = FundingSummaryResult(
+        status=FundingSummaryStatus.SUCCESS, candidate_id="SYNTHETIC-CONSUMER",
+        candidate_name="Synthetic Candidate", total_raised=123.0,
+        confidence=confidence, source_reference=reference,
+        top_sources=[FundingSourceSummary(
+            source_name="Synthetic Donor", source_type="individual", amount=10.0,
+            percentage=8.13, confidence=ConfidenceLevel.VERIFIED_FACT,
+            source_reference=FECSource(source_type="fec_filing"),
+        )],
+    )
+    return score_funding_summary_confidence(summary)
+
+
+class TestAggregateConsumerProvenanceRegression:
+    """The actual scorer, answer and shell must agree on aggregate evidence."""
+
+    indicators = {
+        ConfidenceLabel.VERIFIED_FACT: ("(verified)", "[verified]", "[V]"),
+        ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE: ("(high confidence)", "[high]", "[H]"),
+        ConfidenceLabel.LOW_CONFIDENCE_INFERENCE: ("(low confidence)", "[low]", "[L]"),
+        ConfidenceLabel.UNKNOWN: ("(unknown)", "[?]", "[?]"),
+    }
+
+    @pytest.mark.parametrize("format", list(AnswerFormat), ids=lambda value: value.value)
+    @pytest.mark.parametrize("source_type", [None, "news_report", "fec_filing"])
+    @pytest.mark.parametrize("confidence", list(ConfidenceLevel), ids=lambda value: value.value)
+    def test_total_line_and_shell_follow_claim_evidence(self, format, source_type, confidence):
+        scored = _aggregate_consumer_summary(source_type, confidence)
+        before = asdict(scored)
+        expected = ConfidenceLabel(confidence.value)
+        if confidence == ConfidenceLevel.VERIFIED_FACT and source_type != "fec_filing":
+            expected = ConfidenceLabel.HIGH_CONFIDENCE_INFERENCE
+        answer = generate_quick_answer(scored, format=format)
+        payload = build_vote_shell_payload(answer, answer_format=format)
+        indicator_index = list(AnswerFormat).index(format)
+        assert self.indicators[expected][indicator_index] in answer.lines[0]
+        assert "$123" in answer.lines[0] and "Synthetic Candidate" in answer.lines[0]
+        assert self.indicators[ConfidenceLabel.VERIFIED_FACT][indicator_index] in answer.lines[1]
+        assert answer.confidence_label == expected
+        assert payload.confidence_label == expected
+        assert payload.lines == answer.lines
+        assert payload.source_trace_id == "SYNTHETIC-CONSUMER"
+        assert payload.display_ready == (expected != ConfidenceLabel.UNKNOWN)
+        assert asdict(scored) == before
+
+    @pytest.mark.parametrize("format", list(AnswerFormat), ids=lambda value: value.value)
+    @pytest.mark.parametrize("claim_state", ["missing", "duplicate", "invalid-label"])
+    def test_absent_ambiguous_or_invalid_total_claim_is_unknown(self, format, claim_state):
+        scored = _aggregate_consumer_summary("fec_filing", ConfidenceLevel.VERIFIED_FACT)
+        total = next(claim for claim in scored.summary_claims if claim.claim_type == "total_raised")
+        if claim_state == "missing":
+            scored.summary_claims = []
+        elif claim_state == "duplicate":
+            scored.summary_claims.append(total)
+        else:
+            total.confidence_label = "verified_fact"
+        before = asdict(scored)
+        answer = generate_quick_answer(scored, format=format)
+        payload = build_vote_shell_payload(answer, answer_format=format)
+        indicator_index = list(AnswerFormat).index(format)
+        assert self.indicators[ConfidenceLabel.UNKNOWN][indicator_index] in answer.lines[0]
+        assert answer.confidence_label == ConfidenceLabel.UNKNOWN
+        assert payload.confidence_label == ConfidenceLabel.UNKNOWN
+        assert payload.lines == answer.lines and not payload.display_ready
+        assert asdict(scored) == before
+
+    @pytest.mark.parametrize("source_label", [ConfidenceLabel.LOW_CONFIDENCE_INFERENCE, ConfidenceLabel.UNKNOWN])
+    def test_valid_total_does_not_raise_existing_conservative_overall_label(self, source_label):
+        scored = _aggregate_consumer_summary("fec_filing", ConfidenceLevel.VERIFIED_FACT)
+        scored.scored_sources[0].confidence_label = source_label
+        scored.overall_confidence = source_label
+        answer = generate_quick_answer(scored)
+        payload = build_vote_shell_payload(answer)
+        assert "(verified)" in answer.lines[0]
+        assert self.indicators[source_label][0] in answer.lines[1]
+        assert answer.confidence_label == source_label
+        assert payload.confidence_label == source_label
+        assert payload.display_ready == (source_label != ConfidenceLabel.UNKNOWN)
 
 
 class TestGenerateQuickAnswerVerifiedFact:

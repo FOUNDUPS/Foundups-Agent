@@ -1,0 +1,48 @@
+{
+  "data": {
+    "id": "moonshotai/kimi-k3",
+    "name": "Kimi K3",
+    "created": 1784764800,
+    "description": "Offline provider-asserted endpoint fixture.",
+    "architecture": {
+      "tokenizer": "Other",
+      "instruct_type": null,
+      "modality": "text->text",
+      "input_modalities": [
+        "text"
+      ],
+      "output_modalities": [
+        "text"
+      ]
+    },
+    "endpoints": [
+      {
+        "name": "Moonshot AI: Kimi K3",
+        "model_id": "moonshotai/kimi-k3",
+        "model_name": "Kimi K3",
+        "context_length": 1048576,
+        "pricing": {
+          "prompt": "0.0000030",
+          "completion": "0.000015",
+          "request": "0"
+        },
+        "provider_name": "Moonshot AI",
+        "tag": "moonshotai",
+        "quantization": null,
+        "max_completion_tokens": 131072,
+        "max_prompt_tokens": 917504,
+        "supported_parameters": [
+          "reasoning",
+          "max_tokens"
+        ],
+        "uptime_last_30m": null,
+        "uptime_last_5m": null,
+        "uptime_last_1d": null,
+        "supports_implicit_caching": false,
+        "latency_last_30m": null,
+        "throughput_last_30m": null,
+        "status": 0
+      }
+    ]
+  }
+}

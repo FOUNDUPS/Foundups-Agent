@@ -11,7 +11,7 @@
 - [x] Health monitoring
 - [x] JSONL telemetry
 - [x] CLI integration
-- [x] AI Overseer integration
+- [ ] Bind/test AI Overseer alerts (initialization exists; delivery unimplemented)
 - [x] **YouTube 12-hour limit auto-restart** (2026-03-04)
 
 ### YouTube Duration Limit (24/7 Streaming)
@@ -1438,3 +1438,7 @@ antifaFM Stream (OBS)        External Stream Chat
 - **WSP 27**: DAE Architecture (sensor: chat messages, actuator: DOM clicks)
 - **WSP 77**: Agent Coordination (OpenClaw skill integration)
 - **WSP 91**: Observability (engagement telemetry)
+
+## Shared video tool consumer — proposal (2026-11-16)
+
+antifaFM is one **consumer** of cross-FoundUps video creation, not its owner. Reuse existing FFmpeg/OBS visual schemas as optional scene inputs; do not duplicate the video renderer, provenance signer, NFT/reward ledger or YouTube uploader. See [shared video/provenance/RSI/Mall collectible PoC](../../communication/youtube_shorts/docs/VIDEO_PROVENANCE_RSI_REWARDS_POC.md#architectural-correction-shared-tool-not-a-channel-owned-product-012-2026-11-16). No implementation or streaming change is implied.

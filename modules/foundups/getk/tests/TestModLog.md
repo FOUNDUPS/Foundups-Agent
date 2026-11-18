@@ -1,5 +1,13 @@
 # GetK TestModLog
 
+## 2026-11-18 - Commander authority gate reconciliation on dry-run proof
+
+- Updated `modules/infrastructure/wre_core/tests/test_getk_monorepo_poc_dryrun_proof.py`
+  to align `_intent()` with `openclaw_foundup_orchestrator._handle_build_intent()`'s
+  `is_authorized_commander` guard landed on `main`: asserts non-commander intents fail
+  closed with `"FoundUp mutation denied"` and empty queue before exercising the
+  commander-authorized `validate_foundup getk --dry-run` seam.
+
 ## 2026-06-13 - GetK monorepo PoC bootstrap tests (GETK_FOUNDUP_MONOREPO_POC_BOOTSTRAP_PHASE1)
 
 **Commands**:

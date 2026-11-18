@@ -1,0 +1,125 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "2de765574f6d5fc1f5316034594187cdc3b11b84"
+  },
+  "execution_id": "HOLOINDEX_QUERY_RUNTIME_BASE_PREFIX_CONSUMER_PHASE2C3B",
+  "execution_plane": "local_tools_and_wsp00_subagent_audit",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "phase2c3b_base_prefix_consumer_correction",
+    "canonical_base_prefix": "generation_root/python-runtime",
+    "process_consumer_corrected": true,
+    "candidate_consumer_corrected": true,
+    "child_execution_added": false,
+    "native_loader_closure_verified": false,
+    "write_denial_verified": false,
+    "candidate_activation": false,
+    "holoindex_a_grade": "blocked",
+    "retrieval_quality_rsi": "not_operational"
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:b3deba8925a7ef4a3865a78a38da3a14470c68cd1db0df389efebce0d73e7c13",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "correct only the two inherited base-prefix consumers and their false-green fixtures"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_12_Dependency_Management.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 awakening and WSP_97 execution framing preceded implementation.",
+      "Final governed Holo retrieval was CURRENT at exact base 2de765574f6d5fc1f5316034594187cdc3b11b84 with no gap, no reindex, first-attempt owner acquisition, and receipt sha256:5e13b43b988ea4b2c5f4478086fdd0bf51f599f48a6e177130029a3bd1a201e1.",
+      "Retrieval ranked the process proof, builder composition, candidate tests, module test README, WSP 73, WSP 46, and the Phase 2C3a clarity document; complete local reads supplied missing candidate and base-runtime context.",
+      "Noise was low but nonzero, ordering favored the process consumer, staleness was rejected, and repository-wide exact search found no third defective production consumer."
+    ],
+    "research": [
+      "The materialized base contract owns descriptors and inventory at generation_root but executable, DLL, Lib, and CPython prefix authority at generation_root/python-runtime.",
+      "The builder process incorrectly used generation_root as its prefix; candidate composition incorrectly required generation_root/python.exe.",
+      "Other production generation_root uses retain descriptor, inventory, or volume identity and are correct; the ABI consumer already uses base_prefix_root.",
+      "No dependency or public API changed, so requirements and lockfiles remain unchanged under WSP 12."
+    ],
+    "micro_pass": [
+      "The inherited process/candidate suites passed 28 tests with one expected skip before repair, proving they were false-green because their fixtures collapsed generation_root and base_prefix_root.",
+      "A shared real-materialization falsifier produced three authentic RED failures before production correction: valid candidate rejection, obsolete candidate acceptance, and valid process-prefix rejection.",
+      "The final focused suite passes 31 tests with one expected capability skip and calls topology validators only; it does not simulate child or process authority.",
+      "Production files are 320 and 472 lines with maximum functions 45 and 44; changed tests have maximum functions 41, 34, and 12. README remains exactly at its inherited 1,044-line no-growth boundary and is recorded in the remediation register."
+    ],
+    "macro_pass": [
+      "The exact 13-file adjacent candidate/process/base/runtime-ABI/composition surface passes 206 tests with four expected capability skips in 102.59 seconds.",
+      "Backend-manifest generation coverage passes eight tests; WSP 97 repository-bound validator coverage passes 74 tests with one expected capability skip.",
+      "The WRE test registry is current at 1,638 tests and 269 quarantined entries.",
+      "The authenticated RedDog backend closure is 1,394 runtime files at 2ed73a864da88e291456568b737aca3ef03a106d5823e083a7a2c2fa6f21dc5b.",
+      "Backend compatibility and the deterministic 67-file extension package surface pass at 948,777 bytes and sha256:393b7e0bcc71ec2ed4c84cc7f8ddf8f40356ebb16be5c7456067958c5d1d0931; no VSIX was emitted.",
+      "Independent final WSP_00/WSP_97 review issued GO with coherence 0.780 and no open Phase 2C3b P0 or P1 finding.",
+      "The WSP_15 scope stages exactly 22 paths after this receipt is added; unrelated docs/doc_index.json and sites/ overlays remain excluded."
+    ],
+    "hard_think": [
+      "Correcting two root interpretations is the smallest falsifiable layer; adding a child, import probe, native/subprocess closure, write denial, or activation would be a different authority transaction.",
+      "The durable generation identity must not be replaced by the payload prefix, while executable and sys.path roles must not be derived from the descriptor root.",
+      "The real-materialization test must exercise the exact internal topology boundaries without manufacturing evidence for execution authority."
+    ],
+    "dialectic_sweep": [
+      "Changing the base runtime schema was rejected because its two-root model is already correct and sealed.",
+      "Changing all generation_root occurrences was rejected because descriptor, inventory, and volume consumers correctly use that root.",
+      "Keeping synthetic fixtures collapsed was rejected because passing tests then fail to falsify the production topology.",
+      "The independent WSP_00/WSP_97 audit identified and closed an overbroad process-authority test, a 51-line fixture, and undocumented README size debt before promotion."
+    ],
+    "first_principles": [
+      "One generation has an identity root and a distinct runnable payload prefix; each consumer must use the root that owns the bytes it proves.",
+      "A correct path relationship is necessary but cannot prove that a child ran, packages imported, native images stayed closed, effects were deterministic, or writes were denied.",
+      "Therefore producer provenance, execution closure, activation, A-grade admission, and retrieval-quality RSI remain false."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_candidate_binding.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_process.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_candidate_binding.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_base_prefix_consumers.py",
+      "scripts/reddog_backend_manifest.json",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "extensions/reddog/backend_compatibility_constants.js"
+    ]
+  },
+  "nonclaims": [
+    "No child launch, package import, producer authentication, pre-import safety, ABI/native loaded-image or subprocess closure, deterministic effect, signature, or persistent write denial is proved.",
+    "No owner, route, query, conversation, extension execution, VSIX, activation, A-grade, or retrieval-quality RSI authority is added."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_12",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BASE_PREFIX_CONSUMER_WSP15_RECEIPT_PHASE2C3B.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BASE_PREFIX_CONSUMER_WSP97_EXECUTION_RECEIPT_PHASE2C3B.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BASE_PREFIX_CONSUMER_ASSUMPTION_AUDIT_PHASE2C3B.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_BASE_PREFIX_CONSUMER_INTERFACE_PHASE2C3B.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "WSP_knowledge/WSP_Test_Registry.json",
+    "scripts/reddog_backend_manifest.json"
+  ]
+}

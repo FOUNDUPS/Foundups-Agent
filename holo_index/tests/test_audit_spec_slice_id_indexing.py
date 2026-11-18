@@ -370,11 +370,11 @@ class TestLexicalFallbackHonorsSliceIdBoost:
         import inspect
         from holo_index.core import search_engine
 
-        # Get source of _search_collection (vector search)
-        source = inspect.getsource(search_engine._search_collection)
+        # Vector-row scoring is delegated by the bounded collection pipeline.
+        source = inspect.getsource(search_engine._vector_result)
 
         # Verify it calls _slice_id_match_boost
         assert "_slice_id_match_boost" in source, (
-            "_search_collection must call _slice_id_match_boost "
+            "_vector_result must call _slice_id_match_boost "
             "to honor slice_id boost in vector search path"
         )

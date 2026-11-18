@@ -23,7 +23,57 @@ class SecretsMCPServer:
     async def get_project_env_info() -> Dict[str, Any]
 ```
 
+#### `OpCliSecretResolver`
+WSP 71 Annex A `op://` resolver backed by the 1Password CLI.
+
+```python
+class OpCliSecretResolver:
+    def __init__(
+        *,
+        op_executable: str = "op",
+        timeout_s: float = 10.0,
+        ttl_seconds: int = 300,
+        max_secret_chars: int = 65536,
+        session_id: str = "op-cli-session",
+        runner: OpCliCommandRunner | None = None,
+        audit_callback: Callable[[AuditEvent], None] | None = None,
+    )
+    def resolve(reference: str, requester_id: str | None = None) -> ResolveResult
+```
+
+Security boundary:
+- Calls `op read <reference> --no-newline` as argv, never through a shell.
+- Accepts only `op` or an absolute/path-like executable whose basename is
+  `op` or `op.exe`.
+- Returns the resolved secret value only through `ResolveResult.get_value()`.
+- Audit dictionaries contain reference hashes, status, TTL and requester only;
+  stdout/stderr secret content is never serialized.
+- Tests use an injected runner. Production may use the default shell-free
+  subprocess runner when the 1Password CLI is installed and authenticated.
+
 ## Tool Specifications
+
+### `SystemdCredentialBinding` / `SystemdCredentialSecretResolver`
+
+The immutable binding contains `credential_directory`, positive nonroot
+`expected_uid`/`expected_gid`, `expected_requester`, finite `issued_at`/`expires_at`
+(maximum 300 seconds), a frozen allowlist `credential_ids`, and
+`max_secret_bytes` (1–65536). Construction performs no credential reads.
+Binding metadata alone is not permission or authenticated owner state.
+
+`SystemdCredentialSecretResolver(binding, *, clock, monotonic, audit_callback)`
+exposes `resolve(reference, requester_id=None) -> ResolveResult`.
+Production defaults use system clocks. `parse_systemd_credential_reference`
+returns one strict ASCII credential ID or `None`; `op://`, traversal, URI query,
+percent escapes and additional path segments reject.
+
+Resolution requires the bound Linux identity, descriptor-relative no-symlink
+root-owned ancestry and read-only manager credential custody. Missing/extra
+access principals, wrong permissions, changed/oversized/non-UTF8 content and
+expired or regressing clocks fail closed. No value survives in a failed result.
+Audit callbacks receive metadata only; `credential_pre_delivery_validation`
+is not a delivery receipt. Final lifetime/identity checks follow the callback.
+The caller owns prompt disposal of a successful value and permission admission.
 
 ### 1. get_environment_variable
 

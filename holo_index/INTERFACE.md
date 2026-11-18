@@ -1,10 +1,186 @@
+## Ready-only optional video search — 2026-11-05
+
+```python
+VideoContentIndex.search(query, k=5, channel=None, *,
+                         allow_cold_init=True, cancel_event=None)
+```
+
+Default calls retain legacy embedding initialization and the existing channel
+filter/result format. With cold initialization forbidden, an absent embedding
+model returns no matches before collection access; a model lost during count
+also cannot trigger lazy loading. `_get_embedding()` uses the existing object
+at use time and returns no embedding in that mode rather than a zero vector.
+An event is checked before and between count, encoding, query and returned
+matches. This is cooperative cancellation; active native work may finish later.
+The caller retains lifecycle/authority obligations. Existing index construction,
+maintenance, stored-settings and source-freshness contracts are unchanged.
+
+## Stored Chroma settings admission — 2026-11-01
+
+API: `validate_collection_raw_settings(collection) -> str` in
+`holo_index.vector_segment_durability`, raising
+`UnsafeCollectionSettingsError(ValueError)` with fixed message
+`HOLOINDEX_UNSAFE_COLLECTION_SETTINGS`. The [test history](tests/TestModLog.md#stored-settings-local-qualification--2026-11-01) binds corrected
+local and literal scratch-native acceptance; this is not upstream SDK remediation,
+global runtime closure or persistent-maintenance authority.
+
+The helper captures supported native-model `configuration_json` and
+`serialized_schema` as inert data, without `.configuration`, `.schema`, EF registry
+lookup, `is_legacy` or model construction, returning l2/cosine/ip. Direct EF accepts
+absence/None or exact `{"type":"legacy"}`. Whole schema None is inert empty;
+present nested schema EF None rejects. Exact legacy specs are accepted in schema.
+Exact `{"type":"known","name":"default","config":{}}` is accepted only in direct
+configuration/dense-schema slots under pinned 1.5.5; the guard constructs nothing,
+while the SDK may later construct that inert default. Sparse slots additionally
+accept only exact `{"type":"unknown"}`, the pinned absent-EF sentinel decoded to
+None before builders. Direct/dense unknown, known sparse constructors, extra EF
+keys/kwargs and trust_remote_code (even false) reject. Bounded non-EF JSON padding
+and harmless column names remain allowed.
+
+Both roots require exact builtin JSON types/keys, finite floats and acyclic
+containers. Limits: depth 16 inclusive with roots at zero; 4,096 occurrence nodes
+including keys; 256,000 string code points; 2,048-bit integer magnitude before
+serialization. Shared acyclic aliases count per occurrence. Combined compact
+ensure_ascii/allow_nan=False JSON size is at most 256,000 bytes, without a separator
+between roots. Preflight bounds intermediate encoded representation below 6 MiB,
+not peak RSS; serialization still precedes the final byte check. Every SDK-consumed
+dense/sparse slot in defaults and all named keys is checked, including disabled/
+non-embedding keys, without substring-based name denial.
+
+Core maintenance ensure/create/reset, persisted-proof open and export admit supported handles
+before downstream use. Unsafe refusal is distinct from missing/durability storage
+and cannot trigger reset. Persisted-open refusal attempts owned-client cleanup;
+outer core startup cleanup/error precedence and readonly AST remain unchanged,
+without arbitrary native-failure guarantees. Export admits every fixed baseline
+collection before any page, then uses captured metrics; refusal publishes no
+generation and preserves published artifacts. Owned staging may still occur;
+immutable query snapshots remain separate. Reopened/exported handles revalidate
+under trusted serialized hosting, without global use-time locking, concurrent
+native writers, arbitrary monkeypatch or whole-store rollback promises.
+
+Local/scratch-native acceptance authorizes no current-store inspection/reset,
+package mutation, arbitrary EF invocation, provider or controller. Protected
+publication, new-source PC/Holo, runtime qualification and an explicit governed
+release remain pending; upstream advisories and chain activation remain open or blocked.
+
+## Explicit local-model ownership — 2026-10-01
+
+`QwenInferenceEngine.close() -> None` detaches its model and clears initialized
+state before invoking the captured model's `close()`. No model is a safe no-op;
+an owned model is closed even when initialized is false. Repeated/reentrant
+explicit close does not retry the captured resource, including after failure.
+Native cleanup `Exception` logs only its type and raises stable
+`RuntimeError("Qwen model cleanup failed")` with suppressed exception context.
+Generation itself retains the engine for direct callers; those callers own
+explicit close. Concurrent ownership and native partial-constructor cleanup
+are not qualified by this contract.
+
+The existing WRE local adapter closes every successfully constructed per-call
+engine in `finally`, in raw and native-chat modes. Rejected configuration or
+construction creates no ownership. Cleanup `Exception` invalidates a proposal
+as `local_model_unavailable`; primary failures keep their existing result.
+A primary interruption propagates while cleanup is attempted. A `BaseException`
+raised by cleanup itself is not normalized. Generated text remains
+`success=False`, `_effect_evidence=False`; cleanup confers no execution authority.
+
+## Opt-in local native-chat proposals
+
+`WREMasterOrchestrator(*, local_proposal_mode="raw",
+local_native_chat_profile=None)` validates configuration before constructing
+collaborators. `execute_local_skill_inference` accepts corresponding keyword-only
+`proposal_mode` and `native_chat_profile` arguments. Raw mode requires no profile.
+Native mode requires exactly `runtime_version="0.3.20"` and `template_sha256`
+(64 lowercase hexadecimal characters). Configuration is copied, never taken
+from skill text or input context, and does not confer runtime authority.
+
+The engine's `generate_chat_response(prompt, system_prompt=None, *,
+runtime_version, template_sha256)` checks observed runtime, required formatter
+capabilities and actual model template digest. It renders system/user messages
+once with `enable_thinking=False`, then verifies positive integer limits and
+`input_tokens + max_tokens <= min(actual_context, configured_context)`.
+The per-call handler uses that same rendering and the qualified formatter's
+EOS text/token criteria, with an empty caller stop list (`stop=[]`). Markdown
+`###` content is not a native stop delimiter. The output cap remains in force;
+the default raw route keeps its existing stop list. The call does not replace
+persistent model handlers. This is a qualified optional
+profile, not a promise for every GGUF/template or the declared0.2.72 runtime.
+
+Master configuration errors raise a stable `ValueError` before collaborators;
+adapter failures preserve existing structured failure output. Engine exceptions
+return `Error: Qwen chat response generation failed` and log only exception type.
+Text remains `success=False`, `_effect_evidence=False`: admission, execution,
+acceptance and retention remain separate existing gates. No automatic activation.
+
 # HoloIndex Public Interface
+
+## Current-truth retrieval contract
+
+The canonical docs source set explicitly admits HoloIndex's root `README.md`,
+`INTERFACE.md`, `ROADMAP.md`, `CLI_REFERENCE.md`, test contracts, and memory
+boundary. Current root/test contracts receive bounded heading-scoped vector
+records; generic module docs and historical audits/ModLogs retain one summary
+record per source. Stored records carry low-cardinality truth and record-kind
+metadata. This changes retrieval evidence shape, not factual authority.
+
+Broad status queries such as "current", "working", or "missing" oversample a
+bounded docs candidate set, deduplicate repository paths case-insensitively,
+and globally order current contracts before implementation evidence, unknown
+records, vision, and historical records. Exact PR/slice queries and explicitly
+historical/baseline queries preserve ordinary semantic score ordering. Exact
+module Tier-0 reservation remains stronger and unchanged.
+
+This policy prevents stale audit prose from becoming the default answer to a
+current-state question. It does not prove that a document is true, change the
+ranker automatically, authorize reindexing, or constitute retrieval RSI.
+
+## Owner entry and local-context evidence
+
+The existing one-shot owner adapter selects workspace source from its script
+checkout. A primary checkout is not inherently current main. Configured
+authority selection requires a clean same-repository, same-HEAD worktree;
+the owner also validates the published generation and runtime bindings.
+See [source-bound owner queries](CLI_REFERENCE.md#source-bound-owner-queries)
+for supported JSON requests and the qualification matrix.
+
+`retrieval_mode="lexical"`/`bundle_only=true` uses the existing local bundle
+path without semantic owner/store access. Its `bundle_authority` separates
+`workspace_head` from `workspace_overlay`; UNKNOWN freshness and index-gap
+labels remain visible. Bundle success does not satisfy semantic admission.
+These are existing contracts, not new API fields or a new MCP service.
+
+## Package import boundary
+
+Importing `holo_index.cli.commands.bundle_json` is a bounded, closed-environment
+operation and does not import `holo_index._cli_main` or the vector backend.
+The compatible `holo_index.cli` exports (`main`, `HoloIndex`, `QwenAdvisor`, and
+the two fast-search helpers) remain available through deferred loading. Calling
+`main`, or requesting a semantic export, still requires the normal full CLI
+dependencies. This separation grants no model, network, index, or maintenance
+authority to command-only consumers.
 
 ## Scope
 This document is the stable public contract for consuming HoloIndex programmatically and via CLI.
 For exhaustive machine-level semantics, use:
 - `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.md`
 - `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json`
+
+### Query storage isolation boundary
+
+HoloIndex accepts the one explicit generation root supplied by the bridge-owned
+verified `holoindex_query_replica.v1` route. Governed maintenance publishes a
+canonical snapshot set for all seven baseline collections before its PASS
+receipt. The materializer copies the exact sealed 22-file snapshot set plus
+one selected complete model; it does not copy the legacy vectors tree;
+the owner reproves the descriptor, loads only the path-free immutable snapshot
+adapter, and requires its generation ID to match the replica binding. Query
+startup and retrieval do not start Chroma or open SQLite/HNSW. Canonical
+freshness evidence remains authoritative and generation drift requires restart.
+
+The preferred host route is `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`. Query
+consumers never activate it. The trusted post-merge transaction may reuse the
+bridge controller after canonical refresh, outside its first authority lease,
+then reacquire authority and prove exact HEAD/generation/receipt before durable
+completion.
 
 ### Tool boundary (truth-recorded by PR #704)
 HoloIndex is a **semantic retrieval system**. It **complements** `grep`/`glob`; it does not replace them. Choose the right tool for the query:
@@ -22,6 +198,45 @@ Source-of-truth policy:
 - Human-facing interface contract: this file
 - Menu/operator atlas: `holo_index/CLI_REFERENCE.md` (non-normative)
 
+Exact module Tier-0 injection is implemented by the bounded
+`core/collection_injections.py` seam. Strict semantic owners replace initial
+vector README/INTERFACE rows with exact metadata-filtered rows and require one
+of each. Interactive/non-strict lookup failures preserve other hits and emit
+the complete missing-path warning. Full explicit module paths are
+case-normalized before lookup.
+Vector query/model/fallback/order orchestration is implemented by
+`core/collection_search.py`; `core/search_engine.py::_search_collection`
+remains the public-compatible internal seam. Both the wrapper and every new
+or touched extraction helper are constrained to at most 50 lines, while
+`search_engine.py` is strictly below the 1,500-line WSP 62 hard limit.
+
+Indexed symbol rows expose canonical `symbol` metadata. Exact query tokens
+matching that field receive deterministic keyword weight before hybrid sort,
+so a named callable can outrank semantically adjacent prose. This improves
+literal-symbol ordering inside HoloIndex; direct `rg` remains the authority
+when the caller already knows the exact token.
+
+Generation-bound public regression and deterministic comparison are exposed
+by `holo_index.retrieval_autoresearch`. They perform no ranker change or
+promotion. The independent A-grade composition gate is owned by AI Overseer;
+its accepted receipt is evidence only and still requires a separate external
+promotion authority.
+`holo_index.retrieval_runtime_binding` defines the fixed twelve-module ranker
+closure. `retrieval_ranker_digest_for_root(root)` computes the clean candidate
+digest; `loaded_retrieval_ranker_digest()` computes the digest from module
+origins actually imported by the owner. Retrieval benchmark query receipts
+must carry the latter and equal the former.
+Owner-service receipts additionally bind exact acquisition attempt/retry
+telemetry when valid; consumers reject malformed, missing, or top-level-only
+telemetry before it can authorize a second post-completion proof.
+The owner now emits a secret-free `runtime_environment_digest` over its source
+closure, executable identity, platform ABI, installed-distribution build-record
+metadata, replica/model bindings, declared runtime knobs, and required
+environment checks. Exact runtime byte closure remains false because installed
+distribution payload bytes and all deterministic runtime effects are not yet
+verified. The digest is therefore useful identity evidence, but not complete
+reproducibility or production A-grade evidence.
+
 ## Programmatic API
 
 ### Core Retrieval
@@ -32,7 +247,86 @@ holo = HoloIndex(ssd_path="E:/HoloIndex", quiet=True)
 results = holo.search("send chat message", limit=5, doc_type_filter="all")
 ```
 
+Storage resolution is deterministic:
+
+1. explicit ssd_path / --ssd
+2. HOLOINDEX_SSD_PATH
+3. legacy HOLO_SSD_PATH
+4. platform-safe absolute default
+
+HOLOINDEX_QUERY_READONLY=1 requires the governed `vectors/query_snapshots` set;
+it neither imports the maintenance-only `chromadb` dependency nor requires or
+opens `vectors/chroma.sqlite3`, never creates
+directories or collections, and never writes the repository activity log. The
+immutable query client exposes only the bounded `get`, `count`, and exact vector
+`query` subset required by Holo search. Storage failures raise
+HoloIndexStorageError with one of the stable codes
+HOLOINDEX_STORAGE_UNAVAILABLE, HOLOINDEX_STORAGE_NOT_WRITABLE,
+HOLOINDEX_STORAGE_PATH_MISMATCH, or HOLOINDEX_COLLECTION_UNAVAILABLE.
+ChromaDB itself is not a read-only database client and is therefore absent from
+the query path. The supported RedDog operational adapter uses the host-owned
+service at literal `127.0.0.1`, as
+documented by modules/infrastructure/foundups_mcp_bridge/INTERFACE.md. This
+adapter boundary is not an OS privilege boundary; host deployment must enforce
+filesystem/process permissions separately when required. Legacy consumers,
+including foundups_mcp_bridge `holo_tools.py`, remain outside this Phase-1
+migration and may still open the store directly.
+
+Linked-worktree owner queries keep repository evidence and dependency
+ownership separate. Repository bytes come from the selected clean exact-HEAD
+authority checkout. Python dependencies come from the primary worktree
+derived from the same Git common directory and are still validated by the
+checkout-local virtualenv contract. Failure to prove that relationship falls
+back to the caller workspace and therefore fails closed when no valid runtime
+exists. The resolver never checks out, updates, or indexes either worktree.
+
 Search response contract:
+
+For an exact module basename that resolves uniquely against the complete,
+HEAD-pinned Git module-evidence catalog, or one validated full
+`modules/<domain>/<module>` query path, docs
+retrieval performs zero-to-two exact metadata gets for module-root `README.md`
+and `INTERFACE.md`. Their Tier-0 order is README then INTERFACE. Exact rows use
+`retrieval_provenance: exact_metadata` and `similarity: null`; they are not
+fabricated vector results and do not pass through the vector similarity floor.
+`navigation_docs` producers MUST persist `path` as the repository-relative
+POSIX identity emitted by the canonical source set. Absolute checkout paths,
+backslashes, and query-time path rewriting are outside this contract.
+Consumers that dereference these paths MUST resolve them from
+`HoloIndex.project_root`, not the process CWD, and reject relative escapes.
+Canonical result metadata includes nullable `tier0_module_target`, set from
+the same generation-stable intent before docs retrieval. Consumers must not
+treat `exact_metadata` alone as proof that the query targeted that module.
+Strict owner mode rejects an unavailable catalog or incomplete/corrupt pair.
+Non-strict search logs a stable catalog warning and suppresses basename Tier-0
+promotion when catalog proof is unavailable; it never reverts to vector-hit
+singularity. Full paths do not require the catalog. Stable producer errors are
+`HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE`,
+`HOLOINDEX_TIER0_INCOMPLETE`, and `HOLOINDEX_TIER0_LOOKUP_FAILED`; all other
+exception text is reduced to `HOLOINDEX_SEARCH_FAILED` before leaving HoloIndex.
+Ambiguous or implicit module intent preserves ordinary score ordering.
+The catalog uses a NUL-framed recursive directory projection plus one
+`cat-file --batch` over the immediate immutable trees of exact depth-three
+candidates. A root qualifies only through a direct `src/tests` tree or a
+regular root README/INTERFACE blob; directory depth alone is not evidence.
+Every directory and immediate entry rejects invalid mode/type/framing, Unicode
+`Cc`/`Cf`/`Cs`, and `NFC(value).casefold()` duplicates without changing valid
+spelling. Both Git outputs, batch input, runtime, module count, and cache size
+are bounded. Cache identity is platform-aware and locked; Git calls remain
+outside the lock, so duplicate cold loads are allowed but bounded. Full-path
+intent remains catalog-independent.
+
+The JSON machine specification is authoritative. Its complete response schema
+is structurally compiled by `holo_index.query_result_contract_schema` and
+enforced by `holo_index.query_result_contract`: successful owner
+consumers require the exact response and metadata key sets, per-bucket hit
+schemas, alias/count/query agreement, finite typed ranking fields, and
+canonical collection/backend mappings before evidence can be projected or
+cited. Malformed structures and rule declarations fail with one stable
+contract-invalid boundary before owner startup. The machine specification is
+content-bound in the RedDog runtime manifest, so a missing or modified
+authority fails compatibility.
+
 ```python
 {
   "code_hits": [
@@ -92,6 +386,49 @@ holo.index_test_registry()
 holo.index_skillz_entries()
 ```
 
+Each indexing method returns IndexResult. A zero/invalid test registry does
+not reset navigation_tests. The canonical
+WSP_knowledge/WSP_Test_Registry.json envelope is read from its tests list;
+legacy mapping-only registries remain supported during migration. Any
+malformed row in a mixed registry fails the result before embeddings or reset;
+it cannot be silently filtered from a complete proof.
+
+Scoped maintenance receipts must name only successfully refreshed
+collections. Untouched collection proof is carried forward with its original
+repository SHA, or marked UNVERIFIED when no prior proof exists.
+
+Mutation owners use MaintenanceSession (CLI) or the incremental executor to
+prove a clean Git worktree, acquire the canonical cross-process lease, and
+publish atomic IN_PROGRESS invalidation before collection access. Final PASS
+requires the same clean HEAD, exact declared collection scope, non-empty
+manifests, the canonical source_scope_id for every baseline collection, zero
+recorded source-read, cap, or Python-AST failures, and a durable atomic receipt
+write. The clean exact HEAD is checked again after final collection snapshot
+verification and immediately before that write; dirty/change failure preserves
+the IN_PROGRESS invalidation. Canonical proofs cover Git-tracked sources and
+full raw source content.
+They do not assert zero failures for every legacy format parser. Query
+consumers fail closed
+with HOLOINDEX_MAINTENANCE_ACTIVE or
+HOLOINDEX_MAINTENANCE_LOCK_UNPROVEN.
+
+When a trusted RedDog launcher supplies an explicit maintenance-probe runtime,
+`MaintenanceSession.begin()` revalidates its single site-packages path and
+creates an in-memory current-process executable proof before lease acquisition
+or invalidation. The exact pair is forwarded only to the existing isolated
+snapshot verifier; it is neither persisted nor included in freshness receipts.
+Missing explicit authority keeps direct maintenance runtime-free. Invalid,
+changed, linked, ambiguous, or partial authority fails before mutation as
+`HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED` with stable detail
+`RUNTIME_DEPENDENCY_UNAVAILABLE`; the isolated proof remains single-shot.
+
+Generation publication additionally requires the pinned HNSW collection
+configuration and a complete persisted artifact set for each baseline vector
+segment. This proof reads Chroma's SQLite catalog and segment files without
+loading pickle content or invoking a mutation API. Missing policy or files
+returns VECTOR_SEGMENT_UNAVAILABLE before snapshot comparison. Repeated
+successful process opens do not override this durability failure.
+
 ### Module Compliance Helper
 ```python
 status = holo.check_module_exists("modules/communication/livechat")
@@ -125,9 +462,22 @@ python holo_index.py --search "query" --fast-search
 python holo_index.py --index-all
 python holo_index.py --index-code
 python holo_index.py --index-wsp
+python holo_index.py --index-tests
 python holo_index.py --index-symbols --symbol-roots modules/foundups
 python holo_index.py --index-skillz
 ```
+
+--index is an exact alias for --index-all. The baseline set is code, symbols,
+WSP, tests, skills, docs, and knowledge. Work-ledger and CLI-catalog
+generation remain explicit targeted operations and are not implied by
+--index-all.
+
+Canonical --index-all fixes its symbol roots to modules, scripts, and
+holo_index; its WSP root to WSP_framework/src; and its web root/extensions to
+the versioned source-scope contract. Scoped roots, file/entry caps, disabled
+web indexing, or unreadable sources are diagnostic/incomplete and cannot
+publish CURRENT baseline proof. Semantic backend initialization is required
+before any baseline collection reset.
 
 ### Machine Bundle Output
 ```bash
@@ -135,6 +485,42 @@ python holo_index.py --bundle-json --search "task" --bundle-module-hint modules/
 ```
 
 Bundle schema ID: `wsp_memory_bundle_v1`
+
+Persistent `--search` and `--bundle-json` requests are admitted before backend
+construction only when the freshness receipt proves the invoking repository
+root, resolved SSD, clean exact HEAD, generation, complete canonical baseline,
+embedding space, and no active/unprovable maintenance. A denied raw CLI search
+exits with code `4`; JSON bundle denial returns content-free `error`,
+`stale_reasons`, and `index_gap_detected` fields. Offline/fast lexical mode
+does not open or read the persistent store and reports degraded/UNKNOWN
+freshness. Raw CLI and bundle lexical paths share the same root-confined,
+bounded, no-follow loader. Oversize NAVIGATION is rejected. WSP metadata is
+repository-local and the supplied SSD is not a lexical metadata source.
+Persistent admission reads only the canonical
+`freshness_receipt_path(ssd)`. An explicit receipt argument must resolve to
+that exact stable-ancestor identity, and a final symlink/reparse point is
+rejected before receipt or backend access.
+`rehydrate_canonical_freshness_proof()` exposes the same gate for a caller
+that already holds an expected 40-character repository SHA. It rejects a
+malformed or mismatched expected SHA before receipt loading and returns only
+the existing `ReadonlyQueryAdmission` binding; it never starts an owner,
+opens Chroma, writes a receipt, or reindexes.
+
+HoloIndex also exposes a separate authority-update lease beside the canonical
+maintenance lease. WRE may hold the outer lease while changing a dedicated
+authority checkout; `MaintenanceSession` independently owns the inner SSD
+writer lease and atomic freshness publication.
+The fixed `.holoindex_authority_blocked` marker is a durable fail-closed
+fallback when neither a newer checkout nor canonical invalidation can be
+published. Only exact regular marker content is recognized for recovery.
+
+Module hints accept only repository-relative components. Traversal, absolute
+paths, links, and reparse points are rejected; nested enumeration has fixed
+entry/depth bounds. Module-domain and WSP discovery fail closed on `cap + 1`
+rather than selecting a partial directory prefix. Nested module-file
+enumeration is complete-or-empty: entry overflow, depth overflow, or a scan
+error returns no module-file evidence, and a complete set is sorted before
+selection.
 
 ### Monitoring / Orchestration
 ```bash
@@ -157,8 +543,16 @@ python holo_index.py --health-check
 - `HOLO_SKIP_MODEL=1`: force lexical retrieval path.
 - `HOLO_MIN_SIMILARITY=0.35`: vector hit floor.
 - `HOLO_FAST_SEARCH=1`: retrieval-only fast path.
-- `HOLO_INDEX_WEB=1`: include web assets during `--index-code`.
+  Its compact receipt reports all four result buckets explicitly:
+  `code`, `wsp`, `docs`, and `knowledge`, including zero counts.
+- `HOLO_INDEX_WEB=1`: include web assets during a targeted diagnostic
+  `--index-code`; trusted baseline maintenance uses the canonical tracked web
+  scope and does not accept this override.
 - `HOLO_SYMBOL_AUTO=1`: auto symbol indexing during `--index-code`.
+
+- HOLOINDEX_SSD_PATH: canonical persistent store root.
+- HOLO_SSD_PATH: legacy store-root alias, lower precedence.
+- HOLOINDEX_QUERY_READONLY=1: fail-closed query posture; no HoloIndex maintenance writes.
 
 ## Internal CLI Module Layout
 

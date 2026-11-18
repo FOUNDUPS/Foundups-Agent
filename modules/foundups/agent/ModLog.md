@@ -1,4 +1,616 @@
+## 2026-09-21: Qualify existing FoundUp build route and close preview-wiring drift
+
+- WSP00/15/22/50/97/99;15/P1 source/test-contract qualification after PR1833 and both main workflows passed. Existing WRE consumer targets the WRE executor; older agent build-to-extraction helper is a separate path.
+- Fresh executor defaults to dry-run; guard-admitted dry/disabled paths simulate, while unqualified build/extract can block first. Live delegation remains blocked. Controlled adapter mode does not call a live worker. Existing ContextBundle preview attachment is implemented; corrected stale interface/roadmap claims that it was still unwired.
+- Build/extract model requirements remain unspecified; consumer model admission applies only to validation. The mocked singleton test does not establish the documented consumer force-dry promise; qualify policy/instance isolation separately before source repair.
+- Exact owners, independent review and ranked follow-up are bound in the canonical RSI backlog and AmIBot package. No repository imports, product tests, queue drain, worker/model/service or deployment execution; no new modules, skills or runtime flags.
+
 # Agent Module ModLog
+
+## 2026-07-23 - CREATE_FOUNDUP_REGISTRY_SCHEMA_REPAIR2
+
+- Replaced planner-local shape checks with `Draft202012Validator` evaluation
+  of the canonical `modules/foundups/foundup_registry.schema.json`; no second
+  schema authority was introduced.
+- Split `plan_create_foundup_dry_run` to 45 lines while preserving the stable
+  `FAIL_REGISTRY_UNAVAILABLE` boundary.
+
+## 2026-07-23 - CREATE_FOUNDUP_REGISTRY_FAIL_CLOSED_REPAIR1
+
+- The create-foundup dry-run planner now treats missing, unreadable,
+  malformed, and schema-invalid registries as
+  `FAIL_REGISTRY_UNAVAILABLE` instead of an empty registry.
+- Envelope normalization supplies a deterministic sentinel timestamp when
+  legacy input omits `created_at`; no write or runtime authority was added.
+
+## 2026-07-19 - REDDOG_TRANSPORT_NEUTRAL_GROUNDING_SERVICE_PHASE1
+
+**Author**: 0102 architect | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added Hermes request v2 for natural-language submit through the transport-neutral backend grounding service.
+- Required host-provided authenticated principal and explicit authorized FoundUp scope before adapter construction.
+- Preserved request v1 for already-grounded intents and the same canonical AgentDB resident cycle.
+- Kept external research, model calls, shell, repository mutation, indexing, execution, worktree, PR, and merge authority outside this route.
+
+## 2026-07-19 - REDDOG_TRANSPORT_NEUTRAL_RESIDENT_CLIENT_AND_HERMES_ADAPTER_PHASE1
+
+**Author**: 0102 architect | Commander: 012 | WSP: 00, 15, 50, 71, 97
+
+- Added a Hermes transport adapter for submit/status/cancel/resume against the one canonical resident RedDog AgentDB cycle.
+- Required the host-authenticated principal to match the grounded v2 intent; payload role text never grants authority.
+- Added a bounded one-shot JSON bridge for external Hermes instruments without importing the Hermes builder/model loop.
+- Kept the route read-only: no shell, repo mutation, HoloIndex re-index, worktree, PR, merge, or Hermes execution authority.
+- Omitted unset environment paths instead of overriding canonical resident defaults with empty values.
+
+## 2026-07-09 - WRE worktree cwd hazard guard integration
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 34, 50, 97
+**Slice**: WRE_WORKTREE_CWD_HAZARD_GUARD_PHASE1
+
+### Changed
+
+- Updated `src/worktree_pr_runner.py`: before `git add`, `git commit`, `git push`, or worktree cleanup, `RealWorktreeRunner` now calls the shared WRE cwd guard and refuses to run subprocess if the supplied worktree path resolves to the shared repo root or a nested path inside it. Mutating git commands now execute with the process cwd set to the isolated worktree rather than the main checkout.
+- Extended `tests/test_foundup_scaffold_writer_live.py`: verifies valid mutating git calls run from the worktree cwd, and shared-root / nested-main paths are rejected before subprocess is invoked.
+
+### Boundary
+
+No new live writer authority, no merge authority, no PR-ready path, and no task execution. This slice only hardens the approved runner against lane-cwd contamination.
+
+## 2026-07-04 - FIRST live scaffold writer: isolated worktree + draft PR only (FOUNDUP_SCAFFOLD_WRITER_LIVE_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109
+**Base**: `9b96ac68d` (main; P0 #919 ... preauth #924)
+**Slice**: FOUNDUP_SCAFFOLD_WRITER_LIVE_PHASE1
+
+### Changed
+
+- NEW `src/foundup_scaffold_writer_live.py`: `run_foundup_scaffold_writer_live(...)` -- orchestration
+  that materializes the planned WSP-49 scaffold into an ISOLATED git worktree (outside the main repo)
+  and opens a DRAFT PR ONLY. Subprocess-FREE (delegates every side effect to an injected `runner`).
+  Authorization gates run BEFORE any side effect: preauth_ready + attestations, packet digest binding,
+  contract digest binding, sovereign token bound to the valve env, valve resolving
+  VALVE_OPEN_WORKTREE_CREATE, foundup_id/module_path pin, allowed/denied paths, per-artifact
+  scope/traversal/denied (incl .env/secrets/registry/public/api/WSP-framework), target-not-on-base,
+  worktree-outside-main. Materialization reuses the hardened `scaffold_writer_dryrun` (#923). Emits the
+  7 required receipts; NEVER mutates main/registry/routes/secrets; NEVER merges or marks ready. On any
+  post-worktree failure it invokes `runner.cleanup_worktree` + records a rollback plan. No sovereign
+  token in any receipt/result.
+- NEW `src/worktree_pr_runner.py`: the APPROVED side-effect helper (the ONLY module with subprocess).
+  `RealWorktreeRunner` runs argv-only (no shell) git worktree add/commit/push + `gh pr create --draft`
+  + worktree remove. NO ready/merge method exists.
+- TEST `tests/test_foundup_scaffold_writer_live.py` (31): guard tests with an injected FakeRunner
+  (NO real git/gh in CI) + a subprocess-mocked runner test (draft-only, no ready/merge) + preauth
+  field-compat + Round-4/5 regressions (device-prefix worktree/output_root; materializer-import
+  fail-closed). Agent suite 1128 passed.
+- FIX `src/scaffold_writer_dryrun.py` (#923, second isolation layer): reject Windows device /
+  extended-length prefix output_root (`\\?\`, `\\.\`, `//?/`, `//./`) before `_is_inside` -- same
+  root cause the live writer closes at Guard 8.
+
+### Adversarial (CoR) -- 5 rounds, gate = all-SAFE / 0 blocker / 0 major
+
+Multi-lens sweep (worktree escape / auth bypass / traversal-denied-routes / merge-ready /
+cleanup-partial-write / runner-secrets) run before commit. Rounds 1-4 each surfaced REAL, distinct
+execution-safety findings; all fixed with regression tests:
+
+- R1: Guard-8 anchored only on caller repo_root (major) -> union {repo, _default_repo_root()};
+  uncaught materialize exception skipped cleanup (major) -> wrapped in guarded try/except.
+- R2: pre-seeded worktree could smuggle out-of-scope files (blocker) -> clean-target guard +
+  on-disk rglob validation (on_disk == planned == written) + scoped `git add -- <module_path>`.
+- R3: relative worktree_path guard/runner cwd divergence (blocker) -> `FAIL_WORKTREE_NOT_ABSOLUTE`
+  + RealRunner absolute-path refusal; create-failure orphan (major) -> force `worktree_created=True`.
+- R4: Windows device/extended-length prefix (`\\?\`, `//?/`) evaded `_is_inside`, letting a write
+  land INSIDE main (blocker) -> reject device/extended-length prefixes on raw+resolved string in
+  BOTH the live writer (Guard 8) AND the materializer; deferred materializer import could orphan a
+  worktree on import failure (major) -> import bound BEFORE worktree creation (`FAIL_MATERIALIZER_IMPORT`).
+- R5: all 6 lenses SAFE, 0 blocker / 0 major. Residual = 2 accepted minors (optional: add 'secrets'
+  to the materializer denylist for defense-in-depth; both already dominated by guard-4 exact-set +
+  on-disk validation -- no safety change required).
+
+### Boundary
+
+Draft PR ONLY. Live run requires a real caller supplying a valid preauth packet + 012/DAO sovereign
+token + a valve env emitting VALVE_OPEN_WORKTREE_CREATE. NOT auto-invoked. HoloIndex INDEX_GAP:
+`HOLOINDEX_FOUNDUP_SCAFFOLD_WRITER_LIVE_DISCOVERABILITY_PHASE1` (operator re-index).
+
+## 2026-07-04 - Live-writer preauthorization packet (generic) (FOUNDUP_LIVE_WRITER_PREAUTH_PACKET_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109
+**Base**: `75e092789` (main; P0 #919, P1 #920, P2 #921, create-action #922, writer-dryrun #923)
+**Slice**: FOUNDUP_LIVE_WRITER_PREAUTH_PACKET_PHASE1
+
+### Changed
+
+- NEW `src/live_writer_preauth_packet.py`: `build_live_writer_preauth_packet(idea, foundup_id,
+  foundup_name, module_path, target_branch, ...)` chains the landed dry-run stack -- WSP 109 intake +
+  genesis envelope (P1 builder) -> OpenClaw gate GATE_PASSED -> registry non-existence -> create_foundup
+  dry-run plan -> scaffold writer dry-run sandbox materialization -> emits a GENERIC
+  `LiveWriterPreauthPacket` (all step digests + fail-closed capability flags). Proves the prerequisites
+  for REQUESTING `VALVE_OPEN_WORKTREE_CREATE` are satisfied. Opens NO valve; writes NO real repo/registry;
+  creates NO branch/PR/worktree. Refuses forbidden capability flags, wrong valve state/operation,
+  existing/invalid foundup_id/module_path, gate failure, or plan/artifact mismatch. No subprocess/git/gh
+  (AST-guarded).
+- TEST `tests/test_live_writer_preauth_packet.py` (22): the 12 acceptance items with the pAccess
+  (paccess_001) fixture (fixture only, not implementation) + parametrized capability/valve/module_path
+  refusals + AST denylist. Agent suite 1093 passed.
+
+### Boundary
+
+pAccess is an acceptance FIXTURE only. This is NOT the live writer and NOT pAccess-specific. The LIVE
+writer remains forbidden until FOUNDUP_SCAFFOLD_WRITER_LIVE_PHASE1 (VALVE_OPEN_WORKTREE_CREATE + 012/DAO
+sovereign token + isolated worktree + no protected branch + receipt chain + rollback/cleanup).
+
+### HoloIndex (Addendum)
+
+Preflight recorded; new module + landed #922/#923 modules do not surface (index predates them) ->
+`HOLOINDEX_FOUNDUP_LIVE_WRITER_PREAUTH_PACKET_DISCOVERABILITY_PHASE1` (operator re-index, not RedDog runtime).
+
+## 2026-07-04 - Scaffold dry-run materializer: sandbox-only, fail-closed (FOUNDUP_SCAFFOLD_WRITER_DRYRUN_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109
+**Base**: `2ed3e5418` (main; includes P0 #919, P1 #920, P2 #921, create-action #922)
+**Slice**: FOUNDUP_SCAFFOLD_WRITER_DRYRUN_PHASE1
+
+### Changed
+
+- NEW `src/scaffold_writer_dryrun.py`: `materialize_scaffold_dry_run(contract, output_root, *, real_repo_root)`
+  materializes the FoundUpScaffoldContract's 14 planned WSP-49 artifacts into an ISOLATED sandbox
+  `output_root` ONLY. Fail-closed guards (all BEFORE any write): `FAIL_WRITE_TO_MAIN_REPO` (output_root
+  inside the real repo), `FAIL_MODULE_EXISTS` (module already in real repo), `FAIL_PATH_TRAVERSAL`
+  (absolute/drive/`..`/escape), `FAIL_DENIED_PATH` (.env/main.py/`*_dae.py`/vendor),
+  `FAIL_REGISTRY_OVERWRITE` (foundup_registry.json). `registry_mutated`/`worktree_created`/
+  `wrote_to_main_repo` pinned False. No FAM/Hermes import (AST-guarded).
+- TEST `tests/test_scaffold_writer_dryrun.py` (11): exact-14 materialization end-to-end from the
+  create_foundup planner; written manifest passes the REAL foundup_manifest_validator; all 5 fail-closed
+  classes; AST guard; and the LIVE writer (`foundup_scaffold_writer.py`) proven still ABSENT.
+  Agent suite 1052 passed; P2 contract static test still green.
+
+### Boundary
+
+Dry-run sandbox writer ONLY. The LIVE writer (real-repo paths + registry seed write) remains deferred
+to a future slice gated by `VALVE_OPEN_WORKTREE_CREATE` + 012/DAO sovereign token.
+
+## 2026-07-04 - create_foundup dry-run scaffold planner (FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109
+**Base**: `0046423c6` (main; includes P0 #919 + P1 #920 + P2 #921 scaffold contract)
+**Slice**: FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1
+
+### Changed
+
+- NEW `src/create_foundup_dryrun.py`: `plan_create_foundup_dry_run(envelope)` re-validates a genesis
+  envelope (ai_overseer validator, fail-closed), rejects an existing `foundup_id`
+  (`FAIL_FOUNDUP_ID_EXISTS`) or invalid envelope (`FAIL_ENVELOPE_NOT_GATE_PASSED`), and returns a
+  DRY-RUN `FoundUpScaffoldContract` + planned WSP-49 artifacts + planned manifest + registry seed.
+  Writes NOTHING (`dry_run=True`, `files_written=[]`, fam/hermes/registry/worktree all False). Maps to
+  the P2 `FOUNDUP_SCAFFOLD_CONTRACT_PHASE1` contract. No FAM/Hermes/writer import (AST-guarded).
+- Registry existence check reads `modules/foundups/foundup_registry.json` directly (the read-only
+  loader import is blocked by `modules/foundups/src/__init__` eagerly importing a missing
+  `platform_manager` -- residual, out of scope).
+- TEST `tests/test_create_foundup_dryrun.py` (10): incl. the planned manifest passing the REAL
+  `foundup_manifest_validator`, exists-rejection, invalid/reserved rejection, no-alias invariant,
+  dry-run-no-writes, AST guard. Agent suite green (1041 passed).
+
+### Note
+
+Contract change lives in `moltbot_bridge/foundup_job_contract.py` (create_foundup added to
+CANONICAL_ACTIONS + EXISTING_MODULE_ACTIONS taxonomy + 3 fail-closed StatusReasonCodes).
+
+### Next
+
+FOUNDUP_SCAFFOLD_WRITER_DRYRUN_PHASE1 (valve-gated dry-run writer), then live writer behind
+VALVE_OPEN_WORKTREE_CREATE + 012/DAO sovereign token.
+
+## 2026-07-04 - Hermes builder dry-run by DEFAULT: double opt-in for real writes (HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 97
+**Base**: `ac1cc611a` (main)
+**Slice**: HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1
+
+### Why (OBSERVED safety finding)
+
+The RedDog FoundUp-creation execution-path audit found `HermesFoundUpBuilder.__init__` set
+`self.dry_run = os.environ.get("HERMES_BUILDER_DRY_RUN", "0") == "1"` -- dry_run defaulted to FALSE
+(real writes ON) when the env var was unset. This was the outlier: `BuildPlanExecutor` and
+`HermesJobExecutor` both default `dry_run=True`, and `build_plan_generator` always emits dry-run
+plans. The default-on adapter-level write (`generate_adapters` mkdir + write_text) was reachable via
+the extract/build path, gated only by an env flag plus the security sentinel.
+
+### Changed (safety tightening only; no gate weakened)
+
+- EDIT `src/hermes_adapter.py` (`HermesFoundUpBuilder.__init__`): dry-run is now the DEFAULT. Real
+  writes require an explicit DOUBLE opt-in -- BOTH `HERMES_BUILDER_ALLOW_REAL_WRITES=1` AND
+  `HERMES_BUILDER_DRY_RUN=0`. Any other combination (including all-unset) stays dry-run/safe. Added
+  `self.allow_real_writes` for observability. No change to the security sentinel, CABR, OpenClaw
+  genesis gate, or the WRE execution valve.
+- TEST `tests/test_hermes_foundup_builder.py::TestDryRunDefaultSafety` (A1/A2/A3/A5) and
+  `tests/test_hermes_foundup_job_executor.py::test_a4_executor_respects_builder_dry_run_default` (A4).
+  Full agent suite green: 1031 passed.
+- DOCS INTERFACE.md (env contract) + README.md (safety defaults).
+
+### HoloIndex (Addendum A)
+
+Pre-run recall surfaced `hermes_adapter.py` at #1 for "HERMES_BUILDER_DRY_RUN default". The four new
+audit docs committed at `ac1cc611a` are NOT yet discoverable (code index predates the commit):
+recorded as `HOLOINDEX_FOUNDUP_CREATION_AUDIT_DISCOVERABILITY_PHASE1`. Re-index is an explicit
+operator action, out of scope for this code slice.
+
+### Residual (SPECIFIED_NOT_IMPLEMENTED)
+
+- Hermes real delegation in `hermes_job_executor.py` remains BLOCKED (out of scope).
+- Re-index for the new audit docs pending (operator/worker action, not RedDog runtime).
+
+## 2026-06-20 - Package __init__ lazy import: close the no-vendor boundary at the IMPORT boundary (FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1)
+
+**Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 84, WSP 97
+**Base**: `a02b6fb9c` (origin/main)
+**Slice**: FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1
+
+### Why (decision B: fix the no-vendor boundary at the IMPORT boundary, not just the file AST)
+
+The #805/#806 boundary is "no Hermes / no vendor import". The Kanban publish adapter MODULE (parked
+slice KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1, a DIFFERENT worktree) and the #807 contract
+MODULE (`kanban_plugin_contract.py`) are AST-clean -- BUT importing them THROUGH the package eagerly
+loaded Hermes+subprocess+sqlite3+urllib because `modules/foundups/agent/src/__init__.py` EAGERLY
+imported from `.hermes_adapter` and `.hermes_model_router` (old lines 35-46) to expose 8
+package-level names. So a leaf-module import (e.g. `import
+modules.foundups.agent.src.kanban_plugin_contract`) transitively pulled the entire Hermes/vendor
+runtime. Confirmed live on `a02b6fb9c`: the leaf import leaked
+`hermes_adapter`/`hermes_model_router`/`subprocess`/`sqlite3`/`urllib` into `sys.modules`.
+
+### Changed (package structure only -- src: `__init__.py`)
+
+- EDIT `modules/foundups/agent/src/__init__.py`: replaced the two EAGER
+  `from .hermes_adapter import (...)` / `from .hermes_model_router import (...)` blocks with a PEP 562
+  lazy module-level `__getattr__` backed by a `_LAZY` name->submodule map. The 8 public names still
+  resolve on ACCESS (`from modules.foundups.agent.src import HermesFoundUpBuilder` works), are CACHED
+  into `globals()` on first access (cheap + identity-stable on re-access), and a leaf-module import no
+  longer triggers any Hermes/vendor import. `__version__` and `__all__` are UNCHANGED. Added a
+  `__dir__` so the lazy names still surface for introspection. The module docstring is preserved.
+- NO change to `hermes_adapter.py`, `hermes_model_router.py`, or `kanban_plugin_contract.py` (their
+  diffs are EMPTY). The parked publish adapter is untouched (different worktree).
+
+### Proofs (all in FRESH child interpreters where the boundary assertion needs a clean import graph)
+
+1. `import modules.foundups.agent.src.kanban_plugin_contract` -> none of
+   `hermes_adapter`/`hermes_model_router`/`subprocess`/`sqlite3`/`urllib` in child `sys.modules`.
+2. `import modules.foundups.agent.src.source_authority` (2nd independent AST-clean leaf) -> same.
+3. All 8 `__all__` names resolve lazily and are identity-stable across repeated access; resolved
+   values are the SAME objects exported by `hermes_adapter`/`hermes_model_router` (no behavior change).
+4. Lazy-on-demand: in a fresh child `hermes_adapter` is ABSENT until a public name is accessed, then
+   PRESENT.
+5. No circular import: package + both leaves + both hermes modules import cleanly in several orders.
+6. Bogus package attribute -> `AttributeError` (not ImportError/other).
+
+### WSP 97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|---|---|---|
+| 1 | LEAF_IMPORT_DOES_NOT_EAGER_LOAD_HERMES | YES | Fresh child: `import ...kanban_plugin_contract` leaves `hermes_adapter`/`hermes_model_router` out of `sys.modules`; old eager `__init__` removed. |
+| 2 | KANBAN_ADAPTER_PACKAGE_IMPORT_NO_VENDOR_PULLIN | YES | `test_leaf_adapter_import_no_vendor_pullin` (child): kanban_plugin_contract pulls in none of hermes_adapter/hermes_model_router/subprocess/sqlite3/urllib. (Publish adapter parked elsewhere; contract leaf is the present adapter-side AST-clean leaf.) |
+| 3 | KANBAN_CONTRACT_PACKAGE_IMPORT_NO_VENDOR_PULLIN | YES | `test_leaf_contract_import_no_vendor_pullin` (child): source_authority leaf, same clean `sys.modules`. |
+| 4 | EXISTING_PUBLIC_EXPORTS_PRESERVED | YES | `test_all_public_exports_still_resolve`: `__all__` unchanged (8 names); each resolves non-None, correct type, identity-stable on re-access. |
+| 5 | LAZY_IMPORT_NO_BEHAVIOR_CHANGE | YES | `test_lazy_access_resolves_value_identical_to_source`: package names are the SAME objects as hermes_adapter/hermes_model_router exports; their source diffs are EMPTY. |
+| 6 | NO_CIRCULAR_IMPORT | YES | `test_no_circular_import`: package + both leaves + both hermes modules import in 3 orders (incl. reverse) with returncode 0. |
+| 7 | ADAPTER_REMAINS_PARKED | YES | No `kanban_publish_adapter` file in this worktree; only `__init__.py` + new test changed (git status --short); parked slice rebases + reruns its 7-lane gate after this lands. |
+| 8 | ASCII_CLEAN | YES | Byte-check: 0 non-ASCII bytes in `__init__.py` and `test_package_init_lazy_import.py`. |
+| 9 | NO_SKIP_XFAIL | YES | Full agent suite 1024 passed (CI and heavy mode); new file 8 passed; no skip/xfail markers. |
+| 10 | FILE_SCOPE_EXACT | YES | `git status --short`: only `M src/__init__.py` + `?? tests/test_package_init_lazy_import.py` (+ ModLogs); hermes/contract diffs empty. |
+
+### Follow-up
+
+After this lands, the parked KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1 (different worktree)
+rebases onto the new package head and RE-RUNS its 7-lane gate -- its no-vendor lane now holds at the
+IMPORT boundary, not just the file AST.
+
+## 2026-06-20 - Kanban Contract dict-key redaction + token-precise command match (FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1)
+
+**Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 84, WSP 97
+**Base**: `005dd3629` (origin/main; contains the landed #807 + #838 + #843)
+**Slice**: FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1
+
+### Why (closes 2 findings the parked publish adapter's RE-REVIEW exposed)
+
+After #843 landed, a re-review of the parked publish adapter (slice
+KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1, NOT part of this slice) exposed two NEW gaps in the
+#807 authority contract. Decision A (again): fix the contract at its SOURCE.
+- **Finding 1 (secret-as-dict-KEY survives serialization)**: `_redact_deep` redacted string
+  VALUES/leaves but NOT dict KEYS (`{k: _redact_deep(v) for k, v in node.items()}`). A secret used
+  as a nested dict KEY therefore survived verbatim into `to_dict()` and the adapter outbox.
+  Confirmed live: origin `to_dict()` of a card carrying `{sk: "v", "f": sk}` in a list field leaks
+  the raw `sk-...` as a KEY; HEAD does not.
+- **Finding 2 (#843 command-key over-rejection regression)**: the command-key check used SUBSTRING
+  matching (`any(c in nkey for c in _COMMAND_KEY_MARKERS)`), so `description` (contains "script"),
+  `transcript`, `subscription`, etc. were treated as command-keys. Since #843 made command-keys
+  reject bare strings, an ordinary raw-dict field like `{"description": "ordinary text"}` was now
+  FALSELY REJECTED. The #843 no-weakening lane allowed this regression because a field going
+  accepted->rejected reads as a "strengthening". Confirmed live: origin REJECTS description/
+  transcript/subscription/executive_summary/scripted_notes/prescription/descriptor with an ordinary
+  string value; HEAD ACCEPTS them.
+
+### Changed (LOGIC change to the #807 authority contract -- src: `kanban_plugin_contract.py`)
+
+1. **Fix 1 -- `_redact_deep` now redacts string KEYS as well as string values** (dict branch,
+   `~line 124`): `{(redact_sensitive(k) if isinstance(k, str) else k): _redact_deep(v) for k, v in
+   node.items()}`. Non-string keys pass through unchanged. Uses the SAME `redact_sensitive` redactor
+   as values, returns a NEW structure (the input mapping is NOT mutated), and preserves the
+   deterministic/canonical behavior (downstream `to_dict()` is `json.dumps(sort_keys=True)`). A
+   secret-as-key can no longer survive into `to_dict()` or any serialization.
+2. **Fix 2 -- command-key matching is now TOKEN/BOUNDARY-precise, NOT substring** (`~line 245`):
+   replaced the substring test with `_key_is_command()` (`~line 165`), which runs the existing
+   `_normalize` on the key, splits the normalized key into tokens by `_`, and matches a command-key
+   IFF some TOKEN is EXACTLY a single-token command marker. `_COMMAND_KEY_MARKERS` is now the
+   single-token set `{command, cmd, argv, shell, exec, script}` (frozenset). `run_cmd`/`runCmd` are
+   caught via their `cmd` token; `exec_now` via `exec`; `shell_command` via `shell`/`command`. Legit
+   fields whose names merely CONTAIN a marker substring (description/transcript/subscription/
+   executive/scripted/prescription/...) each normalize to a single NON-marker token and are NOT
+   command-keys. `_command_value_is_argv_or_null` is UNCHANGED -- a bare string under a TRUE command
+   key remains REJECTED; a valid all-safe argv list under a true command key is still ACCEPTED.
+
+### Two-directional parity (this slice needs BOTH no-weakening AND no-over-rejection)
+
+AUTHORITY detection is UNCHANGED and not weakened (the command-KEY change is the only logic change
+on the key path; redaction only ADDS key coverage). The command-KEY change is an INTENDED narrowing:
+it removes false-positive command-keys (description/transcript/...) while keeping the true command
+keys. So `{description: "text"}` flips REJECTED(origin)->ACCEPTED(HEAD) -- the intended fix, NOT a
+weakening (it was never a real authority/command key). The no-weakening invariant applies to
+AUTHORITY markers, not to the command-substring over-matches being fixed.
+
+AUDIT-time live cross-check (origin/main module vs HEAD over the corpus):
+- **NO WEAKENING**: 0 origin-rejected AUTHORITY payloads newly accepted by HEAD.
+- **TRUE command keys (command/cmd/shell/script/exec/argv + run_command/runCmd/exec_now/
+  shell_command) still reject a bare string** (origin False -> HEAD False; #843 invariant carried).
+- **FALSE-POSITIVE FIX**: description/transcript/subscription/executive_summary/scripted_notes/
+  prescription/descriptor flip REJECTED(origin)->ACCEPTED(HEAD).
+- **KEY-REDACTION**: secret-as-key survives origin `to_dict()` (True), does NOT survive HEAD (False);
+  HEAD instance not mutated.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|---|---|---|
+| 1 | DICT_KEYS_REDACTED | PASS | `_redact_deep` dict branch redacts string KEYS via `redact_sensitive`; non-string keys pass through |
+| 2 | NESTED_KEYS_REDACTED | PASS | secret-as-KEY nested several levels deep is redacted (test) |
+| 3 | TO_DICT_NO_SECRET_IN_KEYS_OR_VALUES | PASS | card `to_dict()` of `{sk:"v","f":sk}` in a list field carries no raw secret in keys OR values |
+| 4 | COMMAND_MATCH_TOKEN_PRECISE_NOT_SUBSTRING | PASS | `_key_is_command` matches on a normalized `_`-token == single-token marker; substring fields excluded |
+| 5 | DESCRIPTION_TRANSCRIPT_NOT_COMMAND_KEYS | PASS | description/transcript (+ false-positive battery) accepted with ordinary string values |
+| 6 | TRUE_COMMAND_KEYS_STILL_REJECT_BARE_STRING | PASS | command/cmd/shell/script/exec/argv/run_command/runCmd/exec_now/shell_command bare string rejected |
+| 7 | AUTHORITY_DETECTION_NOT_WEAKENED | PASS | full origin-rejected AUTHORITY corpus still rejected; 0 newly accepted (battery + live cross-check) |
+| 8 | FALSE_POSITIVE_BATTERY_PRESENT | PASS | corpus of legit command-substring field names with ordinary values, all ACCEPTED (NEW #843-lacked invariant) |
+| 9 | ADAPTER_FINDINGS_CLOSED_AT_CONTRACT_SOURCE | PASS | both findings fixed in the contract; adapter inherits safety |
+| 10 | ASCII_CLEAN | PASS | 0 non-ASCII bytes in both edited files (synthetic secret via `chr()`) |
+| 11 | NO_SKIP_XFAIL | PASS | no skip/xfail added |
+| 12 | FILE_SCOPE_EXACT | PASS | only `kanban_plugin_contract.py` + its tests + ModLogs changed |
+| 13 | NO_HERMES_OR_DB_OR_RUNTIME_WIRING | PASS | pure dataclasses/validators; no Hermes import, no Kanban DB, no runtime wiring |
+| 14 | ORIGINAL_OBJECT_NOT_MUTATED | PASS | `_redact_deep` builds a NEW dict; card instance keeps raw key/value after `to_dict()` |
+
+### Validation
+
+- `test_kanban_plugin_contract.py`: 319 passed (was 251; +68 net new for key-redaction + token-
+  precise-command + two-directional parity). Full agent suite: **1016 passed** in BOTH heavy
+  (`AI_OVERSEER_HEAVY_TESTS=1`) and CI mode -- no skip/xfail, no regression.
+
+### Follow-up
+
+The parked slice **KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1** rebases onto this once it lands
+(it relies on the now-guaranteed key+value redaction and the token-precise command-key contract).
+
+---
+
+## 2026-06-19 - Kanban Contract card redaction + command argv-or-null (FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1)
+
+**Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 84, WSP 97
+**Base**: `9e6d6d063` (origin/main; contains #807 + the landed #838 no-raw-echo)
+**Slice**: FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1
+
+### Why (closes 2 HIGH findings the parked Kanban publish adapter surfaced)
+
+The parked publish adapter (slice KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1, NOT part of this
+slice) exposed two latent gaps in the #807 authority contract. Decision A: harden the contract at
+its SOURCE so the adapter and any consumer inherit safety.
+- **Finding A**: `KanbanCardSpec.to_dict()` returned `asdict(self)` with NO redaction -- only
+  `WreEvidencePacket` redacted (via `__post_init__`). A raw secret in a card free-text field
+  serialized VERBATIM. (Proven: origin/main `to_dict()` leaks `sk-...`; HEAD does not.)
+- **Finding B**: `validate_card_spec`'s command-key handling only rejected shell METACHARS. A
+  metachar-free destructive command like `{"command": "rm -rf /"}` PASSED, despite the contract's
+  stated guarantee being "argv-or-null only".
+
+### Changed (LOGIC change -- src: `kanban_plugin_contract.py`)
+
+1. **Finding A -- `KanbanCardSpec.to_dict()` now returns a REDACTED canonical body**
+   (`~line 326`): added a pure deep redactor `_redact_deep()` (`~line 116`) that recurses
+   list/tuple/dict and applies the existing `redact_sensitive` to EVERY string leaf. `to_dict()`
+   returns `_redact_deep(asdict(self))`. Approach = redact AT SERIALIZATION (the dataclass instance
+   is NOT mutated; chosen because the card has no `__post_init__` and the redacted dict is the
+   canonical body any consumer digest is computed over -- so CARD_ID_FROM_REDACTED_CANONICAL_BODY
+   holds without mutating state). Documented in the `to_dict()` docstring.
+2. **Finding B -- `validate_card_spec` command-key is now argv-or-null ONLY** (in the shared
+   `_scan_authority`, `~line 244`): added `_command_value_is_argv_or_null()` + `_argv_element_unsafe()`
+   (`~line 252`). A command-key value is ACCEPTED only when None (null) OR an argv LIST whose every
+   element is a safe string (reusing `_has_shell` + `_value_carries_authority` + `_check_path` per
+   element). A bare STRING (even metachar-free), a dict, or a list with any unsafe/non-string element
+   is REJECTED. Message names the rule class only -- the #838 no-raw-echo invariant is preserved
+   (the raw command value is NEVER echoed).
+3. **No weakening**: every input origin/main rejected is still rejected -- only ADDED rejections
+   (bare/unsafe command strings) + ADDED redaction. The shared scanner change also propagates the
+   argv-or-null rule to `validate_worker_task_spec` / `validate_evidence_packet` (defense-in-depth).
+4. **SENTINEL re-audit alignment (code/docstring agreement)**: `_command_value_is_argv_or_null`
+   (`~line 290`) docstring stated "null OR a NON-EMPTY argv LIST", but the body
+   `all(not _argv_element_unsafe(item) for item in value)` accepted an EMPTY argv list `[]`
+   (`all([])` is True), so `{"command": []}` was ACCEPTED -- contradicting the docstring. Made the
+   CODE match the stated contract: a command-key is accepted only when null/absent OR a NON-EMPTY
+   argv list of all-safe strings; an empty argv list is degenerate/malformed and is REJECTED
+   (`len(value) >= 1 and all(...)`). This is strictly a STRENGTHENING (HEAD now rejects `command: []`
+   which origin accepted) -- the no-weakening invariant is preserved (0 newly-accepted). The SAFE
+   error message is unchanged (no raw echo). Nothing else changed (redaction, bare-string rejection,
+   authority detection untouched).
+
+### Parity proof (this is a LOGIC change -> AST-skeleton-identical no longer applies)
+
+Proven by BATTERY (not skeleton hash). The prior AST-skeleton baseline test was REPLACED by a
+self-contained behavioral no-weakening battery (origin-rejected corpus embedded in the committed
+tests; NO runtime git-show). AUDIT-time cross-check loaded origin/main's module vs HEAD over the
+full corpus: **77/77 origin-rejected inputs still rejected, 0 newly accepted** (zero weakening);
+**14/14 new bare/unsafe command inputs rejected by HEAD** (13 are clean ACCEPTED(origin)->
+REJECTED(HEAD) flips, 1 was already rejected by the authority-by-value scan); **5/5 clean valid
+inputs still accepted**. Redaction parity: origin `to_dict()` leaks the secret, HEAD redacts +
+digest stable on the redacted body + instance not mutated.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|---|---|---|
+| 1 | CARD_TO_DICT_REDACTS_SECRETS | PASS | `to_dict()` returns `_redact_deep(asdict(self))`; tests assert no raw secret in scalar + nested list fields |
+| 2 | CARD_ID_FROM_REDACTED_CANONICAL_BODY | PASS | redacted dict is the canonical body; digest over `to_dict()` stable across two cards differing only in raw secret bytes |
+| 3 | BARE_COMMAND_STRING_REJECTED | PASS | `{"command":"rm -rf /"}` (+ cmd/exec/shell/script/argv/run_cmd, metachar-free, nested) rejected |
+| 4 | COMMAND_ARGV_OR_NULL_ONLY | PASS | null accepted; NON-EMPTY argv list accepted iff every element is a safe string; string/dict/unsafe-element/EMPTY-list rejected (code now matches docstring) |
+| 5 | AUTHORITY_DETECTION_NOT_WEAKENED | PASS | 77/77 origin-rejected still rejected; 0 newly accepted (battery + AUDIT cross-check) |
+| 6 | NO_RAW_ERROR_ECHO | PASS | command rejection names the rule class only; no raw command/secret in any message |
+| 7 | ADAPTER_FINDINGS_CLOSED_AT_CONTRACT_SOURCE | PASS | Findings A+B fixed in the contract; adapter inherits safety |
+| 8 | ASCII_CLEAN | PASS | 0 non-ASCII bytes in both edited files (fullwidth fixture via `\uXXXX`) |
+| 9 | NO_SKIP_XFAIL | PASS | no skip/xfail added |
+| 10 | FILE_SCOPE_EXACT | PASS | only `kanban_plugin_contract.py` + its tests + ModLogs changed |
+| 11 | NO_HERMES_OR_DB_OR_RUNTIME_WIRING | PASS | pure dataclasses/validators; no Hermes import, no Kanban DB, no runtime wiring |
+
+### Validation
+
+- `test_kanban_plugin_contract.py`: 251 passed (was 135; +116 net new, incl. +16 empty-argv-list
+  strengthening cases from the SENTINEL re-audit). Full agent suite: 948 passed in BOTH heavy
+  (`AI_OVERSEER_HEAVY_TESTS=1`) and CI mode -- no skip/xfail, no regression.
+
+### Follow-up
+
+The parked slice **KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1** will be rebased onto this once it
+lands (it relies on the now-guaranteed redacted `to_dict()` + argv-or-null command contract).
+
+## 2026-06-18 - Kanban Plugin Contract no-raw-echo for the #807 authority scanner (FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1)
+
+**Author**: 0102 (AUTHOR worker) | Commander: 012
+**WSP References**: WSP 22, WSP 50, WSP 84, WSP 97
+**Base**: `edbd90642` (origin/main; contains #810/#821/#823/#824/#826/#830)
+**Predecessor**: #830 launch_request slice DEFERRED the imported #807 authority-scanner echo.
+
+### Why
+
+The #830 launch_request no-raw-echo slice DEFERRED `kanban_plugin_contract.py::_scan_authority`
+(the #807 AUTHORITY BOUNDARY shared by `validate_launch_request` AND `validate_card_spec` /
+`validate_worker_task_spec` / `validate_evidence_packet`). Its error messages echoed raw
+user-controlled keys / values / `repr()` / nested trail. This slice COMPLETES the no-raw-echo
+invariant for the authority-scan path. MESSAGE TEXT ONLY -- the authority-detection LOGIC is
+byte-identical (proven mechanically).
+
+### Changed (message text only -- error sites in kanban_plugin_contract.py)
+
+`_scan_authority` (the #807 boundary):
+- non-string key: `f"{trail}: non-string key {key!r}"` -> `"non-string key rejected"`
+- non-printable key: `f"{trail}{key}: non-ASCII / non-printable key rejected"` -> `"non-ASCII / non-printable key rejected"`
+- verified=true: `f"{trail}{key}: verified=true is forbidden ..."` -> `"verified=true is forbidden (advisory-until-verified)"`
+- source_authority promotion: `f"{trail}{key}: '{value}' is a source_authority promotion ..."` -> `"source_authority promotion is forbidden (only monorepo_poc)"`
+- promotion flag: `f"{trail}{key}: promotion flag is forbidden"` -> `"promotion flag is forbidden"`
+- forbidden authority field (KEY presence): `f"{trail}{key}: forbidden authority field '{m}' (presence)"` -> `f"forbidden authority field present (class: {m})"` (KEEP `{m}`, DROP `{trail}{key}`)
+- shell-string command: `f"{trail}{key}: shell-string command is forbidden ..."` -> `"shell-string command is forbidden (argv-or-null only)"`
+- value-carried authority: `f"{trail}: value carries authority '{carried}': {node!r}"` -> `f"value carries a forbidden authority marker (class: {carried})"` (KEEP `{carried}`, DROP `{trail}`+`{node!r}`)
+
+`_check_path` (drop raw `value!r` and the offending char list, keep the fixed field label + rule):
+- `path/ref must be printable ASCII: {value!r}` -> `path/ref must be printable ASCII`
+- `absolute/UNC path forbidden: {value!r}` -> `absolute/UNC path forbidden`
+- `drive path forbidden: {value!r}` -> `drive path forbidden`
+- `path traversal '..' forbidden: {value!r}` -> `path traversal '..' forbidden`
+- `shell metacharacters in path/ref: {sorted(bad)}` -> `shell metacharacters in path/ref forbidden`
+
+`validate_card_spec`:
+- `risk_class '{data.get('risk_class')}' not in {...}` -> `risk_class not in allowed set {sorted(ALLOWED_RISK_CLASSES)}` (drop raw value; keep fixed allowed-set taxonomy)
+
+The fixed `{m}` / `{carried}` tokens come from the `_AUTHORITY_MARKERS` taxonomy (NOT user input) and
+are RETAINED (Addendum-B message locality). The user-controlled nested `trail` is still computed for
+recursion descent but is NEVER interpolated into a message.
+
+### Authority-detection parity proof (logic byte-identical)
+
+1. AST control-flow SKELETON parity: every string literal AND every f-string (`JoinedStr`) is
+   uniformly blanked, so an f-string -> plain-string message rewrite is invisible; ANY branch /
+   condition / call / marker-set change would change the hash. The blanked skeleton SHA-256 of the
+   current file equals the frozen origin/main baseline (`f2ee0e26...`). SELF-CONTAINED -- no
+   `git show` at runtime (the #830 shallow-CI lesson).
+2. NAMED-category authority battery (Addendum A): ~42 fixtures across the #807 corpus
+   (forbidden-authority keys by PRESENCE, ~13 normalized evasions incl. camelCase/separator/UPPER/
+   fullwidth, ~10 authority-by-value, source_authority promotion, verified=true nested,
+   shell-command keys, non-string/non-ASCII keys). Each fixture is mapped to its expected violation
+   CLASS by INPUT DESIGN; the battery asserts rejection WITHOUT parsing the human-readable message
+   (a weakened detector fails even though the message text changed).
+3. No-raw-echo battery: seeds sentinel leak tokens into keys, nested trails, values, and paths;
+   asserts no raw content / repr / control-byte appears in any produced message.
+
+### Downstream
+
+- `validate_launch_request` (#810) imports `_scan_authority`; its SOURCE is UNCHANGED. The #823
+  intake_transport caller-regression (real `SQLiteNonceStore` + spy) confirms an authority-bearing
+  payload is rejected, `IntakeResult.reason == "invalid_request"` (low-cardinality, no auth oracle),
+  no raw key/value/trail leaks into the result/repr/serialized dict, and a valid single-use invite
+  is NOT consumed. `validate_card_spec` / `validate_worker_task_spec` / `validate_evidence_packet`
+  still reject exactly the same inputs (outcome-only assertions; only error TEXT changed).
+- Two `test_foundup_launch_request.py` tests that pinned the #830-DEFERRED old #807 echo text were
+  updated (text-only; outcome assertions kept) to pin the now-LANDED safe rule-only messages.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | SCAN_AUTHORITY_ERRORS_NEVER_ECHO_RAW_KEY_VALUE_TRAIL | YES | `_scan_authority` 8 sites reworded; no-raw-echo battery seeds leak tokens into key/trail/value -> 0 leaks |
+| 2 | AUTHORITY_MARKER_CLASS_KEPT_RAW_DROPPED | YES | `forbidden authority field present (class: {m})` + `value carries a forbidden authority marker (class: {carried})`; `test_marker_class_token_is_taxonomy_not_user_input` |
+| 3 | AUTHORITY_DETECTION_LOGIC_BYTE_IDENTICAL | YES | AST skeleton SHA-256 == frozen origin/main baseline `f2ee0e26...`; NAMED-category battery rejects all fixtures |
+| 4 | FULL_AUTHORITY_AND_EVASION_BATTERY_PARITY | YES | ~42-fixture battery: presence keys, ~13 normalized evasions, ~10 by-value, source_authority/verified/promotion/shell/non-string/non-ASCII |
+| 5 | ERROR_CATEGORY_BASELINE_NOT_MESSAGE_DERIVED | YES | category mapped by INPUT DESIGN (`_AUTHORITY_BATTERY`); pass/fail = rejection, never message parse |
+| 6 | SAFE_MESSAGE_LOCALITY_PRESERVED | YES | `test_safe_message_locality_preserved` asserts distinct rule families, not one bland phrase |
+| 7 | DOWNSTREAM_VALIDATORS_OUTCOME_UNCHANGED | YES | `test_downstream_validators_reject_authority_payloads` + clean-shape accept (outcome-only) |
+| 8 | LAUNCH_REQUEST_SOURCE_UNCHANGED | YES | `git diff` launch_request.py empty; only its imported `_scan_authority` messages changed |
+| 9 | TRANSPORT_LOW_CARDINALITY_RECHECKED | YES | `test_kanban807_authority_body_low_cardinality_and_no_raw_echo`: reason == invalid_request, no leak |
+| 10 | VALID_INVITE_NOT_CONSUMED_BY_AUTHORITY_PAYLOAD | YES | `test_kanban807_authority_body_does_not_consume_valid_invite_sqlite_spy` (real SQLiteNonceStore + spy) |
+| 11 | AST_SKELETON_PARITY_SELF_CONTAINED_NO_GIT | YES | `test_authority_logic_skeleton_matches_origin_baseline` uses frozen hash, no runtime `git show` |
+| 12 | NESTED_TRAIL_NOT_ECHOED | YES | trail computed for descent only; never interpolated; battery seeds `_LEAK_TRAIL` -> 0 leaks |
+| 13 | REPR_VALUE_NOT_ECHOED | YES | all `{value!r}`/`{node!r}`/`{key!r}` removed; `_assert_no_leak` checks `repr(n) not in blob` |
+| 14 | CONTROL_BYTES_NOT_IN_ERRORS | YES | `_assert_no_leak` asserts no `ord(c) < 32 or == 127` in any produced error |
+| 15 | NO_OTHER_807_SLICE_DRIFT | YES | `git status` shows only kanban_plugin_contract.py + 3 test files; scope-guard sources empty diff |
+| 16 | ASCII_CLEAN | YES | byte-check 0 non-ASCII on all 4 edited files; fixtures via `chr()`/`\uXXXX` |
+| 17 | NO_SKIP_XFAIL | YES | grep: no `pytest.skip`/`xfail`/`skipif` in edits; all suites fully run |
+| 18 | FILE_SCOPE_EXACT | YES | kanban_plugin_contract.py + test_kanban_plugin_contract.py + test_intake_transport.py + test_foundup_launch_request.py |
+
+## 2026-06-13 - Kanban Plugin Contract (WRE-side typed seam) (HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1)
+
+**Author**: 0102 (Worker-Lane A) | Commander: 012
+**WSP References**: WSP 11, WSP 22, WSP 50, WSP 84, WSP 97
+**Base**: `ed3ad2066` (origin/main after #801)
+**Predecessors**: #804 (plugin contract), #806 (launch flow), #805 (Option D), #803 (surface-not-authority)
+
+### Added
+
+- **kanban_plugin_contract.py** -- pure, execution-free WRE-side typed seam implementing the three #804/#806
+  shapes: `KanbanCardSpec` (WRE->Kanban), `WorkerTaskSpec` (worker receives), `WreEvidencePacket`
+  (Kanban->WRE, ADVISORY) + `ArtifactRef`. Validators `validate_card_spec` / `validate_worker_task_spec` /
+  `validate_evidence_packet` accept a typed shape OR a hostile inbound dict.
+- Forbidden AUTHORITY cannot ride through any shape: a unified recursive scan normalizes keys (NFKC +
+  camel-split + casefold + separator->underscore, defeating gatePassed/gate-passed/GATE_PASSED/fullwidth)
+  and rejects authority-marker keys by PRESENCE, AND scans every string VALUE for authority markers
+  (gate-pass / merge / land / repo-create / dao / payout / cabr / real-execution / source_authority
+  promotion). Path/ref fields are hygiene-checked (printable ASCII, repo-relative, reject absolute/drive/
+  UNC/traversal/control-chars/shell-metachars). Commands smuggled into command-named keys are rejected.
+- `WreEvidencePacket.verified` is advisory-only: always False at construction; constructing/ingesting
+  verified=true is rejected (nested too). The WRE-side verifier transition is deferred to the named slice
+  WRE_EVIDENCE_PACKET_VERIFICATION_TRANSITION_PHASE1.
+- Secret VALUES are redacted before storage across ALL string-bearing fields (free-text + pr_url/head_sha/
+  tests_run/wsp97_rows/changed_files; defense-in-depth from the SENTINEL observation) -- the #768 policy,
+  reimplemented locally so the module imports no ai_overseer runtime. Deterministic `to_dict()` serialization (json-safe, stable, verified=False, no
+  forbidden keys/values).
+- Boundary: imports nothing from Hermes/Kanban/OpenClaw/WRE-consumer/AI-Overseer; no subprocess/network/
+  file-write/Kanban-DB/worker-spawn (AST-tested). No second orchestrator. Beside context_bundle_builder.py,
+  foundup_manifest_validator.py, module_path_resolution.py.
 
 ## 2026-06-12 - WRE ContextBundle Dry-Run Consumer Phase 1 (first consumer adopts #775 bundle as trusted input)
 

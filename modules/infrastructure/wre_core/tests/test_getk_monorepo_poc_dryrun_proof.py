@@ -53,12 +53,13 @@ def _dry_run_branch_and_isolated_workspace(monkeypatch):
     monkeypatch.setattr(hje, "_executor_singleton", None, raising=False)
 
 
-def _intent(foundup_id):
+def _intent(foundup_id, *, authorized: bool = True):
     return types.SimpleNamespace(
         raw_message=f"validate foundup {foundup_id} --dry-run",
         sender="tenant_w6",
         session_key="w6_getk_session",
         channel="w6_getk_channel",
+        is_authorized_commander=authorized,
     )
 
 
@@ -88,7 +89,14 @@ class TestGetKMonorepoPoCDryRunProof:
                     side_effect=AssertionError("real delegate must not run"),
                 ) as m_delegate:
 
-            # REAL create entry over the OpenClaw queue.
+            # Fail-closed guard: unauthenticated / non-commander intent queues nothing.
+            denied = orchestrator.dispatch_foundup(
+                None, _intent(GETK_FOUNDUP_ID, authorized=False)
+            )
+            assert "FoundUp mutation denied" in denied
+            assert len(orchestrator.get_job_queue()) == 0
+
+            # REAL create entry over the OpenClaw queue (commander-authorized).
             response = orchestrator.dispatch_foundup(None, _intent(GETK_FOUNDUP_ID))
             assert "FoundUpJob created" in response
             queue = orchestrator.get_job_queue()

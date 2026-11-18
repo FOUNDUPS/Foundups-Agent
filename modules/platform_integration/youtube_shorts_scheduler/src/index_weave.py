@@ -22,6 +22,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from .content_generator import validated_video_evidence
+
 logger = logging.getLogger(__name__)
 
 
@@ -534,6 +536,114 @@ def weave_description(
         desc = f"{desc}\n\n{index_block}".rstrip()
 
     return desc
+
+
+@dataclass(frozen=True)
+class MetadataContext:
+    """
+    Read-only context computed from an EXISTING index artifact.
+
+    This carries the woven title/description that the scheduling/publish path
+    applies via the live DOM. It is produced WITHOUT any live YouTube mutation
+    and WITHOUT creating/refreshing the index artifact (no ensure_index_json,
+    no save_index_json, no create_stub_index_json, no GeminiVideoAnalyzer).
+
+    A None return from build_index_metadata_context() means "artifact missing ->
+    skip enhancement" (NOT "index now").
+    """
+    new_title: str
+    new_description: str
+    used_index: bool
+
+
+def build_index_metadata_context(
+    *,
+    channel_key: str,
+    video_id: str,
+    original_title: str,
+    base_description: str,
+    inform_title: bool = False,
+    enhance_description: bool = True,
+    base_dir: Optional[Path] = None,
+) -> Optional[MetadataContext]:
+    """
+    PURE, read-only context builder (Phase 1 decoupling).
+
+    Reads an EXISTING index artifact and composes the woven title/description.
+    It NEVER touches the DOM/driver (takes no dom argument), NEVER creates or
+    refreshes the artifact, and NEVER imports/instantiates GeminiVideoAnalyzer.
+
+    Returns:
+        MetadataContext when an artifact is present (used_index=True), carrying
+        the composed new_title/new_description.
+        None when the artifact is MISSING (load_index_json returned None) -> the
+        caller treats this as "skip enhancement", NOT "index now".
+
+    Composition mirrors the scheduling read path exactly so the live write bytes
+    are unchanged for the artifact-present case:
+        - optional index-informed title (inform_title)
+        - optional human-facing context injection (enhance_description)
+        - topic hashtags + Digital Twin index block woven into the description
+    """
+    idx = load_index_json(channel_key=channel_key, video_id=video_id, base_dir=base_dir)
+    if not isinstance(idx, dict):
+        # Artifact missing -> caller skips enhancement (does NOT index now).
+        return None
+
+    evidence = validated_video_evidence(idx, video_id)
+    if evidence is None:
+        logger.info("[INDEX-WEAVE] Metadata evidence missing or mismatched for %s", video_id)
+        return None
+
+    new_title = original_title
+    if inform_title:
+        try:
+            from .content_generator import generate_clickbait_title_from_index
+
+            new_title = generate_clickbait_title_from_index(
+                original_title=original_title,
+                index_json=idx,
+                video_id=video_id,
+            )
+        except Exception as exc:
+            logger.debug("[INDEX-WEAVE] Index-informed title skipped: %s", exc)
+            new_title = original_title
+
+    if not enhance_description:
+        return MetadataContext(new_title=new_title, new_description=base_description, used_index=True)
+
+    enhanced_base = base_description
+    head, marker, tail = enhanced_base.rpartition("\n\nM2M_CONTEXT\n")
+    if marker:
+        try:
+            old = json.loads(tail)
+            if isinstance(old, dict) and old.get("video_id") == video_id and "modality" in old:
+                enhanced_base = head
+        except (ValueError, TypeError):
+            pass
+    if enhance_description:
+        context = f"Video context ({evidence['modality']}):\n" + evidence["text"][:1000]
+        enhanced_base = inject_context_into_description(
+            base_description=enhanced_base,
+            context_block=context,
+        )
+
+    # Publish only provenance for the inspected summary, not unrelated template
+    # topics or title-derived key points. Summary evidence is not a transcript.
+    block = "M2M_CONTEXT\n" + json.dumps(
+        {key: value for key, value in evidence.items() if key != "text"},
+        ensure_ascii=False, separators=(",", ":"),
+    )
+    new_description = f"{enhanced_base.rstrip()}\n\n{block}".strip()
+    if len(new_description) > 5000 or len(new_title) > 100:
+        logger.info("[INDEX-WEAVE] Metadata exceeds platform limits for %s", video_id)
+        return None
+
+    return MetadataContext(
+        new_title=new_title,
+        new_description=new_description,
+        used_index=True,
+    )
 
 
 def update_index_after_schedule(

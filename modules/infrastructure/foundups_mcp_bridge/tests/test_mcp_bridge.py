@@ -18,12 +18,16 @@ from modules.infrastructure.foundups_mcp_bridge.src import (
     error_response,
     disabled_response,
 )
+from .repository_analysis_cache_support import (
+    _bounded_repository_analysis_scans,
+    impact_call,
+)
 
 
 # ==================== Fixtures ====================
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def bridge():
     """Create bridge with actual repo root."""
     return FoundUpsMCPBridge()
@@ -359,10 +363,9 @@ class TestDiffTools:
 class TestImpactScoring:
     """Test impact prediction tools."""
 
-    def test_impact_score_module_input(self, bridge):
+    def test_impact_score_module_input(self, impact_call):
         """get_change_impact_score handles module input."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="module",
             target="shared_utilities",
         )
@@ -373,10 +376,9 @@ class TestImpactScoring:
         assert "test_coverage" in result["data"]
         assert "confidence" in result["data"]
 
-    def test_impact_score_file_input(self, bridge):
+    def test_impact_score_file_input(self, impact_call):
         """get_change_impact_score handles file input."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="file",
             target="modules/infrastructure/foundups_mcp_bridge/src/bridge_server.py",
         )
@@ -385,10 +387,9 @@ class TestImpactScoring:
         assert "risk_level" in result["data"]
         assert "prior_failures" in result["data"]
 
-    def test_impact_score_commit_range_input(self, bridge):
+    def test_impact_score_commit_range_input(self, impact_call):
         """get_change_impact_score handles commit_range input."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="commit_range",
             target="HEAD~3..HEAD",
         )
@@ -396,20 +397,18 @@ class TestImpactScoring:
         assert "affected_modules" in result["data"]
         assert "risk_level" in result["data"]
 
-    def test_impact_score_invalid_target_type(self, bridge):
+    def test_impact_score_invalid_target_type(self, impact_call):
         """get_change_impact_score rejects invalid target_type."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="invalid",
             target="test",
         )
         assert result["status"] == "error"
         assert "invalid" in result["error"].lower()
 
-    def test_impact_score_nonexistent_module(self, bridge):
+    def test_impact_score_nonexistent_module(self, impact_call):
         """get_change_impact_score handles nonexistent module."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="module",
             target="nonexistent_module_xyz",
         )
@@ -417,10 +416,9 @@ class TestImpactScoring:
         assert result["status"] == "ok"
         assert result["data"]["risk_level"] == "low"
 
-    def test_impact_score_critical_module(self, bridge):
+    def test_impact_score_critical_module(self, impact_call):
         """get_change_impact_score flags critical modules."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="module",
             target="shared_utilities",
         )
@@ -432,10 +430,9 @@ class TestImpactScoring:
             if shared:
                 assert shared["is_critical"] is True
 
-    def test_impact_score_test_coverage_gaps(self, bridge):
+    def test_impact_score_test_coverage_gaps(self, impact_call):
         """get_change_impact_score reports test coverage."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="module",
             target="ai_overseer",
         )
@@ -446,10 +443,9 @@ class TestImpactScoring:
         assert "gaps" in coverage
         assert isinstance(coverage["gaps"], list)
 
-    def test_impact_score_confidence_factors(self, bridge):
+    def test_impact_score_confidence_factors(self, impact_call):
         """get_change_impact_score returns confidence factors."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="module",
             target="foundups_mcp_bridge",
         )
@@ -460,10 +456,9 @@ class TestImpactScoring:
         # Confidence should be between 0 and 1
         assert 0 <= result["data"]["confidence"] <= 1
 
-    def test_impact_score_no_prior_failures_reduces_confidence(self, bridge):
+    def test_impact_score_no_prior_failures_reduces_confidence(self, impact_call):
         """Confidence is reduced when no prior failure data."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="module",
             target="foundups_mcp_bridge",
         )
@@ -473,10 +468,9 @@ class TestImpactScoring:
         # Should mention missing data or HoloIndex
         assert any("failure" in f.lower() or "holoindex" in f.lower() for f in factors)
 
-    def test_impact_score_risk_factors(self, bridge):
+    def test_impact_score_risk_factors(self, impact_call):
         """get_change_impact_score explains risk factors."""
-        result = bridge.call_tool(
-            "get_change_impact_score",
+        result = impact_call(
             target_type="module",
             target="ai_overseer",
         )
@@ -975,10 +969,10 @@ class TestS2HoloSearchAnnexAConformance:
 
     def test_foundup_id_accepted_and_echoed(self, bridge):
         result = bridge.call_tool(
-            "holo_search", query="WSP", foundup_id="gotjunk", limit=3
+            "holo_search", query="WSP", foundup_id="gotjunk_001", limit=3
         )
         assert result["status"] == "ok"
-        assert result["data"]["foundup_id"] == "gotjunk"
+        assert result["data"]["foundup_id"] == "gotjunk_001"
 
     def test_include_shared_with_foundup_id_echoed(self, bridge):
         """include_shared echoes the request value when foundup_id is set."""
@@ -1114,7 +1108,7 @@ class TestS2HoloSearchAnnexAConformance:
     def test_foundup_id_surfaces_unenforced_warning(self, bridge):
         """Passing foundup_id surfaces a truthful 'not yet enforced' warning."""
         result = bridge.call_tool(
-            "holo_search", query="WSP", foundup_id="gotjunk", limit=3
+            "holo_search", query="WSP", foundup_id="gotjunk_001", limit=3
         )
         warnings = result["data"]["metadata"]["warnings"]
         assert any(
@@ -1259,11 +1253,11 @@ class TestS64FederationScopeParity:
         result = bridge.call_tool(
             "holo_search",
             query="WSP",
-            foundup_id="gotjunk",
+            foundup_id="gotjunk_001",
             include_shared=False,
             limit=3,
         )
-        assert result["data"]["foundup_id"] == "gotjunk"
+        assert result["data"]["foundup_id"] == "gotjunk_001"
         assert result["data"]["include_shared"] is False
         warnings = result["data"]["metadata"]["warnings"]
         assert federation_scope_warning("S2") in warnings

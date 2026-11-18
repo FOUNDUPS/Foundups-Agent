@@ -23,6 +23,8 @@ The popup uses the SAME ytcp-visibility-scheduler > ytcp-datetime-picker compone
 as the individual video edit page, so set_schedule_date/set_schedule_time reuse works.
 """
 
+from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
+
 import asyncio
 import logging
 import os
@@ -249,6 +251,7 @@ class ContentPageScheduler:
         if not config:
             logger.error(f"[CPS] Unknown channel: {channel_key}")
             return False
+        self._policy_channel_id = config["id"]
 
         # Navigate to base Studio URL (NO filter params — they cause blank screen)
         base_url = f"https://studio.youtube.com/channel/{config['id']}/videos/{content_type}"
@@ -266,19 +269,22 @@ class ContentPageScheduler:
 
             # Wait for video table to load
             WebDriverWait(self.driver, 15).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "ytcp-video-row"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, "ytcp-video-row, ytcp-video-section-content"))
             )
-            logger.info(f"[CPS] Content page loaded — video rows visible")
+            logger.info("[CPS] Content list mounted; inventory readiness still requires qualified readback")
 
             # Apply visibility filter via sidebar UI (if specified)
             if visibility:
                 if not self._apply_visibility_filter_via_ui(visibility):
-                    logger.warning(f"[CPS] Filter '{visibility}' failed — continuing unfiltered")
+                    logger.warning(f"[CPS] Filter '{visibility}' failed — refusing unfiltered result")
+                    return False
 
             return True
         except TimeoutException:
             logger.warning(f"[CPS] Content page load timeout — no video rows found")
             return False
+        except VerificationHandoff:
+            raise
         except Exception as e:
             logger.error(f"[CPS] Navigation failed: {e}")
             return False
@@ -306,6 +312,8 @@ class ContentPageScheduler:
 
             logger.debug(f"[CPS] Tab '{tab_label}' not found — may already be active")
             return False
+        except VerificationHandoff:
+            raise
         except Exception as e:
             logger.debug(f"[CPS] Tab switch failed: {e}")
             return False
@@ -330,6 +338,15 @@ class ContentPageScheduler:
         if not checkbox_label:
             logger.warning(f"[CPS] Unknown visibility filter: {visibility}")
             return False
+
+        if visibility.upper() == "SCHEDULED":
+            # Reuse the existing chip-bar Skillz route, not the obsolete sidebar
+            # selector. A click acknowledgement alone is not applied-filter proof.
+            from ..skillz.shorts_live_schedule_signal.executor import _apply_has_schedule_filter
+
+            if self.dom.verify_visibility_filter("SCHEDULED"):
+                return True
+            return _apply_has_schedule_filter(self.driver) and self.dom.verify_visibility_filter("SCHEDULED")
 
         try:
             # Step 1: Click filter icon to open dropdown
@@ -399,14 +416,17 @@ class ContentPageScheduler:
 
             # Verify rows reloaded
             WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "ytcp-video-row"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, "ytcp-video-row, ytcp-video-section-content"))
             )
-            logger.info(f"[CPS] Visibility filter '{visibility}' ({checkbox_label}) applied")
-            return True
+            verified = self.dom.verify_visibility_filter(visibility)
+            logger.info(f"[CPS] Visibility filter '{visibility}' ({checkbox_label}) verified={verified}")
+            return verified
 
         except TimeoutException:
             logger.warning(f"[CPS] Timeout applying filter '{visibility}'")
             return False
+        except VerificationHandoff:
+            raise
         except Exception as e:
             logger.warning(f"[CPS] Filter application failed: {e}")
             return False
@@ -449,6 +469,8 @@ class ContentPageScheduler:
                 try:
                     vis_span = row.find_element(By.CSS_SELECTOR, self.sel.VISIBILITY_SPAN_CSS)
                     visibility = vis_span.text.strip().capitalize()
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     # Fallback: search all spans
                     try:
@@ -458,6 +480,8 @@ class ContentPageScheduler:
                             if text in ("unlisted", "private", "public", "scheduled", "draft"):
                                 visibility = text.capitalize()
                                 break
+                    except VerificationHandoff:
+                        raise
                     except Exception:
                         pass
 
@@ -466,6 +490,8 @@ class ContentPageScheduler:
                 try:
                     date_el = row.find_element(By.CSS_SELECTOR, self.sel.VIDEO_DATE_CELL_CSS)
                     date_text = date_el.text.strip().split("\n")[0]  # First line is date, second is "Uploaded"
+                except VerificationHandoff:
+                    raise
                 except Exception:
                     pass
 
@@ -478,6 +504,8 @@ class ContentPageScheduler:
                 })
             except StaleElementReferenceException:
                 continue
+            except VerificationHandoff:
+                raise
             except Exception as e:
                 logger.debug(f"[CPS] Row parse error: {e}")
 
@@ -495,6 +523,14 @@ class ContentPageScheduler:
         Returns:
             True if popup opened
         """
+        from .video_policy import inline_identity, scheduling_policy
+        channel_id, video_id = inline_identity(self.driver, row_element,
+            channel_id=getattr(self, "_policy_channel_id", None),
+            video_id=getattr(self, "_policy_expected_video", None))
+        scheduling_policy(channel_id, video_id, getattr(self.dom, "_policy_cycle_attempts", 0))
+        self._policy_row = row_element
+        self._policy_video_id = video_id
+        self._policy_submission_started = False
         try:
             time_module.sleep(self._pre_click_delay)
 
@@ -632,6 +668,10 @@ class ContentPageScheduler:
         Returns:
             True if button clicked
         """
+        from .video_policy import submit_inline, VideoPolicyBlocked
+        def submit(callback):
+            return submit_inline(self, getattr(self, "_policy_row", None),
+                                 getattr(self, "_policy_video_id", None), callback)
         try:
             pre_save_delay = float(os.getenv("YT_CPS_PRE_SAVE_DELAY", "1.0"))
             time_module.sleep(pre_save_delay)
@@ -643,7 +683,7 @@ class ContentPageScheduler:
                         (By.CSS_SELECTOR, self.sel.POPUP_SAVE_BUTTON_CSS)
                     )
                 )
-                self.dom.safe_click(btn)
+                submit(btn.click)
                 time_module.sleep(1.0)
                 logger.debug("[CPS] Popup schedule button clicked (CSS)")
                 return True
@@ -657,7 +697,7 @@ class ContentPageScheduler:
                         (By.XPATH, self.sel.POPUP_SAVE_BUTTON_XPATH)
                     )
                 )
-                self.dom.safe_click(btn)
+                submit(btn.click)
                 time_module.sleep(1.0)
                 logger.debug("[CPS] Popup schedule button clicked (XPath)")
                 return True
@@ -671,10 +711,12 @@ class ContentPageScheduler:
                     "//ytcp-video-visibility-edit-popup"
                     "//button[.//span[contains(text(),'Schedule') or contains(text(),'Save')]]"
                 )
-                self.driver.execute_script("arguments[0].click();", btn)
+                submit(lambda: self.driver.execute_script("arguments[0].click();", btn))
                 time_module.sleep(1.0)
                 logger.debug("[CPS] Popup schedule button clicked (JS fallback)")
                 return True
+            except VideoPolicyBlocked:
+                raise
             except Exception:
                 pass
 
@@ -682,6 +724,8 @@ class ContentPageScheduler:
             return False
 
         except Exception as e:
+            if isinstance(e, VideoPolicyBlocked):
+                raise
             logger.error(f"[CPS] Popup schedule click failed: {e}")
             return False
 
@@ -694,7 +738,7 @@ class ContentPageScheduler:
         except Exception:
             pass
 
-    def reschedule_row_inline(self, row_element, new_date: str, new_time: str) -> bool:
+    def reschedule_row_inline(self, row_element, new_date: str, new_time: str, *, video_id=None) -> bool:
         """
         Reschedule an already-scheduled video via the inline popup (no edit page nav).
 
@@ -717,6 +761,9 @@ class ContentPageScheduler:
         Returns:
             True if rescheduled successfully
         """
+        self._policy_expected_video = video_id
+        self._policy_requested_schedule = {"date": new_date, "time": new_time,
+            "timezone": getattr(self, "_policy_timezone", None), "visibility": "scheduled"}
         try:
             # Step 1: Open the popup
             if not self._click_visibility_edit_on_row(row_element):
@@ -778,63 +825,33 @@ class ContentPageScheduler:
         time_str: str,
         video_id: str = "unknown",
     ) -> bool:
+        """Use the existing detail owner so title, description and Audience are observable.
+
+        This is the initial route, never a fallback after a popup submission.
+        The old inline button remains fail-closed without a complete detail audit.
         """
-        Schedule a single video from its content page row.
-
-        Full flow:
-        1. Click visibility edit triangle on the row
-        2. Expand schedule section in popup
-        3. Set date
-        4. Set time
-        5. Click "Schedule" button in popup
-
-        Args:
-            row_element: Selenium WebElement for the ytcp-video-row
-            date_str: Date like "Feb 5, 2026"
-            time_str: Time like "5:15 PM"
-            video_id: For logging purposes
-
-        Returns:
-            True if all steps succeeded
-        """
-        workflow_start = time_module.time()
-        logger.info(f"[CPS] Scheduling {video_id} → {date_str} @ {time_str}")
-
-        steps = [
-            ("click_visibility_edit", lambda: self._click_visibility_edit_on_row(row_element)),
-            ("expand_schedule", lambda: self._expand_schedule_in_popup()),
-            ("set_date", lambda: self._set_date_in_popup(date_str)),
-            ("set_time", lambda: self._set_time_in_popup(time_str)),
-            ("click_schedule", lambda: self._click_popup_schedule_button()),
-        ]
-
-        step_times = []
-        for step_name, fn in steps:
-            step_start = time_module.time()
+        from .video_policy import inline_identity, VideoPolicyBlocked
+        try:
+            if getattr(self, "_policy_submission_started", False):
+                raise VideoPolicyBlocked("inline_submission_outcome_unknown")
+            channel_id, current = inline_identity(
+                self.driver, row_element, channel_id=getattr(self, "_policy_channel_id", None),
+                video_id=video_id)
+            # A pending inline draft must be resolved by its owner, not discarded.
+            if self.driver.find_elements(By.CSS_SELECTOR, "ytcp-video-visibility-edit-popup[opened]"):
+                raise VideoPolicyBlocked("inline_draft_open")
+            self.dom.navigate_to_video(current)
+            session = self.dom.begin_policy_edit(channel_id, current)
+            if self.dom.read_edit_page_visibility() not in ("unlisted", "private"):
+                raise VideoPolicyBlocked("detail_visibility_not_schedulable")
+            self.dom._policy_timezone = getattr(self, "_policy_timezone", None)
             try:
-                result = fn()
-                elapsed = time_module.time() - step_start
-                step_times.append((step_name, elapsed))
-
-                if result is False:
-                    logger.error(f"[CPS] Step '{step_name}' returned False for {video_id}")
-                    self._dismiss_popup()
-                    return False
-
-                logger.debug(f"[CPS] Step '{step_name}' OK ({elapsed:.1f}s)")
-            except Exception as e:
-                elapsed = time_module.time() - step_start
-                logger.error(
-                    f"[CPS] Step '{step_name}' failed for {video_id}: "
-                    f"{type(e).__name__}: {e} ({elapsed:.1f}s)"
-                )
-                self._dismiss_popup()
-                return False
-
-        total_time = time_module.time() - workflow_start
-        timing = ", ".join(f"{n}:{t:.1f}s" for n, t in step_times)
-        logger.info(f"[CPS] Scheduled {video_id} → {date_str} {time_str} in {total_time:.1f}s [{timing}]")
-        return True
+                return self.dom.schedule_video(date_str, time_str)
+            finally:
+                self._policy_submission_started = getattr(session, "submitting", False) is True
+        except VideoPolicyBlocked as exc:
+            logger.warning("[CPS] Detail scheduling refused: %s", exc)
+            return False
 
     async def schedule_all_visible(
         self,
@@ -843,111 +860,58 @@ class ContentPageScheduler:
         max_per_day: int = 8,
         max_videos: int = 9999,
         stop_event=None,
+        channel_tz: Optional[str] = None,
     ) -> Dict:
         """
         Schedule all visible unlisted videos on the current content page.
 
         Args:
             tracker: ScheduleTracker instance for slot management
-            time_slots: List of base time slots like ["12:00 AM", "3:00 AM", ...]
+            time_slots: Canonical US-Eastern (ET) peak slots, e.g.
+                ["08:00", "12:00", "20:00"]. These describe the desired
+                US-audience publish time in ET (also accepts 12h "8:00 AM").
             max_per_day: Max videos per day
             max_videos: Max total videos to schedule
             stop_event: Optional threading.Event for cooperative abort
+            channel_tz: IANA tz of the channel's Studio account
+                (e.g. "Asia/Tokyo", "America/New_York"). When provided, each ET
+                base slot is converted (DST-aware) to that account's local
+                wall-clock before the bare time is typed into Studio, so
+                long-form publishes at the US-ET peak for EVERY channel -- the
+                same contract the shorts path uses (#847). When None the slot is
+                typed as-is (backwards compatible).
 
         Returns:
             Dict with scheduled count, errors, video details
         """
-        results = {
-            "total_scheduled": 0,
-            "total_errors": 0,
-            "total_skipped": 0,
-            "scheduled": [],
-            "errors": [],
-        }
-
+        # The inline fallback shares the same calendar/claim owner as detail scheduling.
+        # Long-form lists are not silently reinterpreted as Shorts.
+        from urllib.parse import urlsplit
+        from .channel_config import CHANNELS
+        from .scheduler import YouTubeShortsScheduler
+        blocked = {"total_scheduled": 0, "total_errors": 1, "scheduled": [],
+                   "status": "blocked", "reason": "calendar_detail_handoff_unavailable"}
+        keys = [key for key, cfg in CHANNELS.items() if cfg.get("id") == tracker.channel_id]
+        if len(keys) != 1 or urlsplit(self.driver.current_url).path != f"/channel/{tracker.channel_id}/videos/short":
+            return blocked
+        if stop_event is not None and stop_event.is_set():
+            return {**blocked, "reason": "stop_requested"}
         rows = self.get_video_rows_with_data()
-        unlisted_rows = [r for r in rows if r["visibility"].lower() in ("unlisted", "private")]
-
-        if not unlisted_rows:
-            logger.info("[CPS] No unlisted/private videos found on content page")
-            return results
-
-        logger.info(f"[CPS] Found {len(unlisted_rows)} schedulable videos")
-
-        for i, row_data in enumerate(unlisted_rows):
-            if i >= max_videos:
-                logger.info(f"[CPS] Reached max_videos limit ({max_videos})")
-                break
-
-            if stop_event is not None and stop_event.is_set():
-                logger.info("[CPS] Stop signal received — aborting")
-                break
-
-            video_id = row_data["video_id"]
-            title = row_data["title"]
-
-            # Skip if already tracked
-            if tracker.is_video_scheduled(video_id):
-                logger.debug(f"[CPS] Skipping {video_id} — already scheduled in tracker")
-                results["total_skipped"] += 1
-                continue
-
-            # Get next available slot
-            slot = tracker.get_next_available_slot(time_slots, max_per_day)
-            if slot is None:
-                logger.warning("[CPS] No more available slots — stopping")
-                break
-
-            date_str, time_str = slot
-
-            # Schedule it
-            try:
-                success = await self.schedule_video_from_row(
-                    row_element=row_data["row_element"],
-                    date_str=date_str,
-                    time_str=time_str,
-                    video_id=video_id,
-                )
-
-                if success:
-                    tracker.increment(date_str, video_id)
-                    results["total_scheduled"] += 1
-                    results["scheduled"].append({
-                        "video_id": video_id,
-                        "title": title,
-                        "date": date_str,
-                        "time": time_str,
-                    })
-                    logger.info(f"[CPS] [{i+1}/{len(unlisted_rows)}] {video_id} → {date_str} {time_str}")
-                else:
-                    results["total_errors"] += 1
-                    results["errors"].append({"video_id": video_id, "reason": "step_failed"})
-
-            except Exception as e:
-                logger.error(f"[CPS] Error scheduling {video_id}: {e}")
-                results["total_errors"] += 1
-                results["errors"].append({"video_id": video_id, "reason": str(e)})
-
-            # Human delay between videos
-            delay = self.dom.human_delay(2.0, 1.0)
-            await asyncio.sleep(delay)
-
-            # Refresh page after each successful schedule (row disappears)
-            if results["total_scheduled"] > 0 and results["total_scheduled"] % 3 == 0:
-                self.refresh_page()
-                # Re-fetch rows after refresh (stale elements)
-                rows = self.get_video_rows_with_data()
-                unlisted_rows = [r for r in rows if r["visibility"].lower() in ("unlisted", "private")]
-                # Adjust index (rows changed after refresh)
-                break  # Re-enter loop from schedule_all_visible caller if needed
-
-        return results
+        ids = [r["video_id"] for r in rows if r.get("visibility", "").lower() == "unlisted"]
+        if not ids:
+            return {**blocked, "total_errors": 0, "reason": "no_unlisted_shorts"}
+        owner = YouTubeShortsScheduler(keys[0])
+        owner.driver, owner.dom, owner.tracker = self.driver, self.dom, tracker
+        owner.request_driver, owner.stop_event = self.driver, stop_event
+        owner.max_per_day = min(owner.max_per_day, max_per_day)
+        # A stale row snapshot authorizes only these IDs, never an entire backlog.
+        return await owner.run_scheduling_cycle(video_ids=list(dict.fromkeys(ids)), max_videos=max_videos)
 
     # ============================================================
     # CALENDAR AUDIT
     # ============================================================
 
-    def audit_calendar(self, channel_key: str, max_per_day: int = 3) -> Dict:
+    def audit_calendar(self, channel_key: str, max_per_day: Optional[int] = None) -> Dict:
         """
         Audit the scheduling calendar for a channel.
 
@@ -963,33 +927,24 @@ class ContentPageScheduler:
         Returns:
             Dict with conflicts, gaps, recommendations
         """
+        from .schedule_tracker import channel_daily_cap
+        from .channel_config import get_channel_config
+        from .schedule_inventory import failed_inventory, qualified_inventory
+
+        max_per_day = channel_daily_cap(channel_key, max_per_day)
         logger.info(f"[CPS-AUDIT] Auditing calendar for {channel_key}")
 
-        # Navigate to scheduled shorts
-        if not self.navigate_to_scheduled(channel_key):
-            return {"error": "navigation_failed", "conflicts": [], "gaps": []}
-
-        # Collect all scheduled videos across pages
-        all_scheduled = []
-        page = 1
-        while True:
-            try:
-                self.dom.set_page_size(50)
-            except Exception:
-                pass
-
-            videos = self.dom.get_scheduled_videos_detailed()
-            all_scheduled.extend(videos)
-            logger.info(f"[CPS-AUDIT] Page {page}: {len(videos)} scheduled videos")
-
-            if self.dom.has_next_page():
-                self.dom.click_next_page()
-                time_module.sleep(2)
-                page += 1
-            else:
-                break
-
-        logger.info(f"[CPS-AUDIT] Total scheduled: {len(all_scheduled)} videos")
+        config = get_channel_config(channel_key)
+        channel_id = config["id"] if config else ""
+        inventory = failed_inventory(channel_id, "navigation_failed")
+        if config and self.navigate_to_scheduled(channel_key):
+            inventory = self.dom.read_scheduled_inventory(channel_id)
+        complete = qualified_inventory(inventory, channel_id)
+        inventory_status = "complete" if complete else (inventory["status"] if inventory["status"] in {"partial", "failed"} else "failed")
+        all_scheduled = inventory["videos"]
+        logger.info("[CPS-AUDIT] status=%s observed=%s total=%s rows=%s unparsed=%s",
+                    inventory["status"], len(all_scheduled), inventory["total_scheduled"],
+                    inventory["rows_seen"], len(inventory["unparsed_rows"]))
 
         # Analyze: group by date+time
         slot_map = defaultdict(list)  # "Feb 5, 2026 3:00 PM" -> [video1, video2]
@@ -1029,27 +984,34 @@ class ContentPageScheduler:
 
         # Build recommendations
         recommendations = []
-        if conflicts:
+        if complete and conflicts:
             recommendations.append(
                 f"CONFLICT: {len(conflicts)} time slots have multiple videos. "
                 "Reschedule to spread them out."
             )
-        if heavy_days:
+        if complete and heavy_days:
             total_excess = sum(d["excess"] for d in heavy_days)
             recommendations.append(
                 f"CLUSTERING: {len(heavy_days)} days exceed {max_per_day}/day limit "
                 f"({total_excess} excess videos need redistribution)."
             )
-        if not conflicts and not heavy_days:
+        if not complete:
+            recommendations.append("Calendar read incomplete; total unknown. No automatic calendar repair is qualified.")
+        elif not conflicts and not heavy_days:
             recommendations.append("Calendar looks clean — no conflicts or clustering detected.")
 
         audit_result = {
             "channel": channel_key,
-            "total_scheduled": len(all_scheduled),
+            "status": inventory_status,
+            "inventory": inventory,
+            "total_scheduled": inventory["total_scheduled"] if complete else None,
+            "observed_scheduled_count": len(all_scheduled),
             "unique_dates": len(date_map),
             "max_per_day": max_per_day,
-            "conflicts": conflicts,
-            "heavy_days": heavy_days,
+            "conflicts": conflicts if complete else [],
+            "heavy_days": heavy_days if complete else [],
+            "observed_conflicts": conflicts,
+            "observed_heavy_days": heavy_days,
             "recommendations": recommendations,
             "date_map": {d: len(v) for d, v in sorted(date_map.items())},
             "videos": all_scheduled,
@@ -1057,7 +1019,7 @@ class ContentPageScheduler:
 
         # Log summary
         logger.info(f"[CPS-AUDIT] Results for {channel_key}:")
-        logger.info(f"[CPS-AUDIT]   Total scheduled: {len(all_scheduled)}")
+        logger.info("[CPS-AUDIT]   Total scheduled: %s", audit_result["total_scheduled"])
         logger.info(f"[CPS-AUDIT]   Unique dates: {len(date_map)}")
         logger.info(f"[CPS-AUDIT]   Conflicts: {len(conflicts)}")
         logger.info(f"[CPS-AUDIT]   Heavy days: {len(heavy_days)}")
@@ -1072,6 +1034,8 @@ class ContentPageScheduler:
         tracker,
         time_slots: List[str],
         max_per_day: int = 3,
+        *,
+        inventory: Optional[Dict] = None,
     ) -> Dict:
         """
         Resolve scheduling conflicts by rescheduling duplicate-slot videos.
@@ -1089,6 +1053,23 @@ class ContentPageScheduler:
             Dict with rescheduled count and details
         """
         results = {"rescheduled": 0, "failed": 0, "details": []}
+
+        from .schedule_inventory import qualified_inventory
+
+        if not qualified_inventory(inventory, getattr(tracker, "channel_id", None)):
+            results["error"] = "calendar_inventory_incomplete"
+            return results
+        observed = {video["video_id"]: video for video in inventory["videos"]}
+        for conflict in conflicts:
+            members = conflict.get("videos", [])
+            if len(members) < 2 or len({member.get("video_id") for member in members}) != len(members):
+                results["error"] = "calendar_conflicts_unbound"
+                return results
+            for member in members:
+                video = observed.get(member.get("video_id"))
+                if video is None or conflict.get("slot") != f"{video['date']} {video['time']}":
+                    results["error"] = "calendar_conflicts_unbound"
+                    return results
 
         for conflict in conflicts:
             # Keep first video, reschedule the rest
@@ -1114,6 +1095,7 @@ class ContentPageScheduler:
                 try:
                     self.dom.navigate_to_video(video_id)
                     time_module.sleep(2)
+                    self.dom.begin_policy_edit(tracker.channel_id, video_id, allow_metadata=False)
                     success = self.dom.schedule_video(new_date, new_time)
 
                     if success:
@@ -1168,6 +1150,17 @@ class ContentPageScheduler:
             Dict with rescheduled count and details
         """
         results = {"rescheduled": 0, "failed": 0, "skipped": 0, "details": []}
+
+        from .channel_config import get_channel_config
+        from .schedule_inventory import qualified_inventory
+
+        config = get_channel_config(audit_result.get("channel", ""))
+        if (audit_result.get("status") != "complete" or not config
+                or config["id"] != getattr(tracker, "channel_id", None)
+                or not isinstance(audit_result.get("videos"), list)
+                or not qualified_inventory(audit_result.get("inventory"), config["id"], audit_result["videos"])):
+            results["error"] = "calendar_inventory_incomplete"
+            return results
 
         heavy_days = audit_result.get("heavy_days", [])
         if not heavy_days:
@@ -1239,13 +1232,15 @@ class ContentPageScheduler:
 
                 if row_element:
                     # Use inline popup rescheduling (fast, stays on content page)
-                    success = self.reschedule_row_inline(row_element, new_date, new_time)
+                    self._policy_channel_id = tracker.channel_id
+                    success = self.reschedule_row_inline(row_element, new_date, new_time, video_id=video_id)
                 else:
                     # Fallback: navigate to edit page
                     logger.debug(f"[CPS-THIN] Row not found for {video_id}, using edit page")
                     try:
                         self.dom.navigate_to_video(video_id)
                         time_module.sleep(2)
+                        self.dom.begin_policy_edit(tracker.channel_id, video_id, allow_metadata=False)
                         success = self.dom.schedule_video(new_date, new_time)
                     except Exception as e:
                         logger.error(f"[CPS-THIN] Edit page reschedule failed: {e}")

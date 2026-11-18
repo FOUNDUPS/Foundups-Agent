@@ -1,0 +1,225 @@
+{
+  "name": "reddog",
+  "displayName": "RedDog - FoundUps Interface",
+  "description": "Open the lightweight RedDog interaction surface backed by governed 0102 cognition.",
+  "version": "0.4.141",
+  "publisher": "foundups",
+  "icon": "icon.png",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false
+    },
+    "virtualWorkspaces": {
+      "supported": false
+    }
+  },
+  "activationEvents": [
+    "onCommand:reddog.open",
+    "onCommand:foundupsFusion.open",
+    "onCommand:reddog.setConversationSessionCredential",
+    "onCommand:reddog.clearConversationSessionCredential",
+    "onCommand:reddog.setPrincipalMemexDisclosure",
+    "onCommand:reddog.clearPrincipalMemexDisclosure",
+    "onCommand:reddog.capturePrincipalActivity",
+    "onCommand:reddog.showPrincipalActivityContext",
+    "onCommand:reddog.principalActivityStatus"
+  ],
+  "main": "./extension.js",
+  "scripts": {
+    "generate:contract-shards": "node tests/generate_extension_contract_shard_manifest.js --write",
+    "check:contract-shards": "node tests/generate_extension_contract_shard_manifest.js --check",
+    "test": "node tests/run_reddog_test_tier.js fast",
+    "test:conversation": "node tests/run_conversation_test_tier.js",
+    "test:contract": "node tests/run_reddog_test_tier.js contract",
+    "test:package": "node tests/test_package_surface.js",
+    "test:release": "node tests/verify_extension_contract.js"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "reddog.open",
+        "title": "RedDog: Open",
+        "category": "RedDog"
+      },
+      {
+        "command": "foundupsFusion.open",
+        "title": "Foundups Agent: Open (Legacy)",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.setConversationSessionCredential",
+        "title": "Set Conversation Session Credential",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.clearConversationSessionCredential",
+        "title": "Clear Conversation Session Credential",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.setPrincipalMemexDisclosure",
+        "title": "Set One-Use Principal Memex Disclosure",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.clearPrincipalMemexDisclosure",
+        "title": "Clear Principal Memex Disclosure",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.capturePrincipalActivity",
+        "title": "Capture Principal Activity (Local)",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.showPrincipalActivityContext",
+        "title": "Show Principal Activity Context (Local)",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.principalActivityStatus",
+        "title": "Principal Activity Status (Local)",
+        "category": "RedDog"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "reddog.open"
+        },
+        {
+          "command": "foundupsFusion.open"
+        },
+        {
+          "command": "reddog.setConversationSessionCredential"
+        },
+        {
+          "command": "reddog.clearConversationSessionCredential"
+        },
+        {
+          "command": "reddog.setPrincipalMemexDisclosure"
+        },
+        {
+          "command": "reddog.clearPrincipalMemexDisclosure"
+        },
+        {
+          "command": "reddog.capturePrincipalActivity"
+        },
+        {
+          "command": "reddog.showPrincipalActivityContext"
+        },
+        {
+          "command": "reddog.principalActivityStatus"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "reddog.open",
+          "group": "navigation@100"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "reddog.open",
+          "group": "navigation@100"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "RedDog",
+      "properties": {
+        "reddog.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable used to call the redaction-gated RedDog bridge."
+        },
+        "reddog.leadModel": {
+          "type": "string",
+          "default": "z-ai/glm-5.2",
+          "description": "Evaluation fallback principal model used only when no receipt-bound production runtime binding is configured."
+        },
+        "reddog.panelModels": {
+          "type": "array",
+          "default": [
+            "deepseek/deepseek-v4-pro",
+            "qwen/qwen3.8-max",
+            "moonshotai/kimi-k3"
+          ],
+          "maxItems": 7,
+          "items": {
+            "type": "string"
+          },
+          "description": "Evaluation fallback critic models used only when no receipt-bound production runtime binding is configured. The extension forwards at most seven so Python can prove over-cap truncation."
+        },
+        "reddog.allowEvaluationFallback": {
+          "type": "boolean",
+          "default": false,
+          "description": "Explicitly allow the configured evaluation-only lead and critic roster when no production runtime binding is configured. A rejected configured binding always remains blocked."
+        },
+        "reddog.enableResidentArchitectSession": {
+          "type": "boolean",
+          "default": true,
+          "description": "Submit explicit governed action requests to the resident RedDog audit/research/architect decision cycle after local runtime gates pass. Disable only to pause resident orchestration."
+        },
+        "reddog.progressiveExecutionStage": {
+          "type": "string",
+          "enum": [
+            "audit",
+            "boundedExecution"
+          ],
+          "default": "audit",
+          "enumDescriptions": [
+            "Allow conversation, audit, research, review, and proposal output with no action planning.",
+            "Allow action planning only after all runtime gates pass; backend authority remains limited to signed low-complexity WSP_15 work."
+          ],
+          "description": "Maximum RedDog effect stage. This setting never grants repository, worker, shell, signer, PR, merge, or production authority."
+        },
+        "foundupsFusion.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Legacy alias for reddog.pythonPath. Retained for the 0.4.0 migration."
+        },
+        "foundupsFusion.leadModel": {
+          "type": "string",
+          "default": "z-ai/glm-5.2",
+          "description": "Legacy alias for reddog.leadModel. Retained for the 0.4.0 migration."
+        },
+        "foundupsFusion.panelModels": {
+          "type": "array",
+          "default": [
+            "deepseek/deepseek-v4-pro",
+            "qwen/qwen3.8-max",
+            "moonshotai/kimi-k3"
+          ],
+          "maxItems": 7,
+          "items": {
+            "type": "string"
+          },
+          "description": "Legacy alias for reddog.panelModels. Retained for the 0.4.0 migration with the same seven-item forwarding bound."
+        },
+        "foundupsFusion.allowEvaluationFallback": {
+          "type": "boolean",
+          "default": false,
+          "description": "Legacy alias for reddog.allowEvaluationFallback. Retained for the 0.4.0 migration."
+        },
+        "foundupsFusion.enableResidentArchitectSession": {
+          "type": "boolean",
+          "default": true,
+          "description": "Legacy alias for reddog.enableResidentArchitectSession. Retained for the 0.4.0 migration."
+        }
+      }
+    }
+  },
+  "license": "UNLICENSED",
+  "homepage": "https://github.com/FOUNDUPS/Foundups-Agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FOUNDUPS/Foundups-Agent"
+  }
+}

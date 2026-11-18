@@ -248,43 +248,43 @@ class SelfResearchRefresher:
         return age_hours <= max_age_hours
 
     def refresh_holo_index(self) -> Dict[str, Any]:
-        """Refresh HoloIndex if the tracked code/WSP indexes are stale."""
-        from modules.infrastructure.database.src.agent_db import AgentDB
+        """Prove or refresh HoloIndex through the trusted host handshake."""
+        from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_maintenance_handshake import (
+            ensure_reddog_holoindex_operational,
+        )
 
-        db = AgentDB()
-        code_stale = db.should_refresh_index("code", max_age_hours=self.index_max_age_hours)
-        wsp_stale = db.should_refresh_index("wsp", max_age_hours=self.index_max_age_hours)
         result: Dict[str, Any] = {
             "checked_on": utc_now_iso(),
             "index_max_age_hours": self.index_max_age_hours,
-            "code_stale": code_stale,
-            "wsp_stale": wsp_stale,
-            "refresh_attempted": False,
+            "code_stale": True,
+            "wsp_stale": True,
+            "refresh_attempted": True,
             "refresh_success": False,
             "returncode": None,
             "stdout_tail": "",
             "stderr_tail": "",
         }
-        if not code_stale and not wsp_stale:
-            return result
-
-        command = [sys.executable, str(self.repo_root / "holo_index.py"), "--index-all"]
-        result["refresh_attempted"] = True
         try:
-            completed = subprocess.run(
-                command,
-                cwd=self.repo_root,
-                capture_output=True,
-                text=True,
-                timeout=self.holo_timeout_sec,
-                check=False,
+            operational = ensure_reddog_holoindex_operational(
+                repo_root=self.repo_root,
+                requested=True,
+                auto_maintenance=True,
+                timeout_seconds=self.holo_timeout_sec,
             )
-            result["returncode"] = completed.returncode
-            result["stdout_tail"] = tail_text(completed.stdout)
-            result["stderr_tail"] = tail_text(completed.stderr)
-            result["refresh_success"] = completed.returncode == 0
+            result.update(
+                {
+                    "code_stale": not operational.ready,
+                    "wsp_stale": not operational.ready,
+                    "refresh_attempted": operational.refreshed,
+                    "refresh_success": operational.ready,
+                    "returncode": 0 if operational.ready else 1,
+                    "operational_status": operational.status,
+                    "operational_error": operational.error,
+                    "freshness_generation_id": operational.generation_id,
+                }
+            )
         except Exception as exc:
-            result["stderr_tail"] = f"{type(exc).__name__}: {exc}"
+            result["stderr_tail"] = f"{type(exc).__name__}"
             result["refresh_success"] = False
         return result
 
@@ -324,32 +324,39 @@ class SelfResearchRefresher:
         )
 
         audit = DaemonSelfAuditLoop(self.repo_root)
-        opened = audit.scan_once()
+        scan_status = audit.scan_once_with_status()
         state_path = audit.state_path
-        state: Dict[str, Any] = {}
-        if state_path.exists():
-            try:
-                state = json.loads(state_path.read_text(encoding="utf-8"))
-            except Exception:
-                state = {}
-
-        signature_stats = state.get("signature_stats", {}) or {}
         top_signatures = []
-        for signature, raw in signature_stats.items():
-            top_signatures.append(
-                {
-                    "signature": signature,
-                    "count": int(raw.get("count", 0)),
-                    "recommended_fix": raw.get("recommended_fix", ""),
-                    "last_fix_result": raw.get("last_fix_result", ""),
-                    "last_seen": raw.get("last_seen"),
-                }
-            )
-        top_signatures.sort(key=lambda item: item["count"], reverse=True)
+        signature_count = None
+        history_status = "absent"
+        try:
+            if state_path.exists():
+                state = json.loads(state_path.read_text(encoding="utf-8"))
+                signature_stats = state.get("signature_stats", {}) or {}
+                for signature, raw in signature_stats.items():
+                    top_signatures.append(
+                        {
+                            "signature": signature,
+                            "count": int(raw.get("count", 0)),
+                            "recommended_fix": raw.get("recommended_fix", ""),
+                            "last_fix_result": raw.get("last_fix_result", ""),
+                            "last_seen": raw.get("last_seen"),
+                        }
+                    )
+                top_signatures.sort(key=lambda item: item["count"], reverse=True)
+                signature_count = len(signature_stats)
+                history_status = "available"
+        except (OSError, ValueError, TypeError, AttributeError, OverflowError):
+            # Historical data must not suppress this attempt's diagnostic.
+            top_signatures = []
+            signature_count = None
+            history_status = "unavailable"
         return {
             "checked_on": utc_now_iso(),
-            "events_opened": opened,
-            "signature_count": len(signature_stats),
+            "events_opened": scan_status["event_count"],
+            "scan_status": scan_status,
+            "history_status": history_status,
+            "signature_count": signature_count,
             "top_signatures": top_signatures[:5],
         }
 

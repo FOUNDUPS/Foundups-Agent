@@ -1,0 +1,110 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "bfcf9041b80be6773951e1c2e07500ebf7c9df62"
+  },
+  "execution_id": "HOLOINDEX_RUNTIME_ENVIRONMENT_BINDING_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "holoindex_a_grade": "blocked",
+    "maintenance_replica_rsi": "working",
+    "retrieval_quality_rsi": "not_operational",
+    "exact_installed_distribution_payload_closure": false,
+    "resident_authenticated_owner": false,
+    "independent_evaluator_promotion_rollback_loop": false
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The governed owner path and module documentation were retrieved before editing. The initial governed query was current before the source closure changed; after the runtime-binding edits, the same gate failed closed rather than accepting stale authority.",
+      "Subsequent cold owner attempts exceeded 60 and 180 seconds. The CLI ceiling now matches the existing 270-second health canary with a bounded 300-second maximum, but no live-current usability claim is made before exact-main post-merge activation.",
+      "A WSP_00/WSP_97 architecture audit found parent-predicted child identity, source-read TOCTOU, dependency-payload overclaim, WSP_62 debt, and missing resident/evaluator loops. The first four were converted into code or truthful fail-closed evidence; the latter three remain explicit blockers."
+    ],
+    "research": [
+      "The executing authenticated child now self-attests its runtime-environment digest; the parent no longer predicts an alternate interpreter, ABI, package, model, replica, or source environment in production.",
+      "The RedDog source closure is read descriptor-stably and checked against the canonical backend manifest. Replica and model closure inputs, required environment inputs, runtime knobs, interpreter platform/ABI, and installed distribution build-record identities are bound without publishing absolute paths or secrets.",
+      "Installed distribution RECORD metadata is not represented as installed payload-byte verification. The public exact-closure flag remains false until an immutable activation receipt proves those bytes.",
+      "A measured package scan found 236 distributions and 72151 site-package records, including external and unhashed entries. Hashing that tree per query is not a scalable design; the next layer is a sealed activation-time descriptor consumed by a resident owner."
+    ],
+    "micro_pass": [
+      "Focused Python evidence passed 611 tests with one expected Windows link-capability skip across runtime binding, owner/service/supervisor, communication adapter, retrieval AutoResearch receipts, A-grade gate, canonical CLI, and backend manifest suites.",
+      "The deterministic WRE test registry was regenerated and verified current at 1591 tests and 267 quarantined entries; the repaired Holo large-file proof is now import-safe and its dedicated registry suites passed 45 tests.",
+      "RedDog fast validation passed 14 of 14 members, authenticated contract validation passed 3 of 3 members, package validation passed, and JavaScript syntax validation passed.",
+      "The backend manifest is current at 1356 runtime files and sha256:76911818b5f25654784b3493643fdee51e67653530304dfc61b0df17a3d47461."
+    ],
+    "macro_pass": [
+      "The final four-group authenticated RedDog exhaustive supervisor passed in 190.138 seconds; core was the long pole at 190.038 seconds and no group timed out.",
+      "The generated extension contract contains 18 bounded shards, 6942 lines, and 492 assertions with aggregate sha256:f1bcedc0bc5c4fc66d4d35e54dbf6f606eb15838d013c40f48aa05a0ded606e4.",
+      "The RedDog 0.4.124 package surface contains 67 files and 945692 raw bytes under the 1048576-byte cap, with content digest sha256:c44364cc961b80bd005b0fc433582361e9e63442bc2cee0198f74e4792186647.",
+      "The VSIX was built at O:/RedDog-Releases/reddog-0.4.124.vsix with 275641 bytes and sha256:e48a14f1c3bc1b8f274a66fb51bb60c2adcdfbbfa95e02cd16a8b5876e3ac832. Independent archive inspection remains part of the final subagent gate."
+    ],
+    "hard_think": [
+      "WSP_15 scored exact executing-runtime truth as Complexity 4, Importance 5, Deferability 5, Impact 5, total 19/P0. A retrieval evaluator cannot grade bytes and dependencies different from those that executed its corpus.",
+      "The smallest valid layer is child-authenticated runtime evidence propagated through every receipt and rejected by the A-grade gate unless exact closure is true. It does not pretend to complete resident operation or the independent RSI loop.",
+      "One cold Python/model owner per extension query cannot scale. Benchmark-owner reuse reduces repeated cold starts within evaluation, while a resident authenticated owner remains the production P0."
+    ],
+    "dialectic_sweep": [
+      "Parent-derived environment identity appears deterministic but is false when the child interpreter or environment differs; authenticated child self-attestation resolves that contradiction.",
+      "Hashing distribution metadata is useful identity but is not proof of installed payload bytes; exact-closure admission therefore fails closed.",
+      "A pure propose-and-grade function is not RSI without an independent evaluator, authenticated promotion authority, canary and rollback control, a deployed consumer, and outcome learning.",
+      "Maintenance RSI is real because generation repair, immutable replica verification, route activation, and post-query unchanged-digest proof operate today. Retrieval-quality RSI remains non-operational because its promotion-and-learning loop is absent."
+    ],
+    "first_principles": [
+      "A-grade is an evidence-backed admission result, never a label attached to incomplete runtime identity.",
+      "Runtime evidence must bind the executable child, exact source closure, replica closure, model closure, environment inputs, runtime knobs, and installed dependency payload bytes.",
+      "Scalable repeated retrieval requires an immutable activation descriptor and a resident authenticated owner; per-query environment-tree hashing is rejected.",
+      "The extension remains a thin read-only consumer and gains no repository mutation, reindex, maintenance, worker-dispatch, or promotion authority from this transaction."
+    ],
+    "execute": [
+      "Branch fix/holoindex-runtime-environment-binding",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_environment_binding.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_supervisor.py",
+      "holo_index/retrieval_runtime_binding.py",
+      "holo_index/retrieval_autoresearch.py",
+      "modules/ai_intelligence/ai_overseer/src/m2m_holo_retrieval_benchmark.py",
+      "modules/ai_intelligence/ai_overseer/src/m2m_holo_retrieval_grade_gate.py",
+      "extensions/reddog/package.json",
+      "extensions/reddog/tests/generate_extension_contract_shard_manifest.js",
+      "scripts/reddog_backend_manifest.json",
+      "WSP_knowledge/WSP_Test_Registry.json"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_RUNTIME_ENVIRONMENT_BINDING_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "holo_index/README.md",
+    "holo_index/ROADMAP.md",
+    "holo_index/ModLog.md",
+    "modules/ai_intelligence/ai_overseer/INTERFACE.md",
+    "modules/ai_intelligence/ai_overseer/ROADMAP.md",
+    "modules/ai_intelligence/ai_overseer/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/communication/moltbot_bridge/INTERFACE.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "extensions/reddog/INTERFACE.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md"
+  ]
+}

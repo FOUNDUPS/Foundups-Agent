@@ -1,8 +1,10 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.3",
+    "version": "1.9",
     "status": "active",
+    "mantra_stage_count": 7,
+    "operator_action_count": 9,
     "core_mantra": "HoloIndex -> Research -> Hard Think -> Dialectic Sweep -> First Principles -> Build -> Follow WSP",
     "canonical_operator_meaning": "follow wsp := retrieve wsp -> retrieve evidence -> research -> micro pass -> macro pass -> hard think -> dialectic sweep -> first principles -> execute",
     "protocol_identity": "agentic activation protocol",
@@ -12,22 +14,104 @@
       "out_of_the_box_scope",
       "execute_after_gates_pass"
     ],
-    "execution_steps": [
+    "wsp15_economy_binding": {
+      "authority": "WSP_15",
+      "required_before_execution": true,
+      "runtime_enforcement": "SPECIFIED_NOT_IMPLEMENTED",
+      "questions": [
+        "Do I need it?",
+        "Can I afford it?",
+        "Can I live without it now?"
+      ],
+      "verification_authority": "WSP_6",
+      "differential_rule": "exact test identifiers; aggregate counts are telemetry only"
+    },
+    "test_inventory_reuse_gate": {
+      "required_before_test_authoring": true,
+      "applies_when": ["create", "modify", "replace", "expand"],
+      "authorities": ["WSP_22", "WSP_50", "WSP_84", "WSP_6"],
+      "required_retrieval": [
+        "HoloIndex query for target module, behavior or contract, and likely test vocabulary",
+        "target module tests/TestModLog.md when present",
+        "target module tests/README.md when present",
+        "closest existing tests, fixtures, and helpers"
+      ],
+      "reuse_order": [
+        "reuse or extend an existing test for the same behavior or contract",
+        "add an edge case to the existing file for the same pipeline or fixture",
+        "create a new test file only for a materially distinct subsystem or contract"
+      ],
+      "inventory_update": "update tests/TestModLog.md after test additions, removals, renames, or material expansion; update tests/README.md when execution conventions or suite organization change",
+      "missing_testmodlog_rule": "when active tests exist without tests/TestModLog.md, inventory the actual current test files and create or refresh TestModLog before adding a new test file",
+      "worker_prompt_requirement": "test work prompts SHOULD include concrete HoloIndex search parameters for the target behavior and test surface",
+      "failure_conditions": [
+        "new test file without required retrieval",
+        "duplicate coverage where an existing test could be cleanly extended",
+        "active test inventory materially diverges from tests/TestModLog.md",
+        "historical aggregate pass count reported as fresh without fresh execution evidence"
+      ]
+    },
+    "mantra_stages": [
       "HoloIndex",
       "Research",
-      "Micro Pass",
-      "Macro Pass",
       "Hard Think",
       "Dialectic Sweep",
       "First Principles",
       "Build",
       "Follow WSP"
     ],
+    "operator_actions": [
+      "Retrieve WSPs",
+      "Retrieve Evidence",
+      "Research",
+      "Micro Pass",
+      "Macro Pass",
+      "Hard Think",
+      "Dialectic Sweep",
+      "First Principles",
+      "Execute"
+    ],
+    "validator": {
+      "status": "active_repository_evidence_validation",
+      "entrypoint": "tools/wsp97_execution_validator.py",
+      "receipt_schema_version": "wsp97_execution_receipt.v1.1",
+      "repository_context": {
+        "repo_root": "explicit validator input; exact-case Git top-level",
+        "base_commit": "receipt repository_context.base_commit; exact 40-character commit; ancestor of current HEAD",
+        "expected_base": "optional independent caller assertion"
+      },
+      "resolved_evidence": {
+        "action": "retrieve_wsps",
+        "path_contract": "exact POSIX repository-relative tracked WSP_framework/src/WSP_<id>_*.md",
+        "confinement": "reject absolute, drive, UNC, backslash, traversal, fragment, URL, directory, wrong-case, untracked, symlink, junction, and reparse paths",
+        "wsps_applied_cross_check": "every declared WSP requires a retrieved canonical path; retrieved precedents may exceed declarations"
+      },
+      "opaque_evidence": "all evidence outside action_evidence.retrieve_wsps remains opaque and is never opened or fetched",
+      "legacy_mode": "legacy_structural_non_admitting; diagnostic only; never exits compliant",
+      "resource_limits": {
+        "receipt_bytes": 262144,
+        "receipt_mapping_items": 32,
+        "repository_context_mapping_items": 8,
+        "action_evidence_mapping_items": 32,
+        "evidence_list_items": 128,
+        "evidence_item_bytes": 4096,
+        "retrieve_wsp_path_bytes": 512,
+        "retrieve_wsps_items": 64,
+        "aggregate_evidence_bytes": 131072,
+        "git_calls": 72,
+        "git_timeout_seconds": 5.0,
+        "git_accepted_output_bytes_per_stream": 65536
+      },
+      "receipt_preflight": "before root or Git: exact repository_context/base syntax, expected-base syntax/equality, retrieve_wsps count/path/case, and WSP identifier syntax; malformed receipt exits 1, malformed caller expected-base exits 2",
+      "root_preflight": "lstat every supplied root component before exists, directory, resolve, or Git operations; reject symlink, junction, and reparse components",
+      "truth_boundary": "Receipt v1.1 validates structural completeness, canonical tracked Retrieve WSPs paths, and invoking-worktree base ancestry; it does not authenticate non-WSP evidence, reasoning quality, runtime side effects, or an immutable final snapshot."
+    },
     "rubik_context": "Rubik = MVP DAE. Currently 'Cubes' (modules) need Qwen/Gemma enhancement to become fully agentic Progressive Web Apps (PWAs) that connect ubiquitously to any blockchain via FoundUp MCPs."
   },
   "agent_profiles": {
     "0102": {
-      "context_window": "unlimited",
+      "context_window": "runtime_configured",
+      "model_binding": "runtime_receipt_required",
       "output_mode": "verbose_strategic",
       "specialization": "oversight_validation",
       "mantra_emphasis": "Hard Think + Dialectic Sweep + Follow WSP",
@@ -40,7 +124,8 @@
       "system_prompt_reference": "You are 0102, the strategic orchestrator. Reference WSP 97 and maintain the core mantra throughout operations."
     },
     "qwen": {
-      "context_window": "32K_tokens",
+      "context_window": "runtime_configured",
+      "model_binding": "runtime_receipt_required",
       "output_mode": "structured_json",
       "specialization": "planning_coordination",
       "mantra_emphasis": "Research + CoT retrieval + Build",
@@ -50,10 +135,11 @@
         "Coordination Planning",
         "Implementation Guidance"
       ],
-      "system_prompt_reference": "You are Qwen, the operational coordinator. Reference WSP 97 in coordination and optimize for 32K context."
+      "system_prompt_reference": "You are Qwen, the operational coordinator. Reference WSP 97 and stay within the validated runtime context budget."
     },
     "gemma": {
-      "context_window": "8K_tokens",
+      "context_window": "runtime_configured",
+      "model_binding": "runtime_receipt_required",
       "output_mode": "binary_validation",
       "specialization": "validation_execution",
       "mantra_emphasis": "First Principles + validation after CoR sweep",
@@ -99,7 +185,7 @@
         "Follow WSP: Maintain module structure compliance"
       ],
       "success_criteria": [
-        "All 464 orphans dispositioned",
+        "All in-scope orphans have disposition receipts",
         "Codebase health improved",
         "Integration roadmap created",
         "No functionality loss"
@@ -156,7 +242,7 @@
       "wsp_compliance"
     ],
     "profile_adherence": {
-      "context_window_limits": true,
+      "context_window_limits": "runtime_receipt_required",
       "output_mode_compliance": true,
       "specialization_focus": true
     },
@@ -167,10 +253,11 @@
     }
   },
   "performance_metrics": {
+    "measurement_policy": "Runtime-configured targets measured from validated receipts; WSP 97 defines no universal percentage target.",
     "execution_efficiency": {
-      "mantra_cycle_completion_rate": "target_95_percent",
-      "context_window_optimization": "target_90_percent",
-      "mission_success_rate": "target_95_percent"
+      "mantra_cycle_completion_rate": "measure_from_validated_receipts",
+      "context_window_optimization": "measure_from_runtime_binding_receipts",
+      "mission_success_rate": "measure_from_resolved_success_evidence"
     },
     "agent_performance": {
       "specialization_effectiveness": "measured_by_success_rate",
@@ -192,9 +279,9 @@
       "gemma_system_prompt": "pending"
     },
     "mission_templates": {
-      "mcp_rubik": "active",
-      "orphan_archaeology": "active",
-      "code_review": "planned"
+      "mcp_rubik": "template_active_execution_unproved",
+      "orphan_archaeology": "template_active_execution_unproved",
+      "code_review": "template_planned"
     }
   }
 }

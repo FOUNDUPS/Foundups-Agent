@@ -1,7 +1,10 @@
 {
   "foundup_id": "shield",
   "manifest_version": "1.0.0",
+  "name": "Shield",
   "display_name": "Shield",
+  "version": "0.1.0",
+  "category": "community",
   "description": "Consumer defense FoundUp providing free trust-building POC for document classification and safe metadata extraction.",
   "lifecycle_stage": "incubating",
   "tier": "F0_DAE",
@@ -29,6 +32,8 @@
     "no_token_assignment": true,
     "no_chain_activation": true
   },
+  "routing_prefix": "/f/shield",
+  "data_namespace": "idb_shield",
   "proposed_domain": "shield.foundups.com",
   "domain_status": "not_configured",
   "notes": "Consumer defense parent FoundUp. Free POC = free trust wedge. Private facts stay with user. Aggregate patterns may be used only when safe and non-identifying."

@@ -6,14 +6,22 @@ Command format (strict):
   yt action <action> key=value
 
 Supported actions:
-  comments   -> like/heart/reply runner (YouTube Studio comments)
-  indexing   -> video indexer CLI
-  scheduling -> shorts scheduler CLI
+  comments          -> like/heart/reply runner (YouTube Studio comments)
+  indexing          -> video indexer CLI
+  scheduling        -> shorts scheduler CLI
+  schedule_priority -> what_should_i_schedule SKILLz (read-only channel need ranking)
+  reschedule_plan   -> reschedule_plan SKILLz (dry-run rebalance PLAN for over-cap days; apply is Phase 2)
+  reschedule_apply  -> reschedule_apply SKILLz (flag-gated apply of the plan; DEFAULT DRY-RUN, mutates nothing unless YT_RESCHEDULE_APPLY=1)
+  live_schedule_signal -> shorts_live_schedule_signal SKILLz (read-only LIVE "Has schedule" count + low-viewed signal; self-gated DEFAULT-OFF, no live DOM work unless YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1)
 
 Examples:
   youtube action comments channel=move2japan max_comments=3 like=true heart=true reply=false
   youtube action indexing channel=undaodu batch_size=5
   youtube action scheduling channel=foundups max_videos=3 dry_run=true
+  youtube action schedule_priority upcoming_days=7
+  youtube action reschedule_plan horizon_days=90
+  youtube action reschedule_apply
+  youtube action live_schedule_signal channel=foundups connect=edge
 """
 
 from __future__ import annotations
@@ -27,7 +35,15 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 
-SUPPORTED_ACTIONS = {"comments", "indexing", "scheduling"}
+SUPPORTED_ACTIONS = {
+    "comments",
+    "indexing",
+    "scheduling",
+    "schedule_priority",
+    "reschedule_plan",
+    "reschedule_apply",
+    "live_schedule_signal",
+}
 
 ACTION_ALIASES = {
     "comment": "comments",
@@ -38,6 +54,22 @@ ACTION_ALIASES = {
     "schedule": "scheduling",
     "scheduler": "scheduling",
     "shorts_scheduler": "scheduling",
+    # what_should_i_schedule SKILLz: read-only channel scheduling-priority ranking
+    "what_should_i_schedule": "schedule_priority",
+    "schedule_next": "schedule_priority",
+    "scheduling_priority": "schedule_priority",
+    # reschedule_plan SKILLz: dry-run rebalance PLAN for over-cap days (apply=Phase 2)
+    "reschedule": "reschedule_plan",
+    "rebalance": "reschedule_plan",
+    "rebalance_plan": "reschedule_plan",
+    # reschedule_apply SKILLz: flag-gated apply of the plan (DEFAULT DRY-RUN)
+    "apply_reschedule": "reschedule_apply",
+    "rebalance_apply": "reschedule_apply",
+    "reschedule_apply_plan": "reschedule_apply",
+    # shorts_live_schedule_signal SKILLz: read-only LIVE "Has schedule" + low-viewed signal
+    "shorts_live_schedule_signal": "live_schedule_signal",
+    "live_signal": "live_schedule_signal",
+    "schedule_signal": "live_schedule_signal",
 }
 
 # Repo root: modules/communication/moltbot_bridge/src -> parents[4]
@@ -251,8 +283,13 @@ def _build_scheduling_command(params: Dict[str, str]) -> list[str]:
     if channel:
         cmd.extend(["--channel", channel])
 
-    max_videos = _int_param(params, "max_videos", 5)
+    # An ordinary scheduling request covers the whole recorded batch. Preserve
+    # explicit malformed values for argparse to reject instead of widening scope.
+    max_videos = params.get("max_videos", "0")
     cmd.extend(["--max-videos", str(max_videos)])
+    if "video_ids" in params:
+        # A valid YouTube ID can start with '-'; '=' keeps it an option value.
+        cmd.append("--video-ids=" + params["video_ids"])
 
     browser = params.get("browser", "").strip().lower()
     if browser in {"chrome", "edge"}:
@@ -260,9 +297,96 @@ def _build_scheduling_command(params: Dict[str, str]) -> list[str]:
 
     if _truthy(params.get("dry_run", "false")):
         cmd.append("--dry-run")
+    if _truthy(params.get("preflight", "false")):
+        cmd.append("--preflight")
+    if _truthy(params.get("preserve_metadata", "false")):
+        cmd.append("--preserve-metadata")
     if _truthy(params.get("verbose", "false")):
         cmd.append("--verbose")
 
+    return cmd
+
+
+def _build_schedule_priority_command(params: Dict[str, str]) -> list[str]:
+    """Build the read-only what_should_i_schedule SKILLz invocation.
+
+    Agent/DAE-invoked channel scheduling-priority ranking. No browser, no mutation.
+    """
+    cmd = [
+        sys.executable,
+        "-m",
+        "modules.platform_integration.youtube_shorts_scheduler.skillz.what_should_i_schedule.run_skill",
+        "--upcoming-days",
+        str(_int_param(params, "upcoming_days", 7)),
+        "--json",
+    ]
+    if _truthy(params.get("no_signals", "false")):
+        cmd.append("--no-signals")
+    return cmd
+
+
+def _build_reschedule_plan_command(params: Dict[str, str]) -> list[str]:
+    """Build the dry-run reschedule_plan SKILLz invocation.
+
+    Agent/DAE-invoked rebalance PLAN for over-crowded schedule days. Read-only:
+    no browser, no mutation, no live model. The mutating apply is a Phase-2 slice.
+    """
+    cmd = [
+        sys.executable,
+        "-m",
+        "modules.platform_integration.youtube_shorts_scheduler.skillz.reschedule_plan.run_skill",
+        "--horizon-days",
+        str(_int_param(params, "horizon_days", 90)),
+        "--json",
+    ]
+    if _truthy(params.get("no_signals", "false")):
+        cmd.append("--no-signals")
+    return cmd
+
+
+def _build_reschedule_apply_command(params: Dict[str, str]) -> list[str]:
+    """Build the reschedule_apply SKILLz invocation.
+
+    Flag-gated apply of the reschedule plan. Via this subprocess surface no live
+    browser is supplied, so it is DRY-RUN by construction (it logs would-apply
+    moves, mutates nothing). Real apply requires YT_RESCHEDULE_APPLY=1 AND a live
+    driver wired through the daemon path (not this CLI surface).
+    """
+    cmd = [
+        sys.executable,
+        "-m",
+        "modules.platform_integration.youtube_shorts_scheduler.skillz.reschedule_apply.run_skill",
+        "--json",
+    ]
+    if _truthy(params.get("no_signals", "false")):
+        cmd.append("--no-signals")
+    return cmd
+
+
+def _build_live_schedule_signal_command(params: Dict[str, str]) -> list[str]:
+    """Build the read-only shorts_live_schedule_signal SKILLz invocation.
+
+    Reads the LIVE "Has schedule" scheduled count (fixes the [CPS-AUDIT] false-0) plus
+    a per-video low-viewed signal. The executor SELF-GATES on
+    YT_LIVE_SCHEDULE_SIGNAL_ENABLED (default off): without a live `connect` browser AND
+    the flag set, it does no live DOM work and returns scheduled_count=null (UNKNOWN),
+    never a false 0. No mutation.
+    """
+    cmd = [
+        sys.executable,
+        "-m",
+        "modules.platform_integration.youtube_shorts_scheduler.skillz.shorts_live_schedule_signal.run_skill",
+        "--channel",
+        params.get("channel", "foundups"),
+        "--low-view-threshold",
+        str(_int_param(params, "low_view_threshold", 100)),
+        "--json",
+    ]
+    connect = params.get("connect", "").strip().lower()
+    if connect in {"chrome", "edge"}:
+        cmd.extend(["--connect", connect])
+    if _truthy(params.get("no_signals", "false")):
+        cmd.append("--no-signals")
     return cmd
 
 
@@ -292,7 +416,75 @@ async def execute_youtube_action(action: str, params: Dict[str, str]) -> Dict[st
         cmd = _build_scheduling_command(params)
         timeout_s = _int_param(params, "timeout_s", 1800)
         run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
-        return {"success": bool(run_result.get("success", False)), "action": action, **run_result}
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = (
+            run_result.get("success") is True
+            and isinstance(parsed, dict) and parsed.get("success") is True
+            and not parsed.get("error") and not parsed.get("errors")
+            and parsed.get("batch_complete", True) is True
+        )
+        return {**run_result, "success": success, "action": action, "result": parsed}
+
+    if action == "schedule_priority":
+        cmd = _build_schedule_priority_command(params)
+        timeout_s = _int_param(params, "timeout_s", 120)
+        run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = bool(run_result.get("success", False))
+        if isinstance(parsed, dict) and parsed.get("success") is False:
+            success = False
+        return {
+            "success": success,
+            "action": action,
+            "result": parsed,
+            **run_result,
+        }
+
+    if action == "reschedule_plan":
+        cmd = _build_reschedule_plan_command(params)
+        timeout_s = _int_param(params, "timeout_s", 120)
+        run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = bool(run_result.get("success", False))
+        if isinstance(parsed, dict) and parsed.get("success") is False:
+            success = False
+        return {
+            "success": success,
+            "action": action,
+            "result": parsed,
+            **run_result,
+        }
+
+    if action == "reschedule_apply":
+        cmd = _build_reschedule_apply_command(params)
+        timeout_s = _int_param(params, "timeout_s", 120)
+        run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = bool(run_result.get("success", False))
+        if isinstance(parsed, dict) and parsed.get("success") is False:
+            success = False
+        return {
+            "success": success,
+            "action": action,
+            "result": parsed,
+            **run_result,
+        }
+
+    if action == "live_schedule_signal":
+        cmd = _build_live_schedule_signal_command(params)
+        # A live DOM read can take longer than the offline read-only skills.
+        timeout_s = _int_param(params, "timeout_s", 300)
+        run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = bool(run_result.get("success", False))
+        if isinstance(parsed, dict) and parsed.get("success") is False:
+            success = False
+        return {
+            "success": success,
+            "action": action,
+            "result": parsed,
+            **run_result,
+        }
 
     return {"success": False, "action": action, "error": "unsupported action"}
 

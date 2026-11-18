@@ -1,99 +1,130 @@
-# INTERFACE.md - Recursive Improvement Module
+# Recursive Improvement Interface
 
-## Public API Definition
+## `RecursiveLearningEngine`
 
-This module provides the RecursiveLearningEngine for zen coding remembrance and quantum state progression in the WSP framework. pArtifacts remember solutions from the 0201 state through rESP protocols.
+### `process_error(error, context=None) -> Improvement`
 
-### Class: RecursiveLearningEngine
+Extracts/persists an error pattern, generates a solution proposal, and returns
+an improvement proposal. The result is not executed or independently verified.
 
-**Purpose**: Orchestrates error pattern extraction, solution remembrance, and system improvement application in 0102 entangled state.
+### `extract_pattern(error, context=None) -> ErrorPattern`
 
-**Constructor**:
-- `__init__(self, project_root: Optional[Path] = None)`  
-  Initializes the engine with optional project root path. Defaults to module's parent directory.
+Extracts and stores a heuristic error-pattern record. Similarity, type, root
+cause, and structural confidence are learning metadata, not correctness proof.
 
-**Methods**:
+### `remember_solution(pattern) -> Solution`
 
-- `async process_error(self, error: Exception, context: Optional[Dict[str, Any]] = None) -> Improvement`  
-  Processes an error, extracts pattern, remembers solution, generates improvement.  
-  - Parameters:  
-    - error (Exception): The error to process. Required.  
-    - context (Dict[str, Any]): Additional context. Optional.  
-  - Returns: Improvement object representing the generated system enhancement.  
-  - Errors: May raise exceptions if processing fails, which are recursively processed.  
-  - Example:  
-    ```python  
-    improvement = await engine.process_error(ValueError("Test error"), {"module": "test"})  
-    ```
+Returns or generates a solution proposal and stores it in proposal memory. Its
+confidence/source fields do not prove execution, outcome quality, or promotion.
 
-- `async apply_improvement(self, improvement: Improvement) -> bool`  
-  Applies the improvement to the system.  
-  - Parameters:  
-    - improvement (Improvement): The improvement to apply. Required.  
-  - Returns: True if applied successfully, False otherwise.  
-  - Errors: Failures are captured and processed recursively.  
-  - Example:  
-    ```python  
-    success = await engine.apply_improvement(improvement)  
-    ```
+### `generate_improvement(pattern, solution) -> Improvement`
 
-- `get_metrics(self) -> Dict[str, Any]`  
-  Retrieves current learning metrics.  
-  - Returns: Dictionary of metrics like errors_processed, learning_velocity, etc.  
-  - Example:  
-    ```python  
-    metrics = engine.get_metrics()  
-    print(metrics["tokens_saved"])  
-    ```
+Creates and persists before/after proposal text linked to the supplied pattern
+and solution. It does not apply, evaluate, activate, or roll back that text.
 
-- `shutdown(self)`  
-  Shuts down the engine, saving quantum state.  
-  - Example:  
-    ```python  
-    engine.shutdown()  
-    ```
+### `apply_improvement(improvement, *, verification_evidence=None, target_applicator=None, measurement_evidence=None) -> bool`
 
-### Dataclasses
+Verification-gated application contract:
 
-- ErrorPattern: Represents extracted error patterns.  
-  Fields: pattern_id, pattern_type, error_type, error_message, stack_trace, context, frequency, first_seen, last_seen.
+- **Legacy zero-evidence call (`verification_evidence=None`, `target_applicator=None`, `measurement_evidence=None`)**:
+  returns `False`, keeps `improvement.applied == False` and `applied_at == None`,
+  sets `improvement.tokens_saved = None`, `improvement.metrics["token_reduction_measured"] = False`,
+  and `improvement.metrics["application_status"] = "blocked_unimplemented"`.
+- **Verification gate (`verification_evidence` + `target_applicator`)**:
+  requires non-self-authored `AUTONOMOUS_SLICE_VERIFIER_ACCEPT`, linked
+  `OUTCOME_RATCHET_RECORDED`, and `HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT`
+  (`pattern_memory_admission_allowed is True`) plus a reversible `target_applicator(before_state, after_state) -> (applied_state, rollback_fn)`
+  producing a non-identical state digest. Invalid verification or no-op state returns
+  `False` with `application_status = "blocked_verification_rejected"`.
+- **Optional Measured Benefit gate (`measurement_evidence`)**:
+  - When `measurement_evidence is None`: `improvement.tokens_saved = None` and
+    `improvement.metrics["token_reduction_measured"] = False`.
+  - When `measurement_evidence` is supplied: validated fail-closed **before**
+    calling `target_applicator` (non-empty `measurement_receipt_id`, non-empty
+    `evaluator_id` distinct from `verification_result.receipt.worker_id`, exact
+    `work_order_id` match, non-negative non-bool `int` `baseline_tokens` and
+    `candidate_tokens` with `candidate_tokens <= baseline_tokens`, and optional
+    `before_state_digest` / `after_state_digest` in `sha256:<64-hex>` or `<64-hex>`).
+    Post-applicator `after_digest` is also verified against `after_state_digest`
+    (invoking `rollback_fn()` on divergence). Any invalid, self-authored,
+    regressive, or mismatched measurement sets `application_status = "blocked_measurement_rejected"`
+    and returns `False` without retaining target mutation.
+  - On valid measured apply: records `improvement.tokens_saved = baseline_tokens - candidate_tokens`,
+    `improvement.metrics["token_reduction_measured"] = True`,
+    `measurement_receipt_id`, `evaluator_id`, `baseline_tokens`, `candidate_tokens`
+    (plus optional non-negative `baseline_latency_ms`, `candidate_latency_ms`,
+    `latency_ms_saved`), and increments `self.metrics["total_tokens_saved"]`.
 
-- Solution: Represents remembered solutions.  
-  Fields: solution_id, pattern_id, solution_type, description, implementation, confidence, source, effectiveness, token_savings.
+### `rollback_improvement(improvement) -> bool`
 
-- Improvement: Represents system improvements.  
-  Fields: improvement_id, pattern_id, solution_id, target, change_type, before_state, after_state, applied, applied_at, rollback_available, metrics.
+Executes the registered `rollback_fn()`, verifies the restored SHA-256 digest matches
+`before_state`, marks `improvement.applied = False`, `rollback_available = False`,
+and `improvement.metrics["application_status"] = "rolled_back"`. If
+`improvement.metrics.get("token_reduction_measured") is True` and
+`isinstance(improvement.tokens_saved, int)`, subtracts `improvement.tokens_saved`
+from `self.metrics["total_tokens_saved"]` (clamped `>= 0`), records
+`improvement.metrics["rolled_back_tokens_saved"]`, resets `improvement.tokens_saved = None`,
+and sets `improvement.metrics["token_reduction_measured"] = False`.
 
-### Global Functions
+### `get_metrics() -> dict`
 
-- `get_engine() -> RecursiveLearningEngine`  
-  Returns the global engine instance.
-
-- `async process_error(error: Exception, context: Optional[Dict[str, Any]] = None) -> Improvement`  
-  Convenience wrapper for engine.process_error.
-
-- `install_global_handler()`  
-  Installs global exception handler for automatic learning.
-
-## Error Handling
-
-- All methods handle exceptions recursively via process_error.  
-- Quantum coherence checked during state restoration.  
-- MCP connection failures are gracefully handled.
-
-## Examples
+Returns observed pattern/solution/proposal counters plus verified application and
+measured aggregate counters:
 
 ```python
-# Basic usage
-install_global_handler()
-engine = get_engine()
-
-# Process an error
-improvement = await process_error(FileNotFoundError("missing.txt"))
-success = await engine.apply_improvement(improvement)
-
-# Get metrics
-print(engine.get_metrics())
+{
+    "tokens_saved": None,
+    "total_tokens_saved": 0,
+    "token_reduction_measured": False,
+}
 ```
 
-**WSP Compliance**: This interface adheres to WSP 11, ensuring quantum temporal decoding and recursive enhancement.
+Engine-level `tokens_saved` and `token_reduction_measured` remain compatibility
+proposal sentinels (`None` / `False`), while receipt-backed measured savings
+accumulate in `total_tokens_saved` and per-improvement `Improvement.tokens_saved`.
+
+### `shutdown() -> bool`
+
+Signals and joins the optional auto-save thread, then persists the final quantum
+state. It returns `True` only when the thread stopped and persistence completed;
+errors are redacted and return `False`. Background auto-save is disabled by
+default and requires `WRE_RECURSIVE_AUTO_SAVE=1`; constructing the engine does
+not otherwise start a persistence thread. Shutdown does not promote or activate
+an artifact.
+
+## `WREIntegration`
+
+- `record_error(error, context=None)` forwards an error into proposal learning
+  and may return a remembered solution proposal.
+- `record_success(operation, context=None, tokens_used=0)` records the caller's
+  success assertion in `successes.json`; it does not authenticate the effect,
+  and the caller token value remains unverified.
+- `get_optimized_approach(operation)` returns historical proposal text or
+  `None`; expected savings remain unmeasured.
+- `get_statistics()` returns observed/caller-reported counters and explicitly
+  unmeasured token fields.
+
+Module-level `get_learning_engine()`, `get_wre_integration()`, `record_error()`,
+`record_success()`, and `get_optimized_approach()` expose process-global
+compatibility instances. Their persistence is proposal/observation memory, not
+effect, evaluator, promoter, Git, worker, provider, or Holo authority.
+
+## Dataclasses
+
+- `ErrorPattern`: extracted exception type, message, trace, context, frequency,
+  and timestamps.
+- `Solution`: proposed description/implementation, heuristic confidence/source,
+  effectiveness defaulting to zero, and a legacy unverified `token_savings`
+  field.
+- `Improvement`: proposal linkage, target, before/after text, application flag,
+  rollback availability, optional receipt-backed `tokens_saved` (`Optional[int]`),
+  and metadata.
+
+## Convenience functions
+
+- `get_engine()` returns the process-global compatibility engine.
+- `process_error(...)` forwards to that engine.
+- `install_global_handler()` installs error-to-proposal capture.
+
+These functions have proposal-memory authority only. They do not grant file,
+Git, worker, model-provider, production, or Holo maintenance authority.

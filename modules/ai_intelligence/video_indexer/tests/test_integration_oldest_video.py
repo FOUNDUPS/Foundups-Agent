@@ -306,9 +306,14 @@ def save_test_artifact(data: Dict[str, Any], filename: str) -> str:
 # Test Cases
 # =============================================================================
 
+@pytest.mark.live_browser
 @pytest.mark.integration
 class TestUnDaoDuOldestVideo:
-    """Integration tests for indexing UnDaoDu's oldest video."""
+    """Integration tests for indexing UnDaoDu's oldest video.
+
+    LIVE BROWSER: attaches to a signed-in Chrome on port 9222 and navigates
+    to a hardcoded video. Skipped by default; pass --run-live to run.
+    """
 
     def test_list_videos_via_studio(self):
         """Test: List videos via YouTube Studio (same as commenting system)."""

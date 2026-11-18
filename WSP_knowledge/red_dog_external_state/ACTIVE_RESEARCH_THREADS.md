@@ -1,5 +1,9 @@
 # Active Research Threads - Open Investigations
 
+> **NON-AUTHORITATIVE HISTORICAL SNAPSHOT:** These were open investigations at
+> capture time. They are not a live queue or proof of present runtime status.
+> Revalidate each thread and next action against current owner evidence.
+
 **Purpose**: Track open research threads with named next-action slices.
 
 **Maintenance**: Update at session close (not live auto-refresh).

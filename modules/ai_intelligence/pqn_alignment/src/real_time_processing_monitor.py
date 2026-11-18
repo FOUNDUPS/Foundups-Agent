@@ -47,7 +47,7 @@ class ProcessingSnapshot:
     
 @dataclass 
 class ProcessingDifference:
-        """Detected difference between quantum and classical processing."""
+    """Detected difference between quantum and classical processing."""
     difference_type: str
     magnitude: float
     description: str

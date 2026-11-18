@@ -96,7 +96,7 @@ class TestInitializeWiring:
         """initTileObserver is called in initialize() function."""
         # Find initialize function and check it calls initTileObserver
         init_match = re.search(
-            r"function initialize\(catalog\)\s*\{.*?\n  \}",
+            r"function initialize\(catalog(?:,\s*options)?\)\s*\{.*?\n  \}",
             js_content,
             re.DOTALL
         )
@@ -110,7 +110,7 @@ class TestInitializeWiring:
         """initTileObserver is called after renderTiles()."""
         # Find the order of calls in initialize
         init_match = re.search(
-            r"function initialize\(catalog\)\s*\{.*?\n  \}",
+            r"function initialize\(catalog(?:,\s*options)?\)\s*\{.*?\n  \}",
             js_content,
             re.DOTALL
         )

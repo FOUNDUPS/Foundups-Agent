@@ -1,0 +1,199 @@
+"""Signed owner policy contract for production E0 signer composition."""
+
+from __future__ import annotations
+
+import hashlib
+import json
+from typing import Any, Mapping
+
+from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
+    ascii_deep,
+    is_sha256,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_v6 import (
+    CANONICAL_AUTHORITY_TIERS, _LIST_FIELDS, require_policy_scope_lists as _require_lists,
+    MAX_POLICY_TTL_SECONDS, require_policy_time as _require_time,
+    GRANT_SERVICE_DIGEST_FIELDS,
+    GRANT_SERVICE_FIELDS,
+    GRANT_SERVICE_MANIFEST_FIELDS,
+    POLICY_DIGEST_FIELDS_V5,
+    POLICY_FIELDS_V5,
+    POLICY_PREFIX_V6,
+    POLICY_SCHEMA_V6,
+    require_grant_service_bindings,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_v7 import (
+    GRANT_SERVICE_GIT_PROVENANCE_DIGEST_FIELDS,
+    POLICY_FIELDS_V7,
+    POLICY_PREFIX_V7,
+    POLICY_SCHEMA_V7,
+    require_grant_service_git_provenance_bindings,
+    POLICY_SCHEMA_V10, POLICY_SCHEMA_V11, POLICY_FIELDS_V10, GRANT_SERVICE_INSTALLED_DIGEST_FIELDS,
+    require_grant_service_installed_source_bindings, require_grant_service_installed_work_bindings,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import canonical_signing_input
+POLICY_SCHEMA_V5 = POLICY_PREFIX_V5 = "reddog-signer-owner-e0-policy.v5"
+POLICY_SCHEMA_V8 = POLICY_PREFIX_V8 = "reddog-signer-owner-e0-policy.v8"
+POLICY_FIELDS_V8 = POLICY_FIELDS_V7
+POLICY_SCHEMA_V9 = "reddog-signer-owner-e0-policy.v9"
+POLICY_FIELDS_V9 = POLICY_FIELDS_V8
+POLICY_SCHEMA = POLICY_PREFIX = POLICY_SCHEMA_V6
+POLICY_FIELDS_V6 = POLICY_FIELDS_V5 | GRANT_SERVICE_FIELDS
+POLICY_FIELDS = POLICY_FIELDS_V6
+_DIGEST_FIELDS_V6 = POLICY_DIGEST_FIELDS_V5 + GRANT_SERVICE_DIGEST_FIELDS
+_DIGEST_FIELDS_V7 = (
+    _DIGEST_FIELDS_V6 + GRANT_SERVICE_GIT_PROVENANCE_DIGEST_FIELDS
+)
+_AUTHORITY_BINDING_EXCLUDED_FIELDS = {
+    "schema_version",
+    "policy_id",
+    "owner_config_id",
+    "manifest_id",
+    "artifact_generation_digest",
+    "config_digest",
+    "generation",
+    "generation_revision",
+    "issued_at",
+    "expires_at",
+    "signature",
+} | GRANT_SERVICE_MANIFEST_FIELDS
+
+
+def signer_owner_e0_policy_id(value: Mapping[str, Any]) -> str:
+    fields = _policy_fields(value.get("schema_version"))
+    core = {
+        key: value[key]
+        for key in sorted(fields - {"policy_id", "signature"})
+    }
+    raw = json.dumps(core, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return "sha256:" + hashlib.sha256(raw.encode("ascii")).hexdigest()
+
+
+def signer_key_reference_digest(reference: str) -> str:
+    if type(reference) is not str or not reference or not reference.isascii():
+        raise ValueError("signer_owner_e0_key_reference_invalid")
+    return "sha256:" + hashlib.sha256(reference.encode("ascii")).hexdigest()
+
+
+def signer_owner_e0_authority_binding_digest(value: Mapping[str, Any]) -> str:
+    try:
+        fields = _policy_fields(value.get("schema_version"))
+        included = fields - _AUTHORITY_BINDING_EXCLUDED_FIELDS
+        if value.get("schema_version") in {POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
+            # This alias of artifact_generation_digest is unknown until after
+            # the config containing this binding has been hashed. It remains
+            # covered by the final signed policy and current-selection checks.
+            included = included - {"target_signer_generation_id"}
+        if value.get("schema_version") in {POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
+            # Permission refers to the completed target manifest. Keep these
+            # authenticated in the full policy, outside its pre-config binding.
+            included -= {"grant_authority_permission_snapshot_digest",
+                         "grant_authority_permission_snapshot_receipt_id"}
+        core = {key: value[key] for key in sorted(included)}
+        raw = json.dumps(core, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+        encoded = raw.encode("ascii")
+    except (KeyError, TypeError, UnicodeEncodeError) as exc:
+        raise ValueError("signer_owner_e0_authority_binding_invalid") from exc
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def canonical_signer_owner_e0_policy_input(value: Mapping[str, Any]) -> str:
+    schema = value.get("schema_version")
+    _policy_fields(schema)
+    # Every supported policy's signing prefix is its exact schema identifier.
+    return canonical_signing_input(value, schema)
+
+
+def validated_signer_owner_e0_policy(value: Mapping[str, Any], *, now_epoch: int) -> dict[str, Any]:
+    if not isinstance(value, Mapping) or type(now_epoch) is not int:
+        raise ValueError("signer_owner_e0_policy_malformed")
+    raw = {key: list(item) if isinstance(item, list) else item for key, item in value.items()}
+    try:
+        fields = _policy_fields(raw.get("schema_version"))
+    except ValueError as exc:
+        raise ValueError("signer_owner_e0_policy_malformed") from exc
+    if set(raw) != fields:
+        raise ValueError("signer_owner_e0_policy_malformed")
+    if not ascii_deep(raw) or not _types_valid(raw, fields):
+        raise ValueError("signer_owner_e0_policy_malformed")
+    digest_fields = {
+        POLICY_SCHEMA_V5: POLICY_DIGEST_FIELDS_V5,
+        POLICY_SCHEMA_V6: _DIGEST_FIELDS_V6,
+        POLICY_SCHEMA_V7: _DIGEST_FIELDS_V7,
+        POLICY_SCHEMA_V8: _DIGEST_FIELDS_V7,
+        POLICY_SCHEMA_V9: _DIGEST_FIELDS_V7,
+        POLICY_SCHEMA_V10: _DIGEST_FIELDS_V6 + GRANT_SERVICE_INSTALLED_DIGEST_FIELDS,
+        POLICY_SCHEMA_V11: _DIGEST_FIELDS_V6 + GRANT_SERVICE_INSTALLED_DIGEST_FIELDS,
+    }[raw["schema_version"]]
+    if any(not is_sha256(str(raw[name])) for name in digest_fields):
+        raise ValueError("signer_owner_e0_policy_digest_invalid")
+    if raw["policy_id"] != signer_owner_e0_policy_id(raw):
+        raise ValueError("signer_owner_e0_policy_id_invalid")
+    _require_time(raw, now_epoch)
+    _require_lists(raw)
+    if raw["schema_version"] in {POLICY_SCHEMA_V6, POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
+        require_grant_service_bindings(raw)
+    if raw["schema_version"] in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
+        require_grant_service_git_provenance_bindings(raw)
+    if raw["schema_version"] == POLICY_SCHEMA_V10:
+        require_grant_service_installed_source_bindings(raw)
+    if raw["schema_version"] == POLICY_SCHEMA_V11:
+        require_grant_service_installed_work_bindings(raw)
+    return raw
+
+
+def _types_valid(raw: Mapping[str, Any], fields: frozenset[str]) -> bool:
+    integers = {
+        "generation",
+        "rate_limit_window_seconds",
+        "rate_limit_max_requests",
+        "issued_at",
+        "expires_at",
+    }
+    strings = fields - integers - set(_LIST_FIELDS)
+    return bool(
+        all(type(raw.get(name)) is int for name in integers)
+        and all(type(raw.get(name)) is str and raw[name] for name in strings)
+        and all(type(raw.get(name)) is list for name in _LIST_FIELDS)
+    )
+
+
+def _policy_fields(schema: object) -> frozenset[str]:
+    if type(schema) is not str:
+        raise ValueError("signer_owner_e0_policy_schema_invalid")
+    if schema == POLICY_SCHEMA_V5:
+        return POLICY_FIELDS_V5
+    if schema == POLICY_SCHEMA_V6:
+        return POLICY_FIELDS_V6
+    if schema == POLICY_SCHEMA_V7:
+        return POLICY_FIELDS_V7
+    if schema == POLICY_SCHEMA_V8:
+        return POLICY_FIELDS_V8
+    if schema == POLICY_SCHEMA_V9:
+        return POLICY_FIELDS_V9
+    if schema in {POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
+        return POLICY_FIELDS_V10
+    raise ValueError("signer_owner_e0_policy_schema_invalid")
+__all__ = [
+    "CANONICAL_AUTHORITY_TIERS",
+    "POLICY_FIELDS",
+    "POLICY_FIELDS_V5",
+    "POLICY_FIELDS_V6",
+    "POLICY_FIELDS_V7",
+    "POLICY_FIELDS_V8",
+    "POLICY_FIELDS_V9",
+    "POLICY_FIELDS_V10",
+    "POLICY_SCHEMA",
+    "POLICY_SCHEMA_V5",
+    "POLICY_SCHEMA_V6",
+    "POLICY_SCHEMA_V7",
+    "POLICY_SCHEMA_V8",
+    "POLICY_SCHEMA_V9",
+    "POLICY_SCHEMA_V10",
+    "POLICY_SCHEMA_V11",
+    "canonical_signer_owner_e0_policy_input",
+    "signer_key_reference_digest",
+    "signer_owner_e0_authority_binding_digest",
+    "signer_owner_e0_policy_id",
+    "validated_signer_owner_e0_policy",
+]

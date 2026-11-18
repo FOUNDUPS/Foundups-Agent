@@ -31,6 +31,10 @@ from .persona_registry import resolve_channel_credential_set
 # Import extracted services (WSP 72: Module Independence, WSP 62: Large File Refactoring)
 from .stream_discovery_service import StreamDiscoveryService
 from .multi_channel_coordinator import MultiChannelCoordinator
+from .engagement_lifecycle import (
+    _await_owned_completion, run_confirmed_live_chat, cancel_browser_tasks,
+    run_owned_rotation, dispatch_comment_engagement,
+)
 # RotationSupervisor: Task-based rotation with heartbeat stall detection (WSP 77)
 from .rotation_supervisor import RotationSupervisor, OperationType as RotationOperation
 # Activity Router for breadcrumb-based activity coordination (WSP 77)
@@ -101,6 +105,7 @@ class AutoModeratorDAE:
         self.start_time = time.time()
         self.enable_ai_monitoring = enable_ai_monitoring
         self.heartbeat_service = None
+        self.operator_manifest_task = None
 
         # Comment engagement subprocess tracking (prevent dual-process race condition)
         self._comment_engagement_task = None  # Active async task reference
@@ -411,6 +416,8 @@ class AutoModeratorDAE:
                 opts = Options()
                 opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{chrome_port}")
                 driver = await asyncio.to_thread(webdriver.Chrome, options=opts)
+                from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+                install_youtube_verification_guard(driver, chrome_port)
 
                 # Verify connection works
                 try:
@@ -458,6 +465,8 @@ class AutoModeratorDAE:
                 edge_opts = EdgeOptions()
                 edge_opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{edge_port}")
                 driver = await asyncio.to_thread(webdriver.Edge, options=edge_opts)
+                from modules.infrastructure.foundups_selenium.src.youtube_verification import install_youtube_verification_guard
+                install_youtube_verification_guard(driver, edge_port)
 
                 # Verify connection works
                 try:
@@ -844,6 +853,11 @@ class AutoModeratorDAE:
         if not self.service and video_id:
             logger.info("[AUTH] Stream found! Attempting authentication for chat interaction...")
             try:
+                # Function-local import (WSP coordination: avoid touching the
+                # module-level import block another change may also edit).
+                from modules.platform_integration.youtube_auth.src.youtube_auth import (
+                    OAuthReauthRequiredError,
+                )
                 force_set_raw = os.getenv("YT_FORCE_CREDENTIAL_SET", "").strip()
                 token_index = None
                 if force_set_raw:
@@ -895,6 +909,19 @@ class AutoModeratorDAE:
                             logger.info(f"[OK] Got chat ID with API: {live_chat_id[:20]}...")
                         else:
                             logger.warning("[WARN] Could not get chat ID even with API")
+            except OAuthReauthRequiredError as reauth_err:
+                # Pinned credential set is dead (invalid_grant). Do NOT silently
+                # authenticate via another account/set and do NOT log
+                # "[OK] Authenticated". Surface the exact operator reauth command
+                # with the Chrome/Edge hint so 012 can fix the pinned account.
+                logger.critical(
+                    f"[AUTH] Pinned credential set {reauth_err.set_id} requires "
+                    f"re-authorization (invalid_grant) - NO silent fallback. "
+                    f"Operator action: {reauth_err.operator_action} "
+                    f"(Set 1 -> Chrome for UnDaoDu/Move2Japan, "
+                    f"Set 10 -> Edge for FoundUps/antifaFM)"
+                )
+                logger.info("[NO-QUOTA] Continuing in NO-QUOTA mode (view-only)")
             except Exception as e:
                 logger.warning(f"[WARN] Authentication failed: {e}")
                 logger.info("[NO-QUOTA] Continuing in NO-QUOTA mode (view-only)")
@@ -959,80 +986,41 @@ class AutoModeratorDAE:
         logger.info("MONITORING CHAT - WSP-COMPLIANT ARCHITECTURE")
         logger.info("="*60)
 
-        # === FIX 2026-02-06: Verify live chat BEFORE terminating comments ===
-        # Previously: Comments terminated → live chat failed → disruption + 2min stream search
-        # Now: Verify live chat works → THEN terminate comments → no disruption if chat unavailable
-        logger.info("[LOCK] Verifying live chat availability before disabling comments...")
-        if not self.livechat or not await self.livechat.initialize():
-            logger.warning("[LOCK] Live chat NOT available - keeping comment engagement ACTIVE")
-            logger.info("[LOCK] Will search for another stream without disrupting comments")
-            return  # Exit monitor_chat, will search for new stream without disrupting comments
+        await self._run_confirmed_live_chat()
 
-        # === Live chat CONFIRMED available - NOW safe to terminate comments ===
-        logger.info("[LOCK] Live chat CONFIRMED - disabling comment engagement")
-        await self.terminate_comment_engagement()
-        self._live_stream_pending = False
-        self._live_chat_active = True
-        logger.info("[LOCK] Live chat mode ACTIVE - comment engagement DISABLED")
+    def _get_confirmed_live_channel(self) -> Optional[str]:
+        """Session-scoped exclusion, also held while matching work is settling."""
+        return getattr(self, "_confirmed_live_channel_id", None)
 
-        # === CARDIOVASCULAR: Start heartbeat task (WSP 91) ===
-        heartbeat_task = None
-        if self.telemetry:
-            heartbeat_task = asyncio.create_task(self._heartbeat_loop())
-            logger.info("[HEART] Heartbeat monitoring started (30s interval)")
+    async def _run_confirmed_live_chat(self):
+        """Delegate session lifetime while retaining identity on this DAE."""
+        return await run_confirmed_live_chat(self)
 
-        try:
-            # Session already initialized above, start polling directly
-            self.livechat.is_running = True
-            await self.livechat.run_polling_loop()
-        except KeyboardInterrupt:
-            logger.info("[STOP] Monitoring stopped by user")
-        except Exception as e:
-            logger.error(f"Monitoring error: {e}")
-        finally:
-            # === CARDIOVASCULAR: Stop heartbeat and record stream end (WSP 91) ===
-            if heartbeat_task:
-                heartbeat_task.cancel()
-                try:
-                    await heartbeat_task
-                except asyncio.CancelledError:
-                    pass
-                logger.info("[HEART] Heartbeat monitoring stopped")
 
-            # === CRITICAL: Reset live chat mutex (allow comment engagement restart) ===
-            self._live_chat_active = False
-            logger.info("[LOCK] Live chat mode INACTIVE - comment engagement can restart")
+    async def terminate_comment_engagement(self, for_live_handoff: bool = False):
+        """Settle one confirmed channel, or cancel/await the full supervisor by default."""
+        if for_live_handoff:
+            channel_id = self._get_confirmed_live_channel()
+            if not channel_id:
+                raise RuntimeError("Live handoff requires confirmed session identity")
+            coordinator = getattr(self, "multi_channel_coordinator", None)
+            if coordinator:
+                await coordinator.settle_channel(channel_id)
+            for supervisor in tuple(getattr(self, "_rotation_supervisors", {}).values()):
+                await supervisor.settle_channel(channel_id)
+            return
 
-            if self.telemetry and self.current_stream_id:
-                try:
-                    self.telemetry.record_stream_end(self.current_stream_id)
-                    logger.info(f"[HEART] Stream session ended (SQLite ID: {self.current_stream_id})")
-                    self.current_stream_id = None
-                except Exception as e:
-                    logger.warning(f"Failed to record stream end: {e}")
-
-            if self.livechat:
-                self.livechat.stop_listening()
-
-    async def terminate_comment_engagement(self):
-        """
-        Terminate any running comment engagement subprocess (prevent dual-process race condition).
-
-        Called when switching from comment processing to live chat monitoring.
-        WSP 49: Process isolation - ensure only ONE mode active at a time.
-        """
-        if self._comment_engagement_task and not self._comment_engagement_task.done():
-            logger.info("[LOCK] Terminating comment engagement subprocess (switching to live chat)...")
-            self._comment_engagement_task.cancel()
-            try:
-                await self._comment_engagement_task
-            except asyncio.CancelledError:
-                logger.info("[OK] Comment engagement subprocess terminated successfully")
-            except Exception as e:
-                logger.warning(f"[WARN] Comment engagement termination exception: {e}")
+        task = self._comment_engagement_task
+        if task and not task.done():
+            task.cancel()
+            cancelled = await _await_owned_completion(task)
+            if not task.cancelled():
+                task.result()
             self._comment_engagement_task = None
-        else:
-            logger.debug("[LOCK] No active comment engagement subprocess to terminate")
+            if cancelled:
+                raise asyncio.CancelledError
+        elif task:
+            self._comment_engagement_task = None
 
     async def _wait_for_inbox_clear(self):
         """
@@ -1069,6 +1057,9 @@ class AutoModeratorDAE:
             if self._comment_engagement_task and not self._comment_engagement_task.done():
                 await asyncio.sleep(5)
             else:
+                if self._comments_halted():
+                    logger.warning('[LOCK] Comments halted; settled comment task yields to live handoff without inbox-clear evidence')
+                    return
                 channel_id = self._comment_engagement_active_channel
                 status = self._comment_engagement_status.get(channel_id or "", {})
 
@@ -1113,6 +1104,22 @@ class AutoModeratorDAE:
                 logger.warning("[LOCK] Inbox-clear wait timed out; proceeding to live chat")
                 return
 
+    def _comments_halted(self, result=None):
+        """Retain this DAE's typed halt until settlement and a fresh owner."""
+        from modules.communication.livechat.src.automation_gates import comment_stop_result, comments_exit_code, QUALITY_REASONS
+        receipt = getattr(self, '_comments_halt_receipt', None) or comment_stop_result()
+        if comments_exit_code(result) and not receipt:
+            reason = result.get('quality_halt_reason')
+            receipt = {'state': 'halted', 'all_processed': False,
+                'halted_for_comments_stop': True,
+                'halted_for_reply_quality': result.get('halted_for_reply_quality') is True,
+                'quality_stop_persisted': result.get('quality_stop_persisted') is True,
+                'quality_halt_reason': reason if isinstance(reason, str) and reason in QUALITY_REASONS else 'comments_halted_child',
+                'stats': {'all_processed': False}}
+        if receipt:
+            self._comments_halt_receipt = receipt
+        return receipt
+
     async def _run_comment_engagement(
         self,
         runner,
@@ -1131,6 +1138,10 @@ class AutoModeratorDAE:
 
         This method is launched as an async task and does not block main DAE.
         """
+        halted = self._comments_halted()
+        if halted:
+            self._comment_engagement_status[channel_id] = dict(halted, updated_at=time.time())
+            return
         logger.info(f"[DAEMON][CARDIOVASCULAR] 🎬 _run_comment_engagement STARTED")
         logger.info(f"[DAEMON][CARDIOVASCULAR]   Channel: {channel_id}")
         logger.info(f"[DAEMON][CARDIOVASCULAR]   Video ID: {video_id}")
@@ -1140,17 +1151,19 @@ class AutoModeratorDAE:
         self._comment_engagement_active_channel = channel_id
 
         try:
-            logger.info(f"[DAEMON][CARDIOVASCULAR] 🚀 Calling runner.run_engagement()...")
-            self._log_studio_context(channel_id, label="comment_engagement")
-            result = await runner.run_engagement(
-                channel_id=channel_id,
-                video_id=video_id,
-                max_comments=max_comments
-            )
+            result = await dispatch_comment_engagement(
+                self, runner, channel_id, video_id, max_comments, mode,
+                group_channels_by_browser(role="comments"))
             logger.info(f"[DAEMON][CARDIOVASCULAR] ✅ runner.run_engagement() returned!")
 
-            # Log result
+            # A confirmed handoff is deferred work, not completed engagement.
+            if result and result.get("deferred"):
+                return
             result = result or {}
+            halted = self._comments_halted(result)
+            if halted:
+                self._comment_engagement_status[channel_id] = dict(halted, updated_at=time.time())
+                return
             stats = result.get('stats', {})
             error = result.get('error')
 
@@ -1340,6 +1353,12 @@ class AutoModeratorDAE:
                 for _browser in ("chrome", "edge"):
 
                     _task = _browser_tasks.get(_browser)
+                    if (_task is not None and _task.done() and not _task.cancelled()
+                            and _task.exception() is None
+                            and _task.result() == {'status': 'operator_handoff_required'}):
+                        # An intentional editor handoff is not a crashed worker.
+                        # Keep this browser held while supervising its peer.
+                        continue
                     if _task is None or _task.done():
                         _tag = _browser.upper()
                         # Log what happened
@@ -1370,9 +1389,7 @@ class AutoModeratorDAE:
 
             except asyncio.CancelledError:
                 logger.info("[SUPERVISOR] Supervisor CANCELLED — shutting down browser loops")
-                for _b, _t in _browser_tasks.items():
-                    if _t and not _t.done():
-                        _t.cancel()
+                await cancel_browser_tasks(_browser_tasks)
                 raise
             except Exception as _sup_err:
                 logger.error(f"[SUPERVISOR] Health check error: {_sup_err}", exc_info=True)
@@ -1390,6 +1407,7 @@ class AutoModeratorDAE:
                 update_engagement_status=lambda cid, status: self._comment_engagement_status.update({cid: status}),
                 set_active_channel=lambda cid: setattr(self, '_comment_engagement_active_channel', cid),
                 is_live_stream_pending=lambda: self._live_stream_pending,
+                get_confirmed_live_channel=self._get_confirmed_live_channel,
             )
 
     async def _browser_engagement_loop(
@@ -1471,7 +1489,9 @@ class AutoModeratorDAE:
                 use_rotation_supervisor = _env_truthy("YT_USE_ROTATION_SUPERVISOR", "false")
 
                 # 2026-03-10: DAEmon switch - skip comment engagement if disabled
-                if not comments_enabled:
+                if self._comments_halted():
+                    logger.warning(f"[{tag}-LOOP] PHASE 1 HALTED: comments require explicit recovery")
+                elif not comments_enabled:
                     logger.info(f"[{tag}-LOOP] PHASE 1 SKIPPED: comments disabled via YT_COMMENTS_ENABLED=false")
                 elif use_rotation_supervisor:
                     # NEW: Task-based rotation with heartbeat stall detection
@@ -1481,12 +1501,13 @@ class AutoModeratorDAE:
                             browser=browser_name,
                             heartbeat_timeout=float(os.getenv("YT_ROTATION_HEARTBEAT_TIMEOUT", "60")),
                             task_timeout=float(os.getenv("YT_ROTATION_TASK_TIMEOUT", "300")),
+                            get_confirmed_live_channel=self._get_confirmed_live_channel,
                         )
-                        result = await supervisor.run_rotation(
-                            operation=RotationOperation.COMMENTS,
-                            max_items_per_channel=max_comments if max_comments > 0 else 10,
-                        )
+                        result = await run_owned_rotation(
+                            self, supervisor, browser_name, max_comments, RotationOperation.COMMENTS)
                         comments_processed = result.total_comments
+                        if result.halted:
+                            self._comments_halted({'halted_for_comments_stop': True})
 
                         # Emit stall detection breadcrumb for AI Overseer
                         if result.failed_channels:
@@ -1523,6 +1544,8 @@ class AutoModeratorDAE:
                                 ),
                                 timeout=phase1_timeout,
                             )
+                            if self.multi_channel_coordinator._comments_halt():
+                                self._comments_halted(self.multi_channel_coordinator._comments_halt_receipt)
                         except asyncio.TimeoutError:
                             logger.error(f"[{tag}-LOOP] PHASE 1 TIMEOUT after {phase1_timeout}s — skipping to next phase")
                     finally:
@@ -1530,22 +1553,31 @@ class AutoModeratorDAE:
                             browser_lock.release()
                             logger.debug(f"[{tag}-LOOP] PHASE 1: Browser lock RELEASED")
                 phase1_elapsed = time.time() - phase1_start
-                logger.info(f"[{tag}-LOOP] PHASE 1: COMMENT ENGAGEMENT complete ({phase1_elapsed:.1f}s, {comments_processed} comments)")
-
-                # ACTIVITY ROUTING: Signal comment completion for this browser
-                try:
-                    activity_router = get_activity_router()
-                    activity_router.signal_activity_complete(
-                        ActivityType.COMMENT_ENGAGEMENT,
-                        metadata={"cycle": cycle_count, "browser": browser_name, "comments": comments_processed}
-                    )
-                except Exception as e:
-                    logger.debug(f"[{tag}-LOOP] [ACTIVITY-ROUTER] Signal failed: {e}")
+                if self._comments_halted():
+                    logger.warning(f"[{tag}-LOOP] PHASE 1: COMMENT ENGAGEMENT halted ({phase1_elapsed:.1f}s)")
+                else:
+                    logger.info(f"[{tag}-LOOP] PHASE 1: COMMENT ENGAGEMENT complete ({phase1_elapsed:.1f}s, {comments_processed} comments)")
+                    # ACTIVITY ROUTING: Only settled non-halted comment work completes.
+                    try:
+                        activity_router = get_activity_router()
+                        activity_router.signal_activity_complete(
+                            ActivityType.COMMENT_ENGAGEMENT,
+                            metadata={"cycle": cycle_count, "browser": browser_name, "comments": comments_processed}
+                        )
+                    except Exception as e:
+                        logger.debug(f"[{tag}-LOOP] [ACTIVITY-ROUTER] Signal failed: {e}")
 
                 # ============================================
-                # PHASE 2: VIDEO INDEXING (Chrome only, optional)
+                # PHASE 2: VIDEO INDEXING (per-browser, optional)
+                # 2026-06-18 (EDGE_LOOP_INDEXING_PHASE1): Run for WHICHEVER
+                # browser drives this loop, not Chrome-only. The Chrome-only
+                # gate left Edge channels (FoundUps/antifaFM, port 9223) never
+                # indexed by the loop. run_video_indexing_cycle already filters
+                # channels by the browser param (WSP 84 reuse), so passing
+                # browser_name="edge" indexes FoundUps/antifaFM, "chrome" still
+                # indexes Move2Japan/UnDaoDu. Same YT_VIDEO_INDEXING_ENABLED gate.
                 # ============================================
-                if browser_name == "chrome" and os.getenv("YT_VIDEO_INDEXING_ENABLED", "false").lower() in ("1", "true", "yes"):
+                if os.getenv("YT_VIDEO_INDEXING_ENABLED", "false").lower() in ("1", "true", "yes"):
                     try:
                         from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import run_video_indexing_cycle
                         logger.info(f"[{tag}-LOOP] PHASE 2: VIDEO INDEXING starting...")
@@ -1570,6 +1602,7 @@ class AutoModeratorDAE:
                 shorts_enabled = os.getenv("YT_SHORTS_SCHEDULING_ENABLED", "true").lower() in ("1", "true", "yes")
                 scheduled_count = 0
                 error_count = 0
+                results = None
 
                 logger.info(f"[{tag}-LOOP] PHASE 3: SHORTS SCHEDULING")
                 logger.info(f"[{tag}-LOOP]   Enabled: {shorts_enabled} | Module: {self._shorts_scheduler_available}")
@@ -1595,6 +1628,9 @@ class AutoModeratorDAE:
                         max_shorts = int(os.getenv("YT_SHORTS_PER_CYCLE", "9999"))
 
                         phase3_timeout = int(os.getenv("YT_SHORTS_PHASE3_TIMEOUT", "3600"))  # 60 min default
+                        manifest_queue = getattr(self, 'operator_manifest_queue', None)
+                        stream_requests = (manifest_queue.get_pending_stream_schedule_requests()
+                                           if manifest_queue is not None else [])
                         logger.info(f"[{tag}-LOOP] Running scheduler for {browser_name} (max {max_shorts}/ch, timeout={phase3_timeout}s)...")
 
                         # run_multi_channel_scheduler uses asyncio.run() internally,
@@ -1602,26 +1638,48 @@ class AutoModeratorDAE:
                         # HARDENED: timeout prevents infinite hang on browser stall.
                         # 2026-02-01: stop_event lets us tell the thread to stop
                         # if the timeout fires (threads can't be interrupted directly).
+                        request_worker = None
                         try:
-                            results = await asyncio.wait_for(
-                                asyncio.to_thread(
-                                    run_multi_channel_scheduler,
-                                    browser=browser_name,
-                                    mode="schedule",
-                                    max_per_channel=max_shorts,
+                            if stream_requests:
+                                request_worker = asyncio.create_task(asyncio.to_thread(
+                                    run_multi_channel_scheduler, browser=browser_name,
+                                    mode="schedule", max_per_channel=max_shorts,
                                     stop_event=scheduler_stop_event,
-                                ),
-                                timeout=phase3_timeout,
-                            )
+                                    stream_schedule_requests=stream_requests,
+                                ))
+                                results = await asyncio.wait_for(asyncio.shield(request_worker), timeout=phase3_timeout)
+                            else:
+                                request_worker = asyncio.create_task(asyncio.to_thread(
+                                    run_multi_channel_scheduler, browser=browser_name,
+                                    mode="schedule", max_per_channel=max_shorts,
+                                    stop_event=scheduler_stop_event,
+                                ))
+                                results = await asyncio.wait_for(asyncio.shield(request_worker), timeout=phase3_timeout)
                         except asyncio.TimeoutError:
                             logger.error(f"[{tag}-LOOP] PHASE 3 TIMEOUT after {phase3_timeout}s")
-                            # Signal the leaked thread to stop driving the browser
+                            # Signal the owned thread and wait for it to settle below.
                             if scheduler_stop_event:
                                 scheduler_stop_event.set()
                                 logger.warning(f"[{tag}-LOOP] PHASE 3: Stop signal SENT to scheduler thread")
-                            # Give thread a moment to notice and stop
-                            await asyncio.sleep(5)
                             results = None
+                        except asyncio.CancelledError:
+                            if request_worker is not None:
+                                if scheduler_stop_event:
+                                    scheduler_stop_event.set()
+                            raise
+                        finally:
+                            if request_worker is not None:
+                                if not request_worker.done() and scheduler_stop_event:
+                                    scheduler_stop_event.set()
+                                # Existing settlement owner retains the browser
+                                # lock even through repeated cancellation.
+                                if await _await_owned_completion(request_worker):
+                                    raise asyncio.CancelledError()
+                                if stream_requests and not request_worker.cancelled():
+                                    if request_worker.exception() is not None:
+                                        results = {'operator_handoff_required': True}
+                                    elif results is None:
+                                        results = request_worker.result()
 
                         # Parse results
                         if isinstance(results, dict) and "channels" in results:
@@ -1664,6 +1722,10 @@ class AutoModeratorDAE:
                         if browser_lock and browser_lock.locked():
                             browser_lock.release()
                             logger.debug(f"[{tag}-LOOP] PHASE 3: Browser lock RELEASED")
+
+                if isinstance(results, dict) and results.get('operator_handoff_required') is True:
+                    logger.warning(f"[{tag}-LOOP] Stream scheduling owner settled; awaiting operator review")
+                    return {'status': 'operator_handoff_required'}
 
                 # ============================================
                 # PHASE 4: LINKEDIN FEED ENGAGEMENT (Edge only)
@@ -1810,9 +1872,45 @@ class AutoModeratorDAE:
             mode=mode
         )
     async def run(self):
-        """
-        Main entry point - full DAE lifecycle.
-        """
+        """Hold host runtime ownership through the DAE and its owned shutdown."""
+        from .automation_gates import youtube_runtime_owner
+
+        if getattr(self, "_operator_manifest_run_active", False):
+            raise RuntimeError("AutoModeratorDAE.run is already active")
+        self._operator_manifest_run_active = True
+        watcher = None
+        try:
+            with youtube_runtime_owner():
+                try:
+                    # Independent of optional AI-overseer monitoring, but owned by run.
+                    from .operator_command_queue import OperatorCommandQueue
+                    self.operator_manifest_queue = OperatorCommandQueue(self)
+                    watcher = asyncio.create_task(self.operator_manifest_queue.watch_forever())
+                    self.operator_manifest_task = watcher
+                    logger.info("[012-MANIFEST] Independent operator-manifest watcher started")
+                    return await self._run_dae()
+                finally:
+                    tasks = ((watcher, "[012-MANIFEST] Operator watcher failed"),
+                             (getattr(self, '_comment_engagement_task', None), "[COMMUNITY] Owned engagement failed"))
+                    for task, _ in tasks:
+                        if task is not None and not task.done():
+                            task.cancel()
+                    cancelled = False
+                    for task, message in tasks:
+                        if task is None:
+                            continue
+                        cancelled = await _await_owned_completion(task) or cancelled
+                        if not task.cancelled() and task.exception() is not None:
+                            logger.error(message, exc_info=task.exception())
+                    if cancelled:
+                        raise asyncio.CancelledError()
+        finally:
+            self.operator_manifest_task = None
+            self._operator_manifest_run_active = False
+
+    async def _run_dae(self):
+        """Existing startup, comment-only, and stream-monitoring lifecycle."""
+
         logger.info("=" * 60)
         logger.info("[AI] AUTO MODERATOR DAE STARTING")
         logger.info("WSP-Compliant: Using livechat_core architecture")
@@ -1876,16 +1974,16 @@ class AutoModeratorDAE:
         # Phase -2: Launch dependencies (Chrome + LM Studio for comment engagement)
         if _env_truthy("YT_DEPS_AUTO_LAUNCH", "true"):
             try:
-                from modules.infrastructure.dependency_launcher.src.dae_dependencies import ensure_dependencies
-                # Require LM Studio so UI-TARS vision is available before engagement
-                dep_status = await ensure_dependencies(require_lm_studio=True)
+                from modules.infrastructure.dependency_launcher.src.dae_dependencies import QWEN_MODEL_ID, ensure_dependencies
+                # Language/DOM startup selects General; vision is a separate role.
+                dep_status = await ensure_dependencies(require_lm_studio=True, model_key=os.getenv("LM_STUDIO_NATIVE_MODEL_KEY") or QWEN_MODEL_ID)
                 if not dep_status.get('chrome'):
                     logger.warning("[DEPS] Chrome not ready - comment engagement may fail")
                     logger.warning("[DEPS] Manual launch: chrome --remote-debugging-port=9222")
                 if dep_status.get('lm_studio'):
-                    logger.info("[DEPS] LM Studio ready (UI-TARS vision enabled on port 1234)")
+                    logger.info("[DEPS] LM Studio selected General model ready")
                 else:
-                    logger.warning("[DEPS] LM Studio not ready - falling back to DOM-only actions")
+                    logger.warning("[DEPS] LM Studio General model not ready; DOM actions remain available")
             except ImportError:
                 logger.debug("[DEPS] Dependency launcher not available")
             except Exception as e:
@@ -2363,38 +2461,45 @@ class AutoModeratorDAE:
                             # ORIENT: Query for next activity decision
                             decision = activity_router.get_next_activity()
 
-                            # DECIDE: Determine current activity based on ACTUAL page state (not just _live_chat_active)
-                            # FIX (2026-02-21): Use Chrome page type to determine actual activity
-                            chrome_page = page_state.get("chrome", {}).get("page_type") if page_state else None
+                            # DECIDE: channel-scope the activity signal across BOTH browser
+                            # groups (RC3) instead of the Chrome page alone. Chrome 9222 =
+                            # M2J/UnDaoDu, Edge 9223 = FoundUps/antifaFM; a Chrome comments tab
+                            # says nothing about whether the Edge-bound channels are processed.
+                            # The rollup current_activity precedence is UNCHANGED (FIX 2026-02-21:
+                            # Chrome page wins -> live -> default) so should_pivot is identical.
+                            from .ooda_activity_signal import derive_activity_signal
+                            activity_signal = derive_activity_signal(page_state, self._live_chat_active)
+                            current_activity = activity_signal.current_activity
 
-                            # If Chrome is on comments page, that's what we're doing (regardless of _live_chat_active)
-                            if chrome_page == "youtube_studio_comments":
-                                current_activity = ActivityType.COMMENT_ENGAGEMENT
-
-                                # FIX: When comments are cleared AND we're on comments page, signal completion
-                                if edge_comments_cleared:
-                                    # Get current channel from router
-                                    router_channel_id = activity_router.current_channel_id
-                                    if router_channel_id:
-                                        logger.info(f"[OODA-PIVOT] Comments cleared for {router_channel_id} - signaling completion")
-                                        activity_router.signal_comments_complete(router_channel_id)
-                                        # After signaling, get updated decision
-                                        decision = activity_router.get_next_activity()
-                            elif self._live_chat_active:
-                                current_activity = ActivityType.LIVE_CHAT
-                            else:
-                                current_activity = ActivityType.COMMENT_ENGAGEMENT
+                            # PRESERVED: when Chrome is on comments AND edge comments cleared,
+                            # signal completion to the router (router-state side effect, unchanged).
+                            if activity_signal.chrome_on_comments and edge_comments_cleared:
+                                router_channel_id = activity_router.current_channel_id
+                                if router_channel_id:
+                                    logger.info(f"[OODA-PIVOT] Comments cleared for {router_channel_id} - signaling completion")
+                                    activity_router.signal_comments_complete(router_channel_id)
+                                    # After signaling, get updated decision
+                                    decision = activity_router.get_next_activity()
 
                             should_pivot = decision.next_activity != current_activity and decision.next_activity != ActivityType.IDLE
 
-                            # Log OODA decision
+                            # Log OODA decision -- lead with the channel-scoped truth so a stale
+                            # Chrome comments tab during live cannot read as a real outage.
                             logger.info(
                                 f"[OODA] Pulse #{heartbeat_count}: "
                                 f"Current={current_activity.name}, "
+                                f"{activity_signal.log_summary()}, "
                                 f"Suggested={decision.next_activity.name}, "
                                 f"Pivot={'YES' if should_pivot else 'NO'}, "
                                 f"Reason={decision.reason[:50] if decision.reason else 'none'}"
                             )
+                            if activity_signal.is_misleading_comment_signal:
+                                logger.warning(
+                                    "[OODA] RC3: Current=COMMENT_ENGAGEMENT is a STALE comments tab during live "
+                                    f"(chrome_stale={activity_signal.chrome_stale_during_live}, "
+                                    f"edge_stale={activity_signal.edge_stale_during_live}); the Edge-bound "
+                                    "channels (FoundUps/antifaFM) are NOT being processed this pulse."
+                                )
 
                             # ACT: Signal pivot opportunity (actual pivot handled by higher orchestration)
                             if should_pivot and decision.next_activity != ActivityType.IDLE:
@@ -2420,6 +2525,14 @@ class AutoModeratorDAE:
                                                 # Layer 5: Page state observation
                                                 "page_state_chrome": page_state.get("chrome", {}).get("page_type") if page_state else None,
                                                 "page_state_edge": page_state.get("edge", {}).get("page_type") if page_state else None,
+                                                # RC3: channel-scoped activity signal (Chrome 9222 = M2J/UnDaoDu,
+                                                # Edge 9223 = FoundUps/antifaFM) so a stale Chrome tab can't read
+                                                # as Edge-channel comment processing.
+                                                "chrome_activity": activity_signal.chrome_activity.name if activity_signal.chrome_activity else None,
+                                                "edge_activity": activity_signal.edge_activity.name if activity_signal.edge_activity else None,
+                                                "chrome_stale_during_live": activity_signal.chrome_stale_during_live,
+                                                "edge_stale_during_live": activity_signal.edge_stale_during_live,
+                                                "is_misleading_comment_signal": activity_signal.is_misleading_comment_signal,
                                             }
                                         )
                                     except Exception as bc_e:

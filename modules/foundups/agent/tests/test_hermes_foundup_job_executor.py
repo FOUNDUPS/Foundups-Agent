@@ -130,6 +130,37 @@ def mock_hermes_security_failed() -> Dict[str, Any]:
     }
 
 
+# ---------------------------------------------------------------------------
+# HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1 acceptance A4
+# ---------------------------------------------------------------------------
+
+
+def test_a4_executor_respects_builder_dry_run_default(
+    queued_validate_job: FoundUpJob, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A4: execute_foundup_job(..., force_dry_run=False) with no env opt-in must
+    still run dry-run, because the builder now defaults to dry-run. The executor
+    must not silently enable real writes when the caller merely declines to force
+    dry-run.
+
+    Ref: docs/audits/architecture/HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1.md
+    """
+    monkeypatch.delenv("HERMES_BUILDER_DRY_RUN", raising=False)
+    monkeypatch.delenv("HERMES_BUILDER_ALLOW_REAL_WRITES", raising=False)
+    monkeypatch.setenv("HERMES_BUILDER_SECURITY_GATE", "0")
+
+    repo_root = Path(__file__).resolve().parents[4]
+    result = execute_foundup_job(
+        queued_validate_job, repo_root=repo_root, force_dry_run=False
+    )
+
+    # Builder default (dry-run) is reflected in the job's policy flags...
+    assert result.job.policy_flags.dry_run_mode is True
+    # ...and in the Hermes result payload when the action dispatched.
+    if result.hermes_result is not None:
+        assert result.hermes_result.get("dry_run") is True
+
+
 @pytest.fixture
 def mock_hermes_exfoliation_failed() -> Dict[str, Any]:
     """Mock Hermes result with exfoliation gate failure."""

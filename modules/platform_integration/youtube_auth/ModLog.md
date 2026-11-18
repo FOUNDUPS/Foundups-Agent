@@ -12,6 +12,276 @@ This log tracks changes specific to the **youtube_auth** module in the **platfor
 
 ## MODLOG ENTRIES
 
+### 2026-06-15 - YT-OAUTH-INVALID-GRANT-NO-SILENT-FALLBACK-PHASE1: No silent Set-10 fallback for a pinned set
+
+**By:** 0102 (Worker P3)
+**Slice:** YT-OAUTH-INVALID-GRANT-NO-SILENT-FALLBACK-PHASE1 (builds on #811)
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 97 (Truth Signaling)
+
+**HoloIndex Retrieval (backfilled 2026-06-15, pre-contract worker):** the full retroactive retrieval report + verdict + attention flags are in the PR #812 body. NEEDS_012: HoloIndex miss - retroactive queries surfaced only adjacent files (e.g. livechat/persona_registry.py) and did NOT surface the edit target youtube_auth.py; the get_authenticated_service edits + auto_moderator_dae.py:867 auth block were located by architect-pre-verified direct reads (WSP 50). Indexing gap tracked as HOLOINDEX_YOUTUBE_AUTH_INDEXING_GAP_PHASE1.
+
+**Problem (verified):**
+- `get_authenticated_service()` on `invalid_grant` for a set logged CRITICAL,
+  added the set to `exhausted_sets`, then `continue`d to the NEXT set - even when
+  the caller had EXPLICITLY pinned a credential set. UnDaoDu/Move2Japan are
+  pinned to set 1 (`resolve_channel_credential_set`), so a dead set 1 token
+  silently authenticated via set 10 (the FoundUps/antifaFM account) or degraded
+  to read-only no-auth mode. `auto_moderator_dae.py` then logged
+  "[OK] Authenticated" as if the pinned set had worked.
+
+**Changes:**
+- **Added** `OAuthReauthRequiredError(Exception)` in `src/youtube_auth.py`,
+  carrying `set_id` (int, or list when all sets are dead) and `operator_action`
+  derived from `oauth_health.reauth_command_for(set_id)` (imported
+  function-locally). Exported in INTERFACE.md.
+- **`get_authenticated_service(token_index)`** (no change to
+  `preflight_oauth_check`):
+  - Tracks `is_pinned = token_index is not None`.
+  - Pinned + `invalid_grant` -> raises `OAuthReauthRequiredError(set_id,
+    reauth_command)`. NO fallback to another set, NO no-auth degrade.
+  - Auto-rotation + `invalid_grant` on set N -> marks exhausted, emits a
+    truthful `[OAUTH-HEALTH]` capacity line after the skip, and continues ONLY
+    if a healthy set remains; logs an explicit "falling back to remaining
+    healthy set(s)" line.
+  - Auto-rotation + ALL sets dead -> raises `OAuthReauthRequiredError` listing
+    EVERY reauth command (no no-auth degrade).
+- **`auto_moderator_dae.py`** auth block (~L867 only): catches
+  `OAuthReauthRequiredError` (function-local import) -> logs CRITICAL with the
+  operator reauth command + Chrome/Edge hint; does NOT log "[OK] Authenticated"
+  on a pinned-set failure.
+
+**Tests:** `tests/test_oauth_no_silent_fallback.py` (no network; refresh mocked
+to raise `invalid_grant`):
+- `test_pinned_set1_invalid_grant_does_not_use_set10` - asserts
+  `OAuthReauthRequiredError` raised, set 10 never consulted, no service built.
+- `test_auto_rotation_set1_dead_falls_back_to_set10_when_set10_healthy` -
+  explicit fallback still works, log says fallback to set 10.
+- `test_all_sets_dead_raises_with_both_commands` - raises listing both reauth
+  commands, no no-auth degrade.
+- Result: 3 passed. (Pre-existing legacy `test_youtube_auth.py` failures are
+  unrelated and present on the base branch.)
+
+**Coordination:** Edited ONLY `get_authenticated_service()` + new exception in
+`youtube_auth.py`; `preflight_oauth_check()` left untouched (sibling PR2 owns
+it). Stacks on #811 (browser resolver); merge order #811 -> PR2 -> this PR.
+
+---
+
+### 2026-06-15 - YT-OAUTH-DUAL-PREFLIGHT-MENU-PHASE1: Dual-set fixed-port OAuth preflight + menu 1->1 wiring
+
+**By:** 0102 (Worker P2)
+**Slice:** YT-OAUTH-DUAL-PREFLIGHT-MENU-PHASE1 (stacks on #811 YT-OAUTH-BROWSER-RESOLVER-PHASE1)
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 84 (Code Reuse / single source of truth), WSP 97 (Truth Signaling)
+
+**HoloIndex Retrieval (backfilled 2026-06-15, pre-contract worker):** the full retroactive retrieval report + verdict + attention flags are in the PR #813 body. NEEDS_012: HoloIndex miss - retroactive queries surfaced only adjacent files (e.g. cli/youtube_menu.py) and did NOT surface the edit target youtube_auth.py; the real preflight call site (main.py:monitor_youtube) and all edits were located by architect-pre-verified direct reads (WSP 50). Indexing gap tracked as HOLOINDEX_YOUTUBE_AUTH_INDEXING_GAP_PHASE1.
+
+**CODEQL_FALSE_POSITIVE_STRUCTURALLY_CLEANED (2026-06-15):** the post-rebase CodeQL run flagged 5 `py/clear-text-logging-sensitive-data` (high) - all confirmed false positives (logs credential-set IDs / account labels / browser / ports, never a token or secret; the same rule has 58 pre-existing instances on main). Per 012 direction (remediate, NOT dismiss / merge-red), the 5 log statements (youtube_auth.py reauth banner + main.py preflight summary/expired/healthy) were restructured to log ONLY sanitized non-secret scalars: int set IDs, resolver-derived browser name, int port, and a STATIC public channel-role literal - removing any value read from the oauth/credential container. No OAuth behavior change.
+
+**Problem (verified):**
+- YouTube DAE menu 1->1 ("Live Chat Monitor") runs OAuth preflight via
+  `main.monitor_youtube()`, whose auto-reauth path used
+  `run_local_server(port=0)` (a RANDOM port) instead of the authorize scripts'
+  FIXED ports (`OAUTH_PORT_SET1=8080` / `OAUTH_PORT_SET10=8090`). A random port
+  can mismatch the client's whitelisted redirect_uri.
+- A Set-1 reauth failure was effectively swallowed (the per-set `except`
+  continued without keeping the set dead / surfacing it), so the monitor could
+  start on Set 10 only. 012 saw Edge (Set 10) open but Chrome (Set 1) never did.
+- Preflight iterated sets in dict/registry order (no guarantee Set 1 before
+  Set 10), so even when both were dead the browsers could open out of order.
+
+**Changes:**
+- **Added** `src/youtube_auth.py :: run_supervised_reauth_for_set(set_id, client_secrets, token_file, scopes) -> bool`:
+  - Resolves the per-set browser via #811 `oauth_browser.resolve_browser_for_set`
+    (Set 1 -> Chrome, Set 10 -> Edge).
+  - Uses the FIXED listener port (`OAUTH_PORT_SET1`=8080 / `OAUTH_PORT_SET10`=8090,
+    env-overridable, mirroring `authorize_set1.py`/`authorize_set10.py`) -- NOT
+    `port=0`.
+  - Prints the account label from `oauth_health.SET_METADATA`; returns success
+    bool. BLOCKING by design (run_local_server blocks) so callers run it
+    sequentially. Never logs tokens / client_secret.
+- **Added** module constants `OAUTH_PORT_SET1` / `OAUTH_PORT_SET10` and helper
+  `_oauth_port_for_set(set_id)`.
+- **Refactored** `preflight_oauth_check(auto_reauth=True)`:
+  - Sets are now processed in `sorted()` order (Set 1 before Set 10).
+  - The inline `port=0` auto-reauth block is REPLACED by a SEQUENTIAL call to
+    `run_supervised_reauth_for_set`. On failure the set STAYS in `expired[]` and a
+    CRITICAL log emits the exact `reauth_command_for(set_id)` (WSP 97: no false OK).
+  - `get_authenticated_service()` is intentionally untouched (its `port=0` is
+    owned by a separate slice/PR3).
+- **Wired** `main.py :: monitor_youtube()` (the menu 1->1 / monitor entry path):
+  - Calls `preflight_oauth_check(auto_reauth=..., credential_sets=[1, 10])`
+    explicitly (dual-set contract).
+  - Prints a truthful dual-set summary (`healthy` / `still_dead` / `missing`) and
+    a per-set WARN when Set 1 (UnDaoDu/Move2Japan) or Set 10 (FoundUps/antifaFM)
+    is not healthy.
+  - **SECTION C**: after preflight, logs reconciled quota headroom for BOTH sets
+    via `QuotaMonitor.get_usage_summary()` (function-local import, read-only) so
+    012 sees Set 1 AND Set 10, not Set 1 only.
+- **Tests** `tests/test_dual_set_preflight.py` (no network; mocks
+  `InstalledAppFlow.run_local_server` + `resolve_browser_for_set`):
+  - `both_sets_dead_opens_set1_then_set10` (order [1, 10] asserted; ports
+    [8080, 8090]).
+  - `set1_reauth_failure_set10_still_attempted` (Set 1 stays expired, Set 10
+    still attempted and recovered).
+  - `supervised_reauth_uses_fixed_port_set1/set10` (asserts port=8080 / 8090,
+    not 0) + browser-not-found returns False without crashing.
+  - `menu_path_calls_dual_set_preflight` (mocks preflight; asserts
+    `credential_sets=[1, 10]`).
+  - Result: 9 passed (this file); 22 passed with `test_oauth_credential_health.py`.
+
+**Scope (Phase 1):** dual-set preflight, fixed ports in the SUPERVISED path,
+menu 1->1 wiring, dual-set quota visibility. Out of scope:
+`get_authenticated_service` invalid_grant/fallback (PR3); quota_monitor internals
+(read-only here); the browser resolver itself (#811).
+
+**Verification:**
+```
+python -m pytest modules/platform_integration/youtube_auth/tests/test_dual_set_preflight.py \
+  modules/platform_integration/youtube_auth/tests/test_oauth_credential_health.py
+# 22 passed
+```
+Pre-existing failures in `test_youtube_auth.py` / `test_quota_monitor.py` /
+`test_youtube_auth_coverage.py` were confirmed identical on the pristine #811
+base (target `get_authenticated_service` / quota internals -- not this slice).
+
+### 2026-06-15 - YT-OAUTH-BROWSER-RESOLVER-PHASE1: Per-set OAuth browser resolver
+
+**By:** 0102 (Worker P1)
+**Slice:** YT-OAUTH-BROWSER-RESOLVER-PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 84 (Code Reuse / single source of truth), WSP 97 (Truth Signaling)
+
+**Problem:**
+- `youtube_auth.py` hardcoded browser executable paths inline in TWO places
+  (`get_authenticated_service()` OAuth block and `preflight_oauth_check()`
+  auto-reauth block). No `CHROME_PATH`/`EDGE_PATH` env override and no
+  32/64-bit fallback. The inline set 10 path also pointed only at the x86 Edge
+  location, drifting from `authorize_set10.py` (which checks env, 64-bit, x86).
+- The authorize scripts (`authorize_set1.py`, `authorize_set10.py`) already had
+  the richer candidate ordering, so the same logic existed twice and diverged.
+
+**Changes:**
+- **Added** `src/oauth_browser.py`:
+  - `resolve_browser_for_set(set_id) -> (browser_name, executable_path)`.
+    Set 1 -> "chrome" (CHROME_PATH, 64-bit, x86); set 10 -> "edge"
+    (EDGE_PATH, 64-bit, x86). Candidate order EXACTLY mirrors the authorize
+    scripts. Returns the first path that `os.path.exists()`.
+  - `class BrowserNotFoundError(Exception)` carrying `set_id`,
+    `attempted_paths`, and `operator_action` (from
+    `oauth_health.reauth_command_for(set_id)`). Unknown `set_id` raises it too.
+  - Import-light: only `os` at load; `oauth_health` imported lazily inside the
+    error path to avoid import cycles.
+- **Refactored** `src/youtube_auth.py`: both inline browser-path blocks now call
+  `resolve_browser_for_set(index)`, verify `os.path.exists` before
+  `subprocess.Popen`, and on `BrowserNotFoundError` log CRITICAL with the
+  operator_action then follow the surrounding block's existing error contract
+  (OAuth block re-raises into its `except ... continue`; auto-reauth block
+  `continue`s to the next set). No browser path string literals remain in
+  either block.
+- **Tests** `tests/test_oauth_browser.py` (no network, mocks `os.path.exists`/env):
+  `test_resolve_browser_set1_prefers_chrome_path_env`,
+  `test_resolve_browser_set10_prefers_edge_path_env`,
+  `test_missing_browser_raises_with_reauth_command`, plus fallback-order and
+  unknown-set coverage. 6 passed.
+- **Docs**: INTERFACE.md documents the new exports and the CHROME_PATH/EDGE_PATH
+  env overrides.
+
+**Scope (Phase 1):** browser executable path resolution only. Out of scope:
+menu wiring, OAUTH port parity, `run_local_server(port=0)`, invalid_grant
+rotation/fallback, exhausted_sets logic (separate PRs build on this).
+
+**Verification:**
+```
+python -m pytest modules/platform_integration/youtube_auth/tests/test_oauth_browser.py
+# 6 passed
+```
+### 2026-06-15 - YT-QUOTA-TRACKING-TRUTH-PHASE1: Quota Tracking Truth (drift reconcile, PT reset boundary, real-signal alert gating)
+
+**By:** 0102 (Worker-Lane Q1, Slice YT-QUOTA-TRACKING-TRUTH-PHASE1)
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+
+**Problem (verified from source, not assumed):**
+`quota_monitor.py` could emit a CRITICAL "~99% quota" alert from a STALE / drift-corrupted
+local counter rather than a real Google `quotaExceeded`. This is a WSP 97 truth violation:
+the monitor signalled exhaustion that was not true.
+
+Three confirmed mechanisms in `src/quota_monitor.py`:
+1. `_normalize_usage_data()` loaded the stored `sets.N.used` verbatim without checking it
+   against the sum of its per-operation `units` ledger. A corrupted record (e.g.
+   `used=9901` while the operations ledger sums to `1`) loaded as 99% used.
+2. `_check_alerts()` computed `usage_percent = used / limit` purely from that local counter
+   and raised CRITICAL with no requirement for a real Google signal.
+3. `_check_daily_reset()` used a rolling-24h-from-last_reset window, NOT Google's actual
+   midnight-Pacific quota boundary, so a stale counter could persist across the real reset.
+
+**Changes (`src/quota_monitor.py` only):**
+- **Drift reconciliation on load** (`_normalize_usage_data`): per set, compute
+  `used_from_ops = sum(op["units"])`; if `abs(used - used_from_ops) > 1`, log
+  `WARNING [QUOTA-DRIFT] set N used=X ops_sum=Y; reconciling to Y` and set `used = used_from_ops`.
+  The operations ledger is treated as the source of truth.
+- **Pacific-Time daily reset boundary** (`_check_daily_reset`): reset when the *Pacific-Time
+  calendar date* rolls over (midnight America/Los_Angeles), replacing rolling-24h. Added
+  `to_pacific()` + `_us_pacific_offset_hours()` helpers using stdlib `zoneinfo` when available,
+  with a manual US-DST fallback (PST UTC-8 / PDT UTC-7, 2nd-Sun-Mar to 1st-Sun-Nov) for hosts
+  where the tz database is unavailable. NOTE: this host has no `tzdata` (zoneinfo raised
+  `ZoneInfoNotFoundError`), so the manual fallback is the ACTIVE path here and is exercised by
+  the tests. `last_reset` is now persisted as Pacific wall-clock isoformat.
+- **Real-signal alert gating** (`_check_alerts` + new `report_quota_signal()`): a CRITICAL/
+  WARNING alert now requires EITHER a real Google signal (`report_quota_signal`,
+  for HTTP 403 `quotaExceeded` / `dailyLimitExceeded`) OR a *reconciled* local `used` at/above
+  the threshold. Because the counter is reconciled at load, a drift-corrupted counter alone can
+  no longer produce a false CRITICAL. Alerts now carry a `trigger` field (`google_signal` /
+  `local_counter`) for auditability. Real signals are cleared on the PT daily reset.
+- **Injectable clock**: `__init__` accepts an optional `now_provider` (defaults to
+  `datetime.now`); all internal time reads go through `self._now()` / `self._now_pacific()` so
+  tests are deterministic and offline. Fully backward compatible (additive kwarg; existing
+  callers `QuotaMonitor()` / `QuotaMonitor(memory_dir=...)` unchanged).
+
+**Tests (`tests/test_quota_monitor.py`):**
+- New `TestQuotaTruthSignaling` class (8 tests, all deterministic / no network):
+  corrupt `{used:9901, ops sum:1}` load -> `used==1` + `[QUOTA-DRIFT]` warning; no false
+  CRITICAL after corrupt load; consistent counter -> no drift warning; real `quotaExceeded`
+  signal raises CRITICAL even at ~0% local usage; genuinely high reconciled counter still
+  alerts (`trigger=local_counter`); PT same-day no-reset; PT cross-day reset; PT-boundary is
+  not rolling-24h (1h gap that crosses PT midnight still resets). Times injected as tz-aware
+  UTC for host-independent determinism.
+- Updated the two pre-existing reset tests (`test_check_daily_reset`,
+  `test_check_daily_reset_not_needed`) to assert the new PT-day boundary instead of the
+  removed rolling-24h contract (they previously encoded the old behavior).
+
+**Verification (truthful, executed):**
+- `pytest tests/test_quota_monitor.py` -> 22 passed, 5 failed.
+- The 5 failures are PRE-EXISTING and unrelated to this slice: the test file still assumes a
+  7-set (1-7) credential config while production `daily_limits` is `{1, 10}`
+  (`test_initialization`, `test_get_best_credential_set`,
+  `test_get_best_credential_set_all_exhausted`, `test_get_usage_summary`,
+  `test_quota_file_persistence`). Baseline before this slice was also 5 failed / 14 passed;
+  this slice adds 8 passing tests and fixes 2 reset tests without changing the pre-existing
+  failure set. Those 7-set mismatches are out of scope for this truth slice.
+
+### HoloIndex Retrieval Report
+| # | Query | Hits | Top result | Quality | Used? |
+|---|-------|------|------------|---------|-------|
+| 1 | quota monitor usage reconcile drift credential set | 20 | modules\communication\livechat\src\quota_aware_poller.py | LOW | N |
+| 2 | youtube quota daily reset pacific time critical alert threshold | 20 | modules\communication\livechat\src\mcp_youtube_integration.py | LOW | N |
+| 3 | quota_usage operations units track_api_call get_usage_summary | 20 | modules\communication\livechat\src\intelligent_throttle_manager.py | LOW | N |
+
+### Retrieval verdict
+- noise: HIGH - all 3 queries returned livechat throttle/poller + WSP/docs; none surfaced the
+  actual target `quota_monitor.py`.
+- ordering: target file never ranked; semantic index biased toward livechat quota consumers.
+- missing artifacts: `modules/platform_integration/youtube_auth/src/quota_monitor.py` and its
+  tests were absent from all result sets.
+- staleness/duplication: not the issue; this is a retrieval miss.
+- action: re-queried 3x (all LOW) -> fell back to direct path reads via Glob + Read of
+  `quota_monitor.py`, `tests/test_quota_monitor.py`, and `youtube_auth/ModLog.md`.
+
+### Attention flags (012 triage)
+- [ ] NEEDS_012: merge / sovereign nod / OAuth browser / secrets
+- [x] NEEDS_012: HoloIndex miss - relied on direct path reads (target file not surfaced by 3 queries)
+- [ ] NEEDS_012: test failure / worktree integrity / quota drift (5 failures are PRE-EXISTING 7-set mismatch, not introduced)
+- [ ] CLEAR: CI green, worktree clean, no flags
+- Note: this is quota runtime code -> PR left OPEN for the external gate regardless.
+
 ### 2026-05-01 - OC21: WSP 97 Truth Violation + Operations KeyError Fix
 
 **By:** 0102 (Worker AW3)

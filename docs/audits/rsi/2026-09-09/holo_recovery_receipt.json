@@ -1,0 +1,19 @@
+{
+  "accepted": true,
+  "freshness_receipt_digest": "sha256:e0b7dbb0404c76968bb9052d1bd4f7c0f3b0a9ade4dfc939dfafe838567503cd",
+  "generation_id": "sha256:e6afe7c0c25756e15517b834a31a8b723c0430ae1b1e362848c72dae64cda92a",
+  "no_holoindex_reindex_performed_by_controller": true,
+  "rejection_reasons": [],
+  "schema_version": "reddog_holoindex_postmerge_runtime.v1",
+  "started_runtime_ids": [
+    "openclaw",
+    "openclaw_supervisor"
+  ],
+  "status": "COMPLETED",
+  "stopped_runtime_ids": [
+    "openclaw_supervisor",
+    "openclaw"
+  ],
+  "target_repo_head_sha": "fb58e5279673ef9de30735ccfedc8001c3bb79d6",
+  "task_id": "holoindex_postmerge_refresh:fb58e5279673ef9de30735ccfedc8001c3bb79d6"
+}

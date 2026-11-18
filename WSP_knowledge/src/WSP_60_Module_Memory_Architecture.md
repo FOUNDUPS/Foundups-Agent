@@ -1,20 +1,33 @@
 # WSP 60: Module Memory Architecture
-- **Status:** Active (Updated for HoloDAE Architecture)
+- **Status:** Active specification; runtime implementation is partial
 - **Purpose:** To define the modular memory architecture where each module manages its own persistent data storage following WSP_3 Enterprise Domain organization, integrated with the three-state WSP architecture and HoloDAE intelligence layer.
 - **Trigger:** When a module needs to store persistent data, session state, or configuration information.
 - **Input:** Module-specific data requiring persistence (sessions, cache, configuration, logs).
 - **Output:** Organized, module-specific memory storage with clear data ownership and isolation across WSP three-state architecture.
-- **Responsible Agent(s):** HoloDAE (foundational intelligence), Module-specific DAEs, WSP 54 agents.
+- **Responsible Agent(s):** HoloDAE target role, module-specific DAEs, WSP 54 agents.
 
 ## 1. Overview
 
 This protocol establishes a modular memory architecture where each module manages its own persistent data storage, integrated with the WSP three-state architecture and HoloDAE foundational intelligence system. This architecture ensures proper data isolation, follows WSP_3 Enterprise Domain organization, integrates with WSP_49 Module Directory Structure Standards, and enables HoloDAE and module-specific DAEs to manage memory across all architectural states.
 
+### 1.1 Current implementation boundary (2026-08-28)
+
+This WSP is the normative memory architecture, not proof that every described
+HoloDAE service is running. The governed HoloIndex owner currently provides
+generation-bound, read-only semantic retrieval over sealed snapshots. It does
+not currently provide a production feedback-to-ranker loop, autonomous pattern
+promotion, canary admission, rollback, or candidate-bound outcome learning.
+The experimental `holo_index/adaptive_learning/` package is disabled in the
+production CLI path and grants no write or promotion authority. Statements
+below about feedback, pattern evolution, cross-module validation, monitoring,
+and autonomous management are requirements or roadmap targets unless an
+implementation contract and executable evidence explicitly bind them.
+
 ## 2. HoloDAE Foundational Architecture
 
-### 2.1 Current DAE Architecture (WSP 80)
+### 2.1 Target DAE Architecture (WSP 80)
 
-The system operates with **infinite DAE architecture**:
+The architecture is designed for **infinite DAE composition**:
 
 ```
 FOUNDATIONAL INTELLIGENCE:
@@ -37,9 +50,10 @@ FOUNDUP DAEs ([U+221E] Infinite):
 [U+2514][U+2500][U+2500] ...[U+221E] more as created through WSP 27/73 process
 ```
 
-### 2.2 HoloDAE Memory Management
+### 2.2 HoloDAE Memory Management Target
 
-HoloDAE provides foundational memory services:
+HoloDAE is required to provide these foundational memory services as their
+individual runtime contracts are implemented and verified:
 - **Pattern Memory**: Stores successful patterns for instant recall
 - **Breadcrumb Tracing**: Multi-agent discovery sharing via AgentDB
 - **Violation Tracking**: WSP compliance history and prevention
@@ -93,9 +107,9 @@ HoloDAE Memory (E:/HoloIndex/):  Foundational Intelligence Layer
 
 #### **HoloDAE Memory (E:/HoloIndex/)**
 - **Purpose**: Foundational intelligence and pattern memory
-- **Access**: All DAEs can query, only HoloDAE can write
+- **Access requirement**: DAEs query through governed readers; only an admitted HoloDAE maintenance owner may write
 - **Content**: Semantic search indexes, WSP patterns, violation history
-- **Management**: HoloDAE autonomous management with effectiveness scoring
+- **Management target**: HoloDAE-governed maintenance with effectiveness scoring
 
 #### **Module-Specific Memory Extensions**
 - **Location**: `modules/[domain]/[module]/memory/` (per WSP 49)
@@ -159,11 +173,16 @@ WSP > INTERFACE/README > ModLog > generated memory card. Use `effective_score = 
 
 ### 3.6 Section-Level Indexing (Gemma-Optimized)
 
-To make pattern matching effective, HoloDAE indexes sections, not entire documents:
+The target is section-level indexing rather than whole-document indexing:
 - Split WSP/README/ModLog/INTERFACE by headings (H1/H2/H3).
 - Each section becomes a separate entry with tags: `module`, `doc_type`, `section_path`, `wsp_id`, `intent`.
 - Summary length <= 240 chars; include pointers only (no full text in memory cards).
 - Normalize tags to lowercase, ASCII, stable keys.
+
+The current runtime implements selective section records only for explicitly
+admitted current HoloIndex contracts. General documentation remains summary
+indexed; this partial implementation must not be reported as the complete
+memory-card contract above.
 
 ### 3.7 Memory Feedback Roadmap (0102-First)
 
@@ -177,7 +196,9 @@ Planned feedback signals:
 - **A/B ordering**: alternate memory bundles across sessions; measure time-to-action.
 - **Outcome coupling**: successful change (tests pass/commit) boosts contributing cards.
 
-All feedback and metrics remain silent in output; only memory storage is updated.
+When this roadmap is implemented, feedback and metrics remain silent in normal
+output and update only admitted, candidate-bound memory records. No such
+production writeback is currently active.
 
 ### 3.8 Action Control-Plane Memory Writeback
 
@@ -264,13 +285,16 @@ other_memory = "modules/platform_integration/twitter_api/memory/"  # VIOLATION
 holo_result = holo_index.search("twitter api configuration")
 ```
 
-## 6. HoloDAE Memory Management Services
+## 6. HoloDAE Memory Management Service Requirements
+
+This section specifies required services. It does not assert that their
+autonomous execution or write authority is currently operational.
 
 ### 6.1 Pattern Memory Services
 - **Pattern Storage**: Successful operational patterns stored for instant recall
 - **Pattern Matching**: Identifies similar situations for pattern reuse
 - **Effectiveness Tracking**: Scores patterns based on outcomes (0.0-1.0)
-- **Pattern Evolution**: Updates patterns based on new learning
+- **Pattern Evolution**: Must update patterns only through governed, evaluated learning
 
 ### 6.2 Compliance Monitoring
 - **WSP Validation**: Ensures memory structure compliance with WSP_60
@@ -282,7 +306,7 @@ holo_result = holo_index.search("twitter api configuration")
 - **Breadcrumb Trails**: Shared discovery paths via AgentDB
 - **Collaboration Signals**: Agent availability and task assignments
 - **Coordination Events**: Inter-agent communication logging
-- **Autonomous Tasks**: Discovered work items with tracking
+- **Autonomous Tasks**: Target capability for discovered work items with tracking
 
 ## 7. State Transition Patterns
 
@@ -403,11 +427,11 @@ HoloDAE validates WSP_60 compliance by checking:
 
 ---
 
-**Implementation Status**: Active - All modules should implement WSP_60 memory architecture with HoloDAE intelligence
+**Specification Status**: Active - modules should implement the WSP_60 memory architecture
 
 **Migration Status**: Ongoing - Legacy agent references being updated to HoloDAE architecture
 
-**HoloDAE Status**: Operational - Foundational intelligence layer providing memory management services
+**HoloDAE Runtime Status**: Partial - governed snapshot retrieval is operational; autonomous memory RSI and the feedback/promotion loop are not
 
 **Next Actions**:
 1. Update modules to remove legacy agent references

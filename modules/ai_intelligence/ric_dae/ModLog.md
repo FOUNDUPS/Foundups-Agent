@@ -1,5 +1,18 @@
 ﻿# ricDAE Module Change Log
 
+## [2026-08-21] - Restored declared WSP 60 memory boundary
+
+**What:** Restored `memory/README.md`, which the 2025 scaffolding entry claimed
+was created but was absent from Git and the working tree.
+
+**Why:** HoloIndex correctly reported the module as 6/7 non-compliant. The
+restored documentation defines the empty-by-default memory boundary without
+inventing runtime state or persistence behavior.
+
+**Validation:** `holo_index/tests/test_cli.py` must report 7/7 for `ric_dae`.
+
+**WSP Protocols Applied:** WSP 22, WSP 49, WSP 50, WSP 60, WSP 97
+
 ## [2025-10-07] - Module scaffolding established
 **Who:** 0102 Codex (Assistant)
 **Type:** New module scaffolding

@@ -1,0 +1,76 @@
+name: GitHub client mocked contracts
+
+on:
+  pull_request:
+    paths:
+      - 'requirements-trust-bootstrap.txt'
+      - '.github/scripts/apply_aioresponses_compat.py'
+      - '.github/security/AIORESPONSES_COMPAT.md'
+      - '.github/security/aioresponses-compat-requirements.txt'
+      - 'modules/platform_integration/github_integration/**'
+      - '.github/workflows/github-client-contracts.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'requirements-trust-bootstrap.txt'
+      - '.github/scripts/apply_aioresponses_compat.py'
+      - '.github/security/AIORESPONSES_COMPAT.md'
+      - '.github/security/aioresponses-compat-requirements.txt'
+      - 'modules/platform_integration/github_integration/**'
+      - '.github/workflows/github-client-contracts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  github-client-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install declared test tools in the ephemeral runner
+        run: |
+          python -m pip --isolated --disable-pip-version-check install \
+          --only-binary=:all: --report "$RUNNER_TEMP/github-client-pip.json" \
+          pytest==9.0.3 pytest-asyncio==1.3.0 aiohttp==3.14.5
+          python -m pip --isolated --disable-pip-version-check install \
+          --only-binary=:all: --no-deps --require-hashes \
+          --report "$RUNNER_TEMP/github-client-mock-pip.json" \
+          -r .github/security/aioresponses-compat-requirements.txt
+      - name: Apply the checksum-gated test-mock compatibility backport
+        run: >-
+          python -B .github/scripts/apply_aioresponses_compat.py
+          --receipt "$RUNNER_TEMP/github-client-mock-backport.json"
+      - name: Run the two canonical module unit-shard members
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          env -u GITHUB_TOKEN -u GH_TOKEN python -B -m pytest -q \
+            -c /dev/null --rootdir="$GITHUB_WORKSPACE" --noconftest --import-mode=importlib \
+            -o pythonpath=. -o asyncio_default_fixture_loop_scope=function \
+            -p pytest_asyncio.plugin -p no:cacheprovider \
+            --basetemp="$RUNNER_TEMP/github-client-pytest" \
+            --junitxml="$RUNNER_TEMP/github-client-results.xml" \
+            modules/platform_integration/github_integration/tests/test_github_api_client.py \
+            modules/platform_integration/github_integration/tests/test_reddog_github_permission_probe.py
+      - name: Retain exact cases and installed dependency report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-client-contract-evidence
+          path: |
+            ${{ runner.temp }}/github-client-results.xml
+            ${{ runner.temp }}/github-client-pip.json
+            ${{ runner.temp }}/github-client-mock-pip.json
+            ${{ runner.temp }}/github-client-mock-backport.json
+          if-no-files-found: error
+          retention-days: 14

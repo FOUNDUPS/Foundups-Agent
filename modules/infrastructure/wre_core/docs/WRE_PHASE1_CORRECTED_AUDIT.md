@@ -1,5 +1,10 @@
 # WRE Phase 1 - CORRECTED WSP Compliance Audit
 
+> **Historical point-in-time audit — superseded and non-authoritative.**
+> Its 2025 completion verdict is not current capability evidence. Current
+> execution truth is governed by the module `README.md`, `INTERFACE.md`,
+> `ROADMAP.md`, production receipts, and WSP 95 v2.1.
+
 **Date**: 2025-10-24
 **Auditor**: 0102
 **Status**: Phase 1 is **100% COMPLETE and WSP-COMPLIANT**
