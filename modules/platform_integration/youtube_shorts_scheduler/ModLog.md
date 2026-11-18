@@ -1,5 +1,23 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-11-16 - Pure bounded unlisted batch preview
+
+Added an explicit finite-window/top-bottom/topic-diversity preview seam to the
+existing reschedule planner. Reuses channel daily caps; validates observed
+scope/freshness, exact IDs, evidence/holds and timezone-aware occupied instants.
+Deterministic minute offsets retain minimum spacing, midnight caps and window
+bounds. Invalid inputs fail closed; absent evidence/live state returns no plan.
+No native CLI, manifest, browser, writer, reservation or resident service wiring
+changed. Output explicitly denies execution authority and schedule verification.
+Focused offline regression cases extend the existing planner suite; provider
+state, runtime activation and actual publication are not established. WSP 22/50/84/97.
+
+Validation: 55 planner cases passed; planner + calendar reservations + peak-window
+selection passed 102 cases. The seven adjacent long-form timezone cases failed
+with empty allocation both with this change and with the original base planner
+restored for comparison. They remain an existing unqualified fixture/path, not
+a passing regression claim; no assertions or execution gates were weakened.
+
 ## 2026-11-16 - Live-aware audience timing correction
 
 Latest 012 correction: avoid releases during active livestreams, use named U.S.

@@ -1,3 +1,18 @@
+## 2026-11-16 - Bounded unlisted preview (offline)
+
+`test_reschedule_planner.py` retains the legacy rebalance cases and adds the
+pure finite-window preview contract: exact-ID/top-bottom topic diversity,
+evidence/hold/source exclusions, duplicate conflicts, complete/fresh observation
+gates, active/unknown live state, operator editing, deterministic offsets, UTC
+collision spacing, Studio-local day caps, DST folds and audience conversion.
+Effect-denial controls forbid file/network/reservation effects after timezone
+data loading. No native publisher integration or browser qualification is claimed.
+
+Observed: 55 planner cases and 102 combined planner/calendar-reservation/peak
+cases pass. The seven legacy long-form timezone tests also fail on the unchanged
+base planner (empty allocation); retained separately as a baseline failure, not
+silently skipped or reported as passing.
+
 ## Offline visual-harness caller controls
 
 The four `test_visual_harness_*` cases in `test_layer3_schedule.py` use a fake
