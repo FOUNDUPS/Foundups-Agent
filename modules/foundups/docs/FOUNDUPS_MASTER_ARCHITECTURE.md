@@ -29,6 +29,14 @@ The target is a reusable shell and governed services with per-FoundUp skins, tas
 
 FoundUps may connect through explicit, consented, versioned context and capability contracts while preserving separate identity and authorization. Refer to [manifest schema](PFMALL_FOUNDUP_MANIFEST_SCHEMA.md) and [Mall runtime](../pfmall/README.md).
 
+### Fractal views of the same work
+
+**Design target, 2026-11-19.** A tile identifies an addressable entity by an immutable ID. A parent exposes its parts, a leaf opens an artifact, and a typed edge can lead to a shared module used by several FoundUps. A single primary parent supports direct entry. A separate navigation history records how the user actually arrived. A report issue, an adapter, and a WSP_80 orchestration cube can each have a tile. Only the orchestration cube carries the capability scope defined in [WSP_80](../../../WSP_framework/src/WSP_80_Cube_Level_DAE_Orchestration_Protocol.md).
+
+The 3D build view, 2D Mall field and 0102 conversation project that graph. A work observation identifies an occurrence. A tile identifies its subject. Resolve their association from evidence such as a work order explicitly naming a registered component. Pass visible focus, caller history, work reference and graph revision to the concierge. Multiple workers can concern the same tile, and a worker can move between tiles over time.
+
+Public discovery exposes only the published projection. The interior can show authorized source, interfaces, tests and roadmap sockets. Selection and camera movement express navigation. Approved co-building operations use a separate authenticated, revision-checked write path. See the [navigation contract](PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation) and [Simulator roadmap](../simulator/ROADMAP.md#linking-observed-work-to-mall-tiles).
+
 ## 2. Five-layer funnel
 
 ```text
