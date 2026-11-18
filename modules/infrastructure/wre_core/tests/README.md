@@ -1,3 +1,19 @@
+## Offline Lego block compiler & conservative triage — 2026-11-18
+
+- `test_wre_lego_block_projection.py` (7 cases): exercises synthetic temporary
+  repositories and disposable Git object stores offline to verify distinct Git
+  blob SHA-1 OID vs Git blob SHA-256 vs checkout `EOL_CRLF_DRIFT` provenance,
+  rename-stable `canonical_id` and recursive `parent_block_id` across simulated
+  directory moves, typed 1:N / M:N catalog reconciliation (`DUPLICATE_MANIFEST_FOUNDUP_ID`,
+  `EXTERNAL_FOUNDUP_NO_LOCAL_MODULE`, `MODULE_WITHOUT_FOUNDUP`,
+  `MODULE_WITHOUT_TEST_SHARD`, `QUARANTINED_TEST_ENTRY`, multi-shard modules),
+  safe static AST projection of top-level `SystemExit` poison modules without
+  code execution, conservative `CANDIDATE_ZERO_STATIC_CALLERS` vs
+  `UNKNOWN_DYNAMIC_OR_EXTERNAL_CONSUMER` triage (`deletion_authorized=False`),
+  capability-scoped runtime verification rejecting `SIMULATED_TRANSITION_ONLY`
+  and downgrading on 1-byte edits (`STALE_PROVENANCE_MISMATCH`), and
+  byte-for-byte deterministic JSON + WSP 99 M2M output.
+
 ## Scientific repair & measured RSI regressions — 2026-11-16
 
 - `test_repair_operation_contract.py` (8 cases): `ScientificRepairOperation`
