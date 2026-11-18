@@ -85,6 +85,12 @@ Independent FoundUps may interoperate through versioned, permission-scoped contr
 
 Canonical implementation references: [master architecture](../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md), [Mall platform](../modules/foundups/pfmall/README.md), [manifest schema](../modules/foundups/docs/PFMALL_FOUNDUP_MANIFEST_SCHEMA.md). Bootstrap navigation belongs in WSP_00; evidence, drift reconciliation and verification remain WSP_97 responsibilities.
 
+### Entering the work through the cube
+
+The FoundUPS website introduces the idea as “One cube = one idea. Agents join and build.” The next step for Play FoundUps is to let a person enter that cube while people and agents work. Select a builder in the scaffold, ask RedDog “What is this builder changing?”, and follow the answer into the model, its component and the evidence for the change. In the Simulator pilot this could lead from the cube to the tick engine, then to its source and a test result. Going Back returns to the builder that drew the person's attention.
+
+This is a product target. The 3D cube, the Mall tile field and 0102's conversational view should resolve the same component at the same revision. An authorized user can explore from any of the three. The [architecture](../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work) and [Mall roadmap](../modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation) define the first slice.
+
 ## Session Briefings
 
 For session-start execution context, read:
