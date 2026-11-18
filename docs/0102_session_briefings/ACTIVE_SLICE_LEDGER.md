@@ -1,3 +1,111 @@
+## PR #2403 convergence and qualified merge - 2026-11-16
+
+012 now authorizes reconciliation of the existing PR, independent exact-head
+review, applicable hosted checks and qualified merge/main readback under the
+existing workflow. This supersedes the earlier draft-only scope for this work;
+it grants no runtime activation or bypass of current authorization gates.
+Owner remains the same 0102 worker/worktree. WSP15 C2/I4/D4/Impact3 = 13/P1.
+
+Inputs: owned head `137c7b60e08ea12892126b9bddf374f32eb49353`, main
+`87787840233c8660b1612873bfe99a027f68c772`, common base `e62e9ebaf5`.
+Four paths overlap; automatic CI composition retains main plus the PR's offline
+step. Resolve the three conflicts by preserving both security-note prefixes,
+all 4,579 main security records plus the one owned binding (4,580 total), and
+regenerating the canonical test registry (1,846 entries; 260 quarantined).
+Independent review must verify all main-only and PR-only paths, actual resulting
+head, tests and gates before merge. Original shared checkout and other sessions
+remain outside the write scope. Recovery is the preserved parent commits and a
+scoped revert, not a reset of another lane or a replay of UI actions.
+
+The incoming UI-TARS bridge remains unchanged: driver handoff is compatible,
+verification is localization-only, and the runner retains legacy_1000 rather
+than claiming admission of the new coordinate profile. Installed Red Dog wiring,
+live browser/model checks and measured RSI transfer remain unverified.
+
+Combined local validation passes 122 offline cases with one Windows
+directory-link skip; 40 CI composition contracts, registry and projection checks
+pass. Independent staged-tree inspection preserves all 158 main-only paths and
+all 15 unchanged PR-only paths, with only this ledger's new receipt intentionally
+extended. Security-note composition, all 4,580 review records, all 1,846 registry
+rows and the canonical read-only/gate files are verified. Exact committed-head
+review and hosted checks remain the next gates; no merge or activation is yet
+claimed by this prepublication receipt.
+
+Main advanced during publication to cac0129ad6ce1a92fdc4548f852ba30f1cc8ba9e
+(PR #2407, three scheduler documentation paths). A second normal merge
+preserves its remote scheduling/runbook bytes and composes both ModLog
+entries under the existing heading. The accepted e329db6 visual/code/CI,
+registry, security and skill bytes remain unchanged. Independent review
+and current-head hosted gates must qualify this final composition.
+
+## Execution/delegation guidance follow-up - 2026-11-16
+
+Owner: same delegated 0102 worker and existing PR #2403/worktree; origin
+internal_handoff from 012. Reconciled clean head `3d1a6283cbc8d70860328172cb435c992213689a`
+with current main `87787840233c8660b1612873bfe99a027f68c772`. Main has no changes
+to foundups-wsp or its workspace manifest; no competing exact-path owner was
+found in the bounded PR/session check. Canonical operations Skillz, role binding
+and read-only Start Operations profile are unchanged at these revisions.
+
+WSP15 C1/I3/D3/Impact3 = 10/P2; docs/prompt plane. Reuse existing skill and local
+continuity file; one editor and an independent read-only verifier, no live team
+dispatch/provider/browser work. Scope: concise architect discretion, qualified
+execution/team choice, existing owner/session inspection, bounded handoff and
+return receipts. Preserve visual repair, runtime admission, security and user
+holds. Acceptance: manifest/projection/scanner integrity, unchanged operations
+and visual regressions, independent decision review and exact save readback.
+Canonical operations/runtime files are outside this write scope. The local skill
+is a repository pointer, not another authority or cross-host installation.
+
+Validated locally: 73 offline regressions passed; one directory-link case is
+skipped because this Windows host cannot create directory links. The strict
+workspace manifest verifies all 10 files with only the foundups-wsp digest
+changed; existing safety scanner and Codex projection checks pass. The existing
+personal continuity file was updated in place with expected-original-hash and
+exact readback checks (saved SHA256
+`6e12027074346cc9a543fcd899ac0e31c34c9a9006b392abb717ad1380e67273`);
+the skill validator passes. Independent review accepts all links, role/admission
+boundaries and six offline decision scenarios. Canonical operations, runtime
+profile and visual repair bytes remain unchanged from the prior accepted head.
+These are source/guidance checks, not worker admission or runtime activation.
+
+PR #2403 is currently unmergeable against newer main; no merge/rebase or runtime
+activation is part of this follow-up. Preserve the draft and report that
+pre-existing convergence limitation separately from local validation.
+
+## Visual verification evidence correction — 2026-11-15
+
+Owner: delegated 0102 worker, origin internal_handoff from 012's Red Dog task.
+Base: `e62e9ebaf5583655d4855960723ee627d19b07a4`; lane
+`fix/wre-visual-verification-evidence-20261115`, isolated task worktree.
+Destination: proposed main change through draft PR only; no merge/deploy/activation.
+WSP15 allocation: C2/I4/D4/Impact3 = 13/P1. Correct the observed false-success
+path in the existing Selenium visual runner, observation retry semantics, its
+manual harness consumer, and existing guidance. Other lanes and the separately
+owned SUNVISTA browser/site are excluded. Recovery: retain/revert the scoped
+commit; never replay uncertain UI effects to recover verification.
+Acceptance: unavailable/error/unrun evidence cannot pass; explicit DOM evidence
+remains distinct; one action per step; evidence provenance survives summary and
+PatternMemory; offline regressions plus independent review. Native bootstrap
+and strict tracker check ran in this worktree. Lexical Holo bundle is source-bound
+to the base with UNKNOWN freshness/index gap; semantic owner was not started.
+No related open vision/runner/Selenium PR or named worktree overlap was found in
+the bounded ownership check. Original checkout's unrelated dirty WRE lifecycle
+work is preserved. Independent review accepts the bounded correction after
+repairing CLI failure exit status. Local evidence: runner25/caller3; final focused
+registry/import-safety selection71; prior adjacent selection118 (overlapping);
+CI contracts40; canonical registry/projection and managed skill manifest/safety
+scan passed. Exact-base negative controls expose both false passes. Sandbox
+asyncio/Bash runtime blocks and bounded outside-sandbox reruns are retained in
+TestModLog. Draft [PR #2403](https://github.com/FOUNDUPS/Foundups-Agent/pull/2403)
+is published. First-head hosted CI exposed bounded-runner dependency collection
+and one changed-whole-file binding for already reviewed ModLog prose. Defer the
+manual DOM import and add a fourth import guard; independently review and renew
+only that exact security binding, preserving all existing records/rules/gates.
+Fresh corrective-head hosted CI remains required. Installed/live vision and
+measured RSI transfer are unrun. Retain this clean owned lane for draft review;
+no merge or deployment is authorized in this assignment.
+
 ## Vote public release and next gates — 2026-11-07
 
 Vote v2 and Oversight v5 are live. PRs #2312, #2313 and #2317 are merged.
@@ -1061,3 +1169,49 @@ When a slice lands:
 4. Commit this file as part of the slice's completion commit or immediately after
 
 This ledger is not a planning doc. It is repo-truth state.
+## CI verification selection - 2026-11-14
+
+Owner: 0102 CI optimization worker, internal handoff for 012's authorized WSP97
+CI task; destination `MERGE_TO_MAIN`.
+WSP15 C3/I4/D3/Impact4 = 14/P1. Base/head before edits:
+`45267ddabb1e714aca6cfe6233f5a2daf5b836ca`. Isolated branch
+`fix/ci-risk-selection-20261114`, worktree `agent-worktrees/ci-risk-selection-20261114`.
+Scope: existing CI pilot classifier/workflow/tests and their documentation.
+Reuse landed #2338/#2340 and WRE differential/evidence owners. Preserve #2387's
+separate closure owner, #408 publication hold and unrelated worktrees. Native
+Triage thread visibility is UNKNOWN, not an inactivity finding.
+
+Acceptance: complete exact Git diffs; trusted-base downgrade decisions; structure,
+links and proposal Skill governance; unchanged security/required checks; full
+runtime/systemic/mixed/unknown verification; independent review; exact-head and
+resulting-main CI. Production activation remains BLOCKED: observed main rules
+have strict freshness false, no CODEOWNERS, and no CI fast-path variable. This
+slice changes no server settings. Python narrowing also remains blocked without
+authenticated complete dependency evidence; preserve WRE SYSTEMIC escalation.
+Recovery: revert only this focused PR through normal gates. Next: implement and
+verify the default-off pilot, publish draft, inspect all applicable head checks,
+then eligible normal merge and exact-main verification or record the exact gate.
+
+Retrieval: source-bound Holo query at the recorded base returned
+`HOLOINDEX_AUTHORITY_ROOT_UNRELATED`, UNKNOWN freshness and an index gap. The
+lexical bundle had complete required WRE artifacts but generic WSP/no test hits.
+Direct CI/WRE paths and existing TestModLog/README inventory reduced noise and
+duplication; no semantic freshness or runtime-admission claim is made. Deterministic
+Git/policy verification needs no Qwen/Gemma inference or provider call.
+
+Local evidence: 39 initial CI regressions and 168 existing WRE differential/
+scope/exact-main cases pass. Security passes 52 cases under native Windows;
+the unchanged cleared-environment Bash test passes separately with explicit native
+Git Bash lookup. Default WSL lookup and earlier sandbox/encoding/import setup
+failures remain recorded. Canonical registry regeneration adds only the process
+capability to the extended policy test; inventory/quarantine membership stays.
+Independent source/schema review accepts the inactive pilot. The focused PR owns
+the immutable head, hosted checks, final main readback and terminal receipt; this
+prepublication checkpoint is not a completion or production-savings claim.
+
+Before publication, the owned unpublished branch fast-forwarded to verified main
+`7ced891b3e5cb246969596db782ae5a06d9cab0e`, which adds only the separate #2387
+proposal. No CI-source overlap or local overwrite occurred. Independent review
+accepts the frozen source hashes; the final scope suite has 22 passing cases
+alongside 18 policy cases. All five required main checks were observed successful
+at this base; the opt-in and non-strict rules remained unchanged.

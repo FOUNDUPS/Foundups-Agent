@@ -262,9 +262,9 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 332 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 334 * 1024
     lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
-    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 332 * 1024
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 334 * 1024
     assert "modules/platform_integration/social_media_orchestrator/src/petition_campaign.py" in generated["required_runtime_files"]
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
@@ -292,7 +292,15 @@ def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     ):
         assert member in generated["required_runtime_files"]
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "c44d72c3a2b9e5cafbf4eec7fefd2f6b74d2570fd116f5952cac1d2ed0b95493"
+    assert 'modules/platform_integration/social_media_orchestrator/src/content/publication_reconciliation.py' in generated['required_runtime_files']
+    for resident_member in (
+        'modules/communication/moltbot_bridge/src/reddog_resident_foundup_memex_config.py',
+        'modules/communication/moltbot_bridge/src/reddog_resident_memory_context.py',
+        'modules/communication/moltbot_bridge/src/reddog_scheduled_resident_reconcile.py',
+        'modules/infrastructure/idle_automation/src/resident_reconcile_schedule_adapter.py',
+    ):
+        assert resident_member in generated['required_runtime_files']
+    assert digest == "cb7f5970b56ed261b92e4df2775ab30961da80187b351833f356f5ad7bb55aa4"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

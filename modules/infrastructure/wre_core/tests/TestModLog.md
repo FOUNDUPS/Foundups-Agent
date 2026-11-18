@@ -1,3 +1,32 @@
+## 2026-11-16 — Scientific repair canary, `measurement_evidence`, and `COMPLETE` branch disposition regressions
+
+- `test_repair_operation_contract.py` (8 passed) & `test_scientific_repair_canary_e2e.py` (4 passed): Verified Issue #1522 `ScientificRepairOperation` (`state_history`), `attempt_failure_reproduction` (`shell=False`), `VerifierContextFirewall.project_evidence_packet` allowlist isolation, `ModelIndependencePolicy` anti-self-grading, and SQLite `PatternMemory.store_outcome` persistence without weakening 19/P0 custody gates (`test_pattern_memory.py` 51 passed, `test_wre_autonomous_slice_verifier_runtime.py` 46 passed, `test_wre_telemetry_truth.py` 17 passed, `test_reddog_direction.py` 9 passed, `test_reddog_verified_pattern_memory_sink.py` 21 passed).
+- `recursive_improvement/tests/test_learning.py` (8 passed): Added 4 positive and fail-closed negative `measurement_evidence` tests covering unmeasured `None` preservation, valid measured token/latency deltas + `total_tokens_saved` accumulation + rollback subtraction/clamping, self-authored/regressive/boolean/negative measurement rejection (`blocked_measurement_rejected`), and `work_order_id` / `before_state_digest` / `after_state_digest` mismatch rejection (both pre-applicator zero-call refusal and post-applicator rollback restoration).
+- `test_git_lifecycle.py` (7 passed): Added explicit `COMPLETE` merged PR (`docs/complete-merged`) `BRANCH_MERGED_PR_RETAINED` / `assess_retirement_diff_against_main` assertion alongside existing 9-stage `branch_dispositions` coverage. WSP 5, 6, 22, 48, 49, 50, 97, and 110.
+
+## 2026-11-15 — PC Git inventory stashes and backlog summary regressions
+
+- `tests/test_git_lifecycle_inventory.py`: Added 5 regression tests covering SHA-only `section="stashes"` pagination and message/filename non-leakage, malformed/oversized stash reflogs, concurrent stash mutation blocking (`pc_state_changed_during_observation`), `github_main_present_on_pc` True vs False `pc_backlog_summary` and `worktree_summary` counts, and `verify_git_inventory_receipt()` rejection of malformed or tampered stashes and summaries. Ran alongside `test_git_lifecycle.py` and `test_git_lifecycle_github.py`.
+
+## 2026-11-15 — MetricsIngestorV2 schema & rollback trigger regression
+
+- `test_metrics_ingest_v2_schema.py`: Verified fresh SQLite schema initialization with `idx_approval_skill` on `ai_0102_approvals(skill_id)` and `WRESkillsRegistryV2.check_rollback_triggers()` healthy, `pattern_fidelity_drop`, and `high_exception_rate` outcomes.
+
+## 2026-11-15 — Parent-version-bound recall & evolution continuity regressions
+
+- `test_pattern_memory.py`, `test_skill_evolution_continuity.py`, and `test_wre_master_orchestrator.py`: Added tests covering `parent_version` pre-`LIMIT` SQL filtering, legacy/untagged exclusion, fail-closed blank/invalid filter behavior, and `evolve_skill()` lineage isolation (87 passed).
+
+## 2026-11-15 — Git lifecycle branch dispositions and bundle verification
+
+Added 4 unit/integration regressions in `test_git_lifecycle.py` (7 total)
+covering all 9 `branch_dispositions` stages, `BRANCH_OPEN_PR_HEAD_MOVED`,
+non-`main` `PROTECTED_BRANCH` separation, fork/unknown `head_repository`
+rejection, multi-PR `pr_numbers` history preservation, partial PR coverage
+blocking `BRANCH_UNTRACKED`, `BRANCH_PR_HEAD_MISMATCH`, and deduplicated
+disposable bundle clone excluding dirty working-tree files. Ran full
+`wre-verification-contracts` suite offline plus `test_git_lifecycle_pc.py`
+outside sandbox MSYS2 block. WSP 5, 6, 22, 50, 97 and 110.
+
 ## 2026-11-06 — Readiness evidence and menu admission
 
 Initial baseline: 13 failures and eight import errors across the first 21

@@ -1,5 +1,53 @@
 # YouTube Shorts TestModLog
 
+27 audit correction: compact844×390 was incorrectly assigned a56px tablet floor
+by the width-only harness. The frozen case is a landscape phone with48px floor.
+Corrected only device classification, retained red evidence, and reran unchanged
+geometry/fit/growth oracles. No product CSS adjustment was needed for this result.
+The review skill now requires freezing device identity across orientation.
+
+
+## 2026-11-02 — Compact/fullscreen word-space27
+
+89 Node tests initially pass. Presenter tests preserve default collapse semantics
+and add inline opt-in canonical geometry, same retained time through expand/back,
+both word modes, hidden cancellation, dispose and failed-data native fallback.
+Browser acceptance must now cover both compact and fullscreen at six sizes,
+root/inner and both modes, actual glyph bounds/fit/final floors and strict THUMP
+growth. Replace the older mandatory compact-native oracle only for opted-in
+ready presentation; failed native fallback remains mandatory. Preserve26media
+hashes and actual one-Play/all5/movie-end/game-paused regression.
+
+## 2026-11-02 — SQUISH needs an actual loss
+
+Replay3 is an all-safe demonstration and must have zero SQUISH events/frames;
+retain five full SNIFFs and three progressive THUMPs. Game-world regression
+covers no-input loss, mixed safe/lost, all-safe/outcome-unset, successful practice
+and no-loss practice. Loss cue remains bounded54–56s. Older cancellation test
+uses a loss cue fixture, not a fake victory cue.87 Node tests pass initially;
+independent media/controller/browser proof is recorded separately in
+`O:/Foundups-Agent/outputs/storytime-safe-sounds-20261102/`.
+
+## 2026-11-02 — Single-word25 validation
+
+86 Node tests pass, including invalid profile/caption fallback, retained-time
+redraw, final font floor with strict distance progression, and shared revision
+module graph. Independent director harness:852/852 word-layout assertions,
+both routes × six sizes × five cues × two placements;6/6 native fallback.
+Real single Play observed indices0–4 then movie ended25s, game clock0/score0/paused.
+Actual geometry and screenshots retained in
+`O:/Foundups-Agent/outputs/storytime-word-layout-20261102/` including red baselines.
+Desktop observation does not certify native iOS sound/touch or child comprehension.
+
+## 2026-11-01 — Storytime sound/voice lifecycle
+
+EDUIT Node80/80 includes no action-Foley duck, surviving the old sniff endpoint,
+caption size progression and actual controller resets. Independent decoded MP4
+samples verify5sniff primitives, increasingTHUMP RMS andSQUISH. Python Cairo
+media suite not run: this host lacks CairoSVG; the actual final producer instead
+completed with installed Sharp/Pillow/NumPy and existing FFmpeg. No installation
+or acoustic/native listening PASS is implied. See EDUIT TestModLog and receipts.
+
 ## 2026-11-01 — Private directive upload consumers
 
 `test_operator_upload_policy.py` exercises actual uploader definitions with an

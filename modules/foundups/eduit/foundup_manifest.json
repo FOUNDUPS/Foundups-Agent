@@ -1,7 +1,10 @@
 {
   "foundup_id": "eduit",
   "manifest_version": "1.0.0",
+  "name": "EDUIT",
   "display_name": "EDUIT",
+  "version": "0.1.0",
+  "category": "ai-education",
   "description": "Education Using Information Technology: autonomous browser-first learning through play, with Play EDUIT as the first proposed module.",
   "lifecycle_stage": "incubating",
   "tier": "F0_DAE",
@@ -29,6 +32,6 @@
   },
   "routing_prefix": "/f/eduit",
   "app_route": "/f/eduit/app",
-  "data_namespace": "eduit",
+  "data_namespace": "idb_eduit",
   "notes": "Independent EDUIT educational FoundUp. Separate from existing eSingularity.ai Fukui campaign application. Routes are declared only, not activated. Product name Play EDUIT. Historical Baby0/OBAI/0102/Red Dog lineage is a project interpretation, not verified continuity of model identity."
 }

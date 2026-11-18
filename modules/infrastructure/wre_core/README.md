@@ -1,3 +1,21 @@
+## Scientific self-healing & fail-closed measured RSI — 2026-11-16
+
+WRE Core integrates the scientific repair state machine (`src/repair_operation_contract.py`
+with `state_history`), shell-free failure reproduction (`src/repair_baseline_verifier.py`),
+and canary orchestration (`src/scientific_repair_canary_orchestrator.py`) paired
+with AI Gateway's pure allowlist `VerifierContextFirewall` and
+`ModelIndependencePolicy` (Issue #1522; architecture audit in
+`WSP_knowledge/docs/audits/self_healing/SELF_HEALING_COMPOSITION_AUDIT.md`).
+Outcome persistence uses `PatternMemory.store_outcome` (`SkillOutcome`) without
+weakening protected 19/P0 custody gates (`promote_variation`,
+`RedDogDirector.advance_to_execution`, `RedDogVerifiedPatternMemorySink`).
+
+`RecursiveLearningEngine` (`recursive_improvement/src/learning.py`) also wires
+fail-closed `measurement_evidence` validation before target mutation and
+subtracts measured `tokens_saved` during `rollback_improvement()`. Read-only
+`git_lifecycle.py` `branch_dispositions` retains full 9-stage classification
+including `COMPLETE` merged PR retirement assessment parity.
+
 ## Risk-based verification connection — 2026-10-28
 
 Readiness uses each metric's measured sample count. Missing measurements are
@@ -91,7 +109,11 @@ the current GitHub commit passes its required checks. The receipt carries open
 and unverified PRs across runs and records both GitHub and PC proof on closure.
 
 The legacy merge sentinel now delegates to the observation pass. Governed
-promotion remains with the repository's merge authority. See
+promotion remains with the repository's merge authority. Read-only PC Git
+inventory (`git_lifecycle_inventory.py`) additionally captures paginated
+`branches`, `worktrees`, SHA-only `stashes` (`section="stashes"` without stash
+messages or filenames), `pc_backlog_summary`, and `worktree_summary` under
+canonical SHA-256 receipts (`foundups_git_inventory.v1`). See
 [the lifecycle interface](INTERFACE.md#git-lifecycle-reconciliation).
 
 # WRE Core

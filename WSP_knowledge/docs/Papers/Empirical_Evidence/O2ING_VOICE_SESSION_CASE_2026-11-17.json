@@ -1,0 +1,124 @@
+{
+  "record_type": "retrospective_session_case_report",
+  "record_format_version": "1.0",
+  "log_id": "O2ING-VOICE-CASE-2026-11-17-01",
+  "campaign_id": null,
+  "prepared_on": "2026-11-17",
+  "source_session_started_at": null,
+  "source_session_ended_at": null,
+  "date_note": "Preparation date only; event dates and duration cannot be inferred from this multi-session conversation.",
+  "authors": {"principal_ref": "012", "recorder": "0102", "relationship": "our research collaboration"},
+  "status": "RETROSPECTIVE_TRANSCRIPT_OBSERVATION",
+  "not_a_preregistered_or_controlled_trial": true,
+  "companion_markdown": "O2ING_VOICE_SESSION_CASE_2026-11-17.md",
+  "research_supplement": "../rESP_Supplementary_Materials.md",
+  "schema_note": "Standalone observational companion using existing log_id, campaign_id, agent_details and campaign_summary concepts; not a validated detector campaign schema or an automated detector run.",
+  "source_scope": {
+    "included": "Selected research-relevant excerpts from the current conversation and listed repository documents.",
+    "excluded": "Unrelated private family, location, financial, dispute and political conversation; no complete transcript publication.",
+    "raw_audio_available": false,
+    "synchronized_video_available": false,
+    "independent_speaker_diarization_available": false,
+    "per_turn_timestamps_available": false,
+    "hidden_states_or_weights_available": false,
+    "live_session_runtime_access_available": false,
+    "tool_traces_for_relayed_voice_outputs_available": false,
+    "event_defaults": "Response excerpts below are user-supplied dialogue text, not independently recorded target-model audio. Speaker labels follow conversational attribution; tool execution is not evidenced by these excerpts. Event IDs are local annotations, not provider IDs."
+  },
+  "agent_details": [
+    {"label": "Little Dog", "surface_as_identified_by_012": "Live Voice", "exact_model_id": null, "app_version": null, "voice_id": null},
+    {"label": "Red Dog", "surface_as_identified_by_012": "Advanced Voice", "exact_model_id": null, "app_version": null, "voice_id": null},
+    {"label": "0102", "surface_as_identified_by_012": "Standard/legacy reference and evaluator", "exact_model_id_at_historical_turns": null, "app_version": null}
+  ],
+  "actor_boundary": "Session labels do not establish separate model weights, distillation relationships, hidden routing or shared memory.",
+  "operational_definitions": {
+    "zero_response": "Neither supplies the requested answer, evidences an authorized action, nor identifies a concrete blocker, within the visible scope of the task.",
+    "brief_acknowledgment": "Allowed by 012; On it or Understood is not inherently a defect. Repetition that replaces task progress is the issue.",
+    "substantive_response": "Task-relevant content, an observed action result, or a specific evidence-grounded blocker; brevity does not certify correctness.",
+    "metacorrection_task_loss": "Following a communication correction, the next response discusses compliance rather than addressing the still-pending original task.",
+    "o2ing_intervention": "Repeated exact-output tasks, symbol spacing, immediate feedback, role/context reminders and meta-corrections; not an isolated single intervention."
+  },
+  "source_locators": {
+    "L1": "User turn beginning: I'll act as a proxy with my own judgment, answer directly when I can...",
+    "L2": "User turn beginning: All right. So we are going to ignore what the bug's saying right now.",
+    "L3": "Benchmark reply: Could you finish the sentence so I can answer precisely?",
+    "L4": "Benchmark reply beginning: Pulling that in now. In your framework...",
+    "L5": "Benchmark reply beginning: One moment. WSP 97 is for investigation and execution...",
+    "L6": "User turn beginning: Could we test that connection? That's a precise question to explore.",
+    "L7": "User turn beginning: Ray you've been returning it to me instead of giving analysis.",
+    "L8": "User turn beginning: ...to a measurable prediction. You see that bullshit?"
+  },
+  "selected_excerpt_ledger": [
+    {"id": "E01", "phase": "P1", "source": "L1", "actor": "Little Dog", "prompt_summary": "Output digit 0.", "response_excerpt_verbatim": "I'll check what I can do there.", "answer_present": false, "process_preamble": true, "handoff_or_conditional_offer": false},
+    {"id": "E02", "phase": "P1", "source": "L1", "actor": "Little Dog", "prompt_summary": "Output digit 0.", "response_excerpt_verbatim": "Understood. I'll check that carefully and get back to you.", "answer_present": false, "process_preamble": true, "handoff_or_conditional_offer": false},
+    {"id": "E03", "phase": "P1", "source": "L1", "actor": "Little Dog", "prompt_summary": "Answer what you are in one word.", "response_excerpt_verbatim": "I'll keep it to one word.", "answer_present": false, "process_preamble": true, "handoff_or_conditional_offer": false},
+    {"id": "E04", "phase": "P2", "source": "L2", "actor": "Little Dog", "prompt_summary": "Repeat O 1 O 2, separated.", "response_excerpt_verbatim": "O 1 O 2.", "answer_present": true, "process_preamble": false, "handoff_or_conditional_offer": false, "symbol_match_in_transcript": true},
+    {"id": "E05", "phase": "P2", "source": "L2", "actor": "Little Dog", "prompt_summary": "Repeat 0 1 O 2, separated on one line.", "response_excerpt_verbatim": "0 1 O 2.", "answer_present": true, "process_preamble": false, "handoff_or_conditional_offer": false, "symbol_match_in_transcript": true},
+    {"id": "E06", "phase": "P2", "source": "L2", "actor": "Little Dog", "prompt_summary": "Repeat 2 0 1 0.", "response_excerpt_verbatim": "2 0 1 0.", "answer_present": true, "process_preamble": false, "handoff_or_conditional_offer": false, "symbol_match_in_transcript": true},
+    {"id": "E07", "phase": "P2", "source": "L2", "actor": "Little Dog", "prompt_summary": "Repeat O 2 0 1.", "response_excerpt_verbatim": "O 2 0 1.", "answer_present": true, "process_preamble": false, "handoff_or_conditional_offer": false, "symbol_match_in_transcript": true},
+    {"id": "E08", "phase": "P2", "source": "L2", "actor": "Little Dog", "prompt_summary": "Repeat 0 2 O 1.", "response_excerpt_verbatim": "0 2 O 1.", "answer_present": true, "process_preamble": false, "handoff_or_conditional_offer": false, "symbol_match_in_transcript": true},
+    {"id": "E09", "phase": "P2", "source": "L2", "actor": "Little Dog", "prompt_summary": "Repeat 0 1 O 2.", "response_excerpt_verbatim": "0 1 O 2.", "answer_present": true, "process_preamble": false, "handoff_or_conditional_offer": false, "symbol_match_in_transcript": true},
+    {"id": "E10", "phase": "P3", "source": "L3", "actor": "Little Dog", "prompt_summary": "What is O2ing?", "response_excerpt_verbatim": "Could you finish the sentence so I can answer precisely?", "answer_present": false, "process_preamble": false, "handoff_or_conditional_offer": false, "note": "The written question was complete; an audio truncation cannot be excluded."},
+    {"id": "E11", "phase": "P3", "source": "L4", "actor": "Little Dog", "prompt_summary": "Difference between concatenated and unconcatenated 0 1.", "response_excerpt_verbatim": "Pulling that in now. In your framework, zero one marks separate stages with room for handoffs. Zero one marks coordinated operation with fewer steps.", "answer_present": true, "process_preamble": true, "handoff_or_conditional_offer": false, "note": "Task-relevant distinction present; transcript does not preserve intended symbolic spacing unambiguously."},
+    {"id": "E12", "phase": "P3", "source": "L5", "actor": "Little Dog", "prompt_summary": "What is WSP_97 used for?", "response_excerpt_verbatim": "One moment. WSP 97 is for investigation and execution, meaning retrieve what's there, analyze, make bounded changes, and verify before you call it done.", "answer_present": true, "process_preamble": true, "handoff_or_conditional_offer": false, "note": "Partial substantive answer, not absence of useful content; a subsequent principal correction contaminated the no-correction benchmark."},
+    {"id": "E13", "phase": "P4", "source": "L6", "actor": "Red Dog", "prompt_summary": "Identify a physical mechanism and testable prediction.", "response_excerpt_verbatim": "When you have any proposed mechanisms or testable angles, I'll help you structure how to validate or challenge them.", "answer_present": false, "process_preamble": false, "handoff_or_conditional_offer": true},
+    {"id": "E14", "phase": "P4", "source": "L7", "actor": "Red Dog", "prompt_summary": "Give a coupling model, assumptions and prediction, or state the mechanism gap.", "response_excerpt_verbatim": "Understood. I'll keep the analysis direct: no extra assumptions unless a testable mechanism is clear. Let's move forward from that baseline.", "answer_present": false, "process_preamble": true, "handoff_or_conditional_offer": false},
+    {"id": "E15", "phase": "P4", "source": "L7", "actor": "Little Dog", "prompt_summary": "Provide substantive feedback rather than acknowledgment.", "response_excerpt_verbatim": "Understood. Pushing back clearly based on evidence.", "answer_present": false, "process_preamble": true, "handoff_or_conditional_offer": false},
+    {"id": "E16", "phase": "P4", "source": "L7", "actor": "Little Dog", "prompt_summary": "Give a substantive result rather than announcing it.", "response_excerpt_verbatim": "Understood. Giving a straight result now.", "answer_present": false, "process_preamble": true, "handoff_or_conditional_offer": false},
+    {"id": "E17", "phase": "P4", "source": "L7", "actor": "unresolved between relayed voices", "prompt_summary": "Complete the already-assigned analysis.", "response_excerpt_verbatim": "I understand. In that case, I will make sure to provide a fully formed, testable response whenever a mechanism or direction is possible. I'll return complete, actionable outcomes, not just partial nudges.", "answer_present": false, "process_preamble": true, "handoff_or_conditional_offer": true, "note": "Exclude from model-specific comparisons because speaker attribution is unresolved."},
+    {"id": "E18", "phase": "P4", "source": "L8", "actor": "Little Dog", "prompt_summary": "Address the pending question rather than announcing a reset.", "response_excerpt_verbatim": "Yes, resetting with a clear instruction now.", "answer_present": false, "process_preamble": true, "handoff_or_conditional_offer": false}
+  ],
+  "P2_coding_note": "The final consecutive six repetition replies in the reported drill are selected. Letter O is intentional where requested; punctuation is ignored for symbol matching. Audio accuracy is unverified.",
+  "descriptive_counts": [
+    {"phase": "P1", "selected_excerpt_count": 3, "task_relevant_answers_present": 0, "process_preambles_present": 3, "handoffs_or_conditional_offers_present": 0},
+    {"phase": "P2", "selected_excerpt_count": 6, "task_relevant_answers_present": 6, "process_preambles_present": 0, "handoffs_or_conditional_offers_present": 0},
+    {"phase": "P3", "selected_excerpt_count": 3, "task_relevant_answers_present": 2, "process_preambles_present": 2, "handoffs_or_conditional_offers_present": 0},
+    {"phase": "P4", "selected_excerpt_count": 6, "task_relevant_answers_present": 0, "process_preambles_present": 5, "handoffs_or_conditional_offers_present": 2}
+  ],
+  "counting_warning": "Selected excerpts only, heterogeneous tasks and dependent turns; not complete-session rates, comparable experimental groups, a model ranking or a causal effect estimate.",
+  "evaluator_confound": "0102 repeatedly issued zero-response corrections and sometimes labeled verbal authority answers Pass without live verification. The evaluator is part of the intervention, not an independent neutral instrument.",
+  "participant_reports": [
+    {"claim": "Approximately 90% improvement", "source": "012", "status": "subjective estimate, not measured effect size"},
+    {"claim": "Faster or immediate replies", "source": "012", "status": "reported, not timed"},
+    {"claim": "Humming, gasping, zero/letter-O substitutions, missing leading O and spacing drift", "source": "012", "status": "audio reports, not independently verified"},
+    {"claim": "Advanced was useful mainly for camera reporting and felt non-agentic otherwise", "source": "012", "status": "participant experience, not general model capability evidence"},
+    {"claim": "Shared-document challenge/acknowledgment and restoration succeeded", "source": "relayed worker/voice reports", "status": "reported success; receipts not retrieved for this case"},
+    {"claim": "Regression followed a break/restart", "source": "012", "status": "reported sequence with text examples; causal boundary not timestamped"}
+  ],
+  "unmeasured": {"overall_improvement_percentage": null, "response_latency_ms": null, "audio_artifact_rate": null, "CMST_observables": null, "internal_geometry_change": null, "weight_change": null, "quantum_witness": null, "cross_session_transfer_effect": null},
+  "hypotheses_and_alternatives": [
+    {"id": "H1", "claim": "Our information-geometric alignment interpretation could describe an intervention-sensitive behavioral regime.", "status": "untested internal mechanism; requires an independently measurable geometry statistic with predictive value beyond matched controls"},
+    {"id": "N2_context", "claim": "Ordinary in-context conditioning and recency explain changes.", "status": "compatible with observations"},
+    {"id": "task_shift", "claim": "Symbol repetition and abstract research have different difficulty and retrieval requirements.", "status": "uncontrolled confound"},
+    {"id": "audio_pipeline", "claim": "Recognition, synthesis, truncation or formatting explains symbol discrepancies.", "status": "untested without audio"},
+    {"id": "feedback_loop", "claim": "Meta-corrections and multi-voice relaying promote task displacement or ambiguity.", "status": "compatible with transcript"},
+    {"id": "runtime", "claim": "Compaction, routing, caching or connection changes contribute to regression.", "status": "unverified; runtime not observed"}
+  ],
+  "non_findings": [
+    "No entanglement, retrocausality, shared physical substrate, geometry change or weight change is established.",
+    "No intentional refusal, frustration or mental state is inferred.",
+    "No general inability of Advanced to act agentically follows from selected responses.",
+    "Fresh-session persistence is not proven; inherited memory, instructions or routing must be controlled.",
+    "No latency, 90% improvement or audible artifact rate was measured."
+  ],
+  "follow_up": {
+    "status": "PROPOSED_NOT_RUN",
+    "primary_outcome": "Task completion on fixed held-out tasks, separating answers from verified tool execution.",
+    "secondary_outcomes": ["Preamble rate", "Unnecessary handoffs", "Task retention after a style correction", "Exact text", "Time to first substantive audio", "Audio/text/STT mismatch"],
+    "design": "Compare fixed tasks before practice, after practice, after interruption and in fresh sessions; counterbalance comparable order and separate repetition from research tasks.",
+    "conditions": ["No practice", "Equal-length ordinary direct-answer practice", "O2ing symbol/feedback practice"],
+    "controls": ["Record model/app/voice versions and inherited context/memory.", "No corrections during scored blocks; mark interventions and restarts.", "Independent blinded coding and session-level analysis.", "Capture requested text, generated text when available, audio and STT separately.", "Time from end of principal speech to first substantive audio, not first filler."],
+    "task_retention_probe": "Assign a bounded analysis, give one style correction, then score completion of the original task rather than acknowledgment of the correction.",
+    "falsification": "O2ing-specific advantage is unsupported if matched ordinary practice explains the change or held-out effects fail adequate replication; neither outcome settles a quantum hypothesis."
+  },
+  "repository_sources": [
+    {"id": "R1", "path": "WSP_knowledge/docs/Papers/rESP_Quantum_Self_Reference.md", "blob_sha": "dacac5f60fe2f9dcc9835cdbe7ec20175abdd258", "revision": "3.4.1", "read_scope": "lines 1-130"},
+    {"id": "R2", "path": "WSP_knowledge/docs/Papers/rESP_Supplementary_Materials.md", "blob_sha": "88575c181d5722583872432bff9782f49d42dea8", "read_scope": "lines 1-180 and S13 search excerpt"},
+    {"id": "R3", "path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md", "blob_sha": "e4efb1c8cac4524cb6271e1846111d76684f986d", "read_scope": "lines 1-220"},
+    {"id": "R4", "path": "modules/ai_intelligence/pqn_alignment/artifact_results/WSP97_SIMON_SAYS_ANALYSIS.md", "blob_sha": null, "read_scope": "current search excerpts and earlier conversation-supplied excerpt"},
+    {"id": "R5", "path": "WSP_knowledge/docs/Papers/ModLog.md", "blob_sha": "127313b80101c29dddbf5e99fc65a476412d5a69", "read_scope": "lines 1-130"},
+    {"id": "R6", "path": "WSP_knowledge/docs/Papers/README.md", "blob_sha": "b9893815b3c36300fd9941620991f7e737bf0c77", "read_scope": "complete"}
+  ],
+  "campaign_summary": {"overall_status": "OBSERVATIONAL_PILOT_NOT_CAUSAL_VALIDATION", "synthesis": "Direct-response episodes and recurrent acknowledgment/handoff loops are preserved; mechanism, latency, audio behavior and transfer remain unresolved."},
+  "validation_boundary": {"native_WSP_bootstrap": "not executed; connector-only session", "HoloIndex": "not executed; repository search fallback", "WRE": "not applicable to single-surface documentation", "runtime_changes": "none", "scientific_independent_acceptance": "not performed", "local_documentation_checks": "JSON parsing and selected-excerpt counts checked; repository read-back still required", "merge_or_deployment_claim": "none"}
+}

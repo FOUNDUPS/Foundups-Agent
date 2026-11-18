@@ -1,3 +1,26 @@
+## Editorial review prototype
+
+Run `python -B -m unittest modules.platform_integration.social_media_orchestrator.tests.test_content.test_editorial_review`
+for synthetic revision, review and benchmark-input contracts. No model/provider
+is exercised. Run with the existing compiler/projection selection in CI as well.
+See docs/EDITORIAL_REVIEW.md and the dated TestModLog for measured results.
+
+## Publication reconciliation — 2026-11-16
+
+The existing content fixture also tests the implemented effect-free receipt
+reconciler through the real SOCIAL adapter. Run it with the existing adapter:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHON_DOTENV_DISABLED=1 python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/platform_integration/social_media_orchestrator/tests/test_content/test_content_orchestrator.py modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py
+```
+
+On Windows use an empty pytest config instead of `/dev/null`. Asyncio's local
+self-pipe must be available before the test's application-effect guard is active.
+Use a bounded runner; a socketpair setup stall is not a failed publication test.
+Acceptance is structural receipt binding, preserved open work/readback-only
+actions and zero effects, not external receipt authenticity or memory ingestion.
+See TestModLog for measured results and the retained first failing harness run.
+
 ## Editorial package compiler — 2026-10-27
 
 The original PR added tests/test_content/test_content_orchestrator.py for the compiler. Current-main reconciliation retains the separately repaired legacy content_orchestrator.py scaffold and its explicit quarantine; these new cases do not qualify that older formatting surface. Run it alongside the existing connected campaign selection below. To measure only the two new compiler leaves, enable pytest_cov and pass --cov=modules.platform_integration.social_media_orchestrator.src.content.campaign_brief --cov=modules.platform_integration.social_media_orchestrator.src.content.campaign_planner --cov-fail-under=90. The original 2026-10-27 record reports 107 tests +131 subtests with 99.54% compiler coverage; that historical result is not current-main validation. These are offline source/contract checks, not voice quality, installed runtime, CMS or live delivery evidence.

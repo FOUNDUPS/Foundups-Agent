@@ -1,3 +1,42 @@
+## 2026-11-16 — Scientific repair canary (Issue #1522), fail-closed `measurement_evidence`, and `branch_dispositions` parity
+
+- **Scientific Self-Healing (`src/repair_operation_contract.py`, `src/repair_baseline_verifier.py`, `src/scientific_repair_canary_orchestrator.py`)**: Integrated Issue #1522 `ScientificRepairOperation` state machine with `state_history` audit trail, hardened `attempt_failure_reproduction()` to execute via `shlex.split` + `shell=False`, and wired `ScientificRepairCanaryOrchestrator` with `ModelIndependencePolicy` and `VerifierContextFirewall.project_evidence_packet` plus `PatternMemory.store_outcome` (`SkillOutcome`) while keeping protected 19/P0 custody gates (`promote_variation`, `RedDogDirector.advance_to_execution`, `RedDogVerifiedPatternMemorySink`) untouched. Added composition audit at `WSP_knowledge/docs/audits/self_healing/SELF_HEALING_COMPOSITION_AUDIT.md`.
+- **Fail-Closed Measured Benefit (`recursive_improvement/src/core.py`, `recursive_improvement/src/learning.py`)**: Added `Improvement.tokens_saved` and extended `RecursiveLearningEngine.apply_improvement(..., measurement_evidence=None)` to validate receipt-backed non-self-authored (`evaluator_id != worker_id`), `work_order_id`-matched, non-regressive (`candidate_tokens <= baseline_tokens`), and optional SHA-256 `before_state_digest` / `after_state_digest` measurement evidence fail-closed before target mutation (and rollback on post-applicator `after_digest` mismatch) with `blocked_measurement_rejected`. Extended `rollback_improvement()` to subtract measured `tokens_saved` from `total_tokens_saved` (clamped `>= 0`).
+- **Branch Dispositions Parity (`tests/test_git_lifecycle.py`)**: Verified PR #2390 `branch_dispositions` superset in `src/git_lifecycle.py` and added explicit `COMPLETE` merged PR (`BRANCH_MERGED_PR_RETAINED` / `assess_retirement_diff_against_main`) coverage. WSP 10, 22, 48, 49, 50, 97, and 110.
+
+## 2026-11-15 — Verified RSI improvement application & rollback in RecursiveLearningEngine
+
+- **RecursiveLearningEngine (`recursive_improvement/src/learning.py`)**: Initialized `_rollback_handlers` safely for both `__init__` and `__new__` callers via `_get_rollback_handlers()`; extended `apply_improvement()` with fail-closed `blocked_unimplemented` legacy behavior when no evidence/applicator is provided, strict independent verifier (`AUTONOMOUS_SLICE_VERIFIER_ACCEPT`, `verifier_id != worker_id`, 40-hex `head_sha`), outcome ratchet (`OUTCOME_RATCHET_RECORDED`), held-out gate (`HELD_OUT_RECURSIVE_IMPROVEMENT_REGRESSION_GATE_ACCEPT`, `pattern_memory_admission_allowed is True`), and distinct-digest reversible `target_applicator` validation (`blocked_verification_rejected` on failure), plus `rollback_improvement()` with SHA-256 restored-state verification without fabricating token savings.
+- **Tests (`recursive_improvement/tests/test_learning.py`)**: Added fail-closed unauthenticated and self-verified/rejected-gate regression tests plus a bounded end-to-end RSI cycle through `RedDogDirector`, `admit_runtime_skill("auto_test_registry_audit")`, `verify_autonomous_slice_runtime`, `ratchet_verified_outcome`, `evaluate_held_out_recursive_improvement_regression_gate`, `RedDogVerifiedPatternMemorySink`, queue-authorized admission invoke, `apply_improvement`, and `rollback_improvement`.
+
+## 2026-11-15 — PC Git inventory stashes, backlog summary, and worktree summary
+
+- **Git lifecycle inventory (`src/git_lifecycle_inventory.py`)**: Added `_read_stashes()` (SHA-only `refs/stash` + `rev-list --walk-reflogs refs/stash`, privacy-bounded with no stash messages or filenames), included stashes in `_observe()` pre/post `ls-remote` stability checks (`pc_state_changed_during_observation`), added local `github_main` `cat-file -t` presence check (`github_main_present_on_pc`), `pc_backlog_summary`, `worktree_summary`, `section="stashes"` pagination with `stash_count`, and strict `verify_git_inventory_receipt()` validation while preserving `_SCHEMA`, `_MAX_RECEIPT`, `_PAGE_SIZE`, `branches` row shape, and `branch_comparison` keys.
+- **Tests (`tests/test_git_lifecycle_inventory.py`)**: Added coverage for stash pagination and privacy non-leakage, malformed/oversized stash reflogs, concurrent stash mutation blocking, `github_main_present_on_pc` True/False backlog and worktree summaries, and tampered stash/summary verification rejection.
+
+## 2026-11-15 — Fix MetricsIngestorV2 ai_0102_approvals index schema mismatch
+
+- **metrics_ingest_v2 (`skillz/metrics_ingest_v2.py`)**: Aligned `idx_approval_skill` creation index target from obsolete `human_approvals(skill_id)` to existing table `ai_0102_approvals(skill_id)` so fresh SQLite databases initialize cleanly alongside `WRESkillsRegistryV2`.
+- **Verification**: Added `tests/test_metrics_ingest_v2_schema.py` covering fresh schema initialization and `check_rollback_triggers()` healthy/degraded/exception paths.
+
+## 2026-11-15 — Parent-version-bound pattern recall and evolution lineage
+
+- **PatternMemory (`src/pattern_memory.py`)**: Added `_parent_version_filter` and optional `parent_version: Optional[str] = None` to `recall_successful_patterns()` and `recall_failure_patterns()`, filtering in SQL before `LIMIT` on `json_valid(output_result)=1` and `$._skill_binding.schema_version = 'wre_skill_execution_binding.v1'` + `$._skill_binding.loaded_skill_sha256` (fail-closed `[]` on blank/non-string inputs).
+- **WREMasterOrchestrator (`wre_master_orchestrator/src/wre_master_orchestrator.py`)**: Wired `loaded_skill_digest(skill_content)` into `evolve_skill()` pattern recall (`recall_failure_patterns`, `recall_successful_patterns`) and `store_variation(..., parent_version=...)` so foreign revisions cannot pollute candidate generation.
+- **Docs (`INTERFACE.md`)**: Documented `parent_version` recall filtering and `evolve_skill()` lineage binding.
+
+## 2026-11-15 — Hardened read-only GitHub branch dispositions
+
+Add and harden read-only `branch_dispositions` accounting in
+`reconcile_git_lifecycle()`: enforce exact `sha == head_sha` matching for both
+open and closed/merged PRs (`BRANCH_OPEN_PR_HEAD_MOVED` when moved), separate
+protected non-`main` branches into `PROTECTED_BRANCH`, require strict same-repo
+case-insensitive `head_repository` matching, preserve full sorted `pr_numbers`
+history per ref, emit `BRANCH_PR_OBSERVATION_INCOMPLETE` instead of
+`BRANCH_UNTRACKED` when PR observation is partial, and separate
+`BRANCH_PR_HEAD_MISMATCH` from never-PR'd `BRANCH_UNTRACKED`. WSP 10, 22, 50,
+84, 97 and 110.
+
 ## 2026-11-12 — Security-scan caller lifecycle obligations
 
 The existing security_scan skill now points build/launch callers to WSP 71
@@ -153,6 +192,14 @@ Hosted secret scan required 38 exact reviewed-metadata rebindings after the
 manifest byte identity changed. Independent review confirmed all 38 matched
 unchanged, previously reviewed public source hashes. Historical identities stay;
 no scanner rule or coverage change. See TestModLog for failed-run provenance.
+
+## 2026-10-26 — Reproject the PFMall serving test process capability
+
+Allocation6b5d7902f follows actual CI stale-registry rejection. Unchanged generation
+and independent review agree on one existing test row: capabilities[] ->[process].
+All1773 paths/273 quarantines and every other field remain unchanged. Generator
+write/check and50 cases in the two existing registry/differential owners pass.
+No classifier, test, collection, shard, schema or execution-authority change.
 
 ## 2026-10-22 — Re-review unchanged generated hash metadata
 
@@ -5817,3 +5864,12 @@ Phase 3 completes the autonomous execution chain:
 - Grounded by current Holo evidence at exact base
   `7269deb66f638cc6bbb8239aecf0c8b5ae6b8d22` and documented under WSP 15,
   WSP 50, WSP 62, and WSP 97 before resuming RedDog Phase 2C.
+## 2026-11-14 - CI documentation pilot reuses verification owners
+
+The existing CI scope pilot gains trusted-base selection and a proposal-only
+Skill documentation schema. WRE impact planning, registry projection,
+differential execution and exact-main evidence remain unchanged. Python and
+protected/systemic changes retain full verification; no model may supply
+dependency-completeness or downgrade authority. The CI README records activation
+holds and exact reference timing. No runtime admission or RSI transfer is claimed.
+WSP 6/15/22/50/71/95/97/110.

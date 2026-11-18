@@ -1,4 +1,18 @@
+## 2026-09-19 - Registry-driven FoundUp brand context
+
+- Added an optional `brand_context_path` to the canonical FoundUp registry and a shared `brand_context.schema.json`.
+- Brand context is identity/copy data only. Parent/child brand inheritance never grants token, routing, credential, safe-mutation, financial, or governance authority.
+- eSingularity is the first concrete instance: parent `eSingularity.ai`, child `yumori_me -> YUMORI.me`.
+- Red Dog consumes this through the existing generic FoundUp grounding path rather than per-FoundUp conditionals. WSP 00/15/22/50/95/97/102/109.
+
 # FoundUps Domain - ModLog
+
+## 2026-11-14 - SoftProto live co-design preview direction
+
+- Preserved 012's conversational design plus desktop/tablet/mobile/full-browser preview intent in [the existing SoftProto architecture](docs/SOFTPROTO_LIVE_CODESIGN_PREVIEW_EXTENSION.md).
+- Reused shared command/guardrail owners, WSP 102 design and WSP 95 skill boundaries; WSP 00 unchanged.
+- Documentation only. No editor runtime, deployment, live swarm or RSI completion claimed.
+
 
 ### 2026-10-30 — Persistent repository-first FoundUp intake rule
 

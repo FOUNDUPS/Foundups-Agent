@@ -1,13 +1,17 @@
 # Recursive Improvement Roadmap
 
-**Current state:** proposal/pattern persistence with fail-closed application.
+**Current state:** proposal/pattern persistence with verification-gated
+application, digest-verified rollback, and fail-closed `measurement_evidence`
+token/latency accounting.
 
 ## Completed foundation
 
 - error-pattern, solution-proposal, and improvement-proposal records;
 - JSON persistence and compatibility global handler;
-- proposal metrics that explicitly mark token reduction unmeasured;
-- fail-closed `apply_improvement()` truth boundary.
+- proposal metrics that explicitly mark unmeasured token reduction as `None` / `False`;
+- fail-closed `apply_improvement()` truth boundary (`blocked_unimplemented` without receipts, `blocked_verification_rejected` on failed verification, `blocked_measurement_rejected` on invalid/self-authored/regressive measurement);
+- digest-verified `rollback_improvement()` with measured `total_tokens_saved` subtraction;
+- receipt-backed `measurement_evidence` integration binding non-self-authored `evaluator_id`, `work_order_id`, and state SHA-256 digests.
 
 ## Required next layers
 

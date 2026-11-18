@@ -1,3 +1,93 @@
+## 2026-11-16 — Isolated iPhone YouTube baseline probe parameterization and Build v19 browser alignment
+
+- Extended `modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_{probe.js,reference.html}` with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts) and `?host=youtube|nocookie` official-host comparison, bidirectional `Mall <-> official embed` selection retention, controls strictly below `#hpc-probe-embed`, sanitized `deployment.json` + `SW controller` provenance receipt, and explicit separation of IFrame `101/150` from screen-observed `LOGIN_REQUIRED` prompts.
+- Reconciled remaining `"Build v18"` -> `"Build v19"` modal expectations in `mall_scoped_video_browser.py` (`lines 338, 506`). Physical iPhone Safari and Home Screen PWA gates across Wi-Fi and cellular remain `UNEXECUTED` pending real-device receipts from `012`.
+
+## 2026-11-16 — Build v19 truth gates, activeVideo continuity, and test reconciliation
+
+- Updated `mall_product_state_vm.mjs` (23 passed: `pfmall-member-v19` cache migration, ordinary `/member/` `activeVideo` persistence/validation, and HPC `sessionStorage` isolation) and `test_mall_product_state.py`.
+- Extended `mall_property_listing_vm.mjs` with VM behavioral assertions for ordinary `/member/` `hpc` tile routing to `/member/?foundup=hpc`, `openDesktopVideo` `queueQuery` inheritance, and `restoreActiveVideo` (`autoplay: false`).
+- Reconciled `mall_scoped_video_browser.py` (`Build v19`), `test_non_video_action_surfaces.py` (`internal_app`), and `test_navigation_planes.py` (`foundup_id`-based `Enter FoundUp` handoff and concierge-first gesture hint contract).
+- Full member verification: `pytest -q -p no:cacheprovider public/member/tests` (`1531 passed, 0 failed`) and all 6 Node VM suites (`EXIT=0`).
+
+## 2026-11-15 — Build v18 discovery filters, internal_app quick-view, and viewport verification
+
+- Updated `mall_product_state_vm.mjs` (22 passed including `pfmall-member-v18` cache upgrade and `localStorage` `source_group` round-trip), `mall_scoped_video_browser.py` (`Build v18`), and `test_non_video_quickview_actions.py` (`internal_app`).
+- Verified `1440x900`, `390x844`, `844x390`, and `320x700` member viewports via Python Playwright against an ephemeral localhost server (`verify_sprint6_viewports.py`): zero horizontal overflow, dynamic `Videos`/`Apps`/`HPC` pills, `gotjunk_001` `Open App` CTA, and state reload persistence.
+
+## 2026-11-14 · Mall build identification
+
+The scoped browser fixture checks the build next to #SchumerOUT at desktop
+and phone widths, including space beside the civic action at 320 px. The
+HPC and member plus menus display the same build. The worker fixture checks
+that the label matches the installed v17 cache and that v16 is retired.
+
+## 2026-11-14 · Shared dock phone reference
+
+The existing Chromium and WebKit browser fixtures check the shared dock at
+320/390/430 px portrait and 844 × 390 landscape. The updated tests exercise
+the anchored plus panel, backdrop dismissal, the square in Red Dog's slot,
+pointer release and cancellation, and a multiline transcript that can be
+edited while the same provider frame plays. Independent review caught a
+Stop button that could not be tapped after starting dictation from the
+member mode sheet. The regression covers that entry separately from a
+held pointer. The state fixture checks v16
+installation, v15 retirement and retention of unrelated caches.
+
+The broader targeted Python run had 601 passes and the same three existing
+navigation assertions on the candidate and base `ebfce5717`.
+`TestFoundUpHandoff` expects `fv-open-link` and `routing_prefix` and
+`TestGestureHints` expects the former tap-to-play/pause hint. These are
+outside the dock change. Browser fixtures use controlled provider and
+speech events. They leave physical iPhone and real dictation verification open.
+
+## 2026-11-14 · Phone WikiTube viewer
+
+The base `510079b91` passed the existing scoped and desktop cases. The
+phone regression uses the real member shell with controlled admission,
+media and local speech. It checks in-card playback, the same iframe
+through expansion and queue search, 320/390/430 px portrait and 844 × 390
+landscape, native horizontal touch scrolling in Chromium, plus menu swipe,
+foreground dictation with Stop and pointer cancellation, focus and scroll
+return, and one provider frame. The worker fixture covers v14 to v15
+upgrade and unrelated-cache retention. Physical devices and provider
+playback are separate verification.
+
+## 2026-11-14 · Member WikiTube controls
+
+The controlled Chromium and WebKit member cases cover the Play root route,
+guest sign-in, admitted grid and rows, inline dimensions, iframe continuity
+into full view, queue search and keyboard return, plus and Red Dog actions.
+The existing Chromium HPC cases cover the public route, responsive theater
+and phone layout. The v14 fixture covers the cache upgrade.
+
+Real YouTube in Chromium 143 played `JFp2l1fnf_4` inside a 512.5 × 240
+CSS px selected slot. The same provider window advanced from 0.52 to
+1.06 seconds while the clip expanded and an active queue search was
+submitted. Closing left zero iframes. This run used the local Mall harness.
+
+## 2026-11-13 · Invited desktop poster grid
+
+The new browser case reproduced category rows on fresh desktop entry at
+base `09da53549`. The candidate opened 15 mixed cards in eight columns at
+1440 × 900 CSS px. The controlled player kept one provider iframe, retained
+it on resize, and advanced the queue after both autoplay and manual Play.
+The new desktop rail thumbnails meet the 120 × 70 CSS px minimum.
+WebKit exposed a scroll snap that moved the originating tile out of view.
+Explicit scroll restoration returned to the focused tile. A close at 680 px
+after opening at 1440 px restored the same tile in its new row. Enter FoundUp
+went to `/f/move2japan` after the player closed. The saved rows, wide touch,
+card quick view and scoped HPC cases passed in the Chromium suite.
+
+In a separate Windows Chromium 143 localhost dev-harness run, real YouTube
+clip `JFp2l1fnf_4` advanced from about 0.41 s to 1.02 s in a 1440 × 694
+CSS px iframe. The diagnostic saw
+zero provider document or media requests before tile selection and zero
+remaining player frames after closing. Live invited admission, deployment
+and physical iPhone playback remain separate gates. The v13 cache fixture
+passed 21 cases. The 600-case Python comparison had the same three inherited
+assertions in `test_navigation_planes.py` as the base.
+
 ## 2026-11-13 · Public HPC and admitted member entry
 
 The controlled Chromium fixture follows the real member shell through

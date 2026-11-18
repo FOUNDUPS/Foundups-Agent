@@ -1,3 +1,16 @@
+## 2026-11-14 — Reconcile the nested Claude instruction pointer
+
+Complete the bounded PR #729 instruction consolidation using the existing
+all-file audit. Replace the duplicated nested protocol with links to canonical
+root instructions and WSP 00; preserve current root CLAUDE and generated AGENTS.
+Retire the proposed mandatory read of the dated May 30 stack inventory and its
+unverified model/settings claims. Original head `1757a520c779c3b6a83ed8a4282f2eae13beb10a`
+and inventory blob `ef1823cd89221bd1c8611f03cd1d3039d4c961f7` remain in the
+branch ancestry and existing reconciliation receipt. No runtime change.
+Validation: existing tooling projection check, relative links, complete Git
+delta review and exact root-instruction preservation. Hosted acceptance remains
+bound to the resulting candidate, separately from these local checks.
+
 ## 2026-11-12 — Bounded host launches and build security preflight
 
 Make WSP 91 lifecycle and WSP 71 security review explicit in canonical agent
@@ -835,6 +848,29 @@ Added a parallel connected-regression CI job without removing existing gates.
 Source audit, independent validation and remaining native RSI gaps are recorded
 in the [WRE roadmap](modules/infrastructure/wre_core/ROADMAP.md#current-verification-integration--2026-10-28).
 WSP00/15/22/48/97; local tests are separate from PR/main and runtime evidence.
+
+## 2026-10-26 — Allocate observed serving registry repair
+
+PR2226's actual hosted canonical-registry gate fails. Read-only generation shows
+one existing test owner's capabilities[] ->[process], with1773 paths/273 quarantines
+and every other field fixed. Under13/P1 allocate that exact derived reprojection,
+owner logs and unchanged generator regressions before mutation. No test,
+classifier, scanner, permission or quarantine relaxation. Host PR2225 is merged
+at d0a40a3e8 with the exact independently reviewed tree; serving is now based on main.
+
+## 2026-10-26 — Allocate real member HTTP serving qualification
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP6/22/50/62/71/77/84/97 before authoring.
+Reuse Uvicorn's CLI and the existing RSA test owner; add a separately pinned
+minimal optional server profile and three real loopback-process acceptance cases.
+Preserve all814 existing cases, old dependency environments and historical proof.
+New isolated wheel acquisition/inventory and independent review must precede
+publication. No custom launcher, cloud deploy/IAM/provider session or token effect.
+Existing FX/chain plan records exact file/line budgets and remaining deployment,
+live identity, browser and durable repository-control gates.
+Local repaired serving profile817PASS retains all814 old IDs and43 definition ASTs.
+All28 installed wheel digests match official metadata with no listed advisories;
+manifest unchanged. Independent cleanup fault-path and hosted gates remain required.
 
 ## 2026-10-26 — Isolated member host bootstrap candidate
 
@@ -6395,6 +6431,33 @@ Route matrix table in doc. `json.load(firebase.json)` valid.
 artifacts touched; no secrets read.
 **Next**: after this lands, re-run PFMALL_PUBLIC_BROWSE_HOSTING_DEPLOY_PHASE1 (finalization will now accept
 the config). Optional preview-channel deploy confirms server-side header emission before touching live.
+
+## [2026-06-13] GetK FoundUp Monorepo PoC Bootstrap Phase 1 (Lane W6/AUTHOR, CODE_NON_SPINE)
+
+**Change Type**: Additive FoundUp bootstrap -- new module scaffold + registry entry +
+pure-Python PoC contracts + WRE dry-run proof + audit doc. STOP at MERGE_READY (not self-merged).
+**By**: 0102 (Worker-Lane W6 / AUTHOR) | Commander: 012 | Gate: external 0102
+**WSP References**: WSP 3, WSP 11, WSP 22, WSP 49, WSP 50, WSP 55, WSP 97, WSP 109
+**Slice**: GETK_FOUNDUP_MONOREPO_POC_BOOTSTRAP_PHASE1
+**Base**: `20c26b7d4` (origin/main after #799)
+
+- Proves the operational-WRE build path by adding GetK ("Get a Kei Truck") to the roster: registry
+  entry + valid manifest + WSP-49 module (README/INTERFACE/ROADMAP/src/tests/memory/requirements) +
+  pure-Python PoC contract model (capture/listing/estimate/stakeholder-gate/token-utility/deferred-auction).
+- WRE/OpenClaw/Hermes dry-run PROOF passes via the EXISTING create+drain seam (no new wiring): GetK
+  reaches SIMULATED, source_authority monorepo_poc, resolved_module_path modules/foundups/getk from the
+  shared validated resolver, readiness false, real-exec sinks asserted not-called. No seam gap.
+- Tests: getk contracts 16, getk manifest 11, WRE dry-run proof 2 (29 new); cross-checks registry schema
+  46 + catalog projector 42 still pass. No skips/xfail. No network, no real execution.
+- Boundaries: no auction lookup/scraping/login, no bidding, no payments, no token economics, no PFmall
+  wiring, no AutoPost integration, no regulatory claims as truth, no source_authority promotion, no
+  CABR/PAYOUT/DAO/MVP claim. GETK token is internal utility only (TOKEN_DEFERRED).
+- SKILLz-gap assessment (per 012): RAILS exist (registry, manifest, dry-run seam, autonomous_slice_worker
+  meta-skill) but (a) no FoundUp product SKILLz exist, (b) no end-to-end WRE FoundUp-onboarding BUILD skill
+  (onboarding was manual here), (c) the registry is not HoloIndex-indexed (remembered via README only).
+  Named follow-ups: GETK_IMPORT_REGULATORY_PROVIDER_AUDIT_PHASE1, the GETK product SKILLz,
+  WRE_FOUNDUP_ONBOARDING_BUILDER_SKILL_PHASE1, FOUNDUP_REGISTRY_HOLOINDEX_BRIDGE_PHASE1.
+- Doc: docs/audits/architecture/GETK_FOUNDUP_MONOREPO_POC_BOOTSTRAP_PHASE1.md (11 sections, WSP_97 18/18).
 
 ## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
 
@@ -63583,3 +63646,18 @@ the official CPU index, verifies that build after the unchanged requirements,
 and avoids restoring/retaining the former GPU pip cache. Runtime requirements
 and all acceptance commands remain unchanged. Hosted validation is pending.
 WSP10/22/50/97. No package installation or model change on the Windows PC.
+## 2026-11-14 - Trusted, default-off CI documentation verification
+
+Extend the landed #2338/#2340 pilot with exact-base verifier loading, one scoped
+gate result and an unregistered proposal-only Skill document schema. Keep
+required check names and every full-route command; fail required aggregation on
+absent, pending, failed, cancelled or stale scope evidence. Security/other required
+gates and post-merge full verification remain. Preserve existing WRE differential
+and exact-main owners; no scheduler, router, permission or runtime admission is
+added. See [.github/scripts/README.md](.github/scripts/README.md#audit-markdown-fast-path).
+
+Production activation remains held: current server opt-in absent, strict base
+freshness false and protected workflow ownership unestablished. No settings were
+changed. Python narrowing remains held without authenticated dependency closure.
+WSP 6/10/15/22/34/50/71/87/91/95/97/99/110. Validation and exact-head/main receipts
+are recorded in the focused PR and existing active slice ledger.

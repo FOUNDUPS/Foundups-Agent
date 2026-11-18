@@ -23,6 +23,14 @@ _MAX_ROWS = 2048
 _MAX_OUTPUT = 512_000
 _MAX_RECEIPT = 256 * 1024
 _PAGE_SIZE = 20
+_BACKLOG_KEYS = frozenset({
+    "local_head_count", "attached_worktree_branch_count",
+    "merged_into_github_main_count", "unmerged_unattached_head_count",
+    "stash_count",
+})
+_WORKTREE_SUMMARY_KEYS = frozenset({
+    "total", "attached", "detached", "bare", "locked", "prunable",
+})
 
 
 class _InventoryError(ValueError):
@@ -106,6 +114,25 @@ def _parse_worktrees(output: str, selected: Path) -> list[dict]:
     return rows
 
 
+def _read_stashes(git_fn, root: Path) -> list[dict]:
+    tip = git_fn(
+        root, "for-each-ref", "--format=%(objectname)", "refs/stash",
+        reason="stash_inventory_unavailable",
+    ).removesuffix("\n")
+    if not tip.strip():
+        return []
+    if _SHA.fullmatch(tip) is None:
+        raise _InventoryError("stash_inventory_invalid_or_too_large")
+    output = git_fn(
+        root, "rev-list", "--walk-reflogs", "refs/stash",
+        reason="stash_inventory_unavailable",
+    )
+    shas = output.removesuffix("\n").split("\n") if output else []
+    if not 1 <= len(shas) <= _MAX_ROWS or any(_SHA.fullmatch(sha) is None for sha in shas):
+        raise _InventoryError("stash_inventory_invalid_or_too_large")
+    return [{"sha": sha} for sha in shas]
+
+
 def _observe(root: Path, runner) -> dict:
     deadline = time.monotonic() + 25
 
@@ -141,7 +168,7 @@ def _observe(root: Path, runner) -> dict:
     if selected is None:
         raise _InventoryError("selected_worktree_unverified")
 
-    def local() -> tuple[dict, list, bool]:
+    def local() -> tuple[dict, list, list, bool]:
         branches = _parse_branches(git(
             root, "for-each-ref", "--format=%(refname)%00%(objectname)", "refs/heads",
             reason="local_branches_unavailable",
@@ -149,11 +176,12 @@ def _observe(root: Path, runner) -> dict:
         worktrees = _parse_worktrees(git(
             root, "worktree", "list", "--porcelain", "-z", reason="worktrees_unavailable",
         ), selected)
+        stashes = _read_stashes(git, root)
         status = git(
             selected, "status", "--porcelain=v1", "-z", "--untracked-files=normal",
             "--ignore-submodules=none", reason="selected_status_unavailable",
         )
-        return branches, worktrees, not status
+        return branches, worktrees, stashes, not status
 
     before = local()
     if git(
@@ -175,26 +203,74 @@ def _observe(root: Path, runner) -> dict:
         or _pc_worktree(root, common, bounded_runner) != selected
     ):
         raise _InventoryError("pc_state_changed_during_observation")
-    local_branches, worktrees, clean = before
+    local_branches, worktrees, stashes, clean = before
     current = next(row for row in worktrees if row["selected"])
     if current["head"] is None:
         raise _InventoryError("selected_head_unverified")
+    try:
+        cat_result = bounded_runner(
+            ("git", "--no-replace-objects", "--no-optional-locks",
+             "-c", "core.fsmonitor=false", "cat-file", "-t", f"{github_main}^{{commit}}"),
+            cwd=root, timeout=6,
+        )
+    except (OSError, subprocess.SubprocessError, UnicodeError):
+        raise _InventoryError("github_main_local_check_unavailable") from None
+    github_main_present_on_pc = (
+        cat_result.returncode == 0
+        and isinstance(cat_result.stdout, str)
+        and cat_result.stdout.strip() == "commit"
+    )
+    merged_refs = (
+        _parse_branches(git(
+            root, "for-each-ref", f"--merged={github_main}",
+            "--format=%(refname)%00%(objectname)", "refs/heads",
+            reason="merged_branches_unavailable",
+        ), remote=False)
+        if github_main_present_on_pc
+        else None
+    )
+    attached_branches = {row["branch"] for row in worktrees if row["branch"] is not None}
     return {
         "repository": _REPOSITORY,
         "observed_at": datetime.now(timezone.utc).isoformat(timespec="milliseconds"),
         "selected_pc": {"head": current["head"], "branch": current["branch"], "clean": clean},
         "github_main": github_main,
+        "github_main_present_on_pc": github_main_present_on_pc,
         "branches": [
             {"ref": ref, "pc": local_branches.get(ref), "github": remote.get(ref)}
             for ref in sorted(local_branches.keys() | remote.keys())
         ],
         "worktrees": worktrees,
+        "stashes": stashes,
+        "pc_backlog_summary": {
+            "local_head_count": len(local_branches),
+            "attached_worktree_branch_count": len(attached_branches),
+            "merged_into_github_main_count": len(merged_refs) if merged_refs is not None else None,
+            "unmerged_unattached_head_count": (
+                sum(
+                    ref not in merged_refs and ref not in attached_branches
+                    for ref in local_branches
+                )
+                if merged_refs is not None
+                else None
+            ),
+            "stash_count": len(stashes),
+        },
+        "worktree_summary": {
+            "total": len(worktrees),
+            "attached": sum(not row["bare"] and not row["detached"] for row in worktrees),
+            "detached": sum(row["detached"] for row in worktrees),
+            "bare": sum(row["bare"] for row in worktrees),
+            "locked": sum(row["locked"] for row in worktrees),
+            "prunable": sum(row["prunable"] for row in worktrees),
+        },
     }
 
 
 def _inventory_page(observation: dict, section: str, offset: int) -> dict:
     branches = observation["branches"]
     worktrees = observation["worktrees"]
+    stashes = observation["stashes"]
     snapshot = {key: value for key, value in observation.items() if key != "observed_at"}
     rows = observation.get(section, [])
     end = offset + _PAGE_SIZE
@@ -203,6 +279,7 @@ def _inventory_page(observation: dict, section: str, offset: int) -> dict:
         "inventory_sha256": hashlib.sha256(_canonical(snapshot)).hexdigest(),
         "branch_count": len(branches),
         "worktree_count": len(worktrees),
+        "stash_count": len(stashes),
         "branch_comparison": {
             "same_tip": sum(row["pc"] == row["github"] for row in branches),
             "different_tip": sum(
@@ -217,6 +294,7 @@ def _inventory_page(observation: dict, section: str, offset: int) -> dict:
         "next_offset": end if end < len(rows) else None,
         "branches": rows[offset:end] if section == "branches" else [],
         "worktrees": rows[offset:end] if section == "worktrees" else [],
+        "stashes": rows[offset:end] if section == "stashes" else [],
     }
 
 
@@ -228,7 +306,7 @@ def get_git_inventory(
     if not _valid_request_id(request_id):
         return {"status": "blocked", "reason": "request_id_invalid"}
     if (
-        section not in (None, "summary", "branches", "worktrees")
+        section not in (None, "summary", "branches", "worktrees", "stashes")
         or type(offset) is not int or not 0 <= offset <= 2 * _MAX_ROWS
         or (section in (None, "summary") and offset != 0)
     ):
@@ -251,6 +329,69 @@ def get_git_inventory(
     return {"status": "ok", "receipt": receipt, "sha256": hashlib.sha256(encoded).hexdigest()}
 
 
+def _nonneg_int(value: object) -> bool:
+    return type(value) is int and value >= 0
+
+
+def _valid_stashes(stashes: object) -> bool:
+    return (
+        isinstance(stashes, list)
+        and len(stashes) <= _MAX_ROWS
+        and all(
+            isinstance(row, dict)
+            and set(row) == {"sha"}
+            and isinstance(row["sha"], str)
+            and _SHA.fullmatch(row["sha"]) is not None
+            for row in stashes
+        )
+    )
+
+
+def _valid_summaries(receipt: dict) -> bool:
+    present = receipt.get("github_main_present_on_pc")
+    backlog = receipt.get("pc_backlog_summary")
+    worktree_summary = receipt.get("worktree_summary")
+    if (
+        type(present) is not bool
+        or not isinstance(backlog, dict) or set(backlog) != _BACKLOG_KEYS
+        or not isinstance(worktree_summary, dict) or set(worktree_summary) != _WORKTREE_SUMMARY_KEYS
+    ):
+        return False
+    if not all(_nonneg_int(backlog[k]) for k in (
+        "local_head_count", "attached_worktree_branch_count", "stash_count",
+    )):
+        return False
+    merged = backlog["merged_into_github_main_count"]
+    unmerged = backlog["unmerged_unattached_head_count"]
+    if present:
+        if not (_nonneg_int(merged) and _nonneg_int(unmerged)):
+            return False
+        if merged > backlog["local_head_count"] or unmerged > backlog["local_head_count"]:
+            return False
+    elif merged is not None or unmerged is not None:
+        return False
+    if backlog["attached_worktree_branch_count"] > backlog["local_head_count"]:
+        return False
+    if not all(_nonneg_int(worktree_summary[k]) for k in _WORKTREE_SUMMARY_KEYS):
+        return False
+    if (
+        worktree_summary["attached"] + worktree_summary["detached"] + worktree_summary["bare"]
+        != worktree_summary["total"]
+        or worktree_summary["locked"] > worktree_summary["total"]
+        or worktree_summary["prunable"] > worktree_summary["total"]
+    ):
+        return False
+    if "section" in receipt:
+        return (
+            receipt.get("stash_count") == backlog["stash_count"]
+            and receipt.get("worktree_count") == worktree_summary["total"]
+        )
+    return (
+        len(receipt["stashes"]) == backlog["stash_count"]
+        and len(receipt["worktrees"]) == worktree_summary["total"]
+    )
+
+
 def verify_git_inventory_receipt(
     result: object, request_id: str, *, now: datetime | None = None,
 ) -> bool:
@@ -266,6 +407,8 @@ def verify_git_inventory_receipt(
         or not isinstance(receipt.get("selected_pc"), dict)
         or not isinstance(receipt.get("branches"), list)
         or not isinstance(receipt.get("worktrees"), list)
+        or not _valid_stashes(receipt.get("stashes"))
+        or not _valid_summaries(receipt)
     ):
         return False
     try:

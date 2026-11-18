@@ -1,3 +1,83 @@
+## 2026-11-18 — Reconcile PR #1906 STT normalization guard
+
+- Reconciled `PR #1906` onto current `main`: preserved both the canonical `Speech-to-text normalization guard` section and existing `STT / transcription protected vocabulary` in `frontend/audit/SOURCE_OF_TRUTH.md`, and integrated `test_stt_artifacts_are_rejected_from_current_public_surfaces` (extending STT corruption artifact rejection across `app/page.tsx`, `app/future/page.tsx`, `components/LanguageSwitcher.tsx`, and `content/yumori-vision.ts`) into `tests/test_contracts.py` (`WSP 22`, `WSP 50`, `WSP 97`).
+
+## 2026-11-18 — Reconcile PR #1792 eSingularity / YUMORI.me brand context
+
+- Reconciled `PR #1792` onto current `main`: added `brand_context.json` (`eSingularity.ai` parent identity, `YUMORI.me` movement/preparatory-committee child brand), bound `esingularity_001.brand_context_path` in `foundup_registry.json`, and updated eSingularity/YUMORI Skillz + contracts (`test_esingularity_brand_context_is_single_skill_brand_authority`) while preserving all `#2189`, `#2340`, `#2413`/`#2414`, and live-ticker work.
+
+## 2026-11-16 — Recover JHR release blocker and harden existing publication handoff
+
+Reconciled the relevant YUMORI history, existing issue2126 and read-only Sites
+metadata. Older records already separated merged code, blocked deployment and
+unverified #003 live readback; preserve that obligation and LinkedIn's existing
+edition. Added sanitized failure analysis/manifest open work; hardened JHR and
+website skills to read both ledgers, bind stage receipts, retain old blockers and
+require actual governed memory acknowledgements. The existing SOCIAL owner now
+provides a dry-run receipt reconciler. No manuscripts, frontend, deployment,
+mailbox, public post or running service changed. See JHR audit supplement and
+social content contract for evidence, limits and remaining owner work.
+
+## 2026-11-16 — JHR durable archive and Red Dog channel workflow
+
+- Index #001–004 in `jhr/manifest.json` with immutable existing source bindings,
+  platform-specific delivery evidence, languages, dates and explicit unknowns.
+  Keep #002 in its current reader owner and existing report manuscripts in place;
+  keep #004 as a draft pointer to the same native Doc. No editorial rewrite,
+  duplicated manuscript, new issue, public posting or website deployment.
+- Current website exposes #001/#002; public LinkedIn independently exposes
+  #001/#002/#003. Preserve the #003 historical website claim/current-source/live
+  discrepancy. #004 is DRAFTED v2 and unapproved in its source; both public
+  platforms were checked, while authenticated draft/schedule state is unverified.
+- Extend the existing canonical JHR skill and Codex projection for Red Dog modes,
+  website-first Japanese LinkedIn, separately approved English Substack and Reddit
+  research/discussion. Existing publisher, approval and uncertain-delivery gates
+  remain. This is instruction-level setup, not an installed autonomous publisher.
+- Read-only Gmail review corroborates historical #002 link sharing; no #004
+  publication receipt recovered. Keep private correspondence outside Git.
+- Validation and exact-head/main outcomes are recorded in the focused PR; the
+  dated `jhr/PUBLICATION_AUDIT_20261116.md` and manifest retain scope and gaps.
+  WSP00/10/15/22/34/50/84/97/99; WSP110 read as draft guidance.
+
+## 2026-11-15 — Partner qualification Skillz candidate
+
+- Extend the existing prototype `yumori_work_orchestrator` to distinguish
+  operators, demand customers and collaborators; qualify responsible-person
+  responses and concrete next exchanges rather than name/send counts.
+- Keep organizational survey interest separate from personal membership and
+  formal co-proposer/name-use consent. Reuse existing correspondence/Contacts/
+  Action Queue owners; preserve specific holds, follow-up counts and provider
+  receipts when diagnosing nonresponse or choosing a different action.
+- Compare demand-led existing-hosting/small-pilot options with school/onsen
+  reuse; retain unknown economics, data-control and funding inputs. Public-benefit
+  compute is a goal, not a funded service promise or blanket foreign-training claim.
+- Add partner-outcome baseline/alternative and regression-case requirements to
+  the existing independent review, promotion, rollback and later-cycle RSI gates.
+  This is a proposed prototype revision, not runtime activation or measured RSI.
+- Retrieval used GitHub at base `e2ac080f6cdbc6aa7d291f425c6feb0c878fdfdb`;
+  current module docs and related open PRs were inspected. No orchestrator overlap
+  was found in the bounded PR search; shared ModLog history is preserved.
+  A separate isolated branch avoids touching existing local worktrees.
+- Validation: existing resident-RSI source-contract function passed in isolation;
+  initial prefix/suffix check preserved the prior skill; final readback matches
+  the candidate. Independent source review found no authority weakening; its
+  campaign-wide-hold clarification and five frozen semantic review cases were
+  incorporated. Those cases are documented expectations, not executed tests.
+  Full checkout tests, WSP_00 runtime bootstrap, HoloIndex freshness and native
+  WRE evaluation were not run. Missing memory/README.md was recorded rather than
+  replaced. Exact-head hosted checks and independent review remain merge gates.
+- WSP 00/15/22/50/95/97: docs-candidate execution plane, no provider/runtime effects.
+  WSP15 C2/I4/D3/Impact4 = 13/P1. Smallest alternative was ledger-only guidance;
+  the existing skill is preferred for reusable retrieval, without another skill
+  framework, CRM or scheduler. No frontend, survey, FIN or recipient-state edit.
+
+## 2026-11-15 — Align React 19.3.1 dependency cohort (PR #2351 resolution)
+
+- Dependabot PR #2351 (`53fb430ae893`) bumped only `react-server-dom-webpack` from `19.2.8` to `19.3.1` while leaving `react` and `react-dom` pinned at `19.2.8`, causing `Validate eSingularity` `npm ci` to fail with `ERESOLVE` (`react-server-dom-webpack@19.3.1` requires peer `react@"^19.3.1"` and `react-dom@"^19.3.1"`).
+- Coordinate `react`, `react-dom`, and `react-server-dom-webpack` together to `19.3.1` in `frontend/package.json` and regenerate `frontend/package-lock.json` via `npm 11.19.1` (`--package-lock-only`), advancing transitive `scheduler` from `0.27.0` to `0.28.0`. All unrelated packages (`next` `16.4.3`, `vinext` `1.1.0`, `vite` `8.3.5`, `eslint` `9.39.4`, Cloudflare tooling, and existing optional WASM lock entries) are preserved without `--legacy-peer-deps` or `--force`.
+- Validation on PC Node `v24.11.1` / `npm 11.6.2` (CI uses Node `24.22.1` / `npm 11.19.1`): `npm ci` (490 packages) and `npm@11.19.1 ci --ignore-scripts` (488 packages) succeed cleanly; `npm audit --audit-level=high` reports zero high/critical advisories (7 pre-existing moderate advisories in `@typescript-eslint/*` / `minimatch`); `npm run lint` passes (0 errors, 7 existing `@next/next/no-img-element` warnings); `npm run build` (`vinext build`) completes across all 5 build passes; `test_domain_routing.mjs` passes 32/32; `interest-security.test.mjs` passes 8/8; module `pytest` passes 86/86; `public_catalog_projector --validate` is `SAFE` (`errors=0`); `generate_test_registry.py --check` is `current` (`total=1842`, `quarantined=260`).
+- Local validation does not replace CI `Validate eSingularity` on Node `24.22.1` or live site publication verification. WSP 10/22/50/71/84/97.
+
 ## 2026-10-30 — Reconcile organization-partner inquiry PR #2234
 
 - Preserve the original coalition/inquiry proposal while retaining both

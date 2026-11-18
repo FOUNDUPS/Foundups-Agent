@@ -13,7 +13,7 @@ Primary sources are linked in the page's editor notes: House history, the House 
 
 ## Domain and deployment
 
-User reports hasan4speaker.com forwards to the current site. Direct web requests did not establish the redirect here; container DNS also failed for unrelated hosts. A browser-provider check could not start. These are verification gaps, not evidence of a public outage. Keep forwarding and DNS unchanged. Do not announce a verified migration or create a new site.
+012 reports hasan4speaker.com forwards to the current site. Direct web requests did not establish the redirect here; container DNS also failed for unrelated hosts. A browser-provider check could not start. These are verification gaps, not evidence of a public outage. Keep forwarding and DNS unchanged. Do not announce a verified migration or create a new site.
 
 Publish through the existing Vote Sites project `appgprj_6aee6646e6ac81918ac2624d5d1db413` and its source mirror, following `web/README.md`. Add `press.html` and `press.css` to that project's public allowlist, preserving all other resources and aliases. Verify clean `/press`, legacy `/press.html`, the release anchor, both cover links, back navigation and MIME/CSP on the actual release before reporting live publication.
 

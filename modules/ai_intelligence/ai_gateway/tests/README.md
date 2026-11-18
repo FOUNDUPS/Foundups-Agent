@@ -1,5 +1,15 @@
 # AI Gateway Tests
 
+## Independent repair verifier controls — 2026-11-16
+
+`test_independent_repair_verifier.py` covers 5 offline contract cases for Issue
+#1522: `VerifierContextFirewall.project_evidence_packet` pure allowlist
+projection and `<scratchpad>` / `<thought>` persuasive-narrative stripping,
+`TypeError` rejection of unallowed builder kwargs, `ModelIndependencePolicy.evaluate_independence`
+rejection of self-grading and same-family high-risk assignments plus cross-family
+acceptance, and `IndependentVerifierReceipt` canonical SHA-256 integrity sealing
+and tamper rejection.
+
 ## Native incumbent identity controls — 2026-11-02
 
 Seven additional held-out cases in `test_youtube_model_routing.py` distinguish
@@ -147,3 +157,24 @@ python -m pytest -q modules/ai_intelligence/ai_gateway/tests
 Record material test changes in `TestModLog.md` and behavioral changes in the
 module `ModLog.md`. See WSP 00, WSP 15, WSP 22, WSP 49, WSP 50, WSP 62, and
 WSP 97.
+
+## Offline audio timing fixtures
+
+`test_model_audio_timing_benchmark.py` uses standard-library unittest and synthetic
+responses. The 32 test methods cover malformed timing, strict JSON, gaps and
+adjacent overlaps, identity substitution, real existing-harness SKIPPED behavior,
+and shared/uncertain/concurrent request-count enforcement. It does not call a
+provider or read audio, lyrics, credentials or environment provider settings.
+Run only after exact source/runtime review through the existing bounded runner
+using -I -S -B, a minimal environment and owned temporary outputs. Integration
+checks use the actual harness; valid structure never becomes accepted quality.
+Identical-output controls retain distinct case/candidate identities in either
+registration order, enforce each case's bounds, reject duplicate aliases and
+malformed compound keys, and preserve legacy callers with distinct output bytes.
+
+Live smoke evidence is separate from these fixtures. Two saved authorized STT
+responses passed the same validator and stayed SKIPPED in an offline harness
+replay. Diagnostic SRT round trips preserved each supplied word and timestamp
+within millisecond representation. This does not validate performed-word truth,
+alignment, playback usability or production acceptance; zero-duration cues are
+retained and reported. The private responses are not public test fixtures.

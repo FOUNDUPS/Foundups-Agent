@@ -1,5 +1,26 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-11-15: Harden Windows chained-venv resolution in _mcp_runtime_python
+
+WSP 22/50/97. Updated `_mcp_runtime_python()` in `scripts/launch.py` to retain
+the outer Windows environment's `Lib/site-packages` directory while walking
+chained `pyvenv.cfg` files (`base.parent.parent / "pyvenv.cfg"` or
+`base.parent / "pyvenv.cfg"`) with a resolved-path `visited` cycle guard and
+`Path(fields["home"]) / base.name` cycle fallback until reaching the true
+non-venv runtime executable (returning `(candidate, None)` cleanly on invalid
+or cyclic chains). Extended
+`test_windows_venv_runtime_uses_base_interpreter_and_preserves_pid` in
+`tests/test_mcp_launcher_http.py` to cover 2-level chained venvs and cycle
+handling while preserving the 60-case MCP compatibility test count.
+
+## 2026-11-15: Widen PC Git inventory tool section to stashes
+
+WSP 21/50/97. Widened `get_git_inventory` `section` parameter annotation in
+`src/mcp_server.py` from `Literal["summary", "branches", "worktrees"]` to
+`Literal["summary", "branches", "worktrees", "stashes"]` and added a `"stashes"`
+schema assertion inside `test_git_oauth_exact_discovery_and_single_tool` in
+`tests/test_git_inventory_oauth.py` (preserving the 60-case MCP compatibility count).
+
 ## 2026-11-12: Read-only PC Git inventory
 
 WSP 21/50/84/97. Add an opt-in authenticated HTTP tool using the WRE Git

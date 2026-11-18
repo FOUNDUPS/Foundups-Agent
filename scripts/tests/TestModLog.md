@@ -1,3 +1,23 @@
+## 2026-11-16 — Reconciled UI-TARS coordinate-profile backend digest pin
+
+Updated the expected canonical manifest digest pin in
+`scripts/tests/test_generate_reddog_backend_manifest.py` to
+`1465fd02b74ed36b45895de1a90e7a62b20b25730ca34f8ccfda179878ca0c42` alongside
+`extensions/reddog/backend_compatibility_constants.js` after regenerating the
+unchanged 1,487-member runtime closure on top of `247e12ce6e` for
+`foundups_vision/src/ui_tars_bridge.py`. Verified all 8 manifest/index tests
+pass (`8 passed`). WSP 5/11/22/97.
+
+## 2026-11-16 — Wave 4 WRE/RSI and pfMALL backend digest pin
+
+Updated the expected canonical manifest digest pin in
+`scripts/tests/test_generate_reddog_backend_manifest.py` to
+`568e8b402a77316b0b1952d26d7d8080f749d14dbe06fb2a8ee28a17cdc96d6e` alongside
+`extensions/reddog/backend_compatibility_constants.js` after regenerating the
+unchanged 1,487-member runtime closure for `pfmall/shell_core.py` and WRE
+recursive improvement (`core.py`, `learning.py`). Verified all 8 manifest/index
+tests pass (`8 passed`). WSP 5/11/22/97.
+
 ## 2026-11-10 — Verification gate backend binding
 
 The first final-source hosted binding selection rejected both stale consumer
@@ -6,6 +26,15 @@ the exact expected canonical digest to the independently generated1486-member
 manifest and the matching extension constant. Preserve all source-byte/index
 assertions and byte caps; the Node count boundary now rejects1487. These changes
 bind one new runtime leaf; they do not establish native WRE or live activation.
+
+## 2026-11-01 — UI-TARS leaf binding refresh
+
+CI caught stale backend bytes after the reviewed UI-TARS repair. Regenerate with
+the existing owner; only that LF-normalized leaf hash changes,1481 members fixed.
+Refresh both existing digest literals to b18b39879bebac8f05cade43e884280ba656016b0f3389580b0412aa6525ee26.
+Stage manifest/source/pins before all8 generator/index cases. No semantic oracle,
+member list, byte cap, generator or installed-runtime authority change.
+All8 generator/index cases and3 existing Node compatibility/preflight/recovery owners pass.
 
 ## 2026-11-01 — Private operator directives backend closure
 

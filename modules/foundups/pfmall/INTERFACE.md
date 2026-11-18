@@ -21,7 +21,13 @@ records provider and layout constraints, reproduction and regression evidence.
 - `build_foundup_tile(manifest, overlay) -> FoundUpTile`
 - `FoundUpManifest`, `FoundUpTile`, `FoundUpStateOverlay`
 - `RouteKind`, `RouteTarget`, `ShellCatalog`, `ShellConfig`, `PfmallShell`
-- `VALID_READINESS`
+- `VALID_READINESS`, `VALID_CATEGORIES` (`media`, `ai-education`, `ai-research`, `startup`, `community`, `marketplace`, `games`, `science`, `thought-leadership`, `infrastructure`)
+
+`load_manifest(source)` validates required identity, tier, lifecycle, category,
+readiness, and WSP 104 `routing_prefix` / `data_namespace` rules, coalescing
+explicit JSON `null` values on optional string/list/dict fields to safe empty
+defaults so valid manifests never expose `None` on typed string/collection
+attributes.
 
 The package also exports the read-adapter surface:
 
@@ -34,6 +40,16 @@ The package also exports the read-adapter surface:
 
 `get_default_shell()` lazily boots and caches one process-local shell. This is
 runtime convenience, not durable state or cross-process authority.
+
+## Optional server profile
+
+`requirements-server.txt` includes the HTTP profile plus minimal pinned Uvicorn,
+h11 and click. Use its ordinary CLI with the isolated `intake_host:create_app`
+factory, explicit app directory and resource/trust options in README. No new
+launcher or public API is added. Real-loopback tests identify the child and its
+port0 listener, exercise HTTP draft/rejection/body limits, and reap the process.
+They establish neither container/cloud readiness, a real Clerk identity nor OS
+confinement. The imported development app still requires real tracked static files.
 
 ## Shell-core invariants
 
@@ -145,6 +161,12 @@ mounts its projection after member admission. The public video catalog
 contains the reviewed lane and the aggregate catalog contains its discovery
 card. WSP 104 app handoff and server checks own capability authorization.
 See [HPC's interface](../hpc/INTERFACE.md).
+
+The ordinary invited Mall uses the adaptive poster grid on fresh wide
+fine-pointer visits. It hands the selected lane to the shared full player
+and keeps the grid's scroll and focus through dismissal. Saved layouts
+take precedence. The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#46-desktop-poster-browsing)
+defines how desktop poster selection, category rows and card quick views work.
 
 The static homepage's FX anchor targets the existing `/f/` public directory.
 Its project/ticker search consumes only the scope-free public projection; no

@@ -36,6 +36,7 @@
   var topBar = null;
   var queueRail = null;
   var queueTrack = null;
+  var mediaPanel = null;
   var queueSearchForm = null;
   var queueSearch = null;
   var queueEmpty = null;
@@ -73,6 +74,10 @@
   // ─── localStorage Keys ───
   var SAVED_KEY = 'pfmall_saved_videos';
   var returnTile = null;
+  var memberQueueDock = null;
+  var railQuery = null;
+  var returnScroll = null;
+  var scopedPlayer = false;
   var HISTORY_KEY = 'pfmall_watch_history';
   var HISTORY_MAX = 50; // Max history entries
   /** Local-only resume: omit sub-threshold & “finished” positions (HTML5 video only; embeds cannot read time). */
@@ -159,7 +164,8 @@
     statusEl.textContent = message || '';
     statusEl.hidden = !message;
     playBtn.hidden = !requestYouTubePlay || !['manual-play', 'autoplay-blocked', 'provider-unknown', 'paused'].includes(state);
-    if (inline && !theater && (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
+    if (inline && !theater && !returnScroll &&
+        (state === 'manual-play' || state === 'autoplay-blocked') && !playBtn.hidden && canStartYouTube()) {
       playBtn.scrollIntoView({ block: 'nearest' });
     }
     window.dispatchEvent(new CustomEvent('mallVideoPlayback', { detail: { ...playbackStatus } }));
@@ -299,6 +305,42 @@
     gestureHint = container.querySelector('.video-player-gesture-hint');
     titleEl = container.querySelector('.video-player-title');
     saveBtn = container.querySelector('[data-action="save"]');
+    mediaPanel = document.createElement('div');
+    mediaPanel.className = 'video-player-media-panel';
+    topBar.before(mediaPanel);
+    mediaPanel.append(topBar, stage, statusEl, playBtn);
+    memberQueueDock = window.mallVideoProjection?.createMemberDock?.(
+      'Search this queue',
+      playMemberSearchResult,
+      function() {
+        if (scopedPlayer) return window.mallVideoProjection?.openScopedRedDog?.(currentFoundUpId);
+        close();
+        window.redDog?.open?.();
+        document.querySelector('#accountPlane.open button:not([hidden])')?.focus();
+      }
+    );
+    var queuePanel = document.createElement('div');
+    queuePanel.className = 'video-player-queue-panel';
+    queueRail.before(queuePanel);
+    queuePanel.append(queueRail);
+    if (memberQueueDock) {
+      memberQueueDock.element.hidden = true;
+      memberQueueDock.input.addEventListener('input', filterRail);
+      memberQueueDock.input.addEventListener('change', filterRail);
+      queuePanel.prepend(memberQueueDock.element);
+      var viewport = window.visualViewport;
+      if (viewport) {
+        var alignWithKeyboard = function() {
+          var keyboard = memberQueueDock.element.contains(document.activeElement) && viewport.scale === 1
+            ? Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop) : 0;
+          container.style.setProperty('--video-player-keyboard', keyboard + 'px');
+        };
+        viewport.addEventListener('resize', alignWithKeyboard);
+        viewport.addEventListener('scroll', alignWithKeyboard);
+        memberQueueDock.input.addEventListener('focus', alignWithKeyboard);
+        memberQueueDock.input.addEventListener('blur', alignWithKeyboard);
+      }
+    }
 
     // Attach listeners
     topBar.addEventListener('click', handleTopBarClick);
@@ -307,6 +349,30 @@
     edgeTrigger.addEventListener('mouseenter', showRail);
 
     // Keyboard
+    // Dismiss the innermost control before the shell's expanded-lane Escape handler.
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Escape' || !isOpen || e.isComposing) return;
+      if (memberQueueDock?.dialog.open) {
+        e.preventDefault();
+        e.stopPropagation();
+        memberQueueDock.dialog.close();
+        return;
+      }
+      if (memberQueueDock && !memberQueueDock.element.hidden && e.target === memberQueueDock.input) {
+        e.preventDefault();
+        e.stopPropagation();
+        memberQueueDock.input.blur();
+        topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+        return;
+      }
+      if (memberQueueDock && !memberQueueDock.element.hidden) {
+        e.preventDefault();
+        e.stopPropagation();
+        close();
+        return;
+      }
+      if (returnTile && !scopedPlayer) handleKeydown(e);
+    }, true);
     document.addEventListener('keydown', handleKeydown);
     document.addEventListener('visibilitychange', function() {
       if (isOpen && document.hidden) pausePlayback();
@@ -328,7 +394,7 @@
     topBar.querySelector('[data-action="back"]').setAttribute('aria-label', 'Back');
     previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    if (returnTile) {
+    if (returnTile || matchesQuery) {
       container.setAttribute('aria-modal', 'true');
       var member = document.getElementById('memberArea');
       // An inline iframe keeps its parent when expanded. Inert its siblings,
@@ -348,8 +414,15 @@
       }
     }
     attachGestures();
+    if (memberQueueDock && matchesQuery && (!scopedPlayer || memberQueueDock.setScoped)) {
+      memberQueueDock.setScoped?.(scopedPlayer);
+      memberQueueDock.element.hidden = false;
+      memberQueueDock.fitInput?.();
+      container.classList.add('video-player-queue-docked');
+      filterRail();
+    }
     resetChromeTimer();
-    if (returnTile) topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+    if (returnTile || matchesQuery) topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
   }
 
   function setTheater(enabled, tile) {
@@ -397,14 +470,32 @@
     }
     pendingResumeSeconds = normalizeResumeSeconds(rs, 0);
 
-    returnTile = resumeOpts?.returnTile || null;
+    scopedPlayer = !!resumeOpts?.returnTile;
+    returnTile = resumeOpts?.returnTile || resumeOpts?.returnFocusTo || null;
+    var browseField = resumeOpts?.returnFocusTo?.closest('.mall-tile-field-wrapper');
+    var rowTrack = resumeOpts?.returnFocusTo?.closest('.mall-category-track');
+    returnScroll = browseField ? {
+      field: browseField,
+      top: browseField.scrollTop,
+      left: browseField.scrollLeft,
+      height: browseField.clientHeight,
+      tileTop: returnTile.offsetTop,
+      rowTrack: rowTrack,
+      rowLeft: rowTrack?.scrollLeft
+    } : null;
     onClose = resumeOpts?.onClose || null;
     autoplayRequested = resumeOpts?.autoplay !== false;
-    muteOnStart = resumeOpts?.theater === true;
-    matchesQuery = resumeOpts?.matchesQuery || null;
+    muteOnStart = resumeOpts?.theater === true || resumeOpts?.muted === true;
+    matchesQuery = resumeOpts?.matchesQuery ||
+      (document.getElementById('redDogAnchor')?.querySelector(':scope > .mall-member-search-dock')
+        ? window.mallTileField?.matchesVideoQuery : null);
     queueSearch.value = resumeOpts?.query || '';
+    if (memberQueueDock) memberQueueDock.input.value = resumeOpts?.queueQuery || '';
     filteredIndices = null;
-    container.classList.toggle('scoped-player', !!returnTile);
+    railQuery = null;
+    container.classList.toggle('scoped-player', scopedPlayer);
+    container.classList.toggle('desktop-poster-player', !!returnScroll);
+    mediaPanel.scrollTop = 0;
 
     currentFoundUpId = foundupId;
     currentQueue = queue;
@@ -414,11 +505,36 @@
     container.classList.add('open');
     inline = !!resumeOpts?.inlineMount;
     if (inline) {
-      resumeOpts.inlineMount.appendChild(container);
+      var mount = resumeOpts.inlineMount;
+      if (typeof mount === 'function') mount = mount();
+      mount.appendChild(container);
       container.classList.add('video-player-inline');
-      setTheater(resumeOpts?.theater === true);
+      if (returnScroll) {
+        container.setAttribute('role', 'region');
+        container.setAttribute('aria-label', 'Inline video player');
+        topBar.querySelector('[data-action="expand"]').hidden = false;
+        var closeButton = topBar.querySelector('[data-action="back"]');
+        closeButton.hidden = false;
+        closeButton.setAttribute('aria-label', 'Close player');
+        setPinchTarget(topBar);
+        if (memberQueueDock && memberQueueDock.input.value.trim() && matchesQuery) {
+          var initialQuery = memberQueueDock.input.value.trim().slice(0, 300);
+          var matchingIndices = currentQueue.reduce(function(acc, video, idx) {
+            if (matchesQuery(video, initialQuery)) acc.push(idx);
+            return acc;
+          }, []);
+          if (matchingIndices.length) {
+            railQuery = initialQuery;
+            filteredIndices = matchingIndices;
+          }
+        }
+        renderRail();
+      } else {
+        setTheater(resumeOpts?.theater === true);
+      }
       if (!theater) {
-        container.scrollIntoView({ block: 'nearest' });
+        if (returnScroll) container.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+        else container.scrollIntoView({ block: 'nearest' });
         topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
       }
       if (typeof IntersectionObserver !== 'undefined') {
@@ -432,10 +548,11 @@
       }
     } else {
       enterImmersive();
-      renderRail();
+      filterRail();
     }
 
     renderVideo(currentQueue[currentIndex]);
+    if (inline) resumeOpts.alignInline?.();
 
     // Update save button state
     updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[currentIndex]));
@@ -458,9 +575,10 @@
     pendingResumeSeconds = null;
 
     isOpen = false;
-    container.classList.remove('open', 'video-player-inline', 'video-player-theater');
+    container.classList.remove('open', 'video-player-inline', 'video-player-theater', 'video-player-queue-docked');
     theater = false;
     queueSearchForm.hidden = true;
+    memberQueueDock?.hide();
     if (previousOverflow !== null) document.body.style.overflow = previousOverflow;
     previousOverflow = null;
     inertElements.forEach(function(element) { element.inert = false; });
@@ -490,10 +608,25 @@
       var tile = returnTile.isConnected ? returnTile : document.querySelector(
         '#mallTileField .mall-tile[data-index="' + Number(returnTile.dataset.index) + '"]'
       );
-      if (restore) tile?.focus({ preventScroll: true });
-      container.removeAttribute('aria-modal');
+      if (restore) {
+        tile?.focus({ preventScroll: true });
+        if (returnScroll) {
+          var field = returnScroll.field;
+          var top = returnScroll.top;
+          if (tile && field.contains(tile) &&
+              (tile.offsetTop !== returnScroll.tileTop || field.clientHeight !== returnScroll.height)) {
+            // Density reflow can move the tile far beyond its old scroll offset.
+            var anchor = Math.max(0, returnScroll.tileTop - top);
+            top = tile.offsetTop - Math.min(anchor, Math.max(0, field.clientHeight - tile.offsetHeight));
+          }
+          field.scrollTo({ top: top, left: returnScroll.left, behavior: 'instant' });
+          returnScroll.rowTrack?.scrollTo({ left: returnScroll.rowLeft, behavior: 'instant' });
+        }
+      }
       returnTile = null;
     }
+    container.removeAttribute('aria-modal');
+    returnScroll = null;
 
     window.dispatchEvent(new CustomEvent('videoPlayerClose'));
   }
@@ -501,7 +634,7 @@
   // ─── Navigate Queue ───
   function goToVideo(index) {
     if (index < 0 || index >= currentQueue.length) return;
-    if (theater) {
+    if (theater || returnScroll || container.classList.contains('video-player-queue-docked')) {
       if (index === currentIndex) return;
       autoplayRequested = true;
       try { muteOnStart = ytPlayer?.isMuted?.() ?? muteOnStart; } catch (e) { /* provider not ready */ }
@@ -543,7 +676,8 @@
   }
 
   function handleVideoEnded() {
-    if (inline && !theater) return;
+    if (inline && !theater && !returnScroll) return;
+    autoplayRequested = true;
     nextVideo();
   }
 
@@ -551,12 +685,13 @@
     if (document.hidden) return false;
     var rect = stage.getBoundingClientRect();
     if (rect.width < 200 || rect.height < 200) return false;
-    var wrapper = inline && container.closest('.mall-tile-field-wrapper');
-    var bounds = wrapper?.getBoundingClientRect?.();
-    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity) -
-      Math.max(rect.left, 0, bounds?.left ?? 0));
-    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity) -
-      Math.max(rect.top, 0, bounds?.top ?? 0));
+    var bounds = inline ? container.closest('.mall-tile-field-wrapper')?.getBoundingClientRect()
+      : container.classList.contains('video-player-queue-docked') && mediaPanel.getBoundingClientRect();
+    var track = inline && container.closest('.mall-category-track')?.getBoundingClientRect();
+    var width = Math.max(0, Math.min(rect.right, window.innerWidth, bounds?.right ?? Infinity, track?.right ?? Infinity) -
+      Math.max(rect.left, 0, bounds?.left ?? 0, track?.left ?? 0));
+    var height = Math.max(0, Math.min(rect.bottom, window.innerHeight, bounds?.bottom ?? Infinity, track?.bottom ?? Infinity) -
+      Math.max(rect.top, 0, bounds?.top ?? 0, track?.top ?? 0));
     return width * height > rect.width * rect.height / 2;
   }
 
@@ -669,7 +804,7 @@
   function renderVideo(video) {
     if (!video) return;
     var sourceLink = topBar.querySelector('.video-player-source');
-    var originalUrl = returnTile ? scopedSourceUrl(video) : '';
+    var originalUrl = scopedPlayer ? scopedSourceUrl(video) : '';
     sourceLink.hidden = !originalUrl;
     if (originalUrl) {
       sourceLink.href = originalUrl;
@@ -697,7 +832,7 @@
         sourceLink.hidden = false;
       }
       renderYouTube(youtube, ytId);
-    } else if (youtube || (returnTile && embedUrl)) {
+    } else if (youtube || (scopedPlayer && embedUrl)) {
       pendingResumeSeconds = null;
       reportYouTube('configuration', 'The YouTube video ID is invalid.', 2);
     } else if (embedUrl) {
@@ -708,7 +843,8 @@
       // Direct video file — resume seek when pendingResumeSeconds is valid
       var resumeTarget = pendingResumeSeconds;
       pendingResumeSeconds = null;
-      stage.innerHTML = '<video src="' + esc(sourceUrl) + '" autoplay controls playsinline></video>';
+      stage.innerHTML = '<video src="' + esc(sourceUrl) + '"' + (muteOnStart ? ' muted' : '') +
+        (autoplayRequested ? ' autoplay' : '') + ' controls playsinline></video>';
       var ve = stage.querySelector('video');
       if (ve) {
         // Queue autoplay: advance to next video when current ends
@@ -744,7 +880,11 @@
 
   // ─── Render Rail ───
   function filterRail() {
-    var query = theater ? queueSearch.value.trim().slice(0, 300) : '';
+    var input = theater ? queueSearch : null;
+    if (memberQueueDock && !memberQueueDock.element.hidden) input = memberQueueDock.input;
+    var query = input ? input.value.trim().slice(0, 300) : '';
+    if (query === railQuery) return;
+    railQuery = query;
     filteredIndices = query && matchesQuery ? currentQueue.reduce(function(indices, video, index) {
       if (matchesQuery(video, query)) indices.push(index);
       return indices;
@@ -762,6 +902,17 @@
     var result = filteredIndices[filteredIndices.indexOf(currentIndex) + 1] ?? filteredIndices[0];
     if (result !== currentIndex) goToVideo(result);
     else if (playbackStatus?.state !== 'playing') requestYouTubePlay?.();
+  }
+
+  function playMemberSearchResult() {
+    filterRail();
+    if (!filteredIndices?.length || ['playing', 'loading', 'starting', 'provider-state'].includes(playbackStatus?.state)) return;
+    var media = stage.querySelector('video');
+    if (media && !media.paused && !media.ended) return;
+    var first = filteredIndices[0];
+    if (first !== currentIndex) goToVideo(first);
+    else if (requestYouTubePlay) requestYouTubePlay();
+    else if (media) media.play().catch(function() {});
   }
 
   function renderRail() {
@@ -794,7 +945,10 @@
     // Scroll active into view
     var activeItem = queueTrack.querySelector('.video-player-queue-item.active');
     if (activeItem) {
-      activeItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      queueTrack.scrollTo({
+        left: activeItem.offsetLeft - (queueTrack.clientWidth - activeItem.offsetWidth) / 2,
+        behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+      });
     }
   }
 
@@ -880,6 +1034,8 @@
   }
 
   function handlePinchStart(e) {
+    initialPinchDistance = 0;
+    if (e.target?.closest?.('.video-player-queue-panel, button, a, input')) return;
     if (e.touches.length === 2) {
       initialPinchDistance = getPinchDistance(e.touches);
     }
@@ -924,9 +1080,10 @@
         break;
       case 'enter':
         // Enter FoundUp: navigate to canonical /f/{foundup_id} route (WSP 104)
-        if (currentFoundUpId && !returnTile) {
+        if (currentFoundUpId && !scopedPlayer) {
+          var destination = '/f/' + encodeURIComponent(currentFoundUpId);
           close();
-          window.location.href = '/f/' + encodeURIComponent(currentFoundUpId);
+          window.location.href = destination;
         }
         break;
       case 'save':
@@ -953,17 +1110,27 @@
 
     var index = parseInt(item.dataset.index, 10);
     if (!isNaN(index)) {
+      if (index === currentIndex && requestYouTubePlay &&
+          (theater || container.classList.contains('video-player-queue-docked')) &&
+          playbackStatus?.state !== 'playing') {
+        requestYouTubePlay();
+        return;
+      }
       goToVideo(index);
     }
   }
 
   function handleKeydown(e) {
     if (!isOpen || theater) return;
-    if (e.defaultPrevented || e.target?.closest?.('dialog[open]')) return;
+    if (e.defaultPrevented || e.isComposing || e.target?.closest?.('dialog[open]')) return;
     if (e.key !== 'Escape' && (inline || e.target?.closest?.('button, a, input, textarea, select'))) return;
 
     switch (e.key) {
       case 'Escape':
+        if (returnTile && !scopedPlayer) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
         close();
         break;
       case 'ArrowUp':
@@ -1056,7 +1223,7 @@
     if (!currentFoundUpId || currentIndex < 0) return;
 
     var video = currentQueue[currentIndex];
-    var url = returnTile ? scopedSourceUrl(video) : getShareUrl(video);
+    var url = scopedPlayer ? scopedSourceUrl(video) : getShareUrl(video);
 
     if (!url) {
       showHint('No share link');
@@ -1159,6 +1326,7 @@
 
   // ─── Public API ───
   window.mallVideoPlayer = {
+    openDesktopVideo: open,
     /**
      * Open fullscreen player with a FoundUp's video queue.
      * @param {string} foundupId - The FoundUp ID (queue constraint)
@@ -1174,7 +1342,14 @@
     expandInline: expandInline,
     setTheater: setTheater,
     isTheater: function() { return theater; },
-    getQueueQuery: function() { return queueSearch?.value.trim().slice(0, 300) || ''; },
+    getQueueQuery: function() {
+      var input = (memberQueueDock && (!memberQueueDock.element.hidden || returnScroll)) ? memberQueueDock.input : queueSearch;
+      return input?.value.trim().slice(0, 300) || '';
+    },
+    getCurrentVideoId: function() {
+      var video = currentIndex >= 0 ? currentQueue[currentIndex] : null;
+      return video ? (video.video_id || video.videoId || video.id || null) : null;
+    },
     getPlaybackSnapshot: getPlaybackSnapshot,
 
     /**

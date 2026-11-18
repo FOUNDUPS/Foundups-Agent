@@ -1,3 +1,67 @@
+## 2026-11-16 · Isolated HPC iPhone official YouTube baseline probe extension
+
+- Extended `tests/fixtures/hpc_iphone_playback_probe.js` and `tests/fixtures/hpc_iphone_playback_reference.html` (kept outside `public/` in git) with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts), allowlisted `?host=youtube|nocookie` (`https://www.youtube.com` vs `https://www.youtube-nocookie.com`), `Mall <-> official embed` selection retention, sanitized `deployment.json` + `SW controller` provenance receipt, and distinct `101/150` vs `LOGIN_REQUIRED` vs `autoplay-blocked` reporting, with all controls outside `#hpc-probe-embed`.
+- Added deterministic Node VM regression `tests/fixtures/hpc_iphone_playback_probe_vm.mjs` wired into `public/member/tests/test_mall_product_state.py`. WSP 22, 50, 97, 99, and 104 apply.
+
+## 2026-11-16 · Manifest schema closure, infrastructure category, and Build v19 catalog reconciliation
+
+- **Manifest Discovery & Boot Closure (`shell_core.py`, `modules/foundups/{detect_ai,eduit,shield,holoindex_prod_01}/foundup_manifest.json`)**:
+  - Added `"infrastructure"` to `VALID_CATEGORIES` and hardened `load_manifest()` with null-coalescing defaults (`or ""` / `or []` / `or {}`) so explicit JSON `null` fields never bypass typed string/collection defaults.
+  - Repaired `detect_ai`, `eduit`, `shield`, and `holoindex_prod_01` manifests (`name`, `version`, WSP 104 `idb_{foundup_id}` / `/f/{foundup_id}` alignment, and `F3_INFRA` / `conditional` readiness for `holoindex_prod_01`), achieving 12/12 clean manifest loads with zero warnings on `PfmallShell().boot()`.
+- **Registry & Catalog Truth Alignment (`modules/foundups/foundup_registry.json`, `public/member/mall-video-catalog.json`)**:
+  - Registered `eduit` in `foundup_registry.json`, unified `autopost`'s live Cloud Run URL across registry, catalog, and projection helper, added `esingularity_001` to `mall-video-catalog.json`, reconciled `gotjunk_001` and `holoindex_prod_01`, and normalized video `duration_seconds` and ISO-8601 `Z` timestamps.
+- **Test Gate Alignment (`tests/`)**: Reconciled `test_shell_core.py`, `test_mall_video_catalog.py`, `test_member_pwa_hardening.py`, `test_member_foundup_entry.py`, and `test_member_red_dog_concierge.py` against current hardened member shell and manifest contracts (`752 passed, 0 failed`). WSP 22, 49, 50, 97, and 104 apply.
+
+## 2026-11-14 · Phone search reference refinement
+
+PFWD-1B shares the compact dock across browse and viewer. Plus anchors the
+options panel above the dock. Longer search text wraps above the controls
+for review. The far-right Stop uses the existing foreground dictation
+lifecycle. The worker advances from v15 to v16 with the dock assets.
+Verification is tracked in the [member tests](../../../public/member/tests/TestModLog.md).
+
+## 2026-11-14 · WikiTube phone viewer
+
+Extended PFWD-1B from the desktop queue and phone grid to the shared
+expanded phone viewer. The player, catalog, return state and admission
+owners stay shared. Foreground dictation feeds the editable search.
+The [roadmap](ROADMAP.md#phone-viewer-and-foreground-input) records the
+resident speech and model-selection dependencies. WSP 15, 22 and 97 apply.
+
+## 2026-11-14 · WikiTube search and Play hostname
+
+The ordinary admitted Mall reuses the shared catalog and player for the
+bottom browse dock, a left-aligned queue dock, and inline desktop playback.
+The separate full-view action keeps the provider frame. Search leaves the
+active clip playing and starts the first match when idle. The options menu
+links to AutoPost and reports the current device-model boundary.
+
+Firebase site `foundupscom` in `gen-lang-client-0061781628` accepted the
+custom hostname `play.foundups.com`. GoDaddy saved Firebase's exact CNAME,
+`play` → `foundupscom.web.app`, and a public resolver returned it.
+TLS and live release qualification are tracked separately. The Play root
+route preserves the admitted shell and sign-in return. WSP 15, 22 and 97
+apply. See the [roadmap](ROADMAP.md#wikitube-search-and-play-hostname).
+
+## 2026-11-13 · Desktop poster browsing and full player
+
+The invited Mall selects its poster grid on fresh wide fine-pointer entry.
+The shared field keeps the poster wall in its own scroll container and opens
+video posters in the existing full player. It returns focus and scroll on
+close and retains the expanded lane until collapse. Cache v13 refreshes the
+changed assets. See the [roadmap](ROADMAP.md#desktop-poster-browsing-poc)
+and [browser tests](../../../public/member/tests/README.md#member-poster-grid).
+WSP 22 and 97 apply.
+
+## 2026-11-13 · Desktop poster browsing audit
+
+Mapped the ordinary Mall's mixed catalog, category rows, existing desktop
+grid, Ctrl+wheel navigation, quick view and shared full player. Measured
+the current tile preview and recorded the provider and bandwidth constraints
+in the [media contract](../docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md#84-desktop-previews-and-bandwidth).
+The [roadmap](ROADMAP.md#desktop-poster-browsing-poc) defines the smallest
+desktop PoC slice. WSP 22 and 97 apply.
+
 ## 2026-11-13 · Scoped member entry
 
 The dedicated host mounts the public video projection. The FoundUps member
@@ -43,6 +107,28 @@ HPC joins the canonical FoundUp registry and public discovery projector under
 WSP 97, 104 and 109. The Mall refresh owner generates a global discovery card
 and a public-only video catalog from the reviewed Move2Japan source records.
 The same member-shell field and player render the fixed public lane.
+
+## 2026-10-26 — Reproject the observed process capability
+
+Allocation6b5d7902f precedes the independently accepted capabilities[] ->[process]
+reprojection, same1773/273. Unchanged generator check and existing regressions50PASS.
+All817-case sources remain exact; no classifier/quarantine/permission/manifest change.
+
+## 2026-10-26 — Qualify the actual proposal server separately
+
+Allocation665112e88,14/P1; WSP6/11/22/50/62/71/77/84/97. Add the minimal
+optional Uvicorn server profile and select it in existing contract CI; jobs,
+permissions, test selection and artifact retention remain unchanged. No launcher
+or application logic change. The existing real-RSA owner adds three actual
+loopback-process cases, retaining all814 prior IDs and43 named-definition ASTs.
+Initial missing-server RED814PASS/3FAIL; two new-fixture mistakes and a peer-found
+cleanup gap remain recorded. Repaired817PASS/0FAIL/0ERROR/0SKIP retains the one
+unsuppressed TestClient deprecation. Independent wheel review matches all28
+official release digests, with zero listed registry advisories in this snapshot.
+The manifest check passes unchanged after supplying its missing trusted Git PATH;
+the failed stripped-PATH attempt is preserved. No binary/platform security,
+OS isolation, graceful stop, live provider session, image or deployment claim.
+Independent cleanup fault-path and current-head hosted gates remain required.
 
 ## 2026-10-26 — Isolated proposal host bootstrap candidate
 

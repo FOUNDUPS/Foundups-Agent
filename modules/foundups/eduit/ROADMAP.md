@@ -1,5 +1,116 @@
 # EDUIT execution roadmap
 
+## 2026-11-02 — Use the brown word space at either player size
+
+012 requests a clean animation and separate centered words in brown space,
+with adaptive half/fullscreen lettering and progressively growing THUMP. Extend
+the existing verified movie presentation to compact playback; preserve both
+placement choices, current clocks/media and native fallback. Review rendered
+compact/fullscreen at six sizes, both modes, expansion/collapse and actual
+playback before publication. No new renderer, movie export or learning engine.
+
+## 2026-11-02 — Meaning before cue presence
+
+012 corrects SQUISH semantics: only a mammal caught in the collapse permits it.
+Do not label soil compression as animal squish. Remove false victory cue, gate
+loss cue on engine actor status, rebuild successful movie/audio/frame binding,
+and independently inspect safe/mixed/no-input/practice outcomes. Preserve
+progressive THUMP, complete SNIFF, foot continuity and one-word presentation.
+
+## 2026-11-02 — One word, one visual channel
+
+012 requests removing duplicate action words and centering the separate word.
+Default to Outside picture in expanded movie; preserve On picture behind the
+existing grown-up menu. Keep baked native fallback honest. Freeze geometry,
+readability, distance progression, single-channel rendering and unchanged clocks;
+independently inspect both routes, six sizes and actual complete playback before
+publication. This is a controlled presentation profile, not a new AI backend.
+
+## 2026-11-02 — One Play, whole story, one clear exit
+
+012 supersedes manual child card navigation: two large pictograms, automatic
+five-page story, then a movie that continues after close. Baseline23 did play
+all pages, but its film stopped at.899s during measured scrollbar restoration.
+Test movie advancement beyond3s after modal settlement. Reuse existing storybook,
+viewport owner and harness; preserve23media and learning rules.
+
+## 2026-11-01 — Hear/see the actual successful replay's sound objects
+
+012 confirms22leg, then reports clipped SNIFF, flat THUMPs and missing SQUISH.
+Candidate23 repairs existing cue/audio owners and rebuilds matched media. Test
+the actual successful replay, including all five sniffs and the rescued branch,
+not only legacy scene samples. Independent decoder, static-frame and controller
+checks precede preview; phone listening/TTS latency remain acceptance steps.
+See [sound cue repair](docs/SOUND_CUE_REPAIR.md); no autonomous RSI claim.
+
+## 2026-11-01 — Whole leg in expanded movie, not only gameplay
+
+012's screenshot exposes separate coverage: the game's expanded SVG passed,
+but the movie retained a static sky strip. Extend the existing film replay into
+one responsive scene using real media time, retaining the MP4/audio/game.
+Freeze continuous entry/contact/lift, all750 canonical frames, pause/seek/resize,
+invalid-data fallback and cancellation before implementation. Candidate22 needs
+actual browser frame progression and012's native PWA review; static images and
+mock transport checks alone do not certify mobile playback or performance.
+
+## 2026-11-01 — Test the child's intended start action
+
+012's behavioral correction supersedes a book-size-only acceptance: pressing
+the words/picture or ▶ starts the entire popup, without repeated Next. Keep
+child controls pictorial, visible lesson words and accessible names. Independent
+baseline found the old primary Play already ran all pages; the missing word tap
+and touch-to-pause handler were the coverage gap. Repair the existing handlers
+and review sequence; bind a UI-TARS model proposal to actual CUA input and observe
+the whole result. Retain current model/coordinate and native-device limitations;
+this bounded test is not admission of an autonomous RSI worker.
+
+## 2026-11-01 — Preschool readability before broader RSI claims
+
+Latest012 installed screenshot fails whole-app readability despite prior menu
+checks. Prioritize actual ages3–6 book output: every page, largest phrase, controls,
+silent/unavailable voice, short landscape and outer launch. Fix/reinspect/
+independently verify before publication; retain the failed candidate. Skills now
+route this bounded loop without activating another RSI worker. Existing GoDaddy
+masked forwarding and pending Sites domain validation own the launch defect;
+fresh Gmail verification is explicitly authorized. No native-device acceptance
+or comprehension improvement is inferred from desktop viewport checks.
+
+## 2026-11-01 — PWA app-presentation correction
+
+012 photo audit supersedes the bottom document-flow settings layout: use one
+app-sized Storytime menu for character/music/language and one continuous expanded
+scene for the whole leg and sky opening. Preserve game/feedback coordinates and
+all earned state. Existing interactive review/build skills now enforce these
+checks. Keep WSP15 priority separate from visual-quality/learning-effectiveness
+judgments. Next real tile must prove skill transfer; this repair alone does not.
+
+
+## 2026-11-01 — Full-story sequencing and engine-recorded film
+
+Latest012 correction: Auto play runs all five story plates before a single video
+handoff. Center the actual dialog/text, keep video paused while reading, avoid
+repeating the opening over the film. The replacement25s film uses unchanged live
+game mechanics via deterministic replay; old15s Foley is preserved independently.
+The next learning audit still measures actual foot/contact/word/audio alignment;
+sharing game mechanics is not proof of correct pedagogical timing or RSI transfer.
+Custom-domain masked forwarding is a separate mobile-hosting defect.
+
+
+## 2026-11-01 — Reviewable sleeve choices, then measured learning cues
+
+15/P1(C3/I4/D4/Impact4): visible character/music wheels over the existing engine,
+independent local verification and authorized Sites review preview. See
+[choices contract](docs/CHARACTER_MUSIC_CHOICES.md). First two approved skins and
+two licensed tracks; retain no-autoplay, pause/state, accessibility and provenance.
+Then resume one recorded THUMP timing proof. Full adaptive content, recognition,
+admitted workers and next-tile RSI transfer remain separate. Latest012 direction
+permits verified pushes to the existing PR; merge/main acceptance stays separate.
+
+## Phone storybook and narration correction — 2026-10-29
+
+The existing PR #2256 now includes a follow-up phone-first correction: the first-visit storybook fills nearly the available portrait viewport, uses large short text and a taller picture, retains left/right swipe and Previous/Next, and explicit autoplay reads pages before handing off to the MP4. Browser playback restrictions can block automatic video sound, in which case the existing large Play control receives focus. Skip/Close do not auto-start video. The iPad retains its separate responsive layout. The upper fullscreen context on phones is bounded to avoid an oversized dirt strip; game physics, score, artwork scale and hit geometry remain unchanged. This is source implementation, not verified physical-device acceptance or a published Sites version. English browser TTS remains device-voice dependent; native iPad audible testing, all-locale audio and prerecorded production voices are separate acceptance gaps.
+
+
 > **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 
@@ -173,3 +284,33 @@ Bounded repair evidence: docs/PHONE_FULLSCREEN_REPAIR.md. Retain v12 negative
 control and strengthened phone/tablet oracle on the next actual tile. Physical
 Home Screen/pinch/upgrade acceptance and non-layout findings in issue2252 remain
 open; the layout repair is not closure of narration/replay or autonomous RSI.
+
+---
+
+## EDuIT Discovery long-range specification stages (2026-10-08)
+
+Planning only. Each implementation slice needs a current work order, source-bound
+retrieval, budget, verification and release authority. No dates below promise delivery.
+
+| Stage | Bounded deliverable | Exit gate |
+| --- | --- | --- |
+| Documentation | Historical sources, naming, requirements, contracts, safety and evaluation plan; declarative onboarding | Reviewed source traceability; schema/document consistency; source-control verification |
+| `EDUIT_POC_PLAY_LOOP_PHASE1` | One browser game, bounded deterministic adaptation, synthetic local events | Replay/scoring/input tests, accessible controls, offline continuation, no external participant data |
+| `EDUIT_CONSENTED_PROGRESS_PHASE2` | Role/consent-aware profiles and sync | Auth/isolation, revocation, export/deletion, idempotency and shared-device tests |
+| `EDUIT_LEARNING_PILOT_PHASE3` | Frozen content with supervised approved study | Pre-registered protocol, learner protection, learning/retention/transfer evidence |
+| `EDUIT_DISCOVERY_VALIDATION_PHASE4` | Repeated domain evidence and independent review | Calibrated useful signals; uncertainty/fairness limits; abstention and appeal |
+| `EDUIT_OPPORTUNITY_REFERRALS_PHASE5` | Vetted mentor/enrichment/scholarship pathways | Purpose-specific permission, human recipient/payload approval, delivery receipts and withdrawal |
+| `EDUIT_GOVERNED_CONTENT_IMPROVEMENT_PHASE6` | Candidate evaluation and controlled release | Independent hold-out gate, budget, authorization, monitoring and demonstrated rollback |
+| Baby0 / broader domains | Separate research modules | Qualified developmental/domain-specific review and explicit approval |
+
+### Specification boundary & pre-build reading
+
+A successful schema test is not a running game; a passing game test is not learning
+efficacy; efficacy is not validated discovery. Track completion separately for source merge,
+runtime deployment, participant research, live verification and cleanup.
+
+Before building a Discovery slice: read README, INTERFACE, this ROADMAP, ModLog, test
+inventory and memory boundary; re-read repository bootstrap/WSP 97 and root planning
+authority, use source-bound HoloIndex or the documented fallback, inspect existing
+PWA/game/auth/test owners, then execute only the bounded POC slice. Do not require tablets,
+tokens, scholarship partners or an eSingularity physical site to begin a synthetic software test.

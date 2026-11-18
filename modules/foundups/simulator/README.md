@@ -1,5 +1,9 @@
 # FoundUps Simulator
 
+## Observable Swarm Orchestration read-only telemetry — 2026-11-15
+
+Read-only telemetry adapter (`adapters/work_telemetry_provider.py`), `WorkUnitFrame` lineage/lease fields (`parent_work_id`, `work_order_id`, `swarm_lane`, `lease_active`), deduplicated redacted dependency edges (`depends_on`, `parent_task`, `origin_continuity`, `independent_assurance`), GET-only `/api/work-telemetry`, and `FoundupCube` HUD/ticker summary (`DEPS`, `LEASES`, `LANES`, `VERIF`). Strictly `observation_only=True` and `authority="none"`; focused suite passes `11/11` with `0 skipped` across clean checkouts and live artifacts. See [contract](INTERFACE.md#observable-swarm-orchestration-telemetry-interface--2026-11-15).
+
 ## Prospective micro-UPS allocation — 2026-11-05
 
 The [B03-P4 preview](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md#b03-p4-prospective-micro-ups-allocation-v1)
@@ -349,6 +353,7 @@ curl -N http://localhost:8080/api/sim-events
 
 **Endpoints:**
 - `GET /api/sim-events` - SSE stream of normalized events
+- `GET /api/work-telemetry` - Read-only observed swarm/work telemetry snapshot (`observation_only=true`, `authority="none"`, `mode=ro` SQLite)
 - `GET /api/health` - Health check with mode status
 - `GET /` - API info
 

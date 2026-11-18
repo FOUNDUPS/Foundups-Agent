@@ -81,8 +81,8 @@ class TestQuickViewSourceTypeConfig:
     def test_non_video_source_types_defined(self, mall_planes_js):
         assert "NON_VIDEO_SOURCE_TYPES" in mall_planes_js
 
-    def test_non_video_types_include_all_three(self, mall_planes_js):
-        for st in ["github_repo", "external_app", "internal_service"]:
+    def test_non_video_types_include_all_four(self, mall_planes_js):
+        for st in ["github_repo", "external_app", "internal_app", "internal_service"]:
             assert st in mall_planes_js
 
 

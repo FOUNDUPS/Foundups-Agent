@@ -18,10 +18,29 @@ civic-resource return. The phone cases check the selected install manifest,
 options, scoped search, fixture dictation and Red Dog return. The member
 case uses controlled Clerk and Firestore responses to check sign-in return,
 invitation denial, admitted theater and the public discovery link.
-`node public/member/tests/mall_product_state_vm.mjs` covers v12 installation,
+`node public/member/tests/mall_product_state_vm.mjs` covers v16 installation,
 obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
+### Member poster grid
+
+The same browser suite opens the ordinary invited route with the real catalog.
+It checks a fresh eight-column grid at 1440 × 900, no media frame on hover,
+one shared player from inline to full view, queue filtering and idle submit,
+manual Play for dense tiles, quick view, saved rows and wide touch entry.
+The phone case checks inline playback in the selected card, continuity into
+the full viewer, native horizontal touch scrolling in Chromium, and visible
+queue search in portrait and landscape. It exercises swipe on plus, hold
+and release on Red Dog, the square Stop in Red Dog's position, and dictation
+cancellation using a local recognizer fixture. It also verifies that a long
+transcript wraps, stays editable, and preserves the active provider frame.
+The bottom dock also checks AutoPost and
+keyboard fallback. The Play root uses the normal invitation and sign-in
+path. The suite checks that
+Escape restores focus and scroll in the expanded Move2Japan lane and that
+Ctrl+wheel returns to the browse position. Account and provider events use
+fixtures.
 
 ### Physical iPhone playback
 
@@ -35,11 +54,19 @@ origin with YouTube's Play control. Copying is an explicit user action.
 
 For an isolated Hosting preview, stage
 `modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_probe.js` as
-`public/member/playback-probe/probe.js` and
+`public/member/playback-probe/probe.js`,
 `modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_reference.html` as
-`public/member/playback-probe/reference.html`. Load the deferred probe
-script in the staged member document. The fixture sources live outside
-the Hosting public root. Use an online device and hold the phone and
+`public/member/playback-probe/reference.html`, and a sanitized
+`public/member/playback-probe/deployment.json` (`source_sha`, `channel_id`,
+`hosting_version`, `mall_build`). Load the deferred probe
+script in the staged member document. `reference.html` accepts strictly
+allowlisted `?v=<11-char Short ID>` (8 admitted HPC Shorts + 4 diagnostic-only
+Shorts) and `?host=youtube|nocookie` (`https://www.youtube.com` vs
+`https://www.youtube-nocookie.com`), retains selection across `Mall <-> official
+embed`, keeps all probe controls below `#hpc-probe-embed`, and separates
+`SW controller` from `Mall caches seen` and official `101/150` embed refusal
+from screen-observed `LOGIN_REQUIRED` prompts. The fixture sources live outside
+the Hosting public root. Hold the phone and
 network constant across the browser, Home Screen and official-embed cases.
 
 Let the first Short advance for a few seconds. If it fails, capture the

@@ -12,6 +12,10 @@ This log tracks changes specific to the **stream_resolver** module in the **plat
 
 ## MODLOG ENTRIES
 
+### 2026-11-15 — Repair `test_stream_resolver.py` delegation and quota-rotation contracts (supersedes PR #408)
+
+WSP 00/5/22/50/97. Repaired all 13 failing unit tests in `modules/platform_integration/stream_resolver/tests/test_stream_resolver.py` without `@pytest.mark.skip`, superseding stale PR #408 (`fix/yt-cleanup2-test-contract-rebase`, which skipped 10 `TestYouTubeAPICalls` tests). Aligned delay assertions with `DelayUtils.calculate_enhanced_delay` (`+-10%` jitter, `active_users=0` exponential failure backoff, explicit `force_dev_delay=True`) and aligned YouTube API / quota-rotation tests with `YouTubeAPIOperations` (`part="snippet,liveStreamingDetails,status"`, `maxResults=1`, normalized response dicts, upcoming-to-live candidate verification) and `StreamResolver` (`_fetch_chat_id_with_rotation` 3-attempt credential rotation/invalidation and `resolve_stream` Priority 5 API fallback exhaustion). Result: **33/33 passed, 0 skipped** (`reddog_backend_manifest.json` and `WSP_Test_Registry.json` preserved unchanged).
+
 ### 2026-10-29 — Periodic monitor import syntax repair
 
 Use the existing numeric package name through importlib.import_module inside

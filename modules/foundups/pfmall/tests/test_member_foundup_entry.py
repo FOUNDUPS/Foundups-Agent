@@ -44,9 +44,9 @@ class TestFoundupEntryPage:
         assert "params.get('id')" in html or "params.get(\"id\")" in html
 
     def test_entry_page_fetches_catalog(self):
-        """Page fetches mall-catalog.json to find the FoundUp."""
+        """Page fetches mall-video-catalog.json to find the FoundUp."""
         html = ENTRY_PAGE.read_text(encoding="utf-8")
-        assert "mall-catalog.json" in html
+        assert "mall-video-catalog.json" in html
 
     def test_entry_page_matches_by_foundup_id(self):
         """Page finds the catalog entry by foundup_id field."""
@@ -124,20 +124,19 @@ class TestIndexCardNavigation:
         assert "encodeURIComponent" in html
 
     def test_card_click_does_not_open_overlay(self):
-        """Card click no longer calls openFoundupOverlay directly."""
-        html = INDEX_PAGE.read_text(encoding="utf-8")
-        # Find click event handlers in card binding section
-        # The click handler should NOT call openFoundupOverlay
+        """Tile click delegates through mall-tile-field.js togglePlay, never openFoundupOverlay."""
+        tile_js = (MEMBER_DIR / "js" / "mall-tile-field.js").read_text(encoding="utf-8")
         click_pattern = re.search(
-            r"card\.addEventListener\('click'.*?}\);",
-            html,
+            r"tile\.addEventListener\('click'.*?\}\);",
+            tile_js,
             re.DOTALL,
         )
-        assert click_pattern, "Should have a card click handler"
+        assert click_pattern, "mall-tile-field.js should have a tile click handler"
         handler_body = click_pattern.group(0)
         assert "openFoundupOverlay" not in handler_body, (
-            "Card click handler should navigate, not open overlay"
+            "Tile click handler must activate playback/quick-view, not legacy overlay"
         )
+        assert "togglePlay" in handler_body
 
 
 # ---------------------------------------------------------------------------

@@ -407,17 +407,22 @@ await check('install reloads only explicit public shell and product assets', asy
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
-  assert.equal(h.stores.has('pfmall-member-v12'), true);
+  assert.equal(h.stores.has('pfmall-member-v19'), true);
+  const build = videoProjectionSource.match(/const mallBuild = '(v\d+)';/)?.[1];
+  assert.equal('pfmall-member-' + build, 'pfmall-member-v19');
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  for (const name of ['pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9', 'pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v12', 'pfmall-properties-v1', 'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
+  const obsoleteVersions = Array.from({ length: 17 }, (_, index) => `pfmall-member-v${index + 2}`);
+  for (const name of [...obsoleteVersions, 'pfmall-member-v19', 'pfmall-properties-v1',
+    'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
   await h.event('activate');
-  assert.deepEqual(h.deleted.sort(), ['pfmall-member-v10', 'pfmall-member-v11', 'pfmall-member-v2', 'pfmall-member-v3', 'pfmall-member-v4', 'pfmall-member-v5', 'pfmall-member-v6', 'pfmall-member-v7', 'pfmall-member-v8', 'pfmall-member-v9']);
-  assert.equal(h.stores.has('pfmall-member-v12'), true);
+  assert.deepEqual(h.deleted.sort(), obsoleteVersions.sort());
+  assert.equal(h.stores.has('pfmall-member-v18'), false);
+  assert.equal(h.stores.has('pfmall-member-v19'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -453,7 +458,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v12');
+  const cache = await h.caches.open('pfmall-member-v19');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;
@@ -508,6 +513,57 @@ await check('scoped catalog has a separate cache key and no fallback to the memb
   uncached.setNetwork(async () => { throw new Error('offline'); });
   assert.equal((await uncached.request(scoped)).response.status, 503);
   assert.equal((await h.request('/member/js/mall-tile-field.js?v=unrecognized')).intercepted, false);
+});
+
+await check('normal Mall round-trips source_group fieldScope in localStorage', () => {
+  const h = stateRuntime(ORIGIN + '/member/');
+  h.tf.scope = { type: 'source_group', query: 'apps' };
+  h.api.save();
+  const saved = JSON.parse(h.local.get(VIDEO_KEY));
+  assert.deepEqual(saved.fieldScope, { type: 'source_group', query: 'apps' });
+  h.calls.length = 0;
+  h.tf.scope = null;
+  assert.equal(h.api.restore(), true);
+  assert.deepEqual(h.calls.find(c => c[0] === 'scope'), ['scope', { type: 'source_group', query: 'apps' }]);
+});
+
+await check('ordinary Mall persists and restores activeVideo without touching HPC sessionStorage', () => {
+  const h = stateRuntime(ORIGIN + '/member/');
+  let active = { foundupId: 'move2japan', videoId: 'vid_m2j_01', queueQuery: 'onsen' };
+  const restoredVideos = [];
+  h.tf.getActiveVideo = () => active;
+  h.tf.restoreActiveVideo = value => { restoredVideos.push(copy(value)); return true; };
+  h.api.save();
+  const saved = JSON.parse(h.local.get(VIDEO_KEY));
+  assert.deepEqual(saved.activeVideo, active);
+  assert.equal(h.session.size, 0, 'ordinary Mall activeVideo must never write to sessionStorage');
+
+  active = null;
+  assert.equal(h.api.restore(), true);
+  assert.equal(restoredVideos.length, 0, 'activeVideo restores on animation frame after layout');
+  h.flushFrames();
+  assert.deepEqual(restoredVideos, [{ foundupId: 'move2japan', videoId: 'vid_m2j_01', queueQuery: 'onsen' }]);
+
+  // Malformed activeVideo payloads are rejected and cleared
+  for (const bad of [
+    { foundupId: '../bad', videoId: 'vid_1', queueQuery: '' },
+    { foundupId: 'move2japan', videoId: '', queueQuery: '' },
+    { foundupId: 'move2japan', videoId: 'vid_1', queueQuery: 'x'.repeat(301) },
+    { foundupId: 'move2japan', videoId: 'vid_1', extra: 1 }
+  ]) {
+    h.local.set(VIDEO_KEY, JSON.stringify({ projection: 'default', activeVideo: bad }));
+    assert.equal(h.api.restore(), false);
+    assert.equal(h.local.has(VIDEO_KEY), false);
+  }
+
+  // HPC sessionStorage contract strictly rejects activeVideo mixed into scoped state
+  const hpc = stateRuntime(ORIGIN + '/member/?foundup=hpc');
+  assert.equal(hpc.api.selectVideoScope('hpc'), true);
+  hpc.session.set('pfmall_video_scope_hpc_v1', JSON.stringify({
+    scrollTop: 20, scrollLeft: 0, activeVideo: { foundupId: 'hpc', videoId: 'HPC01', queueQuery: '' }
+  }));
+  assert.equal(hpc.api.restore(), false);
+  assert.equal(hpc.session.has('pfmall_video_scope_hpc_v1'), false);
 });
 
 console.log('Mall product state and service worker runtime: ' + checks + ' passed.');

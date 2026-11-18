@@ -1,3 +1,25 @@
+## 2026-11-15 - WRE visual harness stops on unverified steps
+
+Extend the existing `test_layer3_schedule.py` manual harness with three offline
+fake-runner controls: each failed verification stops subsequent actions and
+preserves the returned summary; explicit date/time DOM readback rejects mismatched
+or absent values and accepts matching values with Studio's narrow spaces.
+The first two visual prompts describe localization targets. The third step uses
+the existing date/time selectors through an explicit DOM callback. CLI exit
+conversion rejects absent, zero-step, failed and inconsistent summaries. These controls
+do not attach a browser, call a model, save a schedule or qualify live selectors.
+Focused execution after the CLI correction: three tests passed with the explicit
+asyncio plugin and no pytest warnings. An inherited pyreadline console teardown
+message followed the successful test result. No live browser/model operation was run.
+
+Hosted collection then exposed an eager `YouTubeStudioDOM` import through the
+scheduler parent and absent `pytz`. A deferred constructor keeps the production
+owner for manual use. The added fourth test clears cached owner/model modules
+and applies a native import finder that rejects the scheduler parent, `pytz`,
+UI-TARS and local model packages during actual harness import. Constructor use
+reaches that guard; no owning package is stubbed. All four focused tests pass
+locally with no pytest warnings; corrected hosted acceptance is still required.
+
 ## 2026-11-10 — Selected CI metadata fixtures
 
 Four existing scheduling positives now use a complete synthetic Studio calendar,

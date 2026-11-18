@@ -117,6 +117,55 @@ def test_windows_venv_runtime_uses_base_interpreter_and_preserves_pid(tmp_path):
     assert process.returncode == 0
     assert int(stdout.strip()) == process.pid
 
+    outer_env = tmp_path / "outer-env"
+    outer_scripts = outer_env / "Scripts"
+    outer_packages = outer_env / "Lib" / "site-packages"
+    outer_scripts.mkdir(parents=True)
+    outer_packages.mkdir(parents=True)
+    outer_launcher = outer_scripts / "python.exe"
+    outer_launcher.write_bytes(b"outer venv launcher")
+
+    inner_env = tmp_path / "inner-env"
+    inner_scripts = inner_env / "Scripts"
+    inner_packages = inner_env / "Lib" / "site-packages"
+    inner_scripts.mkdir(parents=True)
+    inner_packages.mkdir(parents=True)
+    inner_launcher = inner_scripts / "python.exe"
+    inner_launcher.write_bytes(b"inner venv launcher")
+
+    (outer_env / "pyvenv.cfg").write_text(
+        f"home = {inner_scripts}\n"
+        f"executable = {inner_launcher}\n",
+        encoding="utf-8",
+    )
+    (inner_env / "pyvenv.cfg").write_text(
+        f"home = {base_executable.parent}\n"
+        f"executable = {base_executable}\n",
+        encoding="utf-8",
+    )
+    assert launch._mcp_runtime_python(outer_launcher) == (
+        base_executable,
+        outer_packages.resolve(),
+    )
+
+    if (base_executable.parent / inner_launcher.name).is_file():
+        (inner_env / "pyvenv.cfg").write_text(
+            f"home = {base_executable.parent}\n"
+            f"executable = {inner_launcher}\n",
+            encoding="utf-8",
+        )
+        assert launch._mcp_runtime_python(outer_launcher) == (
+            (base_executable.parent / inner_launcher.name).resolve(),
+            outer_packages.resolve(),
+        )
+
+    (inner_env / "pyvenv.cfg").write_text(
+        f"home = {inner_scripts}\n"
+        f"executable = {outer_launcher}\n",
+        encoding="utf-8",
+    )
+    assert launch._mcp_runtime_python(outer_launcher) == (outer_launcher, None)
+
 
 def _mcp_pth_fixture(tmp_path):
     repo, environment = tmp_path / "repo", tmp_path / "fake-venv"

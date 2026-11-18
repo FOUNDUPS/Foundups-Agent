@@ -233,6 +233,56 @@ Use the explicit "today" override rather than the default last-hour window.
    page for authorized metadata edits. Independently read back saved ID, title,
    body and slot as applicable before counting completion.
 
+### Conversational cadence and topic mixing
+
+This is a bounded operator contract composed through the existing scheduling
+skills, not a new dispatcher or a persistent policy change.
+
+1. Reconcile the latest explicit request before allocating slots: channel,
+   source-day bounds, selected IDs, priority topic, spacing, timezone and whether
+   overnight publication is included. Preserve corrections in the private
+   checkpoint. Do not revive an earlier daytime-only window after an all-hours
+   correction, or expand a recent-two-day request into historical backlog.
+2. Inspect live scheduled inventory across the relevant Videos, Shorts and Live
+   surfaces before writes. Record filters, pagination and observation time.
+   Existing releases occupy slots; a stale tracker or an unlisted count is not
+   proof of an empty calendar. Preserve existing schedules unless moving them
+   was explicitly authorized. Reconcile again on resume or conflicting evidence.
+3. Classify exact clips from content, not inherited stream titles. One stream
+   can intentionally cover several subjects. A repeated title or mismatched
+   description is an inspection lead, not proof of a defect. Verify authenticated
+   Studio Ask/Gemini access and exact-ID content availability before relying on
+   it. Retain timestamped output and label model-generated summaries as semantic
+   evidence, not direct listening or verbatim transcripts. An inaccessible clip
+   remains unresolved even if neighboring clips were successfully analyzed.
+4. For an explicit priority-topic-every-two-hours request, allocate that topic
+   at two-hour intervals and eligible other topics in intervening hourly gaps,
+   including overnight only when requested. For example, priority at 12/14/16
+   and others at 13/15 is an allocation pattern, not a fixed timezone or daily
+   default. Fit around existing releases and record any resulting cadence gap.
+   Do not duplicate clips, invent inventory or use unrelated backlog to fill it.
+5. Keep source dates separate from release dates. Read Studio's actual timezone,
+   convert the full release date/time with DST-aware zones, and report the
+   bounded first/last slot and unfilled gaps. If the selected native allocator
+   cannot represent the request, do not silently fall back to its default:
+   use an already-authorized qualified operator surface or report the limitation.
+6. Schedule-only preserves metadata. Authorized enhancement requires matched
+   clip evidence through the existing enhancement owner, not a template rewrite.
+   Hold unsupported personal allegations or other consequential material for
+   specifically applicable approval; a broad scheduling request does not supply
+   approval for a new allegation. Keep evidence-missing and approval-held IDs
+   distinct and leave their state unchanged.
+7. Count completion only after settled Save and independent persisted readback
+   of exact channel/video/date/time/timezone, plus changed metadata when relevant.
+   The detail dialog's Done only stages a change. Reload/reopen without resaving
+   matching results. Persist the receipt in the existing private checkpoint;
+   if recording fails after Save, reconcile the record, never replay the batch.
+
+Report saved schedules separately from actual publication and delivery. A
+verified bounded batch does not establish a resident watcher, native worker
+qualification, PatternMemory ingestion or model training. The existing security,
+pre-save audit, account-verification and approval gates remain in force.
+
 ### Bounded scanning and checkpoint contract
 
 A chat statement such as "while I am live" does not install an always-on worker.
@@ -258,3 +308,86 @@ Current qualification: selected-ID scheduling and read-only preflight exist.
 The historical `publish_daily_clips` source and automatic today-window discovery
 remain unqualified here. These instructions define a bounded operator/handoff
 contract, not a newly deployed watcher or analytics-driven optimization loop.
+
+## 012 live-aware audience timing correction (2026-11-16)
+
+This correction overrides earlier all-hours/on-the-hour examples for subsequent
+requests. Source-day scope and publication-day scope remain separate.
+
+- Do not release Shorts while 012 is actively live on the target channel. Read
+  the channel's actual Live-now status before allocating slots and before any
+  authorized application. A currently active stream has no assumed end time.
+  Existing upcoming slots are conflicts to report, not permission to silently
+  move them. A future slot alone cannot guarantee that no stream will be live;
+  an unattended guarantee requires a qualified existing live-aware owner and
+  pre-release check. Do not claim that guard is deployed from these instructions.
+- Target the requested U.S. audience window, not the PC's clock. Record a named
+  audience timezone (for example America/New_York), release date and UTC instant;
+  convert to the actually displayed Studio timezone, commonly Asia/Tokyo.
+  Compute offsets for each release date, including DST and date rollover; never
+  reuse a fixed U.S./Japan offset. If audience analytics are unavailable, label
+  the selected window an operator assumption, not a measured optimum.
+- Use varied minute offsets and roughly the requested spacing rather than fixed
+  on-the-hour releases. This is editorial pacing, not evasion of platform checks.
+  Check existing releases first; preserve topic ordering, minimum spacing and
+  the explicit audience window. Do not add overnight coverage unless the latest
+  direction requests it. Latest explicit corrections supersede older cadence.
+- When 012 is editing or rescheduling in Studio, stop browser writes and yield
+  the shared tab, including any open unsaved dialog. Do not cancel, save, reload
+  or overwrite that work. Reconcile actual saved state after control is returned.
+- For schedule-only work, use the existing Content-table visibility popup route
+  above rather than opening each video detail page. Content evidence still must
+  exist; list titles alone do not qualify a clip or release held allegations.
+  Verify each saved ID/date/time/timezone independently. A visible control is
+  not evidence that its Save path has been tested in the current session.
+
+Evidence boundary: this update changes operating guidance only. No video,
+resident worker, schedule, account setting or runtime policy is changed by it.
+
+### Current bounded Move2Japan override (012, 2026-11-16)
+
+Latest voice correction supersedes the earlier 15:00-20:00 exclusion and the
+two-hour Hasan-first cadence for this recent-Shorts batch. New slots begin with
+the overnight window starting November 17, 2026 at 20:00 Asia/Tokyo and ending
+November 18 at 04:00. Do not infer authorization for additional nights from
+this bounded window. No scheduling outside that window. Use approximately one
+video every four hours with topic variety, not constant Hasan. Vary minutes only
+within the window and without overriding cadence, collisions or existing slots;
+do not force an extra release at the closing boundary.
+
+Leave November 16 and every existing scheduled item intact. Reconcile current
+operator edits and duplicate IDs before any writes. Record each full JST date,
+UTC instant and date-specific U.S. audience equivalent; overnight slots cross
+a calendar date. The known-live exclusion still applies: this window does not
+authorize release during a known active stream. Held content remains held until
+its applicable approval/evidence is resolved. This is a bounded batch override,
+not a channel-wide runtime policy or permission to move existing schedules.
+
+### Operator demonstration: alternating positions in an Unlisted list
+
+012 demonstrated the intended selection heuristic: alternate top/bottom candidates
+to obtain topic variety rather than exhaust one repeated-title group. Treat row
+position as a navigation aid, not topic evidence, lineage or expanded scope.
+Bind every action to the exact video ID, verified content and authorized source
+window; older bottom rows outside the accepted batch remain excluded.
+
+After a saved visibility change, an item may disappear from the Unlisted-filtered
+list. Reacquire remaining rows because positions change. Disappearance alone is
+not a schedule receipt: independently locate the same ID in scheduled content
+and read its persisted date, time and timezone. Noninteractive observation of
+an operator's list does not prove unseen clicks, saved times or actual topics.
+
+Observed UI qualification (2026-11-16 operator demonstration): newly Scheduled
+rows can remain visible temporarily under the Unlisted filter while the operator
+alternates top and bottom groups. Do not assume immediate disappearance or use
+an unchanged row position as identity. That observation verified visible status
+and date only, not an exact saved time or full playback/content audit.
+
+Current native implementation qualification (source audit 2026-11-16): the
+operator's demonstrated manual list-page workflow is not yet the native writer's
+qualified execution path. `ContentPageScheduler.schedule_video_from_row` routes
+to the detail owner for fresh metadata/Audience checks; `video_policy.submit_inline`
+fails closed with `presave_audit:detail_editor_required`. Do not remove that gate
+to implement the preference above. `schedule_all_visible` delegates frozen IDs
+to the existing calendar/claim owner. Native list-page continuation needs its
+own gate-preserving implementation and tests before live qualification.
