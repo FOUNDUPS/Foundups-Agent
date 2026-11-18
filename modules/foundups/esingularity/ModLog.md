@@ -1,3 +1,7 @@
+## 2026-11-18 — Reconcile PR #1906 STT normalization guard
+
+- Reconciled `PR #1906` onto current `main`: preserved both the canonical `Speech-to-text normalization guard` section and existing `STT / transcription protected vocabulary` in `frontend/audit/SOURCE_OF_TRUTH.md`, and integrated `test_stt_artifacts_are_rejected_from_current_public_surfaces` (extending STT corruption artifact rejection across `app/page.tsx`, `app/future/page.tsx`, `components/LanguageSwitcher.tsx`, and `content/yumori-vision.ts`) into `tests/test_contracts.py` (`WSP 22`, `WSP 50`, `WSP 97`).
+
 ## 2026-11-18 — Reconcile PR #1792 eSingularity / YUMORI.me brand context
 
 - Reconciled `PR #1792` onto current `main`: added `brand_context.json` (`eSingularity.ai` parent identity, `YUMORI.me` movement/preparatory-committee child brand), bound `esingularity_001.brand_context_path` in `foundup_registry.json`, and updated eSingularity/YUMORI Skillz + contracts (`test_esingularity_brand_context_is_single_skill_brand_authority`) while preserving all `#2189`, `#2340`, `#2413`/`#2414`, and live-ticker work.
