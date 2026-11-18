@@ -51,6 +51,21 @@ def test_jhr_003_is_latest_japanese_only() -> None:
     assert (FRONTEND_ROOT / "public" / "jhr" / "jhr-003-hanyu-grid-field.svg").is_file()
 
 
+def test_jhr_primary_metadata_follows_latest_rendered_issue() -> None:
+    """Prevent the archived JHR #001 page from overriding JHR #003 title/OG."""
+    reader = FRONTEND_ROOT / "app" / "reports" / "jhr"
+    page = read(reader / "page.tsx")
+    layout = read(reader / "layout.tsx")
+    assert 'id="jhr-003"' in layout
+    assert 'title: "JHR #003' in layout
+    assert 'alternates: { canonical: "https://esingularity.ai/reports/jhr" }' in layout
+    assert 'url: "https://esingularity.ai/reports/jhr"' in layout
+    assert 'type: "article"' in layout
+    # Page-level metadata overrides parent layouts in Next/Vinext. Keep single owner.
+    assert "export const metadata" not in page
+    assert "Japan Hyperscaler Report #001 | eSingularity" not in page
+
+
 def test_live_field_status_has_one_canonical_source_for_the_campaign_ticker() -> None:
     status = json.loads(read(FRONTEND_ROOT / "content" / "current-field-status.json"))
     ticker = read(FRONTEND_ROOT / "components" / "CampaignTicker.tsx")

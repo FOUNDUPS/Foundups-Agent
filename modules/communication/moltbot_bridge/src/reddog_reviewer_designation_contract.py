@@ -14,6 +14,11 @@ DESIGNATION_SCHEMA = "reddog_reviewer_designation.v1"
 DECISION_SCHEMA = "reddog_effect_reviewer_decision.v1"
 PRIVILEGE = "designate_effect_reviewers"
 SIGNING_PREFIX = "reddog-reviewer-designation.v1."
+PARENT_AUTHORITY_SCHEMA = "reddog_parent_reviewer_designation_authority.v1"
+PARENT_DESIGNATION_SCHEMA = "reddog_parent_reviewer_designation.v1"
+PARENT_DECISION_SCHEMA = "reddog_elevated_authority_reviewer_decision.v1"
+PARENT_PRIVILEGE = "designate_parent_reviewers"
+PARENT_SIGNING_PREFIX = "reddog-parent-reviewer-designation.v1."
 _COMMON_FIELDS = frozenset({
     "schema_version", "privilege", "issuer_principal_id", "issuer_principal_provider",
     "issuer_key_epoch", "repo_full_name", "foundup_id", "policy_digest",
@@ -49,12 +54,12 @@ def _shape(value: Any, fields: frozenset[str]) -> dict[str, Any]:
     return copied
 
 
-def _common(value: Any, fields: frozenset[str], schema: str) -> dict[str, Any]:
+def _common(value: Any, fields: frozenset[str], schema: str, privilege=PRIVILEGE, decision_schema=DECISION_SCHEMA) -> dict[str, Any]:
     copied = _shape(value, fields)
     text_fields = _COMMON_FIELDS - {"issued_at", "expires_at"}
     if (any(not _text(copied[key]) for key in text_fields)
-            or copied["schema_version"] != schema or copied["privilege"] != PRIVILEGE
-            or copied["decision_schema_version"] != DECISION_SCHEMA
+            or copied["schema_version"] != schema or copied["privilege"] != privilege
+            or copied["decision_schema_version"] != decision_schema
             or not is_sha256(copied["policy_digest"])):
         _invalid()
     return copied
@@ -86,15 +91,16 @@ def _reviewer(value: Any) -> dict[str, Any]:
 
 def _signing_input(designation: dict[str, Any]) -> str:
     payload = {key: value for key, value in designation.items() if key != "signature"}
-    result = SIGNING_PREFIX + canonical_json(payload)
+    result = (PARENT_SIGNING_PREFIX if designation["privilege"] == PARENT_PRIVILEGE else SIGNING_PREFIX) + canonical_json(payload)
     if len(result.encode("ascii")) > MAX_SIGNING_INPUT_BYTES:
         _invalid()
     return result
 
 
-def validate_reviewer_designation(value: Any) -> dict[str, Any]:
+def validate_reviewer_designation(value: Any, *, _parent=False) -> dict[str, Any]:
     """Validate and copy one signed-shaped bundle without authenticating its signature."""
-    copied = _common(value, _DESIGNATION_FIELDS, DESIGNATION_SCHEMA)
+    copied = _common(value, _DESIGNATION_FIELDS, PARENT_DESIGNATION_SCHEMA if _parent else DESIGNATION_SCHEMA,
+                     PARENT_PRIVILEGE if _parent else PRIVILEGE, PARENT_DECISION_SCHEMA if _parent else DECISION_SCHEMA)
     owner_digest, signature = copied["owner_authority_digest"], copied["signature"]
     values = copied["reviewers"]
     if (not _text(owner_digest) or not is_sha256(owner_digest)
@@ -112,15 +118,46 @@ def validate_reviewer_designation(value: Any) -> dict[str, Any]:
 
 def reviewer_designation_authority_digest(authority: Any) -> str:
     """Hash the whole validated block, never a caller-supplied verified flag."""
-    return digest(validate_reviewer_designation_authority(authority))
+    if type(authority) is not dict:
+        _invalid()
+    return digest(validate_parent_reviewer_designation_authority(authority) if authority.get("schema_version") == PARENT_AUTHORITY_SCHEMA else validate_reviewer_designation_authority(authority))
 
 
 def reviewer_designation_signing_input(designation: Any) -> str:
     """Revalidate mutable wire data and exclude only its signature from the preimage."""
-    return _signing_input(validate_reviewer_designation(designation))
+    if type(designation) is not dict:
+        _invalid()
+    return _signing_input(validate_reviewer_designation(designation, _parent=designation.get("schema_version") == PARENT_DESIGNATION_SCHEMA))
 
 
 __all__ = [
     "validate_reviewer_designation_authority", "validate_reviewer_designation",
     "reviewer_designation_authority_digest", "reviewer_designation_signing_input",
 ]
+
+
+def validate_parent_reviewer_designation_authority(value):
+    copied = _common(value, _AUTHORITY_FIELDS, PARENT_AUTHORITY_SCHEMA, PARENT_PRIVILEGE, PARENT_DECISION_SCHEMA)
+    if not _text(copied["issuer_public_key"]) or decode_ed25519_public_key(copied["issuer_public_key"]) is None:
+        _invalid()
+    return copied
+
+
+def validate_reviewer_designations(values, *, dual=False):
+    if type(values) is not list or not 1 <= len(values) <= (2 if dual else 1):
+        _invalid()
+    checked = tuple(validate_reviewer_designation(value, _parent=dual and type(value) is dict
+        and value.get("schema_version") == PARENT_DESIGNATION_SCHEMA) for value in values)
+    if len({value["privilege"] for value in checked}) != len(checked):
+        _invalid()
+    return checked
+
+
+def select_reviewer_designation(values, privilege):
+    if privilege not in {PRIVILEGE, PARENT_PRIVILEGE}:
+        _invalid()
+    checked = validate_reviewer_designations(list(values), dual=True)
+    matches = [value for value in checked if value["privilege"] == privilege]
+    if len(matches) != 1:
+        _invalid()
+    return matches[0]

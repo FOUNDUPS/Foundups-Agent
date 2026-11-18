@@ -6,16 +6,21 @@ Connects to Chrome (9222) or Edge (9223) debug sessions.
 """
 
 import asyncio
+import copy
 import logging
+import threading
+import time
+from contextlib import contextmanager
 import os
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from urllib.parse import urlsplit
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, TimeoutException
 
 from .channel_config import get_channel_config, CHANNELS
 from .dom_automation import YouTubeStudioDOM
@@ -25,7 +30,6 @@ from .schedule_dba import record_schedule_outcome
 from .index_weave import (
     load_index_json,
     save_index_json,
-    build_digital_twin_index_block,
     update_index_after_schedule,
     build_index_metadata_context,
 )
@@ -34,6 +38,7 @@ from .content_generator import (
     get_standard_description,
     generate_description_with_context,
 )
+from modules.infrastructure.foundups_selenium.src.youtube_verification import VerificationHandoff
 
 # Content-channel mismatch gate (WSP 97 truth signaling)
 try:
@@ -44,6 +49,25 @@ except ImportError:
     classify_content = None
 
 logger = logging.getLogger(__name__)
+_ACTIVE_SCHEDULE_CHANNELS = set()
+_ACTIVE_SCHEDULE_GUARD = threading.Lock()
+
+
+@contextmanager
+def scheduling_channel_lock(channel_id):
+    """One native-channel owner across CLI, browser threads and storage roots."""
+    from .schedule_tracker import channel_calendar_lock
+    with _ACTIVE_SCHEDULE_GUARD:
+        if channel_id in _ACTIVE_SCHEDULE_CHANNELS:
+            raise TimeoutError('scheduling_channel_busy')
+        _ACTIVE_SCHEDULE_CHANNELS.add(channel_id)
+    try:
+        with channel_calendar_lock(channel_id):
+            yield
+    finally:
+        with _ACTIVE_SCHEDULE_GUARD:
+            _ACTIVE_SCHEDULE_CHANNELS.discard(channel_id)
+SELECTED_BATCH_MAX_PAGES = 100
 
 
 class YouTubeShortsScheduler:
@@ -87,7 +111,7 @@ class YouTubeShortsScheduler:
         # Canonical US-Eastern peak slots (morning/lunch/evening), env-configurable
         # via SHORTS_PEAK_SLOTS_ET. Defined ONCE in peak_window; these are ET and
         # get converted to the channel's Studio-account tz at allocation time.
-        self.time_slots = get_peak_slots_et()
+        self.time_slots = get_peak_slots_et(self.channel_id)
         # Channel Studio-account timezone (registry field). Used to convert the
         # ET peak slot to the local wall-clock the bare-time typer must enter.
         self.channel_tz = self.config.get("timezone")
@@ -95,7 +119,7 @@ class YouTubeShortsScheduler:
         self.dry_run = dry_run
 
         # Initialize tracker
-        self.tracker = ScheduleTracker(self.channel_id, storage_dir)
+        self.tracker = ScheduleTracker(self.channel_id, storage_dir, persist=not dry_run)
 
         # Driver and DOM (initialized on connect)
         self.driver = None
@@ -173,7 +197,7 @@ class YouTubeShortsScheduler:
                 logger.info(f"[SCHEDULER] Connected to Chrome on port {self.chrome_port} (with retry)")
 
             # Initialize DOM automation layer
-            self.dom = YouTubeStudioDOM(self.driver)
+            self.dom = YouTubeStudioDOM(self.driver, capture_diagnostics=not self.dry_run)
             return True
 
         except WebDriverException as e:
@@ -253,6 +277,11 @@ class YouTubeShortsScheduler:
         Returns:
             True if connection is healthy (or reconnected successfully)
         """
+        if getattr(self, 'request_driver', None) is not None:
+            self._guard_stream_request()
+            return bool(self.dom and self.driver is self.request_driver
+                        and self.dom.driver is self.request_driver
+                        and self.dom.check_driver_health(thorough=True))
         if not self.driver or not self.dom:
             logger.warning("[SCHEDULER] No driver/DOM - attempting reconnect")
             return self.reconnect_browser()
@@ -264,14 +293,106 @@ class YouTubeShortsScheduler:
 
         return True
 
+    def _guard_stream_request(self, session=None):
+        """Revalidate frozen scope, cancellation and driver without reconnecting."""
+        from .video_policy import PreSaveAuditBlocked
+        stop = getattr(self, 'stop_event', None)
+        if stop is not None and stop.is_set():
+            raise PreSaveAuditBlocked('stream_schedule_stopped')
+        request = getattr(self, 'stream_schedule_request', None)
+        if request is None:
+            return
+        from modules.communication.livechat.src.automation_gates import _env_truthy, stop_active
+        if (not _env_truthy('YT_SHORTS_SCHEDULING_ENABLED', 'true')
+                or not _env_truthy('YT_AUTOMATION_ENABLED', 'true') or stop_active('scheduling')):
+            raise PreSaveAuditBlocked('stream_schedule_gate_closed')
+        if (request.get('channel_id') != self.channel_id
+                or not isinstance(request.get('expires_at_unix'), (int, float))
+                or time.time() >= request['expires_at_unix']
+                or not isinstance(request.get('stream_title'), str)
+                or not request['stream_title']
+                or getattr(self, 'request_driver', None) is not self.driver
+                or not self.dom or self.dom.driver is not self.driver):
+            raise PreSaveAuditBlocked('stream_schedule_scope_expired_or_changed')
+        allowed_ids = request.get('video_ids', [])
+        if request.get('first_test_only') is True:
+            allowed_ids = allowed_ids[:1]
+            if session is not None and session.allow_metadata is not False:
+                raise PreSaveAuditBlocked('stream_first_test_requires_metadata_preservation')
+        if session is not None and (session.channel_id != self.channel_id
+                or session.original.get('title') != request['stream_title']
+                or session.video_id == request.get('parent_video_id')
+                or session.video_id not in allowed_ids):
+            raise PreSaveAuditBlocked('stream_schedule_child_changed')
+
     # =========================================
     # SCHEDULING WORKFLOW
     # =========================================
 
+    def _navigate_stream_unlisted(self):
+        """Use the existing filtered URL on the frozen request's browser only."""
+        self._guard_stream_request()
+        try:
+            self.dom.navigate_to_shorts(self.channel_id, visibility='UNLISTED')
+        except VerificationHandoff:
+            raise
+        except TimeoutException:
+            # The existing helper waits for a row. A truly empty list has none;
+            # let the strict inventory reader evaluate its explicit empty state.
+            logger.info('[SCHEDULER] Row wait elapsed; inventory still requires qualified readback')
+        self._guard_stream_request()
+
+    def discover_stream_title_batch(self, title):
+        """Read all exact-title Unlisted Shorts; caller owns browser/stream binding."""
+        from .schedule_inventory import collect_unlisted_title_inventory
+        self._navigate_stream_unlisted()
+        return collect_unlisted_title_inventory(self.dom, self.channel_id, title)
+
     async def run_scheduling_cycle(
+        self, max_videos: int = 0, update_metadata: bool = True,
+        video_ids: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """Schedule a batch, or preview it without retaining simulated reservations."""
+        if type(max_videos) is not int or max_videos < 0:
+            raise ValueError('max_videos must be a nonnegative integer')
+        original_tracker = self.tracker
+        if not self.dry_run:
+            with scheduling_channel_lock(self.channel_id):
+                from .schedule_tracker import TRACKER_DIR
+                if not self.tracker.persist or self.tracker.storage_dir.resolve() != TRACKER_DIR.resolve():
+                    raise ValueError('live_calendar_requires_canonical_persistence')
+                self._guard_stream_request()
+                self.tracker.calendar_ready = False
+                try:
+                    self.tracker._load()
+                    if not await self._sync_scheduled_videos():
+                        return {'channel_id': self.channel_id, 'status': 'blocked',
+                                'reason': 'calendar_inventory_or_legacy_claim_unresolved',
+                                'total_scheduled': 0, 'scheduled': [], 'submitted_ids': [],
+                                'batch_complete': False, 'errors': [{'error': 'calendar_not_qualified'}]}
+                    self.dom.begin_policy_cycle()
+                    result = await self._run_scheduling_cycle(max_videos, update_metadata, video_ids)
+                    result['status'] = 'unknown' if result.get('reserved_ids') or result.get('submitted_ids') else 'blocked'
+                    result['saved_state_verified'] = False
+                    return result
+                finally:
+                    self.tracker.calendar_ready = False
+                    if self.dom:
+                        self.dom._policy_before_schedule_submit = None
+                        self.dom._policy_on_schedule_submitting = None
+        if self.dry_run:
+            self.tracker = copy.deepcopy(original_tracker)
+            self.tracker.persist = False
+        try:
+            return await self._run_scheduling_cycle(max_videos, update_metadata, video_ids)
+        finally:
+            self.tracker = original_tracker
+
+    async def _run_scheduling_cycle(
         self,
         max_videos: int = 0,
         update_metadata: bool = True,
+        video_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """
         Run a full scheduling cycle.
@@ -285,10 +406,15 @@ class YouTubeShortsScheduler:
         Args:
             max_videos: Maximum videos to process (0 = unlimited, process all)
             update_metadata: Whether to update titles/descriptions
+            video_ids: Exact recording batch in publishing order; None processes the pending queue.
 
         Returns:
             Summary dict with scheduled_count, errors, etc.
         """
+        if video_ids is not None:
+            video_ids = list(dict.fromkeys(video_ids))
+            if not video_ids:
+                raise ValueError("An explicit recording batch must contain video IDs")
         if not self.driver:
             raise RuntimeError("Not connected to browser. Call connect_browser() first.")
 
@@ -306,6 +432,9 @@ class YouTubeShortsScheduler:
             "scheduled": [],
             "errors": [],
             "skipped": [],
+            "attempted_video_ids": [],
+            "submitted_ids": [],
+            "reserved_ids": [],
         }
 
         # Pre-cycle schedule report
@@ -328,16 +457,28 @@ class YouTubeShortsScheduler:
             # the available slots first, then PRIVATE continues into whatever
             # remains (no per-channel budget doubling).
             for target in visibility_targets:
+                remaining = max_videos - len(results["attempted_video_ids"]) if max_videos else 0
+                if max_videos and remaining <= 0:
+                    break
+                selection = {}
+                if video_ids is not None:
+                    pending = [v for v in video_ids if v not in results['attempted_video_ids']]
+                    if not pending:
+                        break
+                    selection['video_ids'] = pending
                 aborted = await self._run_visibility_pass(
                     target=target,
-                    max_videos=max_videos,
+                    max_videos=remaining,
                     update_metadata=update_metadata,
                     results=results,
+                    **selection,
                 )
                 if aborted:
                     # Navigation/filter failure for this target — stop the cycle.
                     break
 
+        except VerificationHandoff:
+            raise
         except Exception as e:
             logger.error(f"[SCHEDULER] Cycle error: {e}")
             results["errors"].append({"error": str(e)})
@@ -348,6 +489,12 @@ class YouTubeShortsScheduler:
         results["total_errors"] = len(results["errors"])
         results["total_skipped"] = len(results["skipped"])
         results["cycle_seconds"] = round(cycle_elapsed, 1)
+        if video_ids is not None:
+            completed = {row['video_id'] for row in results['scheduled']}
+            results['requested_video_ids'] = video_ids
+            results['unresolved_video_ids'] = [vid for vid in video_ids if vid not in completed]
+            results['batch_complete'] = not results['unresolved_video_ids']
+            results['preview_scope'] = 'selected_batch' if self.dry_run else None
 
         # End-of-cycle report
         n_ok = results["total_scheduled"]
@@ -375,19 +522,29 @@ class YouTubeShortsScheduler:
 
         # Post-cycle audit: verify scheduled state matches YouTube reality
         # Enable with YT_SCHEDULER_POST_AUDIT=true (default: false — opt-in)
-        if os.getenv("YT_SCHEDULER_POST_AUDIT", "false").lower() in ("1", "true", "yes"):
+        if (not self.dry_run and not getattr(self, 'stream_schedule_request', None)
+                and not results['submitted_ids']
+                and os.getenv("YT_SCHEDULER_POST_AUDIT", "false").lower() in ("1", "true", "yes")):
             try:
                 from .schedule_auditor import ScheduleAuditor
                 auditor = ScheduleAuditor(self.channel_key, self.driver)
                 auto_heal = os.getenv("YT_SCHEDULER_AUDIT_AUTO_HEAL", "true").lower() in ("1", "true", "yes")
+                # A bounded clip request cannot authorize channel-wide repairs.
+                if video_ids is not None:
+                    auto_heal = False
                 audit_report = auditor.run_audit(auto_heal=auto_heal)
                 results["audit"] = {
-                    "healthy": audit_report.get("healthy", False),
+                    "status": audit_report.get("status", "failed"),
+                    "healthy": audit_report.get("healthy"),
+                    "total_scheduled": audit_report.get("total_scheduled"),
+                    "observed_scheduled_count": audit_report.get("observed_scheduled_count", 0),
                     "false_positives": len(audit_report.get("false_positives", [])),
                     "time_collisions": len(audit_report.get("time_collisions", [])),
                     "healed": len(audit_report.get("healed", [])),
                 }
-                if not audit_report.get("healthy"):
+                if audit_report.get("status") != "complete":
+                    logger.warning("[SCHEDULER] Post-cycle audit incomplete; total and calendar health unknown")
+                elif audit_report.get("healthy") is False:
                     logger.warning(
                         f"[SCHEDULER] Post-cycle audit found issues: "
                         f"{len(audit_report.get('false_positives', []))} false positives, "
@@ -432,6 +589,8 @@ class YouTubeShortsScheduler:
         Scheduling a PRIVATE video uses the PUBLISH_FROM_PRIVATE radio, which
         PUBLISHES it PUBLIC at the slot — hence default-OFF and deliberate opt-in.
         """
+        if getattr(self, 'stream_schedule_request', None) is not None:
+            return ['UNLISTED']
         if os.getenv("YT_SCHEDULE_INCLUDE_PRIVATE", "0") == "1":
             logger.warning(
                 "[SCHEDULER] YT_SCHEDULE_INCLUDE_PRIVATE=1 — PRIVATE pass ENABLED. "
@@ -503,12 +662,35 @@ class YouTubeShortsScheduler:
         logger.info(f"[SCHEDULER] Private scrape: {len(videos)} videos under PRIVATE filter")
         return videos
 
+    async def _collect_selected_rows(self, target, video_ids, results):
+        """Reuse Studio pagination to bind an exact batch before any edits."""
+        wanted = set(video_ids)
+        found = {}
+        seen_pages = set()
+        for _ in range(SELECTED_BATCH_MAX_PAGES):
+            rows = self._scrape_videos_for_visibility(target)
+            signature = tuple(sorted(row.get('video_id', '') for row in rows))
+            if signature in seen_pages:
+                results['errors'].append({'error': 'Selected batch pagination stalled', 'visibility': target})
+                return None
+            seen_pages.add(signature)
+            for row in rows:
+                if row.get('video_id') in wanted:
+                    found[row['video_id']] = row
+            if wanted.issubset(found) or not self.dom.has_next_page():
+                return [found[vid] for vid in video_ids if vid in found]
+            self.dom.click_next_page()
+            await asyncio.sleep(1)
+        results['errors'].append({'error': 'Selected batch pagination limit reached', 'visibility': target})
+        return None
+
     async def _run_visibility_pass(
         self,
         target: str,
         max_videos: int,
         update_metadata: bool,
         results: Dict[str, Any],
+        video_ids: Optional[List[str]] = None,
     ) -> bool:
         """Run the navigate + continuous batch loop for ONE visibility target.
 
@@ -527,40 +709,56 @@ class YouTubeShortsScheduler:
 
         # Step 1: Navigate to the target-visibility Shorts (with fallback).
         logger.info(f"[SCHEDULER] Navigating to {target} Shorts for {self.channel_name}")
-        if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
-            logger.error(f"[SCHEDULER] Failed to navigate to {target} Shorts")
-            results["errors"].append({"error": f"Navigation to {target} Shorts failed"})
-            return True
-        filter_state = self.dom.read_visibility_filter_state()
-        logger.info(
-            f"[SCHEDULER] List filter state: detected={filter_state.get('detected')} "
-            f"chips={filter_state.get('chip_texts')}"
-        )
-        if filter_state.get("detected") == "SCHEDULED":
-            logger.error(
-                f"[SCHEDULER] Aborting {target} pass — Shorts list is on "
-                f"Scheduled/Has schedule, not {target}"
+        self._guard_stream_request()
+        selected_rows = None
+        request = getattr(self, 'stream_schedule_request', None)
+        if request is not None:
+            if target != 'UNLISTED':
+                from .video_policy import PreSaveAuditBlocked
+                raise PreSaveAuditBlocked('stream_schedule_visibility_changed')
+            fresh = self.discover_stream_title_batch(request['stream_title'])
+            if (fresh.get('complete') is not True or not video_ids
+                    or not set(video_ids) <= set(fresh['video_ids'])
+                    or not set(video_ids) <= set(request['video_ids'])):
+                results['errors'].append({'error': 'Frozen selection not completely observed'})
+                return True
+            # Fresh discovery may include newer matching clips. Only the frozen
+            # selected IDs enter this pass; exact detail identity is checked later.
+            selected_rows = [{'video_id': vid, 'title': request['stream_title']} for vid in video_ids]
+        else:
+            if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
+                logger.error(f"[SCHEDULER] Failed to navigate to {target} Shorts")
+                results["errors"].append({"error": f"Navigation to {target} Shorts failed"})
+                return True
+            filter_state = self.dom.read_visibility_filter_state()
+            logger.info(
+                f"[SCHEDULER] List filter state: detected={filter_state.get('detected')} "
+                f"chips={filter_state.get('chip_texts')}"
             )
-            results["errors"].append({"error": "Wrong visibility filter: SCHEDULED"})
-            return True
-        await asyncio.sleep(2)  # Wait for page load
+            if filter_state.get("detected") == "SCHEDULED":
+                logger.error(f"[SCHEDULER] Aborting {target} pass — list is Scheduled")
+                results["errors"].append({"error": "Wrong visibility filter: SCHEDULED"})
+                return True
+            await asyncio.sleep(2)
+            self.dom.set_page_size(50)
+            await asyncio.sleep(1)
 
-        # Step 1.5: Set page size to 50 for larger batches (2026-01-28)
-        self.dom.set_page_size(50)
-        await asyncio.sleep(1)
+            if video_ids is not None:
+                selected_rows = await self._collect_selected_rows(target, video_ids, results)
+                if selected_rows is None:
+                    return True
 
         # Step 2-4: CONTINUOUS PROCESSING LOOP (2026-01-28: Added for true "until complete")
         # Process batches of videos until none remain under this filter.
         batch_num = 0
         total_processed = 0
-        sync_enabled = os.getenv("YT_SCHEDULER_DO_SYNC", "false").lower() in ("1", "true", "yes")
 
         while True:
                 batch_num += 1
                 logger.info(f"[SCHEDULER] === BATCH {batch_num} ===")
 
                 # Step 2: Get videos for this batch under the active filter.
-                unlisted = self._scrape_videos_for_visibility(target)
+                unlisted = selected_rows if selected_rows is not None else self._scrape_videos_for_visibility(target)
                 logger.info(f"[SCHEDULER] Found {len(unlisted)} {target} videos in batch {batch_num}")
 
                 if not unlisted:
@@ -571,33 +769,34 @@ class YouTubeShortsScheduler:
                     logger.info(f"[SCHEDULER] No more {target} videos - continuous processing complete")
                     break
 
-                # Step 3: Sync existing scheduled videos (disabled by default)
-                if batch_num == 1:  # Only sync on first batch
-                    await self._sync_scheduled_videos()
-                    if sync_enabled:
-                        logger.info(f"[SCHEDULER] Returning to {target} Shorts after sync...")
-                        if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
-                            logger.warning(f"[SCHEDULER] Could not return to {target} Shorts, continuing with cached list")
-                        await asyncio.sleep(2)
-                        # Re-fetch after returning
-                        unlisted = self._scrape_videos_for_visibility(target)
-
                 # Step 4: Process each video in this batch
                 processed = 0
                 slots_exhausted = False  # 2026-01-29: Track if slots ran out (fixes infinite loop bug)
                 # max_videos=0 means unlimited (process all)
-                videos_to_process = unlisted if max_videos == 0 else unlisted[:max_videos]
+                videos_to_process = unlisted if max_videos == 0 else unlisted[:max_videos - total_processed]
                 total_to_process = len(videos_to_process)
                 logger.info(f"[SCHEDULER] Processing {total_to_process} videos (max_videos={max_videos}, batch={batch_num})")
 
                 for video in videos_to_process:
+                    self._guard_stream_request()
                     if max_videos > 0 and processed >= max_videos:
                         break
 
                     video_id = video.get("video_id")
                     original_title = video.get("title", "")
+                    if not self.dry_run:
+                        from .video_policy import scheduling_policy, VideoPolicyBlocked
+                        try:
+                            scheduling_policy(self.channel_id, video_id,
+                                              getattr(self.dom, "_policy_cycle_attempts", 0))
+                        except VideoPolicyBlocked:
+                            results["skipped"].append({"video_id": video_id, "reason": "operator_policy_blocked"})
+                            return True
 
                     # RESUME CAPABILITY: Skip already-scheduled videos
+                    if video_id in self.tracker.reservations:
+                        results['skipped'].append({'video_id': video_id, 'reason': 'schedule_outcome_unknown'})
+                        continue
                     if video_id and self.tracker.is_video_scheduled(video_id):
                         logger.info(f"[SCHEDULER] Skipping (already scheduled): {video_id}")
                         results["skipped"].append({
@@ -665,6 +864,7 @@ class YouTubeShortsScheduler:
                         f"batch={batch_num} | {video_id} | {original_title[:50]}"
                     )
 
+                    results['attempted_video_ids'].append(video_id)
                     try:
                         # Get next available slot
                         slot = self.tracker.get_next_available_slot(
@@ -705,10 +905,19 @@ class YouTubeShortsScheduler:
                             continue
 
                         # Navigate to video edit page
+                        self._guard_stream_request()
                         self.dom.navigate_to_video(video_id)
                         await asyncio.sleep(1.5)
 
+                        if video_ids is not None:
+                            page = urlsplit(self.driver.current_url)
+                            if (page.scheme != 'https' or page.netloc != 'studio.youtube.com'
+                                    or page.path != f'/video/{video_id}/edit'):
+                                raise ValueError('Selected clip edit page identity mismatch')
+
                         edit_vis = self.dom.read_edit_page_visibility()
+                        if video_ids is not None and edit_vis != target.lower():
+                            raise ValueError('Selected clip visibility changed or is unverified')
                         if edit_vis == "scheduled":
                             logger.warning(
                                 f"[SCHEDULER] SKIP {video_id}: edit page visibility is Scheduled "
@@ -738,90 +947,46 @@ class YouTubeShortsScheduler:
                             continue
 
                         # Update metadata if requested
+                        self.dom.begin_policy_edit(self.channel_id, video_id, allow_metadata=update_metadata)
+                        self._guard_stream_request(self.dom._policy_edit())
+                        self.dom._policy_timezone = self.channel_tz
+                        self.dom._policy_calendar_required = True
+                        def reserve_before_submit(session):
+                            self._guard_stream_request(session)
+                            self.tracker.reserve_slot(session.video_id, date_str, time_str, self.channel_tz)
+                            # Reservation precedes the existing durable Save claim/effect.
+                            # Any failure from here remains uncertain, never retryable.
+                            results['reserved_ids'].append(session.video_id)
+                        self.dom._policy_before_schedule_submit = reserve_before_submit
+                        self.dom._policy_on_schedule_submitting = lambda session: results['submitted_ids'].append(session.video_id)
                         if update_metadata:
-                            await self._update_video_metadata(
+                            metadata_updated = await self._update_video_metadata(
                                 video_id=video_id,
                                 original_title=original_title,
                                 date_str=date_str,
                                 time_str=time_str,
                             )
+                            if video_ids is not None and metadata_updated is not True:
+                                raise ValueError('Selected clip metadata update failed')
 
                         # Schedule the video
+                        self._guard_stream_request(self.dom._policy_edit())
                         success = self.dom.schedule_video(date_str, time_str)
 
-                        if success:
-                            self.tracker.increment(date_str, video_id)
-
-                            # SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1: per-private-video
-                            # OUTWARD-FACING breadcrumb. Scheduling a PRIVATE Short via
-                            # PUBLISH_FROM_PRIVATE PUBLISHES it PUBLIC at the slot, so 012
-                            # gets one clear log line per private->public action to review.
-                            if is_private:
-                                logger.warning(
-                                    f"[PRIVATE->PUBLIC] {video_id} scheduled to publish "
-                                    f"{date_str} {time_str}"
-                                )
-
-                            # Update local index JSON with scheduling + description sync (best-effort)
-                            try:
-                                idx = load_index_json(channel_key=self.channel_key, video_id=video_id)
-                                if isinstance(idx, dict):
-                                    block = build_digital_twin_index_block(
-                                        channel_key=self.channel_key,
-                                        video_id=video_id,
-                                        index_json=idx,
-                                    )
-                                    idx2 = update_index_after_schedule(
-                                        index_json=idx,
-                                        channel_key=self.channel_key,
-                                        video_id=video_id,
-                                        date_str=date_str,
-                                        time_str=time_str,
-                                        scheduled_by="0102",
-                                        description_index_block=block,
-                                    )
-                                    save_index_json(channel_key=self.channel_key, video_id=video_id, data=idx2)
-                            except Exception as exc:
-                                logger.debug("[SCHEDULER] Index JSON update skipped: %s", exc)
-
-                            # Record into DBA (PatternMemory) for 0102 recall.
-                            record_schedule_outcome(
-                                channel_id=self.channel_id,
-                                video_id=video_id,
-                                date_str=date_str,
-                                time_str=time_str,
-                                mode="schedule",
-                                success=True,
-                                agent="selenium",
-                                details={"channel_key": self.channel_key},
-                            )
-                            video_elapsed = time_module.time() - video_start
-                            n_done = len(results["scheduled"]) + 1
-                            results["scheduled"].append({
-                                "video_id": video_id,
-                                "date": date_str,
-                                "time": time_str,
-                                "elapsed_sec": round(video_elapsed, 1),
+                        if video_id in results['submitted_ids']:
+                            results.setdefault('submission_attempts', []).append({
+                                'video_id': video_id, 'date': date_str, 'time': time_str,
+                                'outcome': 'unknown', 'workflow_returned': bool(success),
                             })
-                            logger.info(
-                                f"[SCHEDULER] ✅ #{n_done} SCHEDULED: {video_id} → "
-                                f"{date_str} @ {time_str} ({video_elapsed:.1f}s)"
-                            )
+                            logger.info('[SCHEDULER] Schedule submitted; independent readback required')
+                            # A clean editor permits the next distinct clip, but does not
+                            # prove this schedule persisted. Its occupied slot stays reserved.
+                            if not self.dom.schedule_editor_clean_after_submit():
+                                return True
                         else:
-                            record_schedule_outcome(
-                                channel_id=self.channel_id,
-                                video_id=video_id,
-                                date_str=date_str,
-                                time_str=time_str,
-                                mode="schedule",
-                                success=False,
-                                agent="selenium",
-                                details={"channel_key": self.channel_key, "error": "Schedule failed"},
-                            )
-                            results["errors"].append({
-                                "video_id": video_id,
-                                "error": "Schedule failed",
-                            })
+                            results['errors'].append({'video_id': video_id,
+                                                      'error': 'schedule_not_submitted'})
+                            return True
 
                         processed += 1
                         total_processed += 1
@@ -829,15 +994,25 @@ class YouTubeShortsScheduler:
                         # Human-like delay between videos
                         await asyncio.sleep(self.dom.human_delay(3.0, 1.0))
 
+                    except VerificationHandoff:
+                        raise
                     except Exception as e:
                         logger.error(f"[SCHEDULER] Error processing {video_id}: {e}")
                         results["errors"].append({
                             "video_id": video_id,
                             "error": str(e),
                         })
+                        if not self.dry_run:
+                            # Preserve this editor/draft and all unknown claims.
+                            return True
 
                 # End of batch - navigate back to unlisted list for next batch (2026-01-28)
                 logger.info(f"[SCHEDULER] Batch {batch_num} complete: {processed} videos processed")
+
+                # An explicit recording batch is a fixed snapshot, not an open
+                # queue. Never pull in unrelated uploads or retry partial writes.
+                if selected_rows is not None:
+                    break
 
                 # 2026-01-31: Detect stale-unlisted videos (tracker says scheduled, YouTube says unlisted).
                 # If ALL videos in a batch were skipped as "already scheduled" but YouTube still
@@ -899,6 +1074,12 @@ class YouTubeShortsScheduler:
                     logger.info(f"[SCHEDULER] Reached max_videos limit ({max_videos}), stopping")
                     break
 
+                # Preview leaves rows unchanged. Re-reading them would mistake
+                # simulated reservations for stale tracker entries and retry.
+                if self.dry_run:
+                    results["preview_scope"] = "first_visible_batch_per_visibility"
+                    break
+
                 # Navigate back to the target-visibility Shorts list for next batch
                 logger.info(f"[SCHEDULER] Navigating back to {target} Shorts for next batch...")
                 if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
@@ -911,50 +1092,31 @@ class YouTubeShortsScheduler:
         return False
 
     async def _sync_scheduled_videos(self):
-        """Sync tracker with actual YouTube scheduled videos.
-
-        NOTE: "Scheduled" isn't a filterable visibility option in YouTube Studio.
-        The local tracker with persistence is sufficient for resume capability.
-        This sync is now opt-in only (default skip) since it was causing errors.
-
-        Can be enabled with YT_SCHEDULER_DO_SYNC=true if SCHEDULED filter becomes available.
-        """
-        import os
-
-        # Sync is disabled by default - "Scheduled" isn't a real filter option
-        # Local tracker persistence is sufficient for resume capability
-        if os.getenv("YT_SCHEDULER_DO_SYNC", "false").lower() not in ("1", "true", "yes"):
-            logger.debug("[SCHEDULER] Sync skipped (local tracker sufficient for resume)")
-            return
-
+        """Mandatory full calendar read before live allocation, selected or not."""
         try:
-            # Quick timeout for sync navigation - don't block main scheduling
-            logger.info("[SCHEDULER] Syncing with YouTube schedule (experimental)...")
+            from .content_page_scheduler import ContentPageScheduler
+            from .schedule_inventory import qualified_inventory
+            from modules.communication.livechat.src.operator_command_queue import get_unresolved_scheduling_claims
 
-            # Navigate to scheduled filter (with fallback for robustness)
-            if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, "SCHEDULED"):
-                logger.debug("[SCHEDULER] SCHEDULED filter not available, using local tracker")
-                return
-            await asyncio.sleep(2)
-
-            # Get all scheduled videos (paginate if needed)
-            all_scheduled = []
-            while True:
-                scheduled = self.dom.get_scheduled_videos()
-                all_scheduled.extend(scheduled)
-
-                if self.dom.has_next_page():
-                    self.dom.click_next_page()
-                    await asyncio.sleep(1)
-                else:
-                    break
-
-            # Sync to tracker
-            self.tracker.sync_from_youtube(all_scheduled)
-            logger.info(f"[SCHEDULER] Synced {len(all_scheduled)} scheduled videos")
-
+            if ContentPageScheduler(self.driver, self.dom).navigate_to_scheduled(self.channel_key) is not True:
+                return False
+            inventory = self.dom.read_scheduled_inventory(self.channel_id)
+            if not qualified_inventory(inventory, self.channel_id):
+                logger.warning("[SCHEDULER] Scheduled inventory incomplete; tracker sync refused")
+                return False
+            covered = {v['video_id'] for v in inventory['videos']} | set(self.tracker.reservations)
+            if any(c['video_id'] not in covered for c in get_unresolved_scheduling_claims(self.channel_id)):
+                logger.warning('[SCHEDULER] Legacy unknown schedule has no recoverable occupied slot')
+                return False
+            if not self.tracker.sync_from_youtube(inventory['videos'], inventory=inventory):
+                return False
+            self.tracker.bind_calendar_timezone(self.channel_tz)
+            return True
+        except VerificationHandoff:
+            raise
         except Exception as e:
-            logger.debug(f"[SCHEDULER] Sync skipped: {e}")
+            logger.warning('[SCHEDULER] Calendar preflight refused: %s', type(e).__name__)
+            return False
 
     async def _update_video_metadata(
         self,
@@ -964,179 +1126,36 @@ class YouTubeShortsScheduler:
         date_str: str,
         time_str: str,
     ):
-        """Update video title and description (optionally weave index).
-
-        CHANNEL-AWARE (2026-02-22):
-        - FFCPLN channels (move2japan, antifafm): Generate clickbait titles
-        - Non-FFCPLN channels (foundups, undaodu): PRESERVE original title
-        """
+        """Apply matched analyzer evidence, otherwise preserve existing metadata."""
         try:
-            # Get description template for this channel
-            description_template = self.config.get("description_template", "ffcpln")
-
-            # CHANNEL-AWARE TITLE HANDLING
-            # FFCPLN channels: Generate clickbait titles (anti-fascist music promo)
-            # Non-FFCPLN channels: Generate channel-appropriate titles (don't just preserve bad titles)
-
-            def _is_bad_title(title: str) -> bool:
-                """Check if title is just a timestamp or placeholder."""
-                if not title:
-                    return True
-                title = title.strip()
-                # Match timestamp patterns like "0:50", "1:23", "12:34"
-                import re
-                if re.match(r"^\d{1,2}:\d{2}$", title):
-                    return True
-                # Match "Short #abc123" placeholder
-                if title.lower().startswith("short #"):
-                    return True
-                # Too short to be meaningful
-                if len(title) < 5:
-                    return True
+            session = self.dom._policy_edit()
+            if session.video_id != video_id or session.channel_id != self.channel_id:
                 return False
-
-            if description_template == "ffcpln":
-                # FFCPLN: Use clickbait title generation
-                new_title = generate_clickbait_title(original_title=original_title)
-                logger.info(f"[SCHEDULER] [FFCPLN] Generated clickbait title for {self.channel_key}")
-            elif description_template == "foundups":
-                # FOUNDUPS: Startup/pAVS/OpenClaw content - distinct branding
-                if _is_bad_title(original_title):
-                    import random
-                    foundups_titles = [
-                        "🚀 Building the Future with AI Agents #FoundUps #pAVS",
-                        "💡 pAVS: Peer-to-Peer Autonomous Ventures #FoundUps",
-                        "⚡ OpenClaw: Where AI Meets Entrepreneurship #FoundUps",
-                        "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
-                        "🧠 AI + Humans = Better Startups #FoundUps #OpenClaw",
-                        "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
-                        "✨ Innovation Never Sleeps #FoundUps #Startup #AI",
-                        "🌟 From Idea to Launch with AI #FoundUps #pAVS",
-                    ]
-                    new_title = random.choice(foundups_titles)
-                    logger.info(f"[SCHEDULER] [FOUNDUPS] Generated title (original was: '{original_title}')")
-                else:
-                    new_title = original_title.strip()
-                    if "#" in new_title:
-                        new_title = new_title.split("#")[0].strip()
-                    new_title = f"{new_title} #FoundUps #pAVS"
-                    logger.info(f"[SCHEDULER] [FOUNDUPS] Enhanced title for {self.channel_key}")
-            elif description_template == "undaodu":
-                # UNDAODU: Mindfulness/Education/Spirituality content - distinct branding
-                if _is_bad_title(original_title):
-                    import random
-                    undaodu_titles = [
-                        "🧘 Find Your Center Today #UnDaoDu #Mindfulness",
-                        "☯️ Wu Wei: The Art of Non-Doing #UnDaoDu #Zen",
-                        "🌸 A Moment of Peace #UnDaoDu #Meditation",
-                        "✨ Breathe. Be. Become. #UnDaoDu #Mindful",
-                        "🙏 Ancient Wisdom for Modern Times #UnDaoDu",
-                        "💫 The Path to Inner Balance #UnDaoDu #Zen",
-                        "🌿 Mindful Moments #UnDaoDu #Meditation #Peace",
-                        "☮️ Finding Calm in Chaos #UnDaoDu #Mindfulness",
-                    ]
-                    new_title = random.choice(undaodu_titles)
-                    logger.info(f"[SCHEDULER] [UNDAODU] Generated title (original was: '{original_title}')")
-                else:
-                    new_title = original_title.strip()
-                    if "#" in new_title:
-                        new_title = new_title.split("#")[0].strip()
-                    new_title = f"{new_title} #UnDaoDu #Mindfulness"
-                    logger.info(f"[SCHEDULER] [UNDAODU] Enhanced title for {self.channel_key}")
-            else:
-                # Other channels: Just clean up
-                new_title = original_title.strip() if original_title else f"Short #{video_id[:8]}"
-                if "#" in new_title:
-                    new_title = new_title.split("#")[0].strip()
-                logger.info(f"[SCHEDULER] [{description_template.upper()}] Preserved title for {self.channel_key}")
-
-            # CHANNEL-AWARE DESCRIPTION HANDLING
-            # FFCPLN: Replace with promotional description
-            # Non-FFCPLN: READ original description, APPEND template as footer
-            template_description = get_standard_description(description_template)
-
-            if description_template == "ffcpln":
-                # FFCPLN: Use template directly (replace original)
-                base_description = template_description
-                new_description = base_description
-                logger.info(f"[SCHEDULER] [FFCPLN] Using promotional description")
-            else:
-                # NON-FFCPLN: Read original description and PRESERVE it
-                original_description = None
-                try:
-                    original_description = self.dom.get_current_description()
-                    if original_description:
-                        logger.info(f"[SCHEDULER] [{description_template.upper()}] Read original: {original_description[:50]}...")
-                except Exception as read_err:
-                    logger.debug(f"[SCHEDULER] Could not read original description: {read_err}")
-
-                if original_description and original_description.strip():
-                    # ENHANCE: Original + divider + template footer
-                    base_description = f"""{original_description.strip()}
-
----
-
-{template_description}"""
-                    logger.info(f"[SCHEDULER] [{description_template.upper()}] Enhanced description (preserved original)")
-                else:
-                    # No original - use template as base
-                    base_description = template_description
-                    logger.info(f"[SCHEDULER] [{description_template.upper()}] No original found, using template")
-
-                new_description = base_description
-
-            # Optional: weave Digital Twin index into description.
-            # Default ON; disable with YT_SCHEDULER_INDEX_WEAVE_ENABLED=false
-            #
-            # PHASE 1 DECOUPLING (read-for-context only):
-            # The scheduler is a READ-ONLY CONSUMER of the video index artifact
-            # (produced OUTSIDE the scheduler by the Studio Ask / video_indexer
-            # SKILLz action, #819). It no longer OWNS/creates the artifact here:
-            # ensure_index_json / GeminiVideoAnalyzer have been removed from this
-            # read path. If the artifact is ABSENT, build_index_metadata_context
-            # returns None and we SKIP enhancement (keep base_description /
-            # original title) -- we do NOT "index now".
-            index_context = "disabled"
-            if os.getenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true").lower() in ("1", "true", "yes"):
-                inform_title = os.getenv(
-                    "YT_SCHEDULER_INDEX_INFORM_TITLE", "false"
-                ).lower() in ("1", "true", "yes")
-                enhance_description = os.getenv(
-                    "YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION", "true"
-                ).lower() in ("1", "true", "yes")
-
-                ctx = build_index_metadata_context(
-                    channel_key=self.channel_key,
-                    video_id=video_id,
-                    original_title=original_title,
-                    base_description=base_description,
-                    inform_title=inform_title,
-                    enhance_description=enhance_description,
-                )
-                if ctx is not None:
-                    # Artifact present -> apply woven title/description.
-                    index_context = "present"
-                    new_title = ctx.new_title
-                    new_description = ctx.new_description
-                else:
-                    # Artifact absent -> skip enhancement (NOT index now).
-                    index_context = "missing"
-
-            # Behaviour-neutral observability: which index-context branch ran
-            # (no response body, no transcript, no secrets).
-            logger.info("[SCHEDULER] index_context=%s for %s", index_context, video_id)
-
-            # Update via DOM
-            self.dom.edit_title(new_title)
-            await asyncio.sleep(0.5)
-
-            self.dom.edit_description(new_description)
-            await asyncio.sleep(0.5)
-
-            logger.info(f"[SCHEDULER] Updated metadata: {new_title[:50]}...")
-
-        except Exception as e:
-            logger.warning(f"[SCHEDULER] Metadata update failed: {e}")
+            original_title = session.original["title"]
+            if os.getenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true").lower() not in ("1", "true", "yes"):
+                logger.info("[SCHEDULER] index_context=disabled for %s", video_id)
+                return True  # Metadata preservation, not template substitution.
+            original_description = session.original["description"]
+            if not isinstance(original_description, str):
+                return False  # Cannot safely preserve an unread description.
+            ctx = build_index_metadata_context(
+                channel_key=self.channel_key, video_id=video_id,
+                original_title=original_title, base_description=original_description,
+                inform_title=os.getenv("YT_SCHEDULER_INDEX_INFORM_TITLE", "false").lower() in ("1", "true", "yes"),
+                enhance_description=os.getenv("YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION", "true").lower() in ("1", "true", "yes"),
+            )
+            if ctx is None:
+                logger.info("[SCHEDULER] index_context=missing_or_ineligible for %s", video_id)
+                return True
+            logger.info("[SCHEDULER] index_context=present for %s", video_id)
+            if ctx.new_title != original_title:
+                self.dom.edit_title(ctx.new_title)
+            if ctx.new_description != original_description:
+                self.dom.edit_description(ctx.new_description)
+            return True
+        except Exception as exc:
+            logger.warning("[SCHEDULER] Metadata update failed: %s", exc)
+            return False
 
     # =========================================
     # UTILITY METHODS
@@ -1157,7 +1176,7 @@ class YouTubeShortsScheduler:
             List of {date, time, slot_number} dicts
         """
         slots = []
-        temp_tracker = ScheduleTracker(self.channel_id)
+        temp_tracker = self.tracker.preview_copy()
 
         for i in range(count):
             slot = temp_tracker.get_next_available_slot(

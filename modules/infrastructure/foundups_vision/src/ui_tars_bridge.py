@@ -12,7 +12,9 @@ UI-TARS Desktop Location: E:/HoloIndex/models/ui-tars-1.5
 import asyncio
 import json
 import logging
+import math
 import os
+import re
 import subprocess
 import time
 from dataclasses import dataclass, field
@@ -27,6 +29,71 @@ UI_TARS_MODEL = os.getenv("UI_TARS_MODEL", "ui-tars-1.5-7b")
 UI_TARS_PATH = Path(os.getenv("UI_TARS_PATH", "E:/HoloIndex/models/ui-tars-1.5"))
 UI_TARS_TELEMETRY = UI_TARS_PATH / "telemetry"
 SCREENSHOT_DIR = Path("modules/infrastructure/foundups_vision/memory/screenshots")
+
+
+def _ui_tars_15_image_size(width: int, height: int) -> tuple[int, int]:
+    """Explicit Qwen2.5-VL image grid for the verified UI-TARS1.5 profile.
+
+    ByteDance UI-TARS README_coordinates.md specifies factor28 and these bounds.
+    Pre-resize the submitted image so the decoder need not guess a hidden grid.
+    """
+    if not all(type(v) is int and v > 0 for v in (width, height)):
+        raise ValueError("Invalid screenshot dimensions")
+    if max(width, height) / min(width, height) > 200:
+        raise ValueError("Unsupported screenshot aspect ratio")
+    factor, minimum, maximum = 28, 100 * 28 * 28, 16384 * 28 * 28
+    w, h = max(factor, round(width / factor) * factor), max(factor, round(height / factor) * factor)
+    pixels = width * height
+    if w * h > maximum:
+        ratio = math.sqrt(pixels / maximum)
+        # Avoid dropping an entire28px cell at an exact floating-point boundary.
+        w, h = math.floor(width / ratio / factor + 1e-9) * factor, math.floor(height / ratio / factor + 1e-9) * factor
+    elif w * h < minimum:
+        ratio = math.sqrt(minimum / pixels)
+        w, h = math.ceil(width * ratio / factor) * factor, math.ceil(height * ratio / factor) * factor
+    return w, h
+
+
+def _decode_ui_tars_point(output: str, *, coordinate_profile: str = "legacy_1000",
+                          image_size: Optional[tuple[int, int]] = None) -> Dict[str, Any]:
+    """Decode one literal click; never evaluate model text or guess its units."""
+    if coordinate_profile not in {"legacy_1000", "ui_tars_1_5_qwen25vl"}:
+        raise ValueError("Unknown UI-TARS coordinate profile")
+    if not isinstance(output, str) or len(output) > 4096:
+        raise ValueError("Invalid UI-TARS response")
+    actions = re.findall(r"^[ \t]*Action:[ \t]*([^\r\n]+)$", output, re.MULTILINE)
+    if len(actions) != 1:
+        raise ValueError("Expected exactly one UI-TARS Action line")
+    match = re.fullmatch(r"click\(\s*start_box\s*=\s*(['\"])(.*?)\1\s*\)", actions[0].strip())
+    if not match:
+        raise ValueError("Expected a literal UI-TARS click")
+    body = match.group(2)
+    number = r"(\d+(?:\.\d+)?)"
+    point = rf"\(\s*{number}\s*,\s*{number}\s*\)"
+    if coordinate_profile == "legacy_1000":
+        coordinates = re.fullmatch(rf"<\|box_start\|>{point}<\|box_end\|>(?:{point})?", body)
+        bounds = (1000, 1000)
+    else:
+        if (not isinstance(image_size, tuple) or len(image_size) != 2
+                or not all(type(v) is int and v > 0 and v % 28 == 0 for v in image_size)):
+            raise ValueError("UI-TARS1.5 requires explicit submitted image grid")
+        coordinates = re.fullmatch(rf"{point}(?:\s*,?\s*{point})?", body)
+        bounds = image_size
+    if not coordinates:
+        raise ValueError("Coordinates do not match the declared UI-TARS profile")
+    values = [float(v) for v in coordinates.groups() if v is not None]
+    if not all(math.isfinite(v) and 0 <= v <= bounds[i % 2] for i, v in enumerate(values)):
+        raise ValueError("UI-TARS coordinate outside submitted grid")
+    x, y = values[:2]
+    if len(values) == 4:
+        if values[2] < x or values[3] < y:
+            raise ValueError("Inverted UI-TARS box")
+        x, y = (x + values[2]) / 2, (y + values[3]) / 2
+    normalized = x / bounds[0], y / bounds[1]
+    if not all(0 <= v < 1 for v in normalized):
+        raise ValueError("UI-TARS point is outside the clickable image")
+    return {"box": (x, y), "normalized": normalized,
+            "coordinate_profile": coordinate_profile, "model_image_size": bounds}
 
 
 @dataclass
@@ -319,6 +386,11 @@ class UITarsBridge:
             img = Image.open(io.BytesIO(screenshot_bytes))
             original_screenshot_size = img.size  # Actual screenshot dimensions (with DPI scaling)
             resized_image_size = original_screenshot_size  # Will be set if resized
+            coordinate_profile = (context or {}).get("coordinate_profile", "legacy_1000")
+            if coordinate_profile not in {"legacy_1000", "ui_tars_1_5_qwen25vl"}:
+                raise ValueError("Unknown UI-TARS coordinate profile")
+            if coordinate_profile == "ui_tars_1_5_qwen25vl" and UI_TARS_MODEL != "ui-tars-1.5-7b":
+                raise ValueError("UI-TARS1.5 profile requires the verified model identifier")
 
             if img.width > 1280:
                 ratio = 1280 / img.width
@@ -327,6 +399,11 @@ class UITarsBridge:
                 logger.info(f"[UI-TARS] Resized screenshot: {original_screenshot_size} -> {resized_image_size}")
             else:
                 logger.info(f"[UI-TARS] Using original screenshot size: {original_screenshot_size}")
+
+            if coordinate_profile == "ui_tars_1_5_qwen25vl":
+                resized_image_size = _ui_tars_15_image_size(*img.size)
+                if img.size != resized_image_size:
+                    img = img.resize(resized_image_size, Image.Resampling.LANCZOS)
 
             # Convert back to PNG bytes
             img_buffer = io.BytesIO()
@@ -340,16 +417,32 @@ class UITarsBridge:
             try:
                 # Script execution is usually fast enough, but can be wrapped if driver is busy
                 viewport = await asyncio.to_thread(driver.execute_script, 
-                    "return {w: window.innerWidth || 0, h: window.innerHeight || 0, dpr: window.devicePixelRatio || 1};"
+                    "return {w: window.innerWidth || 0, h: window.innerHeight || 0, dpr: window.devicePixelRatio || 1, topLevel: window.top === window};"
                 ) or {}
                 vw = float(viewport.get("w") or 0)
                 vh = float(viewport.get("h") or 0)
-                if vw > 0 and vh > 0:
+                if coordinate_profile == "ui_tars_1_5_qwen25vl":
+                    if viewport.get("topLevel") is not True:
+                        raise ValueError("UI-TARS1.5 requires an explicitly verified top-level viewport")
+                    if (not all(isinstance(viewport.get(k), (int, float)) and not isinstance(viewport.get(k), bool) for k in ("w", "h"))
+                            or not all(math.isfinite(v) and v > 0 for v in (vw, vh))):
+                        raise ValueError("UI-TARS1.5 requires finite positive observed viewport geometry")
+                    scale_x = original_screenshot_size[0] / vw
+                    scale_y = original_screenshot_size[1] / vh
+                    if not all(math.isfinite(v) and v > 0 for v in (scale_x, scale_y)):
+                        raise ValueError("UI-TARS1.5 screenshot scale is invalid")
+                    # Each screenshot axis may round by one physical pixel.
+                    if abs(scale_x - scale_y) > 1 / vw + 1 / vh:
+                        raise ValueError("UI-TARS1.5 screenshot and viewport geometry are inconsistent")
+                    screenshot_scale = scale_x
+                elif vw > 0 and vh > 0:
                     screenshot_scale = max(0.1, min(10.0, original_screenshot_size[0] / vw))
                 logger.info(
                     f"[UI-TARS] Viewport: {int(vw)}x{int(vh)} dpr={viewport.get('dpr')} screenshot_scale={screenshot_scale:.3f}"
                 )
             except Exception as e:
+                if coordinate_profile == "ui_tars_1_5_qwen25vl":
+                    raise ValueError(f"UI-TARS1.5 cannot verify viewport geometry: {e}") from e
                 logger.debug(f"[UI-TARS] Viewport scale check failed: {e}")
 
             logger.info(f"[UI-TARS] Calling LM Studio API for: {action} - {description}")
@@ -373,6 +466,9 @@ class UITarsBridge:
             else:
                 goal = f"Find and click the {description} on the current page."
 
+            coordinate_format = "(x,y)" if coordinate_profile == "ui_tars_1_5_qwen25vl" else "<|box_start|>(x,y)<|box_end|>"
+            coordinate_rule = (f"Coordinates are absolute pixels over the provided {resized_image_size[0]}x{resized_image_size[1]} screenshot; do not normalize to1000."
+                               if coordinate_profile == "ui_tars_1_5_qwen25vl" else "Coordinates are in a 1000x1000 grid over the provided screenshot.")
             prompt = f"""You are a GUI agent operating INSIDE the current web page content.
 Do NOT click the browser address bar, tabs, extensions, or open new pages/tabs. Stay on the current page.
 
@@ -380,10 +476,10 @@ Task: {goal}
 
 Output format (exactly):
 Thought: <one short sentence>
-Action: click(start_box='<|box_start|>(x,y)<|box_end|>')
+Action: click(start_box='{coordinate_format}')
 
 Rules:
-- Coordinates are in a 1000x1000 grid over the provided screenshot.
+- {coordinate_rule}
 - Pick the center of the target.
 - If the target is not visible or you are unsure, output:
   Thought: <one short sentence>
@@ -433,76 +529,30 @@ Rules:
             thought_match = re.search(r'Thought:\s*(.+?)(?=Action:|\Z)', model_output, re.DOTALL)
             thought = thought_match.group(1).strip() if thought_match else ""
 
-            # Extract action coordinates
-            # Supports:
-            # - click(start_box='<|box_start|>(x1,y1)<|box_end|>')
-            # - click(start_box='<|box_start|>(x1,y1)<|box_end|>(x2,y2)')  (bbox)
-            coords_match = re.search(
-                r"click\(\s*start_box\s*=\s*['\"]<\|box_start\|>\((\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)\)<\|box_end\|>(?:\((\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)\))?['\"]",
-                model_output,
-            )
-
-            if not coords_match:
-                duration_ms = int((time.time() - start_time) * 1000)
-                if 'finished()' in model_output or 'call_user()' in model_output:
-                    return ActionResult(
-                        success=False,
-                        action=action,
-                        description=description,
-                        duration_ms=duration_ms,
-                        error=f"Element not found. Model response: {thought or model_output[:100]}",
-                        confidence=0.0,
-                    )
-                return ActionResult(
-                    success=False,
-                    action=action,
-                    description=description,
-                    duration_ms=duration_ms,
-                    error=f"Could not parse coordinates from model output: {model_output[:200]}",
-                    confidence=0.0,
-                )
-
-            # UI-TARS uses 1000x1000 coordinate space, but some models output pixels
-            # Handle both cases by checking if coords are > 1000
-            x1 = float(coords_match.group(1))
-            y1 = float(coords_match.group(2))
-            x2 = float(coords_match.group(3)) if coords_match.group(3) else None
-            y2 = float(coords_match.group(4)) if coords_match.group(4) else None
-
-            # If bbox provided, click center; else use point.
-            box_x = (x1 + x2) / 2.0 if x2 is not None else x1
-            box_y = (y1 + y2) / 2.0 if y2 is not None else y1
-
-            # Auto-detect if model is outputting pixels of the resized image
-            if box_x > 1000 or box_y > 1000:
-                logger.warning(f"[UI-TARS] Detected out-of-bounds coordinates ({box_x}, {box_y}). Normalizing against image size {resized_image_size} instead of 1000.")
-                normalized_x = box_x / float(resized_image_size[0])
-                normalized_y = box_y / float(resized_image_size[1])
+            # Decode using the declared contract; grammar does not imply units.
+            try:
+                point = _decode_ui_tars_point(model_output,
+                    coordinate_profile=coordinate_profile, image_size=resized_image_size)
+            except ValueError as error:
+                return ActionResult(success=False, action=action, description=description,
+                    duration_ms=int((time.time() - start_time) * 1000),
+                    error=str(error), confidence=0.0)
+            box_x, box_y = point["box"]
+            normalized_x, normalized_y = point["normalized"]
+            # One mapping for both profiles, including DPR and any image resizing.
+            resized_pixel_x, resized_pixel_y = normalized_x * resized_image_size[0], normalized_y * resized_image_size[1]
+            screenshot_pixel_x = int(normalized_x * original_screenshot_size[0])
+            screenshot_pixel_y = int(normalized_y * original_screenshot_size[1])
+            if coordinate_profile == "ui_tars_1_5_qwen25vl":
+                viewport_css_x, viewport_css_y = int(normalized_x * vw), int(normalized_y * vh)
             else:
-                normalized_x = box_x / 1000.0
-                normalized_y = box_y / 1000.0
-
-            logger.info(f"[UI-TARS] Parsed coordinates: box=({box_x:.1f},{box_y:.1f}), normalized=({normalized_x:.3f},{normalized_y:.3f})")
-            logger.info(f"[UI-TARS] Thought: {thought[:100] if thought else 'N/A'}")
-
-            # 4. Map to viewport CSS coordinates (elementFromPoint uses CSS pixels)
-            resized_pixel_x = (box_x / 1000.0) * resized_image_size[0]
-            resized_pixel_y = (box_y / 1000.0) * resized_image_size[1]
-
-            # Scale back to original screenshot dimensions
-            scale_x = original_screenshot_size[0] / resized_image_size[0]
-            scale_y = original_screenshot_size[1] / resized_image_size[1]
-
-            screenshot_pixel_x = int(resized_pixel_x * scale_x)
-            screenshot_pixel_y = int(resized_pixel_y * scale_y)
-
-            viewport_css_x = int(screenshot_pixel_x / screenshot_scale)
-            viewport_css_y = int(screenshot_pixel_y / screenshot_scale)
+                viewport_css_x = int(normalized_x * original_screenshot_size[0] / screenshot_scale)
+                viewport_css_y = int(normalized_y * original_screenshot_size[1] / screenshot_scale)
 
             # [IFRAME AWARENESS] Check if we are currently switched into a frame
             # If so, we must adjust viewport_css coordinates to be relative to the frame's internal (0,0)
             try:
-                frame_offset = driver.execute_script(
+                frame_offset = {"x": 0, "y": 0} if coordinate_profile == "ui_tars_1_5_qwen25vl" else driver.execute_script(
                     """
                     const frame = window.frameElement;
                     if (!frame) return { x: 0, y: 0 };
@@ -519,7 +569,7 @@ Rules:
                 logger.debug(f"[UI-TARS] Frame offset check skipped: {e}")
 
             logger.info("[UI-TARS] Coordinate mapping:")
-            logger.info(f"  Box (1000x1000): ({box_x:.1f}, {box_y:.1f})")
+            logger.info(f"  Box ({coordinate_profile}, grid={point['model_image_size']}): ({box_x:.1f}, {box_y:.1f})")
             logger.info(f"  Resized image ({resized_image_size}): ({resized_pixel_x:.0f}, {resized_pixel_y:.0f})")
             logger.info(f"  Screenshot px ({original_screenshot_size}): ({screenshot_pixel_x}, {screenshot_pixel_y})")
             logger.info(f"  Local CSS px: ({viewport_css_x}, {viewport_css_y})")
@@ -648,22 +698,34 @@ Rules:
             # Estimate confidence based on whether model provided thought
             confidence = 0.8 if thought and len(thought) > 20 else 0.6
 
+            execution_ok = isinstance(executed, dict) and executed.get("ok") is True
+            proposal_only = action in {"verify", "find", "diagnose"}
             result = ActionResult(
-                success=True,
+                success=execution_ok,
                 action=action,
                 description=description,
                 duration_ms=duration_ms,
-                confidence=confidence,
+                confidence=confidence if execution_ok else 0.0,
+                error=None if execution_ok else (
+                    str(executed.get("error") or "Browser did not confirm action execution")
+                    if isinstance(executed, dict) else "Browser did not confirm action execution"),
                 metadata={
                     "coordinates": {"x": normalized_x, "y": normalized_y, "box": (box_x, box_y)},
                     "viewport_css": {"x": viewport_css_x, "y": viewport_css_y},
                     "executed": executed,
+                    "action_executed": execution_ok and not proposal_only,
+                    "proposal_only": proposal_only,
                     "thought": thought,
                     "tier": "ui-tars",
+                    "coordinate_profile": coordinate_profile,
+                    "coordinate_grid_size": point["model_image_size"],
+                    "model_image_size": resized_image_size,
+                    "original_screenshot_size": original_screenshot_size,
+                    "observed_viewport": {"width": vw, "height": vh} if coordinate_profile == "ui_tars_1_5_qwen25vl" else None,
                 },
             )
 
-            self._emit_event("action_complete", result.to_dict())
+            self._emit_event("action_complete" if execution_ok else "action_failed", result.to_dict())
             return result
 
         except Exception as e:

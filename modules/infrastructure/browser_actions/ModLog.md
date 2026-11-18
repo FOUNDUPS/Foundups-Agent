@@ -1,5 +1,17 @@
 # Browser Actions - ModLog
 
+## 2026-10-29 — Make the legacy Gemini probe safe to import
+
+Repaired the malformed Step 5 block in `test_final_autonomous_gemini.py` and
+moved browser/provider imports, browser construction, navigation and heart
+clicking behind explicit `main()` invocation. All four functions stay below
+50 lines; root discovery now resolves the repository. Existing prompt and
+selector fallback order remain; the browser closes through finally cleanup.
+`WRE_TEST_MODE = "manual"` preserves exclusion from automated evidence.
+The bounded import regression denies runtime/provider imports and verifies
+silence and unchanged sys.path. No Chrome, model or live action was run;
+manual behavior remains IMPLEMENTED_NOT_VALIDATED. WSP22/34/50/62/97.
+
 ## 2026-09-24: Manager admission guard
 
 - WSP 00/15/22/34/50/62/84/97; C3/I3/D4/Impact3 = 13/P1. The existing action owner now requires no prior pending/connected target, the actual PENDING enum, a matching target and identity with the currently stored pending object before Connect. Rejections return `connection_request_not_admitted` without invitation UI or success credit. Existing policy denials, previews, navigation failures and manager bookkeeping are preserved.

@@ -1,3 +1,44 @@
+## Scientific self-healing & fail-closed measured RSI — 2026-11-16
+
+WRE Core integrates the scientific repair state machine (`src/repair_operation_contract.py`
+with `state_history`), shell-free failure reproduction (`src/repair_baseline_verifier.py`),
+and canary orchestration (`src/scientific_repair_canary_orchestrator.py`) paired
+with AI Gateway's pure allowlist `VerifierContextFirewall` and
+`ModelIndependencePolicy` (Issue #1522; architecture audit in
+`WSP_knowledge/docs/audits/self_healing/SELF_HEALING_COMPOSITION_AUDIT.md`).
+Outcome persistence uses `PatternMemory.store_outcome` (`SkillOutcome`) without
+weakening protected 19/P0 custody gates (`promote_variation`,
+`RedDogDirector.advance_to_execution`, `RedDogVerifiedPatternMemorySink`).
+
+`RecursiveLearningEngine` (`recursive_improvement/src/learning.py`) also wires
+fail-closed `measurement_evidence` validation before target mutation and
+subtracts measured `tokens_saved` during `rollback_improvement()`. Read-only
+`git_lifecycle.py` `branch_dispositions` retains full 9-stage classification
+including `COMPLETE` merged PR retirement assessment parity.
+
+## Risk-based verification connection — 2026-10-28
+
+Readiness uses each metric's measured sample count. Missing measurements are
+UNKNOWN; database-lifetime aggregates are not current-run or model health proof.
+Sampled critical failures remain enforced even when other metrics are unknown.
+Cold-start UNKNOWN retains existing admission after security checks, without
+claiming PASS or READY. See the [readiness interface](INTERFACE.md#readiness-evidence-and-admission--2026-11-06).
+
+The existing verification path now preflights a complete policy/check plan
+before running commands and prevents declared differential evidence from being
+silently dropped at final acceptance. The [interface](INTERFACE.md#risk-verification-preflight-contract--2026-10-28)
+and [current roadmap](ROADMAP.md#current-verification-integration--2026-10-28)
+separate local execution from the remaining native admission and RSI gates.
+CI runs the connected verification contracts in an additive parallel job.
+
+## Exact parent identity for skill feedback
+
+Execution outcomes and non-production candidates now retain the digest of the
+loaded skill instructions; scanner-admission identity remains separate. The
+binding survives unavailable output serialization and SQLite reopen. See the
+[contract](INTERFACE.md#skill-feedback-source-binding--2026-10-22). This repairs
+lineage only; it does not enable Moshpit ingestion or automatic promotion.
+
 ## Measured-zero fidelity — P15 checkpoint
 
 `PatternMemory.get_skill_fidelity_stats` preserves measured 0.0; only absent
@@ -60,46 +101,20 @@ controls and advisory output assertions are in the existing tests; see
 [the measurement interface](INTERFACE.md#advisory-autoresearcher-startup-display).
 This hardening supplies no independent verification or learning authority.
 
-## Merge sentinel prerequisite guard — 2026-09-27
+## Git lifecycle reconciliation
 
-The optional `GIT_MAIN_MERGE_SENTINEL=1` startup helper now refuses to proceed
-without a named branch, readable worktree inventory, clean tracked/untracked
-status and successful fetch. Unknown or dirty state returns before push, PR,
-stash, checkout or deletion. `force=True` bypasses enablement only. ENFORCED
-still controls whether rejection also blocks application startup.
+WRE startup refreshes GitHub branch and PR inventory. Codex SessionStart uses
+the same pass and may fast-forward a selected clean PC `main` worktree after
+the current GitHub commit passes its required checks. The receipt carries open
+and unverified PRs across runs and records both GitHub and PC proof on closure.
 
-After remote command success, the helper checks status again before changing
-local main, checking out or explicitly deleting branches. Dirty or unreadable
-status preserves the detected work and reports incomplete cleanup. It never
-automatically stashes/pops work or asks GitHub CLI to delete the branch as part
-of PR merge. When deletion is requested (including the current unset default),
-successful synchronization/checkout now ends with `cleanup_deletion_unqualified`.
-The helper issues no local or remote branch-deletion commands. `passed` remains
-true in advisory mode and false with ENFORCED; prior actions are retained.
-`DELETE_BRANCH=0` keeps the successful no-delete path. `force=True` cannot
-bypass this retention gate. Server-side auto-delete may still occur independently.
-
-After the initial cleanup status guard, fetch explicitly from origin
-`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
-and capture one full 40/64-character hexadecimal object ID. Read status again
-after the fetch/resolution, then update local main using the captured ID.
-Fetch, resolution, status or branch-update failure stops before checkout and
-explicit deletion; there is no cached-target fallback.
-If checkout itself fails, `cleanup_checkout_failed` is returned with the failure
-message in actions and `passed = not ENFORCED`. The earlier local-main update
-is retained; no rollback or later deletion is attempted. `merged=True` still
-means only prior remote-command success. The existing startup error display
-consumes this structured field without a caller change.
-
-These are snapshots, not an atomic worktree/ref lock. Ref movement before
-commit capture and worktree/ref changes after the final status remain races.
-The fetch updates the remote-tracking ref even if a later check blocks local
-main. Freshness does not prove intended content, checks or merge authority.
-Direct/backup pushes, unchecked PR merging, main readback and server-side
-auto-delete remain open. Automatic branch retirement is blocked pending a
-qualified combined containment/expected-ref/worktree-ownership contract.
-Default-off remains required; this does not certify WSP 97 terminal convergence
-or authorize native RSI.
+The legacy merge sentinel now delegates to the observation pass. Governed
+promotion remains with the repository's merge authority. Read-only PC Git
+inventory (`git_lifecycle_inventory.py`) additionally captures paginated
+`branches`, `worktrees`, SHA-only `stashes` (`section="stashes"` without stash
+messages or filenames), `pc_backlog_summary`, and `worktree_summary` under
+canonical SHA-256 receipts (`foundups_git_inventory.v1`). See
+[the lifecycle interface](INTERFACE.md#git-lifecycle-reconciliation).
 
 # WRE Core
 

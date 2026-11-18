@@ -62,7 +62,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
     POLICY_FIELDS_V5,
     POLICY_FIELDS_V6,
     POLICY_SCHEMA_V5,
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artifact_manifest import (
     NOW,
@@ -839,9 +839,9 @@ def _change_provenance_manifest(setup: dict[str, Any], case: str) -> None:
     _bind_policy(setup["e0"], setup["manifest"])
 
 
-@pytest.mark.parametrize("schema", [POLICY_SCHEMA_V7, POLICY_SCHEMA_V8])
+@pytest.mark.parametrize("schema", [POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9])
 @pytest.mark.parametrize("case", ["valid", "missing", "inconsistent"])
-def test_v7_v8_binding_keeps_signed_manifest_provenance(tmp_path, monkeypatch, schema, case):
+def test_provenance_policy_versions_keep_signed_manifest_binding(tmp_path, monkeypatch, schema, case):
     setup = _setup(tmp_path, monkeypatch,
                    runtime_profile=RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE)
     _use_provenance_policy_schema(setup, schema)

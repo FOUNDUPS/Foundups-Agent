@@ -1,5 +1,20 @@
 # GitHub Integration Module
 
+For project-admission prerequisites, use the regular-file observation contract in
+[INTERFACE](INTERFACE.md). It retains repository IDs, visibility, immutable Git
+objects, file mode and bytes; it does not authorize ownership or tokenization.
+The old Contents tuple remains available for existing callers. Completeness and
+production-readiness assertions below are historical, not a current security audit.
+
+Observation HTTP uses only the exact api.github.com origin, GET without redirects,
+identity encoding and a counted2MiB response ceiling before UTF-8 JSON parsing.
+Per-request limits are5s total and2s connect/socket-connect/socket-read; the whole
+observation has a30s timeout and preserves caller cancellation. These application
+deadlines include cleanup behavior and are not hard wall-clock or RSS guarantees.
+There are at most13 logical GET calls, zero application retries; aiohttp may retry
+an idempotent request once on a stale connection. Legacy operations retain their
+existing transport behavior. No provider/control or token authority is established.
+
 **Complete GitHub API integration and automation for FoundUps Agent**
 
 ---

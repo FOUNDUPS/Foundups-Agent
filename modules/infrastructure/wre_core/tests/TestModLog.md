@@ -1,3 +1,189 @@
+## 2026-11-16 — Scientific repair canary, `measurement_evidence`, and `COMPLETE` branch disposition regressions
+
+- `test_repair_operation_contract.py` (8 passed) & `test_scientific_repair_canary_e2e.py` (4 passed): Verified Issue #1522 `ScientificRepairOperation` (`state_history`), `attempt_failure_reproduction` (`shell=False`), `VerifierContextFirewall.project_evidence_packet` allowlist isolation, `ModelIndependencePolicy` anti-self-grading, and SQLite `PatternMemory.store_outcome` persistence without weakening 19/P0 custody gates (`test_pattern_memory.py` 51 passed, `test_wre_autonomous_slice_verifier_runtime.py` 46 passed, `test_wre_telemetry_truth.py` 17 passed, `test_reddog_direction.py` 9 passed, `test_reddog_verified_pattern_memory_sink.py` 21 passed).
+- `recursive_improvement/tests/test_learning.py` (8 passed): Added 4 positive and fail-closed negative `measurement_evidence` tests covering unmeasured `None` preservation, valid measured token/latency deltas + `total_tokens_saved` accumulation + rollback subtraction/clamping, self-authored/regressive/boolean/negative measurement rejection (`blocked_measurement_rejected`), and `work_order_id` / `before_state_digest` / `after_state_digest` mismatch rejection (both pre-applicator zero-call refusal and post-applicator rollback restoration).
+- `test_git_lifecycle.py` (7 passed): Added explicit `COMPLETE` merged PR (`docs/complete-merged`) `BRANCH_MERGED_PR_RETAINED` / `assess_retirement_diff_against_main` assertion alongside existing 9-stage `branch_dispositions` coverage. WSP 5, 6, 22, 48, 49, 50, 97, and 110.
+
+## 2026-11-15 — PC Git inventory stashes and backlog summary regressions
+
+- `tests/test_git_lifecycle_inventory.py`: Added 5 regression tests covering SHA-only `section="stashes"` pagination and message/filename non-leakage, malformed/oversized stash reflogs, concurrent stash mutation blocking (`pc_state_changed_during_observation`), `github_main_present_on_pc` True vs False `pc_backlog_summary` and `worktree_summary` counts, and `verify_git_inventory_receipt()` rejection of malformed or tampered stashes and summaries. Ran alongside `test_git_lifecycle.py` and `test_git_lifecycle_github.py`.
+
+## 2026-11-15 — MetricsIngestorV2 schema & rollback trigger regression
+
+- `test_metrics_ingest_v2_schema.py`: Verified fresh SQLite schema initialization with `idx_approval_skill` on `ai_0102_approvals(skill_id)` and `WRESkillsRegistryV2.check_rollback_triggers()` healthy, `pattern_fidelity_drop`, and `high_exception_rate` outcomes.
+
+## 2026-11-15 — Parent-version-bound recall & evolution continuity regressions
+
+- `test_pattern_memory.py`, `test_skill_evolution_continuity.py`, and `test_wre_master_orchestrator.py`: Added tests covering `parent_version` pre-`LIMIT` SQL filtering, legacy/untagged exclusion, fail-closed blank/invalid filter behavior, and `evolve_skill()` lineage isolation (87 passed).
+
+## 2026-11-15 — Git lifecycle branch dispositions and bundle verification
+
+Added 4 unit/integration regressions in `test_git_lifecycle.py` (7 total)
+covering all 9 `branch_dispositions` stages, `BRANCH_OPEN_PR_HEAD_MOVED`,
+non-`main` `PROTECTED_BRANCH` separation, fork/unknown `head_repository`
+rejection, multi-PR `pr_numbers` history preservation, partial PR coverage
+blocking `BRANCH_UNTRACKED`, `BRANCH_PR_HEAD_MISMATCH`, and deduplicated
+disposable bundle clone excluding dirty working-tree files. Ran full
+`wre-verification-contracts` suite offline plus `test_git_lifecycle_pc.py`
+outside sandbox MSYS2 block. WSP 5, 6, 22, 50, 97 and 110.
+
+## 2026-11-06 — Readiness evidence and menu admission
+
+Initial baseline: 13 failures and eight import errors across the first 21
+regressions; the import errors deliberately remove model-memory support in the
+fixture and are not evidence of a missing installed dependency. Corrected a
+fixture's counter method name before retaining the baseline result.
+
+Focused candidate and adjacent storage/security/report-reader selection: 207
+passed offline. Coverage includes per-metric counts, absent versus measured
+zero, historical scope, mixed unknown/critical, read-only storage, cold-start
+admission, both Connect WRE paths, headless handoff and menu refusal/diagnostics.
+The host denied network, subprocess execution and native model-stack imports.
+No live database mutation, model load, daemon startup or training was validated.
+Hosted CI selects these regressions; repository delivery and runtime installation
+require separate receipts. WSP5/6/11/15/22/50/97.
+
+## 2026-10-30 — Held-out identity producer/consumer regression
+
+The real verifier → ratchet → held-out gate → Memex rehydrator reproduces one
+failure/31 passes before repair. Version/digest serialization preserves the v2
+ID seed and historical signed shape; constructor metadata, tampering and downgrade
+controls remain explicit. The bridge queue-binding suite owns this connected
+regression; hosted CI also selects the gate and existing authenticity consumers.
+Synthetic input evidence does not establish native independent evaluation.
+
+## 2026-10-29 — Explicit unimplemented/manual classification
+
+Twelve new registry cases cover literal/annotated modes, invalid declarations,
+preserved external-effect reasons and ordinary unit compatibility. The full
+registry owner passes 40 cases; the combined generator/import/registry selection
+passes 51. The 23 added cases yield 19 failures / four passes on unchanged
+baseline. Only inert source fixtures are executed. WSP5/6/22/34/50/97.
+
+## 2026-10-29 — Regenerate registry after F1 encoding repair
+
+The first PR2257 hosted test gate detected a stale registry: removing BOMs
+makes 15 files statically parseable under the existing classifier. Canonical
+regeneration preserves all 1779 paths and changes only those 15 classifications;
+260 remain quarantined. No discovery/classification rule or test skip was added.
+The 28 registry tests and canonical --check pass; 85 affected dummy-STT,
+in-memory permission and schema tests pass. Twelve optional rESP import smoke
+files remain outside executed acceptance. WSP 22/50/84/97.
+
+## 2026-10-28 — Risk-verification preflight and downgrade regressions
+
+Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.
+Independent internal Codex reviewer authored 48 fixed cases before the repair:
+44 failed / 4 passed / 31 deselected. They cover policy omission/substitution,
+wrong types, complete-plan rejection before commands, and legacy compatibility.
+Review of the first repair added 14 cases: four force-full escalation failures
+and ten passing controls. The final connected selection passes **384/384**
+in 41.32s after the WSP62 preflight-function extraction, zero skips. Independent rerun of the two modified suites passes
+**93/93** in 21.18s; this overlaps the 384 and must not be added to it.
+Four additional direct-producer mock probes reject before Git is called.
+The extracted orchestration/preflight functions are 35/23 lines. Existing larger
+verifier-function debt is unchanged. No new module or size exemption was added.
+After extraction the reviewer approved the final source and independently reran
+37 affected controls (37 pass, 10 deselected, 0.46s), also overlapping the 384.
+Canonical registry check: current, 1,775 entries / 273 quarantined.
+Manifest tests: 8 pass in 71.07s; Node backend compatibility contract passes.
+All 1,472 runtime members remain; only the four edited source hashes and two
+existing pins change. Canonical manifest digest:
+`4edbc77efba5fc13fcb67ec70fde129cd54607b31e87b6a56915ccb26548e63e`.
+
+First hosted run on 9aff8815: the new Linux job passed 384/384 in 10.36s.
+Secret scanning correctly stopped on 38 manifest findings because its reviewed
+identities bind the whole file. Architect and independent reviewer verified every
+flagged line unchanged from 4afb9284, already reviewed at that base, and equal
+to its source's public digest. Exactly 38 current fingerprints are added to the
+existing reviewed metadata; all prior identities remain. Scanner/configuration,
+rules, thresholds and full-tree/history coverage are unchanged. Compact sorted
+additions SHA256: `d207314c21d49a3c336d74ebbe926ec90956e8f541dc64d111a36bde5d18361d`.
+Relevant local security controls: 7 pass / 46 deselected. Hosted security-regression
+step passed. The full local suite initially had two Windows encoding errors and
+one unavailable WSL-bash case; UTF8 resolved the encoding errors (52 pass / 1 fail).
+No test was changed or skipped to clear that platform limitation; Linux CI is
+the full shell-test evidence. Publication still requires the repaired head's CI.
+
+Final connected command (Windows PowerShell; CI uses `-c /dev/null`):
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+$env:PYTHON_DOTENV_DISABLED='1'
+C:/Python312/python.exe -B -m pytest -q --tb=short -c NUL --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/infrastructure/wre_core/tests/test_wre_test_impact_differential_gate.py modules/infrastructure/wre_core/tests/test_wre_test_scope_coverage.py modules/infrastructure/wre_core/tests/test_wre_test_registry_differential_plan_runtime.py modules/infrastructure/wre_core/tests/test_wre_test_differential_runtime.py modules/infrastructure/wre_core/tests/test_wre_independent_evidence_producer_runtime.py modules/infrastructure/wre_core/tests/test_wre_autonomous_slice_verifier_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_request_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
+```
+
+Reviewer command: the two changed suites with `-q -p no:cacheprovider`.
+Its 93-case run emitted no warnings. An earlier root 79-case run reported two
+existing pytest configuration warnings with async-plugin autoload disabled.
+The final connected command above isolates configuration and emits none.
+Scope includes failed/pending CI, wrong main/head, cleanup/recovery prerequisites,
+security/held-out closure, stale dependency evidence and self-verification.
+These are contract tests, not a live activation/rollback or main deployment proof.
+
+The new CI job records JUnit evidence bound to `github.sha`, in parallel with
+unchanged mandatory jobs. Hosted results and exact-main readback belong to the
+resulting PR's closure receipt, separately from these local results.
+
+**Compute observation:** recording-runner controls show invalid late checks and
+narrow force-full requests now invoke zero checks/differentials; the baseline
+invoked an earlier check. No comparative hosted runner-minutes, provider cost
+or retained efficiency gain has been measured. Model calls for this slice: zero
+external provider calls; coordinator/reviewer usage not quantified.
+
+**Retrieval:** current task-local Holo helper selected this exact source with
+a lexical module bundle (`ok=true`, `freshness=UNKNOWN`, index gap present).
+The earlier shared-root query rejected an authority/head mismatch and was not
+retried or reindexed. Direct source/caller reads filled missing coverage.
+Broad matches were noisy; exact owner paths removed duplicates. Semantic
+freshness is not claimed. WSP00 bootstrap/strict local gate passed.
+
+## 2026-10-22 — Bind skill feedback to loaded instructions
+
+The coordinator now attaches its execution ID, the exact loaded UTF-8 skill
+text digest, and its separate scanner-admission fingerprint to returned and
+persisted result evidence. Producer/caller `_skill_binding` assertions cannot
+replace this coordinator field. Non-JSON output keeps the existing unavailable
+marker while retaining the binding. Variation `parent_version` uses the same
+loaded-text digest instead of the ambiguous literal `current`.
+
+This identifies observed source text, not authenticated runtime authority or
+proof that the scanner admitted those subsequently loaded bytes. Unknown scanner
+fingerprints remain null. Existing telemetry exclusion, structural-fidelity
+thresholds, effect success, quality placeholder and fail-closed promotion remain.
+No Moshpit ingestion, generic AutoResearch evaluation or production RSI is enabled.
+
+Validation: new real SQLite runner/candidate/reopen regression failed on the
+baseline's forged lineage, then passed. Seven new cases plus existing execution,
+continuity, PatternMemory, admission, telemetry and master suites pass 232 cases.
+Two pytest configuration warnings reflect disabled async-plugin autoload.
+WSP00 used the documented Torch-free fallback (detector witness absent); Holo
+lexical bundle used this checkout with UNKNOWN semantic freshness. WSP15
+C2/I4/D3/Impact3=12/P2; WSP00/5/6/11/15/22/48/50/60/62/84/95/97.
+
+## 2026-10-21 — Operations Skillz version and manifest integrity
+
+Reused role-loader, skill-loader hygiene and skill-manifest guards alongside
+bridge operations/start-control and backend manifest suites:101 pass/2 platform
+skips across the six suites. The unchanged hygiene guard caught the stale
+operations SKILL_MANIFEST after version pins were aligned; its existing generator
+repaired that binding. No test inventory or guard relaxation. Exact commands,
+earlier failures and limits are in the bridge TestModLog PR2150 entry.
+
+## 2026-10-10 — Scanner coverage failure regressions
+
+- Confirmed failed exits/payloads never become successful zero-finding scans;
+  secret/config findings retain type/location and secret values stay out of reports.
+- Confirmed secret gates survive scanner→WRE→real policy, partial findings remain
+  visible, failed CLI outcomes return 2, controller status persists partial/error,
+  and dry-run cannot execute on a live-capable controller.
+- Confirmed source and modern-lockfile edits propose SAST/SCA scans.
+- 131 passed, zero skipped across scanner, executor, trigger, controller and stack
+  E2E suites (2.45s); policy suite separately 29 passed (0.35s). The AI Overseer
+  conftest marks unrelated tests skipped when combined; separate runs avoid that
+  collection behavior without disabling its policy.
+
 ## Measured-zero fidelity regression — P15
 
 Nine frozen cases in existing `test_pattern_memory.py` cover overall/recent/

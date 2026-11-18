@@ -61,7 +61,7 @@ def provider_result_matches(
 
 
 def factory_binding_matches(
-    factory: object, binding: ResolvePerSignIdentity
+    factory: object, binding: ResolvePerSignIdentity, *, request: SigningRequest | None = None
 ) -> bool:
     try:
         values = (
@@ -71,7 +71,8 @@ def factory_binding_matches(
         )
     except Exception:
         return False
-    return all(_same(actual, expected) for actual, expected in values)
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_authority_policy_runtime import initial_handshake_request_allowed
+    return all(_same(actual, expected) for actual, expected in values) and initial_handshake_request_allowed(factory, request)
 
 
 def response_matches(

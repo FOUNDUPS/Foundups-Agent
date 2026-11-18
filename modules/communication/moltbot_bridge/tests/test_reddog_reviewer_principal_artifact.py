@@ -34,7 +34,7 @@ def test_principal_artifact_version_and_shape(case):
             api.parse_principal_records(canonical(value).encode("ascii"))
         return
     if case == "unknown":
-        value["schema_version"] = "reddog_authority_runtime_resolver_supply.v3"
+        value["schema_version"] = "reddog_authority_runtime_resolver_supply.v4"
     elif case == "missing":
         value.pop("reviewer_authorizations")
     elif case == "extra":

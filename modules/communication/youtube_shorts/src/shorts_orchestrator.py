@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Optional, Dict
 from .veo3_generator import Veo3Generator, Veo3GenerationError, InsufficientCreditsError
 from .sora2_generator import Sora2GenerationError
-from .youtube_uploader import YouTubeShortsUploader, YouTubeUploadError
+from .youtube_uploader import YouTubeShortsUploader, YouTubeUploadError, YouTubeUploadPolicyBlocked
 
 # Initialize logger for daemon monitoring
 logger = logging.getLogger(__name__)
@@ -241,7 +241,8 @@ class ShortsOrchestrator:
         privacy: str = "public",
         use_3act: bool = True,
         engine: Optional[str] = None,
-        progress_callback: Optional[callable] = None
+        progress_callback: Optional[callable] = None,
+        policy_fingerprint: Optional[str] = None,
     ) -> str:
         """
         Complete Shorts flow: generate and upload.
@@ -273,6 +274,10 @@ class ShortsOrchestrator:
             - Sora2 enables live-action cinematic prompts via OpenAI when selected
         """
 
+        intent_policy = self.uploader.get_shorts_policy()  # no generation while paused/unknown
+        if ((policy_fingerprint is not None and policy_fingerprint != intent_policy["fingerprint"])
+                or ("topics" in intent_policy and topic not in intent_policy["topics"])):
+            raise YouTubeUploadPolicyBlocked("Selected topic directive changed before generation")
         engine_to_use = self._select_engine(topic, engine)
         generator = self._get_generator(engine_to_use)
         self.generator = generator
@@ -332,6 +337,9 @@ Generated with AI for Move2Japan
                 tags.append("JapaneseFood")
 
             print("[0102] Uploading to YouTube...")
+            fresh_policy = self.uploader.get_shorts_policy()
+            if fresh_policy["fingerprint"] != intent_policy["fingerprint"]:
+                raise YouTubeUploadPolicyBlocked("Generation directive changed; retain artifact without uploading")
             if progress_callback:
                 progress_callback("[U+1F4E4] Uploading to YouTube... Almost there!")
 
@@ -340,12 +348,13 @@ Generated with AI for Move2Japan
                 title=title,
                 description=description,
                 tags=tags,
-                privacy=privacy
+                privacy=privacy,
+                policy_fingerprint=intent_policy["fingerprint"],
             )
 
             # Notify chat with final YouTube link
             if progress_callback:
-                progress_callback(f"[CELEBRATE] Video LIVE! Watch it here: {youtube_url}")
+                progress_callback(f"Upload accepted; saved-state verification pending: {youtube_url}")
 
             elapsed_time = time.time() - start_time
             estimated_cost = duration * getattr(generator, 'cost_per_second', 0.0)
@@ -362,7 +371,8 @@ Generated with AI for Move2Japan
                 "engine": engine_to_use,
                 "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "processing_time": round(elapsed_time, 2),
-                "status": "uploaded"
+                "status": "uploaded",
+                "verification_status": "independent_readback_required",
             }
 
             self.shorts_memory.append(short_record)
@@ -370,7 +380,7 @@ Generated with AI for Move2Japan
 
             print()
             print("=" * 60)
-            print("SHORT CREATED SUCCESSFULLY")
+            print("UPLOAD ACCEPTED - SAVED-STATE VERIFICATION PENDING")
             print("=" * 60)
             print(f"  Topic: {topic}")
             print(f"  URL: {youtube_url}")

@@ -1,27 +1,145 @@
-# EDUIT verification plan
+# EDUIT test inventory
 
-This is a specification-only module; no educational runtime tests exist yet.
-The adjacent canonical schema/loader/README validators remain the owners for FoundUp
-integration checks. This package does not replace or alter them.
+## 2026-11-02 — Compact/fullscreen word-space27
 
-Before implementing tests, read [TestModLog.md](TestModLog.md), inspect those existing
-validators, and retrieve the closest game/PWA/session fixtures in the exact checkout.
-Suggested repository checks after onboarding:
+89 Node tests initially pass. Presenter tests preserve default collapse semantics
+and add inline opt-in canonical geometry, same retained time through expand/back,
+both word modes, hidden cancellation, dispose and failed-data native fallback.
+Browser acceptance must now cover both compact and fullscreen at six sizes,
+root/inner and both modes, actual glyph bounds/fit/final floors and strict THUMP
+growth. Replace the older mandatory compact-native oracle only for opted-in
+ready presentation; failed native fallback remains mandatory. Preserve26media
+hashes and actual one-Play/all5/movie-end/game-paused regression.
+
+## 2026-11-02 — SQUISH needs an actual loss
+
+Replay3 is an all-safe demonstration and must have zero SQUISH events/frames;
+retain five full SNIFFs and three progressive THUMPs. Game-world regression
+covers no-input loss, mixed safe/lost, all-safe/outcome-unset, successful practice
+and no-loss practice. Loss cue remains bounded54–56s. Older cancellation test
+uses a loss cue fixture, not a fake victory cue.87 Node tests pass initially;
+independent media/controller/browser proof is recorded separately in
+`O:/Foundups-Agent/outputs/storytime-safe-sounds-20261102/`.
+
+## 2026-11-02 — Single-word25 validation
+
+86 Node tests pass, including invalid profile/caption fallback, retained-time
+redraw, final font floor with strict distance progression, and shared revision
+module graph. Independent director harness:852/852 word-layout assertions,
+both routes × six sizes × five cues × two placements;6/6 native fallback.
+Real single Play observed indices0–4 then movie ended25s, game clock0/score0/paused.
+Actual geometry and screenshots retained in
+`O:/Foundups-Agent/outputs/storytime-word-layout-20261102/` including red baselines.
+Desktop observation does not certify native iOS sound/touch or child comprehension.
+
+Simple24 supersedes manual child navigation tests per012. Existing harness checks
+exactly two88px/glyph64 actions, all5pages/root+inner/six sizes, one Play through
+book and movie beyond3s, Pause/Resume, incidental taps/swipes and X/no late start.
+Viewport unit freezes observed scrollbar reflow and retains offset/rotation
+oracles. Actual elapsed browser checks remain distinct from model/unit proof.
+
+Sound23 adds `game-audio-lifecycle.test.mjs`: execute actual controller audio/
+action/review functions in a VM with fake media; verify full source completion,
+silent priming, retry/reset/practice/resume and late promises. Replay tests now
+require all five sniffs, progressive gains and SQUISH; narration tests require
+no action duck, a surviving old sniff endpoint and distinct fitted caption sizes.
+80Node tests pass. Real decoded movie samples and independent source/generation
+checks are separate; no acoustic or native-touch proof is inferred from mocks.
+
+`movie-presentation.test.mjs` checks all750 canonical scene frames against the
+existing recorder, bounded safe data, good/bad asset hashes, media-only clock,
+pause/seek/resize/reopen/foreground, rAF fallback and callback teardown. These
+are transport/scene unit tests, not proof of actual browser rVFC progression or
+native iOS performance. See ../docs/MOVIE_PRESENTATION.md and TestModLog.
+
+Use **Run full-story interaction regression** in the existing director_harness
+for the title-start and actual elapsed-time all-page/movie handoff on both routes,
+plus Pause/resume, later-page start, incidental tap and synthetic pointer
+cancel/multitouch/swipe cases. It uses the real silent-play UI option, not a
+forced clock. Separate CUA real presses and UI-TARS model-guided input receipts
+live under outputs/storytime-playback-20261101; do not call synthetic dispatch
+native touch or count static model inference as a completed playthrough.
+
+Preschool book acceptance extends the existing director_harness storybook button:
+all five pages at six sizes on both routes, rendered font/target floors, no
+scroll/clipping and direct hit tests. Independent rendered/silent/voice-failure
+receipts are retained separately; see TestModLog. Actual Home Screen launch is
+not certified by an inner iframe or direct-origin viewport measurement.
+
+App presentation extends the same inventory with scene-presentation.test.mjs:
+canonical scale/world mapping, malformed presentation rejection, default-frame
+identity, full-height leg entry/exit and matching skin sky/opening. Independent
+app-menu/scene browser matrix verifies actual rendered hit bounds and real-earned
+state through native menu, choices, Done/Escape, fullscreen and injected safe
+areas. Cross-origin wrapper escape is a separate user-activated launch check.
+Retain raw failures/repairs; no physical-device claims from synthetic events.
+
+
+Run `node --test modules/foundups/eduit/tests/*.test.mjs` from repository root.
+
+Current sleeve selection adds `choice-wheel.test.mjs` and `music-picker.test.mjs`:
+keyboard/drag/programmatic-centering/rejection/teardown, explicit audio start,
+Off, pause, source allowlist, late promise and playback denial. Current full53/53
+passes; prior baseline Windows/scene failures were repaired against unchanged
+acceptance. The existing director harness adds “Run character wheel checks”.
+Credits/audio rights and physical listening are separate from synthetic tests.
+
+- `storytime.test.mjs`: world clock, rescue outcomes, scene continuity, cue/locale
+  invariants and typography independent of tremor physics.
+- `layout.test.mjs`: gesture adapter cancellation/destroy, root projection and
+  packaging CLI with fake media (not a real video review).
+- `pwa.test.mjs`: manifest, cache bounds and flag/pointer contracts.
+- `director_harness.html`: actual same-origin viewer controller acceptance. Copy
+  temporarily to the packaged site's root as `layout-qa.html`, open through the
+  managed preview, choose a viewport and run. Reload between runs. Uses synthetic
+  pointer events with explicitly stubbed pointer capture, not native touch proof.
+  Remove before publishing. Exercise real mouse hold/unlock separately.
+
+See TestModLog and ../docs/PRESCHOOL_VIEWER_REVIEW.md for results and limitations.
+
+Slow-rescue revision extends the same engine tests and viewer fixture with
+score/sleep/practice/reset and64px bound checks. The optional live rescue button
+uses real-time waits; cloud-browser suspension can exhaust them before the active
+game clock advances. Treat that as inconclusive, never substitute a green engine
+result for a completed browser round.
+
+- `viewport.test.mjs`: execute the actual viewer viewport owner with missing API,
+  normal-zoom offsets, rotation, foreground, and browser-zoom fixtures; assert
+  both owners pause when bounds change. These inputs are not device emulation.
+- `director_harness.html` phone matrix: both root/manifest entry at six dimensions,
+  useful landscape scene size, >=64px controls, safe-area arithmetic, hit tests,
+  one drawing rail and state preservation. First run the identical oracle against
+  the retained published baseline; record a red control before candidate acceptance.
+
+- `director_harness.html` **Run storybook visibility regression**: both root and
+  inner director at390x844,844x390 and1280x900. Uses the actual Story/Skip/Close
+  and explicit storybook Play controls, checks native-modal opening and bounds,
+  no closed-dialog layout or narration, reopening, and resizing while closed.
+  Run the unchanged oracle against original CSS before testing a repair. After
+  replacing local CSS, reload with fresh assets and verify the loaded stylesheet;
+  a cached original rule is not evidence about the candidate. This is browser
+  layout/handler evidence, not physical mobile touch or acoustic acceptance.
+
+---
+
+## 2026-10-08 — EDuIT Discovery specification verification plan
+
+The EDuIT Discovery specification adds JSON Schema validation boundaries without
+replacing the adjacent canonical schema/loader/README validators or Storytime tests:
 
 ```bash
 python -m pytest modules/foundups/tests/test_foundup_registry_schema.py -q
-python -m pytest modules/foundups/tests/test_foundup_ai_hooks_daemon_contract_compliance.py -q
+python -m pytest modules/foundups/tests/test_foundup_ai_hooks_daemon_contract_compliance.py -k eduit -q
 ```
 
-The loader tests and their dependencies must be discovered in the current checkout,
-not assumed from an old command. Local package checks cover JSON syntax, the closed
-learning-event schema, synthetic valid/invalid cases, documentation links, README
-headings, namespace agreement and preservation of baseline registry entries.
-They do not prove full-repository integration, HoloIndex freshness, WSP 00 execution,
-learning benefit, child safety, fairness, deployment or talent detection.
+Local schema checks cover JSON syntax, the closed `schemas/learning_event.schema.json`
+schema, synthetic valid/invalid cases (`examples/learning_event.json`), documentation
+links, README headings, namespace agreement and preservation of baseline registry
+entries. They do not prove HoloIndex freshness, learning benefit, child safety,
+fairness, deployment or talent detection.
 
-POC test categories: seeded replay; scoring correctness; adaptation bounds; identical
-logical results across input modalities; pause/skip; interrupted/offline continuation;
-malformed/untrusted content; no undeclared data egress. Add later tests for consent,
-tenant/role denial, export/deletion, sync conflicts, referrals and release authorization
-only when the corresponding implementation exists.
+Future Discovery test categories (deferred until runtime slices exist): seeded replay;
+scoring correctness; adaptation bounds; identical logical results across input
+modalities; pause/skip; interrupted/offline continuation; malformed/untrusted content;
+no undeclared data egress; consent, tenant/role denial, export/deletion, sync
+conflicts, referrals and release authorization.

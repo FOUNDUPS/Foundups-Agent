@@ -1,5 +1,66 @@
 # Video Indexer Module - Modification Log
 
+## 2026-11-07 — Remove unattended API enrichment; preserve shared-router boundary
+
+WSP00/22/50/77/97. Independently read the key-presence-triggered direct Gemini
+enrichment in the Studio indexing cycle at baseline `fa7d487f3`. Remove that
+paid pass while preserving browser Studio Ask output and the compatible empty
+`gemini_analysis` field. The scoped offline selection passes 32; the new
+key-presence control fails on old source (one failure, one pass). Merge and
+deployment remain pending. The broader shared-router migration
+audit remains SPECIFIED_NOT_IMPLEMENTED. Current YouTube gateway surfaces and
+stages do not include video analysis. Link the existing scheduler repair list
+instead of creating another tracker. No model, provider or browser execution.
+
+See [test scope and evidence limits](tests/TestModLog.md#2026-11-07--no-unattended-paid-enrichment-after-studio-indexing).
+
+## 2026-10-29 — Reconcile preserved YUMORI evidence work order (#1667)
+
+Preserve the original proposal/history, campaign dates and all three JSON/flow
+blocks. Use canonical Moshpit terminology and filename; correct the obsolete
+architecture path and unwired-action descriptions against current action_surface.
+Single-video, channel, registry/browser-grouped portfolio and default-one-cycle
+daemon routes already exist. Reuse current JSON persistence and its SQLite
+metadata catalog; no duplicate route or memory store is introduced.
+
+The YUMORI extractor/projection remains SPECIFIED_NOT_IMPLEMENTED. Current source
+wiring does not qualify live Studio operation or the still-unimplemented unified
+Moshpit renderer. Authenticated visibility is separate from disclosure authority;
+generated/source text is untrusted data, and OBSERVED requires source/timestamp
+support. The proposed live test is explicitly future acceptance, not a dispatch.
+
+Validation: source/text/hash review preserves all original campaign-date counts
+and schema/flow blocks; all five existing owner paths and the canonical relative
+architecture link resolve. The accepted current-main Holo bundle identified the
+actual action/test owners; unrelated shorts/public-member hits were reranked.
+Required artifacts exist; optional planning/memory/runbook artifacts are absent.
+Affected module/CLI/architecture trees are unchanged between retrieval main45aa
+and integration mainc2d4. No executable code, test assertions, runtime metadata,
+browser/provider action or installed-runtime claim. Hosted and resulting-main/
+Holo checks remain separate gates. WSP 11/22/50/60/84/87/97.
+
+
+## 2026-10-22 - Retain omitted-language compatibility for English-only models
+
+A private omission sentinel distinguishes legacy callers from explicit `None`
+auto-detection. Omitted language resolves to `en` for `.en` models and to
+auto-detection for multilingual models; explicit values still reach the existing
+batch factory's validation unchanged. This preserves callers using
+`VIDEO_INDEXER_WHISPER_MODEL=base.en` without weakening the English-only guard.
+Real factory construction with temporary output directories reproduced two
+omitted-language failures before the fix. The focused analyzer/voice language
+selection now passes 21 tests, including all prior language and offset cases.
+No models loaded, external requests or native-worker validation. WSP00/5/11/22/77/84/97.
+
+## 2026-09-21 - Preserve Japanese transcript language and chunk positions
+
+AudioAnalyzer now passes explicit/automatic language and output directory to
+the existing batch transcriber, and language to local-file Whisper. Result
+language comes from evidence instead of a hard-coded English label. Converted
+segments use the actual `timestamp_sec` field, correcting later chunks that
+previously started at zero. Offline fakes cover Japanese/mixed/unknown labels,
+factory forwarding and offsets; real clip ASR remains unverified. WSP 11/22/84/97.
+
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
 ## 2026-09-22 - Pre-merge integrity audit

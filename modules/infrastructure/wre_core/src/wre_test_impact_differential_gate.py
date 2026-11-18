@@ -132,7 +132,7 @@ def make_test_impact_plan(**fields: Any) -> dict[str, Any]:
             "periodic_health_audit",
         )
     }
-    required_suite_kind = _required_suite_kind(
+    required_suite_kind = required_test_suite_kind(
         impact_class,
         **signals,
     )
@@ -185,7 +185,8 @@ def make_test_run_snapshot(**fields: Any) -> dict[str, Any]:
     return payload
 
 
-def _required_suite_kind(impact_class: str, **signals: bool) -> str:
+def required_test_suite_kind(impact_class: str, **signals: bool) -> str:
+    """Derive the required suite from an already validated impact policy."""
     if impact_class == "SYSTEMIC" or any(signals.values()):
         return "FULL_REPOSITORY"
     if impact_class == "MODULAR":
@@ -206,7 +207,7 @@ def validate_test_impact_plan(plan: Mapping[str, Any]) -> list[str]:
         "release_candidate", "periodic_health_audit", "security_closure_required",
         "held_out_closure_required",
     )
-    derived = _required_suite_kind(
+    derived = required_test_suite_kind(
         str(plan.get("impact_class") or ""),
         **{name: plan.get(name) is True for name in bool_fields[:4]},
     )
@@ -396,5 +397,5 @@ def _safe_digest_hex(value: Any) -> str:
 __all__ = [
     "PLAN_SCHEMA", "RECEIPT_SCHEMA", "SCHEMA", "TestDifferentialReceipt",
     "evaluate_test_differential", "make_test_impact_plan", "make_test_run_snapshot",
-    "validate_test_impact_plan",
+    "validate_test_impact_plan", "required_test_suite_kind",
 ]

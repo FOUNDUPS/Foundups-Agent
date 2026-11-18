@@ -43,13 +43,7 @@ def run_entrypoint(
             args.owner_authority_config,
             repo_root=Path(args.repo_root).resolve(),
         )
-        attestor = KernelPeerCredentialAttestor(
-            PeerCredentialPolicy(
-                {dependencies.signer_uid: dependencies.signer_principal_id},
-                allowed_gids=(dependencies.signer_gid,),
-                credential_source_prefix="kernel_root_authority_peer",
-            )
-        )
+        attestor = KernelPeerCredentialAttestor(_peer_policy(dependencies))
         result = serve_root_authority_bounded(
             repo_root=Path(args.repo_root).resolve(),
             socket_path=dependencies.socket_path,
@@ -72,6 +66,23 @@ def run_entrypoint(
 
 def main(argv: Sequence[str] | None = None) -> int:
     return run_entrypoint(argv)
+
+
+def _peer_policy(dependencies):
+    from .foundup_verified_outcome_root_revocation_protocol import GRANT_PEER_PRINCIPAL
+
+    principals = {dependencies.signer_uid: dependencies.signer_principal_id}
+    groups = (dependencies.signer_gid,)
+    grant = getattr(dependencies, "grant_peer_identity", None)
+    if grant is not None:
+        if (type(grant) is not tuple or len(grant) != 2
+                or any(type(value) is not int or value <= 0 for value in grant)
+                or grant[0] in principals):
+            raise ValueError("root_authority_grant_peer_invalid")
+        principals[grant[0]] = GRANT_PEER_PRINCIPAL
+        groups = tuple(sorted(set((*groups, grant[1]))))
+    return PeerCredentialPolicy(principals, allowed_gids=groups,
+        credential_source_prefix="kernel_root_authority_peer")
 
 
 if __name__ == "__main__":  # pragma: no cover

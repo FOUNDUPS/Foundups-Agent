@@ -38,7 +38,7 @@ carries organization/cohort and learner scope derived from authenticated authori
 not trusted directly from client JSON. Store guardian identifiers/consent separately
 from pseudonymous events and separate both from operator logs and public metrics.
 No shared cross-FoundUp learner memory. Local shared-device sessions need an explicit
-clear/switch-user operation and a documented cache-retention policy.
+clear/switch-learner operation and a documented cache-retention policy.
 
 ## Versioning and synchronization
 

@@ -1,8 +1,9 @@
 ---
 name: yumori_contact_ledger
 description: Ground YUMORI.me correspondence in live Gmail/CRM state, preserve routing consent, write plain committee correspondence, reconcile receipts, and promote repeated operator failures into reusable rules.
-version: 0.8.0
-communication_policy_revision: 2026-10-06
+version: 0.8.1
+communication_policy_revision: 2026-10-26
+document_audit_policy_revision: 2026-10-08
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -21,6 +22,7 @@ evals:
   - committee_signature_default
   - no_parallel_contact_database
   - moshpit_receipt_integrity
+  - recipient_document_audit_required
   - recursive_learning_promotion
   - capital_network_graph_reconciliation
 ---
@@ -73,18 +75,55 @@ For every substantive YUMORI.me correspondence task:
 4. Read the complete relevant thread and every current draft for the same recipient/topic scope.
 5. Reconcile the latest real state against Email Log / Action Queue / Correspondence Routing / relevant Moshpit receipts.
 6. Build the **Correspondence State Capsule** below. No substantive recipient-finalized draft may be created or materially updated before the capsule resolves.
-7. Draft or act only within the capsule's current authorization and next-allowed-action state.
-8. Verify provider state after mutation.
-9. Reconcile the canonical records.
-10. If the run exposed a meaningful error, near-miss, stale assumption, duplicate, coverage failure, or reusable improvement, update the operating rule and 0102 learning log.
+7. For a proposal, PDF, form, briefing, presentation or substantive linked document, load
+   `../recipient_document_audit/SKILLz.md` and audit the whole package before finalization.
+   Preserve review-only instructions; an audit PASS is not send authorization.
+8. Draft or act only within the capsule's current authorization and next-allowed-action state.
+9. Verify provider state after mutation.
+10. Reconcile the canonical records.
+11. If the run exposed a meaningful error, near-miss, stale assumption, duplicate, coverage failure, or reusable improvement, update the operating rule and 0102 learning log.
 
 Do not replace these reads with memory.
 
-## Plain committee correspondence
+## External voice modes — principal directive 2026-10-26
 
-Policy revision: 2026-10-06, explicit 012 direction. This replaces the former
-mandatory proxy introduction, third-person monk framing and `0102` sign-off for
-external YUMORI text. Internal operator identity and audit attribution stay intact.
+The principal now wants YUMORI to be a **delegated 0102 AI-operator experiment**. The
+2026-10-06 plain committee policy is retained for actual human/committee-authored
+messages and formal applicant channels, but it is **not a prohibition** on accurate
+0102 attribution when the AI operator is the actual external speaker.
+
+**Mode selection before composition (store in private correspondence state):**
+
+- `AI_OPERATOR`: agent-origin stakeholder research, outreach or follow-up explicitly
+  admitted by a current authority. In natural Japanese, introduce 0102 once as
+  `Michael TroutのAIアシスタント「0102」` and state that Michael has delegated
+  coordination/research. Use the truthful 0102 signature, not a fabricated human
+  sender, employee, legal representative, or registered Japanese subsidiary.
+  No personal human first-person claim and no representation of human review.
+- `HUMAN_COMMITTEE`: 012-directed writing sent as Michael or the actual preparatory
+  committee; do not inject an unwanted AI/proxy preface or sign-off. This includes
+  current historical City/committee threads unless the real sender and recipient
+  context are deliberately changed and verified.
+- `OFFICIAL_FORM`: exact legally/procedurally required applicant, signatory,
+  translator and organization identity. Neither mode can override required fields.
+
+Always answer direct AI-assistance questions truthfully. Changing the voice does not
+retroactively alter historical Sent, current recipient policy, legal authority,
+authorization, or #1779. Unattended `REDDOG_AUTO` SEND is still HOLD-only until the
+sender-boundary service is deployed and independently verified. A human-directed Work
+send is a separate transaction with fresh preflight, not perpetual authorization.
+
+Use the bounded Japanese sample and runtime handoff in
+`../../docs/YUMORI_RESIDENT_0102_OPERATOR_HANDOFF_20261026.md` (from this Skillz
+directory: `../../docs` resolves to `modules/foundups/esingularity/docs`).
+Do not copy the sample blindly: verify current recipient, prior correspondence,
+project claims and release scope. Japanese is the default recipient-facing language
+for Japan, while internal operator state may remain in English with stable schema keys.
+
+### Human/committee-authored correspondence — 2026-10-06 fallback
+
+This replaces the *former mandatory* proxy introduction for human/committee-authored
+messages. Internal operator identity and audit attribution stay intact.
 
 ### Sender and opening
 
@@ -135,6 +174,35 @@ Example opening: `旧羽生小学校・旧下宇坂小学校の事前相談に�
 
 Example closing: `お手数ですが、ご確認のほどよろしくお願いいたします。` followed by
 `YUMORI.me設立準備委員会`.
+
+### Website-first publication links and clean external email (2026-10-16)
+
+- Apply the generic Red Dog `reddog_correspondence_state` **Recipient-facing
+  link/source and HOLD-content gate** before every external send or send-ready
+  draft; this rule also applies when the Gmail tool can be called directly.
+- For **Japan Hyperscaler Report (JHR)**, the primary owned publication is the
+  eSingularity.ai website, with the publicly observed archive at
+  `https://esingularity.ai/reports/jhr`. LinkedIn newsletters are
+  secondary syndication, not the source link for YUMORI government email.
+- Check the live archive for the exact issue before naming it. On 2026-10-16,
+  the production website served **JHR #001 only**, while GitHub already
+  contained **#003** and a prior Sites deployment had verified **#002**.
+  This is a live publication regression, not permission to cite a repository
+  issue as published. LinkedIn #003 is not proof of eSingularity.ai #003.
+  Do not assert that #003 exists on the website until the actual public issue
+  is independently verified; otherwise cite only the verified archive and
+  describe its displayed issue truthfully.
+- No full percent-encoded LinkedIn `/pulse/` link or tracking URL in the
+  visible email. Cite a short verified first-party URL or a descriptive link.
+  Omit JHR altogether from a procedural joint-application question unless
+  the reader actually needs the report.
+- Internal archival drafts marked `内部保管・このまま送信しない` or `HOLD`
+  remain **unsent**. Never copy their internal header, expired deadlines,
+  recipient instructions or raw historical body into a send-ready message.
+  Recompose a new, concise letter if a future send is independently authorized.
+- Audit actual Gmail draft rendering, not only input Markdown or composer text.
+  If a provider-added quoted thread exposes an unwanted oversized URL,
+  revise/hold rather than claiming the message is clean.
 
 ### Existing drafts and other channels
 
@@ -481,6 +549,9 @@ then:
 Routine successful runs do not create learning entries.
 
 ## Dependencies
+
+- `recipient_document_audit` for audience fit, total reading burden, exact PDF/export
+  visual review, internal-artifact removal and review-only release control.
 
 - `reddog_correspondence_state` for provider-delta continuity, stable ask IDs, watermarks and private runtime persistence.
 - `yumori_moshpit` for campaign-vs-agent logging.

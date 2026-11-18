@@ -9,28 +9,36 @@ Owner: `esingularity_001` in `FOUNDUPS/Foundups-Agent`.
 Canonical instructions: `modules/foundups/esingularity/skills/website-update/SKILL.md`.
 All paths below are repository-relative unless explicitly module-relative.
 
-## Shared branding and language — both sites
+## Shared brand context and language — both sites
 
-012's September 13 branding decisions apply to eSingularity.ai and YUMORI.me, including shared ticker items, participation actions, report links and language variants. Context supports the brand; it does not replace it. Read this section when applying either the eSingularity or YUMORI.me skill, including copy-only reviews.
+Do not define or rename FoundUp branding in this Skill. Load the current
+`brand_context_path` from the canonical `foundup_registry.json`, then apply
+`modules/foundups/esingularity/brand_context.json`. The registry-grounded
+context currently resolves the project identity and its child movement identity,
+including canonical spelling, aliases, public domains, default locale, JOIN copy,
+and the bilingual guardian lockup.
 
-| Use | Canonical wording |
-| --- | --- |
-| Movement/site brand | `YUMORI.me` — preserve uppercase YUMORI and lowercase `.me` |
-| Participation button | `JOIN YUMORI.me / 湯守になる` |
-| Separate participation explanation | `準備委員会への参加はこちら` |
-| Bilingual identity lockup | `私は湯守！ / me GUARDIAN! = YUMORI.me` |
-| Japanese report link | `ジャパン・ハイパースケーラー・レポート（JHR）を読む →` |
-| Separate report explanation | `日本の大規模データセンター開発と、地域の選択肢を知る` |
-| English report name | `Japan Hyperscaler Report (JHR)` |
+This Skill owns website behavior around that identity, not the identity itself:
 
-- Keep `.me` in branded wordmarks, headings, link labels, participation buttons and campaign-name references on both sites. Natural references to people as `湯守` need no domain suffix. Lowercase URL hosts, existing code identifiers, and historical quotations are not branding errors; do not mass-rename them.
-- `me GUARDIAN!` is intentional brand language. Preserve lowercase `me`, uppercase `GUARDIAN!`, and Japanese first in the bilingual lockup. Do not silently replace it with `I am a guardian.` as an English grammar correction. Ordinary explanatory prose should still use natural English. The lockup and participation button are different uses; do not cram both into every button.
-- In Japanese explanatory copy, write hyperscaler as `ハイパースケーラー`. Introduce unfamiliar terms in supporting text without replacing the report name with a generic data-center label. Keep `JHR` visible; retain the English series name in English.
-- Japanese remains the default. The approved `JOIN YUMORI.me` and `me GUARDIAN!` brand phrases are deliberate bilingual exceptions, not untranslated UI. Translate all other affected headings, body copy, buttons, captions and current announcements completely when English is selected; changing `html.lang` alone is insufficient.
-- Preserve `eSingularity.ai` as the project identity and `YUMORI.info` as its information alias. Shared branding does not merge the two homepages or make every action a link to the movement homepage. Keep the verified signup destination for JOIN, `/reports/jhr` for JHR, and an absolute `https://esingularity.ai/` URL for project links from YUMORI.me.
-- On narrow screens, wrap or stack the brand and its supporting line without clipping `.me`, `GUARDIAN!` or the report name. Do not concatenate replacement suggestions into duplicated text such as `湯守になる湯守になる`.
+- preserve the separate eSingularity project homepage and child movement homepage;
+- use the active grounded child brand for movement headings, buttons, ticker copy,
+  and participation copy instead of hard-coding a second spelling here;
+- natural references to a human role may follow the exception declared in the
+  brand context;
+- lowercase URL hosts, internal code identifiers, and historical quotations are
+  not automatically branding errors;
+- Japanese remains the default unless the active brand context changes it;
+- translate all non-brand UI completely when another locale is selected;
+- on narrow screens, do not clip the active brand, guardian lockup, or report name.
 
-For future copy changes, compare the affected rendered brand labels in Japanese and English on the requested site and any shared consumers. This is a maintained specification, not evidence that all live labels or translations already comply. A request to update this skill alone does not authorize a site, form, DNS or hosting change.
+JHR remains a website/report label rather than a FoundUp brand. Preserve:
+`ジャパン・ハイパースケーラー・レポート（JHR）を読む →`,
+`日本の大規模データセンター開発と、地域の選択肢を知る`, and
+`Japan Hyperscaler Report (JHR)` where their current surfaces require them.
+
+For future branding changes, edit the FoundUp brand-context file once and run the
+brand-context regressions. Do not sweep every Skillz file for replacement text.
+A brand-context edit alone does not authorize a site, form, DNS, or hosting change.
 
 ## Research before editing — WSP 97
 
@@ -44,13 +52,13 @@ Apply the WSP 97 loop: research → inspect the exact change → inspect adjacen
 
 | Target | Purpose | Visitor goal | Edit boundary |
 | --- | --- | --- | --- |
-| eSingularity.ai (also reached through YUMORI.info) | Explain the Fukui onsen reuse proposal: facility, COG DC, learning and regional revitalization | Understand the proposal and evidence, then participate through YUMORI | `frontend/app/page.tsx` and its necessary dependencies |
-| YUMORI.me / www | Build the wider YUMORI movement and preparatory committee through the WHY / WHAT / HOW case | Become a YUMORI, join the committee and reach supporting information | `frontend/app/yumori/page.tsx` and its necessary dependencies |
+| eSingularity.ai (also reached through YUMORI.info) | Explain the Fukui onsen reuse proposal: facility, COG DC, learning and regional revitalization | Understand the proposal and evidence, then participate through YUMORI.me | `frontend/app/page.tsx` and its necessary dependencies |
+| YUMORI.me / www | Build the wider YUMORI.me movement and preparatory committee through the WHY / WHAT / HOW case | Become a YUMORI.me, join the committee and reach supporting information | `frontend/app/yumori/page.tsx` and its necessary dependencies |
 | Shared ticker | Carry one current campaign announcement across both sites | Find the confirmed action, place, time and destination | Shared component and multilingual `current-field-status.json`; verify both consumers |
 
 “Apply the website skill” applies the workflow to the site named in the request or established by the active task. It does not mean redesign both sites. State the target, requested outcome and bounded edit scope briefly before editing. If the target truly cannot be resolved from the request and visible context, ask one short question before a page-specific mutation.
 
-An eSingularity redesign must leave YUMORI.me's content, order and join funnel intact. A YUMORI edit must preserve the project page. Shared CSS, language handling, navigation helpers and hosting can affect both: inspect their consumers, scope page-specific styling and regression-check the other site. Checking the other page does not authorize redesigning it. A shared ticker update intentionally reaches both.
+An eSingularity redesign must leave YUMORI.me's content, order and join funnel intact. A YUMORI.me edit must preserve the project page. Shared CSS, language handling, navigation helpers and hosting can affect both: inspect their consumers, scope page-specific styling and regression-check the other site. Checking the other page does not authorize redesigning it. A shared ticker update intentionally reaches both.
 
 ### Current eSingularity redesign direction — specified, not yet implemented by this skill change
 
@@ -77,6 +85,20 @@ Both pages retain their separate purposes and join actions. Preserve JHR access,
 
 For announcement-only edits, use `.claude/skills/esingularity-ticker/SKILL.md` (Codex projection: `.agents/skills/esingularity-ticker/SKILL.md`). Keep event date, location, end time and link consistent; do not renew an expired invitation unless 012 confirms it. The live payload contains Japanese, English and Portuguese together and expires automatically; hidden, expired or invalid data falls back to the durable campaign action.
 
+## JHR website-first publishing handoff — 2026-10-13
+
+For **Japan Hyperscaler Report (JHR)** article/issue work, `eSingularity.ai` is the canonical **public** publisher and source for downstream LinkedIn newsletter editions. The source files live under `modules/foundups/esingularity/jhr/`; the rendered JHR website reader currently lives in `frontend/app/reports/jhr/layout.tsx` and `frontend/app/reports/jhr/page.tsx`, with issue anchors such as `/reports/jhr#jhr-003`. A repository research file or Google Doc is a working/evidence artifact, **not** the verified published website edition.
+
+Apply this sequence only to a **new approved JHR issue or a material issue correction**, not every change to a homepage, ticker, CSS, metadata or unrelated article:
+
+1. Run the JHR evidence/significance gate and update the existing JHR repository report and rendered website issue together. Preserve issue number, source citations, Japanese-first copy, claims and previous editions. Do not regenerate a new issue for a correction.
+2. Verify source/build/regression checks, complete the existing authorized Git/hosting release, and independently open the **canonical public JHR URL and exact issue anchor**. Record the source revision/commit, deployment receipt, public URL, issue key and verified live date/content. A branch, PR merge, preview, build or submitted deploy alone is **not** `WEBSITE_LIVE_VERIFIED`.
+3. Only after `WEBSITE_LIVE_VERIFIED`, hand off the immutable **website publication receipt** to `modules/platform_integration/linkedin_agent/skillz/linkedin_jhr_newsletter/SKILLz.md` and `linkedin_publishing`. The LinkedIn edition is a derived distribution adaptation of that published article, not a separately authoritative manuscript. Use the exact site issue URL as its primary backlink.
+4. Before any LinkedIn publishing, verify the current LinkedIn publisher/series, existing edition/draft/schedule and the exact action's authorization. Match subject, factual assertions, issue/source revision and links to the live site. Do not cross-post unrelated website changes or silently reissue an already distributed edition. A material site correction may require an **approved edit to the existing edition**, not an automatic new edition.
+5. Publish/schedule via the existing authorized LinkedIn execution route **only after** its own checks; read back the resulting draft/schedule/permalink. Return the LinkedIn receipt to the existing JHR/LinkedIn continuity surface. If inaccessible or uncertain, record `LINKEDIN_BLOCKED` or `SUBMITTED_UNVERIFIED`; keep the site issue live without claiming LinkedIn publication and never blind-retry.
+
+Minimal handoff fields: `issue_key`, `canonical_website_url`, `website_source_revision`, `website_release_receipt`, `website_live_verified_at`, `website_content_identity` (hash or equivalent verified revision), `linkedin_publisher`, `linkedin_series`, `approval_scope`, `duplicate_check`, `linkedin_delivery_state`, `linkedin_permalink`. Reuse existing receipts/continuity, not a new publication database or autonomous posting service. This is an instruction-level dependency contract until a governed running dispatcher is independently verified. **Never claim automatic cross-posting or an actual LinkedIn publication from a skill edit alone.**
+
 ## Verification and publication
 
 Run from repository root:
@@ -90,7 +112,7 @@ The first test file includes the single-source/both-homepage ticker contract. Fo
 
 If pytest is unavailable, its dependency-free test functions can be invoked directly with `runpy`; label that accurately. Existing suite failures must be compared with the base revision and recorded. Do not remove a ticker assertion merely to make a redesign pass, treat all red CI as harmless, or bypass required merge gates.
 
-For YUMORI landing or shared ticker layout changes, check phone widths (320–390 CSS pixels) and an 11-inch iPad in portrait and landscape (for example 834×1194 and 1194×834), plus desktop. Distinguish viewport simulation from testing actual Safari hardware. Verify the document does not overflow horizontally, the full wordmark and JOIN actions fit, and language controls have their own header slot rather than floating across the ticker. Inspect loaded images and captions; distinguish concept imagery from photographs of completed facilities. Do not infer a broken image merely from an empty hero.
+For YUMORI.me landing or shared ticker layout changes, check phone widths (320–390 CSS pixels) and an 11-inch iPad in portrait and landscape (for example 834×1194 and 1194×834), plus desktop. Distinguish viewport simulation from testing actual Safari hardware. Verify the document does not overflow horizontally, the full wordmark and JOIN actions fit, and language controls have their own header slot rather than floating across the ticker. Inspect loaded images and captions; distinguish concept imagery from photographs of completed facilities. Do not infer a broken image merely from an empty hero.
 
 Ticker speed should be measured in pixels per second, with slower phone/tablet values; a fixed loop duration makes longer announcements race across the screen. Verify a touch-accessible way to stop and read every item, resume behavior, keyboard access, and reduced motion. Check both rendered consumers, including expanded reading mode. If preview is unavailable, record that visual validation remains incomplete; a build is not a visual audit.
 
@@ -112,3 +134,18 @@ If dispatched through Red Dog/WRE, retain its signed work-order, allowed-path, v
 - `cc7de15` / PR #1691 mounted the same ticker on YUMORI.me and added both-consumer assertions. Reuse those checks rather than inventing a parallel ticker system.
 
 These are historical evidence, not current HEAD or deployment receipts. Re-read current source before each edit.
+
+## JHR reconciliation of older open releases — 2026-11-16
+
+For JHR, inspect the relevant YUMORI and JHR private continuity ledgers plus the
+existing issue2126 release obligation, including older unresolved entries.
+Compare the actual Sites project, saved source/version, deployment receipt and
+exact current live issue. Version saved, build/source merged and deployment
+SUCCESS cannot substitute for matching issue/body/assets/metadata readback.
+Preserve concurrent unpublished site work and both homepages before preparing a
+release. A site correction does not authorize reposting an already live LinkedIn
+edition. Feed the source/archive/build/live distinctions into the existing
+`social campaign content action=reconcile dry_run=true` receipt contract at
+`modules/platform_integration/social_media_orchestrator/docs/CONTENT_CAMPAIGN.md`.
+The helper is supplied-evidence review only; this skill still owns actual source,
+build/deploy qualification, authorization and independent live verification.

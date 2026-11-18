@@ -16,6 +16,21 @@ This protocol defines the canonical steps for onboarding a new FoundUp into the 
 
 ---
 
+## Standing 012 Instruction - Repository-First Intake and Updates (2026-10-30)
+
+Before creating, extending, pitching, or preparing to launch a FoundUp, retrieve the current Foundups-Agent requirements and applicable instruction files. Do not reconstruct the framework from conversation memory alone. This standing instruction was explicitly requested during the Vote claim-verification update.
+
+1. Resolve the current FoundUp identity, module, registry/manifest and relevant catalogs/portfolio. Classify new, existing update, fork, derivative or external reference before creating anything.
+2. Read canonical [WSP 109](../../../WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md) and the project's eight intake artifacts. Preserve **OUTCOME -> SOLUTION -> PAIN**: Outcome is the vision; Solution contains PoC -> Prototype -> MVP; Pain includes barriers to reaching and implementing that solution as well as evidenced adoption problems.
+3. Discover and read applicable current Skillz. Verify actual scope, lifecycle and registry status. A named candidate, prototype document or old inventory is not an installed/admitted runtime skill. [WSP 95](../../../WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md) governs executable admission.
+4. Reuse existing intake/module work. The [genesis instruction](../../ai_intelligence/ai_overseer/skillz/foundup_genesis_intake/SKILLz.md) concerns new FoundUps; an existing feature update must not silently create a duplicate genesis, repository or runtime. The [pitch-package instruction](../../platform_integration/social_media_orchestrator/skillz/foundup_pitch_package/SKILLz.md) supplies the current three-part narrative framing, not launch authority.
+5. Keep unspecified stages, metrics, source adapters and release criteria explicit. Do not invent an MVP, claim a corpus has run, or promote planned work to implemented/live status.
+6. Use governed HoloIndex retrieval when available and qualified. If unavailable, record the actual direct-retrieval fallback and its limitations. Never claim a query, bootstrap, skill invocation, validation gate or live launch that did not execute.
+7. Check the existing namespace, public-surface, build and readiness contracts appropriate to the requested scope. Complete authorized documentation and verification; distinguish draft, committed, merged, deployed and locally synchronized outcomes.
+8. Preserve the source request, record material assumptions/corrections, update the owning README/ROADMAP/INTERFACE/ModLog as applicable, and verify the final change set against the repository requirements.
+
+This is persistent project workflow guidance. WSP 109 remains the canonical intake authority; WSP 30 governs staged build planning. Runtime admission, deployment and actual Skillz execution require their own current evidence. For an intake-only update, the eight artifacts are the deliverable; this reference grants no additional effects or launch readiness.
+
 ## 1. Canonical Representation Locations
 
 Every new FoundUp may need representation in the following locations:

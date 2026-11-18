@@ -1,8 +1,8 @@
 # FoundUps Master Architecture
 
-**Version**: 1.1.0
+**Version**: 1.1.1
 
-**Updated**: 2026-08-26
+**Updated**: 2026-10-23 (document map; lifecycle unchanged)
 
 **Status**: Canonical lifecycle and surface contract
 
@@ -20,6 +20,14 @@ RedDog is the operator-facing principal-scoped 0102 Digital Twin that helps a
 person navigate and build this ecosystem. p.fMALL is the discovery and
 interaction shell. OpenClaw, WRE, Hermes, and FoundUp DAEs operate behind
 separately authenticated authority boundaries; they are not browser features.
+
+### Play FoundUps product vocabulary and runtime invariant
+
+**Play FoundUps Mall (p.fMALL)** names the PWA store/discovery shell. **Play FoundUps** names what a person does when interacting with a FoundUp. A FoundUp is a separately identified, manifest-declared experience/venture, not a mandate to duplicate the app runtime or backend.
+
+The target is a reusable shell and governed services with per-FoundUp skins, task-specific AI context, entry routes, capabilities and isolated namespaces. Reuse gestures (touch/swipe/pinch/zoom), navigation, accessibility and shared platform adapters; backend agent, memory, RSI/WRE and optional blockchain services remain permissioned and server-side. Manifest capability declarations are requests/contracts, not proof of authorization. Existing separate PWAs and sites may remain independent deployments while the unified runtime is built; never claim universal composition is implemented.
+
+FoundUps may connect through explicit, consented, versioned context and capability contracts while preserving separate identity and authorization. Refer to [manifest schema](PFMALL_FOUNDUP_MANIFEST_SCHEMA.md) and [Mall runtime](../pfmall/README.md).
 
 ## 2. Five-layer funnel
 
@@ -209,6 +217,7 @@ this document.
 | `FOUNDUPS_ENTITLEMENT_TIERS.md` | Per-surface entitlement matrix |
 | `FOUNDUP_TEMPLATE.md` | Adding a FoundUp |
 | `PFMALL_SHELL_CONTRACT.md` | p.fMALL platform boundary |
+| [`../pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md`](../pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) | AutoPost original photos, private item grouping and shared Mall attachment; specification and implementation gates |
 | `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` | RedDog thin-client and authority contract |
 | `WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md` | RedDog/0102 protocol |
 | `WSP_framework/src/WSP_98_FoundUps_Mesh_Native_Architecture_Protocol.md` | Federated/mesh target gates |

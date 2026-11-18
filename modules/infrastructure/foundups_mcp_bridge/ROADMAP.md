@@ -1,5 +1,36 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-11-15: Windows chained-venv `_mcp_runtime_python` hardening (PR #2402)
+
+Hardened `_mcp_runtime_python()` in `scripts/launch.py` to retain the outer
+Windows virtual environment's `Lib/site-packages` while walking multi-level
+`pyvenv.cfg` chains (`base.parent.parent / "pyvenv.cfg"` or
+`base.parent / "pyvenv.cfg"`) with a resolved-path `visited` cycle guard and
+clean `(candidate, None)` fallback on broken or cyclic chains. Widened
+`get_git_inventory` `section` literal to include `"stashes"`. All 60 cases in
+the MCP runtime compatibility selection (`test_mcp_launcher_http.py`,
+`test_mcp_server_sse.py`, `test_git_inventory_oauth.py`, and
+`test_reddog_holoindex_query_runtime_candidate_binding.py`) pass.
+
+## 2026-11-11: Private draft MCP PoC
+
+The separate source and synthetic transport are qualified independently of
+the Holo bridge. Private activation remains gated on an admitted host and
+supervisor, issuer and tunnel, Google consent, and one exact provider draft.
+Acceptance requires live readback and ChatGPT invocation observed while Codex
+is stopped. See the [operator runbook](docs/PRIVATE_DRAFT_MCP.md).
+
+## 2026-10-19: MCP security dependency coordination
+
+MCP 1.30.0 is now declared consistently in requirements, the launcher's strict
+runtime contract, and the existing candidate-binding regression. Current docs
+reflect the quartet; historical qualification records below remain unchanged.
+Local Linux coverage is 28 passing cases plus a successful real runtime version
+probe. The 19 Windows-only cases and two owned HTTP cases still require the
+unchanged 49-case Windows CI gate. Installed environments require their existing
+governed upgrade and qualification procedure before activation; source acceptance
+does not establish deployment or native execution authority.
+
 ## 2026-10-04: Paired MCP compatibility layer
 
 The existing launcher now pins FastMCP3.2.0/MCP1.28.1 with unchanged

@@ -35,7 +35,7 @@ from modules.communication.moltbot_bridge.src.reddog_current_generation_manifest
     create_current_generation_manifest_launch_selection_boundary,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
-    RuntimeArtifactManifestError, ascii_deep, digest, is_sha256, raw_digest,
+    MAX_ARTIFACT_BYTES, RuntimeArtifactManifestError, ascii_deep, digest, is_sha256, raw_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_launch_selection import (
     CONFIG_FILENAME, RUN_PACKET_FILENAME,
@@ -60,7 +60,8 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 )
 from .reddog_signer_system_service_owner_inputs import (
     load_system_service_signer_identity, load_system_service_model_runtime_verifier,
-    _validate_model_verifier_authority,
+    _validate_model_verifier_authority, _validate_owner_paths, _owner_anchor_root,
+    _validate_outcome_authority_root_separation,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path, validate_runtime_root_path,
@@ -74,6 +75,11 @@ SCHEMA_VERSION_V5 = "reddog_signer_system_service_owner_config.v5"
 SCHEMA_VERSION_V6 = "reddog_signer_system_service_owner_config.v6"
 SCHEMA_VERSION_V7 = "reddog_signer_system_service_owner_config.v7"
 SCHEMA_VERSION_V8 = "reddog_signer_system_service_owner_config.v8"
+SCHEMA_VERSION_V9 = "reddog_signer_system_service_owner_config.v9"
+SCHEMA_VERSION_V10 = "reddog_signer_system_service_owner_config.v10"
+SCHEMA_VERSION_V11 = "reddog_signer_system_service_owner_config.v11"
+SCHEMA_VERSION_V12 = "reddog_signer_system_service_owner_config.v12"
+SCHEMA_VERSION_V13 = "reddog_signer_system_service_owner_config.v13"
 MAX_OWNER_CONFIG_BYTES = 64 * 1024
 ROOT_UID = 0
 FIELDS = frozenset({
@@ -90,6 +96,11 @@ V5_FIELDS = V4_FIELDS | {"reviewer_designation_authority"}
 V6_FIELDS = V5_FIELDS | {"effect_consent_authority"}
 V7_FIELDS = V6_FIELDS | {"startup_custody"}
 V8_FIELDS = V7_FIELDS | {"model_verifier_authority"}
+V9_FIELDS = V8_FIELDS | {"grant_startup_custody"}
+V10_FIELDS = V9_FIELDS | {"grant_rate_store"}
+V11_FIELDS = V10_FIELDS | {"parent_consent_authority"}
+V12_FIELDS = V11_FIELDS | {"parent_reviewer_designation_authority"}
+V13_FIELDS = V12_FIELDS | {"consensus_nonce_authority"}
 _OUTCOME_OWNER_FIELDS = frozenset({
     "descriptor", "authority_socket_path", "authority_service_uid", "signer_uid", "signer_gid",
     "signer_principal_id", "state_root", "state_path", "state_store_id",
@@ -116,7 +127,7 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
     """Load all production signer authority from one root-owned v2 snapshot."""
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
-    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
+    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         raise RuntimeArtifactManifestError("signer_owner_config_v2_required")
     manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
 
@@ -138,7 +149,7 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
     return SystemServiceStartupSelection(
         str(owner["config_id"]), manifest, boundary, authority_supplier,
         signer_uid, signer_gid, principal_authority_supplier,
-        runtime_dependencies_supplier if owner["schema_version"] in {SCHEMA_VERSION_V7, SCHEMA_VERSION_V8} else None,
+        runtime_dependencies_supplier if owner["schema_version"] in {SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13} else None,
     )
 
 
@@ -300,7 +311,7 @@ def _build_generation_reader(
     )
     reader = DurableSignerRuntimeGenerationReader(
         owner["anchor_path"],
-        allowed_root=runtime,
+        allowed_root=_owner_anchor_root(owner, repo=repo),
         repo_root=repo,
         anchor_id=str(owner["anchor_id"]),
         verifier_authority=verifier_authority,
@@ -343,25 +354,27 @@ def _load_owner_config(path: Path | str, *, repo: Path) -> dict[str, Any]:
                 result[key] = item
             return result
         value = json.loads(raw.decode("ascii"), object_pairs_hook=object_pairs)
-        if isinstance(value, dict) and value.get("schema_version") in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8} and duplicates:
+        if isinstance(value, dict) and value.get("schema_version") in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13} and duplicates:
             raise RuntimeArtifactManifestError("signer_owner_config_duplicate_key")
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise RuntimeArtifactManifestError("signer_owner_config_malformed") from exc
     return _validate_owner_config(value, repo=repo, owner_root=root)
 
 
-def _read_root_owned_bytes(target: Path, root: Path) -> bytes:
+def _read_root_owned_bytes(target: Path, root: Path, *, allow_empty: bool = False,
+                           max_bytes: int = MAX_OWNER_CONFIG_BYTES) -> bytes:
     if not sys.platform.startswith("linux"):
         raise RuntimeArtifactManifestError("signer_owner_linux_service_required")
     try:
-        return _read_root_owned_linux_bytes(target, root)
+        return _read_root_owned_linux_bytes(target, root, allow_empty=allow_empty, max_bytes=max_bytes)
     except OSError as exc:
         raise RuntimeArtifactManifestError(
             "signer_owner_config_descriptor_invalid"
         ) from exc
 
 
-def _read_root_owned_linux_bytes(target: Path, root: Path) -> bytes:
+def _read_root_owned_linux_bytes(target: Path, root: Path, *, allow_empty: bool = False,
+                                 max_bytes: int = MAX_OWNER_CONFIG_BYTES) -> bytes:
     _require_secure_ancestry(root)
     directory_flags = (
         os.O_RDONLY
@@ -378,7 +391,7 @@ def _read_root_owned_linux_bytes(target: Path, root: Path) -> bytes:
         file_fd = os.open(target.name, file_flags, dir_fd=directory_fd)
         try:
             _require_root_file_fd(file_fd)
-            return _read_bounded_fd(file_fd)
+            return _read_bounded_fd(file_fd, allow_empty=allow_empty, max_bytes=max_bytes)
         finally:
             os.close(file_fd)
     finally:
@@ -419,19 +432,23 @@ def _require_root_file_fd(file_descriptor: int) -> None:
         raise RuntimeArtifactManifestError("signer_owner_config_permissions_invalid")
 
 
-def _read_bounded_fd(file_descriptor: int) -> bytes:
+def _read_bounded_fd(file_descriptor: int, *, allow_empty: bool = False,
+                     max_bytes: int = MAX_OWNER_CONFIG_BYTES) -> bytes:
+    # Enrollment artifacts opt in; ordinary owner configuration remains 64 KiB.
+    if type(max_bytes) is not int or not 0 < max_bytes <= MAX_ARTIFACT_BYTES:
+        raise RuntimeArtifactManifestError("signer_owner_config_read_limit_invalid")
     chunks: list[bytes] = []
     total = 0
-    while total <= MAX_OWNER_CONFIG_BYTES:
+    while total <= max_bytes:
         chunk = os.read(
             file_descriptor,
-            min(8192, MAX_OWNER_CONFIG_BYTES + 1 - total),
+            min(8192, max_bytes + 1 - total),
         )
         if not chunk:
             break
         chunks.append(chunk)
         total += len(chunk)
-    if total == 0 or total > MAX_OWNER_CONFIG_BYTES:
+    if (total == 0 and allow_empty is not True) or total > max_bytes:
         raise RuntimeArtifactManifestError("signer_owner_config_size_invalid")
     return b"".join(chunks)
 
@@ -445,7 +462,7 @@ def _validate_owner_config(
     expected_fields = {SCHEMA_VERSION: FIELDS, SCHEMA_VERSION_V2: V2_FIELDS,
                        SCHEMA_VERSION_V3: V3_FIELDS, SCHEMA_VERSION_V4: V4_FIELDS,
                        SCHEMA_VERSION_V5: V5_FIELDS, SCHEMA_VERSION_V6: V6_FIELDS,
-                       SCHEMA_VERSION_V7: V7_FIELDS, SCHEMA_VERSION_V8: V8_FIELDS}.get(schema)
+                       SCHEMA_VERSION_V7: V7_FIELDS, SCHEMA_VERSION_V8: V8_FIELDS, SCHEMA_VERSION_V9: V9_FIELDS, SCHEMA_VERSION_V10: V10_FIELDS, SCHEMA_VERSION_V11: V11_FIELDS, SCHEMA_VERSION_V12: V12_FIELDS, SCHEMA_VERSION_V13: V13_FIELDS}.get(schema)
     if expected_fields is None or set(value) != expected_fields:
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     checked = dict(value)
@@ -458,17 +475,22 @@ def _validate_owner_config(
         raise RuntimeArtifactManifestError("signer_owner_repo_binding_mismatch")
     _validate_owner_text_and_digests(checked)
     _validate_owner_paths(checked, repo=repo, owner_root=owner_root)
-    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
+    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         _validate_outcome_authority_owner_config(
             checked, repo=repo, owner_root=owner_root
         )
-    if schema in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
+    if schema in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         from modules.communication.moltbot_bridge.src.reddog_signer_independent_grant_authority_client_supply import validate_independent_grant_authority_owner_config
         validate_independent_grant_authority_owner_config(checked, repo=repo, owner_root=owner_root)
-    if schema in {SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
+    if schema in {SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         from modules.communication.moltbot_bridge.src.reddog_grant_authority_source_policy_authority import validate_grant_authority_source_policy_owner_config
         validate_grant_authority_source_policy_owner_config(checked, repo=repo)
-    if schema in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
+    _validate_owner_extensions(checked, schema, repo, owner_root)
+    return checked
+
+
+def _validate_owner_extensions(checked, schema, repo, owner_root):
+    if schema in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         from .reddog_reviewer_designation_contract import validate_reviewer_designation_authority
         try:
             checked["reviewer_designation_authority"] = validate_reviewer_designation_authority(
@@ -476,18 +498,44 @@ def _validate_owner_config(
             )
         except ValueError as exc:
             raise RuntimeArtifactManifestError("reviewer_designation_authority_invalid") from exc
-    if schema in {SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
+    if schema in {SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         from .reddog_effect_consent_contract import validate_effect_consent_authority
         try:
             checked["effect_consent_authority"] = validate_effect_consent_authority(checked["effect_consent_authority"])
         except ValueError as exc:
             raise RuntimeArtifactManifestError("effect_consent_authority_invalid") from exc
-    if schema in {SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
+    if schema in {SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         from .reddog_signer_system_service_wsp71_resolver_supply import validate_system_service_startup_custody
         validate_system_service_startup_custody(checked, repo_root=repo, owner_root=owner_root)
-    if schema == SCHEMA_VERSION_V8:
+    if schema in {SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         _validate_model_verifier_authority(checked, repo=repo)
-    return checked
+    if schema in {SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
+        from .reddog_grant_authority_startup_custody import validate_grant_startup_custody
+        validate_grant_startup_custody(checked, repo_root=repo, owner_root=owner_root)
+
+    if schema in {SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
+        from .reddog_parent_consent_contract import validate_parent_consent_authority
+        try:
+            checked["parent_consent_authority"] = validate_parent_consent_authority(checked["parent_consent_authority"])
+        except ValueError as exc:
+            raise RuntimeArtifactManifestError("parent_consent_authority_invalid") from exc
+
+
+    if schema in {SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
+        from .reddog_reviewer_designation_contract import validate_parent_reviewer_designation_authority
+        try:
+            authority = validate_parent_reviewer_designation_authority(checked["parent_reviewer_designation_authority"])
+            if any(authority[key] != checked["parent_consent_authority"][key]
+                   for key in ("policy_digest", "repo_full_name", "foundup_id")):
+                raise ValueError("parent_reviewer_scope_mismatch")
+            checked["parent_reviewer_designation_authority"] = authority
+        except ValueError as exc:
+            raise RuntimeArtifactManifestError("parent_reviewer_authority_invalid") from exc
+
+    if schema == SCHEMA_VERSION_V13:
+        from .reddog_consensus_nonce_custody import validate_consensus_nonce_custody
+        validate_consensus_nonce_custody(checked, repo_root=repo, owner_root=owner_root)
+
 
 def _validate_owner_text_and_digests(value: Mapping[str, Any]) -> None:
     text_fields = (
@@ -502,36 +550,6 @@ def _validate_owner_text_and_digests(value: Mapping[str, Any]) -> None:
         not is_sha256(value.get(name)) for name in digest_fields
     ):
         raise RuntimeArtifactManifestError("signer_owner_config_value_invalid")
-
-
-def _validate_owner_paths(
-    value: Mapping[str, Any], *, repo: Path, owner_root: Path
-) -> None:
-    runtime = validate_runtime_root_path(value["runtime_root"], repo_root=repo)
-    high_root = validate_runtime_root_path(value["high_water_root"], repo_root=repo)
-    witness_root = validate_runtime_root_path(value["witness_root"], repo_root=repo)
-    roots = (runtime, high_root, witness_root)
-    if any(
-        first == second or first in second.parents or second in first.parents
-        for first, second in (
-            (runtime, high_root),
-            (runtime, witness_root),
-            (high_root, witness_root),
-            *((owner_root, item) for item in roots),
-        )
-    ):
-        raise RuntimeArtifactManifestError("signer_owner_root_overlap")
-    expected = (
-        (value["anchor_path"], runtime, "generation-anchor.json"),
-        (value["high_water_path"], high_root, "high-water.json"),
-        (value["witness_path"], witness_root, "generation.sqlite3"),
-    )
-    for raw_path, root, filename in expected:
-        path = validate_runtime_artifact_path(
-            raw_path, allowed_root=root, repo_root=repo
-        )
-        if path != root / filename:
-            raise RuntimeArtifactManifestError("signer_owner_path_invalid")
 
 
 def _validate_outcome_authority_owner_config(
@@ -604,34 +622,6 @@ def _validated_outcome_owner_paths(
     return roots
 
 
-def _validate_outcome_authority_root_separation(
-    value: Mapping[str, Any],
-    *,
-    owner_root: Path,
-    state_root: Path,
-    witness_root: Path,
-    installation_root: Path,
-) -> None:
-    existing_roots = tuple(
-        Path(value[name]).resolve()
-        for name in ("runtime_root", "high_water_root", "witness_root")
-    ) + (owner_root,)
-    if any(
-        first == second or first in second.parents or second in first.parents
-        for first, second in (
-            (state_root, witness_root),
-            (state_root, installation_root),
-            (witness_root, installation_root),
-            *(
-                (root, other)
-                for root in (state_root, witness_root, installation_root)
-                for other in existing_roots
-            ),
-        )
-    ):
-        raise RuntimeArtifactManifestError("verified_outcome_owner_root_overlap")
-
-
 def _require_cli_paths(
     runtime: Path,
     config_path: Path | None,
@@ -660,7 +650,7 @@ def _ascii(value: object) -> bool:
 
 __all__ = [
     "RootAuthorityServiceDependencies", "SCHEMA_VERSION", "SCHEMA_VERSION_V2", "SCHEMA_VERSION_V3",
-    "SCHEMA_VERSION_V4", "SCHEMA_VERSION_V5", "SCHEMA_VERSION_V6", "SCHEMA_VERSION_V7", "SCHEMA_VERSION_V8", "SystemServiceStartupSelection",
+    "SCHEMA_VERSION_V4", "SCHEMA_VERSION_V5", "SCHEMA_VERSION_V6", "SCHEMA_VERSION_V7", "SCHEMA_VERSION_V8", "SCHEMA_VERSION_V9", "SCHEMA_VERSION_V10", "SCHEMA_VERSION_V11", "SCHEMA_VERSION_V12", "SCHEMA_VERSION_V13", "SystemServiceStartupSelection",
     "load_system_service_manifest_selection", "load_system_service_revocation_anchor_authority",
     "load_system_service_signer_identity", "load_system_service_startup_selection",
     "load_system_service_verified_outcome_signing_authority",

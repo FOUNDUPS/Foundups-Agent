@@ -13,6 +13,11 @@ These are continuing acceptance gates, not completed features that may later be 
 
 ## Phase 1 — Monorepo incubation (current)
 
+- [x] Implement an exploratory organization-partner invitation and manually sent
+  inquiry template, with a host-restricted `/partners` alias and existing
+  Japanese/English/Portuguese language support. This is repository source only.
+- [ ] Verify this partner-inquiry edition after an authorized production
+  deployment; keep actual inquiry receipt and partner commitments separate.
 - [x] Preserve the live Japanese-first campaign PWA.
 - [x] Move canonical source under `modules/foundups/esingularity/frontend`.
 - [x] Add FoundUp identity, manifest, registry, tests, and module documentation.
@@ -31,7 +36,7 @@ These are continuing acceptance gates, not completed features that may later be 
 ## Phase 3 — Campaign operations
 
 - [x] Bind LinkedIn company page ID `2199715` to `esingularity_001` as the canonical eSingularity.ai social/publishing surface; route AI Koban, JHR amplification, regional AI infrastructure and partner-development content here rather than treating `linkedin_esingularity` as a separate venture. Keep live signed-in page-name verification as a publication gate.
-- [x] Centralize approved YUMORI.me / guardian / JHR branding in the shared website skill, with eSingularity and YUMORI.me entrypoints plus ticker/report cross-references. This records the language contract; it does not publish or certify live compliance.
+- [x] Centralize eSingularity.ai / YUMORI.me FoundUp identity, aliases, domains, JOIN and guardian copy in `brand_context.json`; website/ticker/report Skillz consume that context while retaining their own surface-specific JHR behavior. This records the identity contract; it does not publish or certify live compliance.
 - [ ] Focus eSingularity.ai navigation on three to four primary tabs; determine labels/grouping in the active redesign, preserve JHR and participation access, and verify desktop/mobile consistency. Keep YUMORI.me's movement funnel intact.
 - [x] Make the website skill resolve the target site, purpose, visitor goal and edit boundary before each change.
 - [x] Add the FoundUp-owned [website operations skill](skills/website-update/SKILL.md), with history-backed shared-ticker checks and registry/agent discovery.
@@ -40,6 +45,14 @@ These are continuing acceptance gates, not completed features that may later be 
 - [x] Add the WRE-registered [YUMORI.me correspondence parent](skillz/yumori_contact_ledger/SKILLz.md) for live Gmail/CRM reconciliation, routing consent, 0102 proxy voice, receipts and recursive operator learning without a parallel contact database.
 - [x] Add the WRE-registered [YUMORI Work orchestrator](skillz/yumori_work_orchestrator/SKILLz.md) so 012/Red Dog planning is reconciled against live state, WSP 15-ranked, split into 012 physical actions vs machine work, and handed to the existing governed Work chain. Capital discovery reuses CONTACTS `Capital Targets` / `Capital People` and verified first-degree LinkedIn/Gmail evidence rather than creating another investor database.
 - [x] Add the canonical [grants/subsidies/PPP support registry](docs/GRANTS_AND_SUBSIDIES.md), reconcile it with the Drive grant-audit sheet, and require status labels that distinguish program existence from eligibility, application, selection, and award.
+
+- [x] Define YUMORI as the first FoundUp **resident RSI canary** inside the existing [work orchestrator](skillz/yumori_work_orchestrator/SKILLz.md): reconstruct Memex/Brain/Breadcrumb/provider state each cycle; autonomously identify the highest-leverage blocker; research partners through existing Contacts/Gmail/LinkedIn; verify every outcome; and measure retained improvement on a later unseen cycle without adding another daemon or memory store.
+- [ ] Qualify one real YUMORI resident cycle that reads current provider/project state, selects work and writes private receipts/projections with **no external mutation**.
+- [ ] Close the existing #1779 host-deployment sender boundary, then separately qualify one bounded `REDDOG_AUTO` Gmail transaction with fresh audience/recipient preflight, service-owned provider execution and exact Sent readback.
+- [ ] Qualify LinkedIn partner research first, then connection/DM mutation as a separate provider-effect profile; no mass outreach and no inferred relationship from discoverability.
+- [ ] Demonstrate one retained YUMORI improvement on a later unseen cycle, with independent outcome evidence and rollback, before claiming end-to-end RSI.
+- [ ] Qualify OpenRouter / Fusion as an advisory YUMORI reasoning layer only after live-client/runtime, budget and privacy/redaction evidence; keep private Gmail/contact/Memex payloads out of external panels by default.
+- [ ] Use AI Gateway model AutoResearch for bounded model selection where its benchmark contract fits; do not repurpose WRE AutoResearcher's compute/ROI evaluator as the YUMORI outcome oracle.
 - [x] Send the first formal eligibility inquiry for the MOE/RCESPA regional-coexistence data-center decarbonization program, framed around a currently closed municipal onsen and a future lawful PPP/lease/SPC structure.
 - [ ] Obtain written clarification from RCESPA on closed-facility status, applicant/operator/SPC structure, property/use-right timing, eligible heat-reuse equipment, stacking, and current-round timing.
 - [ ] Feed only verified eligibility and eligible-cost calculations into the Phase 1 financial model; never book a statutory maximum cap or an unverified model placeholder as committed funding.
@@ -90,3 +103,15 @@ Historical Educational Singularity / eSingularity material (including 2007–201
 - [ ] Replace MODEL ONLY scope quantities and rates with surveys/vendor/utility evidence.
 - [ ] Obtain customer orders, carrier route, City use terms and finance/tax review; then select a deployable minimum phase.
 - [ ] Resolve dated drawdowns, VAT bridge, refurbishment scope and actual commissioning sequence. No deployment gate is passed by entering planning estimates.
+
+## 2026-10-13 — governed regional AI Koban expansion pilot (bounded)
+
+- [x] Reconcile 2026-10-09 Hokuriku utility procedural reply (Gmail MID 1a11e5995aa26b04) into YUMORI canonical Gmail / Contacts / Email Log / Moshpit. No capacity, service price or asset rights established.
+- [x] Send a **new**, scope-limited prefectural nuclear-to-DC policy-owner inquiry through the verified Energy Division route, with Governor public correspondence office copied; exact Sent MID 1a13288a812bff6d. This is not a power allocation, City approval or grant application.
+- [x] Seed 7 sourced public-asset research leads across Fukui City, Ono City, Ishikawa/Nanao in [AI_KOBAN_REGIONAL_PUBLIC_ASSET_LEADS.json](docs/AI_KOBAN_REGIONAL_PUBLIC_ASSET_LEADS.json). Existing YUMORI sites retain canonical 3-site priority and city-owner independence.
+- [x] Record a compact restart/yes-no decision contract in [AI_KOBAN_YUMORI_GATES.json](docs/AI_KOBAN_YUMORI_GATES.json). It supplements WSP97 and existing RedDog Work orchestrator; **not** a replacement CRM, Brain, Breadcrumbs or send signer.
+- [x] Add manually run, read-only [official-source page pulse](tools/ai_koban_official_asset_scan.py) seeded by exact site sources. Offline validation is default; `--fetch` is bounded, robots-gated and does not edit status.
+- [ ] Independently test the scanner with live municipal pages where robots permit, compare changed content against official call result/deadline, and route any candidate status change for human verification.
+- [ ] Extend locality coverage in small batches from Fukui to Ishikawa via official municipality sources; MEXT listings are discovery inputs only, not proof the current owner is soliciting.
+- [ ] Validate native RedDog/ModuleDB to Breadcrumbs/Brain exact-once event admission; Docs/Sheets projections do **not** prove runtime ingestion.
+- [ ] Wait for City feedback to the unified school Form1, prefectural office reply, and demand/retailer inputs before any capacity request, legal-use assumption, investment claim or deployment recommendation.

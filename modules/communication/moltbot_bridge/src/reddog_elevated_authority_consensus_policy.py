@@ -81,38 +81,10 @@ class SovereignAuthorizationEvidenceResolver(Protocol):
     ) -> SovereignAuthorizationEvidence | None: ...
 
 
-@dataclass(frozen=True, slots=True)
-class EffectSovereignAuthorizationEvidence:
-    """Supplied assertions only; construction does not authenticate consent."""
-    authorization_digest: str
-    parent_authorization: SovereignAuthorizationEvidence
-    parent_authority_request_digest: str
-    target_signing_request_digest: str
-    effect_request_digest: str
-    consensus_policy_digest: str
-    issued_at: int
-    expires_at: int
-
-
-def _effect_sovereign_shape_valid(evidence, now) -> bool:
-    from .reddog_elevated_authority_consensus_effect_context import _bounded_text
-    from .reddog_signer_optional_authority_bindings import is_sha256_digest
-
-    if type(evidence) is not EffectSovereignAuthorizationEvidence:
-        return False
-    parent = evidence.parent_authorization
-    if type(parent) is not SovereignAuthorizationEvidence:
-        return False
-    times = (now, evidence.issued_at, evidence.expires_at, parent.expires_at)
-    if not all(type(value) is int for value in times) or now < 0 or parent.expires_at <= 0:
-        return False
-    digests = (evidence.authorization_digest, evidence.parent_authority_request_digest,
-               evidence.target_signing_request_digest, evidence.effect_request_digest,
-               evidence.consensus_policy_digest, parent.authorization_digest, parent.authority_request_digest)
-    names = ("principal_id", "principal_provider", "principal_public_key", "reddog_id",
-             "reddog_public_key", "repo_full_name", "foundup_id", "work_order_id", "key_epoch")
-    return (all(type(value) is str and is_sha256_digest(value) for value in digests)
-            and all(_bounded_text(getattr(parent, name)) for name in names))
+from .reddog_effect_sovereign_contract import (
+    EffectSovereignAuthorizationEvidence, ParentBoundEffectSovereignAuthorizationEvidence,
+    _effect_sovereign_shape_valid,
+)
 
 
 @dataclass(frozen=True, slots=True)

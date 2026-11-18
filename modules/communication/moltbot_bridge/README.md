@@ -1,3 +1,177 @@
+## Supervisor startup advisory analysis — 2026-11-05
+
+The resident supervisor initializes the existing Overseer without acquiring
+models. Its plan includes the existing deterministic fallback analysis, labelled
+`fallback`, with complexity 3 and coordination true. This metadata is advisory;
+triage selects the action and existing execution gates remain authoritative.
+Actual language generation retains its established model router and policies.
+
+## Ollama fallback settings — 2026-10-29
+
+The local fallback defaults to `qwen-overseer:latest`, defined by the repository's
+`models/Modelfile.qwen-overseer`. That file refers to a host-specific GGUF path;
+the named model must already be created in Ollama. Set `OPENCLAW_OLLAMA_MODEL`
+to an installed model name, or explicitly blank it to disable this fallback.
+No model is downloaded, created or started by this change.
+
+`OPENCLAW_OLLAMA_TIMEOUT_SEC` defaults to 120 seconds and is clamped to 15–300.
+Blank, invalid or non-finite values use 120. The synchronous HTTP call receives
+this Requests connect/read timeout; it is not a total-turn deadline or immediate
+cancellation. Existing cancellation checks run before and after that call.
+See `docs/OLLAMA_SETUP.md` for setup. Offline contracts pass; live cold-start
+readiness and installed-runtime behavior require separate acceptance.
+
+## Denied WSP preflight
+
+A failed WSP preflight returns an explicit security-block response. It stops
+before permission resolution, planning, conversation execution and result-memory
+updates; it does not turn the denied request into a conversation. Earlier
+continuity/classification reporting and skill checks still occur. Authorized
+advisory behavior, ZeroClaw profile selection and call-local skill verdicts keep
+their existing contracts. See [the interface](INTERFACE.md#denied-wsp-preflight).
+
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+The preserved implementation composes the existing installed HIGH service and
+live authenticated lease; newer main's current-time startup and nonce protections
+must survive reconciliation. Interface descriptions below are source contracts,
+not evidence that this merged candidate has been installed or admitted.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## Installed HIGH connection in progress — 2026-10-20
+
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+The live-lease core passes connected 390/9 platform skips, separate Linux 2/0
+and independent 16 controls. Installed HIGH source/policy selection and model
+artifact ingestion remain separate gates; no native author is admitted.
+[API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+
+### Historical protected-nonce checkpoint — 2026-10-20
+
+The v13 candidate supplies protected, current-owner consensus nonces using the
+existing atomic MAC state and SQLite high-water store. It preserves legacy owner
+versions and the LOW service. See the [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+Connected 437/3 platform skips and independent 21 controls pass. The installed HIGH
+issuer join remains pending; a
+callable adapter is not native author admission or retained RSI benefit.
+
+## Parent-consent prerequisite — 2026-10-19
+
+PR2163 closed policy-bound parent consent on main824d0f71. The current v12/v3
+candidate composes parent/reviewer/model evidence through effect, signer and
+current-use owners. [Contract and limits](INTERFACE.md#exact-parent-consent-connection--2026-10-19),
+[test evidence](tests/TestModLog.md#parent-consensus-connection--2026-10-20) and
+[RSI sequencing](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+The candidate is not installed HIGH admission; protected nonce/custody and genuine
+work/model/reviewer/budget inputs remain separate gates. LOW stays LOW.
+
+## Issuer-only root LOAD — 2026-10-15
+
+[LOAD-only identity, permission fencing and custody requirements](INTERFACE.md#issuer-only-root-load--2026-10-15).
+
+## Callable LOW grant service — 2026-10-15
+
+[One-request LOW API, protected loader, installed startup and runtime checks](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#installed-issuer-startup--2026-10-16). Native admission remains unproved.
+
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+E0 v9 removes the future grant-permission receipt from the pre-configuration
+binding while retaining it in the full signed policy and current admission checks.
+LOW grant requests release the generation lock during signer RPC and revalidate
+under a fresh lease before returning. These repairs have component and Linux
+transport/locking tests; native issuer enrollment and admission remain open.
+See [the contract](INTERFACE.md#grant-bootstrap-binding-and-low-rpc--2026-10-15)
+and [test evidence](tests/TestModLog.md#grant-bootstrap-and-low-rpc--2026-10-15).
+
+## Initial handshake configuration — 2026-10-15
+
+The existing signer composer now supports one explicitly scoped initial LOW
+handshake under E0 and per-request grants. It creates public configuration only;
+native startup still needs the independent grant issuer and authentic custody.
+See [the interface](INTERFACE.md#initial-handshake-configuration--2026-10-15)
+and the current RSI dispatch evidence before attempting runtime activation.
+
+## Initial manifest activation — 2026-10-15
+
+Protected administrative enrollment signs one exact source/artifact inventory in
+an explicit initial-only domain. Existing generation recovery activates it;
+Linux consumes root-installed immutable files and a separate writable anchor.
+Actual isolated publication, activation and credential-free selection passed.
+Disabled component inputs do not qualify worker startup or RSI. See
+[the contract](INTERFACE.md#initial-runtime-manifest-enrollment--2026-10-15).
+
+## Protected generation writer — 2026-10-14
+
+The missing initial-writer adapter now composes existing stores with protected
+owner/receipt bindings and per-mutation guards. Real isolated component execution
+and independent validation passed; manifest admission and native workers remain
+open. See [the API and trust limits](INTERFACE.md#protected-initial-writer-authority--2026-10-14).
+
+## Bounded high-water signing — 2026-10-14
+
+The existing generation bootstrap signer now has a separate explicit v2 interface
+for initial high-water contents. V1 stays anchor-only. Actual isolated signing,
+store transitions and a later public-only read passed as component probes;
+protected writer admission and native workers remain pending. See
+[the v2 contract](INTERFACE.md#initial-high-water-bootstrap-v2--2026-10-14).
+
+## Initial generation bootstrap — 2026-10-14
+
+The generation subsystem now has a root-policy-bound initial-anchor signer.
+Its real systemd component probe passed; complete enrollment and native worker
+admission remain pending. See [the API and scope](INTERFACE.md#initial-generation-anchor-bootstrap--2026-10-14)
+and the existing RSI dispatch runbook. No production service is enabled by this adapter.
+
 ## Current-generation model consumer checkpoint — 2026-10-07
 
 Existing producer/collector/valve wiring is locally qualified with disposable
@@ -31,17 +205,9 @@ production reviewer execution and native RSI are not established.
 
 ## Separate protected-use control proof — 2026-10-05
 
-**Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.
-Hosted474:471pass/3skip; exact-main CI37254048948 and CodeQL37254048507 succeeded.
-Later merged-source19/19 passed. Governed OpenClaw/WRE refresh completed442.5s;
-CURRENT/no-gap query took44.615s, one attempt/no retry. Historical6task/18event
-rows are unchanged, now7/21. Independent maintenance review and normal owned-lane
-retirement are complete; branch, bundle and ignored-file archive are preserved.
-This closes source/retrieval retention, not native worker admission or key custody.
-
-Earlier source-qualification record (historical):
-
-The optional v2 root descriptor separates ACQUIRE/FINISH control authentication from work signing. Existing v1 callers are unchanged. Synthetic source qualification passes (connected467pass/7platform skips); production credential supply and public startup are not activated. See INTERFACE, module ModLog and the canonical RSI backlog.
+V2 separates ACQUIRE/FINISH control authentication from work signing; v1 is unchanged.
+[PR2068 source/retrieval closure](ModLog.md#separate-protected-use-control-proof--2026-10-05)
+does not establish native admission or key custody.
 
 ## Recover an admitted HoloIndex refresh — 2026-10-05
 
@@ -1073,7 +1239,17 @@ Execution additionally requires `--execute --confirm
 REDDOG_RESIDENT_LIVE_CANARY_PHASE1`. The runtime root must be outside the
 repository and already contain the authority, permission, execution-valve,
 signer config/run-packet, and live signer socket artifacts named by the CLI
-receipt. The harness never starts the signer or resolves secret values.
+receipt. The harness never starts the signer or resolves principal signing keys.
+Select an existing author adapter with `--artifact-generator-mode` (or
+`REDDOG_ARTIFACT_GENERATOR_MODE`): `foundups_fusion` (default),
+`openclaw_gateway`, or `hermes_api`. Unsupported or explicitly empty modes reject.
+All modes require declared model-provider identity; this declaration does not
+replace signed model admission. Fusion additionally requires OpenRouter presence.
+Hermes readiness reads and discards the existing confined service credential
+through `RuntimeHermesApiKeyProvider`; no credential value enters the receipt.
+OpenClaw checks executable availability. These checks do not establish service
+health, sandbox confinement, model authority, budget, or worker execution.
+The receipt's `artifact_generator_mode` records selected configuration only.
 The signed runtime-artifact manifest producer is available as a
 content-addressed foundation. Canonical artifact writers and publication share
 a runtime-generation fence, and final publication uses OS-level no-replace
@@ -1207,7 +1383,7 @@ OpenClaw now follows a facade + delegated-module design.
 | `src/openclaw_runtime_support.py` | Runtime probing, IronClaw autostart, model availability |
 | `src/openclaw_status_surface.py` | `connect wre` readiness/status and outward status push |
 | `src/openclaw_process_loop.py` | Full autonomy loop orchestration |
-| `src/openclaw_result_memory.py` | Validate + remember (WRE pattern memory writeback) |
+| `src/openclaw_result_memory.py` / `src/openclaw_memory_queries.py` | WRE result writeback / memory queries, including the [unmounted Moshpit projection](INTERFACE.md#moshpit-projection-layer) |
 | `src/openclaw_turn_state.py` | Token telemetry and cooperative turn cancellation |
 | `src/openclaw_action_ledger.py` | Structured DAEmon action emission |
 | `src/openclaw_social_controller.py` | Social-routing bridge and LinkedIn mission control |
@@ -1245,3 +1421,12 @@ coerced or trimmed. Existing invalid-cache errors still propagate first.
 ### Correspondence authority status — 2026-10-06
 
 For #1779, the legacy V2 JavaScript sender boundary is a quarantined fail-closed compatibility surface. The canonical implementation is the service-owned Python `CorrespondenceSenderBoundary` in `src/reddog_correspondence_sender_boundary.py`. Repository tests qualify that contract only; external Gmail/Work capability isolation remains a deployment/host requirement and must not be inferred from source or a successful individual send.
+
+## Phone-call safety education
+
+[RedDog call safety](../../../.agents/skills/reddog-call-safety/SKILL.md) provides
+WSP 97 call/turn review, missed-call evidence handling, Japan telephony research,
+and offline attack/benign evaluation cases. This is an education package;
+phone integration and runtime enforcement are `SPECIFIED_NOT_IMPLEMENTED`.
+See its [research notes](docs/REDDOG_CALL_SAFETY_RESEARCH_20261013.md)
+before reusing the existing voice ingestion or synthetic chat routing.

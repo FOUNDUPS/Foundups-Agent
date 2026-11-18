@@ -1,4 +1,4 @@
-﻿"""Smoke test for src.quantum_cryptography_system."""
+"""Smoke test for src.quantum_cryptography_system."""
 
 import sys
 from pathlib import Path

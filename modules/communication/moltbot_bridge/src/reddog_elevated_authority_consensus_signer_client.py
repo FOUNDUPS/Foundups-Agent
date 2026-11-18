@@ -125,16 +125,17 @@ def admit_secret_grant_consensus(
     permit: VerifiedElevatedAuthoritySigningPermit | None,
     *,
     now: int,
+    include_expiry: bool = False,
 ) -> Mapping[str, Any] | None:
     """Return signer-verifiable proof or reject LOW/elevated ambiguity."""
 
     if request.authority_tier == "LOW":
         if permit is not None or request.consensus_receipt_digest is not None:
             raise ValueError("secret_grant_consensus_invalid")
-        return None
+        return (None, None) if include_expiry else None
     consume = (consume_effect_signing_permit if type(permit) is VerifiedEffectSigningPermit
                else consume_elevated_authority_signing_permit)
-    proof = consume(permit, signing_request=request, now=now)
+    proof = consume(permit, signing_request=request, now=now, **({"include_expiry": True} if include_expiry else {}))
     if proof is None:
         raise ValueError("secret_grant_consensus_invalid")
     return proof

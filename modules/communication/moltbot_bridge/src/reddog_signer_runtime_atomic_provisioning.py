@@ -70,6 +70,12 @@ def provision_signer_runtime_generation(
             signing.authority_boundary.revalidate(
                 signing.authority, now_epoch=issued_at,
             )
+            initial = signing.authority_boundary.require(signing.authority).get("initial_manifest")
+            if initial is not None:
+                if (type(ttl_seconds) is not int
+                        or ttl_seconds != initial["expires_at"] - initial["issued_at"]):
+                    raise ValueError("initial_manifest_ttl_mismatch")
+                issued_at = initial["issued_at"]
             produced = produce_signed_runtime_artifact_manifest(
                 manifest_directory=runtime_root / MANIFEST_DIRECTORY_NAME,
                 nonce=nonce, issued_at=issued_at,
@@ -494,6 +500,9 @@ def _generation_binding(
     manifest: Mapping[str, Any],
     current: SignerRuntimeGenerationActivation | None,
 ) -> SignerRuntimeGenerationBinding:
+    from .reddog_runtime_artifact_manifest_contract import INITIAL_SCHEMAS
+    if manifest.get("schema_version") in INITIAL_SCHEMAS and current is not None:
+        raise ValueError("initial_manifest_existing_generation")
     if (
         current is not None
         and current.artifact_generation_digest
@@ -517,7 +526,7 @@ def _recover_existing_activation(
             runtime_root,
             current=None,
             nonce=nonce,
-            runtime_profile=context.runtime_profile,
+            runtime_profile=context.manifest_runtime_profile(),
         )
         if len(paths) != 1:
             return None

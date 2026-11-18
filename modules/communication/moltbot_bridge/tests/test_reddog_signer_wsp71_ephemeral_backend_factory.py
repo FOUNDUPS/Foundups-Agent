@@ -487,12 +487,26 @@ def test_proposal_factory_expiry_during_request_reserve_prevents_signature(tmp_p
 
 
 @pytest.mark.parametrize("phase", ["before-sign", "after-sign"])
-def test_proposal_key_expiry_in_principal_io_never_returns_signature(tmp_path, monkeypatch, phase):
+@pytest.mark.parametrize("authorization_expiry_delta", [-5, 0, 5])
+def test_proposal_key_expiry_in_principal_io_never_returns_signature(
+    tmp_path, monkeypatch, phase, authorization_expiry_delta,
+):
     from modules.communication.moltbot_bridge.src import reddog_signer_proposal_activation as module
+    from modules.communication.moltbot_bridge.tests import test_reddog_architect_proposal_signer_policy_runtime as proposal
+    original_authorization = proposal._policy_authorization
+    def authorization(policy, **kwargs):
+        return original_authorization(
+            policy, expires_at=policy.expected_payload.expires_at + authorization_expiry_delta,
+            **kwargs,
+        )
+    monkeypatch.setattr(proposal, "_policy_authorization", authorization)
     case = _proposal_factory_case(tmp_path)
     calls, signed = [], []
     def act(result):
-        expiry = case.config.proposal_policy_authorization.expires_at
+        # Exercise principal I/O at the first actual authority boundary, even
+        # when fixture creation crosses a clock tick between the two objects.
+        expiry = min(case.config.proposal_policy_authorization.expires_at,
+                     case.policy.expected_payload.expires_at)
         clock = [expiry - 1]
         monkeypatch.setattr(module, "time", SimpleNamespace(time=lambda: clock[0]))
         original = case.owner.resolver.resolve
@@ -510,6 +524,7 @@ def test_proposal_key_expiry_in_principal_io_never_returns_signature(tmp_path, m
             key.sign(b"synthetic-expiry-control")
     _call_proposal_component(case, act)
     assert len(signed) == (0 if phase == "before-sign" else 1)
+    assert len(calls) == (1 if phase == "before-sign" else 2)
 
 
 
@@ -562,6 +577,85 @@ def _admitted_proposal_case(tmp_path, monkeypatch):
     case.proposal_fixture = proposal
     case.admitted_fixture = admitted
     return case
+
+
+def _admitted_initial_handshake_case(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as admitted
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_composition import compose_initial_handshake_service_config
+    owner_fixture = admitted.owner_fixture
+    write_config, select = owner_fixture._write_fixture_config, owner_fixture._fixture_selection
+
+    def initial_config(roots, policy, target_public, signing_ref, audit_ref):
+        policy.update(generation=1, generation_revision="revision-1",
+                      allowed_operations=["signer_socket_peer_handshake"],
+                      allowed_authority_tiers=["LOW"], consensus_required_tiers=[])
+        raw, path, _ = write_config(roots, policy, target_public, signing_ref, audit_ref)
+        raw = compose_initial_handshake_service_config(
+            repo_root=roots["repo"], runtime_root=roots["runtime"],
+            signer_runtime_root=roots["signer"],
+            socket_path=roots["runtime"].parent / "socket-state" / "signer.sock",
+            key_provider_profile=raw["key_provider_profiles"][0], peer_policy=raw["peer_policy"],
+            owner_e0_authority_binding_digest=raw["owner_e0_authority_binding_digest"],
+            timeout_s=2.5, max_request_bytes=16384, max_response_bytes=16384,
+        )
+        path.write_text(json.dumps(raw, sort_keys=True), encoding="ascii")
+        return raw, path, owner_fixture._canonical_digest(raw)
+
+    def initial_selection(*args):
+        return dict(select(*args), generation=1, generation_revision="revision-1")
+
+    monkeypatch.setattr(owner_fixture, "_write_fixture_config", initial_config)
+    monkeypatch.setattr(owner_fixture, "_fixture_selection", initial_selection)
+    case = admitted._admission_case(tmp_path, monkeypatch)
+    case.admitted_fixture = admitted
+    return case
+
+
+@pytest.mark.parametrize("mutation", ["valid", "work", "other-low", "wrong-instance", "consensus"])
+def test_admitted_initial_service_signs_only_one_bound_handshake(tmp_path, monkeypatch, mutation):
+    # Real E0 signature, grant consumption, owner lease and crypto. Synthetic
+    # fixture keys, selected packet attachment and OS transport are explicit.
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_mutual_peer_handshake as handshake
+    case = _admitted_initial_handshake_case(tmp_path, monkeypatch)
+    admitted = case.admitted_fixture
+    original = Wsp71EphemeralSignerBackendFactory.__call__
+
+    def frozen_factory(factory):
+        result = original(factory)
+        return replace(result, backend=replace(result.backend, proposal_clock=lambda: grant_fixture.NOW))
+
+    monkeypatch.setattr(Wsp71EphemeralSignerBackendFactory, "__call__", frozen_factory)
+    observed = []
+
+    def serve(**kwargs):
+        binding = case.config.signer_peer_instance_binding
+        if mutation != "work":
+            case.request = handshake._request(
+                case.values["target_private"], run_packet_id=binding.run_packet_id,
+                manifest_id=binding.manifest_id, artifact_generation_digest=binding.artifact_generation_digest,
+                config_digest=binding.config_digest, session_id=binding.session_id,
+                socket_path=binding.socket_path, key_epoch="target-epoch-1",
+                requester_principal_id="principal:grant-admin", now_epoch=grant_fixture.NOW)
+        case.request = replace(case.request, **{
+            "other-low": {"requested_operation": "read_repo"},
+            "wrong-instance": {"key_epoch": "other-epoch"},
+            "consensus": {"consensus_receipt_digest": "sha256:" + "8" * 64},
+        }.get(mutation, {}))
+        grant = _admitted_proposal_grant(case, case.request, "initial-handshake-1")
+        response = admitted._admission_wire(case, kwargs["backend"], grant)
+        observed.append(response)
+        assert response["accepted"] is (mutation == "valid")
+        assert len(case.resolver.calls) == (2 if mutation == "valid" else 0)
+        consumed = json.loads(case.admission.replay_store._config.nonce_path.read_text())["consumed"]
+        assert len(consumed) == (1 if mutation == "valid" else 0)
+        if mutation == "valid":
+            assert Ed25519SignatureVerifier().verify(case.request.signer_public_key, case.request.signing_input, response["signature"])
+            assert not admitted._admission_wire(case, kwargs["backend"], grant)["accepted"]
+        return admitted.CapturingBoundedService()(**kwargs)
+
+    result = admitted.run_reddog_signer_socket_service_runtime_wiring(
+        case.config, case.resolver, serve_bounded=serve, secret_grant_admission=case.admission)
+    assert result.accepted, (result.rejection_reasons, observed, case.events)
 
 
 def _admitted_proposal_config(raw, roots, owner_policy, target_public, principal_private, proposal, admitted, key_epoch="target-epoch-1"):

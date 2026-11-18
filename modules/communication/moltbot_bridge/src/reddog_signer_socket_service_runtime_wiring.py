@@ -80,7 +80,8 @@ from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor 
 from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import PrincipalAuthorityResolver
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import ConversationScopeSignerPolicy
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_authority_policy_runtime import (
-    FAIL_CONTROL_ANCHOR,
+    FAIL_CONTROL_ANCHOR, initial_handshake_socket_path, runtime_authority_policies_valid,
+    runtime_outcome_authority_valid,
     rehydrate_architect_proposal_signer_policy, _proposal_policy_authorization, _is_proposal_signer_profile,
     control_loop_anchor_store as _control_loop_anchor_store,
     control_loop_authority_policy as _control_loop_authority_policy,
@@ -179,6 +180,7 @@ class SignerSocketServiceRuntimeWiringConfig:
     proposal_security_context_digest: str | None = None
     signer_peer_instance_binding: SignerPeerInstanceBinding | None = None
     system_service_owner_config_id: str | None = None
+    initial_handshake_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -341,6 +343,8 @@ def run_reddog_signer_socket_service_runtime_wiring(
     kwargs = dict(locals())
     kwargs.pop("secret_grant_admission")
     if secret_grant_admission is None:
+        if getattr(config, "initial_handshake_only", False):
+            return _reject("FAIL_SIGNER_RUNTIME_SECRET_GRANT_ADMISSION_INVALID")
         return _run_signer_socket_service_runtime(**kwargs)
     try:
         with lease_signer_socket_service_grant_admission(config, secret_grant_admission) as (selected, owner):
@@ -377,6 +381,8 @@ def _run_signer_socket_service_runtime(
     config_reasons = validate_signer_socket_service_runtime_config(config)
     if config_reasons:
         return _reject(*config_reasons)
+    if config.initial_handshake_only and secret_grant_backend is None:
+        return _reject("FAIL_SIGNER_RUNTIME_SECRET_GRANT_ADMISSION_INVALID")
     profiles, profile_reasons = _profiles(config)
     if profile_reasons:
         return _reject(*profile_reasons)
@@ -393,11 +399,9 @@ def _run_signer_socket_service_runtime(
     )
     if conversation_reasons:
         return _reject(*conversation_reasons)
-    if outcome_policy is not None and not verified_outcome_authority_matches_runtime(
-        outcome_policy,
-        verified_outcome_signing_authority,
-        expected_owner_config_id=config.system_service_owner_config_id,
-        signer_peer_instance_binding=config.signer_peer_instance_binding,
+    if not runtime_outcome_authority_valid(
+        config, outcome_policy, verified_outcome_signing_authority,
+        verified_outcome_authority_matches_runtime,
     ):
         return _reject(
             FAIL_SIGNER_RUNTIME_CONFIG_INVALID,
@@ -593,37 +597,8 @@ def validate_signer_socket_service_runtime_config(
     )
     if conversation_reasons:
         return conversation_reasons
-    if (
-        config.verified_outcome_signer_policy is not None
-        and outcome_policy is None
-    ):
-        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
-    if (
-        config.control_loop_anchor_path is not None
-        and control_authority_policy is None
-        and config.proposal_authority_policy is None
-    ):
-        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
-    if (
-        config.provider_mode == PROVIDER_MODE_WSP71_PERMISSIONED
-        and (
-            anchor_store is None
-            or (
-                control_authority_policy is None
-                and config.proposal_authority_policy is None
-            )
-        )
-    ):
-        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
-    if (
-        control_authority_policy is not None
-        and control_authority_policy.signer_public_key
-        not in set(profile_public_keys)
-    ):
-        return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
-    if (
-        outcome_policy is not None
-        and outcome_policy.signer_public_key not in set(profile_public_keys)
+    if not runtime_authority_policies_valid(
+        config, anchor_store, control_authority_policy, outcome_policy, profiles
     ):
         return (FAIL_SIGNER_RUNTIME_CONFIG_INVALID,)
     proposal_policy = rehydrate_architect_proposal_signer_policy(
@@ -708,6 +683,10 @@ def _socket_path_valid(config: SignerSocketServiceRuntimeWiringConfig) -> bool:
             config.runtime_root,
             repo_root=repo_root,
         )
+        if config.initial_handshake_only:
+            signer = validate_runtime_root_path(config.signer_runtime_root, repo_root=repo_root)
+            initial_handshake_socket_path(repo_root, runtime_root, signer, config.socket_path)
+            return True
         socket_path = validate_runtime_artifact_path(
             config.socket_path,
             repo_root=repo_root,

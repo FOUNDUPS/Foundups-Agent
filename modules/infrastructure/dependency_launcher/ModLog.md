@@ -1,4 +1,98 @@
+## 2026-11-10 — Isolate attached Chromium command routes
+
+Copy the Selenium connection command map and pin each Chrome/Edge attachment's
+CDP endpoint before installing the shared verification guard. Existing recovery
+and direct scheduler attachments reuse this owner. The 35 attachment controls and
+11 target-access fixtures passed offline; installed/live browser behavior remains
+separately qualified. No browser launch, kill, account switch or model probe was
+performed by validation. WSP11/22/50/84/97.
+
+## 2026-11-10 — Install human verification guard on attached drivers
+
+Both Chrome/Edge normal and existing recovery attachment paths now install the
+shared Selenium verification gate before returning their driver. The installer
+does not navigate or verify identity. Existing no-kill assertions are preserved;
+offline gate/attachment composition passes. Runtime installation and live popup
+qualification remain separate. WSP11/22/50/84/97.
+
+## 2026-11-07 — LM Link configuration remediation and passive observation
+
+The runtime repair handoff observed the connector starting under `llmster`, then
+LM Studio GUI, with startup/timeouts and no peers. The supported
+`lms link disable` command exited 0 and acknowledged `forceDisabled=true`. All 36 passive
+samples over 36 seconds then found no connector; the GUI remained present in
+every sample. This is configuration-only remediation, not a dependency-launcher
+source window fix. It does not prove model HTTP availability, model residency,
+future restart behavior or indefinite connector absence. No credentials, private
+configuration paths or host identifiers are recorded here. See the [YouTube DAE
+checkpoint](../../communication/livechat/README.md#youtube-dae-repair-checkpoint--2026-11-07).
+WSP00/22/50/77/97.
+
+## Preserve browser sessions during attachment — 2026-11-05
+
+- Monitoring observed the old repeated-readiness-failure branch execute an
+  image-wide Chrome termination. This predates the modern Studio row repair.
+  The observed log does not establish which HTTP failure caused the branch.
+- Separate valid no-page inventories from unknown CDP state in the existing
+  owner, invoke the tab-recovery helper at most once, and remove all four Chrome/Edge image-wide
+  kill/relaunch paths. Retain public signatures and read-only boolean readiness;
+  startup remains separate. Generic driver failures preserve sessions too.
+- Extended the existing test owner with actual fake HTTP-to-retry composition:
+  22 failures/13 passes before source repair, then35 passes. Original11 cases
+  retain their assertions; eight readiness mocks now target the private probe.
+  The focused+adjacent startup selection passes84 cases. Independent injected
+  HTTP witnesses pass60 cases plus28 exception-race cases. These are separate
+  overlapping checks, not a combined end-to-end count. Runtime promotion remains
+  separate. A lost PUT response followed by the existing GET fallback cannot
+  prove a single physical tab; only helper-invocation count is bounded here.
+- Retrieval: task-source lexical bundle binds main76cb579b, freshness UNKNOWN
+  with index gap retained. README/INTERFACE/ROADMAP/test memory/NAVIGATION read;
+  no module memory/README exists. Broad historical docs were noisy, so prioritize
+  exact retry and HTTP owners. No duplicate lifecycle system or new dependency.
+  Manual source repair is appropriate for this HTTP/Selenium composition defect;
+  live local model capacity remains with the running DAE. WSP00/10/11/22/50/84/97.
+
+## Recover documented native startup configuration — 2026-10-31
+
+Complete the README configuration table for the existing `LMS_CLI_PATH` and
+`LM_STUDIO_PREFER_LLMSTER` settings. Source review confirms the current facade
+passes the preference to the bounded startup owner; false does not authorize a
+cold GUI launch. No implementation, model default, autoload or startup test is
+replaced. Old helper API-v1 deltas remain preserved for lifecycle-owner review.
+This is documentation recovery, not a fresh server/model observation. WSP 11/22/50/97.
+
 # Dependency Launcher Module - ModLog
+
+## 2026-10-29 — Local bounded native server startup layer
+
+- Retained the existing facade and legacy model helper APIs; extracted bounded
+  startup into one sibling to reduce the existing monolith. Prefer headless CLI;
+  require known process state, the existing lifecycle node lock, checked command
+  exits/timeouts and explicit loopback bind. Uncertain failures never launch an
+  alternate runtime. Cold GUI spawning is refused/manual action after independent
+  review found persisted GUI autostart/LAN settings unqualified. Existing GUI
+  native reuse and explicit CLI loopback start remain supported. External GUI
+  owners remain outside this coordination lock.
+- Native HTTP and exact selected residency replace TCP/fuzzy readiness. The
+  legacy `load_model` startup flag now verifies without calling automatic model
+  helpers. Missing models are not-ready/manual action; no persistent preload
+  service or model lifecycle ownership was added.
+- Forward explicit native keys through `ensure_dependencies`; YouTube General
+  selection uses `LM_STUDIO_NATIVE_MODEL_KEY` or unchanged qwen3.5-4b default.
+  Explicit vision callers retain UI-TARS checks; General does not certify vision.
+- Actual owned-source selection passed94 cases (49 startup,21 routing/boundary,
+  24 lifecycle), zero failures/skips. Real effect APIs were denied; test journals
+  and OS-lock namespaces were private. The corrected harness uses an explicit
+  credential-free child environment and constant-message effect denials; mock
+  assertions do not serialize kwargs. The earlier49 draft cases overlap.
+  Independent review remains separate; no live startup,
+  model action, main.py execution, remote publication or scheduler result claimed.
+- Retrieval: task-source Holo returned `HOLOINDEX_MAINTENANCE_ACTIVE`; lexical
+  bundle bound clean01b87f0e, UNKNOWN freshness/index-gap retained. Direct owner
+  contracts replaced noisy unrelated hits. Both Gemini sources match, tests are
+  AST-equivalent; differing historical docs were not copied wholesale.
+- WSP00/10/11/22/50/62/84/97. Local-only work; root owns publication and runtime.
+
 
 **Module:** infrastructure/dependency_launcher
 **WSP Reference:** WSP 22 (ModLog Protocol)

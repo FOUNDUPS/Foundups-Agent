@@ -224,6 +224,101 @@ class TestPatternMemory:
         assert memory.recall_failure_patterns("absent") == []
         assert memory.recall_failure_patterns("qwen_gitpush", limit=0) == []
 
+    def test_recall_parent_version_pre_limit_and_fail_closed(self, memory):
+        """Foreign versions must not crowd out LIMIT and malformed/blank versions fail closed."""
+        from modules.infrastructure.wre_core.src.skill_execution_truth import (
+            bind_skill_execution_result,
+            loaded_skill_digest,
+        )
+
+        v1_digest = loaded_skill_digest("# Skill v1\n")
+        v2_digest = loaded_skill_digest("# Skill v2\n")
+        fp = "a" * 64
+
+        # Insert 20 high-fidelity foreign (v1) successes and failures
+        for i in range(20):
+            bound_ok = bind_skill_execution_result(
+                {"output": f"v1 ok {i}"},
+                skill_content="# Skill v1\n",
+                execution_id=f"v1_ok_{i:02d}",
+                admission_fingerprint=fp,
+            )
+            memory.store_outcome(SkillOutcome(
+                execution_id=f"v1_ok_{i:02d}",
+                skill_name="bounded_skill",
+                agent="qwen",
+                timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}),
+                output_result=json.dumps(bound_ok),
+                success=True,
+                pattern_fidelity=0.99,
+                outcome_quality=0.99,
+                execution_time_ms=100,
+                step_count=1,
+            ))
+            bound_fail = bind_skill_execution_result(
+                {"output": f"v1 fail {i}"},
+                skill_content="# Skill v1\n",
+                execution_id=f"v1_fail_{i:02d}",
+                admission_fingerprint=fp,
+            )
+            memory.store_outcome(SkillOutcome(
+                execution_id=f"v1_fail_{i:02d}",
+                skill_name="bounded_skill",
+                agent="qwen",
+                timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}),
+                output_result=json.dumps(bound_fail),
+                success=False,
+                pattern_fidelity=0.10,
+                outcome_quality=0.0,
+                execution_time_ms=100,
+                step_count=1,
+            ))
+
+        # Target v2 rows with lower fidelity than the 20 v1 rows + malformed + wrong schema_version
+        for eid, success, fid, raw_output in [
+            ("v2_ok_01", True, 0.91, json.dumps(bind_skill_execution_result({"output": "v2 ok"}, skill_content="# Skill v2\n", execution_id="v2_ok_01", admission_fingerprint=fp))),
+            ("v2_fail_01", False, 0.65, json.dumps(bind_skill_execution_result({"output": "v2 fail"}, skill_content="# Skill v2\n", execution_id="v2_fail_01", admission_fingerprint=fp))),
+            ("legacy_ok", True, 0.98, json.dumps({"output": "legacy"})),
+            ("malformed_ok", True, 0.99, "{bad json"),
+            ("forged_schema_ok", True, 0.99, json.dumps({"_skill_binding": {"schema_version": "wrong.v0", "loaded_skill_sha256": v2_digest}})),
+            ("forged_schema_fail", False, 0.05, json.dumps({"_skill_binding": {"schema_version": "wrong.v0", "loaded_skill_sha256": v2_digest}})),
+        ]:
+            memory.store_outcome(SkillOutcome(
+                execution_id=eid,
+                skill_name="bounded_skill",
+                agent="qwen",
+                timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}),
+                output_result=raw_output,
+                success=success,
+                pattern_fidelity=fid,
+                outcome_quality=0.5 if success else 0.0,
+                execution_time_ms=100,
+                step_count=1,
+            ))
+
+        # Pre-LIMIT filtering preserves v2 despite 20 higher-scoring v1 rows
+        v2_successes = memory.recall_successful_patterns(
+            "bounded_skill", min_fidelity=0.90, limit=3, parent_version=v2_digest
+        )
+        assert [r["execution_id"] for r in v2_successes] == ["v2_ok_01"]
+
+        v2_failures = memory.recall_failure_patterns(
+            "bounded_skill", max_fidelity=0.89, limit=5, parent_version=v2_digest
+        )
+        assert [r["execution_id"] for r in v2_failures] == ["v2_fail_01"]
+
+        # Backward compatibility when parent_version=None
+        assert len(memory.recall_successful_patterns("bounded_skill", min_fidelity=0.90, limit=50)) == 24
+        assert v1_digest != v2_digest
+
+        # Fail-closed on blank/invalid parent_version
+        for bad in ("", "   ", 123):
+            assert memory.recall_successful_patterns("bounded_skill", parent_version=bad) == []
+            assert memory.recall_failure_patterns("bounded_skill", parent_version=bad) == []
+
     def test_get_skill_metrics_no_data(self, memory):
         """Test metrics for skill with no executions"""
         metrics = memory.get_skill_metrics("nonexistent_skill", days=7)

@@ -1,29 +1,27 @@
-"""
-Test suite for agent_coordinator
-WSP 5 compliant test coverage
-"""
+"""Test scaffold for agent_coordinator; SPECIFIED_NOT_IMPLEMENTED.
 
+No behavioral coverage exists yet. Production code is not imported during
+collection. Replace the placeholders with behavioral assertions before removing
+the scaffold marker and skip. SOURCE_MODULE is the intended future test subject.
+"""
 import pytest
-import sys
-from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
+WRE_TEST_MODE = "scaffold"
+SOURCE_MODULE = 'modules.development.cursor_multi_agent_bridge.src.agent_coordinator'
+pytestmark = pytest.mark.skip(reason="SPECIFIED_NOT_IMPLEMENTED: test scaffold")
 
-from O:.Foundups-Agent.modules.development.cursor_multi_agent_bridge.src.agent_coordinator import *
 
 class TestAgentCoordinator:
-    """Test cases for agent_coordinator"""
-    
+    """Pending behavioral tests for agent_coordinator."""
+
     def test_initialization(self):
-        """Test basic initialization"""
-        # TODO: Implement test
-        assert True
-    
+        """TODO: verify initialization behavior."""
+        pytest.fail("Replace scaffold with behavioral assertions")
+
     def test_basic_functionality(self):
-        """Test core functionality"""
-        # TODO: Implement test
-        assert True
+        """TODO: verify core behavior."""
+        pytest.fail("Replace scaffold with behavioral assertions")
+
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    raise SystemExit(pytest.main([__file__, "-v"]))

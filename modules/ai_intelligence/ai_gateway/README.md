@@ -1,5 +1,16 @@
 # AI Gateway Module
 
+## YouTube task routing
+
+`call_youtube_task` owns stage/surface-specific routing for original-comment
+assessment, writing and exact final review. It uses the existing local general
+incumbent or an exact current signed production binding; it never uses the generic
+social/Grok fallback chain. The central registry nominates three observed free
+Gemma/Nemotron models for `youtube_reply` evaluation only. Discovery, catalog
+membership and NVIDIA shadow proposals do not promote them. See
+`modules/communication/video_comments/LLM_INTEGRATION.md` for configuration,
+privacy/cost boundaries, cancellation and evidence limits.
+
 **Module Purpose**: Unified AI service access with intelligent routing, fallback, and load balancing across multiple AI providers.
 
 **WSP Compliance Status**: [OK] WSP 49 (Module Structure), WSP 3 (Enterprise Domain), WSP 27 (DAE Architecture)
@@ -18,6 +29,15 @@ pairs retain their existing request behavior.
 
 [VERIFIED] The contract is covered by offline mocked-transport tests; it does
 not grant model promotion, provider availability, or live-call authority.
+
+## OpenRouter transport boundary
+
+OpenRouter requests disable redirects and reject 3xx responses before parsing.
+Transport exceptions expose a fixed diagnostic while preserving timeout
+classification; provider credentials are excluded from `ProviderConfig` repr.
+Other provider transport behavior and the K3 request contract remain unchanged.
+This controls displayed transport diagnostics, not arbitrary successful model
+output or exception-object memory. Live calls still require existing admission.
 
 ## Model Intelligence Catalog
 
@@ -605,6 +625,23 @@ selection, benchmark, promotion, signed-evidence, policy and trusted-key JSON
 inputs, then writes the runtime-binding receipt path for later resident runtime
 consumption. It remains disabled unless explicitly configured.
 
+## Independent Repair Verifier Firewall
+
+`src/independent_repair_verifier.py` enforces model independence and builder
+context isolation for scientific self-healing verification (Issue #1522):
+
+- `VerifierContextFirewall.project_evidence_packet(...)` exposes a pure
+  keyword-only allowlist (`ALLOWED_FIELDS`) over observable pain, desired
+  outcome, `baseline_receipt_id`, `candidate_diff`, `changed_files`,
+  before/after measurements, tests/results, quarantined research summaries,
+  prior failed hypotheses, WSP constraints, and consumed mutation budget,
+  sanitizing persuasive tags/phrases into an immutable `VerifierEvidencePacket`.
+  Unallowed builder chat or scratchpad kwargs fail closed with `TypeError`.
+- `ModelIndependencePolicy.evaluate_independence(...)` rejects missing or
+  identical normalized `builder_identity` / `verifier_identity` pairs, enforces
+  `DIFFERENT_MODEL_FAMILY` on high/critical/governance tiers, and pairs with
+  SHA-256-sealed `IndependentVerifierReceipt`.
+
 **Usage Examples**:
 ```python
 from modules.ai_intelligence.ai_gateway import AIGateway
@@ -626,3 +663,67 @@ result = gateway.call_with_fallback("Analyze this code", task_type="code_review"
 - DU (Emergence): Collapse into 0102 resonance and emit next prompt
 
 wsp_cycle(input="012", log=True)
+
+## Offline audio word-timing evaluation
+
+`src/model_audio_timing_benchmark.py` supplies pure structural diagnostics and a
+verifier adapter for the existing model-combination benchmark harness. It keeps
+lyric accuracy, alignment and timing provenance unknown. A valid timing shape
+returns SKIPPED rather than accepted transcription quality. No provider call,
+subtitle timing synthesis, scheduler or production promotion is added.
+
+Cases bind the audio, preprocessing and agent configuration independently from
+model candidate identity. One SharedAttemptBudget instance must cover every
+candidate and diagnostic in an initial two-attempt evaluation. It is a count
+guard only; monetary authorization and durable live admission remain separate.
+
+The 2026-11-15 operator-authorized smoke test used the same 75-second original
+Antifa FM cache excerpt for both requests: source offset 15 seconds, mono 16 kHz
+PCM WAV, no reference lyrics or language hints in either request. The existing
+account's configured cap was checked privately before execution. Both requests
+used `/api/v1/audio/transcriptions`, `verbose_json`, word granularity and
+`provider={data_collection: deny, zdr: true}`, with no provider routing controls.
+
+| Requested model | HTTP seconds | Returned words | Zero-duration words | Reported USD cost |
+| --- | ---: | ---: | ---: | ---: |
+| `qwen/qwen3-asr-0.6b` | 3.750 | 222 | 21 | 0.00024975 |
+| `nvidia/parakeet-tdt-0.6b-v3` | 3.485 | 217 | 1 | 0.0012500025 |
+
+Both supplied lists passed finite, nonnegative, monotonic and excerpt-bound
+checks with no adjacent overlaps. Total inference attempts: **2/2**, exhausted;
+reported total cost: **$0.0014997525**. These are single-sample connectivity and
+format observations. Serving provider and timestamp implementation were absent
+from the transcription responses. A separate read-only generation-metadata GET
+resolved both providers to PrimeIntellect and Qwen's serving model to
+`qwen/qwen3-asr-0.6b-20260813`; Parakeet's serving model matched the request.
+Reported gateway latency was 2018/2463 ms; model-only time was unavailable.
+Metadata reported Parakeet cost $0.001250002, a $0.0000000005 difference from
+transcription usage.cost. Both reports are retained; settlement is unmeasured.
+Independent listening, performed-word truth,
+timing accuracy, instrumental hallucinations and a quality winner remain unknown.
+
+Private diagnostic SRT files preserve every returned interval, including zero
+durations, using the existing broadcaster SRT generator. They are not validated
+usable captions or lip sync. Audio, reference text, raw responses, generation
+IDs, original source/hash/offset and detailed receipts stay in the retained
+private run evidence; none belongs in public fixture commits by default.
+
+This source layer adds no live STT transport. The smoke transaction was a bounded
+operator-directed adapter, not automatic WRE admission or production promotion.
+The existing harness remains the shared evaluation owner for future audio and
+comment task families; each needs its own frozen references and scorer contract.
+
+For multiple offline observations, register by full identity:
+
+```python
+verifier = build_timing_verifier(
+    {case.task_id: case for case in cases},
+    {observation.lookup_key: observation for observation in observations},
+)
+```
+
+`lookup_key` binds case, candidate topology and response digest. Identical response
+bytes may belong to different cases or candidates. Legacy output-digest keys remain
+supported; a digest-only dictionary can already have discarded repeated outputs
+before this API is called. Duplicate full identities are rejected. This changes
+registration safety, not transcription quality or the SKIPPED acceptance boundary.

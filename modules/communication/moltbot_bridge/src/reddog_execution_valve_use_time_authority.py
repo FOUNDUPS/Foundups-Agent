@@ -127,6 +127,7 @@ class GovernedValveUseTimeAuthorityResolver:
     revoked_key_epochs: tuple[str, ...] = ()
     leeway_s: int = 60
     signer_peer_secret_access_grant_supplier: Any = None
+    parent_consensus_authority: Any = None
 
     def resolve(
         self,
@@ -176,6 +177,7 @@ class GovernedValveUseTimeAuthorityResolver:
             model_work_order=work_order,
             retained_proposal_inputs=artifacts.get("authority_profile", {}).get("proposal_verification_inputs"),
             revoked_key_epochs=frozenset(self.revoked_key_epochs),
+            parent_consensus_authority=self.parent_consensus_authority,
         )
         generation_binding_receipt_id = generation_evidence.receipt_id
         reasons.extend(

@@ -6,7 +6,9 @@ from dataclasses import asdict, dataclass, replace
 from typing import Any, Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    DESCRIPTOR_SCHEMA_V2,
     validate_root_verified_outcome_descriptor_public,
+    validate_root_verified_outcome_descriptor_identity_public,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
     RootAuthorityExchange,
@@ -15,6 +17,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_protocol import (
     OP_ADVANCE,
     OP_LOAD,
+    TARGET_ROLE, GRANT_ROLE,
     RootRevocationRequest,
     canonical_signer_input,
     request_id_for,
@@ -27,6 +30,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_capability_
     freeze_owner_e0_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
+    POLICY_SCHEMA_V10,
     validated_signer_owner_e0_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
@@ -45,6 +49,7 @@ class _ClientState:
     binding: SignerGrantRevocationAuthorityBinding
     exchange: RootAuthorityExchange
     request_signer: Callable[[str], str]
+    requester_role: str = TARGET_ROLE
 
 
 _issue_client, _lookup_client = _build_process_local_registry(
@@ -84,13 +89,22 @@ def _create_root_revocation_anchor_authority(
     descriptor: Mapping[str, Any], *, owner_config_id: str,
     policy: Mapping[str, Any], binding: SignerGrantRevocationAuthorityBinding,
     exchange: RootAuthorityExchange, request_signer: Callable[[str], str],
-    now_epoch: int,
+    now_epoch: int, requester_role: str = TARGET_ROLE,
 ) -> RootRevocationAnchorAuthority:
     checked = validated_signer_owner_e0_policy(policy, now_epoch=now_epoch)
-    root_descriptor = validate_root_verified_outcome_descriptor_public(
+    validate_descriptor = (validate_root_verified_outcome_descriptor_identity_public
+        if requester_role == GRANT_ROLE else validate_root_verified_outcome_descriptor_public)
+    if (checked["schema_version"] == POLICY_SCHEMA_V10
+            and isinstance(descriptor, Mapping)
+            and descriptor.get("schema_version") == DESCRIPTOR_SCHEMA_V2
+            and type(descriptor.get("grants")) is list and descriptor["grants"] == []):
+        validate_descriptor = validate_root_verified_outcome_descriptor_identity_public
+    root_descriptor = validate_descriptor(
         descriptor, now_epoch=now_epoch
     )
     if (
+        requester_role not in {TARGET_ROLE, GRANT_ROLE}
+        or
         type(binding) is not SignerGrantRevocationAuthorityBinding
         or type(exchange) is not RootAuthorityExchange
         or not callable(request_signer)
@@ -105,6 +119,7 @@ def _create_root_revocation_anchor_authority(
         descriptor=root_descriptor, owner_config_id=owner_config_id,
         policy=freeze_owner_e0_policy(checked), binding=binding,
         exchange=exchange, request_signer=request_signer,
+        requester_role=requester_role,
     ))
     return authority
 
@@ -126,6 +141,8 @@ def _exchange(
     import time
 
     state = _lookup_client(authority)
+    if state.requester_role == GRANT_ROLE and operation != OP_LOAD:
+        raise ValueError("root_revocation_grant_load_only")
     request = RootRevocationRequest(
         operation=operation, request_id="sha256:" + "0" * 64,
         request_nonce=secrets.token_hex(32),
@@ -135,6 +152,11 @@ def _exchange(
         binding_digest=state.binding.anchor_binding_digest(),
         policy=dict(state.policy), snapshot_id=snapshot_id,
         issued_at=int(time.time()), signer_instance_signature=_placeholder(),
+        requester_role=state.requester_role,
+        requester_principal_id=(state.policy["grant_authority_principal_id"]
+            if state.requester_role == GRANT_ROLE else None),
+        requester_key_epoch=(state.policy["grant_authority_key_epoch"]
+            if state.requester_role == GRANT_ROLE else None),
     )
     signature = state.request_signer(canonical_signer_input(request))
     request = replace(request, signer_instance_signature=signature)

@@ -1,3 +1,105 @@
+## Scientific self-healing canary & fail-closed measured benefit — 2026-11-16
+
+- [x] Reconcile `branch_dispositions` (`MAIN_BRANCH`, `PROTECTED_BRANCH`,
+  `BRANCH_OPEN_PR`, `BRANCH_OPEN_PR_HEAD_MOVED`, `BRANCH_MERGED_PR_RETAINED`
+  including `COMPLETE` PR retirement assessment, `BRANCH_CLOSED_PR_UNMERGED`,
+  `BRANCH_PR_OBSERVATION_INCOMPLETE`, `BRANCH_PR_HEAD_MISMATCH`,
+  `BRANCH_UNTRACKED` with exact `sha == head_sha` reuse protection) in
+  `src/git_lifecycle.py` and `tests/test_git_lifecycle.py` (7 passed).
+- [x] Integrate Issue #1522 `ScientificRepairOperation` (`state_history`),
+  `attempt_failure_reproduction` (`shell=False`), and
+  `ScientificRepairCanaryOrchestrator` paired with AI Gateway's
+  `VerifierContextFirewall` + `ModelIndependencePolicy` while keeping all 19/P0
+  native PatternMemory custody gates fail-closed (`test_repair_operation_contract.py`
+  8 passed, `test_scientific_repair_canary_e2e.py` 4 passed).
+- [x] Wire fail-closed `measurement_evidence` validation and `rollback_improvement`
+  `total_tokens_saved` subtraction in `RecursiveLearningEngine`
+  (`recursive_improvement/tests/test_learning.py` 8 passed).
+
+## Current RSI selection — 2026-11-01
+
+Follow the [canonical dispatch checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#micro-verification-and-protected-native-composition--2026-11-01).
+PR2276's assurance/receipt connection is merged and exact-main checked; its older
+publication instruction is closed. Native19/P0 now has an explicit protected
+requester/lease-consumption gap, not a safe ordinary-main factory call. R15's
+existing test-registry procedure remains the first admitted improvement target.
+The source-item and subsequent aggregate/display Vote proposals were independently
+rejected; coordinator repairs closed the bounded defects. The latter passes398
+module cases and demonstrates why consumers need independent verification after
+scorer tests pass. These qualify micro verification fixtures, not native G1–G5.
+See [the aggregate trial](../../../docs/operations/RSI_SWARM_DISPATCH.md#vote-aggregate-to-display-trial--2026-11-01).
+The October28 verification classification/CI observations below remain scoped
+historical evidence; their performance experiment remains queued, not the next
+native execution requirement. Preserve mandatory checks and current owners.
+
+## PC Git inventory observability — 2026-11-15
+
+`git_lifecycle_inventory.py` extends `foundups_git_inventory.v1` with SHA-only
+stash pagination (`section="stashes"`), `github_main_present_on_pc`,
+`pc_backlog_summary`, and `worktree_summary` while keeping `branches` row shape,
+`branch_comparison` keys, 20-row pagination, and the 256 KiB receipt cap
+backwards-compatible.
+
+## Current verification integration — 2026-10-28
+
+Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.
+This selection supersedes the older "Current selection" below for the
+risk-verification lane only. [PR2248](https://github.com/FOUNDUPS/Foundups-Agent/pull/2248)
+is the [preserved handoff](../../../docs/operations/WRE_RISK_BASED_VERIFICATION_HANDOFF_20261028.md);
+its planning document is not runtime admission.
+
+WSP15: C3/I4/D4/Impact4 = **15/P1**. Reconcile the existing policy-to-execution
+connection before optimizing broad CI scheduling. Reuse wins over a new router,
+scheduler, memory store or supervisor. The nine-suite connected selection
+passes 384 cases locally; independent source/test review passes an overlapping
+93 cases. See [TestModLog](tests/TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+
+| Connection | Classification | Current evidence and remaining boundary |
+|---|---|---|
+| WRE test-impact planning | IMPLEMENTED | `wre_test_impact_differential_gate.py` derives required scope deterministically; mandatory escalation is preserved. |
+| Registry and dependency selection | IMPLEMENTED | `wre_test_registry_differential_plan_runtime.py` verifies exact revisions, registry, recognized dependency/config parity and bounded shards. This is not a general dependency graph. |
+| Differential execution | IMPLEMENTED | `wre_test_differential_runtime.py` runs the trusted collector against archived parent/candidate trees. This is local execution, not OS-confined native authority. |
+| Independent outcome verification | TESTED_ONLY | Resident producer/capability/verifier wiring exists. New controls prevent a declared/bound policy from falling back to ordinary results. Local-only differential receipts still fail final acceptance. |
+| AI Gateway compute routing | IMPLEMENTED | Existing campaign admission, configured gateway and benchmark owners remain. This deterministic slice requires no model selection or provider calls; it does not qualify current live routes. |
+| Hybrid worker coordination | SPECIFIED | Existing AgentDB/resident queue owns tickets; the integrated hybrid team model remains unproved. Reuse [hybrid architecture](../../../docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md#verification-and-swarm-research-reconciliation--2026-10-28). |
+| WRE PatternMemory | IMPLEMENTED | The registry executor records `telemetry_projection`; loaded-skill bindings and real SQLite retention exist. A projection is not a learned improvement or promotion receipt. |
+| WSP97 completion | TESTED_ONLY | Existing merge-sentinel contracts cover failed/pending CI and exact-main identity. Hosted checks, squash merge and post-merge readback remain separate per-PR evidence. |
+| WSP48 improvement retention | BLOCKED | Generic `recursive_improvement/src/learning.py::apply_improvement` still fails closed. No authenticated activation, rollback and later-use benefit for this loop is demonstrated here. |
+
+**Closed in this slice:** complete policy/check-plan preflight before commands;
+bound-policy substitution/omission rejection; mandatory full-scope escalation;
+final-verifier downgrade rejection; additive parallel CI coverage for planner,
+producer, resident caller, final verifier and exact-main prerequisite contracts.
+No existing CI/security/release check is removed or weakened.
+
+**Next eligible layer:** measure the existing canonical shard projection and
+current CI critical path on the same exact source. Propose disjoint parallel
+batches with unchanged test inventory, mandatory checks and final aggregation;
+compare wall time, runner-minutes, accepted results, retries and escaped defects.
+WSP15 C3/I4/D3/Impact4 = 14/P1; an experiment cannot promote its own acceptance
+criteria. Do not claim savings from a shorter selected suite alone.
+
+Observed reference: [CI run 40624168626, test job 122605013062](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40624168626/job/122605013062)
+took 525s. Signing composition 81s, startup/policy 64s, dependency cache 74s and
+dependency installation 65s are distinct contributors. These are observed step
+durations from a single reference run, not a before/after performance estimate.
+
+**Still blocked:** authenticated OS-isolated consumption of projected shards,
+accepted native worker outcome, controlled promotion/rollback, later measured
+retained benefit and bounded continuation. More unit tests do not close these
+gates. The bridge's existing runtime/admission owners supply the missing
+evidence; do not mint grants or replace them.
+
+## Skill-feedback lineage checkpoint — 2026-10-22
+
+The existing coordinator/result and variation paths now retain the loaded skill
+text identity; seven added controls plus connected suites pass 232 cases locally.
+Real SQLite reopen is exercised; scanner and model outputs are substituted.
+Next: admit evidence-backed corrections against these exact run/source bindings
+through existing owners. Moshpit nomination ingestion, authenticated evaluation,
+activation/rollback and later measured benefit remain incomplete. No new store,
+scheduler, production promoter or model execution is introduced.
+
 ## Closed measured-zero layer — P15 checkpoint
 
 Selected 14/P1 (C2/I4/D4/Impact4): repair existing fidelity statistics without
@@ -8,7 +110,7 @@ retained/control/recovery use of unchanged baseline SQLite rows selects positive
 → zero control → positive. The owned lane is retired with recovery preserved.
 This closes the measured consumer repair, not model learning or native admission.
 
-**Current selection:** follow the [canonical system checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05).
+**Historical October5 selection:** [preserved checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05); superseded by the current selection above.
 At724bb684 the bounded existing local adapter produced two rejected regression
 proposals (0/2 accepted). Retain the independently verified team-authored coverage
 repair, then qualify installed models on the fixed task. The earlier registered

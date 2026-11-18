@@ -1,5 +1,61 @@
 # foundups_mcp_bridge TestModLog
 
+## 2026-11-16: Windows chained-venv `_mcp_runtime_python` & 60-case MCP compatibility verification
+
+Verified PR #2402 chained `pyvenv.cfg` resolution and cycle fallback coverage in
+`test_windows_venv_runtime_uses_base_interpreter_and_preserves_pid`
+(`tests/test_mcp_launcher_http.py`) alongside `"stashes"` section schema
+coverage in `tests/test_git_inventory_oauth.py`. Full 60-case MCP compatibility
+selection (`test_mcp_launcher_http.py`, `test_mcp_server_sse.py`,
+`test_git_inventory_oauth.py`, and
+`test_reddog_holoindex_query_runtime_candidate_binding.py`) passed (`60 passed`)
+under the isolated MCP runtime environment with `-B`, `-p no:cacheprovider`, and
+outside-repository `--basetemp`. WSP 22/49/50/97.
+
+## 2026-11-11: Private draft sender verification scope
+
+Synthetic suites cover the fixed provider allowlist, OAuth audience/scope
+and revocation, Japanese MIME/attachments, one-shot approval, encrypted
+snapshot, concurrent editing, uncertain updates and duplicate reconciliation.
+The separate-process test uses the official MCP client against a real
+loopback listener and verifies discovery, invocation, reconnect and shutdown.
+The local pinned candidate passed all 112 draft cases. The first hosted
+candidate passed both dedicated draft jobs and the 49-case Holo compatibility
+job; the required broad gate detected stale test registry entries. Regenerate
+the canonical registry for the six new test files without changing any gate.
+Live provider and Codex-stopped ChatGPT evidence remain outside this result.
+
+## 2026-10-26: FastMCP 3.4.11 exact-contract candidate
+
+- Retain the existing 49-case Windows compatibility selection and exact quartet
+  comparison. Update only the reviewed FastMCP version in the existing isolated
+  query candidate regression; no skip condition or assertion is weakened.
+- Disposable Linux Python 3.12.14: 28 passed, 19 existing Windows-only skips,
+  two Windows-owned HTTP lifecycle cases explicitly deselected. The actual
+  candidate interpreter passes the launcher capability probe and pip check.
+- These Linux results do not replace the required 49/49, zero-skips Windows
+  lifecycle gate. The original requirement-only PR2190 failure remains recorded
+  at Actions run 40148256348, job 121034152544 (45 passed, 4 failed).
+
+## [2026-10-19] MCP 1.30.0 coordinated dependency contract
+
+- Updated the existing exact launcher dependency assertion to MCP 1.30.0;
+  the inert query candidate still admits only packaging 26.0, disjoint from
+  the launcher quartet. Existing version-drift rejection remains intact.
+- Fresh external CPython 3.12.14 copy-based venv with the declared quartet and
+  pytest 9.0.3: launcher, HTTP server and candidate-binding selection yielded
+  **28 passed, 19 skipped, 2 deselected in 3.00s**. The two deselected owned HTTP
+  cases and 19 skipped platform cases require Windows; this is partial coverage.
+  Used `-B`, disabled plugin autoload/cacheprovider, `--noconftest`, importlib
+  mode and an external basetemp. The real candidate version probe also passed.
+- Initial full-selection attempts: **28 passed, 19 skipped, 2 errors**, first
+  because uv's symlink interpreter was rejected, then because Linux lacks the
+  required System32 observer. No production service was launched. Do not count
+  these as passing lifecycle tests or aggregate repeated counts.
+- The unchanged Windows CI gate still requires all **49** cases without skips,
+  including real authentication, allowlist, concurrency and owned cleanup.
+  Hosted verification remains pending at this source checkpoint. WSP22/50/71/97.
+
 ## [2026-10-04] Hosted observer correction
 
 First PR2057 head9f74a627 passed46 controls but failed both live cases: fixed

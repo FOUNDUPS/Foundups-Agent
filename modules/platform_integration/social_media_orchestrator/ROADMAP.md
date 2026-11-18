@@ -1,3 +1,50 @@
+## Bounded editorial review layer - 2026-11-18
+
+Local review/refinement contracts and existing-harness benchmark-task projection
+are implemented; see docs/EDITORIAL_REVIEW.md. Actual critic execution, independent
+held-out editorial quality, authenticated platform placement/queue, analytics and
+admitted transferable learning remain separate gates. Keep Substack transport
+DRAFT_OR_HANDOFF_ONLY and preserve existing publication reconciliation.
+
+## Indexed editorial / Substack / Mall handoff assessment — 2026-11-15
+
+Extend the same community/newsletter instruction in PR2394; no new orchestrator,
+scheduler or runtime adapter. Reuse full video-index provenance, existing private
+Drive issue/manuscript owners, strict public-content compilation, qualified
+provider effects and the Mall registry/video projection owners. A metadata
+projection or load/save round trip is not a verified lossless source handoff.
+
+Substack remains DRAFT_OR_HANDOFF_ONLY. Daily two-or-three posting is an upper
+bound, never a target; use a conservative two-item proposal limit until a more
+specific publication policy is resolved. Actual account, calendar timezone,
+queued/published/in-flight state, separate web/email/Notes effects and independent
+readback remain unverified. Legacy retries/X pilot limits do not establish them.
+
+Public Mall projection must reject private Drive/raw index data and unreleased
+assets. The inspected scoped video projector is HPC-only; generic new-lane
+admission is separate. /member/media is public static delivery, not private
+storage. Next bounded implementation requires source-retention, private-to-public,
+cap/queue/restart and provider-readback tests under the existing owners.
+
+## Community/newsletter instruction — 2026-11-15
+
+Recovered staged work extends the existing campaign skill with a reusable
+[community/newsletter workflow](skillz/foundup_campaign_operator/references/community-newsletter-workflow.md).
+It links current newsletter/ROC, issue-brief, source-verification and video-index
+owners without hardcoded campaign identities or private Drive pointers. No new
+executor, route, provider account, queue, native admission or cadence is installed.
+
+Next bounded slice: reuse existing content/admission owners for effect-free
+multi-destination preparation, then qualify one transport at a time. Keep the
+current compiler restricted to X/LinkedIn and Reddit/Substack
+DRAFT_OR_HANDOFF_ONLY. Require exact account/revision approval, independent
+destination readback, uncertain-write reconciliation and tested recovery before
+live automation. Instruction review is not runtime or RSI proof.
+
+## Current content layer — 2026-10-27
+
+Source-backed editorial package compilation is implemented locally through the existing content owner/SOCIAL adapter; no model, scheduler or publication effect. [Contract](docs/CONTENT_CAMPAIGN.md), [Soro audit and ordered remaining work](docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md). Qualified voice/research generation, durable admitted scheduling, generic verified publishing/CMS and measured performance feedback remain incomplete. Older phase checkboxes below are historical planning, not current runtime certification.
+
 # Social Media Orchestrator - ROADMAP
 
 **Domain**: platform_integration  
@@ -11,6 +58,38 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 **Digital Twin Alignment**: Orchestrate 012 Digital Twin comment processing and scheduling (LinkedIn-first POC), using decision outputs from `modules/ai_intelligence/digital_twin`.
 
 ## Current Status: CREATED
+
+### Petition intake and audit — 2026-10-27
+
+PR2236 instruction groundwork is merged at main50cd2ff after22 successful
+exact-head checks. The continuation adds an effect-free petition planning route,
+bounded conversation shortcut, public-link intake validation and a Change.org
+adoption flow. This is a source prototype; host installation is unqualified.
+Remaining gates: actual public petition/source readback, private durable campaign
+state, provider account/policy binding, grounded copy generation, admitted
+publication/readback and aggregate outcome/update integration. The principal
+creates the petition and supplies its link. Optional local browser create/manage
+qualification reuses the existing Selenium owner, with human credential steps.
+See [the current audit](docs/audits/PETITION_SESSION_AUDIT_20261027.md).
+
+### Supervised petition instruction — 2026-10-27 (merged groundwork)
+
+Existing campaign owner now contains the reusable petition playbook and
+`launch-petition` discovery wrappers. Campaign-specific copy and evidence remain
+private; authenticated platform access, original-media review,
+draft readback, publication and distribution remained unproved. That instruction
+slice introduced no native executor, CLI route, production registration or
+cadence. The planning continuation above does not establish unattended execution.
+
+### AntifaFM prototype — 2026-10-18
+
+Implemented explicit SOCIAL campaign operations, bounded connected conversation
+reads, the existing AI drafter's station brief, and API-only own-account X
+publication with durable claims/readback. Prompt wrappers reuse the current
+OpenClaw/Codex owners; no production registration, reply publishing or cadence.
+Next host qualification: verify Move2Japan's API identity, inspect three real
+listener decisions with the configured local model, then qualify an authorized
+own-account post. [Runbook](docs/ANTIFAFM_CAMPAIGN.md).
 
 ### Current caller/reload characterization — 2026-09-28
 

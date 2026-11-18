@@ -16,6 +16,8 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 MOSHPIT_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_moshpit" / "SKILLz.md"
 FUKUI_PROCEDURE_SKILL_PATH = MODULE_ROOT / "skillz" / "fukui_city_procedure" / "SKILLz.md"
 FUNDING_PPP_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_funding_ppp_intelligence" / "SKILLz.md"
+BRAND_CONTEXT_PATH = MODULE_ROOT / "brand_context.json"
+WEBSITE_SKILL_PATH = MODULE_ROOT / "skills" / "website-update" / "SKILL.md"
 CONTACT_LEDGER_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_contact_ledger" / "SKILLz.md"
 WORK_ORCHESTRATOR_SKILL_PATH = MODULE_ROOT / "skillz" / "yumori_work_orchestrator" / "SKILLz.md"
 REDDOG_CORRESPONDENCE_SKILL_PATH = REPOSITORY_ROOT / "modules" / "communication" / "moltbot_bridge" / "skillz" / "reddog_correspondence_state" / "SKILLz.md"
@@ -56,6 +58,29 @@ def test_no_token_is_invented_for_the_campaign() -> None:
 
 
 
+def test_esingularity_brand_context_is_single_skill_brand_authority() -> None:
+    registry = load_json(REGISTRY_PATH)
+    entry = next(item for item in registry["entities"] if item["foundup_id"] == "esingularity_001")
+    assert entry["brand_context_path"] == "modules/foundups/esingularity/brand_context.json"
+
+    brand = load_json(BRAND_CONTEXT_PATH)
+    assert brand["canonical_brand"] == "eSingularity.ai"
+    child = next(item for item in brand["child_foundups"] if item["foundup_id"] == "yumori_me")
+    assert child["canonical_brand"] == "YUMORI.me"
+    assert brand["authority_boundary"] == "BRANDING_ONLY_NO_EXECUTION_AUTHORITY"
+
+    for skill_path in (
+        MOSHPIT_SKILL_PATH,
+        FUKUI_PROCEDURE_SKILL_PATH,
+        FUNDING_PPP_SKILL_PATH,
+        WEBSITE_SKILL_PATH,
+    ):
+        skill_text = skill_path.read_text(encoding="utf-8")
+        assert "brand_context" in skill_text
+        assert "uppercase YUMORI and lowercase" not in skill_text
+        assert "Movement/site brand" not in skill_text
+
+
 def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     registry = load_json(WRE_SKILLS_REGISTRY_PATH)
     assert registry["total_skills"] == len(registry["skills"])
@@ -69,14 +94,35 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     skill = MOSHPIT_SKILL_PATH.read_text(encoding="utf-8")
     assert "name: yumori_moshpit" in skill
     assert "promotion_state: prototype" in skill
-    assert "YUMORI Moshpit" in skill
+    assert "YUMORI.me Moshpit" in skill
     assert "0102 Moshpit" in skill
     assert "reverse chronological within each day" in skill
     assert "https://docs.google.com/document/d/1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM/edit" in skill
     assert "is the canonical YUMORI campaign ledger" in skill
     assert "Do not create or maintain a parallel Markdown, DOCX, Library, or repository campaign ledger." in skill
+    # Both canonical Docs must use native content mutation; private-log failures stay observable.
+    assert "## Private 0102 Moshpit native write parity" in skill
+    assert "applies **equally to both**" in skill
+    assert "0102 Moshpit — Agent Learning & Action Log" in skill
+    assert "documents.batchUpdate" in skill
+    assert "exact returned connector error code/message" in skill
+    assert "one pending learning-log delta" in skill
+    assert "do not create a parallel log" in skill
     assert "Branch-protection “required” status alone is never sufficient evidence." in skill
     assert "Never merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed." in skill
+
+    # These protect the operator policy; they do not execute live Docs ordering.
+    ordering = skill.split("## Ordering rule", 1)[1].split("\n## ", 1)[0]
+    assert "**end/completion time**" in ordering
+    assert "Do not sort from times merely mentioned inside the body" in ordering
+    assert "If an event's own time is unknown, do not invent one" in ordering
+    assert "every moved event has an established effective event time" in ordering
+    write_procedure = skill.split("## Write procedure", 1)[1].split("\n## ", 1)[0]
+    assert "standalone `HEADING_2` paragraph" in write_procedure
+    assert "standalone `NORMAL_TEXT` paragraph beginning with `•`" in write_procedure
+    assert "no paragraph contains multiple activity bullets" in write_procedure
+    assert "verify the whole current-day block after mutation" in write_procedure
+    assert "Do not rewrite or reorder historical event text" in write_procedure
 
     for projection in (
         REPOSITORY_ROOT / ".agents" / "skills" / "yumori-moshpit" / "SKILL.md",
@@ -134,11 +180,44 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "AWARDED" in funding_text
 
     correspondence_text = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
-    assert "Plain committee correspondence" in correspondence_text
-    assert "communication_policy_revision: 2026-10-06" in correspondence_text
-    assert "do not open with" in correspondence_text
-    assert "0102です" in correspondence_text
-    assert "Default sign-off: `YUMORI.me設立準備委員会`." in correspondence_text
+    assert "\nversion: 0.8.1\n" in correspondence_text
+    assert "communication_policy_revision: 2026-10-26" in correspondence_text
+    current_voice, human_fallback = correspondence_text.split(
+        "## External voice modes — principal directive 2026-10-26", 1
+    )[1].split(
+        "### Human/committee-authored correspondence — 2026-10-06 fallback", 1
+    )
+    current_voice = " ".join(current_voice.split())
+    assert (
+        "2026-10-06 plain committee policy is retained for actual human/committee-authored "
+        "messages and formal applicant channels"
+    ) in current_voice
+    for mode in ("AI_OPERATOR", "HUMAN_COMMITTEE", "OFFICIAL_FORM"):
+        assert f"- `{mode}`:" in current_voice
+    assert "explicitly admitted by a current authority" in current_voice
+    assert "Michael TroutのAIアシスタント「0102」" in current_voice
+    assert (
+        "not a fabricated human sender, employee, legal representative, or registered Japanese subsidiary"
+    ) in current_voice
+    assert "No personal human first-person claim and no representation of human review." in current_voice
+    assert "012-directed writing sent as Michael or the actual preparatory committee" in current_voice
+    assert "do not inject an unwanted AI/proxy preface or sign-off" in current_voice
+    assert "Neither mode can override required fields." in current_voice
+    assert "Always answer direct AI-assistance questions truthfully." in current_voice
+    assert (
+        "Changing the voice does not retroactively alter historical Sent, current recipient policy, "
+        "legal authority, authorization, or #1779."
+    ) in current_voice
+    assert (
+        "Unattended `REDDOG_AUTO` SEND is still HOLD-only until the sender-boundary service "
+        "is deployed and independently verified."
+    ) in current_voice
+    assert (
+        "A human-directed Work send is a separate transaction with fresh preflight, not perpetual authorization."
+    ) in current_voice
+    assert "do not open with" in human_fallback
+    assert "0102です" in human_fallback
+    assert "Default sign-off: `YUMORI.me設立準備委員会`." in human_fallback
     assert "Default sign-off:\n\n`0102`" not in correspondence_text
     assert "signature_only_0102_default" not in correspondence_text
     assert "monk_third_person_reference" not in correspondence_text
@@ -202,6 +281,63 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
                 assert "Default sign-off is `0102`" not in projected
                 assert "0102 writes as proxy" not in projected
 
+
+
+def test_stt_artifacts_are_rejected_from_current_public_surfaces() -> None:
+    source_of_truth = (FRONTEND_ROOT / "audit" / "SOURCE_OF_TRUTH.md").read_text(encoding="utf-8")
+    assert "Speech-to-text normalization guard" in source_of_truth
+    for canonical in (
+        "旧すかっとランド九頭竜",
+        "Sukatto Land Kuzuryu",
+        "YUMORI.me",
+        "九頭竜川",
+        "Kuzuryu River",
+        "あわら温泉",
+        "Yukemuri Yokocho",
+        "旧下宇坂小学校",
+        "旧羽生小学校",
+    ):
+        assert canonical in source_of_truth
+
+    current_surfaces = "\n".join(
+        read(relative)
+        for relative in (
+            "app/page.tsx",
+            "app/future/page.tsx",
+            "components/LanguageSwitcher.tsx",
+            "content/yumori-vision.ts",
+        )
+    )
+    for artifact in (
+        "Scott Lando",
+        "Scottland",
+        "Kazuri",
+        "Kazury",
+        "Kazuru",
+        "Kuzuri",
+        "Kuzuru",
+        "Owarasa",
+        "cubicle restaurant",
+        "旧すかっとらんど九頭竜",
+        "旧スカットランド九頭竜",
+        "すかっとランド九頭龍",
+    ):
+        assert artifact not in current_surfaces
+
+
+def test_yumori_monthly_member_meeting_notice_is_public() -> None:
+    page = read("app/yumori/page.tsx")
+    assert "毎月第2火曜日" in page
+    assert "19:00〜20:00" in page
+    meeting = page.split('id="monthly-meeting"', 1)[1].split("</section>", 1)[0]
+    assert "毎月第2火曜日 19:00〜20:00（日本時間）" in meeting
+    assert "定例：毎月第2火曜日 19:00〜20:00 JST" in meeting
+    assert "次回：" not in meeting
+    assert "初回は" not in meeting
+    assert not re.search(r"\d{4}年\d{1,2}月\d{1,2}日", meeting)
+    assert "https://meet.google.com/twb-ihey-bhu" in page
+    assert 'id="monthly-meeting"' in page
+    assert "主たる事務所と銀行口座は準備中" in page
 
 
 def test_sites_configuration_and_primary_routes_are_present() -> None:
@@ -529,3 +665,81 @@ def test_phone_skill_is_human_led_plain_and_truthful_with_identical_projection()
     assert "YUMORI.me設立準備委員会です。" in spoken
     for label in ("0102", "AI", "代理", "digital twin"):
         assert label not in spoken
+
+
+
+def test_reddog_email_link_source_quality_policy() -> None:
+    """Regression: social syndication, giant URLs and HOLD archive text stay out of mail."""
+    generic = REDDOG_CORRESPONDENCE_SKILL_PATH.read_text(encoding="utf-8")
+    yumori = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
+    document_audit = (
+        MODULE_ROOT / "skillz" / "recipient_document_audit" / "SKILLz.md"
+    ).read_text(encoding="utf-8")
+
+    # This checks the documented operator policy, not a deployed Gmail interceptor.
+    assert "Recipient-facing link/source and HOLD-content gate" in generic
+    assert "No giant naked links" in generic
+    assert "percent-encoded URLs" in generic
+    assert "Internal-only text never escapes" in generic
+    assert "final rendered plain-text/HTML MIME" in generic
+    assert "Gmail provider success or a" in generic
+
+    assert "Website-first publication links" in yumori
+    assert "https://esingularity.ai/reports/jhr" in yumori
+    assert "LinkedIn newsletters are" in yumori
+    assert "secondary syndication" in yumori
+    assert "the production website served **JHR #001 only**" in yumori
+    assert "Do not assert that #003" in yumori
+    assert "内部保管・このまま送信しない" in yumori
+    assert "unrelated" in yumori
+
+    assert "publisher-owned" in document_audit
+    assert "long," in document_audit
+    assert "percent-encoded bare URLs" in document_audit
+    assert "never\n  cite the live website as #003" in document_audit
+    assert "SUPERSEDED／送信禁止" in document_audit
+
+def test_yumori_work_orchestrator_defines_resident_rsi_canary() -> None:
+    """Resident YUMORI must compose existing memory/provider owners, not a new agent stack."""
+    text = WORK_ORCHESTRATOR_SKILL_PATH.read_text(encoding="utf-8")
+    for required in (
+        "Resident RSI canary — target autonomous loop",
+        "FoundUp scope `esingularity_001`",
+        "operational FoundUp Memex snapshot supply",
+        "Brain for durable consolidated understanding",
+        "Breadcrumbs for recent episodic",
+        "Gmail / LinkedIn / other providers as transaction truth",
+        "WRE PatternMemory / verified outcomes",
+        "Resident cycle contract",
+        "Autonomous effect ladder",
+        "Model and research workers",
+        "OpenRouter / Fusion is a candidate advisory intelligence layer",
+        "privacy/redaction gate",
+        "AI Gateway model AutoResearch",
+        "WRE AutoResearcher only for the bounded configuration/compute-ROI target",
+        "REDDOG_AUTO",
+        "#1779 host deployment closure",
+        "Autonomous Gmail operating loop",
+        "RESPOND",
+        "RESEARCH_MORE",
+        "reddog_recipient_preflight",
+        "No mass blast.",
+        "Autonomous partner discovery and unblocking",
+        "search existing Contacts, Gmail and LinkedIn",
+        "RSI learning contract",
+        "Retained improvement test",
+        "a later,",
+        "unseen YUMORI cycle",
+        "012 interventions required and why",
+        "cost per verified useful outcome",
+    ):
+        assert required in text
+
+    assert "Do not create a\nseparate YUMORI daemon" in text
+    for forbidden in (
+        "new store for YUMORI memory",
+        "auto-send regardless of #1779",
+        "raw private Gmail bodies may be sent to OpenRouter",
+    ):
+        assert forbidden not in text
+
