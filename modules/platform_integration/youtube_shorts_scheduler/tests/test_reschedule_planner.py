@@ -123,8 +123,8 @@ def test_bounded_preview_exclusions_and_identical_duplicate():
     ({"live_state": "unknown"}, "live_state_not_clear"),
     ({"operator_editing": True}, "operator_editing"),
     ({"inventory_complete": False}, "inventory_incomplete"),
-    ({"observed_at": _at("2026-11-16T11:58:00+09:00")}, "observations_stale_or_future"),
-    ({"observed_at": _at("2026-11-16T12:01:00+09:00")}, "observations_stale_or_future"),
+    ({"observed_at": datetime.fromisoformat("2026-11-16T11:58:00+09:00")}, "observations_stale_or_future"),
+    ({"observed_at": datetime.fromisoformat("2026-11-16T12:01:00+09:00")}, "observations_stale_or_future"),
 ])
 def test_bounded_preview_observation_blocks(change, reason):
     args = _preview_inputs()
@@ -159,8 +159,8 @@ def test_bounded_preview_conflicting_duplicate_fails_closed():
 
 @pytest.mark.parametrize("field,value,reason", [
     ("visibility", "private", "not_unlisted"),
-    ("source_at", _at("2026-11-14T00:00:00+09:00"), "outside_source_window"),
-    ("source_at", _at("2026-11-17T00:00:00+09:00"), "source_in_future"),
+    ("source_at", datetime.fromisoformat("2026-11-14T00:00:00+09:00"), "outside_source_window"),
+    ("source_at", datetime.fromisoformat("2026-11-17T00:00:00+09:00"), "source_in_future"),
     ("evidence_ref", "", "content_evidence_missing"),
     ("topic", "", "content_evidence_missing"),
 ])
@@ -278,7 +278,6 @@ def test_bounded_preview_skips_fold_candidates_and_keeps_elapsed_spacing():
 
 def test_bounded_preview_has_no_file_network_or_reservation_effects(monkeypatch):
     import builtins
-    import socket
     import pytz
     from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
     # Load bundled timezone data before sealing effects, even in isolated runs.
@@ -287,7 +286,7 @@ def test_bounded_preview_has_no_file_network_or_reservation_effects(monkeypatch)
     def forbidden(*args, **kwargs):
         raise AssertionError("preview attempted external effect")
     monkeypatch.setattr(builtins, "open", forbidden)
-    monkeypatch.setattr(socket, "socket", forbidden)
+    monkeypatch.setattr("socket.socket", forbidden)
     monkeypatch.setattr(ScheduleTracker, "reserve_slot", forbidden)
     monkeypatch.setattr(ScheduleTracker, "save", forbidden)
     assert plan_bounded_unlisted_batch(**_preview_inputs())["effects_disabled"]

@@ -3,7 +3,7 @@
 `test_reschedule_planner.py` retains the legacy rebalance cases and adds the
 pure finite-window preview contract: exact-ID/top-bottom topic diversity,
 evidence/hold/source exclusions, duplicate conflicts, complete/fresh observation
-gates, active/unknown live state, user editing, deterministic offsets, UTC
+gates, active/unknown live state, operator editing, deterministic offsets, UTC
 collision spacing, Studio-local day caps, DST folds and audience conversion.
 Effect-denial controls forbid file/network/reservation effects after timezone
 data loading. No native publisher integration or browser qualification is claimed.
@@ -12,6 +12,19 @@ Observed: 55 planner cases and 102 combined planner/calendar-reservation/peak
 cases pass. The seven legacy long-form timezone tests also fail on the unchanged
 base planner (empty allocation); retained separately as a baseline failure, not
 silently skipped or reported as passing.
+
+## Offline visual-harness caller controls
+
+The four `test_visual_harness_*` cases in `test_layer3_schedule.py` use a fake
+runner, synthetic readback and a native import guard for the scheduler parent,
+`pytz` and model packages. The production DOM constructor loads only on manual
+use, so collection does not require the full scheduler's dependencies. Run them with
+`python -m pytest modules/platform_integration/youtube_shorts_scheduler/tests/test_layer3_schedule.py -k visual_harness --import-mode=importlib`.
+They never attach Chrome or call UI-TARS. The separate manual `--wre-tars` path
+stops after any failed verification and exits nonzero for an absent, empty, failed
+or inconsistent summary. Its date/time value assertion is DOM evidence;
+the earlier visual checks only localize described targets. These checks do not
+prove a saved or published schedule.
 
 ## 2026-11-10 — Native request inventory inspection
 

@@ -181,3 +181,9 @@ cut, then the existing hosting owner must deploy it before Refresh can show it.
 This is a read-only creator-review surface, not a new renderer, public editing
 API, separate PWA, authentication system or WRE worker. Voice and whiteboard
 capture remain deferred. A local build is not evidence of public deployment.
+
+## Proposed video provenance / cryptographic RSI PoC (2026-11-16)
+
+See [staged video provenance, agent identity and gifted collectible research](docs/VIDEO_PROVENANCE_RSI_REWARDS_POC.md). This is a **proposal only**: first prove a signed media manifest on a real LEGO-style video, then adversarial watermark benchmarking, governed WRE research, independently authorized DAE signatures, unclaimed-return reward policy, and isolated experimental geometry. No NFT minting, new signing authority, or autonomous worker is active.
+
+Shared-tool boundary clarification: this module is one existing video/render/publish implementation candidate, **not** the universal owner of all FoundUps video or NFT rewards. See the [cross-FoundUp architecture and Mall rarity/claim contract](docs/VIDEO_PROVENANCE_RSI_REWARDS_POC.md#architectural-correction-shared-tool-not-a-channel-owned-product-012-2026-11-16). antifaFM, EDUIT, other FoundUps and code-built LEGO scenes may consume shared video capabilities through qualified adapters; publishing, signing and rewards remain separate contracts.

@@ -63,6 +63,12 @@ function writeFixture(entities) {
         build_contract: { safe_mutation_surface: [entity.module_path + '/**'] }
       }) + '\n', 'utf8');
     }
+    if (entity.brand_context_path && !entity.brand_context_path.includes('..')
+      && fs.existsSync(path.join(sourceRoot, entity.brand_context_path))) {
+      const brandTarget = path.join(repo, entity.brand_context_path);
+      fs.mkdirSync(path.dirname(brandTarget), { recursive: true });
+      fs.copyFileSync(path.join(sourceRoot, entity.brand_context_path), brandTarget);
+    }
   }
   const skill = path.join(repo, 'modules', 'communication', 'moltbot_bridge', 'skillz', 'reddog_operations', 'SKILLz.md');
   fs.mkdirSync(path.dirname(skill), { recursive: true });
@@ -179,6 +185,17 @@ const adjacentAliasWins = grounding.resolveFoundupWorkGrounding(
 );
 assert.strictEqual(adjacentAliasWins.foundup_id, 'gotjunk_001',
   'an incidental alias elsewhere in the prompt must not create ambiguity');
+
+const yumoriBrand = grounding.resolveFoundupWorkGrounding(
+  root, 'work on YUMORI.me FoundUp', rootAuthority
+);
+assert.strictEqual(yumoriBrand.passed, true);
+assert.strictEqual(yumoriBrand.foundup_id, 'esingularity_001');
+assert.strictEqual(yumoriBrand.brand_foundup_id, 'yumori_me');
+assert.strictEqual(yumoriBrand.canonical_brand, 'YUMORI.me');
+assert.strictEqual(yumoriBrand.brand_context_path, 'modules/foundups/esingularity/brand_context.json');
+assert(yumoriBrand.evidence_targets.includes('modules/foundups/brand_context.schema.json'));
+assert(yumoriBrand.evidence_targets.includes('modules/foundups/esingularity/brand_context.json'));
 
 const registry = JSON.parse(fs.readFileSync(path.join(root, grounding.REGISTRY_PATH), 'utf8'));
 for (const entity of registry.entities) {

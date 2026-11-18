@@ -1,7 +1,7 @@
 ---
 name: linkedin_jhr_newsletter
 description: Research, significance-gate, draft, maintain and publish the Japan Hyperscaler Report LinkedIn newsletter from the canonical eSingularity JHR evidence lane
-version: 1.3.0
+version: 1.4.1
 author: 0102
 agents: [qwen]
 intent_type: CONTENT_GENERATION
@@ -15,6 +15,15 @@ Read the [newsletter router](../linkedin_newsletters/SKILLz.md) and [master
 routing contract](../../docs/LINKEDIN_ACTIVITY_ROUTING.md). This skill owns only
 the Japan Hyperscaler Report (JHR) LinkedIn lane. It does not own general Project
 eSingularity Page articles or YUMORI.me campaign posts.
+
+Red Dog's existing JHR entrypoint is
+`.claude/skills/japan_hyperscaler_report/SKILL.md` (Codex projection in `.agents`).
+Use `modules/foundups/esingularity/jhr/manifest.json` for dated issue identity,
+source and platform evidence. Refresh the live publisher, public archive, private
+draft and schedule before placement; the manifest does not grant approval.
+Japanese LinkedIn, separately approved English Substack and Reddit research have
+distinct roles in that entrypoint. This child owns LinkedIn only and does not
+automatically post to Substack or Reddit. Preserve historical bilingual editions.
 
 ## Source, identity and significance gate
 
@@ -98,3 +107,14 @@ Track the shared newsletter stages. Route exact approved content through
 matching queue entry and live permalink independently. Record provenance, report
 number, publication state and next monitored signal in the established JHR/project
 continuity surface. `NO_REPORT` is a complete researched outcome, not a failure.
+
+## Carry forward open website releases — 2026-11-16
+
+Read the relevant JHR and YUMORI release receipts, including unresolved issue2126
+work, before choosing the next edition. Preserve known LinkedIn permalinks even
+if the website is behind: reconcile the existing edition read-only, never repost
+it to repair a missing site issue. Private drafts/schedule unavailable means
+coverage unknown. Carry edition artifact hash, source revision/hash, verified
+publisher/series/destination, exact approval scope and provider readback into the
+existing SOCIAL content reconciliation packet. A prepared packet is not a grant,
+and a Docs/Git receipt is not an acknowledged Brain/Memex write.
