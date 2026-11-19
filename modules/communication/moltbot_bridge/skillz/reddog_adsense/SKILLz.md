@@ -52,9 +52,21 @@ is not evidence that its wrapper/root contains the tag. Do not remove redirects,
 change DNS, robots, authentication, indexing or crawler/security controls just
 to pass verification. Record a blocker and the existing owner instead.
 
-## 3. Choose only an offered verification-only method
+## 3. Check existing ownership before choosing a verification method
 
-Read the methods actually offered by that site's AdSense screen.
+Before any site edit or deploy, inspect the site's current ownership state in
+AdSense. Google's official guidance says AdSense may detect ownership already
+verified in Search Console and continue its readiness checks without an AdSense
+tag or ads.txt. Where existing authorized access permits, check the exact site's
+Search Console ownership, then read back what AdSense actually recognizes.
+Search Console verification alone is not proof AdSense has detected it, nor that
+policy review has passed. If AdSense already recognizes ownership, skip the
+verification deployment and report the separate review status.
+
+This check does not authorize creating a Search Console property, adding DNS or
+verification records, granting permissions, or changing accounts. If existing
+ownership is unavailable or not detected, retain that uncertainty and read the
+methods actually offered by that site's AdSense screen before a scoped change.
 
 1. Prefer its **meta tag** when available: use the exact account-generated tag
    in the existing site's HTML head/metadata owner. Do not guess its value or
@@ -72,7 +84,8 @@ Read the methods actually offered by that site's AdSense screen.
    stop at that boundary. Do not invent a DNS verification option from another
    Google product or change DNS because a remembered guide mentioned it.
 
-Use the existing site's authorized release path, narrowly scoped. Read back the
+Only if a site change is still needed, use the existing site's authorized release
+path, narrowly scoped. Read back the
 published head/root file at the exact domain before selecting **Verify**. Preserve
 cache/redirect/crawl behavior and report access blocks without bypassing them.
 
@@ -124,3 +137,5 @@ fresh-session loading, live account verification or an admitted autonomous run.
 
 - [Add a site and verification methods](https://support.google.com/adsense/answer/12169212?hl=en)
 - [Site-management states](https://support.google.com/adsense/answer/12131223?hl=en)
+
+- [Existing Search Console ownership detection](https://support.google.com/adsense/answer/12176698?hl=en)

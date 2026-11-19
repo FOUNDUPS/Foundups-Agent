@@ -5,6 +5,9 @@
   AdSense owner at main `7432d31e5a68544d2bbab6715f02f64b0b5b6f85`.
   Reuse WRE registry/discovery, NAVIGATION and thin Claude/Codex entrypoints;
   no new Rolodex database, executor or account data store.
+- Check existing Search Console ownership and actual AdSense recognition before
+  any verification deployment; detection is not policy approval. No new property,
+  DNS record or access grant is authorized by this check (Google help 12176698).
 - Preserve ownership-only scope, actual offered meta/ads.txt choices, redirect
   and crawler behavior, private records and the separate YouTube payment lane.
 - Local WSP 00 gate passed. Holo lexical bundle used the isolated source;
