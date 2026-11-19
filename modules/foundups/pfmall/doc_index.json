@@ -75,7 +75,7 @@
     },
     {
       "doc_type": "roadmap",
-      "hash_sha256": "d7e2c56efdee0d0aca809dfef55bcb384997cf10c68afd83918c308e27b2a57e",
+      "hash_sha256": "18298da22779a34fa14f8ec14ed54da91beab558e095c97c57ceb5f082215007",
       "links": {
         "automation": [
           "doc_dae"
@@ -86,7 +86,7 @@
       },
       "module_hint": "pfmall",
       "path": "modules/foundups/pfmall/ROADMAP.md",
-      "size_bytes": 36073,
+      "size_bytes": 37696,
       "status": "active",
       "wsp_refs": [
         "WSP 12",

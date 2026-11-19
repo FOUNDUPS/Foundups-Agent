@@ -1,5 +1,31 @@
 # p.fMALL Roadmap
 
+## iPhone 12 review correction — 012 feedback, 2026-11-19
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.** The opened review
+preview still wraps the app header, displays Member Portal on a separate row,
+and places All/A–Z/Readiness/Category/Videos/Apps/Shop above narrow tiles.
+[HPC H1G](../hpc/ROADMAP.md#h1g--iphone-12-preview-feedback--012-2026-11-19)
+owns the ordered shared-shell correction and acceptance: one compact FoundUPS
+header, remove the visible portal label while preserving account access, move
+existing filters into the existing `+` sheet, fit tiles/video to the available
+phone viewport, and preserve one bottom search/dictation/Red Dog dock. HPC
+continues as the first qualification surface; verify ordinary Mall and PC too.
+
+The preview's `+` dialog reports Build v24; pushed native
+`feat/hpc-floating-wikitube-v20` remains `75c838b6` / v23.
+The served receipt identifies that base plus a v24 overlay, but reports its
+hosting version as unverified. Recover the owner's complete overlay and verify
+deployment parity before runtime mutation. A docs merge or a tile-only responsive
+test does not close the actual header, keyboard, full-shell or iPhone checks.
+
+**Deferred AutoPost TODO:** bottom-right icon near camera-flip controls and
+bottom search, as requested by 012. The precise icon action still needs
+definition in the existing AutoPost owner. Retain the current Mall camera
+link and [capture handoff](AUTOPOST_ITEM_CAPTURE_HANDOFF.md); no external
+capture rewrite, new search engine or AutoPost implementation in this slice.
+Keep preview approval and production publication separate.
+
 ## Fractal tile graph and agent work navigation
 
 **Specified, 2026-11-19; census first.** The website build cube is the intended
