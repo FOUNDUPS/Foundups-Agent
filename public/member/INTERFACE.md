@@ -3,6 +3,29 @@
 **Module**: `public/member/`
 **Version**: 2.3.0
 
+## Proposed fractal view contract — 2026-11-19
+
+The [navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+owns the future component graph view. Reuse this shell's search, field, player
+and permitted state owners. A component's stable identity can appear in
+multiple lenses without duplicating the component. Containment and typed reuse,
+dependency or work links follow the [master architecture](../../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work).
+
+The future return record retains caller, lens, selection and recoverable view
+state. Keep graph snapshot revision separate from exact source revision and
+overlay identity; unavailable pinned evidence must not silently open main.
+Revalidate access for Back, direct entry, search and conversational context.
+Private PC paths and receipts stay in architect scope. A builder association
+requires explicit permitted work-to-component evidence; animations and aggregate
+telemetry cannot supply it.
+
+Tools → Benchmark and graph selection are planned navigation surfaces. This
+specification adds no dispatcher command, endpoint, execution authority or
+resident voice transport. Functionality and integration evidence remain
+independent. The [documentation audit](../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+records implementation boundaries; existing interfaces below retain their
+current contracts.
+
 ## Public Interface
 
 ### Public video projection

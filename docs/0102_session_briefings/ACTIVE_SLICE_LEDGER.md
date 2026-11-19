@@ -1,3 +1,26 @@
+## PR #2427 fractal documentation reconciliation — 2026-11-19
+
+Owner: 0102 documentation lane; principal 012; origin external_principal.
+Resume existing `docs/pfmall-fractal-work-navigation-20261119`, observed open
+head `b90a1b01f4caa478f8f1d8f7dc154c67a26fcdd4` on main
+`7432d31e5a68544d2bbab6715f02f64b0b5b6f85`. Preserve the prior five-document
+navigation changes and extend the existing owners with recovered Tertia
+provenance, inclusive census, separate functionality/integration, bounded
+parallel comparisons and explicit source/reported-local/target labels.
+The [documentation audit](../audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+owns coverage, corrections and unresolved evidence; no competing Carbon run.
+
+Current authorization is documentation update/review only. No merge, deployment,
+production routing or financial change is claimed or authorized by this entry.
+Validate the resulting exact head, read hosted checks, and retain the open PR as
+the reviewable handoff. Main and PC convergence remain separate later gates.
+Recheck this entry against the live PR before a subsequent mutation.
+
+Next evidence dependency: the existing Carbon/PC owner supplies the inaccessible
+local `121c5066687c5ab7571ef52382e5d9c68494cc36` graph, schemas and receipt
+bindings; reconcile 430/431 and 209/211 by ID. Proposed bounded WSP_15 next
+slice C2/I4/D4/Impact3 = 13/P1. Protected native-admission gates are unchanged.
+
 ## PR #2403 convergence and qualified merge - 2026-11-16
 
 012 now authorizes reconciliation of the existing PR, independent exact-head

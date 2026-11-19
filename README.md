@@ -48,6 +48,12 @@ Canonical RedDog navigation:
 - [RedDog outcome / vision](docs/REDDOG_OUTCOME_VISION.md)
 - [RedDog Lick connection handshake](extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md)
 
+For the Play FoundUps fractal, read [how it works](docs/foundups_vision.md#how-the-fractal-system-works),
+the [identity and evidence contract](modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work),
+and the [census/benchmark/visualization sequence](modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation).
+The [dated documentation audit](docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+separates inspected source, reported local work and remaining targets.
+
 ---
 
 ## 🌐 **THE INTELLIGENT INTERNET ORCHESTRATION SYSTEM**

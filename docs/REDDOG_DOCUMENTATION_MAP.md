@@ -36,6 +36,8 @@ not mean RedDog has 376 canonical specifications.
 | Lick/Gemini/rESP findings | `docs/audits/architecture/REDDOG_LICK_HANDSHAKE_AUDIT_PHASE1.md` | Historical evidence audit, not runtime or patent-status authority |
 | Public member digital-twin contract | `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` | Public-surface contract |
 | FoundUps domain integration | `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` | FoundUps domain navigation |
+| Play FoundUps fractal and work exploration | [System explanation](foundups_vision.md#how-the-fractal-system-works), [identity/evidence](../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work), [navigation](../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation) | Shared entity model and specified navigation; no implicit cross-chat synchronization or execution authority |
+| Fractal audit benchmarking and provenance | [Dispatch](operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19), [documentation audit](audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md) | Existing research/model/scaffold owners; source-verified comparisons and reported-local boundaries |
 | Sensitive evidence/secret boundary | `WSP_framework/src/WSP_71_Secrets_Management_Protocol.md` §2.3 | Security requirements that reference, but do not redefine, the Lick |
 | Protocol-level digital-twin authority | `WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md` | WSP authority; product handshakes do not belong here |
 

@@ -1,5 +1,19 @@
 # Member Area Module Change Log
 
+## 2026-11-19 — Fractal member-view documentation reconciliation
+
+- Added link-first target guidance to README, INTERFACE and ROADMAP using the
+  existing architecture, navigation and Mall planning owners. Census includes
+  immature candidates; bounded auditor samples run in parallel before the
+  separately scoped graph visualization slice.
+- Distinguished shared identity, caller/lens/selection return, graph/source
+  revisions and public/architect scope from current catalog and dispatcher
+  behavior. Local dictation does not establish resident voice or PC relay.
+- Documentation-only diff/link review; no browser implementation, live playback,
+  PC runtime or graph execution is asserted. See the
+  [documentation audit](../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+  for inspected-main versus reported-local evidence and unresolved gaps.
+
 ## 2026-11-16 · Build v19 catalog truth, HPC tile routing, and activeVideo continuity
 
 - **Catalog Truth & Schema Normalization (`mall-video-catalog.json`)**:

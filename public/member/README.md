@@ -5,6 +5,26 @@
 
 ## Overview
 
+### Fractal work navigation target — 2026-11-19
+
+The intended member experience uses this shared shell as one view of the
+FoundUps component graph. Select a FoundUp or permitted builder association,
+open the component and its revision-bound evidence, then return to the same
+caller, lens and selection. The same component keeps one ID when reached from
+another FoundUp, Tools or 0102. Public discovery exposes approved fields;
+authorized architect views may also expose private source and receipt links.
+The [master architecture](../../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+and [navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+own this target; the [Mall roadmap](../../modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation)
+starts with census discovery and parallel bounded auditor samples.
+
+The full graph, Tools → Benchmark branch and builder-to-source bridge are not
+established by the current catalog or browser dispatcher. The
+[documentation audit](../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+separates inspected source, the reported local graph and outstanding runtime
+evidence. Local search dictation below remains its existing browser capability;
+it does not establish a resident voice conversation or PC-thread relay.
+
 ### Public scoped video
 
 HPC uses this shell's shared field, player, header brand and bottom anchor.
