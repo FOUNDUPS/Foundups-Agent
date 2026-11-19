@@ -88,6 +88,41 @@ This is operator guidance, not a new thread registry, executor or authority.
 Use the current supported conversation interface; do not invent tool names or
 assume a phone voice conversation and a Work thread share history.
 
+Enter WSP_00 state before actionable intake. Under WSP_97, resolve the project
+and read its current canonical Mosh Pit FIRST when available: today's entries,
+the prior latest entry/day, completed work and pending obligations. Then use
+chat, email, Drive or Git as needed to corroborate facts and reconcile newer
+evidence. The timeline is continuity context, not proof of external effects.
+
+Every actionable item receives one compact factual machine-to-machine intake
+record in the identified canonical Mosh Pit, including blocked or unauthorized
+items. Deduplicate by stable item/source identity, then update or append its
+decision, state, verified receipt and next action using the existing ledger
+format and native revision/readback safeguards. Suggested fields, not a new
+schema or JSON enforcement:
+
+`JST | item_id | source_ref | state | owner | next | exhibit_ref`
+
+Do not log casual chatter or secret contents. If the ledger is unavailable,
+ambiguous or cannot be written safely, retain one pending delta with the
+blocker in the existing task and reconcile it when access returns; never
+claim it was logged or create a parallel case ledger. Recording an unauthorized
+action as BLOCKED does not authorize performing it. All actual external effects
+retain their separate approval and verification gates.
+
+The existing Work thread owns execution and the resumable brief, not a
+replacement timeline. Keep private exhibits at their authorized owners, using
+stable source IDs and permitted links in the private ledger rather than copying
+their contents. Respect the destination's audience and existing ledger format.
+
+For voice intake, listen silently until asked to respond; avoid filler.
+Return receipts in the authorized written conversation without unsolicited
+spoken interruption; result closure does not override silent listening.
+Apply this operating contract across AI interfaces only within their actual
+verified capabilities. Record unsupported listening, handoff or ledger access
+as a limitation, not a simulated success. Google Wave is a future collaboration
+concept here, not a current named feature or available integration.
+
 1. Resolve the requested lane by existing title, purpose, current owner and
    stable provider thread ID. Reuse the verified thread for YouTube Work,
    mtrout Work or Red Dog Work; preserve existing HPC Work and unrelated lanes.
@@ -112,8 +147,7 @@ assume a phone voice conversation and a Work thread share history.
    with observed evidence or UNKNOWN/BLOCKED. A listed thread is not a sent
    brief; a sent brief is not worker acceptance; acceptance is not completion.
    Return the verified result or blocker to the originating conversation unless
-   another destination was authorized. Do not
-   claim live voice availability, automatic cross-device synchronization,
+   another destination was authorized. Do not claim live voice availability, automatic cross-device synchronization,
    runtime admission or a future watcher from saved instructions alone.
 5. Reuse the [canonical Moshpit contract](../../../../../foundups/esingularity/skillz/yumori_moshpit/SKILLz.md)
    for compact dated activity/result/source receipts and newest-first event
