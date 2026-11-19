@@ -5,6 +5,8 @@
 - Windows Node 24.22.1: strict clean install with lifecycle scripts disabled, dependency constraints, TypeScript, lint (seven existing image warnings) and complete Vinext build pass. Separate npm audit reports zero vulnerabilities at this observation. Candidate builds use sanitized environments and bounded Windows Jobs; no deployment, private credentials or provider actions.
 - Clerk installation, types and repaired lint pass. The initial unconfigured build failed at Missing publishableKey; a subsequent production build passed using only the existing application's public publishable-key configuration, without copying private environment files or passing secret keys. Preserve the initial failure. Keep PR #1762 draft and its explicit merge hold pending independent final acceptance, the recorded signed-head requirement and hosted checks. These local results do not certify live Clerk sessions, production remediation or alert closure. WSP 10/12/22/34/50/71/91/97.
 
+- Hosted qualification on `c54a425ded480c242363bdd9f93f6524d811805a`: all five required contexts, 27 checks and all applicable workflows passed, including repository CI44549031280 and eSingularity44549031511 (88 module cases and Linux build). GitGuardian's neutral size-limit response remains an explicit scan-coverage gap. This dated predecessor evidence does not accept a later head or release the draft/independent-review hold.
+
 ## 2026-11-18 — Moshpit receipt privacy and event-date ordering
 
 - Extend the existing `skillz/yumori_moshpit/SKILLz.md`; no second skill, ledger, sender or runtime integration. Use compact action/result/source-link receipts and preserve private manuscripts in their existing owners. Check destination audience before linking.
