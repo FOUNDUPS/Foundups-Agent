@@ -1,3 +1,12 @@
+## 2026-11-19 — Reconcile PR #1762 residual lint dependencies
+
+- Preserve current Next 16.4.6, React 19.3.1, sharp 0.35.5 and Cloudflare peer versions. Apply only the missing eslint-config-next/@next/eslint-plugin-next 16.3.4 graph, including two required nested utility packages; every unrelated lock entry is unchanged. The Clerk companion keeps its newer runtime and adds the proposed fastq 1.20.3 plus a standard home-link lint repair.
+- Retain main's byte-identical icon manifest and all six effective translation/deduplication fixes from the original proposal. Retire the dated, branch-scoped lock-preparation/validation workflows from the reconciled tree; preserve their source in the original PR ancestry.
+- Windows Node 24.22.1: strict clean install with lifecycle scripts disabled, dependency constraints, TypeScript, lint (seven existing image warnings) and complete Vinext build pass. Separate npm audit reports zero vulnerabilities at this observation. Candidate builds use sanitized environments and bounded Windows Jobs; no deployment, private credentials or provider actions.
+- Clerk installation, types and repaired lint pass. The initial unconfigured build failed at Missing publishableKey; a subsequent production build passed using only the existing application's public publishable-key configuration, without copying private environment files or passing secret keys. Preserve the initial failure. Keep PR #1762 draft and its explicit merge hold pending independent final acceptance, the recorded signed-head requirement and hosted checks. These local results do not certify live Clerk sessions, production remediation or alert closure. WSP 10/12/22/34/50/71/91/97.
+
+- Hosted qualification on `c54a425ded480c242363bdd9f93f6524d811805a`: all five required contexts, 27 checks and all applicable workflows passed, including repository CI44549031280 and eSingularity44549031511 (88 module cases and Linux build). GitGuardian's neutral size-limit response remains an explicit scan-coverage gap. This dated predecessor evidence does not accept a later head or release the draft/independent-review hold.
+
 ## 2026-11-18 — Moshpit receipt privacy and event-date ordering
 
 - Extend the existing `skillz/yumori_moshpit/SKILLz.md`; no second skill, ledger, sender or runtime integration. Use compact action/result/source-link receipts and preserve private manuscripts in their existing owners. Check destination audience before linking.

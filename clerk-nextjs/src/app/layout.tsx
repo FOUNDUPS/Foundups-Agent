@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import {
   ClerkProvider,
   SignInButton,
@@ -38,9 +39,9 @@ export default function RootLayout({
         >
           {/* Header with auth buttons */}
           <header className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-4 bg-[#08080f]/80 backdrop-blur-md border-b border-white/10">
-            <a href="/" className="text-xl font-bold">
+            <Link href="/" className="text-xl font-bold">
               Found<span className="text-[#7c5cfc]">UPS</span>
-            </a>
+            </Link>
             <nav className="flex items-center gap-4">
               <SignedOut>
                 <SignInButton mode="modal">
