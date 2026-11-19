@@ -4,7 +4,7 @@ description: Reconcile corporate registration, tax accounts, exemption records, 
 ---
 # Red Dog corporate records
 
-Draft framework, not installed or admitted execution. Apply current WSP_00 and WSP_97; record unavailable native gates without claiming compliance. Reuse the project's existing private Mosh Pit and records folder; do not create a parallel case ledger.
+Draft framework, not installed or admitted execution. Apply current WSP_00 and WSP_97; record unavailable native gates without claiming compliance. Before acting, check the skill Rolodex and read the applicable skill. If none fits, record the gap; a missing skill does not authorize action. Reuse the project's existing private Mosh Pit and records folder; do not create a parallel case ledger.
 
 ## Resolve the actual question
 
@@ -19,7 +19,7 @@ Read the latest project ledger first, then the underlying notices, submitted for
 3. For payments, match payee, entity/account, purpose, period, amount/currency, payment date and transaction reference. Distinguish initiated, settled, agency-applied, reversed and disputed. A bank debit proves neither correct allocation nor tax clearance. Never pay again merely because a portal has not updated.
 4. For credits/refunds, distinguish requested, approved, issued, received and reconciled. A credit balance is not a cash refund; an approval is not funds received. Match actual credit application or incoming settlement to the correct account/period before closing.
 5. Reconcile contradictory records explicitly. Retain both sources, observation dates and the smallest missing proof. Draft an inquiry only if needed; sending it needs scoped authorization and verified recipients. Do not admit liability or waive rights as an incidental clarification.
-6. Record a compact factual ledger delta: date/time, item ID, source reference, state, owner, next action and exhibit reference. Reuse existing format and preserve history. Stop a closed follow-up only after the specific outcome is evidenced; unresolved items retain a concrete trigger/date, not endless unchanged polling.
+6. Record a compact factual ledger delta: date/time, item ID, source reference, state, owner, next action and exhibit reference. Reuse the existing format and preserve history. Put new entries immediately below the pinned instructions, newest first. Stop a closed follow-up only after the specific outcome is evidenced; unresolved items retain a concrete trigger/date, not endless unchanged polling.
 
 ## Authority checkpoints
 
@@ -50,6 +50,8 @@ source-backed due date and proof of fulfillment. Prior-year acceptance does not
 prove the next renewal. Read the existing local-procedure skill when relevant.
 
 ## Authorized written inquiries and live calls
+
+Coordinate all correspondence with the authorizing principal using the current scope; do not re-ask for routine wording already delegated. Log outgoing and incoming correspondence in the accompanying private Mosh Pit with its actual timestamp, agency/thread, evidence or provider receipt, state, owner and next action. Distinguish drafts, sends, automated acknowledgments and substantive replies. Do not resend to repair wording after a verified send unless specifically authorized.
 
 For an ordinary authorized written inquiry, open directly with the factual question;
 use a subject describing the business issue. Do not prepend a default AI introduction
