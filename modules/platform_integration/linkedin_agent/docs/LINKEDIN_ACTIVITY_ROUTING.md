@@ -4,6 +4,14 @@ Use the existing `linkedin_engagement` skill as the repository master and
 `operate-0102-linkedin` as its Work counterpart. These are instruction routes,
 not a new executor, daemon, or certification of legacy automation.
 
+All public releases in this workflow follow the existing
+[scheduled release contract](../skillz/linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership),
+including the Work `operate-0102-linkedin` counterpart. Carry that contract into
+its authorized handoff; this repository does not verify the installed Work copy.
+One private cross-series Drive Mosh Pit tracks release status while lane masters
+retain research history. Calendar review, editorial sign-off, proposed slot,
+confirmed LinkedIn queue and later live permalink are distinct evidence.
+
 ## Select scope before opening queues
 
 | 012 request | Activity skill | Scope |
