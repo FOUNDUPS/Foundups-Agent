@@ -14,14 +14,16 @@ checks, TypeScript and lint pass. Lint retains one unused StatCard warning.
 A separate npm audit reports zero vulnerabilities for this lockfile as of this
 observation; that is not a general security or deployed-runtime certification.
 
-The production build compiles and typechecks, then still fails prerendering
-`/` with `Missing publishableKey`. A deployment-owner-provided Clerk
-configuration and a fresh successful build remain required. Qualification
-excluded private environment files and provider credentials and disabled
-keyless provisioning. No placeholder key, authentication bypass or lint-rule
-exception was introduced. The earlier October observations below remain dated
-history. Draft/merge hold, independent final review, hosted checks, deployment
-and alert-closure verification remain separate gates.
+The initial build without Clerk configuration compiled and typechecked but
+failed prerendering `/` with `Missing publishableKey`. A subsequent build passed
+using only the existing application's configured public publishable key in the
+otherwise sanitized child environment. No private dotenv file or secret key was
+copied into the qualification directory; keyless provisioning stayed disabled.
+No placeholder key, authentication bypass or lint-rule exception was introduced.
+This is successful source/build qualification, not a verified live Clerk session
+or deployment. The earlier failed build and October observations remain dated
+history. Draft/merge hold, independent final review, the recorded signed-head
+requirement, hosted checks, deployment and alert closure remain separate gates.
 
 ## Dependency qualification — 2026-10-23
 
