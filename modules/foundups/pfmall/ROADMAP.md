@@ -2,13 +2,68 @@
 
 ## Fractal tile graph and agent work navigation
 
-**Specified, 2026-11-19.** The website build cube is the visual entrance to a FoundUp's work. The Mall, Simulator and 0102 share tile identity across spatial, catalog and conversational views. The [master architecture](../docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work) owns identity and scope. The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation) owns drill-down and return behavior.
+**Specified, 2026-11-19; census first.** The website build cube is the intended
+visual entrance to a FoundUp's work. The Mall, Simulator and 0102 should resolve
+the same component identity across spatial, catalog and conversational views.
+The [master architecture](../docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+owns identity and scope; the [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+owns drill-down and return. This sequence supersedes the earlier immediate
+build plan and its verified-wiring admission gate.
 
-1. **Audit.** Pin main, the Mall v22 overlay and the JHR audit source. Inventory ventures, modules, artifacts, open sockets and publications. Reconcile the opus baseline. Produce the dated tile graph and WSP_15 report in the existing ignored audit directory. Verify coverage, permissions, unique IDs and tree integrity before isolated implementation.
-2. **Build.** Freeze schemas and fixtures. Inventory lanes feed the compiler. The Mall frontend develops against the same fixtures. Project public and architect catalogs with scoped references and ETags. Support co-build, HPC community, investor/licensing, Akiya market and continuous WikiTube playback on one engine.
-3. **Rank.** Use canonical [WSP_15](../../../WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md) for module and approved-work priority. Store lifecycle, completeness and the separate 20–100 Mall rescue score independently. Require publication evidence for an opus item and verified wiring for a module.
-4. **Co-build.** Route approved roadmap additions, socket links, renames and evidence-backed promotions through an authenticated server patch with actor scope, patch ID and base revision. Commit an accepted edit and its receipt together. Verify concurrent writes, idempotent retry, tenant isolation and persistence after regeneration.
-5. **Qualify.** Run Simulator and JHR pilots. In one pilot bind a real or explicitly labelled fixture work record to a component, select the builder, enter the model, open a revision-bound source or test leaf and return to the same builder. Verify voice/text and 2D/3D target parity, direct entry, HPC → AutoPost → Back, WikiTube continuity and stale or restricted evidence. Record observed, fixture-only and blocked results separately.
+1. **Sprint 1 — Census and parallel auditor samples.** Inventory accessible
+   FoundUps, modules, cubes, tools, artifacts, sockets and publications once,
+   including immature, unwired, archived and proposed candidates. Preserve
+   inaccessible leads and exclusions. Pin each repository and relevant overlay,
+   record its coverage denominator, retain existing stable IDs, and mark missing
+   identity or ownership as unknown. Record functionality and integration
+   independently; neither is required to appear in the census. Use existing
+   registries and matching evidence, then scan the delta. The original graph
+   counts remain unresolved until their ID sets and exclusion reasons are available.
+2. **Parallel bounded sampler within Sprint 1.** Select up to three eligible
+   packets: discovery, dependency tracing, and duplicate review or integration.
+   Run the existing incumbent first on each selected packet, then eligible
+   workers independently before sharing answers. Freeze each packet's source,
+   question, tool access and budget across runs. Reuse admitted dispatch and
+   compatible held-out harness/evaluator contracts; record exact runtime/model,
+   input digest, tools, retries, verifier, anchors, recovered/missed links,
+   unsupported claims, elapsed time and observed resource use. Unavailable
+   metrics are `UNKNOWN`. An admitted local Nemotron route may propose
+   candidates with acceptance/rejection reasons. Missing dispatch, model or
+   adapter access does not halt independent census lanes or permit routing
+   changes. Results qualify only the sampled tasks.
+3. **Sprint 2 — Mall graph visualization.** Reuse the existing Fractal Tile
+   Graph schema, projector, viewer and navigation test once recovered. A shared
+   component has one ID across views. Qualify a Tools → Benchmark → harness or
+   evaluator → supported module/model → run receipt → test or source path using
+   real IDs and pinned evidence. Graph snapshot revision and source revision
+   remain distinct. Qualify a builder → work reference → component → artifact
+   path separately, including unresolved, stale, simulated and restricted cases.
+   Back restores caller, lens and selection; direct entry uses permitted
+   ancestors. If rendering needs a code change outside the approved slice,
+   deliver the graph query and expected path with visual acceptance pending.
+4. **Sprint 3 — Historical lifecycle and economics.** Keep historical diagrams,
+   venture lifecycle gates and the Simulator's equations under their separate
+   canonical owners. Reconcile evidence before connecting their graph views.
+   A visual transition establishes neither economic execution nor settlement.
+5. **Sprint 4 — Evidence closure.** Reconcile canonical documentation and ModLogs
+   with attributed receipts and unresolved gaps. This current documentation-only
+   reconciliation is authorized separately; it does not execute the later
+   slices or replace Carbon's audit receipts.
+
+Use [WSP_15](../../../WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md)
+for work priority independently of venture maturity, functionality, integration,
+completeness and the separate Mall rescue score. Distinguish installed,
+configured, callable, tested, observed running, fixture-only, inaccessible and
+proposed evidence. Publication requires its own evidence; census inclusion does
+not imply public exposure. Keep private PC references and receipts in architect
+scope. Authenticated, revision-checked co-build mutation remains a later,
+separately admitted capability.
+
+The [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+pins inspected main at `7432d31e5a68544d2bbab6715f02f64b0b5b6f85`. The local
+`121c5066687c5ab7571ef52382e5d9c68494cc36` graph and HPC → AutoPost → Back result
+are reported evidence, not independently recovered or rerun here. Live playback,
+live Simulator wiring and the full Tools branch remain unproven by this edit.
 
 ## Single floating bottom dock — 012 clarification, 2026-11-18
 

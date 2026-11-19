@@ -15,6 +15,25 @@ state-overlay presentation, static shell assets, and policy objects used by the
 member Mall. It does not own a model, a durable RedDog conversation, worker
 execution, or FoundUp business logic.
 
+## Fractal discovery target — 2026-11-19
+
+The intended Mall lets a person open a FoundUp, inspect its parts, follow a
+dependency or reuse link, and return to the caller. A shared component retains
+one stable ID across the Mall, 3D cube and 0102 views. The
+[master architecture](../docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+owns identity, containment and typed relationships; the
+[navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+owns caller, lens and selection restoration and permitted artifact access.
+
+The [roadmap](ROADMAP.md#fractal-tile-graph-and-agent-work-navigation) starts with
+an inclusive census and parallel bounded auditor samples. Functionality,
+integration and venture maturity remain separate evidence. The shared graph,
+builder-to-source navigation and Tools → Benchmark branch are targets; the
+implemented shell surfaces below do not establish that wiring. The
+[documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+separates inspected main source, the reported local `121c50666` graph and
+unverified runtime claims.
+
 ## Implemented surfaces
 
 - The public homepage links **FX** to the existing `/f/` directory, which searches

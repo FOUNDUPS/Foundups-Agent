@@ -1,3 +1,15 @@
+## 2026-11-19 — Fractal census and researcher boundary documentation
+
+Link WRE responsibilities to the existing dispatch owner's single census and
+bounded comparison contract. Distinguish WRE admission, OpenClaw/Hermes
+scaffolding, ROC Auto Researcher, AI Gateway model AutoResearch and unresolved
+Open Researcher naming. Qualify the repair canary's embedded research sample,
+callback defaults, identity-string policy and staged-name field separately from
+native execution evidence. Preserve its real baseline/scratch/outcome effects
+and historical qualification records. Validation: source/doc review and Markdown
+diff/link checks. No code, researcher/canary run or runtime claim was added.
+WSP 15/22/50/84/97/110.
+
 ## 2026-11-16 — Scientific repair canary (Issue #1522), fail-closed `measurement_evidence`, and `branch_dispositions` parity
 
 - **Scientific Self-Healing (`src/repair_operation_contract.py`, `src/repair_baseline_verifier.py`, `src/scientific_repair_canary_orchestrator.py`)**: Integrated Issue #1522 `ScientificRepairOperation` state machine with `state_history` audit trail, hardened `attempt_failure_reproduction()` to execute via `shlex.split` + `shell=False`, and wired `ScientificRepairCanaryOrchestrator` with `ModelIndependencePolicy` and `VerifierContextFirewall.project_evidence_packet` plus `PatternMemory.store_outcome` (`SkillOutcome`) while keeping protected 19/P0 custody gates (`promote_variation`, `RedDogDirector.advance_to_execution`, `RedDogVerifiedPatternMemorySink`) untouched. Added composition audit at `WSP_knowledge/docs/audits/self_healing/SELF_HEALING_COMPOSITION_AUDIT.md`.

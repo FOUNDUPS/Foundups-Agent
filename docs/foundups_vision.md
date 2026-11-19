@@ -2,7 +2,7 @@
 
 **Document class:** FoundUps vision and design thesis
 
-**Updated:** 2026-08-26
+**Updated:** 2026-11-19 (fractal product description; economic thesis retained)
 
 **Truth rule:** economic outcomes, adoption counts, token budgets, network
 effects, quantum language, and planetary-scale claims below are targets or
@@ -84,6 +84,53 @@ The intended architecture reuses one governed shell/runtime and shared service c
 Independent FoundUps may interoperate through versioned, permission-scoped contracts and explicit user consent; do not confuse a separately hosted public site with a shared-origin Mall installation.
 
 Canonical implementation references: [master architecture](../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md), [Mall platform](../modules/foundups/pfmall/README.md), [manifest schema](../modules/foundups/docs/PFMALL_FOUNDUP_MANIFEST_SCHEMA.md). Bootstrap navigation belongs in WSP_00; evidence, drift reconciliation and verification remain WSP_97 responsibilities.
+
+### How the fractal system works
+
+The fractal is the repeating way FoundUps organizes and explores its ecosystem.
+A module supplies a bounded capability. An orchestration cube composes
+capabilities under a defined scope. A FoundUp combines an outcome, identity,
+people or agents, and the components it uses. The same components can serve
+several FoundUps without duplicating their implementation or ownership.
+Descendant FoundUps are a further lifecycle and economic relationship whose
+gates must be established separately.
+
+In the Mall, a tile is an address for a real entity or a declared candidate:
+a FoundUp, module, shared tool, community, book, paper, video, or planned
+capability. Opening a container reveals its parts using the same interaction
+at each depth. Opening an actionable leaf reaches its permitted artifact or
+entrypoint. Recursion means the interaction can repeat; it does not require
+an infinite loaded canvas, unlimited compute, or every item to be executable.
+This develops the Tertia material supplied by 012 as a navigable reference
+space connected to real work. [Source provenance and corrections](audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md#source-provenance)
+distinguish that design from implementation evidence.
+
+The architect inventory includes unfinished, unconnected, experimental,
+archived and unresolved candidates. Each answers three questions: what it is
+supposed to do; what evidence supports its functionality and, separately, its
+integration; and where it is used, reusable or overlapping another capability.
+A missing adapter is visible as a gap. Lack of maturity is not a reason to
+drop an item. Public discovery is a separately permitted projection.
+
+One stable identity can appear in several views. A shared AutoPost component
+entered from HPC is still the same component when entered from Tools. Back
+returns to the actual caller and its recoverable lens, selection and browsing
+state. Sorting or asking 0102 to filter the view changes the projection, not
+the component's identity or authority.
+
+The target 2D field, 3D build view and supported conversational navigation
+resolve that same graph. Existing cube animation and local navigation fixtures
+do not establish a working voice-connected 3D graph. A component's identity,
+its source revision, the inventory snapshot and a work observation remain
+distinct. The [master architecture](../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+defines those relationships and their evidence boundaries.
+
+Structural composition, venture maturity, WSP_15 priority and economics have
+different owners. A tile connection does not prove that a service ran, a
+venture reached MVP, or capital moved. The census supplies evidence for later
+visualization and reconciliation. Alongside Carbon's separately assigned census,
+bounded independent comparisons can use frozen samples of its audit tasks through
+the [existing research and benchmark owners](operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19).
 
 ### Entering the work through the cube
 

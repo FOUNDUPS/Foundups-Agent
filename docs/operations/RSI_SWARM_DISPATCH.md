@@ -5302,6 +5302,93 @@ The execution path is:
 
 Nemotron's optional evaluation path feeds candidate routing evidence into AI Gateway. It is not an additional runtime boss above WRE. A Fusion panel is optional only where an admitted SINGLE/PANEL policy permits that topology; never silently strip an already-bound panel to save cost.
 
+## Fractal census and bounded comparison — 2026-11-19
+
+This is the operating contract for the Fractal documentation reconciliation
+(2026-11-19); the [source audit](../audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+owns its pins, findings and gaps. Carbon's Sprint 1 audit is separately assigned;
+its current runtime was not observed in this documentation review.
+This documentation change neither redispatches that audit nor executes a
+benchmark. Preserve the dated native qualifications elsewhere in this document;
+they prove their recorded tasks and revisions, not current PC availability.
+
+Run the broad census once through disjoint, admitted inventory, tooling and
+history assignments, with independent verification reserved. Reuse source pins
+and existing records; keep a coverage denominator, exclusions and evidence status
+for each repository/worktree. A blocked benchmark or inaccessible lane does not
+stop another authorized lane. WSP 15 ranks the next work slice; venture maturity
+remains a separate lifecycle attribute.
+
+Deliberate duplicate work is confined to **up to three different task packets**,
+selected and frozen before any comparison results are inspected. Each packet
+binds source/overlay hashes, question, delivered evidence, tools, acceptance
+rubric, budget, retries and independent verifier, shared across eligible runs.
+Freeze an independently
+source-checked Carbon reference for scoring and withhold it, along with other
+workers' answers, until independent submissions close. An unfinished Carbon
+reference remains pending; neither author identity nor consensus makes it an
+oracle. Additional packets require a new bounded scope, not an open-ended
+benchmark campaign.
+
+Independently supported extra findings may correct the reference. Retain the
+original digest, correction evidence and disagreements; apply the correction
+consistently when scoring without exposing answers to unfinished workers.
+
+Use these comparison controls:
+
+- Run the admitted incumbent first for each packet. The existing
+  [harness](../../modules/ai_intelligence/ai_gateway/src/model_combination_benchmark_harness.py)
+  sorts candidate IDs and executes candidates/tasks serially; including an
+  incumbent does not make it first. Use a separate incumbent invocation. After
+  it closes, independent candidate jobs may run in parallel only within existing
+  admission, worker/model capacity and reserved reviewer limits. This is job
+  scheduling policy, not a new harness concurrency feature.
+- Separate model and scaffold comparisons. Hold the admitted scaffold, sources
+  and tools fixed when comparing exact provider/model IDs; hold the model and
+  exposed settings fixed when comparing admitted OpenClaw/Hermes execution
+  paths. WRE remains the admission/dispatch owner. Record unavoidable differences,
+  native runtime/version, verifier identity and actual executing route. An app
+  label, configured model name or ChatGPT analyst is not a native worker receipt.
+- Keep an author-plus-verifier result separate from each author's independent
+  result. The [harness interface](../../modules/ai_intelligence/ai_gateway/INTERFACE.md)
+  reserves verification outside candidate panels. Qualify the verifier's actual
+  source-checking contract and independence; a different display name is
+  insufficient.
+- Bind both the shared source/question packet digest and each actual sent input
+  digest. The configured runner adds candidate/role/task wrappers. Record bytes
+  and source ranges actually delivered, truncation, tool limits and retrieval
+  freshness; a manifest alone does not prove that a worker received every anchor.
+  Preserve existing read/target limits and report missing coverage explicitly.
+- Score correct source anchors, recovered reference links, unsupported claims,
+  missed links, elapsed time and observed resource use against the frozen
+  reference. The existing [term verifier](../../modules/ai_intelligence/ai_gateway/src/model_autoresearch_semantic_verifier.py)
+  and digest checks do not implement that source-audit rubric. Reuse a qualified
+  evaluator/adapter where its contract fits; otherwise record that missing link
+  and retain completed results. Measured, estimated and reserved usage remain
+  distinct; unavailable metrics are `UNKNOWN`, and unexecuted candidates are
+  `NOT_RUN`. Do not turn missing measurements into zero cost or a win.
+- Keep raw execution/output evidence in its admitted receipt stores. The
+  [campaign output guard](../../modules/ai_intelligence/ai_gateway/src/model_autoresearch_campaign_execution.py)
+  requires runtime output outside the repository; an approved in-repository
+  audit folder does not override it. Store architect graph/registry projections
+  and receipt references only in the approved audit location, retaining private
+  PC paths and receipts in architect scope.
+
+**Auto Researcher participation:** as eligible Carbon units close, the existing
+research owner may consume their frozen packets only through a verified adapter
+whose target/evaluator contract fits. Preserve the baseline, propose a one-variable
+improvement and retest against unseen held-out checks within the frozen packet
+cap, admission and budget. The WRE ROC researcher and AI Gateway model
+AutoResearch remain separate owners; neither the ROC dictionary evaluator nor the
+model term verifier is automatically a source-audit adapter. If the adapter is
+unavailable, retain that precise gap and completed work. Reserve primary census
+and verifier resources; pause benchmarking first when capacity is constrained.
+
+A result qualifies only the frozen task and tested configuration. Neither a
+graph render nor a better benchmark score establishes a production RSI loop,
+automatic routing promotion or wider workforce readiness. Keep production
+defaults unchanged and carry the smallest evidenced gap through WSP 15/97/110.
+
 ## What was actually checked
 
 - Local CLI: `openclaw --version` returned `OpenClaw 2026.5.2 (8b2a6e5)`. `hermes` was not resolved on this shell's PATH; that does not establish whether a separately hosted native API is available.

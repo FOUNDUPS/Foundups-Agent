@@ -16,6 +16,23 @@ The [Vote release accounting and Launch Pad](modules/foundups/voteballots/docs/R
 track the public Vote, Oversight and Coalition release and the remaining
 candidate/evidence and runtime gates.
 
+## FoundUps census and parallel audit benchmarking — 2026-11-19
+
+The [Mall roadmap](modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation)
+owns the current four-sprint sequence: inclusive ecosystem census with a bounded
+parallel audit-comparison lane; graph visualization; historical/lifecycle and
+economic reconciliation under separate owners; then evidence-driven documentation
+closure. The [existing dispatch runbook](docs/operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19)
+owns model/scaffold comparisons and the Auto Researcher connection requirements.
+Benchmark admission failures do not stop independently authorized census work.
+
+012 has separately authorized the present documentation reconciliation. It
+does not start another Carbon census, promote a model, change production routing,
+or authorize later visualization/economic execution. The
+[documentation audit](docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+records source pins, original Tertia provenance and unresolved local evidence.
+Existing protected native-admission and completion gates below remain in force.
+
 ## WRE Git lifecycle and PC convergence — P0
 
 Prioritize shared GitHub-to-PC completion before further HPC feature work.

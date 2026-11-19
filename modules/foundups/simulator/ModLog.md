@@ -1,3 +1,15 @@
+## 2026-11-19 — Fractal work-navigation roadmap reconciliation
+
+- Linked the work-to-component target to the census-first Mall roadmap and
+  [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md).
+  Kept component identity, graph/source revisions, functionality/integration and
+  missing mappings distinct from aggregate telemetry and source presence.
+- Preserved observation-only/no-authority behavior and separate historical and
+  financial owners. No equations, simulation parameters, settlement gates or
+  previous evidence were changed.
+- Documentation-only diff/link review. Reported local graph work does not prove
+  live Simulator wiring; no telemetry, economic or PC-runtime test was run here.
+
 ## 2026-11-15 — Observable Swarm Orchestration lineage, lease, and zero-skip invariance enhancements
 - Enhanced `modules/foundups/simulator/frame_schema.py` (`WorkUnitFrame`: `parent_work_id`, `work_order_id`, `swarm_lane`, `lease_active`) and `modules/foundups/simulator/adapters/work_telemetry_provider.py` to extract structured context lineage (`parent_task_id`, `depends_on`, `work_order_id`, `swarm_lane`), compute unexpired `lease_active` flags, emit deduplicated 64-char-redacted `depends_on` and `parent_task` dependency edges, and export `active_lease_count` + `swarm_lanes` while keeping `FRAME_SCHEMA_VERSION = "1.0.0"`, `observation_only=True`, and `authority="none"`.
 - Updated `public/js/foundup-cube.js` (`getWorkTelemetrySummary()`, `handleWorkTelemetrySync()`, HUD color key, and ticker) to surface `dependenciesCount`, `activeLeaseCount`, `verifierCount`, `verifiers`, and `lanes` (`DEPS:<n> LEASES:<m>`, `LANES:<k> VERIF:<v>`) with zero mutation or authority claims.

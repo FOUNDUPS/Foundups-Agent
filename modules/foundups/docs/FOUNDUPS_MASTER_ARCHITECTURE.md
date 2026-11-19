@@ -1,8 +1,8 @@
 # FoundUps Master Architecture
 
-**Version**: 1.1.1
+**Version**: 1.2.0
 
-**Updated**: 2026-10-23 (document map; lifecycle unchanged)
+**Updated**: 2026-11-19 (fractal identity, evidence and document map; lifecycle gates unchanged)
 
 **Status**: Canonical lifecycle and surface contract
 
@@ -31,11 +31,111 @@ FoundUps may connect through explicit, consented, versioned context and capabili
 
 ### Fractal views of the same work
 
-**Design target, 2026-11-19.** A tile identifies an addressable entity by an immutable ID. A parent exposes its parts, a leaf opens an artifact, and a typed edge can lead to a shared module used by several FoundUps. A single primary parent supports direct entry. A separate navigation history records how the user actually arrived. A report issue, an adapter, and a WSP_80 orchestration cube can each have a tile. Only the orchestration cube carries the capability scope defined in [WSP_80](../../../WSP_framework/src/WSP_80_Cube_Level_DAE_Orchestration_Protocol.md).
+**Design contract, reconciled 2026-11-19.** The fractal is a recursive navigation
+and composition model: open an entity to inspect its parts, follow a relationship
+to another entity, or open a leaf's permitted artifact. The same interaction
+repeats at different scales. It does not promise unlimited depth in memory,
+infinite resources, or a working implementation of every proposed view.
 
-The 3D build view, 2D Mall field and 0102 conversation project that graph. A work observation identifies an occurrence. A tile identifies its subject. Resolve their association from evidence such as a work order explicitly naming a registered component. Pass visible focus, caller history, work reference and graph revision to the concierge. Multiple workers can concern the same tile, and a worker can move between tiles over time.
+#### Identity, composition and relationships
 
-Public discovery exposes only the published projection. The interior can show authorized source, interfaces, tests and roadmap sockets. Selection and camera movement express navigation. Approved co-building operations use a separate authenticated, revision-checked write path. See the [navigation contract](PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation) and [Simulator roadmap](../simulator/ROADMAP.md#linking-observed-work-to-mall-tiles).
+A stable tile ID identifies a logical subject. Names, locations, implementations
+and evidence can change while that identity remains. A report issue, an adapter,
+a FoundUp and a WSP_80 orchestration cube can each have a tile. A visual cube or
+container alone has no orchestration authority; only a scoped orchestration
+cube carries the contract in [WSP_80](../../../WSP_framework/src/WSP_80_Cube_Level_DAE_Orchestration_Protocol.md).
+Manifest registration remains owned by the FoundUp registry. Inventorying a
+candidate does not register, deploy or activate it.
+
+The primary containment relation supplies an acyclic browse hierarchy and
+direct-entry ancestry. Other relationships cross that hierarchy. A shared
+component has one ID even when multiple FoundUps or views refer to it.
+Containment does not transfer ownership, execution authority or economic rights.
+Real dependency cycles must be recorded and assessed by their owner, not
+discarded solely to make a display tree.
+
+| Relationship | Meaning and evidence requirement |
+|---|---|
+| Contains / member of | Structural placement or declared cube/FoundUp membership; identify the declaring owner. |
+| Calls / reads from / depends on | Trace the actual caller, registration, route, data contract or other integration; mark inference and unknowns. |
+| Reuses / overlaps | Identify compatible capability and behavior; independent review is needed before recommending consolidation. |
+| Runs through / evaluates | Distinguish scaffold, model, harness and evaluator; a declared route is not an observed execution. |
+| Produces receipt / verified by | Link the exact run, evidence and verifier, including disagreements and limits. |
+| Lifecycle / descendant / economic | Link separately owned stage gates or economic records; no transition or payment is inferred from a tile edge. |
+
+These are semantic requirements, not a new JSON schema. Reconcile them with the
+existing pinned Fractal Tile Graph schema and projector when the reported local
+artifacts are accessible. Reuse supported fields and aliases; preserve an
+unsupported relation in the audit ledger rather than inventing an accepted API.
+
+#### Inventory and evidence
+
+Account for every discovered candidate, including partial, unintegrated,
+documented-only, proposed, archived and inaccessible items. Preserve the
+enumeration denominator, exclusions and unresolved identity associations.
+The three audit questions are purpose; evidence of functionality and integration;
+and use, reuse or overlap. These assessments have separate fields:
+
+| Assessment | What it establishes |
+|---|---|
+| Functionality | Behavior supported by implementation, a test outcome or an observation in a named environment. |
+| Integration | Actual callers, adapters and dependencies, with separate evidence for an observed connection. |
+| Availability and execution | Installed, configured, callable, tested, observed running, fixture-only, inaccessible or proposed; statuses may coexist for different environments. |
+| Maturity | Venture lifecycle evidence and approved gates; a working module alone does not establish a paying-customer MVP. |
+| Priority | Canonical [WSP_15](../../../WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md) dimensions and 4–20 score/P0–P4 band. Completeness and any optional Mall rescue ranking are separate. |
+
+A test file proves that a test exists, not that it passed. A passing receipt
+is bound to its source and environment, not every later revision. Zero static
+imports creates an orphan candidate; dynamic registration, standalone entrypoints
+and external consumers still require investigation. Color is a presentation
+summary with a legend, not a substitute for these independent assessments or an
+access-control decision.
+
+#### Views and work observations
+
+The target 3D build view, 2D Mall field and supported 0102 conversation project
+the same identified entities. Co-building, community spaces such as HPC,
+portfolio/licensing research, domain markets such as Akiya and WikiTube/media
+are views over those entities. An All Mall overview adds a view, not a sixth
+independent engine. A view does not prove licensing readiness, property status,
+live playback or a worker's availability.
+
+Each artifact reference binds its repository, path and exact source revision,
+or a base revision plus recorded overlay digest. The graph/projection revision
+identifies the inventory snapshot and stays distinct from source revisions.
+A work ID identifies an occurrence; a tile identifies its subject. Their
+many-to-many association requires a permitted work order, source change,
+receipt or equivalent evidence. A worker label, lease, animation or aggregate
+progress count alone cannot identify the changed component.
+
+Pass only permitted focus, actual caller history, work reference and graph
+revision to the concierge. Navigation restores the caller across shared edges.
+Simulated, stale, unmapped and restricted observations retain those labels.
+Public discovery exposes only the permitted published projection; architect
+views can expose authorized source, tests, private receipts and roadmap gaps.
+Private paths and receipt content must not enter public exports, public search
+or history, or unauthorized agent context. Selection and camera motion are navigation. Approved graph
+changes require a separate authenticated, revision-checked write path.
+
+The first visualization acceptance path is
+`Tools → Benchmark → harness/evaluator → supported module or model/scaffold configuration → run receipt → pinned test/source → Back`.
+Use real IDs where evidence exists and expose missing owners/adapters as gaps.
+The complementary builder path follows an observed work record to its component
+and pinned evidence. The [navigation contract](PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation),
+[Mall roadmap](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation)
+and [Simulator roadmap](../simulator/ROADMAP.md#linking-observed-work-to-mall-tiles)
+own acceptance and sequencing.
+
+#### Implementation boundary at the documentation audit
+
+| Evidence class | Bounded conclusion |
+|---|---|
+| Inspected repository source | Main `7432d31e5a68544d2bbab6715f02f64b0b5b6f85` contains existing catalog, navigation and cube/work-observation owners. Presence does not establish a live PC route. |
+| Reported local work | Carbon's report names commit `121c5066687c5ab7571ef52382e5d9c68494cc36`, a Fractal Tile Graph and local HPC → AutoPost → Back checks. This documentation audit could not retrieve that commit or independently replay its private receipts. |
+| Target / specified | Full 2D/3D/conversation graph navigation, evidence-bound builder drill-down, the Tools branch and later authorized co-building. Local media/voice fixtures are not live playback or live Simulator wiring. |
+
+The [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+retains the source provenance, count discrepancies and next evidence needed.
 
 ## 2. Five-layer funnel
 
@@ -201,6 +301,8 @@ this document.
 | General stakeholder interior | Not implemented |
 | Universal Progressive Web Agent scaffold | Target, not implemented |
 | WSP 98 mesh-native/zero-server deployment | Target, not implemented |
+| Fractal graph at reported local `121c50666` | Reported local candidate; not present in inspected main and not independently replayed in this audit |
+| Unified 2D/3D/voice graph and Tools → Benchmark walkthrough | Specified; navigation, artifact binding and live execution need separate acceptance |
 
 ## 9. Failure modes
 
@@ -221,6 +323,10 @@ this document.
 | Document | Purpose |
 |---|---|
 | `FOUNDUPS_MASTER_ARCHITECTURE.md` | Lifecycle, surfaces, identity, and truth boundary |
+| [Mall navigation](PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation) | Stable-target drill-down, caller restoration and revision-bound evidence |
+| [Mall roadmap](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation) | Census, parallel benchmark sampling, visualization and later reconciliation |
+| [Audit benchmark dispatch](../../../docs/operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19) | Existing scaffold/model/research owners and bounded comparison contracts |
+| [Fractal documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md) | Dated provenance, owner coverage, corrections and unresolved evidence |
 | `FOUNDUPS_DISCORD_BLUEPRINT.md` | Community server structure |
 | `FOUNDUPS_ENTITLEMENT_TIERS.md` | Per-surface entitlement matrix |
 | `FOUNDUP_TEMPLATE.md` | Adding a FoundUp |

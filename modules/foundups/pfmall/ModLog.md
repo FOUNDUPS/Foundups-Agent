@@ -1,3 +1,17 @@
+## 2026-11-19 — Fractal census and projection documentation reconciliation
+
+- Replaced the immediate graph-build sequence with inclusive census discovery,
+  parallel samples of up to three eligible auditor packets, then separately
+  scoped visualization, historical/economic owners and evidence closure.
+- Linked README and INTERFACE to existing architecture/navigation owners and the
+  [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md).
+  Kept identity across views, graph/source revisions, functionality/integration,
+  public/architect scope and future co-build authority distinct.
+- Documentation only. Inspected main source and reported local `121c50666`
+  evidence retain separate status; graph counts, PC runtime, live playback and
+  Simulator wiring are not certified by these edits. Validation is scoped diff
+  and link review; no runtime tests or worker dispatch were performed here.
+
 ## 2026-11-16 · Isolated HPC iPhone official YouTube baseline probe extension
 
 - Extended `tests/fixtures/hpc_iphone_playback_probe.js` and `tests/fixtures/hpc_iphone_playback_reference.html` (kept outside `public/` in git) with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts), allowlisted `?host=youtube|nocookie` (`https://www.youtube.com` vs `https://www.youtube-nocookie.com`), `Mall <-> official embed` selection retention, sanitized `deployment.json` + `SW controller` provenance receipt, and distinct `101/150` vs `LOGIN_REQUIRED` vs `autoplay-blocked` reporting, with all controls outside `#hpc-probe-embed`.

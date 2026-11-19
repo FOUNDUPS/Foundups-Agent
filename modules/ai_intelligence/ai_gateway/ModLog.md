@@ -1,5 +1,16 @@
 # AI Gateway Module Change Log
 
+## 2026-11-19 — Fractal auditor comparison documentation
+
+Link the benchmark README to the existing dispatch owner's bounded census and
+comparison contract. Document serial candidate-ID ordering, separate
+incumbent-first invocation, shared-packet versus actual-input digests, estimated
+usage and the missing source-audit scoring adapter. Keep repair evidence
+projection distinct from independent model execution. The architecture audit
+records exact source pins; existing native qualification history is retained.
+Validation: source/doc review and Markdown diff/link checks. No code, provider
+call, benchmark run, route/default change or new runtime receipt. WSP 15/22/50/84/97/110.
+
 ## 2026-11-16 - Preserve distinct audio observations with identical output bytes
 
 Independent review of PR2399 found response-digest-only lookup discarded case or
