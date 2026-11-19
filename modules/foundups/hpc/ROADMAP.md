@@ -123,6 +123,85 @@ older row-player contract during reconciliation. Refresh that owner and current
 main before implementation. Keep #2405 diagnostics and #2411 Vote navigation
 separate. This documentation changes neither their branches nor deployed UI.
 
+### H1G · iPhone 12 preview feedback — 012, 2026-11-19
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED by this documentation
+slice.** 012 opened the review preview on an iPhone 12 and supplied
+`IMG_0515.jpeg`: the app header wraps onto two lines, visible Member Portal
+text occupies the second row, filter pills consume two more rows, and three
+narrow portrait tiles leave too little usable browsing space. Opening the
+preview is confirmed by 012; phone layout acceptance remains open.
+
+The reviewed [Firebase preview](https://foundupscom--play-v24-iphone-3rrzxm0r.web.app/member/)
+shows **Build v24** inside its existing `+` options dialog in this audit
+browser. 012 called the opened test v21. Record these observations separately:
+neither a channel name nor this browser's build label proves which assets or
+service worker the physical phone loaded.
+
+#### Ordered fixes in the existing shared Mall owner
+
+| Priority | Required change | Acceptance |
+| --- | --- | --- |
+| 1 | Keep the ordinary/public Mall phone header on **one compact line**: FoundUPS identity and the existing compact account action. Remove visible **Member Portal** wording from that header. | No wrap, clipping or horizontal page scroll at 390 CSS px and narrower supported widths. Keep an accessible account/sign-in action and its existing destination. Preserve HPC's distinct banner/Voice and selected-player controls. |
+| 2 | Move **All, A–Z, Readiness, Category, Videos, Apps, Shop and other applicable discovery controls** from above the grid into the existing bottom `+` options sheet. | No filter rows occupy the resting browsing canvas. The same controls, selection and handlers remain available in `+`; scope-inapplicable controls stay hidden. Preserve query, source/category selection, order, Back and scroll state. |
+| 3 | Make the tiles and active video fit the phone's **available app viewport**, with useful content space recovered from the header/filter rows. | Readable tile content, no horizontal overflow, media contained within the viewport, provider controls unobscured and the final tile scrollable clear of the dock. Keep density policy, CSS, persisted state and row/player placement consistent. Do not treat three columns as an unconditional acceptance rule; qualify any density change with the existing owner. |
+| 4 | Preserve **one floating bottom dock** with `+`, search, dictation and Red Dog. Retain the existing AutoPost camera/photos entry. | Upward menu/input growth, safe-area and keyboard clearance, focus/Escape/backdrop recovery, and one player/search surface through browsing, selection, rotation and return. H1F remains in force. |
+
+Served-source inspection confirms `public/member/css/member.css`'s mobile
+`.mall-header` column rule (at or below 720 CSS px) and `mountOpenMall()`'s visible
+portal label are present in this preview. Its phone density remains `3x4` /
+`3x5`; the v24 overlay has not corrected these layout behaviors. Extend
+`createMemberDock()` and its
+`.mall-member-search-options` dialog in `mall-video-projection.js`.
+Move/reuse `#mallProjection` and the existing
+`mall-tile-field.js` projection/source handlers; do not create another
+filter engine, shell or dock. A CSS-only column change must not contradict the
+field's density policy or row calculations.
+
+Use the existing full-shell browser cases, including
+`public/member/tests/mall_scoped_video_browser.py`, for the real header,
+options sheet, dock and player. The tile-only responsive fixture cannot prove
+header or dock acceptance. Cover 390 x 844 CSS px, a narrower supported width,
+rotation and keyboard; then verify the same candidate on the physical iPhone
+in its browser view. Retain the separate PC main-video -> thumbnails -> bottom
+dock check and single-player/query/return regression checks.
+
+#### Deferred AutoPost follow-up
+
+**LATER_STAGE / TODO**, as 012 explicitly requested: add an AutoPost
+bottom-right icon near the camera-flip control and a bottom search surface
+using the shared interaction contract. The icon's exact action is not fully
+specified by this feedback; settle it in the existing AutoPost capture owner
+before wiring a new behavior. Preserve current capture, permissions and return
+context. Use the existing [capture handoff](../pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md)
+and external `FOUNDUPS/autopost` roadmap. This is not an AutoPost
+implementation or a reason to delay the immediate Mall layout correction.
+
+#### Source and completion boundary
+
+Main inspected: `7432d31e5a68544d2bbab6715f02f64b0b5b6f85`.
+Pushed native branch `feat/hpc-floating-wikitube-v20` remains
+`75c838b6eab19807487ee02c4b2f9367e580547e` / Build v23. The served
+preview has v24 markers, worker cache `pfmall-member-v24`, and Shop filtering
+from a later overlay. Its [served deployment receipt](https://foundupscom--play-v24-iphone-3rrzxm0r.web.app/member/playback-probe/deployment.json)
+reports that base plus overlay digest
+`92e1e9338a8256328520546c89cc816563aee25f81b88214ade2fd8c87b67946`,
+repair handoff `RD-MOSH-20261117-PHONE404-04`, and
+`hosting_version: unverified`. This audit has not verified the complete
+patch digest or immutable hosting version. Preserve the existing native
+implementation owner and unpushed overlay. Before runtime mutation, reconcile
+the owner's exact overlay and deployment configuration with these served
+assets; then apply this correction there and publish an updated review preview.
+Do not overwrite newer preview work with the older remote branch.
+
+WSP 15 allocation for this bounded layout slice: C=2, I=4, D=4, Impact=4,
+total 14/P1, subject to owner verification cost. Needed for phone PoC
+acceptance; affordable by extending existing controls; cannot defer before
+phone acceptance. AutoPost remains deferred. Documentation, source merge,
+preview publication, physical-device acceptance and production launch require
+distinct receipts. 012's preview review precedes production launch; this
+feedback is not production approval.
+
 ## 2026-11-16 — Return navigation, concise HPC identity and changed phone acceptance
 
 Source: 012's latest direction. **CHANGES_POC_ACCEPTANCE** for the top-anchored phone player and return navigation; the larger shared floating dock is **LATER_STAGE**. The previous selected-tile/original-row phone placement is superseded, with desktop and ordinary Mall behavior retained. These requirements are specified, not an implementation or deployment receipt.
