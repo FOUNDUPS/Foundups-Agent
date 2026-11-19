@@ -24,6 +24,8 @@ CPython 3.12.10 remains qualified last-official-3.12 Windows evidence with known
 Foreground provider turns discard raw history; durable VSIX/PFMall/phone conversation adapters and ChatGPT-like cross-session memory remain missing.
 OpenClaw is the resident 0102 execution/supervision layer and Hermes is bounded. Backend modules now authenticate and reserve existing requests, persist a trusted new FoundUp scope, and durably bind the original empty-ID first TURN to its resolved ID/revision 0. The VSIX still has no service caller, so no first-turn handler or conversation CAS executes.
 
+Multi-voice arbitration is proposed in the [dual-loop coordination contract](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md#multi-voice-coordination-task-ownership-and-affect-separation-2026-11-19-proposal): one committing 0102 task owner and one authorized RedDog speaking path, with independent reasoning shade, measured activity dot, and optional consented affect. See the [roadmap](ROADMAP.md#single-owner-multi-voice-coordination--proposed-2026-11-19). This is documentation, not running orchestration.
+
 ## Model-routing authority
 
 The routing plane represents work as `ModelTaskRequirements`; AI Gateway owns
