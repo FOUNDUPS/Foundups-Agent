@@ -1,3 +1,18 @@
+## 2026-11-19 - Website AdSense operator procedure (prototype)
+
+- WSP 97 decision: CREATE a narrow procedure in the existing module Skillz
+  owner after source-bound lexical retrieval and tracked-tree search found no
+  AdSense owner at main `7432d31e5a68544d2bbab6715f02f64b0b5b6f85`.
+  Reuse WRE registry/discovery, NAVIGATION and thin Claude/Codex entrypoints;
+  no new Rolodex database, executor or account data store.
+- Preserve ownership-only scope, actual offered meta/ads.txt choices, redirect
+  and crawler behavior, private records and the separate YouTube payment lane.
+- Local WSP 00 gate passed. Holo lexical bundle used the isolated source;
+  semantic freshness UNKNOWN with index gap retained, no reindex or promotion.
+- Validation: focused discovery/projection tests and independent procedure review
+  are recorded with exact candidate head in the PR. No merge, live site release,
+  account change, phone activation or production admission is claimed.
+
 ## 2026-11-18 - Audit existing work before work orders and builds
 
 - Decision: EXTEND the existing `foundups-wsp` entry and `reddog_operations`
