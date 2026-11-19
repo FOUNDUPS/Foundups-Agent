@@ -409,3 +409,7 @@ The architecture is successful when 012 experiences one continuous RedDog that i
 The intended user experience is one RedDog.
 
 The internal implementation is a fast interaction loop continuously supported by a deeper 0102 cognition and orchestration loop.
+
+## Independent visual signals: reasoning depth versus processing activity (2026-11-19 proposal)
+
+RedDog shade communicates selected reasoning depth: Quick (`FAST`) is light, Contemplative (`CRITIC`) is darker, and Deep (`PANEL`) is darkest. The background 0102 dot is a separate indicator of *measured* processing activity: its size and pulse may increase with actual workload, then settle when processing ends even while RedDog remains in Deep mode. Do not derive dot size/pulse from selected depth, elapsed waiting time, or imagined compute. When telemetry is unavailable or stale, use a neutral, explicitly non-quantitative animation. Theme inversion is cosmetic, not a distinct cognition state. Instrumentation must identify what is actually measured (e.g. active jobs or CPU utilization); never relabel a proxy as compute usage. The foreground RedDog loop remains responsive during permitted asynchronous 0102 work, subject to existing verification/authority gates. This specifies a future UI contract, not current implementation. Delivery gates belong to [RedDog roadmap](../../extensions/reddog/ROADMAP.md).
