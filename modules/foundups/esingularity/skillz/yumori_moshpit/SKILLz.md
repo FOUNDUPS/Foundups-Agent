@@ -144,6 +144,16 @@ A verified outbound email can belong in YUMORI.me Moshpit when it materially adv
 
 Pure no-send escalation, queue reconciliation, formula repair, integrity checks, or operator telemetry belong in 0102 Moshpit, not the campaign timeline, unless 012 explicitly asks to promote the event into campaign history.
 
+When 012 explicitly requests actionable project intake, retain its compact
+factual intake/status receipt in that project's existing Moshpit, including
+blocked or no-send status. This requested project record is distinct from
+unrequested routine telemetry and from a separate agent-learning incident;
+do not duplicate it into 0102 learning without a meaningful learning event.
+Use the [existing named Work intake contract](../../../../communication/moltbot_bridge/workspace/skills/foundups-wsp/SKILL.md#named-work-lanes-and-voice-handoff)
+for intake and execution handoff; this Skillz remains the classification,
+ordering and native-write owner. Neither record nor link grants outbound
+authority or authorizes performing a blocked action.
+
 Material external replies and procedural outcomes stay in YUMORI.me Moshpit because they change the campaign path.
 
 ## Evidence and privacy
