@@ -1,3 +1,43 @@
+## Publishing/checkpoint documentation re-review — 2026-11-20
+
+PR2433 head `43b84a1be5a932095c3ce51bdb67cfa1edeaba96` failed security
+job `135682223255`: three unreviewed current-tree findings, 213 already reviewed,
+zero introduced-history findings. New guidance/log prefixes changed whole-file
+digests and moved three unchanged, previously approved lines. Author and independent
+read-only verifier compared canonical Git LF bytes against base
+`908b47b369bb5c1f20478a751875617a51585108`; all flagged lines and their contexts
+are identical and all three prior fingerprints exist in the base approval list.
+
+| Existing file | Rule | Base → head line | Canonical head file SHA256 |
+| --- | --- | --- | --- |
+| `modules/communication/moltbot_bridge/ModLog.md` | generic-api-key | 4098 → 4118 | `55e039261fc2a941060ff907b16117f8aaff5c9901b88321feb301c30de4fe26` |
+| `modules/platform_integration/linkedin_agent/README.md` | linkedin-client-secret | 279 → 283 | `13e0fed2c18cdfc8aba29dabdd02251b544d7022e0d94338699d9101f90807a9` |
+| `modules/platform_integration/linkedin_agent/ModLog.md` | linkedin-client-secret | 1097 → 1123 | `593e020327d2c601dd98f82395334d31c00173e20b85d13f9a957724ff923193` |
+
+Append only these three independently recomputed current-file/rule/line bindings,
+preserving all 4,739 earlier entries and their order (4,742 at this step).
+
+The same PR's required manifest/index checks then rejected the Operations Skillz's
+stale content binding. The existing generator refreshed that one source hash;
+all 1,494 runtime members and every other source hash remain unchanged. Both
+consumer pins now bind canonical payload
+`63dfca54a090d275e0aabcf7e8a272e393abc275498a5b9d0ee2a7578d6d049a`;
+LF manifest file SHA256 is
+`d1b1a0b010c13f25aff12fffc54b0f1e5518436dbd4583d607314aa23c40cdfb`.
+Independent re-review against current main
+`cb4d60482cf412bb570502d3edc399ef9ddccd83` rehashed all 39 existing approved
+manifest source-path/SHA rows (37 generic-api-key, 2 discord-api-token): unchanged
+lines, prior approvals present, each source digest verified from staged Git bytes.
+The independently derived renewal recordset matched the author's (sorted canonical
+recordset SHA256 `992c718fe4990c91b988c35a16d721d954d78f8b0fdef6677b595f24b7caae15`).
+Append those 39 exact renewals too: 42 new bindings, 4,781 total.
+
+No credential values, new finding classification, scanner rule/exclusion,
+fingerprint formula, scope or failure handling changes. Retain the failed evidence;
+fresh exact-head tracked-tree/introduced-history scans and main checks remain
+required. All 53 existing security-gate regressions pass locally with UTF-8 and
+the existing Git Bash route; no fixture/assertion was weakened. WSP 71/97.
+
 ## Pre-build workflow metadata re-review - 2026-11-18
 
 Reconciled source `58500850772e17e0a4cb9d3c7f57f8afcd0d42be` onto main

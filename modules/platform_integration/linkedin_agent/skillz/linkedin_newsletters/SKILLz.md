@@ -26,6 +26,10 @@ Read the [editorial orchestration contract](references/editorial-workflow.md) fo
 Red Dog -> 0102 handoffs, evidence-backed audits, collaborative issue development
 and new-series onboarding. Reuse the [issue brief](assets/issue-brief.md) and
 [new newsletter child template](assets/newsletter-skill-template.md).
+All lanes inherit the [scheduled release contract](../linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership):
+one cross-series private Drive Mosh Pit controls releases; the lane masters keep
+research histories. Two reviewers inspect the same copy/assets; a ready draft or
+private calendar review does not establish a confirmed LinkedIn scheduled item.
 Use [article targeting](../linkedin_article_targeting/SKILLz.md) and current live
 publisher/series identity, never a guessed newsletter URL or historic count. Select
 one or all of these dedicated lanes:

@@ -88,8 +88,10 @@ rather than forcing a plug. Preserve eSingularity.ai, FoundUps.com and YUMORI.me
 
 ## Google Docs collaboration and learning
 
-Maintain one stable **master moshpit per lane**, including Good/Bad/Ugly as a
-separate group editorial lane. Discover existing Docs and continuity first; reuse
+Maintain one stable **research master moshpit per lane**, including Good/Bad/Ugly
+as a separate group editorial lane. Release status belongs in the single private
+cross-series control record in the [publishing contract](../../linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership);
+preserve the lane histories and link the release row. Discover existing Docs and continuity first; reuse
 an existing lane index rather than create a duplicate. A manuscript is not an
 index: preserve its content and link it from the master. If converting an existing
 document, add the requested index without deleting history or changing its ID.

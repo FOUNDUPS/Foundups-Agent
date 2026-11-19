@@ -1,3 +1,29 @@
+## 2026-11-20: Scheduled release and shared editorial control
+
+- Decision EXTEND, owned publishing/checkpoint assignment from 012; source/base
+  `908b47b369bb5c1f20478a751875617a51585108`, isolated clean checkout observed
+  2026-11-20 JST. C2/I4/D4/Impact4=14/P1 (WSP 15). Dependency PR1762 remains
+  with Fix Codebase; external scheduling remains with its publisher, not this lane.
+- Source-bound Holo lexical bundles report workspace_head, freshness UNKNOWN,
+  index gap true. Semantic freshness is not claimed. Retrieval evaluation: broad
+  searches included legacy helpers; reranked to current routing/Skillz/contracts,
+  deduplicated paths and directly read module/test owners. No required artifact
+  was invented; historical counts/map entries remain dated, not live evidence.
+- Extend existing publishing, targeting, newsletter/group/company routes with
+  schedule-ahead-only releases, named durable decision, two reviewers of identical
+  copy/assets, mobile preview/provenance and one actual publisher. One private
+  cross-series release record preserves lane research histories and separates
+  private review, editorial readiness, proposed slot, queue and live permalink.
+- Preserve JHR website-first, identities, group audience, auth/dedup/read-back.
+  Work counterpart is named routing only; no installed Work-skill update verified.
+  12 offline activity cases pass locally/independently; targeting is in the
+  49-case combined selection. WSP00 strict gate passed. No live posting, Drive
+  changes, scheduler installation, runtime promotion or private data in Git.
+- Independent publishing and checkpoint scenario reviews accepted. PR/exact-head
+  CI, protected merge/main checks and cleanup are separate closure receipts.
+  WSP 10/15/22/50/71/91/95/97. Manual instruction editing is the smallest layer;
+  model execution/worker admission is unnecessary for this source-bound docs task.
+
 ## 2026-09-28: RSI contact-diligence contract and CI repair
 
 - WSP00/15/22/50/95/97; C1/I3/D3/Impact3 = 10/P2. Fresh main inspection found the new offline contract failing despite green PR1927 checks; the CI workflow did not invoke this suite.
