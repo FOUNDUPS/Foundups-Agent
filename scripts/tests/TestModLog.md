@@ -1,3 +1,18 @@
+## 2026-11-20 - Checkpoint guidance content binding
+
+The required CI correctly rejected the changed Operations Skillz's stale backend
+and staged-index bindings (two manifest assertions failed). Reused the existing
+generator and refreshed only that source hash, the sibling Skillz manifest and
+both canonical digest pins to
+`63dfca54a090d275e0aabcf7e8a272e393abc275498a5b9d0ee2a7578d6d049a`.
+Membership remains 1,494; assertions, caps, registry and generator are unchanged.
+All eight existing manifest/index cases pass after staging the exact sources and
+pins; focused Node compatibility/recovery commands pass. All 53 existing security
+gate regressions pass with UTF-8 and the existing Git Bash available as the test
+working directory. Initial Windows locale/WSL-command failures are environmental
+observations, not relaxed tests. Fresh hosted/head/main checks remain separate.
+WSP 22/50/71/97; no installed backend or runtime activation was attempted.
+
 ## 2026-11-18 - Operations Skillz content binding
 
 Refreshed the existing canonical manifest digest pin alongside the extension
