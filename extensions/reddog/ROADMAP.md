@@ -1139,3 +1139,14 @@ Status: `SPECIFIED_NOT_IMPLEMENTED`. Place after existing conversation-plane rea
 - [ ] MVP gate: real instrumentation, integration tests, browser accessibility evidence, and authenticated resident transport; no fabricated compute readings or implied effect authority.
 
 See [dual-loop architecture](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md) and [README](README.md).
+
+## Single-owner multi-voice coordination — proposed (2026-11-19)
+
+Status: `SPECIFIED_NOT_IMPLEMENTED`. Extends the [dual-loop cognition architecture](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md#multi-voice-coordination-task-ownership-and-affect-separation-2026-11-19-proposal) and existing reasoning-shade / measured-workload-dot plan. No new voice transport, executor, emotion detector, runtime authority, or deployment is implied.
+
+- [ ] POC: feed three synthetic Standard/Advanced/Little Dog voice-source streams into a shared scoped event log. Normalize transcript/event provenance, detect real duplicates, and preserve legitimately repeated utterances.
+- [ ] POC: demonstrate one task owner, one authorized speaker, one final reply per turn with scoped owner/epoch/version checks and supersession on interruption; multiple read-only reviewers may run behind 0102.
+- [ ] Prototype: bind intent-based `FAST / CRITIC / PANEL` routing to existing conversation policy and AI Gateway; hold conflicting/stale writers, and enforce separate WSP/governed authorization plus effect idempotency receipts.
+- [ ] Prototype: render independent signals for tier shade, measured workload dot, and optional, correctable communication affect. Link the [existing Lick affect boundary](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md#affect-palette-un-dao-du-and-wsp-authority), not a new emotion-state authority. No inferred feelings or unmeasured compute consumption.
+- [ ] Verification: simulate duplicate STT, speaker overlap, delayed out-of-order results, reconnection, retry, task handoff, cancellation, unknown telemetry/affect, theme switch and reduced motion. Assert one published response and no duplicate authorized effects.
+- [ ] MVP gate: authenticated scoped transport, durable ownership/epoch journal, exact-result/receipt reconciliation, failure recovery, accessibility review and observable live-device evidence. A visually shared conversation alone is not proof of a single backend process.
