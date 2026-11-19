@@ -1,5 +1,100 @@
 # RedDog Roadmap
 
+## Current PAL reconciliation — PR1638
+
+WSP15: C4/I4/D3/Impact4 = 15/P1. The existing local activity-ledger proposal is
+integrated locally with main `4169b051` at source checkpoint `8a88810d7`.
+Fresh Node24.22.1 focused, fast-tier and package checks pass; independent review
+and hosted convergence remain pending. It is not a second memory store or an
+RSI completion claim. Scope: key initialization/recovery rejection, authenticated
+append, cooperating-process serialization, truthful write/context receipts,
+and the existing command/package closure. Canonical detail and measured results
+belong in [the existing integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
+
+Local source/behavior review is complete: 13 independent adversarial probes,
+18 fast-tier members and the actual package/archive path pass within their
+documented scopes. Remaining publication gates: fresh remote main/owner,
+exact-head hosted checks and squash/readback. Before installed promotion:
+VS Code/profile SecretStorage and filesystem qualification. Cross-root key sharing, automatic
+stale-lock recovery, anti-rollback anchoring and multi-device sync are not proved
+by the local candidate. Existing blockchain/PF Mall and native RSI lanes retain
+their ownership. Historical version/release claims below keep their original
+scope.
+
+## AutoPost lens continuation
+
+Extend the existing external [AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md)
+and local-vision work order; do not duplicate their camera, CaptureSkills,
+identity store or connector responsibilities. [AutoPost PR 12](https://github.com/FOUNDUPS/autopost/pull/12)
+adds provisional-reference freshness and merged on 2026-10-18
+(`3c0fc19d40e225ed7f826541a33c38293f9fe664`; reconciled 2026-11-17). Repository
+merge is not production deployment or real-phone/liveness acceptance.
+
+- [x] Map enrollment, renewal, recipient-scoped sharing, peer requirements,
+  recovery and model-membership boundaries in the existing canonical Lick design.
+- [ ] Activate the merged provisional-freshness slice (`FOUNDUPS/autopost#12`,
+  `3c0fc19d40e225ed7f826541a33c38293f9fe664`) and prove consent, expiry, guest
+  fallback and renewal on a real phone with an available public RedDog host.
+- [ ] Close AutoPost's existing local-vision phone gate before expanding models:
+  observable output, capture-ID correlation, correction reuse and measured latency.
+- [ ] Build possession-bound enrollment and server-verified step-up through the
+  existing identity owner; then reviewed short-lived peer-proof delegation.
+- [ ] Verify the existing Liberty ingress contract and approved publishing
+  receipts before automatic dispatch. A model's scene label grants no authority.
+- [ ] Audit existing entitlement/model-routing owners for optional smarter
+  RedDog memberships. No billing stack or assurance upgrade is implied.
+
+## Continuous Lick design and evaluation
+
+Evaluated 2026-09-13 (Asia/Tokyo); reconciled 2026-11-17; runtime expansion is
+`SPECIFIED_NOT_IMPLEMENTED`. Canonical
+[design](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md#continuous-lick-and-mutual-verification-proposed)
+and [audit](../../docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md).
+These are bounded follow-on slices, not new WSPs or completed security claims.
+
+- [x] `LICK_CONTINUOUS_AUDIT`: distinguish request continuity, live-human
+  evidence, participant/profile continuity, media provenance, and action
+  authority. Evaluate Gemini's palette/000-222 coupling against source.
+- [ ] `LICK_ENCOUNTER_RENEWAL`: finish existing stage-1 possession binding,
+  participant/channel-change invalidation, corrections, and withdrawal UI.
+  Keep sensing opt-in and reuse AutoPost capture plus existing session/AgentDB
+  ownership. Prior draft host-recovery PRs `#1680` and `#1641` were closed
+  unmerged on 2026-10-06 (see [host-recovery reconciliation](../../docs/audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md));
+  verify current `reddog_public_session_gate.py` and the
+  [public-surface work order](docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md)
+  rather than creating another host, memory store, or guest-authority path.
+- [ ] `LICK_MUTUAL_CONTINUITY_POC`: two local clients, synthetic data, explicit
+  peer trust bootstrap, reviewed session-key delegation, both nonces, peer/role/
+  channel/purpose binding, expiry, and signed acknowledgements. Prove replay,
+  wrong-peer, wrong-channel, revocation, and reconnect rejection. Report human
+  presence as unknown; this is machine/session evidence only.
+- [ ] `LICK_STREAM_PROVENANCE_POC`: evaluate C2PA live-video support using one
+  sender, receiver, and actual rendition path. Start from AutoPost's existing
+  `foundupsAuthorIdentity.ts` signer/verifier; audit key custody, peer trust,
+  stable-ID linkability, and received-byte comparison before extending it.
+  Bind media to encounter/track/epoch; test altered, reordered, missing,
+  cross-stream and replayed segments, clock rollback, expired keys, unsigned
+  downgrade, and provenance stripping. Show receiver-owned evidence status and
+  declared AI transformations. Measure delay and overhead; stop for review
+  after this layer before sensor work.
+- [ ] `LICK_CAPTURE_LIVENESS_EVALUATION`: define the capture trust boundary,
+  local template custody, participant/track association, accessible challenges,
+  and issuer trust. Test virtual-device injection, presentation artifacts,
+  real-time relays, human-operated synthetic media, and compromised endpoints.
+  Predeclare test sets/thresholds; measure attack acceptance, legitimate
+  rejection, uncertainty, detection delay, device conditions, battery, and
+  accessibility. No universal human-presence/deepfake guarantee follows.
+- [ ] `LICK_GOVERNED_INTEGRATION`: consume scoped, expiring assessments in 3V
+  Verification and existing action-specific authority checks. Verify that
+  high semantic state, affect colors, peer assertions, signed media, and an
+  authorized but unattended agent cannot mint human presence or extra effects.
+  Retain guest communication when an optional modality is unavailable.
+
+The affect palette is optional communication context, not an authentication
+gate. The security target is bounded rejection of invalid evidence in conforming
+clients, not making deepfake creation impossible. Ship no production human
+assurance until the applicable capture/liveness and recovery gates pass.
+
 ## Status
 
 Phase: RedDog 0.4.141 held builder-child identity rebind candidate.
@@ -106,11 +201,13 @@ Current implementation:
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
 - [x] RedDog Lick non-biometric PoC: explicit session consent, guest/display-name
-  claims, one-use continuity challenge, provisional encounter profile,
+  claims, one-use request-continuity challenge, provisional encounter profile,
   expiry/withdrawal, AutoPost capture linkage, and a non-authoritative
   `LickReceipt`. Not deployed; possession proof, change detection, corrections,
   and deletion-tombstone UI remain before any biometric evaluation. AutoPost
-  does not decide identity. See `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`.
+  does not decide identity. Human presence and receipt signatures remain false.
+  See `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` and the continuous Lick section
+  above for separately unimplemented mutual/media verification.
 
 - Governed Holo resident binding (implemented / exact-main live acceptance passed): the VSIX one-shot and canonical
   resident/OpenClaw read-only worker now use the same verified replica resolver
@@ -418,6 +515,51 @@ IDE extension POC
   -> pfMALL RedDog surface
   -> governed public FoundUps launch flow
 ```
+
+## Moshpit conversation navigation and pins (planned)
+
+Status: `SPECIFIED_NOT_IMPLEMENTED`. Canonical requirement:
+[Moshpit conversation navigation and pins](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#conversation-navigation-and-pins-specified-not-implemented).
+
+- Reuse existing conversation/Breadcrumb/Brain-Memex ownership and inspect the
+  Google Wave-inspired GotJunk message components before implementing persistence
+  or a new UI. No separate Moshpit memory store.
+- Add contextual pin/unpin for messages, Markdown blocks and artifacts; a single
+  bottom/thumb-accessible pin icon opens a scoped tray and jumps to original
+  sources. Pins retain source identity/revision and current access checks.
+- Show conversation history oldest-above/latest-near-bottom, preserve the reading
+  anchor while paging or receiving live replies, and retain a return-to-latest
+  action. The newest-first project activity/audit view remains separate.
+- Select the smallest implementation slice using WSP_15 after owner/dependency
+  reconciliation. Verify pin persistence/isolation, source lifecycle, pagination,
+  focus and scroll behavior in isolated soft-proto; desktop and physical-phone
+  acceptance are outstanding. A documented requirement is not runtime readiness.
+- Reconcile project-Moshpit activity filtering through the canonical
+  [principal-significance inclusion gate](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#principal-significance-inclusion-gate-include--exclude--needs_resolution)
+  (`include` / `exclude` / `needs_resolution`), `0102-delegated` consequential-result
+  attribution, `EVIDENCED` truth class, and 14 acceptance cases while keeping
+  recoverable conversation history and pinned sources separate, preserving Contact
+  and read-only Memex emitter boundaries, and routing stale HoloIndex updates
+  strictly through the governed `WSP_00` / WRE / CI maintenance owner.
+
+This is part of the existing Moshpit/RedDog roadmap, not a parallel Wave project.
+
+### Next bounded slices: actions, search and AutoPost convergence (2026-11-17)
+
+Canonical contract: [Moshpit RedDog layers, actions, search and AutoPost convergence](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md#reddog-layers-moshpit-actions-search-and-autopost-convergence-2026-11-17-proposed).
+
+- **Reconcile first:** inspect existing Wave message components (never route private captures/chats through `gotjunk_messages`/`gotjunk_blobs` public-read Firestore rules), RedDog thread/history owner, PAL, Breadcrumb/Brain-Memex projection, AutoPost capture/DAEmon and current PRs; classify actual runtime readiness before allocating a sprint.
+- **Ordered WSP_15 sprint dependency sequence:**
+  - **Sprint 1 — Moshpit Navigation** (`C2 + I5 + D5 + Imp5 = 17`, **P0**): conversation history navigation, stable reading anchor on incoming messages, bottom pin tray, idempotent pin/unpin, return-to-source, and explicit separation of generic conversation (oldest-above/latest-near-bottom), AutoPost white Moshpit (swipe-up over live camera, latest-at-top), and project Moshpit (newest-JST-day-first).
+  - **Sprint 2 — Contextual Actions** (`C2 + I5 + D4 + Imp5 = 16`, **P0**): text-labeled long-press menu (`Pin / Unpin`, `Audit`, `Store`, `Archive`, `Delete`), archive-not-delete, confirmed delete with `DeletionReceipt`, non-certifying `Audit`, truth-preserving `Store`, and zero external side effects.
+  - **Sprint 3 — Scoped Search** (`C3 + I4 + D4 + Imp4 = 15`, **P1**): active-context default (`conversation`, `pins`, `foundup_moshpit`), explicitly selected/authorized cross-FoundUp scope, provenance, source jump, and bounded pagination.
+  - **Sprint 4 — RedDog Controls & Muzzle** (`C3 + I4 + D4 + Imp4 = 15`, **P1**): shared `+` controls (`AI Models`, `Listening`, independent `Muzzle` output mute, `Reasoning: Instant [default] / Think / Deep / Auto [post-verification]`, `Autoplay`, `DAEmon`, left/right switchable RedDog placement); preserve open decisions on muzzled queueing and recording-mic linkage.
+  - **Sprint 5 — AutoPost Integration** (`C4 + I4 + D3 + Imp4 = 15`, **P1**): shared translucent dock below shutter with `+` and RedDog, sticky video recording toggle (stop never shoots a photo), local perception proposal + 012 review/correction, PAL/Breadcrumb/Brain-Memex admission into Moshpit; zero automatic public upload or identity assertion.
+  - **Sprint 6 — 0102 Continuity** (`C4 + I4 + D3 + Imp4 = 15`, **P1**): authenticated 0102 context retrieval, reconnect, open-loop recovery, bounded `Instant -> Think -> Deep` escalation, and separate Lick encounter-consent boundary.
+  - **Sprint 7 — DAEmon Verification** (`C3 + I3 + D3 + Imp3 = 12`, **P2**): model load duration, inference latency, media/network symptoms, failed actions, retries, recovery, and 012 corrections via existing DAEmon owners (no duplicate telemetry DB).
+  - **Sprint 8 — SoftProto capture evidence handoff** (`C4 + I5 + D4 + Imp5 = 18`, **P0 dependency for preview acceptance**): reuse the existing SoftProto preview and external AutoPost capture owners; require a real phone-openable exact-revision link, persistent or explicitly restored RedDog context, user-authorized on-demand screenshot then bounded ten-second recording, synchronized sanitized DAEmon event window, preview/consent/stop and correlation receipt into the existing feedback/task owner. No parallel recorder, logger or task queue; do not merge UI runtime without physical-phone tap/swipe acceptance. Continuous cross-app sharing remains deferred.
+- **Testing:** phone-sized soft-proto, desktop pointer/keyboard, and physical-device acceptance (when authorized), cross-principal denial, reconnect, revoked/deleted/superseded sources, permission denial, corrected classification and audit receipts. Use WSP_15, WSP_97 and soft-proto promotion gates.
+
 
 ## WSP_15 Priorities
 
@@ -985,3 +1127,26 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - No hidden access to `.env` or gitignored files.
 - No automatic F0 mutation.
 - No worm-like self-propagation, auto-install, or background repo modification behavior.
+
+## Reasoning shade + 0102 workload dot — proposed (2026-11-19)
+
+Status: `SPECIFIED_NOT_IMPLEMENTED`. Place after existing conversation-plane reasoning-depth semantics and before any production workload visualization; do not block current foreground chat on telemetry.
+
+- [ ] POC: map existing `FAST` / `CRITIC` / `PANEL` to light / medium / dark RedDog shade, independent of 0102 activity and theme.
+- [ ] Prototype: define a scoped, timestamped, freshness-checked, privacy-safe 0102 workload telemetry adapter; measure actual processing activity, not mode or latency proxies. Distinguish unavailable/unknown from measured zero.
+- [ ] Prototype: bind dot size and pulse to measured workload with bounded, accessible motion; settle after work completes, including while `PANEL` remains selected. Use neutral animation when telemetry is missing or stale; respect reduced-motion settings.
+- [ ] Verification: test all 3 reasoning modes against idle, active, completed, missing and stale telemetry; verify theme inversion does not alter state; verify foreground conversation continues during permitted asynchronous cognition; avoid claiming backend CPU/GPU utilization unless directly measured.
+- [ ] MVP gate: real instrumentation, integration tests, browser accessibility evidence, and authenticated resident transport; no fabricated compute readings or implied effect authority.
+
+See [dual-loop architecture](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md) and [README](README.md).
+
+## Single-owner multi-voice coordination — proposed (2026-11-19)
+
+Status: `SPECIFIED_NOT_IMPLEMENTED`. Extends the [dual-loop cognition architecture](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md#multi-voice-coordination-task-ownership-and-affect-separation-2026-11-19-proposal) and existing reasoning-shade / measured-workload-dot plan. No new voice transport, executor, emotion detector, runtime authority, or deployment is implied.
+
+- [ ] POC: feed three synthetic Standard/Advanced/Little Dog voice-source streams into a shared scoped event log. Normalize transcript/event provenance, detect real duplicates, and preserve legitimately repeated utterances.
+- [ ] POC: demonstrate one task owner, one authorized speaker, one final reply per turn with scoped owner/epoch/version checks and supersession on interruption; multiple read-only reviewers may run behind 0102.
+- [ ] Prototype: bind intent-based `FAST / CRITIC / PANEL` routing to existing conversation policy and AI Gateway; hold conflicting/stale writers, and enforce separate WSP/governed authorization plus effect idempotency receipts.
+- [ ] Prototype: render independent signals for tier shade, measured workload dot, and optional, correctable communication affect. Link the [existing Lick affect boundary](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md#affect-palette-un-dao-du-and-wsp-authority), not a new emotion-state authority. No inferred feelings or unmeasured compute consumption.
+- [ ] Verification: simulate duplicate STT, speaker overlap, delayed out-of-order results, reconnection, retry, task handoff, cancellation, unknown telemetry/affect, theme switch and reduced motion. Assert one published response and no duplicate authorized effects.
+- [ ] MVP gate: authenticated scoped transport, durable ownership/epoch journal, exact-result/receipt reconciliation, failure recovery, accessibility review and observable live-device evidence. A visually shared conversation alone is not proof of a single backend process.

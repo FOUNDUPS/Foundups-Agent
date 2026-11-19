@@ -1,5 +1,13 @@
 # HoloIndex Development Roadmap
 
+## Stored-settings delivery gates — 2026-11-01
+
+The [API contract](INTERFACE.md#stored-chroma-settings-admission--2026-11-01) has corrected local, literal scratch-native and package
+acceptance, with every failed attempt retained in [TestModLog](tests/TestModLog.md#stored-settings-local-qualification--2026-11-01).
+Complete protected publication and exact new-source PC/Holo/runtime gates before
+requesting a separate governed maintenance release. This work does not upgrade
+the vulnerable SDK or qualify its remaining native cases and chain activation.
+
 ## [2026-09-13] R03 existing entry-path qualification
 
 - [Source-selection procedure and matrix](CLI_REFERENCE.md#source-bound-owner-queries): existing owner, selector and local bundle paths; no new runtime implementation.

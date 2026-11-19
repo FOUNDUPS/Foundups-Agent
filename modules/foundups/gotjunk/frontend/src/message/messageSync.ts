@@ -17,7 +17,8 @@
 import {
   collection,
   doc,
-  setDoc,
+  runTransaction,
+  arrayUnion,
   getDoc,
   getDocs,
   deleteDoc,
@@ -92,46 +93,45 @@ export const syncThreadToCloud = async (
   if (!db) return false;
 
   try {
-    const now = Timestamp.now();
     const docRef = doc(db, MESSAGES_COLLECTION, key);
-
-    // WSP AUDIT FIX: Check if doc exists to preserve createdAt
-    const existingDoc = await getDoc(docRef);
-    const isNewThread = !existingDoc.exists();
-
-    // Convert messages to Firestore format (strip context from each message)
-    const firestoreMessages: FirestoreMessage[] = thread.messages.map(msg => ({
-      id: msg.id,
-      authorId: msg.authorId,
-      authorDisplayName: msg.authorDisplayName,
-      text: msg.text,
-      createdAt: msg.createdAt,
-      parentId: msg.parentId,
-      ttlMs: msg.ttlMs,
-      expiresAt: msg.expiresAt,
-    }));
-
-    // WSP AUDIT FIX: Only set createdAt and ownerUid on new threads
-    const threadDoc: Partial<FirestoreThreadDoc> = {
-      threadKey: key,
-      contextType: thread.context.type,
-      itemId: thread.context.itemId,
-      alertId: thread.context.alertId,
-      status: thread.metadata.status,
-      closedAt: thread.metadata.closedAt,
-      closedReason: thread.metadata.closedReason,
-      messages: firestoreMessages,
-      updatedAt: now,
-    };
-
-    // Only set createdAt and ownerUid on first creation
-    if (isNewThread) {
-      threadDoc.createdAt = now;
-      threadDoc.ownerUid = currentUserId;
+    for (const message of thread.messages) {
+      if (message.authorId !== currentUserId) continue;
+      const serialized = Object.fromEntries(Object.entries({
+        id: message.id, authorId: message.authorId,
+        authorDisplayName: message.authorDisplayName, text: message.text,
+        createdAt: message.createdAt, parentId: message.parentId,
+        ttlMs: message.ttlMs, expiresAt: message.expiresAt,
+      }).filter(([, value]) => value !== undefined));
+      await runTransaction(db, async (transaction) => {
+        const existing = await transaction.get(docRef);
+        const now = Timestamp.now();
+        if (!existing.exists()) {
+          transaction.set(docRef, {
+            threadKey: key, ownerUid: currentUserId,
+            contextType: thread.context.type,
+            ...(thread.context.itemId ? { itemId: thread.context.itemId } : {}),
+            ...(thread.context.alertId ? { alertId: thread.context.alertId } : {}),
+            status: 'active', messages: [serialized], createdAt: now, updatedAt: now,
+          });
+          return;
+        }
+        const remote = existing.data();
+        if (remote.messages.some((stored: FirestoreMessage) => stored.id === message.id)) return;
+        if (remote.status !== 'active') throw new Error('Thread is closed');
+        transaction.update(docRef, { messages: arrayUnion(serialized), updatedAt: now });
+      });
     }
-
-    await setDoc(docRef, threadDoc, { merge: true });
-    console.log(`[MessageSync] Synced thread to cloud: ${key} (${thread.messages.length} messages, new=${isNewThread})`);
+    await runTransaction(db, async (transaction) => {
+      const existing = await transaction.get(docRef);
+      if (!existing.exists() || existing.data().ownerUid !== currentUserId) return;
+      if (existing.data().status === thread.metadata.status) return;
+      transaction.update(docRef, {
+        status: thread.metadata.status,
+        closedAt: thread.metadata.closedAt ?? null,
+        closedReason: thread.metadata.closedReason ?? null,
+        updatedAt: Timestamp.now(),
+      });
+    });
     return true;
   } catch (error) {
     console.error('[MessageSync] Failed to sync thread:', key, error);

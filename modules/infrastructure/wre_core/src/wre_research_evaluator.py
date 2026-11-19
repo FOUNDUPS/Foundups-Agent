@@ -11,7 +11,9 @@ import json
 import ast
 import math
 from collections.abc import Mapping
+from inspect import signature
 from pathlib import Path
+from types import MappingProxyType
 
 # Add repo root to sys.path if not present
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -24,6 +26,7 @@ from modules.foundups.simulator.economics.unified_sustainability import (
 from modules.foundups.simulator.economics.agent_compute_costs import (
     AGENT_INFRASTRUCTURE_COSTS,
 )
+from modules.foundups.simulator.economics import unified_sustainability as economics
 
 
 class ResearchSustainabilityCalculator(UnifiedSustainabilityCalculator):
@@ -32,7 +35,8 @@ class ResearchSustainabilityCalculator(UnifiedSustainabilityCalculator):
     premium pricing multipliers and demand elasticity.
     """
 
-    def __init__(self, multipliers, agent_allocation, *args, **kwargs):
+    def __init__(self, multipliers, agent_allocation, *args, cost_catalog=None, **kwargs):
+        self.cost_catalog = snapshot_cost_catalog(cost_catalog)
         super().__init__(*args, **kwargs)
         self.multipliers = multipliers
         self.agent_allocation = agent_allocation
@@ -60,9 +64,9 @@ class ResearchSustainabilityCalculator(UnifiedSustainabilityCalculator):
             elasticity_factor = max(0.1, 1.0 - 0.22 * (m - 1.0))
             task_count = int(tasks_per_month * fraction * elasticity_factor)
 
-            infra = AGENT_INFRASTRUCTURE_COSTS.get(agent_name)
-            if infra:
-                cost = task_count * infra.total_usd
+            unit_cost = self.cost_catalog.get(agent_name)
+            if unit_cost is not None:
+                cost = task_count * unit_cost
                 revenue = cost * m
                 total_cost += cost
                 total_revenue += revenue
@@ -124,7 +128,105 @@ def _coerce_metric_map(value: object) -> dict[str, float]:
     return result
 
 
-def evaluate_target(target_path: Path) -> dict:
+def snapshot_cost_catalog(cost_catalog=None) -> Mapping:
+    """Copy finite nonnegative unit totals; never retain mutable cost objects."""
+    if cost_catalog is None:
+        cost_catalog = {name: cost.total_usd for name, cost in AGENT_INFRASTRUCTURE_COSTS.items()}
+    if not isinstance(cost_catalog, Mapping) or not cost_catalog:
+        raise ValueError("cost catalog must be a nonempty mapping")
+    captured = {}
+    for name, value in cost_catalog.items():
+        if not isinstance(name, str) or isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError("cost catalog requires string names and numeric totals")
+        try:
+            total = float(value)
+        except (OverflowError, ValueError) as error:
+            raise ValueError("cost catalog totals must be finite and nonnegative") from error
+        if not math.isfinite(total) or total < 0:
+            raise ValueError("cost catalog totals must be finite and nonnegative")
+        captured[name] = total
+    return MappingProxyType(captured)
+
+
+def _profile_number(value):
+    """Keep primitive numeric values without losing integer precision."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError("comparison basis requires numeric profile values")
+    try:
+        finite = math.isfinite(value)
+    except (OverflowError, ValueError):
+        finite = False
+    if not finite:
+        raise ValueError("comparison basis requires finite profile values")
+    return value
+
+
+def _profile_tiers(distribution):
+    """Preserve consumed iteration order and distinguish absent tiers from zero."""
+    if not isinstance(distribution, Mapping):
+        raise ValueError("comparison basis requires a tier distribution mapping")
+    rows = []
+    for name, fraction in distribution.items():
+        if not isinstance(name, str):
+            raise ValueError("comparison basis requires string tier names")
+        tier = economics.TIERS.get(name)
+        rows.append([name, _profile_number(fraction),
+                     _profile_number(tier.price_usd) if tier else None])
+    return rows
+
+
+def snapshot_comparison_basis() -> str:
+    """Copy consumed ambient inputs for drift checks, not immutable execution.
+
+    Costs have a separate frozen catalog. Definition-bound defaults are read from
+    the actual methods; overridden or unused defaults are deliberately excluded.
+    The JSON value is neither an authenticated oracle identity nor a receipt.
+    """
+    try:
+        defaults = signature(UnifiedSustainabilityCalculator.calculate_sustainability).parameters
+        constructor = signature(UnifiedSustainabilityCalculator.__init__).parameters
+        angel = signature(UnifiedSustainabilityCalculator.calculate_angel_revenue).parameters
+        distribution = defaults["tier_distribution"].default or economics.TIER_DISTRIBUTION
+        values = {
+            "schema": "wre_roc_comparison_v1",
+            "tiers": _profile_tiers(distribution),
+            "subscription_margin": _profile_number(economics.SUBSCRIPTION_GROSS_MARGIN),
+            "angel": [_profile_number(getattr(economics.ANGEL_TIER, name))
+                      for name in ("price_usd", "max_angels_per_opo", "opo_treasury_fee")],
+            "angel_stake": _profile_number(angel["avg_opo_stake_usd"].default),
+            "dex_fee": _profile_number(economics.FEE_RATES[economics.FeeType.DEX_TRADE]),
+            "burn": _profile_number(constructor["monthly_burn_usd"].default),
+            "sats_per_usd": _profile_number(economics.SATS_PER_USD),
+            "activity": [_profile_number(defaults[name].default) for name in (
+                "monthly_dex_volume_usd", "monthly_exits_usd", "monthly_creations_usd", "monthly_opos")],
+        }
+        return json.dumps(values, allow_nan=False, separators=(",", ":"))
+    except (AttributeError, KeyError, TypeError) as error:
+        raise ValueError("comparison basis cannot capture current profile") from error
+
+
+def _check_comparison_basis(expected):
+    if not isinstance(expected, str) or not expected:
+        raise ValueError("comparison basis must be a nonempty captured string")
+    if expected != snapshot_comparison_basis():
+        raise ValueError("comparison basis drifted during this invocation")
+
+
+def evaluate_target(target_path: Path, *, cost_catalog=None, comparison_basis=None) -> dict:
+    """Optionally reject persistent profile drift before returning any metrics.
+
+    Only None opts out for direct callers. Before/after sampling does not protect
+    concurrent mutation or a transient change restored before the second check.
+    """
+    if comparison_basis is not None:
+        _check_comparison_basis(comparison_basis)
+    metrics = _evaluate_target(target_path, cost_catalog=cost_catalog)
+    if comparison_basis is not None:
+        _check_comparison_basis(comparison_basis)
+    return metrics
+
+
+def _evaluate_target(target_path: Path, *, cost_catalog=None) -> dict:
     """
     Parse target constants from target_path and evaluate fitness.
 
@@ -132,6 +234,7 @@ def evaluate_target(target_path: Path) -> dict:
     dry-run research loop from turning a generated proposal into live code.
     """
     allocation, multipliers = load_target_config(target_path)
+    cost_catalog = snapshot_cost_catalog(cost_catalog)
 
     # Validation guards
     if not allocation or not multipliers:
@@ -144,7 +247,7 @@ def evaluate_target(target_path: Path) -> dict:
         }
 
     # Reject impossible mixtures before the simulator can reward negative costs.
-    unknown_agents = (set(allocation) | set(multipliers)) - set(AGENT_INFRASTRUCTURE_COSTS)
+    unknown_agents = (set(allocation) | set(multipliers)) - set(cost_catalog)
     invalid_fractions = any(value < 0.0 or value > 1.0 for value in allocation.values())
     if unknown_agents or invalid_fractions:
         return {
@@ -182,10 +285,15 @@ def evaluate_target(target_path: Path) -> dict:
                 "error": f"Multiplier {k}={v} is out of bounds [1.0, 5.0]",
             }
 
-    # Run simulation
+    return _evaluate_config(allocation, multipliers, cost_catalog)
+
+
+def _evaluate_config(allocation, multipliers, cost_catalog) -> dict:
+    """Score a valid literal configuration against explicit captured unit costs."""
     calc = ResearchSustainabilityCalculator(
         multipliers=multipliers,
         agent_allocation=allocation,
+        cost_catalog=cost_catalog,
     )
 
     # Calculate overall metrics using standard parameters

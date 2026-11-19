@@ -67,7 +67,7 @@ def run_skill(
     dom: Any = None,
     plan: Optional[Dict[str, Any]] = None,
     plan_factory: Optional[Callable[[], Dict[str, Any]]] = None,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     dry_run: Optional[bool] = None,
     emit_signals: bool = True,
 ) -> Dict[str, Any]:

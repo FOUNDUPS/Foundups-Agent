@@ -68,9 +68,42 @@ SOURCES = tuple(
         "reddog_signer_secret_grant_durable_nonce_store.py",
         "reddog_signer_secret_grant_revocation_oracle.py",
         "reddog_signer_wsp71_ephemeral_backend_factory.py",
+        "reddog_signer_proposal_activation.py",
     )
 )
 PROTOCOL_SOURCE = SOURCE_ROOT / "reddog_isolated_signer_socket_protocol.py"
+
+
+@pytest.mark.parametrize("mutation", ["valid", "attestation", "signature", "missing", "binding", "expired", "other-operation"])
+def test_deferred_handshake_uses_canonical_response_verifier(monkeypatch, mutation):
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_mutual_peer_handshake as fixture
+    from modules.communication.moltbot_bridge.src import reddog_signer_mutual_peer_handshake as handshake
+    from modules.communication.moltbot_bridge.src import reddog_signer_resolve_per_sign_validation as validation
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
+    monkeypatch.setattr(handshake.time, "time", lambda: fixture.NOW)
+    private = fixture._private_key()
+    request = fixture._request(private)
+    mac = SimpleNamespace(build=lambda *args: "audit-mac-v1:" + "a" * 64)
+    response = replace(fixture._backend(private), audit_mac_builder=mac).sign(request, fixture._peer())
+    assert response.accepted
+    binding = SimpleNamespace(signer_public_key=response.signer_public_key,
+                              signer_key_fingerprint=response.key_fingerprint, key_epoch=response.key_epoch)
+    if mutation == "attestation":
+        response = replace(response, audit_attestation_signature=response.signature)
+    elif mutation == "signature":
+        response = replace(response, signature=response.audit_attestation_signature)
+    elif mutation == "missing":
+        response = replace(response, audit_attestation_signature="")
+    elif mutation == "binding":
+        binding.signer_public_key = "wrong-key"
+    elif mutation == "expired":
+        monkeypatch.setattr(handshake.time, "time", lambda: fixture.NOW + 120)
+    elif mutation == "other-operation":
+        request = replace(request, requested_operation="unsupported-operation")
+    accepted = validation.response_matches(response, request, binding) and validation.signature_matches(
+        response, request, Ed25519SignatureVerifier(), binding)
+    assert accepted is (mutation == "valid")
 
 
 def _digest(character: str) -> str:
@@ -269,11 +302,33 @@ class _Factory:
         )
 
 
+class _UnitGrantAndResolutionBackend(ResolvePerSignSignerBackend):
+    """Synthetic crypto unit seam; does NOT qualify current-owner admission.
+
+    Keep grant verification, durable consumption, revocation and resolution
+    behavior under test. Public owner admission is covered by the exact-class
+    negatives below and the admitted socket runtime suite, not this adapter.
+    """
+
+    def _resolve_and_sign(self, request, peer, consumed_grant):
+        from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant import SignerSecretAccessGrantRejected
+        from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import _reject
+        try:
+            return self.grant_boundary.authorize_consumed_use(
+                consumed_grant,
+                lambda: self._resolve_and_sign_current(request, peer, consumed_grant),
+            )
+        except SignerSecretAccessGrantRejected:
+            return _reject(REJECT_SECRET_GRANT_INVALID)
+        except Exception:
+            return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
+
+
 def _backend(
     grant: Mapping[str, Any], factory: _Factory,
     nonce_store: DurableSignerSecretGrantNonceStore,
 ) -> ResolvePerSignSignerBackend:
-    return ResolvePerSignSignerBackend(
+    return _UnitGrantAndResolutionBackend(
         binding=_binding(nonce_store),
         grant_boundary=SignerSecretAccessGrantBoundary(
             nonce_store=nonce_store,
@@ -539,7 +594,7 @@ def test_factory_exception_is_sanitized_and_grant_is_burned(nonce_store) -> None
             raise RuntimeError("secret-value-must-not-escape")
 
     factory = _RaisingFactory()
-    backend = ResolvePerSignSignerBackend(
+    backend = _UnitGrantAndResolutionBackend(
         binding=_binding(nonce_store),
         grant_boundary=SignerSecretAccessGrantBoundary(
             nonce_store=nonce_store,
@@ -609,7 +664,7 @@ def test_restart_replay_rejects_with_shared_durable_nonce_store(tmp_path: Path) 
     grant = _grant(request, store)
 
     def build() -> ResolvePerSignSignerBackend:
-        return ResolvePerSignSignerBackend(
+        return _UnitGrantAndResolutionBackend(
             binding=_binding(store),
             grant_boundary=SignerSecretAccessGrantBoundary(
                 nonce_store=store,
@@ -671,7 +726,7 @@ def test_expiry_or_revocation_during_resolution_rejects_before_signing(
             return result
 
     factory = _MutatingFactory(ephemeral)
-    backend = ResolvePerSignSignerBackend(
+    backend = _UnitGrantAndResolutionBackend(
         binding=_binding(nonce_store),
         grant_boundary=SignerSecretAccessGrantBoundary(
             nonce_store=nonce_store,
@@ -706,7 +761,7 @@ def test_revocation_and_signing_are_linearized_by_one_authority_fence(
             return super().sign(request, peer)
 
     factory = _Factory(_BlockingBackend())
-    backend = ResolvePerSignSignerBackend(
+    backend = _UnitGrantAndResolutionBackend(
         binding=_binding(nonce_store),
         grant_boundary=SignerSecretAccessGrantBoundary(
             nonce_store=nonce_store,
@@ -751,7 +806,7 @@ def test_grant_expiring_inside_signing_callback_rejects_response(
             clock[0] = NOW + 101
             return response
 
-    backend = ResolvePerSignSignerBackend(
+    backend = _UnitGrantAndResolutionBackend(
         binding=_binding(nonce_store),
         grant_boundary=SignerSecretAccessGrantBoundary(
             nonce_store=nonce_store,
@@ -948,3 +1003,74 @@ def test_modified_socket_parser_functions_remain_bounded() -> None:
     assert functions
     for node in functions:
         assert node.end_lineno - node.lineno + 1 <= 50
+
+
+def _resolution_boundary_change_case(nonce_store, change):
+    request = _request()
+    grant = _grant(request, nonce_store)
+    clock = [NOW]
+    oracle = AtomicSignerSecretGrantRevocationOracle()
+    ephemeral = _EphemeralBackend()
+
+    class ChangingFactory(_Factory):
+        def __call__(self):
+            result = super().__call__()
+            if change == "expiry":
+                clock[0] = grant["expires_at"]
+            else:
+                oracle.revoke_grant(grant["grant_id"])
+            return result
+
+    factory = ChangingFactory(ephemeral)
+    backend = _UnitGrantAndResolutionBackend(
+        binding=_binding(nonce_store),
+        grant_boundary=SignerSecretAccessGrantBoundary(
+            nonce_store=nonce_store, revocation_oracle=oracle, clock=lambda: clock[0]),
+        signature_verifier=_Verifier(grant), principal_key_resolver=_Resolver(),
+        backend_factory=factory,
+    )
+    result = backend.sign_with_secret_grant(request, _peer(), grant)
+    assert factory.calls == 1
+    assert oracle.is_revoked(grant_id=grant["grant_id"], key_epoch=grant["key_epoch"],
+                             at_epoch=clock[0]) is (change == "revocation")
+    assert clock[0] == (grant["expires_at"] if change == "expiry" else NOW)
+    assert result.accepted is False and result.rejection_code == REJECT_SECRET_GRANT_INVALID
+    assert ephemeral.calls == 0
+
+
+def test_expiry_only_during_resolution_rejects_before_signing(nonce_store):
+    _resolution_boundary_change_case(nonce_store, "expiry")
+
+
+def test_local_revocation_only_during_resolution_rejects_before_signing(nonce_store):
+    _resolution_boundary_change_case(nonce_store, "revocation")
+
+@pytest.mark.parametrize("lease_kind", ["absent", "noop_lookalike"])
+def test_untrusted_owner_lease_rejects_before_resolution_or_signing(
+    nonce_store, lease_kind
+):
+    """Synthetic grant/crypto fixtures do not confer current-owner authority."""
+    from contextlib import nullcontext
+
+    request = _request()
+    grant = _grant(request, nonce_store)
+    ephemeral = _EphemeralBackend()
+    factory = _Factory(ephemeral)
+    if lease_kind == "noop_lookalike":
+        # A method-shaped context that yields itself holds no owner fence.
+        factory.signing_authority_lease = lambda: nullcontext(factory)
+    else:
+        assert not hasattr(factory, "signing_authority_lease")
+
+    fixture = _backend(grant, factory, nonce_store)
+    production = ResolvePerSignSignerBackend(
+        binding=fixture.binding, grant_boundary=fixture.grant_boundary,
+        signature_verifier=fixture.signature_verifier,
+        principal_key_resolver=fixture.principal_key_resolver,
+        backend_factory=factory,
+    )
+    result = production.sign_with_secret_grant(
+        request, _peer(), grant
+    )
+
+    assert (result.accepted, factory.calls, ephemeral.calls) == (False, 0, 0)

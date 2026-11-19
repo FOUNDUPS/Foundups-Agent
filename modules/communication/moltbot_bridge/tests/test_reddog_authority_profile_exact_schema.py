@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from types import MappingProxyType
 
 import pytest
 
@@ -482,3 +483,59 @@ def test_profile_m2m_nested_policy_has_same_predicates(read, field, value, accep
     else:
         with pytest.raises(ValueError, match=r"authority_profile_invalid:bounded_worker_plan.m2m_envelope"):
             read(profile)
+
+
+@pytest.mark.parametrize("parent", ("proposal_admission", "operational_context_binding.proposal_admission"))
+@pytest.mark.parametrize("read", (rehydrate_authority_profile_runtime, rehydrate_authority_profile_effect_scope))
+@pytest.mark.parametrize("case", ("valid", "cycle", "depth", "nodes", "bytes", "secret", "digest", "false_no_effect"))
+def test_embedded_proposal_packets_are_bounded_before_profile_traversal(parent, read, case) -> None:
+    packet = _m2m_envelope() if case == "valid" else _invalid_m2m(case)
+    profile = {"proposal_admission": {"bounded_worker_plan": {"m2m_envelope": packet}}}
+    if parent.startswith("operational_context_binding."):
+        profile = {"operational_context_binding": profile}
+    if case != "valid":
+        with pytest.raises(ValueError, match=re.escape(parent + ".bounded_worker_plan.m2m_envelope")):
+            read(profile)
+        return
+    restored = read(profile)
+    for part in parent.split("."):
+        restored = restored[part]
+    expected = encode_m2m_envelope(packet)
+    packet["I"]["fixture"].append("caller mutation")
+    assert encode_m2m_envelope(restored["bounded_worker_plan"]["m2m_envelope"]) == expected
+
+
+@pytest.mark.parametrize("parent", ("proposal_admission", "operational_context_binding.proposal_admission"))
+@pytest.mark.parametrize("case", ("unknown", "domain_unknown", "domain_packet", "env_unknown"))
+def test_embedded_proposal_plans_keep_closed_nested_schemas(parent, case) -> None:
+    plans = {"unknown": {"unknown": "field"},
+             "domain_unknown": {"domain_profile": {"unknown": "field"}},
+             "domain_packet": {"domain_profile": {"m2m_envelope": _m2m_envelope()}},
+             "env_unknown": {"env_policy": {"unknown": True}}}
+    plan = plans[case]
+    profile = {"proposal_admission": {"bounded_worker_plan": plan}}
+    if parent.startswith("operational_context_binding."):
+        profile = {"operational_context_binding": profile}
+    with pytest.raises(ValueError, match="authority_profile_invalid"):
+        rehydrate_authority_profile_runtime(profile)
+
+
+@pytest.mark.parametrize("parent", ("proposal_admission", "operational_context_binding",
+                                    "operational_context_binding.proposal_admission"))
+@pytest.mark.parametrize("read", (rehydrate_authority_profile_runtime, rehydrate_authority_profile_effect_scope))
+@pytest.mark.parametrize("kind", ("dict_subclass", "mapping_proxy"))
+@pytest.mark.parametrize("with_packet", (False, True))
+def test_embedded_plan_cannot_coerce_non_plain_ancestors(parent, read, kind, with_packet) -> None:
+    class CustomDict(dict):
+        pass
+    plan = {"m2m_envelope": _m2m_envelope()} if with_packet else {}
+    profile = {"proposal_admission": {"bounded_worker_plan": plan}}
+    if parent.startswith("operational_context_binding"):
+        profile = {"operational_context_binding": profile}
+    owner = profile
+    parts = parent.split(".")
+    for part in parts[:-1]:
+        owner = owner[part]
+    owner[parts[-1]] = (CustomDict if kind == "dict_subclass" else MappingProxyType)(owner[parts[-1]])
+    with pytest.raises(ValueError, match="authority_profile_invalid"):
+        read(profile)

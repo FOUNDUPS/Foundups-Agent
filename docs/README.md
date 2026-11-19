@@ -6,7 +6,7 @@
 
 **Status:** ACTIVE
 
-**Last Updated:** 2026-09-11
+**Last Updated:** 2026-11-19 (fractal navigation and source classification)
 
 **WSP Compliance:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 87 (Code Navigation)
 
@@ -20,7 +20,24 @@ evidence, and historical memory. The canonical identity boundary is
 [`extensions/reddog/ARCHITECTURE.md`](../extensions/reddog/ARCHITECTURE.md):
 RedDog is the fast interaction/exchange surface, while 0102 is the deeper
 Digital Twin and orchestration layer. The map also owns navigation to Lick,
-Contact Memory, Mosh Pit, and the specified-not-implemented Memex emitter.
+Contact Memory, Moshpit, and the specified-not-implemented Memex emitter.
+
+## Play FoundUps fractal read order
+
+| Need | Existing owner |
+|---|---|
+| Plain-language explanation | [FoundUps vision: how the fractal works](foundups_vision.md#how-the-fractal-system-works) |
+| Stable identities, composition and evidence | [Master architecture](../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work) |
+| Selection, pinned evidence and Back | [Mall navigation contract](../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation) |
+| Census, parallel comparisons and later visualization | [Mall roadmap](../modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation) |
+| Actual model/scaffold/research owners | [Existing RSI dispatch](operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19) |
+| Provenance, coverage and unresolved claims | [Documentation audit](audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md) |
+
+These links connect the documentation without replacing module contracts or
+concatenating historical records into a competing master. The vision document
+below is the FoundUps product/economic thesis; it is not the computer-vision
+module's README. Navigation and graph targets remain distinct from observed
+runtime evidence.
 
 ## Quick Navigation
 
@@ -79,7 +96,7 @@ Contact Memory, Mosh Pit, and the specified-not-implemented Memex emitter.
 | Document | Created | Purpose | Sprints Covered |
 |----------|---------|---------|-----------------|
 | [VISION_AUTOMATION_SPRINT_MAP.md](VISION_AUTOMATION_SPRINT_MAP.md) | 2025-11-30 | Complete vision automation sprint roadmap (A1-A5, V1-V6) | All sprints ✅ |
-| [foundups_vision.md](foundups_vision.md) | 2025-10-xx | foundups_vision module architecture and design | Vision AI integration |
+| [Computer-vision module README](../modules/infrastructure/foundups_vision/README.md) | Module-owned | Vision AI integration and module implementation | See module roadmap |
 | [WSP_VIOLATION_LOG.md](WSP_VIOLATION_LOG.md) | 2025-11-30 | Sprint V6 WSP 50 violation analysis (pattern_memory.py duplicate) | V6 Pattern Learning |
 
 **Related Modules:**

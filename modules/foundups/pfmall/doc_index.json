@@ -1,0 +1,133 @@
+{
+  "doc_index_version": "1.0",
+  "collection": "modules/foundups/pfmall",
+  "generated_at": "2026-10-23T09:02:04Z",
+  "documents": [
+    {
+      "path": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
+      "doc_type": "architecture",
+      "module_hint": "pfmall",
+      "wsp_refs": [
+        "WSP 22",
+        "WSP 50",
+        "WSP 83",
+        "WSP 84",
+        "WSP 97"
+      ],
+      "hash_sha256": "601941205ce252bb71742518ce76a94de732b118bd41b3e5e77843de2572b6cd",
+      "size_bytes": 12466,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "modules/foundups/pfmall/README.md",
+          "modules/foundups/pfmall/INTERFACE.md",
+          "modules/foundups/pfmall/ROADMAP.md",
+          "modules/foundups/pfmall/ModLog.md",
+          "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+          "modules/foundups/README.md",
+          "NAVIGATION.py"
+        ],
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ]
+      }
+    },
+    {
+      "doc_type": "readme",
+      "hash_sha256": "e46490ece8aa5a9dd52bb850a81b51beec11507c1e1a1287193b028c83700414",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md"
+        ]
+      },
+      "module_hint": "pfmall",
+      "path": "modules/foundups/pfmall/README.md",
+      "size_bytes": 14355,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 12",
+        "WSP 49",
+        "WSP 60"
+      ]
+    },
+    {
+      "doc_type": "architecture",
+      "hash_sha256": "120c889aa9bb33f0a0398849353176c770c187c33d00f4476738518aaa9a2755",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md"
+        ]
+      },
+      "module_hint": "pfmall",
+      "path": "modules/foundups/pfmall/INTERFACE.md",
+      "size_bytes": 20457,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 104"
+      ]
+    },
+    {
+      "doc_type": "roadmap",
+      "hash_sha256": "18298da22779a34fa14f8ec14ed54da91beab558e095c97c57ceb5f082215007",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md"
+        ]
+      },
+      "module_hint": "pfmall",
+      "path": "modules/foundups/pfmall/ROADMAP.md",
+      "size_bytes": 37696,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 12",
+        "WSP 15",
+        "WSP 30",
+        "WSP 49",
+        "WSP 60",
+        "WSP 97"
+      ]
+    },
+    {
+      "doc_type": "summary",
+      "hash_sha256": "95e6fa34583aa6f2a028cc7d8c398fb19b6121bf43b41f791edf55bbdb503681",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md"
+        ]
+      },
+      "module_hint": "pfmall",
+      "path": "modules/foundups/pfmall/ModLog.md",
+      "size_bytes": 25387,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 10",
+        "WSP 12",
+        "WSP 15",
+        "WSP 22",
+        "WSP 49",
+        "WSP 50",
+        "WSP 57",
+        "WSP 60",
+        "WSP 83",
+        "WSP 84",
+        "WSP 87",
+        "WSP 97",
+        "WSP 104"
+      ]
+    }
+  ]
+}

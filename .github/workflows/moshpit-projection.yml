@@ -1,0 +1,152 @@
+name: Moshpit projection
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+permissions:
+  contents: read
+jobs:
+  projection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install bounded test runner
+        run: python -m pip --isolated install pytest==9.0.3
+      - name: Verify unmounted projection with normal package imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/moshpit-evidence"
+          timeout --signal=TERM --kill-after=5s 90s python -I -B - <<'PY' 2>&1 | tee "$RUNNER_TEMP/moshpit-evidence/run.log"
+          import hashlib, json, os, platform, subprocess, sys, tempfile
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+          R = Path.cwd().resolve()
+          D = Path(os.environ['RUNNER_TEMP']).resolve() / 'moshpit-evidence'
+          T = D / 'temp'
+          T.mkdir()
+          selected = 'modules/communication/moltbot_bridge/tests/test_moshpit_projection.py'
+          checkout = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode().strip()
+          tracked = set(subprocess.check_output(['git', 'ls-files', '-z', '--', '*.py']).decode().strip('\0').split('\0'))
+          required = [selected, '.github/workflows/moshpit-projection.yml'] + ['modules/communication/moltbot_bridge/src/' + name + '.py' for name in ('moshpit_projection', 'moshpit_render', 'openclaw_memory_queries')]
+          before = {p: hashlib.sha256((R / p).read_bytes()).hexdigest() for p in required}
+          (D / 'source-before.json').write_text(json.dumps(before, sort_keys=True), encoding='utf-8')
+          config = D / 'pytest.ini'
+          config.write_text('[pytest]\n', encoding='utf-8')
+          os.environ.clear()
+          os.environ.update(HOME=str(T), TMPDIR=str(T), TMP=str(T), TEMP=str(T),
+              PYTHONDONTWRITEBYTECODE='1', PYTHON_DOTENV_DISABLED='1', PYTEST_DISABLE_PLUGIN_AUTOLOAD='1')
+          tempfile.tempdir = str(T)
+          sys.path.insert(0, str(R))
+          # Pytest report metadata must not invoke host discovery subprocesses.
+          platform.node = lambda: 'synthetic-projection-test'
+          platform.processor = lambda: 'not-probed'
+          denied = []
+          hashing_source = False
+          def reject(event):
+              denied.append(event)
+              (D / 'denied.json').write_text(json.dumps(denied), encoding='utf-8')
+              raise RuntimeError('moshpit_guard_denied:' + event)
+          def resolved(value, fd=None):
+              if isinstance(value, int):
+                  return Path('/proc/self/fd/' + str(value)).resolve()
+              p = Path(os.fsdecode(value))
+              if not p.is_absolute() and fd not in (None, -1):
+                  p = Path('/proc/self/fd/' + str(fd)).resolve() / p
+              return p.resolve()
+          def owned(value, fd=None):
+              try:
+                  return resolved(value, fd).is_relative_to(D)
+              except (TypeError, ValueError, OSError):
+                  return False
+          def audit(event, args):
+              global hashing_source
+              if event.startswith('socket.') or event in ('subprocess.Popen', 'os.system', 'os.fork', 'os.forkpty', 'os.posix_spawn', 'os.exec', 'os.spawn', 'os.kill', 'os.killpg'):
+                  reject(event)
+              if event == 'sqlite3.connect':
+                  reject(event)
+              if event == 'import' and str(args[0]).split('.')[0] in ('openai', 'anthropic', 'requests', 'httpx', 'google', 'boto3', 'llama_cpp', 'torch', 'transformers', 'dotenv', 'psycopg', 'psycopg2'):
+                  reject('provider_account_import')
+              if event == 'open':
+                  mode, flags = args[1] or '', args[2] or 0
+                  writing = any(c in mode for c in 'wax+') or flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)
+                  if writing and not owned(args[0]):
+                      reject('write_outside_temp')
+                  if not isinstance(args[0], int):
+                      p = resolved(args[0])
+                      if not writing and p.is_relative_to(R) and p.suffix == '.py' and not hashing_source:
+                          relative = p.relative_to(R).as_posix()
+                          if relative not in tracked and relative not in required:
+                              reject('untracked_source_import')
+                          hashing_source = True
+                          try:
+                              before.setdefault(relative, hashlib.sha256(p.read_bytes()).hexdigest())
+                          finally:
+                              hashing_source = False
+                      if p.name.startswith('.env') or p.suffix in ('.pem', '.key', '.gguf', '.safetensors') or any(x in ('.ssh', '.aws', '.azure') for x in p.parts):
+                          reject('sensitive_read')
+              mutations = {'os.remove': 1, 'os.rmdir': 1, 'os.mkdir': 2, 'os.chmod': 2, 'os.chown': 3, 'os.utime': 3, 'os.truncate': None}
+              if event in mutations:
+                  i = mutations[event]
+                  if not owned(args[0], args[i] if i is not None and len(args) > i else None):
+                      reject(event)
+              if event in ('os.rename', 'os.link') and not all(owned(args[i], args[i+2] if len(args) > i+2 else None) for i in (0, 1)):
+                  reject(event)
+              if event == 'os.symlink':
+                  reject(event)
+              if event == 'os.chdir' and resolved(args[0]) != R and not owned(args[0]):
+                  reject(event)
+          sys.addaudithook(audit)
+          # Hooks precede pytest and normal application imports; no package substitution.
+          import pytest
+          class Inventory:
+              collected = []
+              def pytest_collection_finish(self, session):
+                  self.collected = sorted(item.nodeid for item in session.items)
+          inventory = Inventory()
+          code = 1
+          try:
+              code = int(pytest.main(['-q', '--tb=short', '--capture=sys', '-o', 'log_file=' + str(T / 'pytest.log'), '-c', str(config), '--rootdir=.', '--confcutdir=.',
+                  '--noconftest', '--import-mode=importlib', '-p', 'no:cacheprovider',
+                  '--basetemp=' + str(T / 'pytest'), '--junitxml=' + str(D / 'results.xml'), selected], plugins=[inventory]))
+          finally:
+              after = {p: hashlib.sha256((R / p).read_bytes()).hexdigest() for p in before}
+              modules = {}
+              for name, module in list(sys.modules.items()):
+                  value = getattr(module, '__file__', None)
+                  if value and Path(value).is_file() and Path(value).resolve().is_relative_to(R):
+                      p = Path(value).resolve()
+                      modules[name] = {'path': p.relative_to(R).as_posix(), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()}
+              result = {'checkout_commit': checkout, 'pytest_exit': code, 'denied': denied, 'collected': inventory.collected,
+                  'source_unchanged': before == after, 'imported_repository_modules': modules,
+                  'python': sys.version, 'pytest': pytest.__version__,
+                  'scope': 'Python-level guard; synthetic source; unmounted/unregistered; not an OS sandbox or native authority proof'}
+              (D / 'source-before.json').write_text(json.dumps(before, sort_keys=True), encoding='utf-8')
+              (D / 'source-after.json').write_text(json.dumps(after, sort_keys=True), encoding='utf-8')
+              (D / 'result.json').write_text(json.dumps(result, indent=2), encoding='utf-8')
+          cases = list(ET.parse(D / 'results.xml').getroot().iter('testcase'))
+          names = sorted(case.get('name') for case in cases)
+          expected = sorted(item.split('::', 1)[1] for item in inventory.collected)
+          assert code == 0 and not denied and before == after
+          assert names and names == expected and len(names) == len(set(names))
+          assert not any(case.find(tag) is not None for case in cases for tag in ('failure', 'error', 'skipped'))
+          assert hashlib.sha256('\n'.join(names).encode()).hexdigest() == 'c014f4d9dc36539bd4b1f973c04f667088c1f69c1e4674612cddcedb983eb9e1'
+          PY
+      - name: Preserve source, effect guard and test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moshpit-projection-${{ github.sha }}
+          path: ${{ runner.temp }}/moshpit-evidence/
+          if-no-files-found: error

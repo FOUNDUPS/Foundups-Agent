@@ -1,9 +1,9 @@
 # tests/README.md - Test Documentation for Recursive Improvement
 
 ## Test Strategy
-- **Current scope**: one async smoke test for the error-to-improvement proposal path, plus execution-truth regressions in `wre_core/tests/test_wre_telemetry_truth.py`.
-- **Coverage boundary**: quantum-state restoration/coherence, metrics, concurrency, and persistence failure modes are not comprehensively covered here.
-- **Authority boundary**: passing tests do not prove automatic improvement application, evaluation, promotion, activation, rollback, or production RSI.
+- **Current scope**: 8 async tests in `test_learning.py` covering error-to-proposal smoke flow, legacy unauthenticated fail-closed `blocked_unimplemented`, self-verified/rejected-gate `blocked_verification_rejected`, bounded end-to-end RSI apply + rollback with PatternMemory custody enforcement, unmeasured `None` preservation, valid receipt-backed `measurement_evidence` + `total_tokens_saved` accumulation + rollback subtraction, self-authored/regressive/boolean/negative measurement rejection (`blocked_measurement_rejected`), and `work_order_id` / state-digest mismatch rejection (both pre-applicator and post-applicator rollback), plus execution-truth regressions in `wre_core/tests/test_wre_telemetry_truth.py`.
+- **Coverage boundary**: quantum-state restoration/coherence, concurrency, and persistence failure modes are not comprehensively covered here.
+- **Authority boundary**: passing tests prove fail-closed verification and measurement enforcement on bounded reversible applicators, not unrestricted autonomous production code editing.
 
 ## How to Run
 - Install dependencies: `pip install -r ../requirements.txt` (add pytest for testing)

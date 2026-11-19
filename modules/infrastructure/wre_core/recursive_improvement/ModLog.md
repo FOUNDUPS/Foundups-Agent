@@ -10,6 +10,31 @@ Track development progress and changes for the WSP 48 Recursive Self-Improvement
 
 ## Change Log
 
+### 2026-11-16 - Fail-Closed Measured Benefit (`measurement_evidence`) & Rollback Accounting
+
+- Added `tokens_saved: Optional[int] = None` to `Improvement` in `src/core.py` with full JSON round-trip persistence.
+- Extended `RecursiveLearningEngine.apply_improvement(..., measurement_evidence=None)` in `src/learning.py`:
+  - Preserves unmeasured `improvement.tokens_saved = None` and `improvement.metrics["token_reduction_measured"] = False` when `measurement_evidence` is omitted.
+  - Validates `measurement_evidence` fail-closed **before** calling `target_applicator` (requiring non-empty `measurement_receipt_id`, non-self-authored `evaluator_id != worker_id`, exact `work_order_id` match, non-negative non-bool integer `baseline_tokens` and `candidate_tokens` with `candidate_tokens <= baseline_tokens`, and optional `before_state_digest` / `after_state_digest` matching).
+  - Verifies post-applicator `after_digest` against `after_state_digest` when supplied, invoking `rollback_fn()` and returning `False` with `application_status="blocked_measurement_rejected"` on divergence.
+  - Records verified `tokens_saved`, `measurement_receipt_id`, `evaluator_id`, `baseline_tokens`, `candidate_tokens`, optional latency deltas, and increments `self.metrics["total_tokens_saved"]`.
+- Extended `RecursiveLearningEngine.rollback_improvement()` to subtract measured `improvement.tokens_saved` from `self.metrics["total_tokens_saved"]` (clamped `>= 0`), store `rolled_back_tokens_saved`, and reset `tokens_saved = None` and `token_reduction_measured = False`.
+- Added 4 positive and fail-closed negative `measurement_evidence` tests in `tests/test_learning.py` (8 total tests passing) and reconciled `INTERFACE.md`, `README.md`, `ROADMAP.md`, and `tests/README.md`. (WSP 22/48/49/50/97)
+
+### 2026-11-15 - Verification-Gated Improvement Application & Rollback
+
+- Initialized `self._rollback_handlers` in `RecursiveLearningEngine.__init__` and added
+  `_get_rollback_handlers()` for `__new__`-constructed instances.
+- Extended `apply_improvement()` to preserve fail-closed `blocked_unimplemented`
+  semantics on legacy unauthenticated calls while verifying independent verifier,
+  ratchet, and held-out regression gate receipts plus reversible `target_applicator`
+  execution (`applied_verified` on pass, `blocked_verification_rejected` on reject)
+  without fabricating token-reduction metrics.
+- Added `rollback_improvement()` to execute registered rollback handlers, verify
+  restored state SHA-256 against `before_state`, update persistence/metrics, and
+  pop consumed handlers.
+- Added bounded RSI cycle, fail-closed, and rollback tests in `tests/test_learning.py`.
+
 ### 2026-08-26 - Shutdown and Background-Persistence Hardening
 
 - Replaced the nonexistent `save_quantum_state()` shutdown call with a bounded

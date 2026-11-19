@@ -3,6 +3,98 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Fractal projection sequence — 2026-11-19
+
+**Specified; no implementation in this documentation slice.** Follow the
+[Mall roadmap](../../modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation):
+census first, with up to three eligible independent auditor packets in parallel
+(discovery, dependency, duplicate review or integration). Immature and unwired
+candidates remain discoverable with explicit evidence gaps. Keep functionality,
+integration, venture maturity and WSP_15 work priority separate.
+
+Sprint 2 reuses the reported local graph/projector/viewer once its pinned
+artifacts are recovered, for a Tools → Benchmark walkthrough and a separately
+evidenced builder-to-component path. One component
+ID can appear under several views. Retain graph and source revisions, caller,
+lens and selection; qualify Back, direct entry, stale/restricted evidence and
+public/architect boundaries under the [navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation).
+Record rendering, observed tool execution and live playback separately. When a
+render needs an unapproved code change, retain the query/path and mark visual
+acceptance pending.
+
+Historical lifecycle and economic reconciliation remain separate owners in
+Sprint 3; evidence closure follows in Sprint 4. This documentation update
+reconciles the existing owners now. The [documentation audit](../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+records inspected main, reported local `121c50666` evidence and unresolved gaps.
+This plan creates no new graph engine, model route or co-build write authority.
+
+## Build v19 Mall Truth & Continuity — 2026-11-16
+
+- Reconciled `mall-video-catalog.json` (16 entries) with `foundup_registry.json` and `foundup_manifest.json` contracts: added `esingularity_001`, aligned `holoindex_prod_01` (`F3_INFRA` / `conditional` / `infrastructure`), `gotjunk_001` (`012` creator + `external_url`), and `autopost` (`external_url`), and normalized video `duration_seconds` and `YYYY-MM-DDTHH:MM:SSZ` timestamps.
+- Unified `internal_app` (`Open App`) CTA parity across `index.html`, `foundup.html`, and `mall-planes.js`.
+- Closed Phase 3 continuity gaps under `Build v19` / `pfmall-member-v19`: ordinary `/member/` `hpc` tile navigation to `/member/?foundup=hpc`, desktop inline `queueQuery` inheritance in `openDesktopVideo`, and reload-safe `activeVideo` (`{ foundupId, videoId, queueQuery }`) persistence in `pfmall_mall_state_v1` without altering HPC's tab-local `sessionStorage` boundary.
+
+## FX1 Public Directory — 2026-10-25
+
+- Implemented locally: homepage FX link to the existing `/f/` public directory,
+  honest project/ticker framing and declared-symbol search using the existing
+  filter. Existing routes and member admission remain the owners.
+- Verified with existing route/gateway test files; see
+  [tests/TestModLog.md](tests/TestModLog.md). Deployment, actual browser layout,
+  repository claims and chain/market readiness remain separate gates.
+
+## Move2Japan Product Integration (2026-10-18)
+
+The registered Move2Japan entry now targets the actual member page with houses
+selected. The shared field owns geographic navigation and detail planes; Red Dog,
+identity, account return, view persistence and the service worker retain their
+existing Mall owners. New responsive category browsing from the parallel Mall
+change remains the ordinary Mall default. House controls cannot mutate its video
+scope or overwrite its saved position.
+
+| Stage | Acceptance gate | Current implementation |
+| --- | --- | --- |
+| POC | People can search sourced houses | Eight dated Fukui observations, five area rows, combined location/land/price filters in the actual Mall |
+| Prototype | Brokers/owners publish through the shared account system | Pending: authority verification, listing lifecycle, consent/media rights, review and a durable provider |
+| MVP | Actual paying customers receive the promised benefit | Pending: shared server-side entitlement checks, settled payment evidence, delivery, expiry/refund handling |
+
+Account admission is not a housing subscription or publishing permission. No paid
+inventory, subscription issuer or token issuance is introduced. The module's
+[roadmap](../../modules/foundups/move2japan/ROADMAP.md) owns publisher and membership
+work. Repository merge, private review publication, production Firebase deployment
+and primary-domain cutover require separate receipts; see the
+[rebaseline](../../modules/foundups/move2japan/docs/08_HOUSING_DISCOVERY_REBASELINE.md).
+
+## Current Runtime and Creator Studio Direction (updated 2026-10-18)
+
+The current implementation has Clerk admission, a video Mall, creator/category
+filtering, queue playback and bounded presentation controls. Source contracts are
+[README.md](README.md) and [INTERFACE.md](INTERFACE.md). The original dashboard,
+wallet and marketplace plan below is historical; its Firebase-auth checkbox and
+layer labels do not describe the complete current runtime.
+
+The proposed creator-facing Live mode belongs to external
+[AutoPost](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md#phase-4b--autopost-live-mode-planned).
+The [p.fMALL roadmap](../../modules/foundups/pfmall/ROADMAP.md) owns shared
+integration and presentation planning. Consume its
+[build contract](../../modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+[API constraints](../../modules/foundups/docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+and [machine outcome](../../modules/foundups/docs/mobile_studio/mobile_studio_outcome.v1.json)
+before any implementation. This member browser remains a discovery/playback
+surface. AutoPost already implements browser capture and recorded-file YouTube
+upload; its continuous Live transport, durable creator service and shared live
+projection are specified or planned, not implemented by this update. The first
+AutoPost media proof is foreground WebRTC/relay, with native adoption based on
+device evidence. Existing
+presentation messages and player-open events confer no publishing authority or
+proof of live playback.
+
+- **Build v18 (2026-11-15)**: Progressive `#mallProjection` discovery pills (`Videos`, `Apps`, `HPC` via JS without modifying `index.html`), `internal_app` quick-view CTA (`GotJunk`), `localStorage` `source_group` persistence, desktop inline `queueQuery` + `ended` auto-advance, and Red Dog concierge category filtering.
+
+## Historical Layer Plan
+
+Retained for lineage. Use the current contracts above for implementation truth.
+
 ## Layer Progression
 
 ```

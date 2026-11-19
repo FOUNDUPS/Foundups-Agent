@@ -69,6 +69,8 @@ FILES = (
     "modules/communication/moltbot_bridge/tests/"
     "test_reddog_signer_system_service_entrypoint.py",
     "modules/communication/moltbot_bridge/tests/"
+    "test_reddog_signer_system_service_startup_authority.py",
+    "modules/communication/moltbot_bridge/tests/"
     "test_reddog_signer_peer_instance_packet_validator_generation.py",
     "modules/communication/moltbot_bridge/tests/"
     "reddog_signer_generation_anchor_test_support.py",

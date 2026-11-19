@@ -6,6 +6,7 @@ import json
 import pickle
 from pathlib import Path
 import subprocess
+from types import SimpleNamespace
 
 import pytest
 
@@ -31,6 +32,7 @@ from modules.infrastructure.wre_core.src.wre_test_differential_verification impo
 from modules.infrastructure.wre_core.src.wre_test_differential_capability import (
     ProducedTestDifferentialCapability,
 )
+from modules.infrastructure.wre_core.src import wre_independent_test_evidence_runtime as checks_runtime
 
 
 DIGEST = "sha256:" + "a" * 64
@@ -315,3 +317,162 @@ def test_candidate_process_does_not_receive_unrelated_environment(
         expected_changed_paths=["tests/test_environment.py"],
     )
     assert produce_independent_slice_evidence(request).accepted is True
+
+
+class _RecordingCheckRunner:
+    """Preflight observation only: no command or model is executed."""
+
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, ...]] = []
+
+    def run(self, argv, **kwargs):
+        self.calls.append(tuple(argv))
+        return SimpleNamespace(
+            returncode=0, timed_out=False, stdout="", stderr="", duration_ms=0,
+            stdout_truncated=False, stderr_truncated=False,
+        )
+
+
+def _observe_check_execution(request: dict, tmp_path: Path, monkeypatch):
+    runner = _RecordingCheckRunner()
+    differential_calls: list[dict] = []
+
+    def fake_differential(req, **kwargs):
+        differential_calls.append(dict(req))
+        return SimpleNamespace(evidence={}, verification_capability=None, rejection_reasons=())
+
+    monkeypatch.setattr(checks_runtime, "produce_test_differential_evidence", fake_differential)
+    result = checks_runtime.execute_independent_test_evidence(
+        request, runner=runner, operation_cwd=tmp_path,
+        worktree_path=tmp_path, repo_root=tmp_path.parent,
+        head_sha=request["head_sha"],
+    )
+    return result, runner.calls, differential_calls
+
+
+@pytest.mark.parametrize("policy_owner", ["request", "bound_work_order"])
+@pytest.mark.parametrize("policy", [None, False, True, [], ["malformed"], "malformed", 7])
+def test_malformed_policy_rejects_before_check_execution(
+    tmp_path: Path, monkeypatch, policy_owner: str, policy: object,
+) -> None:
+    request = _request(tmp_path, "b" * 40, "a" * 40)
+    request["test_impact_policy"] = {}
+    request["bound_work_order"]["slice_verifier_plan"]["test_impact_policy"] = {}
+    if policy_owner == "request":
+        request["test_impact_policy"] = policy
+    else:
+        request["bound_work_order"]["slice_verifier_plan"]["test_impact_policy"] = policy
+    result, ordinary, differential = _observe_check_execution(request, tmp_path, monkeypatch)
+    assert result.rejection_reasons
+    assert ordinary == differential == []
+
+
+@pytest.mark.parametrize("request_policy", ["absent", "empty", "mismatch"])
+def test_bound_policy_cannot_be_dropped_or_substituted_before_execution(
+    tmp_path: Path, monkeypatch, request_policy: str,
+) -> None:
+    request = _request(tmp_path, "b" * 40, "a" * 40)
+    if request_policy == "absent":
+        request.pop("test_impact_policy")
+    elif request_policy == "empty":
+        request["test_impact_policy"] = {}
+    else:
+        request["test_impact_policy"] = _policy(impact_class="MODULAR")
+    result, ordinary, differential = _observe_check_execution(request, tmp_path, monkeypatch)
+    assert result.rejection_reasons
+    assert ordinary == differential == []
+
+
+@pytest.mark.parametrize("failure", ["late-invalid", "duplicate", "missing", "selection"])
+def test_entire_check_plan_preflight_precedes_every_command(
+    tmp_path: Path, monkeypatch, failure: str,
+) -> None:
+    request = _request(tmp_path, "b" * 40, "a" * 40)
+    pytest_check = request["required_checks"][0]
+    request["required_checks"] = [{"name": "lint", "argv": ["ruff", "check", "."]}, pytest_check]
+    if failure == "late-invalid":
+        request["required_checks"].append({"name": "invalid", "argv": ["shell", "anything"]})
+    elif failure == "duplicate":
+        request["required_checks"].append(deepcopy(pytest_check))
+    elif failure == "missing":
+        request["required_checks"].pop()
+    else:
+        pytest_check["argv"] = ["python", "-m", "pytest", "tests/other.py", "-q"]
+    result, ordinary, differential = _observe_check_execution(request, tmp_path, monkeypatch)
+    assert result.rejection_reasons
+    assert ordinary == differential == []
+
+
+@pytest.mark.parametrize("empty_policy", [False, True], ids=["absent", "adapter-empty"])
+def test_preflight_preserves_ordinary_check_execution_without_differential_policy(
+    tmp_path: Path, monkeypatch, empty_policy: bool,
+) -> None:
+    request = _request(tmp_path, "b" * 40, "a" * 40, test_impact_policy={})
+    if not empty_policy:
+        request.pop("test_impact_policy")
+        request["bound_work_order"]["slice_verifier_plan"].pop("test_impact_policy")
+    result, ordinary, differential = _observe_check_execution(request, tmp_path, monkeypatch)
+    assert result.rejection_reasons == ()
+    assert len(ordinary) == 1
+    assert differential == []
+
+
+@pytest.mark.parametrize("signal", [
+    "dependency_evidence_stale", "protected_authority_surface",
+    "release_candidate", "periodic_health_audit",
+])
+@pytest.mark.parametrize("full_scope", [False, True], ids=["narrow-reject", "full-control"])
+def test_force_full_signals_are_applied_before_check_execution(
+    tmp_path: Path, monkeypatch, signal: str, full_scope: bool,
+) -> None:
+    path = "modules/communication/moltbot_bridge/tests/test_leaf.py"
+    selection = [".", "-q"] if full_scope else [path, "-q"]
+    request = _request(
+        tmp_path, "b" * 40, "a" * 40, expected_changed_paths=[path],
+        test_impact_policy=_policy(
+            impact_class="SYSTEMIC" if full_scope else "ISOLATED",
+            selection_args=selection, **{signal: True},
+        ),
+        required_checks=[
+            {"name": "lint", "argv": ["ruff", "check", "."]},
+            {"name": "pytest", "argv": ["python", "-m", "pytest", *selection]},
+        ],
+    )
+    result, ordinary, differential = _observe_check_execution(request, tmp_path, monkeypatch)
+    if full_scope:
+        assert result.rejection_reasons == ()
+        assert len(ordinary) == len(differential) == 1
+    else:
+        assert result.rejection_reasons
+        assert ordinary == differential == []
+
+
+@pytest.mark.parametrize("updates", [
+    {"schema_version": "wrong"}, {"timeout_s": True}, {"impact_class": []},
+    {"selection_args": None}, {"protected_authority_surface": 0},
+])
+def test_malformed_policy_fields_fail_before_ordinary_checks(
+    tmp_path: Path, monkeypatch, updates: dict,
+) -> None:
+    request = _request(tmp_path, "b" * 40, "a" * 40, test_impact_policy=_policy(**updates))
+    request["required_checks"].insert(0, {"name": "lint", "argv": ["ruff", "check", "."]})
+    result, ordinary, differential = _observe_check_execution(request, tmp_path, monkeypatch)
+    assert result.rejection_reasons
+    assert ordinary == differential == []
+
+
+def test_narrowed_systemic_selection_fails_before_ordinary_checks(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    path = "modules/communication/moltbot_bridge/tests/test_leaf.py"
+    request = _request(
+        tmp_path, "b" * 40, "a" * 40, expected_changed_paths=[path],
+        test_impact_policy=_policy(selection_args=[path, "-q"]),
+        required_checks=[
+            {"name": "lint", "argv": ["ruff", "check", "."]},
+            {"name": "pytest", "argv": ["python", "-m", "pytest", path, "-q"]},
+        ],
+    )
+    result, ordinary, differential = _observe_check_execution(request, tmp_path, monkeypatch)
+    assert result.rejection_reasons
+    assert ordinary == differential == []

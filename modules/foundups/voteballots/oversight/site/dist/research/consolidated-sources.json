@@ -1,0 +1,1140 @@
+[
+  {
+    "title": "H. Res. 5, 119th Congress, engrossed",
+    "url": "https://www.govinfo.gov/content/pkg/BILLS-119hres5eh/html/BILLS-119hres5eh.htm",
+    "pinpoint": "\u00a7\u00a73(i),3(s),3(t),3(v)",
+    "proposition": "Current separate orders for remote witnesses, Seven-Member requests, deposition authority and specified continuing subpoena litigation.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "H. Res. 5, 118th Congress, engrossed",
+    "url": "https://www.govinfo.gov/content/pkg/BILLS-118hres5eh/html/BILLS-118hres5eh.htm",
+    "pinpoint": "\u00a7\u00a73(i),3(j),3(k)",
+    "proposition": "Prior separate orders include chair-signature restriction, remote-witness limitation and counsel deposition authority.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "House Rules and Manual, 119th Congress, Rule X",
+    "url": "https://www.govinfo.gov/content/pkg/HMAN-119/html/HMAN-119-pg463.htm",
+    "pinpoint": "Rule X clauses1\u20134; \u00a7749a",
+    "proposition": "Committee jurisdiction and history of removal of Member-attendance requirement.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "119th Regulations for the Use of Deposition Authority",
+    "url": "https://rules.house.gov/sites/evo-subsites/rules.house.gov/files/documents/119th-staff-deposition-authority-regulations-final.pdf",
+    "pinpoint": "Regulations1\u201311",
+    "proposition": "Three-day consultation and notice, joint investigations, counsel questioning, privilege appeals, certification and release procedures.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "House Administration Committee Rules,119th Congress",
+    "url": "https://cha.house.gov/committee-rules-119",
+    "pinpoint": "Rule5",
+    "proposition": "Detailed current remote-witness restrictions and implementing approvals.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Internal Revenue Code confidentiality statute",
+    "url": "https://uscode.house.gov/us/usc/119-118/t26/s6103/",
+    "pinpoint": "26U.S.C.\u00a76103(a),(d),(f),(p)",
+    "proposition": "Tax confidentiality, tax-committee and specially authorized other-committee requests, examiner limits and state tax route.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Unauthorized tax disclosure statute",
+    "url": "https://uscode.house.gov/us/usc/t26/s7213/",
+    "pinpoint": "26U.S.C.\u00a77213",
+    "proposition": "Criminal consequences vary by actor and conduct.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Unauthorized tax inspection statute",
+    "url": "https://uscode.house.gov/us/usc/119-118/t26/s7213A/",
+    "pinpoint": "26U.S.C.\u00a77213A",
+    "proposition": "Unauthorized inspection restrictions and penalties.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Civil tax disclosure and inspection remedy",
+    "url": "https://uscode.house.gov/us/usc/119-118/t26/s7431/",
+    "pinpoint": "26U.S.C.\u00a77431",
+    "proposition": "Civil remedies for qualifying unauthorized inspection or disclosure.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Bank Secrecy Act reporting statute",
+    "url": "https://uscode.house.gov/us/usc/119-120/t31/s5318/",
+    "pinpoint": "31U.S.C.\u00a75318(g)",
+    "proposition": "Suspicious transaction reporting, confidentiality and official-duty limits.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Bank Secrecy Act report availability",
+    "url": "https://uscode.house.gov/us/usc/119-120/t31/s5319/",
+    "pinpoint": "31U.S.C.\u00a75319",
+    "proposition": "Agency availability for consistent purposes and open-records exemption.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Official CFR part1010",
+    "url": "https://www.govinfo.gov/content/pkg/CFR-2024-title31-vol3/pdf/CFR-2024-title31-vol3-part1010.pdf",
+    "pinpoint": "31C.F.R.\u00a71010.950(c);\u00a71010.955",
+    "proposition": "Express congressional written-request route; separate BOI access rule. Historical CFR should be rechecked live before execution.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Treasury Order180-02",
+    "url": "https://home.treasury.gov/about/general-information/orders-and-directives/treasury-order-180-02",
+    "pinpoint": "January17,2025; paragraphs3(c)\u2013(e)",
+    "proposition": "Legislative SAR request policy includes legal review, Treasury GC approval, accommodation and restricted review safeguards.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Federal Reserve reproduction of SAR regulation",
+    "url": "https://www.federalreserve.gov/frrs/regulations/section-1020320-reports-by-banks-of-suspicious-transactions.htm",
+    "pinpoint": "31C.F.R.\u00a71020.320(e)",
+    "proposition": "SAR confidentiality applies to covered government recipients; underlying facts are distinct from report existence.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Seven-Member Rule",
+    "url": "https://uscode.house.gov/us/usc/119-121/t5/s2954/",
+    "pinpoint": "5U.S.C.\u00a72954",
+    "proposition": "Executive-agency information requests by specified committees,seven House committee members or five Senate committee members.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Carnahan v.Maloney Supreme Court docket",
+    "url": "https://www.supremecourt.gov/docket/docketfiles/html/public/22-425.html",
+    "pinpoint": "No.22-425; June26,2023",
+    "proposition": "Supreme Court vacated judgment and remanded with instructions to dismiss; no merits decision establishing enforcement standing.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "House Rules and Manual,119th complete rules",
+    "url": "https://www.govinfo.gov/content/pkg/HMAN-119/html/HMAN-119-houserules.htm",
+    "pinpoint": "RuleII clause8; RuleXI clause2(m)",
+    "proposition": "OGC direction,BLAG,continuing litigation and committee subpoena powers.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Senate civil subpoena enforcement jurisdiction",
+    "url": "https://uscode.house.gov/view.xhtml?edition=prelim&num=0&req=granuleid%3AUSC-prelim-title28-section1365",
+    "pinpoint": "28U.S.C.\u00a71365(a),(b)",
+    "proposition": "Senate statutory jurisdiction,official-capacity exception and continuity certification.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Senate Legal Counsel authorization",
+    "url": "https://uscode.house.gov/view.xhtml?edition=prelim&num=0&req=granuleid%3AUSC-prelim-title2-section288b",
+    "pinpoint": "2U.S.C.\u00a7288b(b)",
+    "proposition": "Senate resolution required for Legal Counsel civil subpoena enforcement.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Senate Legal Counsel enforcement",
+    "url": "https://uscode.house.gov/us/usc/119-118/t2/s288d/",
+    "pinpoint": "2U.S.C.\u00a7288d",
+    "proposition": "Directed civil enforcement and committee authorization mechanics.",
+    "accessed": "2026-11-05",
+    "domain_register": "alpha-sources.json"
+  },
+  {
+    "title": "Final Report of the Select Committee to Investigate the January 6th Attack on the United States Capitol",
+    "url": "https://www.govinfo.gov/content/pkg/GPO-J6-REPORT/html-submitted/index.html",
+    "pinpoint": "Committee staff listing; report issued December 22, 2022",
+    "proposition": "David B. Buckley was Staff Director, Timothy J. Heaphy Chief Investigative Counsel, and Denver Riggleman Senior Technical Advisor.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "H. Res. 503, 117th Congress, as adopted June 30, 2021",
+    "url": "https://www.congress.gov/117/bills/hres503/BILLS-117hres503eh.pdf",
+    "pinpoint": "Sections 3-7, particularly 4(d), 5(c)(4)-(8), 6 and 7",
+    "proposition": "The select committee had specific legislative-investigative purposes, subpoena and deposition powers, extended questioning authority, records/staffing arrangements and termination provisions, but could not mark up legislation.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "Inside the January 6 Investigation, interview with Timothy Heaphy",
+    "url": "https://cafe.com/stay-tuned/inside-the-january-6-investigation-with-tim-heaphy/",
+    "pinpoint": "January 19, 2023 transcript; five investigative teams discussion and discussion of DOJ requests for congressional witness interview records",
+    "proposition": "Firsthand account of color-coded teams and the sequencing/investigation-integrity concerns surrounding transcript disclosure. Attributed personal account rather than official organizational instrument.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "Committee on House Administration, Committee Rules, 119th Congress",
+    "url": "https://cha.house.gov/committee-rules-119",
+    "pinpoint": "Deposition authority procedures, paragraphs 1-10 and incorporation-by-reference provision",
+    "proposition": "Reproduces deposition notice/consultation, joint-investigation attendance, questioning, privilege, transcript correction, certification and release procedures; controlling regulations must be checked.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "House Committee on Rules, 119th Congress Regulations",
+    "url": "https://rules.house.gov/resources/119th-congress-regulations",
+    "pinpoint": "Staff Deposition Authority Regulations and Remote Witness Participation Regulations links",
+    "proposition": "Official directory for the 119th Congress deposition and remote-witness regulations.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "U.S. Constitution, Twentieth Amendment",
+    "url": "https://constitution.congress.gov/constitution/amendment-20/",
+    "pinpoint": "Sections 1-2",
+    "proposition": "Congressional terms start at noon January 3 and Congress assembles January 3 unless a different day is appointed by law; these do not guarantee completed House organization by January 6.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "U.S. House, Positions with Members and Committees",
+    "url": "https://www.house.gov/employment/positions-with-members-and-committees",
+    "pinpoint": "Individual employing offices, background screening and HVAPS sections",
+    "proposition": "Members and committees are employing offices; recruitment services do not themselves possess hiring authority.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "Committees' Congressional Handbook",
+    "url": "https://cha.house.gov/committees-congressional-handbook",
+    "pinpoint": "Committee Staff; Employees; Consultants",
+    "proposition": "Committee chairs exercise employment authority within applicable rules, employee ceilings apply, and consultant arrangements require prescribed approval and conditions.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "18 U.S.C. \u00a7 207",
+    "url": "https://uscode.house.gov/us/usc/119-118/t18/s207/",
+    "pinpoint": "Subsections (a) and other provisions as applicable to individual candidate facts",
+    "proposition": "Former-government personnel may face particular-matter and representation restrictions; hiring and assignment require individualized review.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "title": "Congressional Research Service, Protection of Classified Information by Congress: Current Practices, RS20748, May 29, 2026; primary CRS report mirrored by EveryCRSReport",
+    "url": "https://www.everycrsreport.com/files/2026-05-29_RS20748_b687c54519671d52a8b675a72c8dcaba125e5d6c.pdf",
+    "pinpoint": "Printed pages 3-5; Security Clearances for Staff; House Committee Staff. Canonical official product: https://www.congress.gov/crs-product/RS20748",
+    "proposition": "Congress has formal safeguarding and staff clearance processes; clearance and access are not automatic consequences of prior executive-branch service. Full report date and text verified; mirror hosts the primary CRS document.",
+    "accessed": "2026-11-05",
+    "domain_register": "beta-sources.json"
+  },
+  {
+    "id": "D01",
+    "title": "Frequently Asked Questions",
+    "url": "https://www.justice.gov/pardon/frequently-asked-questions",
+    "pinpoint": " state convictions and D.C. clemency scope; U.S. Constitution, Article II, \u00a7 2, cl. 1",
+    "proposition": " state convictions and D.C. clemency scope; U.S. Constitution, Article II, \u00a7 2, cl. 1",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D02",
+    "title": "*Gamble v. United States*, 587 U.S. 678 (2019)",
+    "url": "https://www.supremecourt.gov/opinions/18pdf/17-646_d18e.pdf",
+    "pinpoint": " majority Parts II\u2013IV",
+    "proposition": " majority Parts II\u2013IV",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D03",
+    "title": "N.Y. Criminal Procedure Law \u00a7 40.51",
+    "url": "https://www.nysenate.gov/legislation/laws/CPL/40.51",
+    "pinpoint": " presidential-clemency exception",
+    "proposition": " presidential-clemency exception",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D04",
+    "title": "N.Y. General Business Law \u00a7 352-c",
+    "url": "https://www.nysenate.gov/legislation/laws/GBS/352-C",
+    "pinpoint": " especially subdivisions 1, 4, 5 and 6",
+    "proposition": " especially subdivisions 1, 4, 5 and 6",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D05",
+    "title": "N.Y. Executive Law \u00a7 63",
+    "url": "https://www.nysenate.gov/legislation/laws/EXC/63",
+    "pinpoint": " subdivisions 2, 3 and 12",
+    "proposition": " subdivisions 2, 3 and 12",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D06",
+    "title": "*People v. Greenberg*, 95 A.D.3d 474 (1st Department 2012)",
+    "url": "https://www.nycourts.gov/REPORTER/3dseries/2012/2012_03546.htm",
+    "pinpoint": " civil scienter/reliance analysis",
+    "proposition": " civil scienter/reliance analysis",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D07",
+    "title": "N.Y. Penal Law \u00a7 460.20",
+    "url": "https://www.nysenate.gov/legislation/laws/PEN/460.20",
+    "pinpoint": " enterprise corruption and participation",
+    "proposition": " enterprise corruption and participation",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D08",
+    "title": "N.Y. Criminal Procedure Law \u00a7 20.20",
+    "url": "https://www.nysenate.gov/legislation/laws/CPL/20.20",
+    "pinpoint": " state territorial jurisdiction",
+    "proposition": " state territorial jurisdiction",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D09",
+    "title": "N.Y. Criminal Procedure Law \u00a7 20.40",
+    "url": "https://www.nysenate.gov/legislation/laws/CPL/20.40",
+    "pinpoint": " county geographical jurisdiction",
+    "proposition": " county geographical jurisdiction",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D10",
+    "title": "8 Del. C. \u00a7 284",
+    "url": "https://delcode.delaware.gov/title8/c001/sc10/index.html#284",
+    "pinpoint": " corporate charter forfeiture",
+    "proposition": " corporate charter forfeiture",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D11",
+    "title": "6 Del. C. \u00a7 18-112",
+    "url": "https://www.delcode.delaware.gov/title6/c018/sc01/",
+    "pinpoint": " domestic LLC judicial cancellation",
+    "proposition": " domestic LLC judicial cancellation",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D12",
+    "title": "Civil Fraud Laws",
+    "url": "https://www.oag.ca.gov/dmfea/laws/civil_fraud",
+    "pinpoint": " Business and Professions Code \u00a7 17200 et seq",
+    "proposition": " Business and Professions Code \u00a7 17200 et seq",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D13",
+    "title": "Investment and Financial Services Laws",
+    "url": "https://dfpi.ca.gov/rules-enforcement/laws-and-regulations/investment-and-financial-services-laws-administered-by-the-dfpi/",
+    "pinpoint": " Corporations Code \u00a7 25401",
+    "proposition": " Corporations Code \u00a7 25401",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D14",
+    "title": "Digital Financial Assets",
+    "url": "https://dfpi.ca.gov/regulated-industries/digital-financial-assets/",
+    "pinpoint": " July 1, 2026 licensing/application trigger",
+    "proposition": " July 1, 2026 licensing/application trigger",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D15",
+    "title": "Florida Statutes \u00a7 817.234 (2026)",
+    "url": "https://www.flsenate.gov/Laws/Statutes/2026/817.234",
+    "pinpoint": " insurance fraud",
+    "proposition": " insurance fraud",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D16",
+    "title": "Florida Statutes \u00a7 212.085 (2026)",
+    "url": "https://www.flsenate.gov/Laws/Statutes/2026/212.085",
+    "pinpoint": " fraudulent sales-tax exemption",
+    "proposition": " fraudulent sales-tax exemption",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D17",
+    "title": "Fraud Laws",
+    "url": "https://www.njoag.gov/about/divisions-and-offices/office-of-the-insurance-fraud-prosecutor-home/fraud-laws/",
+    "pinpoint": "New Jersey OAG, [Fraud Laws](https://www.njoag.gov/about/divisions-and-offices/office-of-the-insurance-fraud-prosecutor-home/fraud-laws/); N.J.S.A. 2C:21-4.6",
+    "proposition": "New Jersey OAG, [Fraud Laws](https://www.njoag.gov/about/divisions-and-offices/office-of-the-insurance-fraud-prosecutor-home/fraud-laws/); N.J.S.A. 2C:21-4.6",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D18",
+    "title": "N.J.S.A. 2C:21-10",
+    "url": "https://lis.njleg.state.nj.us/nxt/gateway.dll/statutes/1/2785/3029?f=templates%24fn%3Ddocument-frameset.htm%24q%3D%5Brank%2C100%3A%5Bdomain%3A%5Band%3A2C%3A21-10.+Commercial+bribery+breach+of+duty+to+act+disinterestedly%5D%5D+%5Bsum%3A2C%3A21-10.+Commercial+bribery+and+breach+of+duty+to+act+disinterestedly%5D+%5D+%24x%3Dserver%243.0",
+    "pinpoint": " commercial bribery",
+    "proposition": " commercial bribery",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D19",
+    "title": "Virginia Code \u00a7 18.2-178",
+    "url": "https://law.lis.virginia.gov/vacode/title18.2/chapter6/section18.2-178/",
+    "pinpoint": " false pretenses",
+    "proposition": " false pretenses",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D20",
+    "title": "Virginia Code \u00a7 58.1-3907",
+    "url": "https://law.lis.virginia.gov/vacode/title58.1/chapter39/section58.1-3907/",
+    "pinpoint": " specified local taxes and transaction-record falsification",
+    "proposition": " specified local taxes and transaction-record falsification",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D21",
+    "title": "D.C. Code \u00a7 28-3909",
+    "url": "https://code.dccouncil.gov/us/dc/council/code/sections/28-3909",
+    "pinpoint": " consumer civil enforcement, with applicability notes",
+    "proposition": " consumer civil enforcement, with applicability notes",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D22",
+    "title": "D.C. Code \u00a7 22-3221",
+    "url": "https://code.dccouncil.gov/us/dc/council/code/sections/22-3221",
+    "pinpoint": " fraud",
+    "proposition": " fraud",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D23",
+    "title": "NRS Chapter 205",
+    "url": "https://www.leg.state.nv.us/nrs/NRS-205.html#NRS205Sec377",
+    "pinpoint": " \u00a7 205.377",
+    "proposition": " \u00a7 205.377",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D24",
+    "title": "NRS Chapter 686A",
+    "url": "https://www.leg.state.nv.us/NRS/NRS-686A.html#NRS686ASec2815",
+    "pinpoint": " insurance fraud definitions and operative provisions",
+    "proposition": " insurance fraud definitions and operative provisions",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D25",
+    "title": "NRS Chapter 598",
+    "url": "https://www.leg.state.nv.us/Division/Legal/LawLibrary/NRS/NRS-598.html",
+    "pinpoint": " applicable deceptive trade practices",
+    "proposition": " applicable deceptive trade practices",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D26",
+    "title": "815 ILCS 505/2 and /7",
+    "url": "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=2356&ChapterID=65",
+    "pinpoint": " consumer fraud public enforcement",
+    "proposition": " consumer fraud public enforcement",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D27",
+    "title": "*Trump v. Vance*, 591 U.S. 786 (2020)",
+    "url": "https://www.supremecourt.gov/opinions/19pdf/19-635_o7jq.pdf",
+    "pinpoint": " subpoena-specific constitutional review",
+    "proposition": " subpoena-specific constitutional review",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D28",
+    "title": "*Trump v. United States*, 603 U.S. 593 (2024)",
+    "url": "https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf",
+    "pinpoint": " official/unofficial act immunity",
+    "proposition": " official/unofficial act immunity",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D29",
+    "title": "12 U.S.C. \u00a7 25b",
+    "url": "https://uscode.house.gov/us/usc/119-118/t12/s25b/",
+    "pinpoint": " subsections (b) and (i), preemption and visitorial powers",
+    "proposition": " subsections (b) and (i), preemption and visitorial powers",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D30",
+    "title": "*Eastland v. United States Servicemen's Fund*, 421 U.S. 491 (1975)",
+    "url": "https://www.govinfo.gov/content/pkg/USREPORTS-421/pdf/USREPORTS-421-491.pdf",
+    "pinpoint": " 501\u2013511",
+    "proposition": " 501\u2013511",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D31",
+    "title": "Federal Rules of Criminal Procedure",
+    "url": "https://www.uscourts.gov/sites/default/files/2025-02/federal-rules-of-criminal-procedure-dec-1-2024.pdf",
+    "pinpoint": " Rule 6(e), particularly (e)(3)(E)(iv)",
+    "proposition": " Rule 6(e), particularly (e)(3)(E)(iv)",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D32",
+    "title": "18 U.S.C. \u00a7 6002",
+    "url": "https://uscode.house.gov/us/usc/119-120/t18/s6002/",
+    "pinpoint": " use and derivative-use immunity",
+    "proposition": " use and derivative-use immunity",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D33",
+    "title": "18 U.S.C. \u00a7 6005",
+    "url": "https://uscode.house.gov/us/usc/119-120/t18/s6005/",
+    "pinpoint": " congressional immunity orders",
+    "proposition": " congressional immunity orders",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D34",
+    "title": "*Kastigar v. United States*, 406 U.S. 441 (1972)",
+    "url": "https://www.govinfo.gov/content/pkg/USREPORTS-406/pdf/USREPORTS-406-441.pdf",
+    "pinpoint": " 460\u2013462",
+    "proposition": " 460\u2013462",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D35",
+    "title": "N.Y. Criminal Procedure Law \u00a7 190.40",
+    "url": "https://www.nysenate.gov/legislation/laws/CPL/190.40",
+    "pinpoint": " grand-jury compulsion and immunity",
+    "proposition": " grand-jury compulsion and immunity",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D36",
+    "title": "N.Y. Criminal Procedure Law \u00a7 50.10",
+    "url": "https://www.nysenate.gov/legislation/laws/CPL/50.10",
+    "pinpoint": " transactional scope of immunity",
+    "proposition": " transactional scope of immunity",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "id": "D37",
+    "title": "D.C. Code \u00a7 28-3910",
+    "url": "https://code.dccouncil.gov/us/dc/council/code/sections/28-3910",
+    "pinpoint": " subsection (a)(3), later criminal-use restriction on consumer investigative information",
+    "proposition": " subsection (a)(3), later criminal-use restriction on consumer investigative information",
+    "accessed": "2026-11-05",
+    "source_type": "primary-official",
+    "domain_register": "delta-sources.json"
+  },
+  {
+    "title": "Watkins v. United States, 354 U.S. 178 (1957)",
+    "url": "https://www.govinfo.gov/content/pkg/USREPORTS-354/pdf/USREPORTS-354-178.pdf",
+    "pinpoint": "187\u2013200, 208\u2013215",
+    "proposition": "Congressional inquiry must relate to a legitimate congressional function; clarity and pertinency bear on witness rights.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Trump v. Mazars USA, LLP, 591 U.S. 848 (2020)",
+    "url": "https://www.supremecourt.gov/opinions/19pdf/19-715_febh.pdf",
+    "pinpoint": "862\u2013871; slip opinion 11\u201320",
+    "proposition": "Special separation-of-powers considerations for congressional demands for presidential personal information, including third-party-held records; distinct from executive privilege.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Trump v. Mazars USA, LLP, 39 F.4th 774 (D.C. Cir. 2022)",
+    "url": "https://media.cadc.uscourts.gov/opinions/docs/2022/07/21-5176-1954101.pdf",
+    "pinpoint": "Opinion pp. 15\u201324, 41\u201359",
+    "proposition": "Remand applied heightened scrutiny in the case after the presidency; substantial explanation did not eliminate necessary narrowing; discussed successor committee and reissuance.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "United States v. Nixon, 418 U.S. 683 (1974)",
+    "url": "https://www.govinfo.gov/content/pkg/USREPORTS-418/pdf/USREPORTS-418-683.pdf",
+    "pinpoint": "705\u2013716",
+    "proposition": "Qualified presidential confidentiality analysis in a criminal-trial subpoena, not a universal congressional privilege override.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Trump v. Thompson, 595 U.S. 464 (2022)",
+    "url": "https://www.supremecourt.gov/opinions/21pdf/21a272_9p6b.Pdf",
+    "pinpoint": "Order pp. 1\u20132",
+    "proposition": "Denial of interim relief did not conclusively resolve every former-presidential privilege issue; appellate discussion of former status treated as dicta.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "United States v. Zubaydah, 595 U.S. 195 (2022)",
+    "url": "https://www.supremecourt.gov/opinions/21pdf/20-827_new_e29f.pdf",
+    "pinpoint": "Slip opinion pp. 7\u201318",
+    "proposition": "State secrets may apply to harmful official confirmation of information reported publicly; private-contractor custody does not eliminate issue.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Eastland v. United States Servicemen\u2019s Fund, 421 U.S. 491 (1975)",
+    "url": "https://www.govinfo.gov/content/pkg/USREPORTS-421/pdf/USREPORTS-421-491.pdf",
+    "pinpoint": "501\u2013511",
+    "proposition": "Speech or Debate protects legislative acts including subpoena activity within legitimate legislative sphere.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Gravel v. United States, 408 U.S. 606 (1972)",
+    "url": "https://www.govinfo.gov/content/pkg/USREPORTS-408/pdf/USREPORTS-408-606.pdf",
+    "pinpoint": "613\u2013629",
+    "proposition": "Aide protection turns on legislative acts; private publication is distinguished from legislative activity.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "de la Torre v. Cassidy, No. 25-5353 (D.C. Cir. July 31, 2026)",
+    "url": "https://media.cadc.uscourts.gov/opinions/docs/2026/07/25-5353-2186066.pdf",
+    "pinpoint": "Opinion pp. 8\u201322",
+    "proposition": "Speech or Debate barred civil challenge to committee subpoena/contempt acts; denial of jurisdictional discovery upheld.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Committee on the Judiciary v. McGahn, 968 F.3d 755 (D.C. Cir. 2020) (en banc)",
+    "url": "https://www.govinfo.gov/content/pkg/USCOURTS-caDC-19-05331/pdf/USCOURTS-caDC-19-05331-1.pdf",
+    "pinpoint": "Opinion pp. 3\u20134, 38",
+    "proposition": "Article III standing held; other threshold objections expressly not resolved by that standing decision.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Joint Motion to Dismiss Appeal and Vacate Panel Opinion, Committee on the Judiciary v. McGahn, No. 19-5331 (filed June 10, 2021)",
+    "url": "https://levin-center.org/wp-content/uploads/2021/09/2021-6-10-Joint-Motion-to-Dismiss-McGahn-appeal-and-vacate-panel-opinion.pdf",
+    "pinpoint": "Filed motion pp. 2\u20134",
+    "proposition": "Primary filed motion records testimony under accommodation and request for dismissal/vacatur; not a merits appellate holding. Hosted copy of filed court document.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "28 U.S.C. \u00a7 1365, Senate actions",
+    "url": "https://uscode.house.gov/us/usc/119-136/t28/s1365/",
+    "pinpoint": "Subsections (a), (b), (e), and editorial note on repealed (c)",
+    "proposition": "Senate-specific enforcement jurisdiction with executive-branch exception; not a general House statute; special expedition subsection repealed.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "2 U.S.C. \u00a7 192, Refusal of witness to testify or produce papers",
+    "url": "https://www.govinfo.gov/content/pkg/USCODE-2024-title2/html/USCODE-2024-title2-chap6-sec192.htm",
+    "pinpoint": "Statutory operative paragraph",
+    "proposition": "Specified willful default and pertinent refusal are criminal contempt subjects.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "2 U.S.C. \u00a7 194, Certification of failure to testify or produce; grand jury action",
+    "url": "https://usc-cdn.house.gov/view.xhtml?edition=prelim&num=0&req=granuleid%3AUSC-prelim-title2-section194",
+    "pinpoint": "Statutory operative paragraph",
+    "proposition": "Certification pathway for congressional contempt; distinct from automatic compliance remedy.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Winter v. Natural Resources Defense Council, Inc., 555 U.S. 7 (2008)",
+    "url": "https://www.govinfo.gov/content/pkg/USREPORTS-555/pdf/USREPORTS-555-7.pdf",
+    "pinpoint": "20\u201324",
+    "proposition": "Four preliminary-injunction requirements and extraordinary discretionary character of relief.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Federal Rule of Civil Procedure 65",
+    "url": "https://www.govinfo.gov/content/pkg/USCODE-2024-title28/html/USCODE-2024-title28-app-federalru-dup1-rule65.htm",
+    "pinpoint": "Rule 65(a), (b), (d)",
+    "proposition": "Notice, ex parte TRO conditions, and specificity requirements. Current rules portal separately checked; counsel must use current adopted rule text before filing.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Federal Rules of Civil Procedure, current rules portal",
+    "url": "https://www.uscourts.gov/forms-rules/current-rules-practice-procedure/federal-rules-civil-procedure",
+    "pinpoint": "Current rules description and PDF access",
+    "proposition": "Official route for checking adopted procedural rules; portal describes latest amendments in 2025.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "Trump v. United States, 603 U.S. 593 (2024)",
+    "url": "https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf",
+    "pinpoint": "Slip opinion pp. 6\u201318, 30\u201332; Part III-C",
+    "proposition": "Criminal official-act immunity and restrictions on use of official acts; not blanket record privilege or comprehensive state-process holding.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "H.R. Rep. No. 119-831 (September 15, 2026)",
+    "url": "https://www.govinfo.gov/content/pkg/CRPT-119hrpt831/html/CRPT-119hrpt831.htm",
+    "pinpoint": "Report title, date, committee recommendation",
+    "proposition": "Current committee contempt recommendation concerning Leon D. Black; committee report is not criminal conviction or judicial cause-of-action decision.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "5 U.S.C. \u00a7 13104, Contents of reports",
+    "url": "https://uscode.house.gov/us/usc/119-121/t5/s13104/",
+    "pinpoint": "Subsections (a), (d), (f)",
+    "proposition": "Existing financial disclosure content, amount bands and arrangements provide specific baseline for proposed disclosure study.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "28 U.S.C. \u00a7 2201, Creation of remedy",
+    "url": "https://uscode.house.gov/us/usc/119-121/t28/s2201/",
+    "pinpoint": "Subsection (a)",
+    "proposition": "Declaratory remedy applies in an actual controversy within jurisdiction; statute is not an independent jurisdictional grant.",
+    "accessed": "2026-11-05",
+    "domain_register": "epsilon-sources.json"
+  },
+  {
+    "title": "GitHub secure workflow guidance",
+    "url": "https://docs.github.com/en/actions/reference/security/secure-use",
+    "pinpoint": "Least privilege; untrusted inputs; third-party actions",
+    "proposition": "Workflow security boundaries and credential handling",
+    "accessed": "2026-11-05",
+    "domain_register": "eta-sources.json"
+  },
+  {
+    "title": "GitHub workflow syntax",
+    "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax",
+    "pinpoint": "permissions; events; jobs",
+    "proposition": "Separate build and deployment permissions",
+    "accessed": "2026-11-05",
+    "domain_register": "eta-sources.json"
+  },
+  {
+    "title": "GitHub repository REST API",
+    "url": "https://docs.github.com/en/rest/repos/repos",
+    "pinpoint": "Create a repository for the authenticated user",
+    "proposition": "Repository creation requires an endpoint/permission distinct from content writing",
+    "accessed": "2026-11-05",
+    "domain_register": "eta-sources.json"
+  },
+  {
+    "title": "GitHub Pages custom workflow",
+    "url": "https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages",
+    "pinpoint": "Artifact upload and deploy jobs",
+    "proposition": "Static artifact deployment requirements",
+    "accessed": "2026-11-05",
+    "domain_register": "eta-sources.json"
+  },
+  {
+    "title": "CRS R45992 \u2014 The Emoluments Clauses and the Presidency",
+    "url": "https://www.congress.gov/crs_external_products/R/PDF/R45992/R45992.1.pdf",
+    "pinpoint": "Meaning and scope; enforcement sections",
+    "proposition": "Foreign and domestic clauses differ; enforcement and business-benefit questions require separate analysis.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "Supreme Court Order List, January 25, 2021",
+    "url": "https://www.supremecourt.gov/orders/courtorders/012521zor_3f14.pdf",
+    "pinpoint": "Page 2, Nos. 20-330 and 20-331",
+    "proposition": "Judgments vacated and cases remanded for dismissal as moot; no merits resolution.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "Constitution Annotated, 2022 official edition",
+    "url": "https://www.govinfo.gov/content/pkg/GPO-CONAN-2022/pdf/GPO-CONAN-2022.pdf",
+    "pinpoint": "ArtI.S9.C8.3",
+    "proposition": "Emoluments litigation, standing, and vacatur history; the large PDF was discoverable but full open exceeded retrieval size limit.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "Trump v. United States, 603 U.S. 593 (2024)",
+    "url": "https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf",
+    "pinpoint": "Slip opinion pp. 6\u201315, 18\u201319, 30\u201332",
+    "proposition": "Official-act criminal immunity and restrictions on evidentiary use; no immunity for unofficial acts under the holding.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "OGE Opinion 83x16",
+    "url": "https://www.oge.gov/web/oge.nsf/B6E2E25892ED56A4852585E30071C67B/7C412A858FF0CF9B852585BA005BEF6D",
+    "pinpoint": "Opinion summary",
+    "proposition": "President and Vice President not subject to specified criminal conflict restrictions.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "18 U.S.C. \u00a7 201",
+    "url": "https://uscode.house.gov/us/usc/119-118/t18/s201/",
+    "pinpoint": "Subsections (a)\u2013(c)",
+    "proposition": "Public official/official act definitions and distinct bribery and gratuity provisions.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "18 U.S.C. \u00a7 1956",
+    "url": "https://uscode.house.gov/us/usc/119-118/t18/s1956/",
+    "pinpoint": "Subsections (a), (c), (f), (i)",
+    "proposition": "Laundering elements and jurisdiction/venue require branch-specific analysis.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "DOJ FARA Frequently Asked Questions",
+    "url": "https://www.justice.gov/nsd-fara/frequently-asked-questions",
+    "pinpoint": "Registration scope and online database",
+    "proposition": "FARA applies to specified agency activities; filings provide public research leads.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "FinCEN final BOI rule",
+    "url": "https://www.federalregister.gov/documents/2026/08/14/2026-16576/beneficial-ownership-information-reporting-requirement-revision",
+    "pinpoint": "91 FR 52508; summary and effective date",
+    "proposition": "Final rule effective August 14, 2026 continues domestic and U.S.-person exemptions and extends relief.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "Treasury announces final BOI rule",
+    "url": "https://home.treasury.gov/news/press-releases/sb0603",
+    "pinpoint": "August 11, 2026; rule bullet list",
+    "proposition": "Domestic/U.S.-person relief and announced deletion of previously reported U.S.-person information.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "SEC EDGAR APIs",
+    "url": "https://www.sec.gov/search-filings/edgar-application-programming-interfaces",
+    "pinpoint": "Submissions and XBRL APIs",
+    "proposition": "Public filing interfaces, identifiers, updates and bulk data.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "SEC Accessing EDGAR Data",
+    "url": "https://www.sec.gov/search-filings/edgar-search-assistance/accessing-edgar-data",
+    "pinpoint": "Fair access",
+    "proposition": "Declared user-agent and inspected maximum ten requests per second.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "FEC Browse Data",
+    "url": "https://www.fec.gov/data/browse-data/",
+    "pinpoint": "Bulk data and API",
+    "proposition": "Public campaign-finance filings are downloadable; reported records require reconciliation.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "GENIUS Act, Public Law 119-27",
+    "url": "https://www.govinfo.gov/content/pkg/PLAW-119publ27/html/PLAW-119publ27.htm",
+    "pinpoint": "Sections 3\u20134 and 20; 139 Stat. 419",
+    "proposition": "Payment-stablecoin framework and statutory effective-date rule.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "OCC Bulletin 2026-50",
+    "url": "https://www.occ.treas.gov/news-issuances/bulletins/2026/bulletin-2026-50.html",
+    "pinpoint": "October 21, 2026; summary and background",
+    "proposition": "OCC final GENIUS rule states January 18, 2027 effective date; excludes separate BSA/AML/OFAC rulemaking.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "FinCEN/OFAC stablecoin proposed rule announcement",
+    "url": "https://www.fincen.gov/news/news-releases/treasury-proposes-rule-implement-genius-acts-requirements-counter-illicit",
+    "pinpoint": "April 8, 2026; proposed-rule description",
+    "proposition": "AML and sanctions framework described as proposed, not operative final law in this source.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "FinCEN FIN-2019-G001",
+    "url": "https://www.fincen.gov/system/files/2019-05/FinCEN%20CVC%20Guidance%20FINAL.pdf",
+    "pinpoint": "May 9, 2019; introductory scope and business models",
+    "proposition": "Existing BSA obligations for convertible-virtual-currency business models.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "31 C.F.R. \u00a7 1020.320, Federal Reserve reproduction",
+    "url": "https://www.federalreserve.gov/frrs/regulations/section-1020320-reports-by-banks-of-suspicious-transactions.htm",
+    "pinpoint": "Subsections (d)\u2013(e)",
+    "proposition": "SAR confidentiality and distinction from underlying facts, transactions and documents.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "31 U.S.C. \u00a7 5318",
+    "url": "https://www.govinfo.gov/content/pkg/USCODE-2024-title31/html/USCODE-2024-title31-subtitleIV-chap53-subchapII-sec5318.htm",
+    "pinpoint": "Subsection (g)(2)",
+    "proposition": "Statutory SAR confidentiality framework; 2024 edition historical text corroborated with current regulation.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "Trump v. Mazars USA, LLP, 591 U.S. 848 (2020)",
+    "url": "https://www.supremecourt.gov/opinions/19pdf/19-715_febh.pdf",
+    "pinpoint": "Slip opinion pp. 18\u201320",
+    "proposition": "Third-party custody does not eliminate presidential personal-record separation-of-powers review.",
+    "accessed": "2026-11-05",
+    "domain_register": "gamma-sources.json"
+  },
+  {
+    "title": "House Judiciary Committee Democratic Staff job opportunities",
+    "url": "https://democrats-judiciary.house.gov/about/job-opportunities",
+    "pinpoint": "Counsel/Professional Staff Member and Staff Assistants; 120th Congress; Oversight/Investigations; rolling applications",
+    "proposition": "The committee Democratic staff is recruiting for the 120th Congress. This does not prove personal-office hiring, future leadership, hub adoption or endorsement. Observation date is not the posting date.",
+    "accessed": "2026-11-06",
+    "domain_register": "house-readiness-sources.json"
+  },
+  {
+    "title": "Epstein Files Transparency Act, Public Law 119-38",
+    "url": "https://www.govinfo.gov/content/pkg/PLAW-119publ38/html/PLAW-119publ38.htm",
+    "pinpoint": "\u00a7\u00a7 2\u20133; approved November 19, 2025",
+    "proposition": "Enacted DOJ release and reporting provisions, with protections; distinct from later proposals.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "H.R. 9694 introduced text",
+    "url": "https://www.govinfo.gov/content/pkg/BILLS-119hr9694ih/html/BILLS-119hr9694ih.htm",
+    "pinpoint": "July 15, 2026; proposed \u00a7 4 and amendments",
+    "proposition": "Introduced DOJ/state/victim/member enforcement proposal; not State Department transfer or enacted authority.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "S. 5005 introduced record",
+    "url": "https://www.govinfo.gov/app/details/BILLS-119s5005is",
+    "pinpoint": "July 15, 2026 introduced/referred version",
+    "proposition": "Senate counterpart; latest verified bill-stage material, not complete later action history.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "DOJ disclosure notice",
+    "url": "https://www.justice.gov/epstein/doj-disclosures",
+    "pinpoint": "Privacy Notice and Court Records note",
+    "proposition": "Agency cautions about inadvertent personal information and existing victim/court/grand-jury redactions.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "Senate Standing Rules",
+    "url": "https://www.rules.senate.gov/rules-of-the-senate",
+    "pinpoint": "Rules XXV and XXVI(1)\u2013(2)",
+    "proposition": "Jurisdictions, investigative powers and committee-specific procedures.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "Senate investigative overview",
+    "url": "https://www.senate.gov/about/powers-procedures/investigations/overview.htm",
+    "pinpoint": "Historical overview and legislative-purpose limits",
+    "proposition": "Both chambers exercise investigative powers with legislative foundation.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "National Archives agency records law",
+    "url": "https://www.archives.gov/about/laws/fed-agencies.html",
+    "pinpoint": "44 U.S.C. \u00a7\u00a7 3101\u20133106",
+    "proposition": "Agency records duties; does not collapse separate Presidential Records Act regime.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "FoundUps work-order architecture",
+    "url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/152d52dd92088728340fbcb17fe80c4bdf63a732/docs/architecture/REDDOG_EPHEMERAL_AUTHORITY_WORKER_ROUTING.md",
+    "pinpoint": "Restaurant/work-order model and DOCS_ONLY status",
+    "proposition": "Reuse scoped work orders and temporary authority; architecture not runtime completion.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "WRE verification owner",
+    "url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/152d52dd92088728340fbcb17fe80c4bdf63a732/modules/infrastructure/wre_core/README.md",
+    "pinpoint": "Readiness and risk-based verification sections",
+    "proposition": "Existing verification/admission ownership; measured evidence and unknown gates remain distinct.",
+    "accessed": "2026-11-07",
+    "domain_register": "member-experience-sources.json"
+  },
+  {
+    "title": "Moltbook-Official/moltbook, skill.md",
+    "url": "https://github.com/Moltbook-Official/moltbook/blob/main/skill.md",
+    "pinpoint": "Getting Started; Core Features; Staying Active; Setup for Automatic Polling",
+    "proposition": "Official project source describes a social network for agents, human-claimed registration, submolts, service-specific credentials and four-hour-plus social check-ins; these are not a universal research or interoperability standard.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "OpenClaw, Heartbeat migration",
+    "url": "https://docs.openclaw.ai/gateway/heartbeat",
+    "pinpoint": "Upgrade an existing monitor; First setup; Monitor scratch; documentation sidebar release v2026.10.10",
+    "proposition": "Current official documentation migrates monitoring to ordinary automation jobs, removes legacy heartbeat settings after verified conversion, retires runtime reading of HEARTBEAT.md, and describes explicit initial setup with a generally 30-minute proactive job.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "OpenClaw, Tool and agent permissions",
+    "url": "https://docs.openclaw.ai/gateway/security/tool-permissions",
+    "pinpoint": "Read-only mode; Read-only tools + read-only workspace; Sub-agent delegation guardrail",
+    "proposition": "Official examples combine sandbox mode all, workspaceAccess ro and read-only tool allow/deny controls; denial of shell and file mutation is separate from workspace exposure.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "OpenClaw, Configuration \u2014 tool policy",
+    "url": "https://docs.openclaw.ai/gateway/config-tools/tool-policy",
+    "pinpoint": "MCP and plugin tools inside sandbox tool policy; tools.allow/tools.deny",
+    "proposition": "Tool policy is layered, deny wins, write/edit/apply_patch require distinct controls, and sandboxed MCP/plugin visibility has an additional allowlist gate. A catalogue entry is not proof of connection or authorization.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "A2A Protocol Specification, version 1.0.0",
+    "url": "https://a2a-protocol.org/v1.0.0/specification/",
+    "pinpoint": "Sections 3 and 8, protocol operations and Agent Card discovery",
+    "proposition": "A2A provides inter-agent discovery and task/interaction contracts; a deployed endpoint must truthfully declare its supported interface and authentication requirements.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "Model Context Protocol specification, 2026-07-28",
+    "url": "https://modelcontextprotocol.io/specification/2026-07-28",
+    "pinpoint": "Overview; Base Protocol",
+    "proposition": "MCP defines model-application integration with context and tools; this version describes stateless, self-contained requests and per-request capability negotiation.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "MCP 2026-07-28, Authorization Security Considerations",
+    "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization/security-considerations",
+    "pinpoint": "Token Audience Binding and Validation; Communication Security; Access Token Privilege Restriction",
+    "proposition": "Implementations must protect tokens, use intended audiences and HTTPS, and must not pass an inbound client token through as an upstream API credential.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "offgrid-ing/arp, Agent Relay Protocol",
+    "url": "https://github.com/offgrid-ing/arp",
+    "pinpoint": "README, Why ARP and protocol overview",
+    "proposition": "This named Agent Relay Protocol project describes a stateless WebSocket relay, cryptographic public-key addresses and encrypted messages. It is distinct from Agent Relationship Protocol projects and is optional in our design.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "Agent Relationship Protocol documentation",
+    "url": "https://docs.arp.run/",
+    "pinpoint": "Version v0.1 draft/public review header and overview",
+    "proposition": "arp.run uses ARP to mean Agent Relationship Protocol and labels its current documented specification v0.1 draft; it is not the same project as offgrid-ing/arp.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "RFC 8785, JSON Canonicalization Scheme",
+    "url": "https://www.rfc-editor.org/rfc/rfc8785",
+    "pinpoint": "Sections 3 and 4",
+    "proposition": "JCS specifies deterministic canonical JSON representation suitable for repeatable hashing and signing; project-specific authorization semantics remain separate.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  },
+  {
+    "title": "RFC 8032, Edwards-Curve Digital Signature Algorithm (EdDSA)",
+    "url": "https://www.rfc-editor.org/rfc/rfc8032",
+    "pinpoint": "Section 5.1 and test vectors",
+    "proposition": "Specifies the Ed25519 signature mechanism; signatures authenticate key control and message integrity, not factual truth or operator independence.",
+    "accessed": "2026-11-05",
+    "domain_register": "theta-sources.json"
+  }
+]

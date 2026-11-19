@@ -9,6 +9,20 @@ The adapter is implemented and tested offline. No provider account, phone line,
 microphone or live Japanese call was available in the build environment. It is not
 yet registered as a callable tool in ChatGPT or the RedDog/WRE runtime.
 
+## Human-operated two-phone conversation
+
+Use the [Red Dog Phone Conversation skill](../../../.claude/skills/reddog-phone-conversation/SKILL.md)
+to create a call-specific brief, Japanese opening, question plan and bounded
+conversation from 012's objective. It supports English consultation and resuming
+the task through “reference the skill”. Phone A carries the call; Phone B carries
+the voice session. 012 controls dialing, audio and hangup. Voice/audio acceptance
+remains to be tested on the actual devices.
+
+The canonical skill is projected byte-for-byte under `.agents/skills/` and fits
+RedDog's existing advisory Skillz/Wardrobe/Rolodex path discovery. This adds no
+telephone tool, WRE executor, provider call or production registration. The
+message-only CLI/profile below retains its existing scope and acceptance gates.
+
 ## Start here
 
 - [Setup and first call](docs/SETUP.md): accounts, requirements, voice, commands,

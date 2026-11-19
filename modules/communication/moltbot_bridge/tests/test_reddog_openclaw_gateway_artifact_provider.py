@@ -7,7 +7,8 @@ from unittest.mock import patch
 import pytest
 from prompt.swarm.m2m_compiler import decode_m2m_envelope, encode_m2m_envelope
 from modules.communication.moltbot_bridge.src.reddog_artifact_generation_model_binding import artifact_generation_digest
-from modules.communication.moltbot_bridge.src.fusion_redaction_gate import REDACTION_GATE_PASSED
+from modules.communication.moltbot_bridge.src.fusion_redaction_gate import REDACTION_GATE_PASSED, evaluate_redaction_gate
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_contract import artifact_generation_output_contract
 from modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider import (
     FAIL_GATEWAY, OpenClawGatewayArtifactGenerationRunner,
 )
@@ -315,14 +316,15 @@ _M2M_PROVIDER_CASES = (
 )
 
 
-def _m2m_provider_case(case):
+def _m2m_provider_case(case, *, context='{"output_schema":"artifact_contents","planned_artifacts":["src/example.py"]}'):
     packet = {"schema": "0102_m2m_v1", "ROLE": "worker", "ORIGIN": "internal_handoff",
               "PRINCIPAL_REF": "012", "L": "A", "S": "src/example.py", "M": "exec",
               "T": "provider-egress-fixture", "A": "Write exactly src/example.py",
               "R": [15, 97, 99], "I": {"values": [True, 1, 1.0, None, {"note": "unchanged"}]},
               "O": ["src/example.py"], "F": ["scope_violation"]}
     wire = encode_m2m_envelope(packet)
-    metadata = {"prompt_schema": "0102_m2m_v1", "m2m_prompt_digest": artifact_generation_digest(wire)}
+    metadata = {"prompt_schema": "0102_m2m_v1", "m2m_prompt_digest": artifact_generation_digest(wire),
+                "m2m_context_digest": artifact_generation_digest(context)}
     supplied = redacted = wire
     if case == "missing_digest": metadata.pop("m2m_prompt_digest")
     elif case == "missing_schema": metadata.pop("prompt_schema")
@@ -368,3 +370,91 @@ def test_m2m_prompt_integrity_precedes_gateway_effects(tmp_path, case):
     if case == "canonical":
         values = decode_m2m_envelope(task)["I"]["values"]
         assert [type(value) for value in values[:4]] == [bool, int, float, type(None)]
+
+
+_M2M_CONTEXT_CASES = (
+    "exact", "raw_changed", "empty", "none", "swapped_artifacts", "stripped_rules",
+    "missing_digest", "digest_null", "digest_mapping", "digest_malformed",
+    "digest_changed", "nonstring", "context_only", "context_only_null", "legacy",
+)
+
+
+def _m2m_context_case(case):
+    data = {**artifact_generation_output_contract(["src/example.py"]), "evidence_context": "synthetic evidence"}
+    context = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    metadata, prompt, _ = _m2m_provider_case("canonical", context=context)
+    if case in ("raw_changed", "swapped_artifacts", "stripped_rules"):
+        if case == "raw_changed": data["evidence_context"] = "changed evidence"
+        elif case == "swapped_artifacts": data["planned_artifacts"] = ["src/other.py"]
+        else: data.pop("hard_rules")
+        context = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    elif case == "empty": context = ""
+    elif case == "none": context = None
+    elif case == "nonstring": context = data
+    elif case == "missing_digest": metadata.pop("m2m_context_digest")
+    elif case == "digest_null": metadata["m2m_context_digest"] = None
+    elif case == "digest_mapping": metadata["m2m_context_digest"] = {"digest": "invalid"}
+    elif case == "digest_malformed": metadata["m2m_context_digest"] = "sha256:invalid"
+    elif case == "digest_changed": metadata["m2m_context_digest"] = artifact_generation_digest(context + " ")
+    elif case in ("context_only", "context_only_null"):
+        metadata = {"m2m_context_digest": metadata["m2m_context_digest"] if case == "context_only" else None}
+        prompt = "legacy governed task"
+    elif case == "legacy": metadata, prompt, _ = _m2m_provider_case("legacy")
+    return metadata, prompt, context
+
+
+@pytest.mark.parametrize("case", _M2M_CONTEXT_CASES)
+def test_m2m_raw_context_integrity_precedes_gateway_effects(tmp_path, case):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    metadata, prompt, context = _m2m_context_case(case)
+    redacted = context if type(context) is str else "synthetic redacted context"
+    gate = SimpleNamespace(status=REDACTION_GATE_PASSED, redacted_prompt=prompt, redacted_context=redacted)
+    with patch("modules.communication.moltbot_bridge.src.reddog_openclaw_gateway_artifact_provider.evaluate_redaction_gate", return_value=gate):
+        result = _generate(provider, prompt=prompt, context=context, verified_extra=metadata)
+    if case not in ("exact", "legacy"):
+        assert result.rejection_reasons == ("FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING",)
+        assert runner.calls == [] and not provider.runtime_root.exists()
+        assert result.file_write_performed is False and result.worker_process_started is False
+        return
+    assert result.ok and len(runner.calls) == 5
+    task, delivered = runner.message.split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)
+    assert task == prompt and delivered == context
+
+
+def _m2m_redaction_case(case):
+    metadata, prompt, context = _m2m_context_case("exact")
+    context = context.replace("synthetic evidence", "Synthetic contact fixture@example.invalid")
+    if case == "blocked": context = "<think>synthetic forbidden fixture</think>"
+    metadata["m2m_context_digest"] = artifact_generation_digest(context)
+    if case == "prompt_tamper": prompt += " "
+    return metadata, prompt, context, evaluate_redaction_gate(prompt, context, audit_mode=True)
+
+
+@pytest.mark.parametrize("case", ("redacted", "blocked", "prompt_tamper"))
+def test_m2m_gateway_real_redaction_and_final_frame(tmp_path, case):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    metadata, prompt, context, gate = _m2m_redaction_case(case)
+    result = _generate(provider, prompt=prompt, context=context, verified_extra=metadata)
+    if case != "redacted":
+        expected = "FAIL_OPENCLAW_REDACTION_BLOCKED" if case == "blocked" else "FAIL_ARTIFACT_GENERATION_M2M_PROMPT_BINDING"
+        assert result.rejection_reasons == (expected,)
+        assert runner.calls == [] and not provider.runtime_root.exists()
+        assert result.file_write_performed is False and result.worker_process_started is False
+        return
+    assert gate.status == REDACTION_GATE_PASSED and gate.redacted_context != context
+    assert metadata["m2m_context_digest"] == artifact_generation_digest(context)
+    assert metadata["m2m_context_digest"] != artifact_generation_digest(gate.redacted_context)
+    assert result.ok and len(runner.calls) == 5
+    task, delivered = runner.message.split("TASK:\n", 1)[1].split("\n\nGOVERNED CONTEXT:\n", 1)
+    assert task == prompt and delivered == gate.redacted_context
+    assert "fixture@example.invalid" not in runner.message
+
+
+def test_gateway_context_argument_remains_required(tmp_path):
+    runner = FakeRunner()
+    provider = _provider(tmp_path, runner)
+    with pytest.raises(TypeError, match="context"):
+        provider.generate_artifacts(prompt="legacy task", binding=object(), timeout_seconds=5)
+    assert runner.calls == [] and not provider.runtime_root.exists()

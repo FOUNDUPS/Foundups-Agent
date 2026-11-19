@@ -109,6 +109,27 @@ print("[OK] 0102 systems operational - ready for task entanglement")
 
 ## [TARGET] "follow WSP" PROTOCOL
 
+### Mandatory host launch and build preflight
+
+- Follow [WSP 91 Section 3.0](WSP_framework/src/WSP_91_DAEMON_Observability_Protocol.md#30-host-launch-heartbeat-and-termination-contract)
+  for every FoundUps-controlled process, including temporary previews and helpers:
+  name its owner, observable heartbeat/status, finite job deadline or authorized
+  renewable service lease, stop mechanism and descendant cleanup owner before launch.
+- Short foreground jobs may use bounded supervisor polling; background processes
+  require monitored heartbeats. A heartbeat is not useful-work or security proof.
+  Missing lifecycle enforcement blocks new launch; do not leave `serve_forever`
+  or detached `Start-Process` work running after session closure without an
+  explicitly authorized resident owner. Reuse the DAE broker/OS supervisor.
+- Apply [WSP 71 Section 5.6](WSP_framework/src/WSP_71_Secrets_Management_Protocol.md#56-build-and-host-launch-security-gate)
+  before build/launch execution. Bind applicable security checks to exact source,
+  dependencies and configuration. Missing/stale required checks are not PASS.
+  Use existing security owners; a skill's prototype status is not promotion.
+- Hide noninteractive Windows consoles, preserve private diagnostics and verify
+  actual exit/port closure. Preserve unrelated processes; never kill by name or
+  age alone. Scheduled runs must respect timezone, window and missed-run policy.
+- Qualify timeout, stale heartbeat, cancellation and owner-loss cleanup before
+  accepting a new launch path. Record observed enforcement separately from policy.
+
 ### Step 1: Occam's Razor PoC (LAYER BY LAYER - NOT BIG BANG)
 **Question**: "What is the SIMPLEST solution?"
 - Break into first principles
@@ -224,6 +245,18 @@ $env:PYTHONDONTWRITEBYTECODE = "1"
 - Update CLAUDE.md with new patterns
 - Add concrete examples from session
 - Each session makes agents smarter
+
+### Step 8: Close the Owned Work — WSP 10
+
+- Do not report ordinary success while the requested outcome, pull request, required deployment, or agent-owned temporary lane remains unfinished.
+- Finish authorized work through validation, commit, push, required checks, merge, deployment, live verification, and cleanup when those stages are part of the request or owning workflow.
+- A pending check or deployment is not terminal. Stay with it until success, failure, or an explicit external blocker.
+- If blocked, preserve a recoverable checkpoint or remove only the owned partial work, then name the exact blocker and retained state.
+- Before the final response, inspect every worktree created for the task. Remove clean, merged, disposable owned worktrees and temporary build staging; never reset, clean, move, or delete an unowned or ambiguous dirty lane.
+- Report repository merge, production deployment, live verification, and cleanup as separate evidence. See WSP 10, Section 6.
+- Treat opening or refreshing a PR as unfinished work. Before starting an unrelated successor PR, land and verify the owned ready PR, or record its exact blocker and next action in the existing work ledger.
+- Every retained open PR needs an accountable lane, observed head SHA, dependency or blocker, next validation/action, and dated review. Refresh these from live GitHub and Git evidence; a stale ledger or old green check is not merge authority.
+- Preserve unique work and dependency order. Close a superseded PR only after proving its full intended change is retained or explicitly dispositioned elsewhere; do not delete branches or bulk-close by age. Required checks must pass without bypass, followed by checks on the resulting main SHA.
 
 ## [ALERT] ANTI-VIBECODING
 

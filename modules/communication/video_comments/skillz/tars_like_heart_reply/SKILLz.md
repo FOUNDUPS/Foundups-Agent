@@ -16,6 +16,31 @@ trigger:
 ---
 # TARS Like + Heart + Reply Skill
 
+## Current visual evidence boundary (2026-11-05)
+
+The language route assesses, writes and reviews the exact proposed reply before
+submission. UI-TARS supplies optional private visual observations only. Generic
+locator confidence never certifies text quality or delivery; the current bridge
+recaptures its own image and is not bound to the saved evidence screenshot.
+Exact new creator-reply readback and durable history own delivery. Screenshot,
+vision or optional evidence-append failures do not authorize a duplicate retry.
+
+## Current reply identity boundary (2026-11-05)
+
+The current row/reply owners govern posting, including exact receiving channel,
+original comment/video/author binding, final language review and durable unknown
+delivery reservations. Modern original-owned video thumbnails and `a#name`
+authors are supported without inferring author UC IDs or watch URLs. Only the
+observed toolbar-owned fully disabled zero pair can form an empty baseline.
+Expanded native controls require a settled owned inventory, not a displayed
+count. Modern creator readback requires frozen canonical receiving context,
+fresh native UC/URL proof, owned badge/name anchors and a new exact-text reply ID.
+Multiple, collapsed/loading or conflicting inventories remain unqualified.
+Native textarea entry uses current `value`, with exact-prefix recovery and
+confirmed micro-edit rewind. Historical labels below grant no posting authority.
+The 137 synthetic controls do not establish live delivery; nested submission and
+unknown-delivery retry remain blocked under the existing history owner.
+
 **WSP Reference:** WSP 96 (WRE Skills Protocol)
 **Status:** ✅ VALIDATED (PoC → Production)
 **Last Validated:** 2025-12-28

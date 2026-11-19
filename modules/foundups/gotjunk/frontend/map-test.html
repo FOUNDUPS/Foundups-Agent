@@ -213,8 +213,13 @@
           throw new Error('Cesium library not loaded');
         }
 
-        // Cesium ion access token (free default token - replace with your own for production)
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWE1OWUxNy1mMWZiLTQzYjYtYTQ0OS1kMWFjYmFkNjc5YzciLCJpZCI6NTc3MzMsImlhdCI6MTYyNzg0NTE4Mn0.XcKpgANiY19MC4bdFUXMVEBToBmqS8kuYpUlxJHYZxk';
+        // Explicit public browser token supplied by Vite HTML environment replacement.
+        // Restrict this token to approved domains in Cesium; it is not a secret.
+        const cesiumToken = '%VITE_CESIUM_ION_TOKEN%';
+        if (!cesiumToken || cesiumToken.startsWith('%VITE_')) {
+          throw new Error('Configure VITE_CESIUM_ION_TOKEN before using the Cesium demo');
+        }
+        Cesium.Ion.defaultAccessToken = cesiumToken;
 
         cesiumViewer = new Cesium.Viewer('cesium-container', {
           baseLayerPicker: false,

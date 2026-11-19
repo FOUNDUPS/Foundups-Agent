@@ -15,6 +15,8 @@ trigger:
 
 # Git Linkedin Bridge
 
+This prototype is not the LinkedIn master. Use [activity routing](../docs/LINKEDIN_ACTIVITY_ROUTING.md). Do not run this bridge as part of skill editing, commit/push verification or a read-only audit: it may publish social content. Exact content/destination approval and verified live results remain required. TODO metadata below is a readiness gap, not an implemented orchestration contract.
+
 **Purpose**: TODO - Describe what this skill does
 
 **Source**: `modules\platform_integration\linkedin_agent\src\git_linkedin_bridge.py`

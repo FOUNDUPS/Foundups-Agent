@@ -1,10 +1,18 @@
 # RedDog
 
+The PR1638 local activity candidate adds explicit capture, context and status
+commands through the existing Principal Memex registration. It is not automatic
+conversation ingestion or permission to send personal context to a model.
+See [PAL interfaces](INTERFACE.md#principal-activity-ledger-candidate--pr1638)
+and [qualification/recovery limits](docs/PRINCIPAL_ACTIVITY_LEDGER_ARCHITECTURE.md).
+Installed-host qualification remains pending; the historical release statement
+below does not qualify the new ledger.
+
 Version: 0.4.141
 0.4.141 first binds the corrected fast-RedDog/deep-0102 identity boundary while preserving the 0.4.140 builder release: 1,398 backend files at `sha256:700d50f84e12...86e09ed` with one evidence-only held child. It changes no extension effect authority.
 
 Documentation entry points: the repository-wide [RedDog documentation map](../../docs/REDDOG_DOCUMENTATION_MAP.md) separates current product truth from audits and history; [RedDog architecture](ARCHITECTURE.md) defines the identity boundary.
-[Contact Memory](docs/CONTACT_MEMORY_ARCHITECTURE.md), [RedDog Lick](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md), [Mosh Pit](docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md), and the [Memex projection emitter](docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md) specify planned continuity surfaces.
+[Contact Memory](docs/CONTACT_MEMORY_ARCHITECTURE.md), [RedDog Lick](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md), [Moshpit](docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md), and the [Memex projection emitter](docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md) specify planned continuity surfaces.
 They are not implemented authority and do not grant biometric, identity, wallet, work, or execution effects. `ARCHITECTURE.md` and `.gitignore` remain repository-only inputs outside the executable VSIX.
 
 The parent reproves the exact inert builder composition around a suspended Job-contained child using `-I -S -B -E -s`, a fixed six-entry `sys.path`, closed O:/E: roots, and bounded path-free JSON.
@@ -15,6 +23,8 @@ CPython 3.12.10 remains qualified last-official-3.12 Windows evidence with known
 `conversation_plane_policy.js` keeps intent, reasoning depth, and effect ceiling independent; unknown text is `CHAT / FAST / NONE`, and risk never raises effects. Chat gets no repository/HoloIndex context or work authority; shared Python/JavaScript vectors run through `npm run test:conversation`.
 Foreground provider turns discard raw history; durable VSIX/PFMall/phone conversation adapters and ChatGPT-like cross-session memory remain missing.
 OpenClaw is the resident 0102 execution/supervision layer and Hermes is bounded. Backend modules now authenticate and reserve existing requests, persist a trusted new FoundUp scope, and durably bind the original empty-ID first TURN to its resolved ID/revision 0. The VSIX still has no service caller, so no first-turn handler or conversation CAS executes.
+
+Multi-voice arbitration is proposed in the [dual-loop coordination contract](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md#multi-voice-coordination-task-ownership-and-affect-separation-2026-11-19-proposal): one committing 0102 task owner and one authorized RedDog speaking path, with independent reasoning shade, measured activity dot, and optional consented affect. See the [roadmap](ROADMAP.md#single-owner-multi-voice-coordination--proposed-2026-11-19). This is documentation, not running orchestration.
 
 ## Model-routing authority
 
@@ -86,12 +96,12 @@ Python, worker threads, and a materialized backend are required.
 The deny-by-default webview CSP permits only the packaged icon, VS Code-theme
 styles, and one fresh nonce-bound script; it admits no network script source.
 
-The VSIX surface is exactly 67 files: 62 root runtime JavaScript modules, the
+The VSIX source payload is exactly 69 files: 64 root runtime JavaScript modules, the
 Python bootstrap, and four public files. The packaged license must match root
 authority; tests, internal docs, caches, credentials, dependencies, and build
 artifacts remain excluded. `npm run test:package` proves two stable VSCE lists,
 regular non-symlink membership, and the 1 MiB raw cap without building a VSIX.
-Tracked attributes pin 66 packaged text members to LF and keep `icon.png`
+Tracked attributes pin 68 packaged text members to LF and keep `icon.png`
 binary. Receipt v2 binds effective-policy and sorted member-content digests;
 CR bytes or attribute overrides fail closed. Archive size remains verified on
 the built artifact. See `docs/REDDOG_PACKAGE_EOL_REPRODUCIBILITY_PHASE1.md`.
@@ -628,7 +638,10 @@ query-time repair and editor-side indexing remain forbidden.
 
 Version 0.4.46 resolves named FoundUp work through the canonical registry and
 requires current registry, manifest, module, Skillz, and status evidence before
-Fusion. Identity and safe mutation scope remain bound through continuity,
+Fusion. When a registry entry declares `brand_context_path`, the current brand
+schema/context also become mandatory grounding evidence. Parent and child brand
+identity can be concatenated into the receipt, but branding never widens the
+registered FoundUp's execution or safe-mutation authority. Identity and safe mutation scope remain bound through continuity,
 wardrobe, work-order, WRE, OpenClaw, and resident-intent handoffs. The generic
 grounding receipt grants no execution authority. The checked-in JSON schema is
 evaluated directly, dirty evidence is labeled as workspace-current, and every
@@ -988,12 +1001,19 @@ Set `OPENROUTER_API_KEY` in the environment used to launch Cursor. Do not store 
 ## Install
 
 Build the VSIX locally only after the package contract accepts the exact
-LF-governed working-tree bytes. Do not commit `*.vsix`.
+LF-governed working-tree bytes. Supply the extension subdirectory as the README
+link base; VSCE otherwise resolves this monorepo's links at the repository root.
+For a published release, use its verified commit in place of `main` to pin the
+documentation. Do not commit `*.vsix`.
 
 ```powershell
 cd extensions/reddog
 npm run test:package
-vsce package --no-dependencies
+vsce package --no-dependencies --baseContentUrl https://github.com/FOUNDUPS/Foundups-Agent/blob/main/extensions/reddog
 ```
 
 From Cursor, run `Extensions: Install from VSIX...`, choose `reddog-0.4.141.vsix` (or the current version), reload the window, then run `RedDog: Open`; do not use workspace-extension install for normal operation.
+
+## Reasoning shade and 0102 activity indicator (proposed; 2026-11-19)
+
+RedDog's visual shade expresses the selected reasoning depth, independently of measured 0102 workload. The three user-facing labels are Quick (`FAST`), Contemplative (`CRITIC`), and Deep (`PANEL`); labels do not change the existing conversation intent or effect-ceiling contract. The background 0102 dot represents processing activity only when backed by valid workload telemetry. Size and pulse may respond to measured load; they must not be inferred from reasoning mode, response latency, or cosmetic animation. Once measured processing ends, the dot settles even if Deep remains selected. With missing, stale, or unsupported telemetry, render a neutral non-quantitative idle/unknown animation; never simulate a load measurement. Theme inversion (dark dot on light surface, light dot on dark surface) is purely presentational, not a processing state. This is a proposed UI contract, not a claim of implemented compute telemetry or live dual-loop integration. See [architecture](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md) and [roadmap](ROADMAP.md).

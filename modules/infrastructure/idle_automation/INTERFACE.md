@@ -21,6 +21,20 @@ wsp_cycle(input="interface", log=True)
 
 ## Primary Interface
 
+### Self-audit report status — 2026-10-07
+
+`SelfResearchRefresher.scan_self_audit()` now preserves the complete producer
+snapshot as `scan_status`. `events_opened` is its exact `event_count`, including
+`None` on an ordinary failed scan. Zero events does not prove input coverage or
+health: inspect `outcome`, `coverage`, and `error_codes`. `last_success` is scoped
+to the newly created scanner instance, not a durable success history.
+
+`top_signatures` remains historical data. `history_status` is `available`,
+`absent`, or `unavailable`; `signature_count` is `None` when history is unknown.
+Malformed history cannot suppress the current scan snapshot. These diagnostics
+do not authorize execution, establish an independently verified improvement,
+or convert historical signatures into current findings.
+
 ### Exact-SHA HoloIndex Post-Merge Coordination
 
 `coordinate_holoindex_postmerge()` observes `origin/main` from a configured
@@ -194,6 +208,11 @@ if result["overall_success"]:
 | `IDLE_AUTOMATION_RUNTIME_ROOT` | path | `~/.foundups-agent/idle_automation` | Trusted private claim-state root outside the repository |
 | `AUTO_OPENROUTER_CATALOG_REFRESH` | bool | `false` | Enable the exact daily OpenRouter catalog refresh claim |
 | `OPENROUTER_CATALOG_RUNTIME_ROOT` | path | `~/.foundups-agent/ai_gateway/openrouter_catalog` | Trusted outside-repository provider evidence root |
+| `AUTO_REDDOG_RESIDENT_RECONCILE` | bool | `false` | Enable the daily read-only resident FoundUp reconcile claim |
+| `REDDOG_AUTHENTICATED_PRINCIPAL_ID` | string | none | Authenticated principal identity required by the resident client |
+| `REDDOG_AUTHORIZED_FOUNDUP_IDS` | CSV | none | Must resolve to exactly one FoundUp for the scheduled profile |
+| `REDDOG_SCHEDULED_RESIDENT_FOUNDUP_ID` | string | scope default | Optional explicit FoundUp; must match the single authorized scope |
+| `REDDOG_SCHEDULED_RESIDENT_WORK_FOCUS` | string | none | Required objective/state-reconciliation focus for the daily resident cycle |
 
 ### Safety Controls
 
@@ -330,6 +349,23 @@ or runtime-binding authority.
 
 Cancellation propagates without finalizing or recording the claim. The claim
 remains leased for the existing bounded expiry and replay-recovery policy.
+
+### Daily resident FoundUp reconcile
+
+`ScheduleParser` accepts `resident_reconcile` only with `daily` cadence.
+`IdleAutomationDAE` forwards the complete current `ScheduleClaim` only when
+`AUTO_REDDOG_RESIDENT_RECONCILE=true`; otherwise it returns a bounded disabled
+result without importing or invoking the resident adapter.
+
+The adapter uses the canonical RedDog resident API client. It requires current
+model-runtime bindings, Brain state, Breadcrumbs and the existing operational FoundUp
+Memex supply derived from the registered FoundUp manifest and module ROADMAP. Workspace
+memory notes are additive. Principal/private Memex remains a separate authenticated
+source and is never reconstructed from chat, mail or the FoundUp snapshot.
+
+Success requires the resident response's complete read-only/no-effect contract. The
+schedule execution history may carry the resident receipt ID and resident intent ID for
+correlation, but cadence state does not become RedDog execution authority.
 
 ### Durability Contract
 

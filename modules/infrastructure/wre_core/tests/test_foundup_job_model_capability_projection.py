@@ -15,7 +15,7 @@ from modules.communication.moltbot_bridge.src.foundup_job_contract import (
     PolicyFlags,
 )
 from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
-    model_runtime_binding_receipt,
+    model_selection_and_runtime_binding_receipts,
 )
 from modules.infrastructure.wre_core.src.foundup_job_model_capability_consumer import (
     TrustedModelRuntimeBindingArtifact,
@@ -108,10 +108,13 @@ def _job(
 
 
 def _binding(**overrides) -> dict:
-    binding = model_runtime_binding_receipt(
+    _, binding = model_selection_and_runtime_binding_receipts(
         runtime_surface=RUNTIME_SURFACE,
         task_family=TASK_FAMILY,
+        provider="openai",
     )
+    # WRE projects the core receipt; the authenticated runtime consumes its wrapper.
+    binding.pop("verification_receipt")
     binding.update(overrides)
     if overrides:
         _refresh_receipt_id(binding)
@@ -321,6 +324,7 @@ def test_valid_validate_binding_projects_exact_receipt_lineage() -> None:
     [
         ({"schema_version": "wrong.v1"}, "binding_schema_invalid"),
         ({"unexpected": "field"}, "binding_schema_invalid"),
+        ({"verification_receipt": {"unexpected": True}}, "binding_schema_invalid"),
         ({"decision": "rejected"}, "binding_decision_not_bound"),
         ({"runtime_surface": "reddog_artifact_generation"}, "binding_surface_mismatch"),
         ({"task_family": "other_task"}, "binding_task_family_mismatch"),
@@ -349,6 +353,15 @@ def test_binding_digest_and_lineage_mismatch_reject_stably() -> None:
     _refresh_receipt_id(binding)
     lineage = _project_binding(_job(), binding)
     assert lineage.rejection_reasons == ("binding_lineage_invalid",)
+
+
+def test_aggregator_provider_is_not_qualified_by_direct_provider_fixture() -> None:
+    binding = _binding()
+    assert binding["role_bindings"][0]["provider"] == "openai"
+    binding["role_bindings"][0]["provider"] = "openrouter"
+    _refresh_receipt_id(binding)
+    projection = _project_binding(_job(), binding)
+    assert projection.rejection_reasons == ("binding_lineage_invalid",)
 
 
 def test_one_sided_binding_lineage_rejects_without_raw_exception() -> None:

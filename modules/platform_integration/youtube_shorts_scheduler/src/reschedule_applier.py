@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 # Authoritative per-day cap (#844) + the needs-live-list sentinel (#851).
 try:
     from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import (
-        HARD_CAP_PER_DAY,
+        HARD_CAP_PER_DAY, channel_daily_cap,
     )
 except Exception:  # pragma: no cover - defensive import for isolated tests
     HARD_CAP_PER_DAY = 3
@@ -183,7 +183,7 @@ def apply_moves(
     moves: List[Dict[str, Any]],
     *,
     dom: Any = None,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     dry_run: Optional[bool] = None,
     emit_signals: bool = True,
 ) -> Dict[str, Any]:
@@ -221,9 +221,17 @@ def apply_moves(
     # Batch-local target-day fill counter: (channel_id, to_date) -> planned count.
     target_fill: Dict[tuple, int] = {}
 
+    from .peak_window import is_move2japan
+
     for move in moves or []:
         video_id = move.get("video_id")
         channel_id = move.get("channel_id")
+        if not is_dry_run and is_move2japan(channel_id):
+            # This legacy apply adapter has no independent Studio timezone or
+            # existing-target occupancy receipt. Do not certify the new cadence.
+            results.append(_move_record(move, STATUS_SKIPPED, reason="cadence_live_unqualified"))
+            continue
+        effective_cap = channel_daily_cap(channel_id, cap)
         to_date = move.get("to_date")
         slot_local = move.get("slot_local")
 
@@ -238,12 +246,12 @@ def apply_moves(
 
         # 2) CAP SAFETY: never plan/apply more than `cap` onto a target day.
         key = (channel_id, to_date)
-        if target_fill.get(key, 0) >= cap:
+        if target_fill.get(key, 0) >= effective_cap:
             rec = _move_record(move, STATUS_SKIPPED, reason="cap")
             results.append(rec)
             logger.warning(
                 "[RESCHED-APPLY] Skip %s -> %s @ %s: target day at cap (%d)",
-                video_id, to_date, slot_local, cap,
+                video_id, to_date, slot_local, effective_cap,
             )
             if emit_signals:
                 _emit_move_breadcrumb(rec, is_dry_run)
@@ -312,7 +320,7 @@ def apply_plan(
     dom: Any = None,
     plan: Optional[Dict[str, Any]] = None,
     plan_factory: Optional[Callable[[], Dict[str, Any]]] = None,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     dry_run: Optional[bool] = None,
     emit_signals: bool = True,
 ) -> Dict[str, Any]:

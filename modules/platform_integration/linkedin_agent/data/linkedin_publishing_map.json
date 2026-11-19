@@ -107,7 +107,7 @@
     },
     {
       "key": "esingularity",
-      "display_name": "eSingularity",
+      "display_name": "eSingularity.ai",
       "entity_type": "company_page",
       "company_id": "2199715",
       "status": "active",
@@ -116,9 +116,9 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:2199715",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A2199715",
-      "aliases": ["esingularity", "e singularity", "0102 channel"],
-      "routing_tags": ["singularity", "dae", "agenticness", "education", "sustainable future", "0102"],
-      "notes": "Educational Singularity — 0102 epoch channel. Current consciousness state perspective.",
+      "aliases": ["esingularity", "e singularity", "0102 channel", "esingularity.ai", "ai koban", "ai交番"],
+      "routing_tags": ["singularity", "dae", "agenticness", "education", "sustainable future", "0102", "ai koban", "regional ai", "sovereign ai", "data center", "fukui", "jhr", "partner development", "community-first infrastructure"],
+      "notes": "Canonical LinkedIn social/publishing surface for FoundUp esingularity_001 and the current eSingularity.ai project. Primary current lanes: AI Koban, regional/sovereign AI infrastructure, JHR amplification, three-site feasibility, community-first compute and partner development. Historical Educational Singularity articles remain provenance. Verify the live signed-in page name/entity before mutation because cached public labels may lag.",
       "published_articles": [
         {"date": "2025-10-15", "title": "DAE's Perspective: The Rubik Cube of Agenticness"},
         {"date": "2023-06-05", "title": "Charting the Future of AI Education: AGI Courses via EDUIT.org"},

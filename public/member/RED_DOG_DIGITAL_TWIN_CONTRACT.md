@@ -2,7 +2,7 @@
 
 **Version**: 1.2.0
 **Status**: Active identity and surface contract; authenticated PFMall transport is specified, not implemented
-**Last updated**: 2026-09-05
+**Last updated**: 2026-11-19 (fractal context cross-reference; transport status unchanged)
 
 **Vision:** `docs/REDDOG_OUTCOME_VISION.md` defines the Red Dog north-star outcome. This contract defines current identity, authority, surface, and implementation truth; where the two differ, the difference is roadmap work rather than license to overstate current capability.
 
@@ -52,6 +52,14 @@ The following are **not currently implemented** in PFMall:
 The existing `reddog:command` browser event is a presentation hook only. It is
 not an authenticated AI transport and must not be upgraded into one by adding
 secrets, authority, or durable state to the browser.
+
+The specified [fractal navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+adds a permitted tile focus, caller history, graph revision and optional
+work/artifact binding to future contextual navigation. Those fields describe
+the required context; they do not establish an installed voice adapter,
+automatic synchronization between separate chats, or authority to dispatch
+OpenClaw/Hermes/WRE. The [dated audit](../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+separates copied PC reports from independently observed behavior.
 
 ## 3. Target hybrid topology
 

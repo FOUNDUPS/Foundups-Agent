@@ -43,7 +43,9 @@ from holo_index.storage_contract import (
     resolve_holoindex_ssd_path,
     storage_path_identity,
 )
-from holo_index.vector_segment_durability import durable_hnsw_configuration
+from holo_index.vector_segment_durability import (
+    durable_hnsw_configuration, validate_collection_raw_settings,
+)
 
 # Dependency bootstrap for this module
 # HOLOINDEX_AUTO_PIP_OPT_IN_PHASE1: Auto-install is now EXPLICIT OPT-IN only.
@@ -611,7 +613,7 @@ class HoloIndex:
                     detail=f"{type(exc).__name__}: {str(exc).strip()}",
                 ) from exc
         try:
-            return self.client.get_or_create_collection(
+            collection = self.client.get_or_create_collection(
                 name,
                 configuration=durable_hnsw_configuration(),
             )
@@ -621,12 +623,15 @@ class HoloIndex:
                 path=self.ssd_path,
                 operation=f"get_or_create_collection:{name}",
             ) from exc
+        validate_collection_raw_settings(collection)
+        return collection
 
     def _reset_collection(self, name: str):
         if os.getenv("HOLOINDEX_QUERY_READONLY", "").strip().lower() in {"1", "true", "yes", "y", "on"}:
             raise RuntimeError(
                 "HOLOINDEX_READONLY_QUERY_GUARD: refusing collection reset in read-only query context"
             )
+        self._ensure_collection(name)
         try:
             self.client.delete_collection(name)
         except Exception:
@@ -636,11 +641,13 @@ class HoloIndex:
             "embedding_model": self.index_embedding_model_id,
             "embedding_space_fingerprint": self.index_embedding_space_fingerprint,
         }
-        return self.client.create_collection(
+        collection = self.client.create_collection(
             name,
             metadata=metadata,
             configuration=durable_hnsw_configuration(),
         )
+        validate_collection_raw_settings(collection)
+        return collection
 
     # --------- Data Loading --------- #
 

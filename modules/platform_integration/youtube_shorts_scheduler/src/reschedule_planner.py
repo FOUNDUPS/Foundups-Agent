@@ -57,8 +57,9 @@ WSP References:
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,7 @@ logger = logging.getLogger(__name__)
 # single load-bearing knob (HARD_CAP_PER_DAY, schedule_tracker.py, landed #844).
 try:
     from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import (
-        HARD_CAP_PER_DAY,
+        HARD_CAP_PER_DAY, channel_daily_cap,
         ScheduleTracker,
     )
 except Exception:  # pragma: no cover - defensive import for isolated tests
@@ -78,7 +79,7 @@ except Exception:  # pragma: no cover - defensive import for isolated tests
 try:
     from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import (
         convert_et_to_channel_tz,
-        get_peak_slots_et,
+        get_peak_slots_et, require_same_date_cadence,
     )
 except Exception:  # pragma: no cover - defensive import for isolated tests
     def get_peak_slots_et() -> List[str]:  # type: ignore
@@ -89,6 +90,213 @@ except Exception:  # pragma: no cover - defensive import for isolated tests
 
 # How far ahead to search for under-target target days when none are free sooner.
 DEFAULT_HORIZON_DAYS = 90
+
+
+def plan_bounded_unlisted_batch(
+    *, channel_id, candidates, allowed_video_ids, source_start, source_end,
+    windows, timezone, occupied, inventory_complete, observed_at, live_state,
+    operator_editing, now, minimum_spacing_minutes=240,
+    minute_offsets=(7, 19, 31), max_per_day=None,
+    audience_timezone="America/New_York",
+):
+    """Pure preview of a finite unlisted batch; never a writer authorization.
+
+    Inputs are caller-supplied observations, NOT proof of provider state. The
+    caller must independently qualify their provenance. All datetimes must be
+    aware. Windows and source range are explicit half-open intervals. No current
+    date, future night, title-derived topic or runtime default is inferred.
+    This API is deliberately NOT wired to CLI, manifests, reservations or Save.
+    """
+    import pytz
+
+    def fail(reason):
+        raise ValueError("bounded_preview:" + reason)
+
+    def instant(value):
+        if not isinstance(value, datetime) or value.tzinfo is None or value.utcoffset() is None:
+            fail("aware_datetime_required")
+        return value.astimezone(dt_timezone.utc)
+
+    def sequence(value, name, limit):
+        if not isinstance(value, (list, tuple)) or len(value) > limit:
+            fail(name + "_invalid")
+
+    def video_id(value):
+        if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9_-]{11}", value):
+            fail("video_id_invalid")
+        return value
+
+    def text(value):
+        return isinstance(value, str) and bool(value.strip()) and len(value) <= 1000
+
+    if not isinstance(channel_id, str) or not re.fullmatch(r"UC[A-Za-z0-9_-]{22}", channel_id):
+        fail("channel_id_invalid")
+    try:
+        zone = pytz.timezone(timezone)
+        audience = pytz.timezone(audience_timezone)
+    except (pytz.UnknownTimeZoneError, AttributeError, TypeError):
+        fail("timezone_invalid")
+    current, observed = instant(now), instant(observed_at)
+    start, end = instant(source_start), instant(source_end)
+    if start >= end or end - start > timedelta(days=31):
+        fail("source_bounds_invalid")
+    if type(minimum_spacing_minutes) is not int or not 240 <= minimum_spacing_minutes <= 1440:
+        fail("spacing_invalid")
+    if max_per_day is not None and (type(max_per_day) is not int or max_per_day < 0):
+        fail("daily_cap_invalid")
+    cap = channel_daily_cap(channel_id, max_per_day)
+    sequence(minute_offsets, "minute_offsets", 60)
+    if (len(minute_offsets) < 2
+            or any(type(n) is not int or not 0 <= n < 60 for n in minute_offsets)
+            or len(set(minute_offsets)) < 2):
+        fail("minute_offsets_invalid")
+    if type(inventory_complete) is not bool or type(operator_editing) is not bool:
+        fail("observation_flags_invalid")
+    if live_state not in ("not_live", "live", "unknown"):
+        fail("live_state_invalid")
+    sequence(windows, "windows", 31)
+    if not windows:
+        fail("windows_required")
+    intervals = []
+    for pair in windows:
+        if not isinstance(pair, (tuple, list)) or len(pair) != 2:
+            fail("window_invalid")
+        left, right = map(instant, pair)
+        if (left >= right or right - left > timedelta(days=1)
+                or any(v.second or v.microsecond for v in (left, right))
+                or left < current or (intervals and left < intervals[-1][1])):
+            fail("window_bounds_invalid")
+        # A Studio wall time must identify exactly one instant (reject DST folds).
+        for value in (left, right):
+            try:
+                wall = value.astimezone(zone).replace(tzinfo=None)
+                if zone.localize(wall, is_dst=None).astimezone(dt_timezone.utc) != value:
+                    fail("window_wall_time_invalid")
+            except pytz.InvalidTimeError:
+                fail("window_wall_time_ambiguous")
+        intervals.append((left, right))
+    if intervals[-1][1] - intervals[0][0] > timedelta(days=31):
+        fail("window_horizon_invalid")
+    sequence(allowed_video_ids, "allowed_video_ids", 1000)
+    allowed = {video_id(v) for v in allowed_video_ids}
+    sequence(candidates, "candidates", 1000)
+    sequence(occupied, "occupied", 10000)
+    occupied_by_id = {}
+    day_ids = {}
+    for row in occupied:
+        if not isinstance(row, dict) or set(row) != {"channel_id", "video_id", "publish_at", "status"}:
+            fail("occupied_schema_invalid")
+        vid = video_id(row["video_id"])
+        when = instant(row["publish_at"])
+        if row["channel_id"] != channel_id or row["status"] not in ("scheduled", "reserved", "unknown"):
+            fail("occupied_scope_invalid")
+        if vid in occupied_by_id and occupied_by_id[vid] != when:
+            fail("occupied_conflict")
+        occupied_by_id[vid] = when
+        day_ids.setdefault(when.astimezone(zone).date(), set()).add(vid)
+
+    seen, eligible, excluded = {}, [], []
+    keys = {"channel_id", "video_id", "visibility", "source_at", "topic",
+            "evidence_ref", "content_verified", "held"}
+    for row in candidates:
+        if not isinstance(row, dict) or set(row) != keys:
+            fail("candidate_schema_invalid")
+        vid = video_id(row["video_id"])
+        created = instant(row["source_at"])
+        if (row["channel_id"] != channel_id or type(row["held"]) is not bool
+                or type(row["content_verified"]) is not bool
+                or row["visibility"] not in ("unlisted", "private", "public", "scheduled", "unknown")
+                or not isinstance(row["topic"], str) or not isinstance(row["evidence_ref"], str)):
+            fail("candidate_fields_invalid")
+        if vid in seen:
+            if row != seen[vid]:
+                fail("candidate_conflict")
+            continue
+        seen[vid] = dict(row)
+        reason = None
+        if vid not in allowed:
+            reason = "outside_allowed_ids"
+        elif row["held"]:
+            reason = "held"
+        elif vid in occupied_by_id or row["visibility"] == "scheduled":
+            reason = "already_scheduled_or_reserved"
+        elif row["visibility"] != "unlisted":
+            reason = "not_unlisted"
+        elif created > current:
+            reason = "source_in_future"
+        elif not start <= created < end:
+            reason = "outside_source_window"
+        elif not row["content_verified"] or not text(row["topic"]) or not text(row["evidence_ref"]):
+            reason = "content_evidence_missing"
+        if reason:
+            excluded.append({"video_id": vid, "reason": reason})
+        else:
+            eligible.append(dict(row))
+    excluded.extend({"video_id": vid, "reason": "candidate_missing"}
+                    for vid in sorted(allowed - set(seen)))
+    result = {"schema": "bounded_unlisted_preview.v1", "status": "preview_only",
+              "effects_disabled": True, "execution_authorized": False,
+              "scheduling_verified": False, "channel_id": channel_id,
+              "timezone": timezone, "audience_timezone": audience_timezone,
+              "observation_at": observed.isoformat(), "daily_cap": cap,
+              "planned": [], "excluded": excluded, "unplaced": [],
+              "limitations": ["caller_observations_not_provider_proof",
+                              "no_future_live_state_guarantee", "not_a_writer_input"]}
+    blocked = ("inventory_incomplete" if not inventory_complete else
+               "observations_stale_or_future" if not timedelta(0) <= current - observed <= timedelta(seconds=60) else
+               "operator_editing" if operator_editing else
+               "live_state_not_clear" if live_state != "not_live" else None)
+    if blocked:
+        result.update(status="blocked", reason=blocked)
+        result["unplaced"] = [r["video_id"] for r in eligible]
+        return result
+
+    # Stable top/bottom traversal; scan from the chosen end for a different
+    # verified topic when available. Never classify from row position or title.
+    ordered, from_top, last_topic = [], True, None
+    while eligible:
+        indices = list(range(len(eligible)))
+        if not from_top:
+            indices.reverse()
+        index = next((i for i in indices if eligible[i]["topic"].strip().casefold() != last_topic), indices[0])
+        picked = eligible.pop(index)
+        ordered.append(picked)
+        last_topic = picked["topic"].strip().casefold()
+        from_top = not from_top
+
+    spacing = timedelta(minutes=minimum_spacing_minutes)
+    occupied_instants = list(occupied_by_id.values())
+    cursor, tick, previous = 0, 0, None
+    for left, right in intervals:
+        anchor = left
+        while anchor < right and cursor < len(ordered):
+            candidate = anchor + timedelta(minutes=minute_offsets[tick % len(minute_offsets)])
+            tick += 1
+            anchor += spacing
+            if previous is not None:
+                candidate = max(candidate, previous + spacing)
+            if candidate >= right or candidate <= current:
+                continue
+            local = candidate.astimezone(zone)
+            try:
+                if zone.localize(local.replace(tzinfo=None), is_dst=None).astimezone(dt_timezone.utc) != candidate:
+                    continue
+            except pytz.InvalidTimeError:
+                continue
+            if (len(day_ids.get(local.date(), set())) >= cap
+                    or any(abs(candidate - old) < spacing for old in occupied_instants)):
+                continue
+            row = ordered[cursor]
+            result["planned"].append({"video_id": row["video_id"], "topic": row["topic"],
+                                      "evidence_ref": row["evidence_ref"],
+                                      "publish_at_utc": candidate.isoformat(),
+                                      "publish_at_studio": local.isoformat(),
+                                      "publish_at_audience": candidate.astimezone(audience).isoformat()})
+            occupied_instants.append(candidate)
+            day_ids.setdefault(local.date(), set()).add(row["video_id"])
+            previous, cursor = candidate, cursor + 1
+    result["unplaced"] = [r["video_id"] for r in ordered[cursor:]]
+    return result
 
 # Sentinel for moves whose specific video id is unknown from the tracker (needs
 # the LIVE Studio list -- Phase 2).
@@ -226,14 +434,15 @@ def find_target_days(
 
 # === Malleable seam: peak-slot assignment (per channel tz) ====================
 
-def assign_peak_slot(slot_index: int, channel_tz: str, on_date: datetime) -> tuple:
+def assign_peak_slot(slot_index: int, channel_tz: str, on_date: datetime, channel_id: str = "") -> tuple:
     """Return (slot_et, slot_local) for the slot_index-th fill of a day.
 
     slot_index 0 -> morning (08:00 ET), 1 -> lunch (12:00 ET), 2 -> evening (20:00
     ET); beyond the list it clamps to the last slot. slot_local is the bare 12h
     wall-clock to type into Studio in the channel account tz (DST-aware, #847).
     """
-    et_slots = get_peak_slots_et()
+    require_same_date_cadence(channel_id, channel_tz, on_date)
+    et_slots = get_peak_slots_et(channel_id)
     idx = min(slot_index, len(et_slots) - 1)
     slot_et = et_slots[idx]
     slot_local = convert_et_to_channel_tz(slot_et, channel_tz, on_date)
@@ -267,7 +476,7 @@ def plan_channel_reschedule(
     schedule: Dict[str, int],
     *,
     video_ids: Optional[Dict[str, List[str]]] = None,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     today: Optional[datetime] = None,
     horizon_days: int = DEFAULT_HORIZON_DAYS,
 ) -> ChannelReschedulePlan:
@@ -292,6 +501,7 @@ def plan_channel_reschedule(
         ChannelReschedulePlan with moves + summary (days_over_cap, total_moves,
         unplaceable_moves).
     """
+    cap = channel_daily_cap(channel_id, cap)
     vids = video_ids or {}
     base = today or datetime.now()
 
@@ -322,7 +532,7 @@ def plan_channel_reschedule(
                 if used >= cap:
                     continue
                 slot_index = used  # 0->morning, 1->lunch, 2->evening
-                slot_et, slot_local = assign_peak_slot(slot_index, channel_tz, to_dt)
+                slot_et, slot_local = assign_peak_slot(slot_index, channel_tz, to_dt, channel_id)
                 moves.append(
                     MovePlan(
                         channel_id=channel_id,
@@ -375,7 +585,7 @@ def _default_load_schedule(channel_id: str) -> tuple:
 
 def plan_all_channels(
     *,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     channels: Optional[List[Dict[str, str]]] = None,
     load_schedule: Callable[[str], tuple] = _default_load_schedule,
     today: Optional[datetime] = None,

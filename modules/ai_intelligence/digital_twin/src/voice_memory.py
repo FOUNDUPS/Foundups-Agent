@@ -74,25 +74,41 @@ def _probe_chromadb_health(ssd_path: str = "E:/HoloIndex") -> bool:
         return False
 
 
-def _get_video_index():
-    """Lazy load VideoContentIndex from HoloIndex."""
+def _get_video_index(*, allow_cold_init: bool = True, cancel_event=None):
+    """Reuse the owned cache; optionally forbid cold initialization."""
     global _video_index
+    if cancel_event is not None and cancel_event.is_set():
+        return None
     if _video_index is None:
+        if not allow_cold_init:
+            logger.debug('[VOICE-MEMORY] Cold optional video memory skipped (ready-only)')
+            return None
         try:
             # Subprocess probe: detect HNSW corruption before loading in-process
-            if not _probe_chromadb_health():
+            healthy = _probe_chromadb_health()
+            if cancel_event is not None and cancel_event.is_set():
+                return None
+            if not healthy:
                 logger.warning("[VOICE-MEMORY] Skipping VideoContentIndex — ChromaDB probe failed")
                 _video_index = False
                 return None
             from holo_index.core.video_search import VideoContentIndex
+            if cancel_event is not None and cancel_event.is_set():
+                return None
             _video_index = VideoContentIndex()
             logger.info("[VOICE-MEMORY] HoloIndex VideoContentIndex connected")
         except ImportError:
+            if cancel_event is not None and cancel_event.is_set():
+                return None
             logger.debug("[VOICE-MEMORY] HoloIndex not available")
             _video_index = False
         except Exception as e:
+            if cancel_event is not None and cancel_event.is_set():
+                return None
             logger.warning(f"[VOICE-MEMORY] HoloIndex connection failed: {e}")
             _video_index = False
+    if cancel_event is not None and cancel_event.is_set():
+        return None
     return _video_index if _video_index else None
 
 
@@ -308,17 +324,22 @@ class VoiceMemory:
         logger.info(f"[VOICE-MEMORY] Loaded {len(self.documents)} documents")
         return True
     
-    def query(self, text: str, k: int = 5) -> List[Dict[str, Any]]:
+    def query(self, text: str, k: int = 5, *, allow_cold_init: bool = True,
+              cancel_event=None) -> List[Dict[str, Any]]:
         """
         Query voice memory for similar snippets (hybrid: local + HoloIndex).
 
         Args:
             text: Query text
             k: Number of results
+            allow_cold_init: False reuses only an existing video index/model.
+            cancel_event: Optional cooperative cancellation between stages.
 
         Returns:
             List of {text, source_id, source_type, score, ...}
         """
+        if cancel_event is not None and cancel_event.is_set():
+            return []
         results = []
 
         # 1. Query local corpus (comments)
@@ -328,10 +349,18 @@ class VoiceMemory:
             elif self.vectorizer:
                 results.extend(self._query_tfidf(text, k))
 
+        if cancel_event is not None and cancel_event.is_set():
+            return []
         # 2. Query HoloIndex video transcripts (if enabled)
         if self.include_videos:
-            video_results = self._query_holoindex(text, k)
+            if allow_cold_init and cancel_event is None:
+                video_results = self._query_holoindex(text, k)
+            else:
+                video_results = self._query_holoindex(
+                    text, k, allow_cold_init=allow_cold_init, cancel_event=cancel_event)
             results.extend(video_results)
+        if cancel_event is not None and cancel_event.is_set():
+            return []
 
         # 3. Sort by score and dedupe
         results = sorted(results, key=lambda x: x.get("score", 0), reverse=True)
@@ -352,14 +381,26 @@ class VoiceMemory:
 
         return final_results
 
-    def _query_holoindex(self, text: str, k: int) -> List[Dict[str, Any]]:
+    def _query_holoindex(self, text: str, k: int, *, allow_cold_init: bool = True,
+                         cancel_event=None) -> List[Dict[str, Any]]:
         """Query HoloIndex VideoContentIndex for video transcripts."""
-        video_index = _get_video_index()
+        if allow_cold_init and cancel_event is None:
+            video_index = _get_video_index()
+        else:
+            video_index = _get_video_index(allow_cold_init=allow_cold_init, cancel_event=cancel_event)
         if not video_index:
+            return []
+        if cancel_event is not None and cancel_event.is_set():
             return []
 
         try:
-            matches = video_index.search(text, k=k)
+            if allow_cold_init and cancel_event is None:
+                matches = video_index.search(text, k=k)
+            else:
+                matches = video_index.search(text, k=k, allow_cold_init=allow_cold_init,
+                                             cancel_event=cancel_event)
+            if cancel_event is not None and cancel_event.is_set():
+                return []
             results = []
             for match in matches:
                 results.append({

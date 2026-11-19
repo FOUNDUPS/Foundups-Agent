@@ -6,14 +6,16 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping, TypeVar
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    DESCRIPTOR_SCHEMA_V2,
+    validate_root_verified_outcome_descriptor_identity_public,
     validate_root_verified_outcome_descriptor_public,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
     RootAuthorityExchange,
-    _lookup_exchange,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_protected_use_client_exchange import (
     exchange_protected_use,
+    _valid_dependencies,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_protected_use_protocol import (
     OP_ACQUIRE,
@@ -26,6 +28,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_capability_
     freeze_owner_e0_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
+    POLICY_SCHEMA_V10,
     validated_signer_owner_e0_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
@@ -107,7 +110,13 @@ def _create_root_protected_use_authority(
     now_epoch: int,
 ) -> RootProtectedUseAuthority:
     checked = validated_signer_owner_e0_policy(policy, now_epoch=now_epoch)
-    root_descriptor = validate_root_verified_outcome_descriptor_public(
+    validate_descriptor = validate_root_verified_outcome_descriptor_public
+    if (checked["schema_version"] == POLICY_SCHEMA_V10
+            and isinstance(descriptor, Mapping)
+            and descriptor.get("schema_version") == DESCRIPTOR_SCHEMA_V2
+            and type(descriptor.get("grants")) is list and descriptor["grants"] == []):
+        validate_descriptor = validate_root_verified_outcome_descriptor_identity_public
+    root_descriptor = validate_descriptor(
         descriptor, now_epoch=now_epoch
     )
     if not _valid_dependencies(
@@ -122,20 +131,6 @@ def _create_root_protected_use_authority(
         exchange=exchange, request_signer=request_signer,
     ))
     return authority
-
-
-def _valid_dependencies(
-    policy: Mapping[str, Any], descriptor: Mapping[str, Any], owner_config_id: str,
-    binding: object, exchange: object, request_signer: object,
-) -> bool:
-    return bool(
-        type(binding) is SignerGrantRevocationAuthorityBinding
-        and type(exchange) is RootAuthorityExchange and callable(request_signer)
-        and _lookup_exchange(exchange).expected_uid == 0
-        and owner_config_id == policy["owner_config_id"]
-        and policy["target_signer_public_key"] == descriptor["signer_public_key"]
-        and binding.policy_id == policy["policy_id"]
-    )
 
 
 def _finish(

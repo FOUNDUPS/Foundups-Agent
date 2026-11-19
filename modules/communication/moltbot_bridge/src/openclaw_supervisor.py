@@ -2259,7 +2259,12 @@ class OpenClawSupervisor:
             from modules.ai_intelligence.ai_overseer.src.ai_overseer import (
                 AIIntelligenceOverseer,
             )
-            self._ai_overseer = AIIntelligenceOverseer(repo_root=self.repo_root)
+            # Supervisor plans use advisory classification only. Native model
+            # acquisition here races the interactive console on Windows and is
+            # not required by the supervisor's existing triage/dispatch owners.
+            self._ai_overseer = AIIntelligenceOverseer(
+                repo_root=self.repo_root, initialize_models=False
+            )
             logger.info("[SUPERVISOR] AI Overseer loaded")
         except ImportError as e:
             logger.debug("[SUPERVISOR] AI Overseer unavailable: %s", e)
@@ -2368,20 +2373,17 @@ class OpenClawSupervisor:
 
         self._observe_holoindex_postmerge(obs)
 
-        # Poll DaemonSelfAuditLoop for real events (ported from Supervisor24x7)
-        # NOTE: scan_once() returns int (count of events), not an iterable
-        if self._self_audit_loop and hasattr(self._self_audit_loop, "scan_once"):
-            try:
-                event_count = self._self_audit_loop.scan_once()
-                if event_count and event_count > 0:
-                    obs["self_audit_event_count"] = event_count
-                    self.metrics.events_observed += event_count
-                    logger.info(
-                        "[SUPERVISOR] OBSERVE: %d self-audit events detected",
-                        event_count,
-                    )
-            except Exception as exc:
-                logger.warning("[SUPERVISOR] OBSERVE: scan_once() failed: %s", exc)
+        from modules.infrastructure.wre_core.src.daemon_self_audit_loop import observe_self_audit_status
+
+        status = observe_self_audit_status(self._self_audit_loop, enabled=self.self_audit_enabled)
+        obs["self_audit_status"] = status
+        event_count = status["event_count"]
+        if event_count is not None and event_count > 0:
+            obs["self_audit_event_count"] = event_count
+            self.metrics.events_observed += event_count
+            logger.info("[SUPERVISOR] OBSERVE: %d self-audit events detected", event_count)
+        if status["outcome"] == "failed":
+            logger.warning("[SUPERVISOR] OBSERVE: scan_once() failed: %s", "scan_failed")
 
         return obs
 
@@ -2655,7 +2657,8 @@ class OpenClawSupervisor:
         if triage["action"] == "claim_signed_worker_tasks_until_idle":
             plan["max_claims"] = triage.get("max_claims", 1)
 
-        # WSP 77: AI Overseer fast classification (Gemma 50-100ms)
+        # WSP 77: advisory analysis; lightweight startup uses the existing
+        # deterministic fallback. Triage, not this metadata, owns the action.
         if self._ai_overseer is not None:
             try:
                 mission_desc = f"{triage['action']}: {triage.get('reason', 'supervisor cycle')}"

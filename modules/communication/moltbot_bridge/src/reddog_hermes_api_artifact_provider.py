@@ -55,7 +55,7 @@ class HermesApiArtifactGenerationRunner:
         route = signed_hermes_route(verified)
         if route is None:
             return reject_hermes("FAIL_HERMES_MODEL_BINDING")
-        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt):
+        if not validate_provider_m2m_prompt(verified, prompt, gate.redacted_prompt, context):
             return reject_hermes(FAIL_M2M_PROMPT_BINDING)
         try:
             api_key = self.api_key_provider.read_key()

@@ -1,0 +1,98 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "verifier",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "QA",
+  "S": {
+    "owner": "modules/foundups/memory_horizon",
+    "read": [
+      "modules/foundups/memory_horizon/src",
+      "modules/foundups/memory_horizon/tests",
+      "modules/foundups/memory_horizon/docs",
+      "modules/foundups/memory_horizon/work_orders"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-07.json"
+    ]
+  },
+  "M": "qa",
+  "T": "MH-RSI-07",
+  "A": "VALIDATE deterministic product and measurement acceptance against Phase 1 contract",
+  "R": [
+    0,
+    5,
+    6,
+    15,
+    22,
+    50,
+    62,
+    84,
+    97,
+    99,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "depends_on": [
+      "MH-RSI-06"
+    ],
+    "author_independent": true,
+    "no_source_fix_in_verifier_lane": true,
+    "synthetic_first": true,
+    "no_live_medical_claim": true,
+    "effect_boundary": "Read/test only except result evidence."
+  },
+  "O": [
+    "deterministic synthetic acceptance report",
+    "browser/device test plan/results where environment permits",
+    "defect list with narrow repair tickets if needed",
+    "work_orders/results/MH-RSI-07.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_MH-RSI-06",
+    "depends_on": [
+      "MH-RSI-06"
+    ],
+    "objective": "Independently falsify the POC before any public-surface work.",
+    "steps": [
+      "Run focused/module tests from current candidate.",
+      "Verify deterministic replay, contamination guard and export round-trip.",
+      "Check 12+ unique event availability and both probe presentation modes.",
+      "Attempt timing/background/resume edge cases in available browser harnesses.",
+      "Return accept/reject/blocked with exact evidence; author lane performs any repair."
+    ],
+    "wsp15": {
+      "complexity": 4,
+      "importance": 5,
+      "deferability": 5,
+      "impact": 5,
+      "total": 19,
+      "priority": "P0"
+    },
+    "requirements": {
+      "compute_class": "HIGH",
+      "reasoning_depth": "DEEP",
+      "tools": [
+        "repository_read",
+        "test_runner"
+      ],
+      "verification_class": "INDEPENDENT_ACCEPTANCE"
+    },
+    "acceptance": [
+      "Verifier did not author the candidate it accepts.",
+      "All Phase 1 criteria have evidence or explicit blockers.",
+      "Any failure produces a reproducible defect, not a prose concern.",
+      "No public/deployment action occurs."
+    ],
+    "rollback": "Read-only verifier lane; preserve all failure evidence."
+  }
+}

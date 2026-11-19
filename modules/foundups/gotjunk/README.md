@@ -1,5 +1,37 @@
 # GotJUNK? FoundUp
 
+## Current product direction — intelligent camera and FoundUps Mall
+
+GotJunk is planned as a domain workflow inside the existing Play FoundUps Mall. AutoPost owns the reusable camera, capture, media, and perception pipeline. The intended intelligent camera uses image evidence together with spoken or selected user intent to propose a destination such as a GotJunk dumping report or a Shop listing. The user can confirm or correct the proposal before handoff. GotJunk will not add a separate camera stack.
+
+A confirmed GotJunk report is distinct from a reuse, giveaway, or sale listing. Report submission, administrator notification, and public status display are planned capabilities, not implemented services. The receiving organization and accepted intake channel remain to be identified. See the [current roadmap](ROADMAP.md) and [Mall migration handoff](PFMALL_MIGRATION_HANDOFF.md).
+
+## Mall migration evidence stage — 2026-10-12
+
+GotJunk remains an **offline-first** source. Its actual browser database is
+`got-junk-pwa` / `captured_items`; no rename, cloud migration, or production
+cutover is authorized. The new
+[metadata-only inventory planner](MIGRATION_INVENTORY_README.md) accepts
+explicit operator exports and reports conflicts without including owner IDs,
+location or raw media. It does not access Firebase or install a new backend.
+Mall public discovery and independently reviewed publication reads are in
+PRs #2117 and #2118. Neither authorizes enabling a production provider.
+
+
+## Architecture direction — 2026-10-12
+
+GotJunk is a legacy FoundUp to be migrated onto the shared Play FoundUps /
+p.fMALL architecture alongside Shop and GetK. The Mall owns internal discovery
+and search; GotJunk retains its capture and item-management behavior. Its
+existing Mall manifest/route does not mean storage and services are shared.
+
+See [migration decision and agent handoff](PFMALL_MIGRATION_HANDOFF.md) for
+verified owners, storage gaps, staged implementation and acceptance gates.
+Migration is **not implemented**. The deployment instructions below describe
+the legacy system, not a recommendation to expand it. Do not enable legacy
+Firebase Storage just to unblock deployment before resolving shared storage
+ownership. Preserve the security fixes and assess any live legacy exposure.
+
 **Purpose**: Rapid-capture PWA to take photos/videos and organize them with AI-powered swipe interface and geo-fencing
 
 **Domain**: `modules/foundups/` (WSP 3 functional distribution)
@@ -169,7 +201,7 @@ const nearbyItems = allItems.filter(item => {
 
 ## Development Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for PoC → Prototype → MVP progression.
+See [ROADMAP.md](ROADMAP.md) for the current intelligent-camera routing and Play FoundUps Mall convergence plan. The legacy PoC → Prototype → MVP material remains there as historical context.
 
 ### Phase 1: PoC (COMPLETE)
 - ✅ Photo capture with geolocation
@@ -210,7 +242,7 @@ This FoundUp leverages WRE-built platform modules:
 
 ---
 
-**Remember**: This is a **standalone FoundUp application**, not infrastructure. Platform definitions live in WSP_framework/, this implements them.
+**Architecture status**: This is a legacy standalone application planned for convergence into the existing Play FoundUps Mall. The Mall owns discovery, AutoPost owns camera/capture/perception, and GotJunk owns its domain workflows. Convergence is not implemented.
 
 ---
 

@@ -233,7 +233,7 @@ def test_run_skill_scan_reports_missing_scanner(tmp_path: Path):
     """Scanner unavailable: available=False, passed=False (WSP 95 fail-closed)."""
     skills_dir = _wardrobe(tmp_path)
 
-    with patch("modules.communication.moltbot_bridge.src.skill_safety_guard.shutil.which", return_value=None):
+    with patch.object(guard, "_locate_scanner", return_value=None):
         result = run_skill_scan(skills_dir=skills_dir)
 
     assert result.available is False
@@ -527,6 +527,55 @@ def test_openclaw_dae_cached_verdict_never_skips_current_scan(cached, age, sever
     assert dae._skill_scan_message == "current"
 
 
+def _offline_scanner_parent_environment(conflicting):
+    """Return only synthetic values; never inspect the real parent environment."""
+    launch = {name: "synthetic-" + name for name in (
+        "PATH", "PATHEXT", "SYSTEMROOT", "WINDIR", "COMSPEC",
+        "LANG", "LC_ALL", "NO_COLOR",
+    )}
+    parent = dict(launch, OPENAI_API_KEY="synthetic-not-a-credential",
+                  HTTP_PROXY="synthetic-proxy", PYTHONPATH="synthetic-module-path",
+                  LITELLM_API_BASE="synthetic-endpoint", UNSAFE_KNOB="synthetic")
+    parent.update(TMP="parent-temp", TEMP="parent-temp", PYTHONIOENCODING="ascii")
+    if conflicting:
+        parent.update(PYTHON_DOTENV_DISABLED="0", LITELLM_MODE="DEV",
+                      LITELLM_LOCAL_MODEL_COST_MAP="False", PYTHONDONTWRITEBYTECODE="0")
+    return parent, launch
+
+
+@pytest.mark.parametrize("conflicting", [False, True], ids=["missing", "conflicting"])
+def test_scanner_child_forces_offline_environment(scan_subject, monkeypatch, conflicting):
+    """Both scanner command forms receive enforced offline import controls."""
+    skills, reports, single = scan_subject
+    parent, launch = _offline_scanner_parent_environment(conflicting)
+    original_parent = dict(parent)
+    monkeypatch.setattr(guard.os, "environ", parent)
+    with patch.object(guard.subprocess, "run", side_effect=_scanner_process(
+        {}, single_skill=single,
+    )) as scanner:
+        result = run_skill_scan(skills, report_dir=reports)
+    scanner.assert_called_once()
+    command = scanner.call_args.args[0]
+    invocation = scanner.call_args.kwargs
+    private_report = Path(command[command.index("--output") + 1])
+    expected = dict(launch)
+    expected.update(TMP=str(private_report.parent), TEMP=str(private_report.parent),
+                    PYTHONIOENCODING="utf-8", PYTHON_DOTENV_DISABLED="1",
+                    LITELLM_MODE="PRODUCTION", LITELLM_LOCAL_MODEL_COST_MAP="True",
+                    PYTHONDONTWRITEBYTECODE="1")
+    assert invocation["env"] == expected
+    assert parent == original_parent
+    assert command[0:3] == ["skill-scanner", "scan" if single else "scan-all", str(skills)]
+    assert ("--skill-file" in command) is single
+    assert ("--recursive" in command) is not single
+    assert invocation["capture_output"] is True and invocation["text"] is True
+    assert invocation["timeout"] == 90
+    assert result.available is True and result.passed is True
+    assert result.manifest_passed is True and result.exit_code == 0
+    assert private_report.parent.parent == reports and not private_report.parent.exists()
+    assert Path(result.report_path).is_file()
+
+
 @pytest.mark.parametrize("change", ["edit", "add", "delete", "manifest"])
 def test_openclaw_dae_rechecks_changed_wardrobe(tmp_path, change):
     dae = _openclaw_dae(ttl=300)
@@ -565,18 +614,20 @@ def test_openclaw_dae_legacy_cache_controls_rescan(ttl, age, always):
 
 @pytest.mark.parametrize("mode", ["scan", "unavailable", "import_error"])
 @pytest.mark.parametrize("passed", [False, True])
-def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed):
+@pytest.mark.parametrize("details", [False, True])
+def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed, details):
     dae = _openclaw_dae()
     dae._skill_scan_required = not passed
     first = guard.SkillScanResult(mode == "scan", passed, 0, "/test", None, "first")
     second = guard.SkillScanResult(True, not passed, 0, "/test", None, "second")
     results = [] if mode == "import_error" else [first]
     results.append(second)
-    later = []
+    later, messages = [], []
 
     def publish(self, name, value):
         object.__setattr__(self, name, value)
         if self is dae and name == "_skill_scan_message" and not later:
+            messages.append(value)
             later.append(None)
             monkeypatch.setitem(sys.modules, guard.__name__, guard)
             later[0] = dae._ensure_skill_safety()
@@ -585,8 +636,14 @@ def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed):
     if mode == "import_error":
         monkeypatch.setitem(sys.modules, guard.__name__, None)
     with patch.object(guard, "run_skill_scan", side_effect=results) as scan:
-        assert dae._ensure_skill_safety() is passed
+        if details:
+            result = dae._ensure_skill_safety(details=True)
+            assert type(result) is tuple and len(result) == 2
+            assert result[0] is passed and result[1] == messages[0]
+        else:
+            assert dae._ensure_skill_safety() is passed
     assert later == [not passed]
+    assert dae._skill_scan_message == "second"
     assert dae._skill_scan_ok is (not passed)  # Latest diagnostics are not this call's verdict.
     assert scan.call_count == len(results)
 
@@ -598,7 +655,8 @@ def test_openclaw_dae_returns_own_verdict(monkeypatch, mode, passed):
     ("max_severity", "medium", "low"), ("max_severity", "medium", "high"),
     (None, None, None),
 ])
-def test_openclaw_dae_rejects_policy_drift(available, field, before, after):
+@pytest.mark.parametrize("details", [False, True])
+def test_openclaw_dae_rejects_policy_drift(available, field, before, after, details):
     dae = _openclaw_dae()
     if field:
         setattr(dae, "_skill_scan_" + field, before)
@@ -611,7 +669,12 @@ def test_openclaw_dae_rejects_policy_drift(available, field, before, after):
         return guard.SkillScanResult(available, True, 0, "/test", None, "current")
 
     with patch.object(guard, "run_skill_scan", side_effect=scan) as call:
-        assert dae._ensure_skill_safety() is (available and field is None)
+        if details:
+            result = dae._ensure_skill_safety(details=True)
+            assert result[0] is (available and field is None)
+            assert result[1] == ("skill scan policy changed during scan" if field else "current")
+        else:
+            assert dae._ensure_skill_safety() is (available and field is None)
     call.assert_called_once()
     if field:
         assert dae._skill_scan_message == "skill scan policy changed during scan"
@@ -656,3 +719,18 @@ def test_openclaw_dae_process_downgrades_foundup_on_safety_failure():
     with patch.object(guard, "run_skill_scan", return_value=_failed_scan_result("blocked by test")):
         gate_result = dae._ensure_skill_safety(force=False)
     assert gate_result is False
+
+
+@pytest.mark.parametrize("details", [False, None, 1, "truthy-object"])
+@pytest.mark.parametrize("force", [False, True])
+@pytest.mark.parametrize("passed", [False, True])
+def test_openclaw_dae_details_requires_literal_true(details, force, passed):
+    dae = _openclaw_dae()
+    if details == "truthy-object":
+        details = MagicMock()
+        details.__bool__.side_effect = AssertionError("details must not use truthiness")
+    result = guard.SkillScanResult(True, passed, 0, "/test", None, "current")
+    with patch.object(guard, "run_skill_scan", return_value=result) as scan:
+        assert dae._ensure_skill_safety(force=force, details=details) is passed
+    scan.assert_called_once()
+    assert dae._skill_scan_message == "current"

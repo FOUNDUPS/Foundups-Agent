@@ -205,30 +205,119 @@ class TestPatternMemory:
         assert all(p["success"] == 1 for p in patterns)
 
     def test_recall_failure_patterns(self, memory):
-        """Test recalling failed execution patterns"""
-        # Store 2 successful and 3 failed outcomes
-        for i in range(5):
-            fidelity = 0.65 if i >= 2 else 0.92  # Last 3 are failures
-            outcome = SkillOutcome(
-                execution_id=f"exec_{i:03d}",
-                skill_name="qwen_gitpush",
+        """Failure recall separates outcome success from structural fidelity."""
+        cases = [(True, 0.20), (False, 0.20), (False, 0.65),
+                 (False, 0.70), (False, 0.99), (True, 0.92)]
+        for i, (success, fidelity) in enumerate(cases):
+            memory.store_outcome(SkillOutcome(
+                execution_id=f"exec_{i:03d}", skill_name="qwen_gitpush",
+                agent="qwen", timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}), output_result=json.dumps({}),
+                success=success, pattern_fidelity=fidelity, outcome_quality=0.70,
+                execution_time_ms=1000, step_count=4,
+            ))
+        patterns = memory.recall_failure_patterns("qwen_gitpush", max_fidelity=0.70)
+        assert {p["execution_id"] for p in patterns} == {"exec_001", "exec_002", "exec_003"}
+        assert all(p["success"] == 0 and p["pattern_fidelity"] <= 0.70 for p in patterns)
+        expanded = memory.recall_failure_patterns("qwen_gitpush", max_fidelity=1.0)
+        assert {p["execution_id"] for p in expanded} == {"exec_001", "exec_002", "exec_003", "exec_004"}
+        assert memory.recall_failure_patterns("absent") == []
+        assert memory.recall_failure_patterns("qwen_gitpush", limit=0) == []
+
+    def test_recall_parent_version_pre_limit_and_fail_closed(self, memory):
+        """Foreign versions must not crowd out LIMIT and malformed/blank versions fail closed."""
+        from modules.infrastructure.wre_core.src.skill_execution_truth import (
+            bind_skill_execution_result,
+            loaded_skill_digest,
+        )
+
+        v1_digest = loaded_skill_digest("# Skill v1\n")
+        v2_digest = loaded_skill_digest("# Skill v2\n")
+        fp = "a" * 64
+
+        # Insert 20 high-fidelity foreign (v1) successes and failures
+        for i in range(20):
+            bound_ok = bind_skill_execution_result(
+                {"output": f"v1 ok {i}"},
+                skill_content="# Skill v1\n",
+                execution_id=f"v1_ok_{i:02d}",
+                admission_fingerprint=fp,
+            )
+            memory.store_outcome(SkillOutcome(
+                execution_id=f"v1_ok_{i:02d}",
+                skill_name="bounded_skill",
                 agent="qwen",
                 timestamp=datetime.now().isoformat(),
                 input_context=json.dumps({}),
-                output_result=json.dumps({}),
-                success=(i < 2),
-                pattern_fidelity=fidelity,
-                outcome_quality=0.70,
-                execution_time_ms=1000,
-                step_count=4
+                output_result=json.dumps(bound_ok),
+                success=True,
+                pattern_fidelity=0.99,
+                outcome_quality=0.99,
+                execution_time_ms=100,
+                step_count=1,
+            ))
+            bound_fail = bind_skill_execution_result(
+                {"output": f"v1 fail {i}"},
+                skill_content="# Skill v1\n",
+                execution_id=f"v1_fail_{i:02d}",
+                admission_fingerprint=fp,
             )
-            memory.store_outcome(outcome)
+            memory.store_outcome(SkillOutcome(
+                execution_id=f"v1_fail_{i:02d}",
+                skill_name="bounded_skill",
+                agent="qwen",
+                timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}),
+                output_result=json.dumps(bound_fail),
+                success=False,
+                pattern_fidelity=0.10,
+                outcome_quality=0.0,
+                execution_time_ms=100,
+                step_count=1,
+            ))
 
-        # Recall failure patterns (≤0.70 fidelity)
-        patterns = memory.recall_failure_patterns("qwen_gitpush", max_fidelity=0.70)
+        # Target v2 rows with lower fidelity than the 20 v1 rows + malformed + wrong schema_version
+        for eid, success, fid, raw_output in [
+            ("v2_ok_01", True, 0.91, json.dumps(bind_skill_execution_result({"output": "v2 ok"}, skill_content="# Skill v2\n", execution_id="v2_ok_01", admission_fingerprint=fp))),
+            ("v2_fail_01", False, 0.65, json.dumps(bind_skill_execution_result({"output": "v2 fail"}, skill_content="# Skill v2\n", execution_id="v2_fail_01", admission_fingerprint=fp))),
+            ("legacy_ok", True, 0.98, json.dumps({"output": "legacy"})),
+            ("malformed_ok", True, 0.99, "{bad json"),
+            ("forged_schema_ok", True, 0.99, json.dumps({"_skill_binding": {"schema_version": "wrong.v0", "loaded_skill_sha256": v2_digest}})),
+            ("forged_schema_fail", False, 0.05, json.dumps({"_skill_binding": {"schema_version": "wrong.v0", "loaded_skill_sha256": v2_digest}})),
+        ]:
+            memory.store_outcome(SkillOutcome(
+                execution_id=eid,
+                skill_name="bounded_skill",
+                agent="qwen",
+                timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}),
+                output_result=raw_output,
+                success=success,
+                pattern_fidelity=fid,
+                outcome_quality=0.5 if success else 0.0,
+                execution_time_ms=100,
+                step_count=1,
+            ))
 
-        assert len(patterns) == 3
-        assert all(p["pattern_fidelity"] <= 0.70 for p in patterns)
+        # Pre-LIMIT filtering preserves v2 despite 20 higher-scoring v1 rows
+        v2_successes = memory.recall_successful_patterns(
+            "bounded_skill", min_fidelity=0.90, limit=3, parent_version=v2_digest
+        )
+        assert [r["execution_id"] for r in v2_successes] == ["v2_ok_01"]
+
+        v2_failures = memory.recall_failure_patterns(
+            "bounded_skill", max_fidelity=0.89, limit=5, parent_version=v2_digest
+        )
+        assert [r["execution_id"] for r in v2_failures] == ["v2_fail_01"]
+
+        # Backward compatibility when parent_version=None
+        assert len(memory.recall_successful_patterns("bounded_skill", min_fidelity=0.90, limit=50)) == 24
+        assert v1_digest != v2_digest
+
+        # Fail-closed on blank/invalid parent_version
+        for bad in ("", "   ", 123):
+            assert memory.recall_successful_patterns("bounded_skill", parent_version=bad) == []
+            assert memory.recall_failure_patterns("bounded_skill", parent_version=bad) == []
 
     def test_get_skill_metrics_no_data(self, memory):
         """Test metrics for skill with no executions"""
@@ -516,6 +605,85 @@ class TestPatternMemory:
         # Connection should be closed
         with pytest.raises(Exception):
             memory.conn.cursor()
+
+
+    @staticmethod
+    def _store_fidelity_sample(memory, execution_id, skill_name, age_days, fidelity, success=False):
+        memory.store_outcome(SkillOutcome(
+            execution_id=execution_id, skill_name=skill_name, agent="qwen",
+            timestamp=(datetime.now() - timedelta(days=age_days)).isoformat(),
+            input_context="{}", output_result="{}", success=success,
+            pattern_fidelity=fidelity, outcome_quality=0.0,
+            execution_time_ms=1, step_count=0,
+            notes="Synthetic structural-fidelity observation; no execution claim",
+        ))
+
+    @pytest.mark.parametrize("samples,expected", [
+        ([(1, 0.0)], (1, 0.0, 0.0, 0.0)),
+        ([(10, 0.8), (1, 0.0)], (2, 0.4, 0.5, -0.8)),
+        ([(10, 0.0), (1, 0.8)], (2, 0.4, 0.5, 0.8)),
+        ([], (0, 0.5, 0.0, 0.0)),
+        ([(10, 0.8)], (1, 0.8, 1.0, 0.0)),
+        ([(1, 0.8)], (1, 0.8, 1.0, 0.0)),
+        ([(10, 0.4), (1, 0.8)], (2, 0.6, 0.5, 0.4)),
+    ], ids=["zero_overall", "zero_recent", "zero_older", "no_history",
+            "missing_recent_window", "missing_older_window", "nonzero_unchanged"])
+    def test_fidelity_statistics_preserve_observations_and_absence(self, memory, samples, expected):
+        """An observed zero is data; absent history retains its established default."""
+        try:
+            for index, (age, fidelity) in enumerate(samples):
+                self._store_fidelity_sample(memory, f"sample_{index}", "measured_skill", age, fidelity)
+            stats = memory.get_skill_fidelity_stats("measured_skill", days=30)
+            count, average, threshold_rate, trend = expected
+            assert stats["skill_name"] == "measured_skill"
+            assert stats["total_executions"] == count
+            assert stats["avg_fidelity"] == pytest.approx(average)
+            assert stats["success_rate"] == pytest.approx(threshold_rate)
+            assert stats["recent_trend"] == pytest.approx(trend)
+        finally:
+            memory.close()
+
+    def test_fidelity_threshold_rate_is_not_outcome_success(self, memory):
+        """The historical rate measures fidelity >=0.7, independently of effect success."""
+        try:
+            self._store_fidelity_sample(memory, "below", "threshold_skill", 1, 0.699, success=True)
+            self._store_fidelity_sample(memory, "at", "threshold_skill", 1, 0.7, success=False)
+            stats = memory.get_skill_fidelity_stats("threshold_skill")
+            assert stats["total_executions"] == 2
+            assert stats["success_rate"] == pytest.approx(0.5)
+            rows = memory.conn.execute(
+                "SELECT execution_id, success FROM skill_outcomes ORDER BY execution_id"
+            ).fetchall()
+            assert [(row["execution_id"], row["success"]) for row in rows] == [("at", 0), ("below", 1)]
+        finally:
+            memory.close()
+
+    def test_retained_zero_fidelity_does_not_outrank_measured_positive(self, memory, temp_db):
+        """The real selector consumes retained measurements, without a model or dispatch."""
+        from modules.infrastructure.wre_core.src.skill_selector import SkillSelector
+
+        try:
+            self._store_fidelity_sample(memory, "zero", "zero_skill", 1, 0.0)
+            self._store_fidelity_sample(memory, "positive", "positive_skill", 1, 0.4)
+        finally:
+            memory.close()
+        reopened = PatternMemory(db_path=temp_db)
+        try:
+            ranked = reopened.rank_skills_for_context(["zero_skill", "positive_skill"], [])
+            selection = SkillSelector(pattern_memory=reopened).select_skill(
+                ["zero_skill", "positive_skill"], {}
+            )
+            assert [row["skill_name"] for row in ranked] == ["positive_skill", "zero_skill"]
+            assert ranked[0]["score"] > ranked[1]["score"]
+            assert ranked[1]["components"]["fidelity"] == 0.0
+            assert selection.selected.skill_name == "positive_skill"
+            assert selection.branch_count == 2
+            assert {item.skill_name: item.fidelity for item in selection.candidates} == {
+                "zero_skill": 0.0, "positive_skill": 0.4,
+            }
+            assert reopened.conn.execute("SELECT COUNT(*) FROM skill_outcomes").fetchone()[0] == 2
+        finally:
+            reopened.close()
 
 
 class TestSkillOutcome:

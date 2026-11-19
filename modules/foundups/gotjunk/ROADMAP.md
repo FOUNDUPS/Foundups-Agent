@@ -1,4 +1,29 @@
-# GotJUNK? FoundUp - Development Roadmap
+# GotJUNK? FoundUp — Roadmap
+
+## Current direction — intelligent camera and Mall convergence
+
+**Status:** Documentation plan only. This update does not implement routing, report intake, a provider, data migration, or production cutover.
+
+GotJUNK? is a FoundUp in the existing Play FoundUps Mall. Preserve the stable identity `gotjunk_001` and route `/f/gotjunk_001`. The Mall owns internal discovery. GotJunk owns its domain workflows and records. See the [Mall migration handoff](PFMALL_MIGRATION_HANDOFF.md) for the approved architecture and data migration gates.
+
+AutoPost owns the reusable camera, capture, media, and perception pipeline. The planned intelligent camera will consider both what the camera perceives and what the person says or selects. It proposes a destination such as a GotJunk dumping report or a Shop listing, then hands the capture and context to that FoundUp's workflow. Users can confirm or correct a proposal, especially when intent or visual evidence is ambiguous. GotJunk must not build a second camera or duplicate AutoPost capture/media services.
+
+### Planned iterations
+
+1. **R0 — Reconcile owners and contracts.** Verify AutoPost CaptureSkills, event/media references, FoundUp manifest and route owners, and Mall handoff. Specify a versioned route proposal with capture provenance, candidate FoundUp/action, evidence, confidence, and user confirmation/correction. Perception alone must not dispatch an action.
+2. **R1 — Shared intelligent-camera routing proof.** In AutoPost, use existing perception plus spoken or selected intent to propose GotJunk, Shop, or another registered FoundUp. Confirm or correct the proposal on-device. Cover clear examples, ambiguous scenes, low confidence, missing speech, offline behavior, and corrections. This shared capability belongs in AutoPost, not in a GotJunk-specific camera.
+3. **R2 — GotJunk report handoff.** A confirmed GotJunk route opens a local/private report draft with original media references, capture time, optional consented location, user description, and report category. A civic/administrator report is separate from reuse, giveaway, or sale listings.
+4. **R3 — Authorized report intake and status.** Identify the responsible receiving organization and accepted intake channel. Add authenticated, idempotent submission and truthful states for local draft, queued, submitted, received, assigned, and resolved. A platform receipt does not mean an administrator acted.
+5. **R4 — Mall presentation and access.** Present only policy-approved reports and status in the existing Mall. Restrict precise coordinates, reporter contact details, and unreviewed media to authorized recipients. Preserve existing Mall routes and experiences.
+6. **R5 — Pilot, migration, and release gates.** Verify routing and correction behavior, cross-FoundUp authorization, offline retry/deduplication, media retention, old-origin capture export/import, rollback, and deployed service/rules evidence. Do not cut over or delete legacy data without separately approved migration evidence.
+
+**Open dependencies:** AutoPost destination delivery is not established. Authenticated shared identity, private media transfer/report writer, and the production listing provider remain unresolved. No verified Fukui City or land-administrator intake integration has been identified. Resolve these owners before the affected implementation sprint.
+
+## Historical standalone roadmap
+
+The phase-based PoC/Prototype/MVP material below records the legacy standalone application. Its pricing, AI, cloud-sync, monetization, and deployment milestones are historical and do not supersede the intelligent-camera/Mall direction above. Retain as implementation history until individually reconciled.
+
+# Historical standalone roadmap (superseded)
 
 ## Phase 1: PoC (COMPLETE ✅)
 
@@ -35,7 +60,7 @@
 
 ---
 
-## Phase 2: Prototype (CURRENT 🚧)
+## Phase 2: Prototype (historical status, not current direction)
 
 **Status**: In Progress
 **Duration**: 2-4 weeks
@@ -275,8 +300,6 @@ Internal messaging module: `frontend/src/message/`
 
 ---
 
-**Current Phase**: Prototype 🚧
-**Next Milestone**: AI Integration + Enhanced Export
-**Estimated Completion**: [TBD based on resource availability]
+**Legacy roadmap status:** Historical. See the current direction and iterations at the top of this document.
 
 For detailed implementation, see [README.md](README.md) and [INTERFACE.md](INTERFACE.md).
