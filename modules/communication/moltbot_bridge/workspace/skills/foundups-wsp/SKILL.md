@@ -82,6 +82,82 @@ receipt, security and authorization gates and user holds. **Start Operations
 remains read-only and grants no mutation authority.** This workspace skill is a
 prompt surface under the [skill boundary policy](../../../docs/SKILL_BOUNDARY_POLICY.md).
 
+## Named Work lanes and voice handoff
+
+This is operator guidance, not a new thread registry, executor or authority.
+Use the current supported conversation interface; do not invent tool names or
+assume a phone voice conversation and a Work thread share history.
+
+Enter WSP_00 state before actionable intake. Under WSP_97, resolve the project
+and read its current canonical Mosh Pit FIRST when available: today's entries,
+the prior latest entry/day, completed work and pending obligations. Then use
+chat, email, Drive or Git as needed to corroborate facts and reconcile newer
+evidence. The timeline is continuity context, not proof of external effects.
+
+Every actionable item receives one compact factual machine-to-machine intake
+record in the identified canonical Mosh Pit, including blocked or unauthorized
+items. Deduplicate by stable item/source identity, then update or append its
+decision, state, verified receipt and next action using the existing ledger
+format and native revision/readback safeguards. Suggested fields, not a new
+schema or JSON enforcement:
+
+`JST | item_id | source_ref | state | owner | next | exhibit_ref`
+
+Do not log casual chatter or secret contents. If the ledger is unavailable,
+ambiguous or cannot be written safely, retain one pending delta with the
+blocker in the existing task and reconcile it when access returns; never
+claim it was logged or create a parallel case ledger. Recording an unauthorized
+action as BLOCKED does not authorize performing it. All actual external effects
+retain their separate approval and verification gates.
+
+The existing Work thread owns execution and the resumable brief, not a
+replacement timeline. Keep private exhibits at their authorized owners, using
+stable source IDs and permitted links in the private ledger rather than copying
+their contents. Respect the destination's audience and existing ledger format.
+
+For voice intake, listen silently until asked to respond; avoid filler.
+Return receipts in the authorized written conversation without unsolicited
+spoken interruption; result closure does not override silent listening.
+Apply this operating contract across AI interfaces only within their actual
+verified capabilities. Record unsupported listening, handoff or ledger access
+as a limitation, not a simulated success. Google Wave is a future collaboration
+concept here, not a current named feature or available integration.
+
+1. Resolve the requested lane by existing title, purpose, current owner and
+   stable provider thread ID. Reuse the verified thread for YouTube Work,
+   mtrout Work or Red Dog Work; preserve existing HPC Work and unrelated lanes.
+   A matching title alone is not identity, and a search miss with incomplete
+   coverage is not proof that a lane is absent. Resolve ambiguous matches
+   before dispatch; do not create duplicates to escape a lookup failure.
+2. Create a missing lane only within explicit creation scope. Rename only the
+   exact identified thread when authorized; never rename another active task
+   to make its title fit. Keep the existing title when rename is unsupported.
+   Record stable ID and verified title separately from visibility: an API
+   creation receipt does not prove the thread appears in the phone sidebar.
+   Return a supported accessible thread link when available; otherwise state
+   the discovery/visibility limitation without claiming it is fixed.
+3. Before resuming, read the existing thread's latest work, holds, revisions
+   and unfinished obligations. Send one bounded brief: objective, source
+   references/revision, owner, allowed effects, exclusions, acceptance checks,
+   independent verification where required, and intended return destination.
+   Reconcile later voice corrections into that same brief/task. Do not replay
+   a consequential action merely because voice delivery or acknowledgment
+   was interrupted; inspect its actual outcome first.
+4. Track CREATED, BRIEF_DELIVERED, ACKNOWLEDGED and VERIFIED_RESULT separately,
+   with observed evidence or UNKNOWN/BLOCKED. A listed thread is not a sent
+   brief; a sent brief is not worker acceptance; acceptance is not completion.
+   Return the verified result or blocker to the originating conversation unless
+   another destination was authorized. Do not claim live voice availability, automatic cross-device synchronization,
+   runtime admission or a future watcher from saved instructions alone.
+5. Reuse the [canonical Moshpit contract](../../../../../foundups/esingularity/skillz/yumori_moshpit/SKILLz.md)
+   for compact dated activity/result/source receipts and newest-first event
+   chronology. Keep detailed briefs, manuscripts and exhibits with their
+   existing authorized private owners; link rather than duplicate. Verify
+   destination audience and access before including evidence references.
+   Never copy private thread/document IDs, links, account data or case details
+   into public Skillz, manifests or repository logs. Conversation order stays
+   distinct from Moshpit timeline order.
+
 ## Antigravity handoff (when requested)
 
 Use this procedure only for an authorized Antigravity handoff. Reuse the active
