@@ -1,6 +1,6 @@
 # HPC roadmap
 
-## 2026-11-20 - Integrated v25 phone candidate; publication pending
+## 2026-11-20 - Integrated v25 rotation repair; qualification and publication pending
 
 012's current prototype gate is one top-anchored shared player, the existing
 video field scrolling beneath it, and one tile tap requesting playback with
@@ -39,19 +39,38 @@ for byte at generation
 required to reconstruct this scope. Historical overlay authorship and a full
 Hosting clone are not established by this recovery.
 
-The integrated working candidate on `dba56a6f20efd932971683ece710cba7e1921488`
-retains those v24 behaviors, the qualified player and the scroll-clearance fix.
+The initial integration assembled on `dba56a6f20efd932971683ece710cba7e1921488`
+retained those v24 behaviors, the qualified player and the scroll-clearance fix.
 Its build label, versioned assets and member cache advance together to v25.
 The root, public-directory and FoundUp detail pages use the same v25 projection
 reference; the existing host allowlist adds only `play-v25-iphone`. The
 diagnostic probe retains source `313d8168205178cf5387e1912bd5e462d1dafaa9`.
-Local integrated checks are logged: 159 targeted pytest checks, 29 actual-worker
-VM cases and the complete 222-path integration hash manifest pass. These are
-controlled/local results, not a combined browser or physical-device acceptance.
+Local integrated checks are logged: 159 targeted pytest checks and 29
+actual-worker VM cases passed. The complete 222-path recovery/integration hash
+manifest passed before the subsequent player rotation repair; it is historical
+bundle-parity evidence, not a whole-current-source acceptance receipt.
 The two exact public SDK source bindings were independently reviewed, applied
-by the release owner and confirmed by a third review. That renewal is complete;
-fresh security and browser CI on the integrated commit remain PENDING. The
-earlier native repair PASS does not qualify this combined source.
+by the release owner and confirmed by a third review.
+
+Integrated [run 44684325801](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44684325801)
+on `58627755e4942f72852367fb7be68790dca706e8` FAILED the public-TV gate.
+Security and the other four gates (player policy, delayed queue callbacks,
+worker/state VM and static contracts) passed. Chromium's public-TV portion
+passed; WebKit passed initial portrait and landscape, then failed the return
+to 390 x 844 portrait. Its stage had resized correctly, but the player retained
+the landscape header offset (top 132px instead of 165px) and zero grid
+clearance. The first row overlapped the player by 117.797px, and a Member
+Portal control also intersected it. The synchronous window-resize geometry
+update did not track the final responsive header/player boxes.
+
+The follow-up source repair observes only the existing header and player with
+one guarded `ResizeObserver`, then reruns the existing geometry calculation
+while floating/theater mode is open. It adds no playback request, timer or
+iframe and preserves the existing resize/pause guards. The existing public-TV
+assertion now also rejects portrait header overlap; its 90ms wait, minimum
+stage size, visibility and tile-clearance checks are unchanged. Fresh CI for
+this revised player remains PENDING. Neither the native PASS nor the partially
+passing integrated run qualifies the revised combined build or a real phone.
 
 Publication remains BLOCKED by publisher access. Firebase CLI/API connectivity
 is available, but the publishing session is unauthenticated; the official
@@ -62,9 +81,10 @@ binding. A changed build label in source does not update a phone's cached app.
 
 Next work, in order:
 
-1. Qualify the exact integrated commit with fresh security and browser/queue CI,
-   retaining the completed local discovery/cache checks and SDK review evidence.
-   Keep the native repair result and integrated result distinct.
+1. Qualify the exact integrated rotation-repair commit with fresh security and
+   browser/queue CI, retaining the failed WebKit rotation receipt and completed
+   discovery/cache and SDK review evidence. Keep the historical native PASS,
+   failed integrated run and next qualification result distinct.
 2. Use an authenticated, authorized Firebase publisher for the existing
    project/site. Bind the candidate receipt to the qualified source SHA,
    actual delivered hashes and immutable Hosting version.

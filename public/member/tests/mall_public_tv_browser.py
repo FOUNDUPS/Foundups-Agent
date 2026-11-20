@@ -146,7 +146,7 @@ def verify_boot_and_selection(engine):
             page.set_viewport_size({'width':width,'height':height})
             page.wait_for_timeout(90)
             g=geometry(page)
-            clear=(g['tile']['y']>=g['player']['bottom']-1) if height>width else (all(x['playerIntersection']==0 for x in g['visibleTiles']) and not g['headerOverlap'])
+            clear=((g['tile']['y']>=g['player']['bottom']-1) if height>width else all(x['playerIntersection']==0 for x in g['visibleTiles'])) and not g['headerOverlap']
             check(engine.name+f' {width}x{height} approved responsive player clearance',g['floating'] and min(g['iframe']['width'],g['iframe']['height'])>=200 and g['iframe']['visible']>.5 and clear and g['overlappingControls']==0 and g['player']['top']>=-1 and g['player']['bottom']<=height+1,g)
         check(engine.name+' orientation keeps one iframe',page.evaluate('window.tvFrame===document.querySelector("#videoPlayerFullscreen iframe")&&window.fixturePlayback.created===1'))
         before=page.locator('#videoPlayerFullscreen').bounding_box()

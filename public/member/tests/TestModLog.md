@@ -1,4 +1,4 @@
-## 2026-11-20 - Native phone repair qualified; v25 integration pending
+## 2026-11-20 - Native repair qualified; integrated WebKit rotation failure and repair
 
 Source base: `75c838b6eab19807487ee02c4b2f9367e580547e` plus the bounded
 player/CSS repair. The existing `mall_scoped_video_browser.py --player-policy`
@@ -67,11 +67,11 @@ artifact-parity evidence, not an integrated browser-suite result. Original
 ephemeral staging is no longer needed for this Mall/HPC asset scope; historical
 overlay authorship and the complete old Hosting manifest remain unverified.
 
-The integrated working candidate on `dba56a6f20efd932971683ece710cba7e1921488`
-retains the recovered v24 shell/data/probe and qualified player. Its v25 label,
+The initial integration assembled on `dba56a6f20efd932971683ece710cba7e1921488`
+retained the recovered v24 shell/data/probe and qualified player. Its v25 label,
 versioned references and member cache are coordinated, including the shared
-projection's root/directory/detail consumers. The player hash remains the
-qualified value above. Combined tile CSS, which preserves the additional v24
+projection's root/directory/detail consumers. That initial player's hash was
+the qualified value above. Combined tile CSS, which preserves the additional v24
 styles and the clearance repair, is
 `379cc77a236643da69b4c5b6547a97e224c28beb150815bc0feb8dfd1680ffac`.
 The diagnostic probe/reference retain source
@@ -80,16 +80,50 @@ The diagnostic probe/reference retain source
 Local integrated verification is logged: 159 targeted pytest checks and 29
 direct cases executing the actual worker code in its VM passed. These separate
 receipts are not a unique aggregate assertion count; their browser/network
-environment is controlled. The full 222-path integration hash manifest also
-passes. Neither result establishes browser playback or physical-phone success.
+environment is controlled. The full 222-path recovery/integration hash manifest
+passed before the later player rotation repair. This remains historical bundle
+parity, not a receipt for all current source or physical-phone success.
 The two exact public SDK source bindings were independently reviewed, applied
 by the release owner and confirmed by a third review. Source-linked review
-renewal is complete; fresh integrated security and browser CI remain PENDING.
+renewal is complete.
 Current-build fixture expectations move to v25, cache retirement covers
 v2-v24, and foreign-root cache sentinels remain unchanged. Retain all playback,
 queue, visibility, admission and public-field exclusion assertions when running
 the existing suites on the final combined commit. The native-source PASS and
 derived-file parity do not replace that integrated result.
+
+**Integrated result: FAIL.**
+[Run 44684325801](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44684325801)
+tested exact commit `58627755e4942f72852367fb7be68790dca706e8`, tree
+`485b265ad119f66fe6287bbaba99d27f891b58d8`. Security passed. Its outcome receipt
+records player policy, queue callbacks, worker/state VM and static contracts
+with exit 0, and public TV with exit 1. Chromium's public-TV portion passed;
+WebKit's first 390 x 844 portrait and 844 x 390 landscape checks passed, but
+the return to portrait failed. No aggregate integrated PASS is claimed.
+
+The retained geometry identifies stale responsive offsets: the returning
+portrait iframe was 372 x 210.59375px and fully visible, while player top stayed
+at 132px instead of the initial portrait 165px. Its bottom was 395.375px; the
+first tile began at the wrapper's 277.578125px with scrollTop 0, leaving
+117.797px overlap. The Member Portal control also intersected the player.
+The compact-landscape zero clearance and header-derived top survived the final
+portrait reflow because geometry was updated synchronously on window resize,
+without observing the later header/player box changes.
+
+The follow-up repair adds one `ResizeObserver` in `ensureDOM()`, observing only
+the existing header and player. While open in floating/theater mode it calls
+the existing `syncFloatingGeometry()`. Grid padding remains an output; no
+playback request, iframe replacement or timer is added, and the immediate
+resize/pause guards remain. The existing public-TV portrait clearance check is
+strengthened to reject header overlap too. Its 90ms wait, minimum dimensions,
+visibility, tile-clearance and same-iframe requirements are unchanged.
+Revised player SHA-256:
+`d2e1d6f9553e2d4e486644201bb7298ee679462be91b010cac7812bc24ac1db2`.
+Combined tile CSS remains
+`379cc77a236643da69b4c5b6547a97e224c28beb150815bc0feb8dfd1680ffac`.
+Fresh security and browser CI on this revision remain PENDING. The native
+qualification hashes and integrated failure receipt above are historical;
+neither qualifies the revised player or actual iPhone playback.
 
 Firebase CLI/API connectivity is available but the publishing session is
 unauthenticated; the official plugin is not installed. The staged v25 deployment

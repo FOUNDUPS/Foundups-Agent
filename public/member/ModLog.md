@@ -1,6 +1,6 @@
 # Member Area Module Change Log
 
-## 2026-11-20 - Floating repair and recovered v25 integration candidate
+## 2026-11-20 - Recovered v25 integration and WebKit rotation repair
 
 Repair candidate on `75c838b6eab19807487ee02c4b2f9367e580547e`:
 
@@ -35,20 +35,39 @@ addition. Generation remains
 This removes the original ephemeral-staging dependency for this scope; it does
 not claim a full historical Hosting clone.
 
-The integrated working candidate on `dba56a6f20efd932971683ece710cba7e1921488`
-preserves the qualified player and clearance repair alongside the recovered
+The initial integration assembled on `dba56a6f20efd932971683ece710cba7e1921488`
+preserved the qualified player and clearance repair alongside the recovered
 v24 UI/data. Build label, member cache and versioned assets advance together to
 v25, including root, directory and FoundUp-detail projection references. The
 host allowlist adds only the proposed `play-v25-iphone` channel. Existing
 desktop presentation and member admission remain their current owners.
 
-Local integrated verification passed: 159 targeted pytest checks, 29
-actual-worker VM cases and the full 222-path integration hash manifest. The two
-exact public SDK source bindings were independently reviewed, applied by the
-release owner and confirmed by a third review. Source-linked review renewal is
-complete; fresh integrated security and browser CI remain PENDING. These local
-fixture results and the native-source hosted PASS above are not acceptance of
-the combined build on a real phone.
+Local integrated verification passed: 159 targeted pytest checks and 29
+actual-worker VM cases. The full 222-path recovery/integration hash manifest
+passed before the later player rotation repair; retain it as historical bundle
+parity, not a receipt for all current source. The two exact public SDK source
+bindings were independently reviewed, applied by the release owner and
+confirmed by a third review.
+
+Integrated [run 44684325801](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44684325801)
+on `58627755e4942f72852367fb7be68790dca706e8` FAILED public-TV qualification.
+Security, player policy, delayed queue callbacks, worker/state VM and static
+contracts passed. Chromium's public-TV portion passed. WebKit passed initial
+390 x 844 portrait and 844 x 390 landscape, then retained the old header
+offset and zero grid clearance on return to portrait. The correctly resized
+iframe did not prevent a 117.797px tile/player overlap and intersecting Member
+Portal control. The synchronous resize measurement missed the final responsive
+header/player boxes.
+
+Added one guarded `ResizeObserver` for the existing header and player so actual
+box changes rerun `syncFloatingGeometry()`. It does not observe the grid padding
+output or issue media commands, add timers or replace the iframe. Existing
+resize/pause and playback guards remain. The public-TV portrait assertion now
+also rejects header overlap; all existing 90ms timing, size, visibility and
+tile-clearance requirements remain. Combined tile CSS is unchanged. Fresh CI
+for this revision remains PENDING; the earlier native PASS and partially
+passing integrated run do not qualify the revised build or a real phone.
+
 Firebase CLI/API connectivity is available but publishing is unauthenticated,
 and the official plugin is not installed. The v25 receipt remains explicitly
 unpublished and unbound to a final commit/Hosting version. No release, delivered

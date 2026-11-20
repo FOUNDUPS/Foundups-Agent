@@ -580,6 +580,17 @@
         pauseHiddenPlayback();
       }
     });
+    // Responsive boxes can settle after the window resize event (notably on
+    // WebKit rotation). Re-measure the existing layout without restarting media.
+    // Observe only the header/player; grid padding is an output, not an input.
+    if (typeof ResizeObserver !== 'undefined') {
+      var geometryObserver = new ResizeObserver(function () {
+        if (isOpen && (floating || theater)) syncFloatingGeometry();
+      });
+      geometryObserver.observe(container);
+      var floatingHeader = document.querySelector('.mall-header');
+      if (floatingHeader) geometryObserver.observe(floatingHeader);
+    }
     // One event-driven media visibility observer; chrome/rail timers stay separate.
     if (typeof IntersectionObserver !== 'undefined') {
       new IntersectionObserver(pauseHiddenPlayback, { threshold: [0, 0.5] }).observe(stage);
