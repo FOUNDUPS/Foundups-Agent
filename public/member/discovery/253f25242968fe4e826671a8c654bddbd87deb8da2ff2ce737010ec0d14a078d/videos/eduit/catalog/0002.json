@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 300,
+      "embed_url": "https://www.youtube.com/embed/Kge-icfXJl8",
+      "source_url": "https://www.youtube.com/watch?v=Kge-icfXJl8",
+      "thumbnail_url": "https://i.ytimg.com/vi/Kge-icfXJl8/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:42:38Z",
+      "title": "The Esingularity Prize",
+      "video_id": "Kge-icfXJl8"
+    },
+    {
+      "duration_seconds": 523,
+      "embed_url": "https://www.youtube.com/embed/JR_7biWI6fg",
+      "source_url": "https://www.youtube.com/watch?v=JR_7biWI6fg",
+      "thumbnail_url": "https://i.ytimg.com/vi/JR_7biWI6fg/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:33:51Z",
+      "title": "Will eSingularity Happen in 10 Years?",
+      "video_id": "JR_7biWI6fg"
+    },
+    {
+      "duration_seconds": 219,
+      "embed_url": "https://www.youtube.com/embed/HUneSmY_9sQ",
+      "source_url": "https://www.youtube.com/watch?v=HUneSmY_9sQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/HUneSmY_9sQ/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:26:18Z",
+      "title": "The eSingularity Platform: Every Child",
+      "video_id": "HUneSmY_9sQ"
+    },
+    {
+      "duration_seconds": 386,
+      "embed_url": "https://www.youtube.com/embed/fk5ZwzIDIFk",
+      "source_url": "https://www.youtube.com/watch?v=fk5ZwzIDIFk",
+      "thumbnail_url": "https://i.ytimg.com/vi/fk5ZwzIDIFk/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:14:44Z",
+      "title": "Eduit: The vision",
+      "video_id": "fk5ZwzIDIFk"
+    },
+    {
+      "duration_seconds": 468,
+      "embed_url": "https://www.youtube.com/embed/EfMZVAm6NPE",
+      "source_url": "https://www.youtube.com/watch?v=EfMZVAm6NPE",
+      "thumbnail_url": "https://i.ytimg.com/vi/EfMZVAm6NPE/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:21:59Z",
+      "title": "Why is Flattening Global Education Important? #TheSingularityInitiative #MichaelTrout",
+      "video_id": "EfMZVAm6NPE"
+    },
+    {
+      "duration_seconds": 178,
+      "embed_url": "https://www.youtube.com/embed/CjVyzXvAXhg",
+      "source_url": "https://www.youtube.com/watch?v=CjVyzXvAXhg",
+      "thumbnail_url": "https://i.ytimg.com/vi/CjVyzXvAXhg/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:34:43Z",
+      "title": "Video blog - E-Singularity",
+      "video_id": "CjVyzXvAXhg"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/eduit/catalog/0003.json",
+  "order": "catalog",
+  "page": 2,
+  "page_size": 6,
+  "record_id": "eduit",
+  "schema_version": 1,
+  "total": 21
+}

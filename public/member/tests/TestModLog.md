@@ -1,10 +1,10 @@
-## 2026-11-20 - Phone startup and floating-clearance hosted qualification
+## 2026-11-20 - Native phone repair qualified; v25 integration pending
 
 Source base: `75c838b6eab19807487ee02c4b2f9367e580547e` plus the bounded
 player/CSS repair. The existing `mall_scoped_video_browser.py --player-policy`
 runner now includes `verify_phone_muted_autoplay_retry()` at 390 x 844.
 
-Passing assertions cover one tile tap with unmuted rejection then muted
+Passing native-source assertions cover one tile tap with unmuted rejection then muted
 success; two total requests when both starts are blocked; genuine error 150;
 late blocked callbacks preserving playing, paused and provider-error states;
 computed scroll padding matching floating clearance; scrolling a lower tile
@@ -12,7 +12,7 @@ below a stationary player; same iframe across selection/ended queue continuation
 and clearance/start guards after tuck and close. Controlled provider events
 must not be reported as live YouTube or physical-device evidence.
 
-Executed and passed: `node --check public/member/js/mall-video-player.js`,
+Executed and passed for the native repair: `node --check public/member/js/mall-video-player.js`,
 Python AST parsing of the fixture, and `git diff --check`. A separate reviewer
 reproduced the late-callback status overwrite using the actual handler in a
 Node VM, which prompted the early pending-start guard. That focused review is
@@ -35,7 +35,7 @@ The unchanged existing security gate passed before browser execution.
 These suites overlap; their groups are not a unique aggregate assertion count.
 The [retained artifact](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44666808469/artifacts/14598316306)
 contains the exact source receipt, dependency versions, outcomes and browser logs.
-Verified runtime SHA-256 values:
+Verified runtime SHA-256 values for that native-source run:
 
 - Player: `eff7e52547c1d56b498f3adfa9b3348bd84c01c68a62bed1ee603a67480b2ba5`.
 - Tile CSS: `671a580fe6d46aa3e2bed771aa963c8dc9f2ab1a77ddf6b547924899c40391fa`.
@@ -55,11 +55,51 @@ application assertions. They are environment/setup history, not application
 failures. The successful hosted run supersedes the browser-execution block.
 No local security restriction was removed or private browser profile used.
 
-Remaining qualification: preserve and integrate the delivered v24 overlay,
-publish an isolated preview through the authorized Firebase publisher, verify
-delivered asset/version parity, and record physical Safari/Home Screen playback
-with advancing real YouTube media time. Those gates remain UNEXECUTED. This pass
-does not establish that the current public v24 URL contains the repair.
+**v24 recovery and integrated v25 candidate:** all 206 JSON assets reachable
+from the observed discovery root were downloaded with no missing or unreachable
+references. The existing exporter plus the inferred `hero_label` allowlist
+addition reproduces all 206 files byte for byte from the observed catalog:
+17 metadata records, 1,205 videos, generation
+`253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d`.
+Only `python -B scripts/refresh_mall_catalog.py --public-pages-only --apply`
+was run for reconstruction; no source/API refresh was used. This is completed
+artifact-parity evidence, not an integrated browser-suite result. Original
+ephemeral staging is no longer needed for this Mall/HPC asset scope; historical
+overlay authorship and the complete old Hosting manifest remain unverified.
+
+The integrated working candidate on `dba56a6f20efd932971683ece710cba7e1921488`
+retains the recovered v24 shell/data/probe and qualified player. Its v25 label,
+versioned references and member cache are coordinated, including the shared
+projection's root/directory/detail consumers. The player hash remains the
+qualified value above. Combined tile CSS, which preserves the additional v24
+styles and the clearance repair, is
+`379cc77a236643da69b4c5b6547a97e224c28beb150815bc0feb8dfd1680ffac`.
+The diagnostic probe/reference retain source
+`313d8168205178cf5387e1912bd5e462d1dafaa9`.
+
+Local integrated verification is logged: 159 targeted pytest checks and 29
+direct cases executing the actual worker code in its VM passed. These separate
+receipts are not a unique aggregate assertion count; their browser/network
+environment is controlled. The full 222-path integration hash manifest also
+passes. Neither result establishes browser playback or physical-phone success.
+The two exact public SDK source bindings were independently reviewed, applied
+by the release owner and confirmed by a third review. Source-linked review
+renewal is complete; fresh integrated security and browser CI remain PENDING.
+Current-build fixture expectations move to v25, cache retirement covers
+v2-v24, and foreign-root cache sentinels remain unchanged. Retain all playback,
+queue, visibility, admission and public-field exclusion assertions when running
+the existing suites on the final combined commit. The native-source PASS and
+derived-file parity do not replace that integrated result.
+
+Firebase CLI/API connectivity is available but the publishing session is
+unauthenticated; the official plugin is not installed. The staged v25 deployment
+receipt remains unpublished with no final source/Hosting binding. Publication,
+delivered asset/cache/version parity, real YouTube advancing time and physical
+Safari/Home Screen acceptance remain UNEXECUTED. The next phone check requires
+Build v25, a stationary floating player, tiles scrolling beneath it, one-tap
+startup with bounded muted recovery, queue continuation and correct return.
+Retained desktop WikiTube presentation and playback must also be checked.
+The existing public v24 URL is not proof that the repair has been delivered.
 
 ## 2026-11-16 - v23 root cache ownership and optional gateway opener
 

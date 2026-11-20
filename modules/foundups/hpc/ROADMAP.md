@@ -1,6 +1,6 @@
 # HPC roadmap
 
-## 2026-11-20 - Phone repair qualified; preview publication pending
+## 2026-11-20 - Integrated v25 phone candidate; publication pending
 
 012's current prototype gate is one top-anchored shared player, the existing
 video field scrolling beneath it, and one tile tap requesting playback with
@@ -23,36 +23,60 @@ The existing security gate and both Chromium/WebKit player-policy and delayed
 queue suites pass. This includes the new 390 x 844 startup/scroll case and the
 retained 375px floating-player, gesture and queue controls. The hosted runner
 resolves the earlier local browser-launch limitation without changing local
-permissions. Provider/network fixtures are controlled: integrated v24 delivery,
-real YouTube time progression and physical iPhone Safari/PWA are UNEXECUTED.
+permissions. This PASS qualifies the native-source repair, not the newly
+integrated v25 candidate. Its provider/network events are controlled; real
+YouTube time progression and physical iPhone Safari/PWA remain UNEXECUTED.
 See `public/member/tests/TestModLog.md` for source hashes and retained evidence.
 
-Publishing remains BLOCKED in this session. Firebase Hosting lists the existing
-`play-v24-iphone` channel, but its Cloud Shell returned Site Unavailable on the
-initial attempt and one reload. The official Firebase plugin is available but
-not installed. No new Hosting release, production merge or build-label change
-is claimed. A new source commit alone does not update a phone's cached build.
+The v24 recovery blocker is resolved for the observed Mall/HPC surface. The
+six changed Mall shell files, catalog metadata and diagnostic probe were
+recovered from the public preview. All 206 referenced discovery JSON assets
+were retrieved with no missing references. The existing offline exporter, with
+only `hero_label` added to its metadata allowlist, reproduces every asset byte
+for byte at generation
+`253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d`
+(17 metadata records and 1,205 videos). Original ephemeral staging is no longer
+required to reconstruct this scope. Historical overlay authorship and a full
+Hosting clone are not established by this recovery.
+
+The integrated working candidate on `dba56a6f20efd932971683ece710cba7e1921488`
+retains those v24 behaviors, the qualified player and the scroll-clearance fix.
+Its build label, versioned assets and member cache advance together to v25.
+The root, public-directory and FoundUp detail pages use the same v25 projection
+reference; the existing host allowlist adds only `play-v25-iphone`. The
+diagnostic probe retains source `313d8168205178cf5387e1912bd5e462d1dafaa9`.
+Local integrated checks are logged: 159 targeted pytest checks, 29 actual-worker
+VM cases and the complete 222-path integration hash manifest pass. These are
+controlled/local results, not a combined browser or physical-device acceptance.
+The two exact public SDK source bindings were independently reviewed, applied
+by the release owner and confirmed by a third review. That renewal is complete;
+fresh security and browser CI on the integrated commit remain PENDING. The
+earlier native repair PASS does not qualify this combined source.
+
+Publication remains BLOCKED by publisher access. Firebase CLI/API connectivity
+is available, but the publishing session is unauthenticated; the official
+Firebase plugin is not installed. The earlier Cloud Shell attempt failed to
+open. No v25 Hosting release or production merge is claimed. Its staged
+deployment receipt is explicitly unpublished and has no final source/release
+binding. A changed build label in source does not update a phone's cached app.
 
 Next work, in order:
 
-1. Recover the original v24 staging bundle or immutable Hosting version. Preserve
-   its six changed shell files (index, member worker, video projection JS/CSS,
-   tile-field JS/CSS), catalog metadata, discovery generation
-   `253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d`,
-   and diagnostic probe from `313d8168205178cf5387e1912bd5e462d1dafaa9`.
-   Fresh served-file comparisons establish these differences; the complete
-   derived video-page tree and immutable Hosting manifest remain unverified.
-2. Apply the qualified player patch and only the scroll-clearance CSS hunk to
-   that bundle. Do not replace v24 with this plain native v23 continuation or
-   overwrite its additional tile styles. Qualify the integrated bundle.
-3. Use an authorized Firebase publisher for the existing project/site. Advance
-   build label, versioned asset references and worker generation together;
-   preserve the explicit preview-host allowlist. Bind the release receipt to
-   actual delivered hashes and an immutable Hosting version.
-4. Publish an isolated preview and provide `/member/?foundup=hpc`; `/member/`
-   alone is the general Mall. Verify physical Safari/Home Screen playback,
-   advancing media time, scrolling, queue continuation and return/restore
-   before production promotion.
+1. Qualify the exact integrated commit with fresh security and browser/queue CI,
+   retaining the completed local discovery/cache checks and SDK review evidence.
+   Keep the native repair result and integrated result distinct.
+2. Use an authenticated, authorized Firebase publisher for the existing
+   project/site. Bind the candidate receipt to the qualified source SHA,
+   actual delivered hashes and immutable Hosting version.
+3. Publish the isolated `play-v25-iphone` candidate and provide its verified
+   `/member/?foundup=hpc` URL; `/member/` alone is the general Mall.
+4. Record physical Safari/Home Screen results before production promotion.
+   The phone must show **Build v25**; the player must stay anchored while tiles
+   scroll beneath it; one tile tap must request playback and allow the bounded
+   muted fallback; and the queue must continue without creating a second
+   player. Record advancing real media time and return/restore behavior. Check
+   that the existing desktop WikiTube layout, selection and queue still work.
+   A genuine provider refusal remains a visible failure, not a playback PASS.
 
 The existing [v24 HPC preview](https://foundupscom--play-v24-iphone-3rrzxm0r.web.app/member/?foundup=hpc)
 still serves the previous runtime. A cloud-browser attempt timed out after its

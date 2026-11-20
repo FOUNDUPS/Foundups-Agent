@@ -1,3 +1,25 @@
+## HPC v25 integrated shell review renewal — 2026-11-20
+
+Recovering the served v24 shell and advancing its build/asset references to v25
+changes two HTML file hashes. Independent review and root verification compared
+both complete public Clerk SDK elements with the approved `dba56a6f` source:
+the elements, flagged lines and line positions are byte-identical. The existing
+[source-bound evidence](reviewed-hpc-phone-evidence.json) retains the earlier
+review and adds `v25_integration_renewal` with both comparisons and exact bindings.
+
+Append only these two `generic-api-key` metadata bindings, preserving all 4,620
+previous entries (4,622 total):
+
+- `public/index.html`, line 80, file SHA-256 `f23e68ae06256b6c1b38b0ea039d914b6cbf0755255cb6ccebaebe38d1deed38`.
+- `public/member/index.html`, line 28, file SHA-256 `6c2e3bea8a9431c70fdea5bf579d25856bddee5fa6ac42e5633e5997ce29ad5f`.
+
+The sorted compact new-fingerprint-list SHA-256 is
+`187fc6de9c9629c94bdb7e493bbc82a797901d86528fd88048f49605bbd95fa3`.
+Scanner rules, exclusions, fingerprint formula and scan coverage remain unchanged.
+Fresh exact-head tracked-tree and introduced-history checks are required before
+the integrated browser qualification. This metadata review does not establish
+deployment or physical-phone playback.
+
 ## HPC phone candidate review renewal — 2026-11-20
 
 The isolated phone qualification run [44663491734](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44663491734)

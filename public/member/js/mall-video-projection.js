@@ -11,10 +11,13 @@
     ['hpc.foundups.com', 'hpc'],
     ['play.foundups.com', 'mall']
   ]);
+  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v25-iphone)-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
+    dedicatedHosts.set(window.location.hostname, 'mall');
+  }
   const publicScopes = new Set(['hpc']);
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
-  const mallBuild = 'v23';
+  const mallBuild = 'v25';
   const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
 
   function hostScope(location) {

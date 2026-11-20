@@ -210,7 +210,7 @@ def expect_hpc_banner_header(page):
     expect(image).to_have_attribute("height", "353")
     expect(image).to_be_visible()
     page.wait_for_function("document.querySelector('.mall-hpc-banner-image')?.naturalWidth === 1280")
-    expect(build).to_have_text("Build v23")
+    expect(build).to_have_text("Build v25")
     image_box, build_box, header_box = image.bounding_box(), build.bounding_box(), header.bounding_box()
     assert abs(image_box["width"] / image_box["height"] - 1280 / 353) < .03
     assert abs(build_box["x"] - image_box["x"]) <= 1
@@ -265,7 +265,7 @@ def main():
         expect(page.locator("#videoScopeTitle")).to_have_text("HPC")
         expect(page.locator("#videoScopeHeader #videoScopeTopic")).to_have_text("#SchumerOUT")
         build = page.locator("#videoScopeHeader .mall-build-label")
-        expect(build).to_have_text("Build v23")
+        expect(build).to_have_text("Build v25")
         expect(build).to_be_visible()
         expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
@@ -456,7 +456,7 @@ def main():
         expect(page.locator(".mall-video-grid-empty")).to_have_text("No videos match your search.")
         more.tap()
         menu = page.get_by_role("dialog", name="More options")
-        expect(menu.get_by_text("Build v23", exact=True)).to_be_visible()
+        expect(menu.get_by_text("Build v25", exact=True)).to_be_visible()
         assert menu.bounding_box()["x"] <= more.bounding_box()["x"] + 1
         assert menu.bounding_box()["y"] + menu.bounding_box()["height"] < dock.bounding_box()["y"]
         expect(menu.get_by_role("combobox", name="Browser AI")).to_be_disabled()
@@ -625,7 +625,7 @@ def verify_member_poster_grid(page):
     player.get_by_role("button", name="Search options").click()
     options = player.get_by_role("dialog", name="Search options")
     expect(options.get_by_role("combobox", name="Browser AI")).to_be_disabled()
-    expect(options.get_by_text("Build v23", exact=True)).to_be_visible()
+    expect(options.get_by_text("Build v25", exact=True)).to_be_visible()
     page.keyboard.press("Escape")
     expect(options).not_to_be_visible()
     expect(player).to_be_visible()

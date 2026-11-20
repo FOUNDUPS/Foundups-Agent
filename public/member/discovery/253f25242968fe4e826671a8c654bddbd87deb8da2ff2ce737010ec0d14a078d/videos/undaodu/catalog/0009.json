@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 181,
+      "embed_url": "https://www.youtube.com/embed/XUMS8UTQM_o",
+      "source_url": "https://www.youtube.com/watch?v=XUMS8UTQM_o",
+      "thumbnail_url": "https://i.ytimg.com/vi/XUMS8UTQM_o/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:54:33Z",
+      "title": "I'm a Creator",
+      "video_id": "XUMS8UTQM_o"
+    },
+    {
+      "duration_seconds": 301,
+      "embed_url": "https://www.youtube.com/embed/XUHYgnVWPl4",
+      "source_url": "https://www.youtube.com/watch?v=XUHYgnVWPl4",
+      "thumbnail_url": "https://i.ytimg.com/vi/XUHYgnVWPl4/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:57:45Z",
+      "title": "Michael J. Trout pitching 100 early stage startups by 2020",
+      "video_id": "XUHYgnVWPl4"
+    },
+    {
+      "duration_seconds": 267,
+      "embed_url": "https://www.youtube.com/embed/XS_n3_X9Las",
+      "source_url": "https://www.youtube.com/watch?v=XS_n3_X9Las",
+      "thumbnail_url": "https://i.ytimg.com/vi/XS_n3_X9Las/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:43:43Z",
+      "title": "HootSuite for Launching Startups: FounderUp's Command Center Approach",
+      "video_id": "XS_n3_X9Las"
+    },
+    {
+      "duration_seconds": 184,
+      "embed_url": "https://www.youtube.com/embed/xOxsO6s-VB8",
+      "source_url": "https://www.youtube.com/watch?v=xOxsO6s-VB8",
+      "thumbnail_url": "https://i.ytimg.com/vi/xOxsO6s-VB8/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:09:39Z",
+      "title": "Night Life and Snacks in Japan",
+      "video_id": "xOxsO6s-VB8"
+    },
+    {
+      "duration_seconds": 379,
+      "embed_url": "https://www.youtube.com/embed/xmddOFcp__o",
+      "source_url": "https://www.youtube.com/watch?v=xmddOFcp__o",
+      "thumbnail_url": "https://i.ytimg.com/vi/xmddOFcp__o/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:20:37Z",
+      "title": "Why this book is important, E-Singularity.",
+      "video_id": "xmddOFcp__o"
+    },
+    {
+      "duration_seconds": 182,
+      "embed_url": "https://www.youtube.com/embed/xKtab8UBx0k",
+      "source_url": "https://www.youtube.com/watch?v=xKtab8UBx0k",
+      "thumbnail_url": "https://i.ytimg.com/vi/xKtab8UBx0k/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:45:15Z",
+      "title": "Michael Trautt, Founder of Founderups Corp, tells his story",
+      "video_id": "xKtab8UBx0k"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/undaodu/catalog/0010.json",
+  "order": "catalog",
+  "page": 9,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

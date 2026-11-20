@@ -50,7 +50,7 @@ PUBLIC_DISCOVERY_METADATA_FIELDS = (
     "foundup_id", "canonical_foundup_id", "name", "title", "creator",
     "creator_display", "entity", "source_type", "source_id", "source_handle",
     "category", "tags", "geo", "status", "display_order", "poster_url",
-    "channel_avatar_url", "theme", "tagline", "one_sentence_pitch", "description",
+    "channel_avatar_url", "theme", "tagline", "hero_label", "one_sentence_pitch", "description",
     "tier", "lifecycle_stage", "launch_readiness", "entry_copy", "discovery_kind",
     "public_plan_url", "public_poc_url", "external_url", "routing_prefix",
     "topic_family", "related_lanes", "parent_channels", "derivation_method",

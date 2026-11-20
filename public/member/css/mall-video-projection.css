@@ -394,6 +394,14 @@
   gap: .5rem;
 }
 
+@media (min-width: 760px) {
+  body:not([data-mall-video-scope]) .red-dog-anchor:has(> .mall-member-search-dock) {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+}
+
 .red-dog-anchor > .mall-member-search-dock { grid-area: 1 / 1; }
 .red-dog-anchor > .mall-member-search-dock .mall-member-search-bar {
   position: static;

@@ -108,6 +108,7 @@
   var HOVER_FLIP_DELAY_MS = 650;
   var HOLD_FLIP_DELAY_MS = 450;
   var activeFlippedTile = null;
+  var desktopBlockNav = null;
   var fixedRenderedCount = 0;
   var fixedTailObserver = null;
   var fixedBrowsePosition = null;
@@ -826,7 +827,12 @@
     if (fixedVideoField) bindScopedPlayerHistory(mallCatalog[0].foundup_id);
     else {
       initTileObserver();
-      if (groupDefinitions === null) window.mallVideoProjection?.mountMemberDock?.();
+      if (groupDefinitions === null) {
+        window.mallVideoProjection?.mountMemberDock?.();
+        ensureDesktopBlockNav();
+        bindBlockSwipe();
+      }
+      syncDesktopBlockNav();
     }
   }
 
@@ -1620,13 +1626,134 @@
       !['__proto__', 'constructor', 'prototype'].includes(identifier) ? identifier : null;
   }
 
-  function renderCardBack(item, index, canonical) {
+  function validPublicHttpUrl(value) {
+    if (typeof value !== 'string' || !value || /[\u0000-\u0020\\]/.test(value)) return '';
+    try {
+      var parsed = new URL(value);
+      return parsed.protocol === 'https:' && parsed.hostname && !parsed.username && !parsed.password ? parsed.href : '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function publicLaunchLabel(item) {
+    var fid = item && item.foundup_id;
+    if (fid === 'autopost') return 'Enter AutoPost \u2197';
+    if (fid === 'science_swarm') return 'Enter Science Swarm \u2197';
+    if (fid === 'hpc') return 'Open HPC Shorts \u2197';
+    if (fid === 'esingularity_001') return 'Open eSingularity.ai \u2197';
+    if (item && (String(item.category || '').toLowerCase() === 'marketplace' || fid === 'gotjunk_001')) return 'Open Shop \u2197';
+    if (item && item.source_type === 'github_repo') return 'View Repo \u2197';
+    if (item && item.launch_readiness === 'discoverable_only') return 'Project Info \u2197';
+    return 'Open Preview \u2197';
+  }
+
+  function openNonVideoFoundUpDetail(index) {
+    var item = mallCatalog[index];
+    if (!item) return;
+    if (isEntityGrid() && item.discovery_kind === 'candidate') {
+      var candidateTile = getTileElement(index);
+      if (candidateTile) setCardFlipped(candidateTile, true, { pinned: true });
+      return;
+    }
+    var foundupId = item.foundup_id || item.id;
+    if (desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) window.mallVideoPlayer.close();
+    if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
+      window.mallPlanes.openFoundUpById(foundupId);
+      return;
+    }
+    if (foundupId) navigateToFoundUp(foundupId);
+  }
+
+  function stepMallBlock(direction) {
+    if (!tileFieldWrapper || fixedVideoField || groupDefinitions !== null || expandedFoundUp !== null) return;
+    var step = Math.max(240, Math.round((tileFieldWrapper.clientHeight || window.innerHeight || 640) * 0.72));
+    var delta = (direction < 0 ? -1 : 1) * step;
+    if (delta > 0 && isEntityGrid() && catalogPager?.hasMore &&
+        (tileFieldWrapper.scrollTop + tileFieldWrapper.clientHeight >= tileFieldWrapper.scrollHeight - step)) {
+      loadCatalogPage();
+    }
+    if (typeof tileFieldWrapper.scrollBy === 'function') {
+      tileFieldWrapper.scrollBy({ top: delta, behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+    } else {
+      tileFieldWrapper.scrollTop = clampScroll(tileFieldWrapper.scrollTop + delta, tileFieldWrapper.scrollHeight, tileFieldWrapper.clientHeight);
+    }
+  }
+
+  function syncDesktopBlockNav() {
+    if (!desktopBlockNav) return;
+    desktopBlockNav.hidden = fixedVideoField || groupDefinitions !== null || expandedFoundUp !== null || !mallCatalog.length;
+  }
+
+  function ensureDesktopBlockNav() {
+    var hostShell = document.querySelector('.mall-shell');
+    if (!hostShell || desktopBlockNav) return desktopBlockNav;
+    var nav = hostShell.querySelector('.mall-desktop-block-nav');
+    if (!nav) {
+      nav = document.createElement('div');
+      nav.className = 'mall-desktop-block-nav';
+      nav.setAttribute('aria-label', 'Mall block navigation');
+      nav.innerHTML =
+        '<button type="button" class="mall-block-step-btn" data-mall-block-step="-1" aria-label="Previous block" title="Previous block">\u25c0</button>' +
+        '<button type="button" class="mall-block-step-btn" data-mall-block-step="1" aria-label="Next block" title="Next block">\u25b6</button>';
+      hostShell.appendChild(nav);
+    }
+    if (!nav.dataset.blockNavBound) {
+      nav.dataset.blockNavBound = '1';
+      nav.querySelectorAll('[data-mall-block-step]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          stepMallBlock(Number(btn.dataset.mallBlockStep || 1));
+        });
+      });
+    }
+    desktopBlockNav = nav;
+    syncDesktopBlockNav();
+    return desktopBlockNav;
+  }
+
+  function bindBlockSwipe() {
+    if (!tileFieldWrapper || tileFieldWrapper.dataset.blockSwipeBound) return;
+    tileFieldWrapper.dataset.blockSwipeBound = '1';
+    var startX = 0;
+    var startY = 0;
+    var swipeActive = false;
+    tileFieldWrapper.addEventListener('touchstart', function(e) {
+      if (fixedVideoField || groupDefinitions !== null || layoutMode !== 'grid' || expandedFoundUp !== null || activeFlippedTile) {
+        swipeActive = false;
+        return;
+      }
+      if (!e.touches || e.touches.length !== 1 || e.target?.closest?.('.mall-card-back, .mall-field-group-track, .mall-category-track')) {
+        swipeActive = false;
+        return;
+      }
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      swipeActive = true;
+    }, { passive: true });
+    tileFieldWrapper.addEventListener('touchend', function(e) {
+      if (!swipeActive) return;
+      swipeActive = false;
+      if (e.touches && e.touches.length > 0) return;
+      if (!e.changedTouches || e.changedTouches.length !== 1) return;
+      var dx = e.changedTouches[0].clientX - startX;
+      var dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > 64 && Math.abs(dx) > Math.abs(dy) * 1.6) {
+        // Swipe LEFT advances next block; swipe RIGHT returns previous block
+        stepMallBlock(dx < 0 ? 1 : -1);
+      }
+    }, { passive: true });
+    tileFieldWrapper.addEventListener('touchcancel', function() { swipeActive = false; }, { passive: true });
+  }
+
+  function renderCardBack(item, index, canonical, cardHasVideos) {
     var name = item.name || item.title || 'Untitled source';
     var candidate = item.discovery_kind === 'candidate';
     var sourceLabel = item.source_type === 'linkedin_profile' ? 'Source profile' : 'Source channel';
     var kind = canonical ? 'FoundUp' : sourceLabel + ' · not a canonical FoundUp';
     var pitch = item.one_sentence_pitch || item.tagline || 'No public pitch provided.';
     var description = item.description || 'No public description provided.';
+    var entitySub = (item.entity && item.entity !== name && item.entity !== (item.title || ''))
+      ? '<p class="mall-card-kind">' + escapeHtml(item.entity) + '</p>' : '';
     var osp = ['outcome', 'solution', 'pain'].filter(function(key) { return item[key]; }).map(function(key) {
       return '<div class="mall-tile-osp-row"><span class="mall-tile-osp-kicker osp-' + key + '">' +
         key.charAt(0).toUpperCase() + key.slice(1) + '</span><p>' + escapeHtml(item[key]) + '</p></div>';
@@ -1634,10 +1761,19 @@
     if (candidate) kind = 'Project candidate · canonical registration unverified';
     var stage = canonical || candidate ? 'Stage: ' + (item.lifecycle_stage || 'not supplied') +
       ' · ' + (item.launch_readiness || 'readiness not supplied').replace(/_/g, ' ') : '';
+    var publicUrl = (!candidate) ? (validPublicHttpUrl(item.external_url) || validPublicHttpUrl(item.public_poc_url)) : '';
+    var backExpandBtn = (!candidate && !cardHasVideos)
+      ? '<button type="button" class="mall-card-expand-detail" data-expand-foundup="1" aria-label="' +
+        escapeAttr('Expand ' + name + ' full details') + '" title="Expand full details (or pinch out)">\u2922</button>'
+      : '';
     return '<section class="mall-card-back" id="mall-card-about-' + index + '" role="group" aria-label="' +
       escapeAttr('About ' + name) + '" hidden inert>' +
-      '<button type="button" class="mall-card-flip-back">Back to portrait</button>' +
+      '<div class="mall-card-back-bar">' +
+        '<button type="button" class="mall-card-flip-back">Back to portrait</button>' +
+        backExpandBtn +
+      '</div>' +
       '<h3>' + escapeHtml(name) + '</h3>' +
+      entitySub +
       '<p class="mall-card-kind">' + escapeHtml(kind) + '</p>' +
       '<p class="mall-card-pitch"><strong>Pitch</strong> ' + escapeHtml(pitch) + '</p>' +
       '<p>' + escapeHtml(description) + '</p>' +
@@ -1647,6 +1783,8 @@
       (candidate && item.public_plan_url === 'https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md'
         ? '<a class="mall-card-plan" href="' + escapeAttr(item.public_plan_url) + '" target="_blank" rel="noopener noreferrer">Read public plan (new tab)</a>' : '') +
       ((item.videos?.length || item.video_pages?.catalog) ? '<button type="button" class="mall-tile-osp-play">Play queue</button>' : '') +
+      (publicUrl ? '<a class="mall-card-public-launch" data-public-launch-id="' + escapeAttr(item.foundup_id || '') +
+        '" href="' + escapeAttr(publicUrl) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(publicLaunchLabel(item)) + '</a>' : '') +
       (canonical ? '<button type="button" class="mall-card-enter" data-canonical-foundup-id="' +
         escapeAttr(canonical) + '">Enter FoundUp · Member Portal</button>' : '') +
       '</section>';
@@ -1660,14 +1798,17 @@
       setCardFlipped(activeFlippedTile, false, { focus: false });
     }
     tile.classList.toggle('is-card-flipped', flipped);
+    if (flipped && options?.pinned) tile.dataset.flipPinned = '1';
+    else if (!flipped || options?.pinned === false) delete tile.dataset.flipPinned;
     tile.tabIndex = flipped ? -1 : 0;
     front.hidden = front.inert = flipped;
     back.hidden = back.inert = !flipped;
     var trigger = front.querySelector('.mall-card-flip');
-    trigger.setAttribute('aria-expanded', String(flipped));
+    if (trigger) trigger.setAttribute('aria-expanded', String(flipped));
     activeFlippedTile = flipped ? tile : (activeFlippedTile === tile ? null : activeFlippedTile);
     if (options?.focus !== false) {
-      (flipped ? back.querySelector('.mall-card-flip-back') : trigger).focus({ preventScroll: true });
+      var targetFocus = flipped ? back.querySelector('.mall-card-flip-back') : trigger;
+      if (targetFocus && typeof targetFocus.focus === 'function') targetFocus.focus({ preventScroll: true });
     }
     return flipped;
   }
@@ -1760,6 +1901,11 @@
         ? '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6-6 6M10 20H4v-6m0 6 6-6"/></svg>'
         : '&#9654;';
       var expandBtn = hasVideos ? '<button type="button" class="mall-tile-expand" aria-label="Open fullscreen" title="Fullscreen">' + expandIcon + '</button>' : '';
+      var detailExpandBtn = (!hasVideos && cardBack && !candidate)
+        ? '<button type="button" class="mall-card-expand-detail" data-expand-foundup="1" aria-label="' +
+          escapeAttr('Expand ' + (item.name || item.title || 'this card') + ' full details') +
+          '" title="Expand full details (or pinch out)">\u2922</button>'
+        : '';
 
       // Enter FoundUp button (bottom-left, visible during preview) — video tiles only
       // Uses stable foundup_id for WSP 104 canonical routing
@@ -1793,6 +1939,7 @@
         previewContainer +
         (fixedVideoField ? '' : '<span class="mall-tile-badge ' + badgeClass + '">' +
           escapeHtml(entityGrid ? (canonical ? 'FoundUp' : candidate ? 'Project candidate' : sourceLabel) : readiness.replace('_', ' ')) + '</span>') +
+        detailExpandBtn +
         queueBadge +
         sourceActionBadge +
         playIndicator +
@@ -1806,7 +1953,7 @@
         '</div>' +
         (cardBack ? '<button type="button" class="mall-card-flip" aria-expanded="false" aria-controls="mall-card-about-' +
           index + '" aria-label="' + escapeAttr('About ' + (item.name || item.title || 'this source')) + '">About</button></div>' +
-          renderCardBack(item, index, canonical) : '') +
+          renderCardBack(item, index, canonical, !!hasVideos) : '') +
       '</article>';
     });
 
@@ -1884,6 +2031,7 @@
       else fixedRenderedCount = end;
       renderFixedTail(itemsToRender.length, entityGrid, batchSize);
     }
+    syncDesktopBlockNav();
   }
 
   function renderFixedTail(total, entityGrid, batchSize) {
@@ -2086,7 +2234,9 @@
           if (e.pointerType !== 'mouse') return;
           clearTimeout(hoverTimer);
           hoverTimer = null;
-          if (tile.classList.contains('is-card-flipped') && !tile.contains(document.activeElement)) setTileFlipped(tile, false, { focus: false });
+          if (tile.classList.contains('is-card-flipped') && tile.dataset.flipPinned !== '1' && !tile.contains(document.activeElement)) {
+            setTileFlipped(tile, false, { focus: false });
+          }
         });
         tile.addEventListener('touchstart', function(e) {
           if (!e.touches || e.touches.length !== 1) {
@@ -2104,7 +2254,7 @@
             if (!tile.isConnected) return;
             holdTriggered = true;
             tapGuardActive = true;
-            setTileFlipped(tile, !tile.classList.contains('is-card-flipped'));
+            setTileFlipped(tile, !tile.classList.contains('is-card-flipped'), { pinned: true });
           }, HOLD_FLIP_DELAY_MS);
         }, { passive: true });
         tile.addEventListener('touchmove', function(e) {
@@ -2146,7 +2296,7 @@
       tile.addEventListener('click', function(e) {
         clearTimeout(hoverTimer);
         if (tile.classList.contains('is-card-flipped')) return;
-        if (e.target.closest('.mall-card-front[hidden], .mall-card-back, .mall-card-flip')) return;
+        if (e.target.closest('.mall-card-front[hidden], .mall-card-back, .mall-card-flip, .mall-card-expand-detail')) return;
         // Ignore tap if guard is active (just finished dragging)
         if (tapGuardActive) return;
         if (groupDefinitions !== null && tileField.closest('[inert]')) return;
@@ -2166,12 +2316,12 @@
           return;
         }
         if (tile.classList.contains('is-card-flipped') ||
-            (e.target !== tile && e.target.closest('.mall-card-flip, .mall-card-back'))) return;
+            (e.target !== tile && e.target.closest('.mall-card-flip, .mall-card-back, .mall-card-expand-detail'))) return;
         var index = Number(tile.dataset.index || 0);
         var memberPlayer = usesMemberVideoPlayer();
         if ((e.key === 'i' || e.key === 'f') && e.target === tile && hasOspBack) {
           e.preventDefault();
-          setTileFlipped(tile);
+          setTileFlipped(tile, undefined, { pinned: true });
           return;
         }
         if ((fixedVideoField || memberPlayer) && e.target !== tile) return;
@@ -2185,7 +2335,8 @@
         } else if (e.key === 'Enter') {
           e.preventDefault();
           // Match the pointer path in the shared video presentations.
-          if (fixedVideoField || memberPlayer || (isEntityGrid() && mallCatalog[index]?.discovery_kind === 'candidate')) togglePlay(index);
+          if (fixedVideoField || memberPlayer) togglePlay(index);
+          else if (isEntityGrid()) togglePlay(index);
           else openFullscreenFromTile(index);
         }
       });
@@ -2199,7 +2350,7 @@
       if (flip && flipBack) {
         flip.addEventListener('click', function(e) {
           e.stopPropagation();
-          if (!tapGuardActive) setCardFlipped(tile, true);
+          if (!tapGuardActive) setCardFlipped(tile, true, { pinned: true });
         });
         flipBack.addEventListener('click', function(e) {
           e.stopPropagation();
@@ -2211,18 +2362,37 @@
           setCardFlipped(tile, false);
           togglePlay(Number(tile.dataset.index || 0));
         });
+        tile.querySelector('.mall-card-public-launch')?.addEventListener('click', function(e) {
+          e.stopPropagation();
+        });
         tile.querySelector('.mall-card-enter')?.addEventListener('click', function(e) {
           e.stopPropagation();
           navigateToFoundUp(e.currentTarget.dataset.canonicalFoundupId);
         });
       }
+      tile.querySelectorAll('.mall-card-expand-detail').forEach(function(detailBtn) {
+        detailBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (tapGuardActive) return;
+          setCardFlipped(tile, false, { focus: false });
+          openNonVideoFoundUpDetail(Number(tile.dataset.index || 0));
+        });
+      });
 
       // Pinch support via gesture engine (if available)
       if (window.gestureZone) {
         window.gestureZone(tile, {
           onPinchOut: function() {
-            if (tile.classList.contains('is-card-flipped')) return;
             var index = Number(tile.dataset.index || 0);
+            var activeItems = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
+            var item = activeItems[index];
+            var tileHasVideos = item && (item.videos?.length || item.video_data || (entityPortraitField && item.video_pages?.catalog && item.video_count) || (!usesMemberVideoPlayer() && item.video_count));
+            if (!tileHasVideos && !fixedVideoField && !isPropertyListing(item)) {
+              setCardFlipped(tile, false, { focus: false });
+              openNonVideoFoundUpDetail(index);
+              return;
+            }
+            if (tile.classList.contains('is-card-flipped')) return;
             if (fixedVideoField || expandedFoundUp !== null) {
               openFullscreenFromTile(index);
               return;
@@ -2360,16 +2530,16 @@
     var memberPlayer = usesMemberVideoPlayer();
     var hasVideos = item && (item.videos?.length || item.video_data || (entityPortraitField && item.video_pages?.catalog && item.video_count) || (!memberPlayer && item.video_count));
 
-    // Non-video tiles: enter dedicated member video projection (e.g. HPC) or open quick-view
+    // Non-video tiles: scoped member projection on portal, or flip card to reveal OSP & actions
     if (!hasVideos) {
       if (isEntityGrid() && item?.discovery_kind === 'candidate') {
         var candidateTile = getTileElement(index);
-        if (candidateTile) setCardFlipped(candidateTile, true);
+        if (candidateTile) setCardFlipped(candidateTile, true, { pinned: true });
         return;
       }
       var foundupId = item && (item.foundup_id || item.id);
       var memberProjection = foundupId && !fixedVideoField && window.mallVideoProjection?.memberPath?.(foundupId);
-      if (memberProjection) {
+      if (memberProjection && !entityPortraitField) {
         if (desktopInlineTile) window.mallVideoPlayer.close();
         window.mallStateRestore?.save?.();
         if (typeof window.location?.assign === 'function') {
@@ -2379,10 +2549,12 @@
         }
         return;
       }
-      if (desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) window.mallVideoPlayer.close();
-      if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
-        window.mallPlanes.openFoundUpById(foundupId);
+      var nonVideoTile = getTileElement(index);
+      if (nonVideoTile && nonVideoTile.querySelector('.mall-card-back')) {
+        setCardFlipped(nonVideoTile, !nonVideoTile.classList.contains('is-card-flipped'), { pinned: true });
+        return;
       }
+      openNonVideoFoundUpDetail(index);
       return;
     }
 
@@ -3512,6 +3684,16 @@
   }
 
   /**
+   * Load remaining small discovery pages when an explicit sort/filter chip needs full-catalog coverage.
+   */
+  async function hydrateCatalogForFilter(expectedScope, expectedProjection) {
+    while (catalogPager?.hasMore && currentFieldScope === expectedScope && currentProjection === expectedProjection) {
+      var batch = await loadCatalogPage();
+      if (!batch.length) break;
+    }
+  }
+
+  /**
    * Set projection mode and re-render tiles
    * @param {string} projection - Projection name: default, alpha, readiness, category
    */
@@ -3522,6 +3704,9 @@
       projection = 'default';
     }
 
+    currentFieldScope = null;
+    mallCatalog = fullCatalog.slice();
+    originalOrder = mallCatalog.slice();
     currentProjection = projection;
     mallCatalog = sortByProjection(projection);
     renderTiles();
@@ -3563,7 +3748,7 @@
   }
 
   /**
-   * Bind projection chip click handlers and progressive Build v18 discovery pills
+   * Bind projection chip click handlers and progressive Build v24 discovery pills
    */
   function bindProjectionChips() {
     var nav = document.getElementById('mallProjection');
@@ -3571,7 +3756,8 @@
       nav.dataset.discoveryFiltersBound = '1';
       [
         { group: 'videos', label: 'Videos' },
-        { group: 'apps', label: 'Apps' }
+        { group: 'apps', label: 'Apps' },
+        { group: 'shop', label: 'Shop' }
       ].forEach(function(spec) {
         if (nav.querySelector('[data-scope-group="' + spec.group + '"]')) return;
         var btn = document.createElement('button');
@@ -3585,22 +3771,12 @@
             clearFieldScope();
           } else {
             filterBySourceGroup(spec.group);
+            hydrateCatalogForFilter(currentFieldScope, currentProjection);
           }
           window.mallStateRestore?.save?.();
         });
         nav.appendChild(btn);
       });
-      if (!nav.querySelector('[data-hpc-shortcut]')) {
-        var hpcLink = document.createElement('a');
-        hpcLink.className = 'mall-projection-chip mall-filter-chip';
-        hpcLink.href = '/member/?foundup=hpc';
-        hpcLink.dataset.hpcShortcut = '1';
-        hpcLink.textContent = 'HPC';
-        hpcLink.addEventListener('click', function() {
-          window.mallStateRestore?.save?.();
-        });
-        nav.appendChild(hpcLink);
-      }
     }
     var chips = document.querySelectorAll('.mall-projection-chip[data-projection]');
     chips.forEach(function(chip) {
@@ -3612,7 +3788,11 @@
           clearFieldScope();
         } else {
           setProjection(proj);
+          if (proj !== 'default') {
+            hydrateCatalogForFilter(currentFieldScope, currentProjection);
+          }
         }
+        window.mallStateRestore?.save?.();
       });
     });
     updateProjectionChips();
@@ -3643,6 +3823,12 @@
       if (groupKey === 'apps') {
         return sortScopedResults(fullCatalog.filter(function(item) {
           return ['github_repo', 'external_app', 'internal_app', 'internal_service'].indexOf(item.source_type) !== -1;
+        }));
+      }
+      if (groupKey === 'shop') {
+        return sortScopedResults(fullCatalog.filter(function(item) {
+          return String(item.category || '').toLowerCase() === 'marketplace' ||
+            String(item.source_type || '').toLowerCase() === 'marketplace';
         }));
       }
       return fullCatalog.slice();

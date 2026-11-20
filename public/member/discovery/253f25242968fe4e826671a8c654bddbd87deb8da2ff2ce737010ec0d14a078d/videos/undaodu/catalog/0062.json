@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 301,
+      "embed_url": "https://www.youtube.com/embed/DfLOzz4PlmM",
+      "source_url": "https://www.youtube.com/watch?v=DfLOzz4PlmM",
+      "thumbnail_url": "https://i.ytimg.com/vi/DfLOzz4PlmM/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:49:16Z",
+      "title": "What is FoundUp's Vision?",
+      "video_id": "DfLOzz4PlmM"
+    },
+    {
+      "duration_seconds": 481,
+      "embed_url": "https://www.youtube.com/embed/dCkGPoMnSEY",
+      "source_url": "https://www.youtube.com/watch?v=dCkGPoMnSEY",
+      "thumbnail_url": "https://i.ytimg.com/vi/dCkGPoMnSEY/hqdefault.jpg",
+      "timestamp": "2026-01-14T17:07:33Z",
+      "title": "Basic Addition",
+      "video_id": "dCkGPoMnSEY"
+    },
+    {
+      "duration_seconds": 87,
+      "embed_url": "https://www.youtube.com/embed/DBZmwf7gKQM",
+      "source_url": "https://www.youtube.com/watch?v=DBZmwf7gKQM",
+      "thumbnail_url": "https://i.ytimg.com/vi/DBZmwf7gKQM/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:40:11Z",
+      "title": "Exercise Makes You Smarter",
+      "video_id": "DBZmwf7gKQM"
+    },
+    {
+      "duration_seconds": 47,
+      "embed_url": "https://www.youtube.com/embed/DBL7iz-alAs",
+      "source_url": "https://www.youtube.com/watch?v=DBL7iz-alAs",
+      "thumbnail_url": "https://i.ytimg.com/vi/DBL7iz-alAs/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:33:20Z",
+      "title": "Baby swallows leaving the nest",
+      "video_id": "DBL7iz-alAs"
+    },
+    {
+      "duration_seconds": 281,
+      "embed_url": "https://www.youtube.com/embed/dBHxEIYKLiU",
+      "source_url": "https://www.youtube.com/watch?v=dBHxEIYKLiU",
+      "thumbnail_url": "https://i.ytimg.com/vi/dBHxEIYKLiU/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:07:33Z",
+      "title": "Japanese Government System",
+      "video_id": "dBHxEIYKLiU"
+    },
+    {
+      "duration_seconds": 577,
+      "embed_url": "https://www.youtube.com/embed/dA1c-QARzaM",
+      "source_url": "https://www.youtube.com/watch?v=dA1c-QARzaM",
+      "thumbnail_url": "https://i.ytimg.com/vi/dA1c-QARzaM/hqdefault.jpg",
+      "timestamp": "2026-01-12T20:09:18Z",
+      "title": "LinkedIn Crowdfunding",
+      "video_id": "dA1c-QARzaM"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/undaodu/catalog/0063.json",
+  "order": "catalog",
+  "page": 62,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

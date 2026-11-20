@@ -20,7 +20,7 @@ jobs:
   browser-policy:
     needs: security
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     container:
       # Official v1.62.0-noble image; browsers and system libraries are prebuilt.
       image: mcr.microsoft.com/playwright/python:v1.62.0-noble@sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d
@@ -28,6 +28,7 @@ jobs:
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       PYTHONUNBUFFERED: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +36,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Record exact source and qualification boundary
         shell: bash
         run: |
@@ -47,44 +51,81 @@ jobs:
           python -B - <<'PY'
           import hashlib, json, os, pathlib, subprocess
           files = [
-              'public/member/js/mall-video-player.js',
-              'public/member/css/mall-tile-field.css',
+              'public/index.html', 'public/f/index.html',
+              'public/member/index.html', 'public/member/foundup.html',
+              'public/member/member-sw.js', 'public/member/mall-video-catalog.json',
+              'public/member/discovery/catalog.json',
+              'scripts/refresh_mall_catalog.py',
               'public/member/tests/mall_scoped_video_browser.py',
               'public/member/tests/mall_queue_callbacks_browser.py',
+              'public/member/tests/mall_public_tv_browser.py',
+              'public/member/tests/mall_product_state_vm.mjs',
+              'public/member/tests/test_mall_tile_field.py',
+              'public/member/tests/test_refresh_catalog_safety.py',
+              'modules/foundups/pfmall/tests/test_member_pwa_hardening.py',
               '.github/workflows/hpc-phone-qualification.yml',
               'requirements-trust-bootstrap.txt',
           ]
+          generation = json.loads(pathlib.Path('public/member/discovery/catalog.json').read_text())['generation']
+          for pattern in [
+              'public/member/js/*.js', 'public/member/css/*.css',
+              'public/member/playback-probe/*',
+              f'public/member/discovery/{generation}/**/*.json',
+          ]:
+              files.extend(str(p) for p in pathlib.Path('.').glob(pattern) if p.is_file())
+          files = sorted(set(files))
           receipt = {
               'source_sha': os.environ['GITHUB_SHA'],
               'source_tree': subprocess.check_output(['git', '-c', 'safe.directory=' + os.environ['GITHUB_WORKSPACE'], 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
               'run_id': os.environ['GITHUB_RUN_ID'],
               'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
               'playwright_version': '1.62.0',
+              'mall_build': 'v25', 'discovery_generation': generation,
               'browser_image_digest': 'sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d',
               'source_sha256': {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in files},
-              'scope': 'Real shell and CSS; mocked provider and network routes in Chromium and WebKit.',
+              'scope': 'Integrated v25 shell, recovered v24 discovery data and CSS; controlled provider/network fixtures in Chromium and WebKit; actual worker/state VM and targeted static contracts.',
               'real_youtube': 'UNEXECUTED', 'physical_iphone': 'UNEXECUTED', 'deployment': 'NONE',
           }
           pathlib.Path(os.environ['HPC_EVIDENCE_DIR'], 'source.json').write_text(json.dumps(receipt, indent=2) + '\n')
           PY
       - name: Bootstrap checksum-verified Python trust
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
-      - name: Install matching Python browser package
+      - name: Install matching browser and contract-test packages
         timeout-minutes: 5
         run: |
-          python -m pip --isolated install --only-binary=:all: playwright==1.62.0
+          python -m pip --isolated install --only-binary=:all: playwright==1.62.0 pytest==9.2.0
           python -m pip freeze > "$HPC_EVIDENCE_DIR/dependencies.txt"
-      - name: Qualify player policy and delayed queue callbacks
-        timeout-minutes: 8
+          node --version >> "$HPC_EVIDENCE_DIR/dependencies.txt"
+      - name: Qualify integrated phone, desktop, paging and cache behavior
+        timeout-minutes: 10
         shell: bash
         run: |
           set -euo pipefail
-          policy_status=0
-          queue_status=0
-          python -B public/member/tests/mall_scoped_video_browser.py --player-policy 2>&1 | tee "$HPC_EVIDENCE_DIR/player-policy.log" || policy_status=$?
-          python -B public/member/tests/mall_queue_callbacks_browser.py 2>&1 | tee "$HPC_EVIDENCE_DIR/queue-callbacks.log" || queue_status=$?
-          printf 'player_policy_exit=%s\nqueue_callbacks_exit=%s\n' "$policy_status" "$queue_status" > "$HPC_EVIDENCE_DIR/outcomes.txt"
-          test "$policy_status" -eq 0 && test "$queue_status" -eq 0
+          combined_status=0
+          run_gate() {
+            local gate_name="$1"
+            local gate_status=0
+            shift
+            timeout --signal=TERM --kill-after=5s 180s "$@" 2>&1 | tee "$HPC_EVIDENCE_DIR/$gate_name.log" || gate_status=$?
+            printf '%s_exit=%s\n' "$gate_name" "$gate_status" >> "$HPC_EVIDENCE_DIR/outcomes.txt"
+            if [ "$gate_status" -ne 0 ]; then combined_status=1; fi
+          }
+          run_gate player-policy python -B public/member/tests/mall_scoped_video_browser.py --player-policy
+          run_gate queue-callbacks python -B public/member/tests/mall_queue_callbacks_browser.py
+          run_gate public-tv python -B public/member/tests/mall_public_tv_browser.py --worker
+          run_gate worker-state node public/member/tests/mall_product_state_vm.mjs
+          run_gate static-contracts python -B -m pytest -q -c /dev/null --noconftest -p no:cacheprovider \
+            public/member/tests/test_mall_tile_field.py \
+            modules/foundups/pfmall/tests/test_member_pwa_hardening.py \
+            public/member/tests/test_refresh_catalog_safety.py
+          exit "$combined_status"
+      - name: Retain public-TV request and geometry receipt
+        if: always()
+        shell: bash
+        run: |
+          if [ -f "$GITHUB_WORKSPACE/../mall_v25_public_tv_qa.json" ]; then
+            cp "$GITHUB_WORKSPACE/../mall_v25_public_tv_qa.json" "$HPC_EVIDENCE_DIR/"
+          fi
       - name: Retain source receipt and browser logs
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/rcPWtwm4KgU",
+      "source_url": "https://www.youtube.com/watch?v=rcPWtwm4KgU",
+      "thumbnail_url": "https://i.ytimg.com/vi/rcPWtwm4KgU/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:27:02Z",
+      "title": "⚡ OpenClaw: Where AI Meets Entrepreneurship #FoundUps",
+      "video_id": "rcPWtwm4KgU"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/zyJRS1ERk5o",
+      "source_url": "https://www.youtube.com/watch?v=zyJRS1ERk5o",
+      "thumbnail_url": "https://i.ytimg.com/vi/zyJRS1ERk5o/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:25:26Z",
+      "title": "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
+      "video_id": "zyJRS1ERk5o"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/DY3I7gIRxh4",
+      "source_url": "https://www.youtube.com/watch?v=DY3I7gIRxh4",
+      "thumbnail_url": "https://i.ytimg.com/vi/DY3I7gIRxh4/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:23:51Z",
+      "title": "💡 pAVS: Peer-to-Peer Autonomous Ventures #FoundUps",
+      "video_id": "DY3I7gIRxh4"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/dSZpYbLsm1Q",
+      "source_url": "https://www.youtube.com/watch?v=dSZpYbLsm1Q",
+      "thumbnail_url": "https://i.ytimg.com/vi/dSZpYbLsm1Q/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:22:15Z",
+      "title": "🚀 Building the Future with AI Agents #FoundUps #pAVS",
+      "video_id": "dSZpYbLsm1Q"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/MaEXDXB42Xk",
+      "source_url": "https://www.youtube.com/watch?v=MaEXDXB42Xk",
+      "thumbnail_url": "https://i.ytimg.com/vi/MaEXDXB42Xk/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:20:39Z",
+      "title": "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
+      "video_id": "MaEXDXB42Xk"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/Mqcn-m-rq44",
+      "source_url": "https://www.youtube.com/watch?v=Mqcn-m-rq44",
+      "thumbnail_url": "https://i.ytimg.com/vi/Mqcn-m-rq44/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:19:03Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "Mqcn-m-rq44"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/foundups_main/catalog/0004.json",
+  "order": "catalog",
+  "page": 3,
+  "page_size": 6,
+  "record_id": "foundups_main",
+  "schema_version": 1,
+  "total": 44
+}

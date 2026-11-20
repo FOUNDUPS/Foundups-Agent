@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 1136,
+      "embed_url": "https://www.youtube.com/embed/MIhzLNlTDDY",
+      "source_url": "https://www.youtube.com/watch?v=MIhzLNlTDDY",
+      "thumbnail_url": "https://i.ytimg.com/vi/MIhzLNlTDDY/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:27:12Z",
+      "title": "What's the difference between a Found Up and a Start Up",
+      "video_id": "MIhzLNlTDDY"
+    },
+    {
+      "duration_seconds": 441,
+      "embed_url": "https://www.youtube.com/embed/MHbN4yEO_QU",
+      "source_url": "https://www.youtube.com/watch?v=MHbN4yEO_QU",
+      "thumbnail_url": "https://i.ytimg.com/vi/MHbN4yEO_QU/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:43:21Z",
+      "title": "Open Incubator",
+      "video_id": "MHbN4yEO_QU"
+    },
+    {
+      "duration_seconds": 464,
+      "embed_url": "https://www.youtube.com/embed/mEPFDqvu9s8",
+      "source_url": "https://www.youtube.com/watch?v=mEPFDqvu9s8",
+      "thumbnail_url": "https://i.ytimg.com/vi/mEPFDqvu9s8/hqdefault.jpg",
+      "timestamp": "2026-01-14T16:50:07Z",
+      "title": "Kids versus Grandparents (Sports Festival)",
+      "video_id": "mEPFDqvu9s8"
+    },
+    {
+      "duration_seconds": 428,
+      "embed_url": "https://www.youtube.com/embed/mB7yY8dwcIc",
+      "source_url": "https://www.youtube.com/watch?v=mB7yY8dwcIc",
+      "thumbnail_url": "https://i.ytimg.com/vi/mB7yY8dwcIc/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:35:45Z",
+      "title": "How Can Education Be Free?",
+      "video_id": "mB7yY8dwcIc"
+    },
+    {
+      "duration_seconds": 594,
+      "embed_url": "https://www.youtube.com/embed/MAoLcxtb0J0",
+      "source_url": "https://www.youtube.com/watch?v=MAoLcxtb0J0",
+      "thumbnail_url": "https://i.ytimg.com/vi/MAoLcxtb0J0/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:17:22Z",
+      "title": "Foundups.com and Foundup Dollars",
+      "video_id": "MAoLcxtb0J0"
+    },
+    {
+      "duration_seconds": 450,
+      "embed_url": "https://www.youtube.com/embed/mao8OQYRFjA",
+      "source_url": "https://www.youtube.com/watch?v=mao8OQYRFjA",
+      "thumbnail_url": "https://i.ytimg.com/vi/mao8OQYRFjA/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:05:16Z",
+      "title": "Outside Park: Fun and Exhilarating Adventure",
+      "video_id": "mao8OQYRFjA"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/undaodu/catalog/0039.json",
+  "order": "catalog",
+  "page": 38,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

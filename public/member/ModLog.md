@@ -1,6 +1,6 @@
 # Member Area Module Change Log
 
-## 2026-11-20 - Floating scroll clearance and bounded muted startup
+## 2026-11-20 - Floating repair and recovered v25 integration candidate
 
 Repair candidate on `75c838b6eab19807487ee02c4b2f9367e580547e`:
 
@@ -25,11 +25,35 @@ The tests exercise the actual native application shell/CSS with controlled
 providers, including 390px startup/scroll cases and delayed queue callbacks.
 This supersedes the earlier local browser-launch block, not the device gate.
 
-No release or cache generation was advanced. The public v24 overlay still needs
-integration without losing its six shell changes, discovery generation and
-newer diagnostic probe. Authorized Firebase publication remains unavailable;
-integrated-preview and physical iPhone/real YouTube acceptance are unexecuted.
-See the HPC roadmap and member TestModLog for exact remaining work and evidence.
+The v24 recovery blocker is now resolved for the observed Mall/HPC surface.
+Recovered the six changed shell files, public catalog metadata and the newer
+diagnostic probe from `313d8168205178cf5387e1912bd5e462d1dafaa9`. All 206
+referenced discovery JSON assets were retrieved and exactly reproduced by the
+existing offline exporter with the single `hero_label` metadata allowlist
+addition. Generation remains
+`253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d`.
+This removes the original ephemeral-staging dependency for this scope; it does
+not claim a full historical Hosting clone.
+
+The integrated working candidate on `dba56a6f20efd932971683ece710cba7e1921488`
+preserves the qualified player and clearance repair alongside the recovered
+v24 UI/data. Build label, member cache and versioned assets advance together to
+v25, including root, directory and FoundUp-detail projection references. The
+host allowlist adds only the proposed `play-v25-iphone` channel. Existing
+desktop presentation and member admission remain their current owners.
+
+Local integrated verification passed: 159 targeted pytest checks, 29
+actual-worker VM cases and the full 222-path integration hash manifest. The two
+exact public SDK source bindings were independently reviewed, applied by the
+release owner and confirmed by a third review. Source-linked review renewal is
+complete; fresh integrated security and browser CI remain PENDING. These local
+fixture results and the native-source hosted PASS above are not acceptance of
+the combined build on a real phone.
+Firebase CLI/API connectivity is available but publishing is unauthenticated,
+and the official plugin is not installed. The v25 receipt remains explicitly
+unpublished and unbound to a final commit/Hosting version. No release, delivered
+cache update, production merge or physical iPhone/real YouTube success is
+claimed. See the HPC roadmap and member TestModLog for remaining test gates.
 
 ## 2026-11-16 - Build v23 bounded public TV continuation
 

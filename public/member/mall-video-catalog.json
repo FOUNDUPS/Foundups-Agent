@@ -11194,7 +11194,7 @@
     "description": "Kosei AI Systems — AI content automation service for businesses. Internal service FoundUp with planned production domain.",
     "tier": "F0_DAE",
     "lifecycle_stage": "incubating",
-    "launch_readiness": "ready",
+    "launch_readiness": "conditional",
     "routing_prefix": "/f/kosei",
     "data_namespace": "idb_kosei",
     "token_symbol": "KOSEI",
@@ -11220,6 +11220,7 @@
       "marketplace",
       "peer-to-peer",
       "selling",
+      "shop",
       "local"
     ],
     "topic_family": "commerce",
@@ -11229,7 +11230,8 @@
     "related_lanes": [
       "foundups_main"
     ],
-    "tagline": "Turn your junk into someone's treasure",
+    "hero_label": "SHOP",
+    "tagline": "Shop local peer-to-peer reuse.",
     "description": "Peer-to-peer marketplace for selling unwanted items. List it, price it, move it.",
     "tier": "F0_DAE",
     "lifecycle_stage": "proto",
@@ -11275,7 +11277,8 @@
     "related_lanes": [
       "foundups_main"
     ],
-    "tagline": "System Knowledge Retrieval",
+    "hero_label": "INTELLIGENCE",
+    "tagline": "Intelligence search",
     "description": "Enterprise-grade artifact and memory retrieval system for the p.fMALL shell.",
     "tier": "F3_INFRA",
     "lifecycle_stage": "incubating",
@@ -11300,7 +11303,7 @@
     "creator": "012",
     "creator_id": "012",
     "creator_display": "UnDaoDu (012)",
-    "entity": "eSingularity",
+    "entity": "AI Koban",
     "source_type": "external_app",
     "source_id": "modules/foundups/esingularity",
     "source_handle": "esingularity",
@@ -11309,6 +11312,7 @@
     "tags": [
       "012-lane",
       "ai-infrastructure",
+      "ai-koban",
       "community",
       "esingularity",
       "fukui",
@@ -11323,11 +11327,13 @@
       "eduit",
       "move2japan"
     ],
-    "tagline": "温泉を守る。福井のAIの未来をつくる。",
+    "hero_label": "AI KOBAN",
+    "tagline": "AI Koban / Compute for FoundUps",
+    "one_sentence_pitch": "AI Koban / Compute for FoundUps — regional Japan onsen & clean AI infrastructure.",
     "description": "Regional AI infrastructure FoundUp for Fukui: AI Koban, three-site feasibility, Japan Hyperscaler Report research, and the YUMORI public-asset/community-reuse program.",
     "tier": "F0_DAE",
     "lifecycle_stage": "proto",
-    "launch_readiness": "ready",
+    "launch_readiness": "conditional",
     "routing_prefix": "/f/esingularity_001",
     "data_namespace": "idb_esingularity_001",
     "poster_url": "/media/posters/esingularity.jpg",
@@ -11341,6 +11347,7 @@
   },
   {
     "foundup_id": "hpc",
+    "canonical_foundup_id": "hpc",
     "title": "Hasan Piker Coalition",
     "creator": "012",
     "creator_id": "012",
@@ -11377,8 +11384,7 @@
     "public_poc_url": "https://hpc.foundups.com/",
     "outcome": "Open political-media community traces clips to primary sources and connects directly to civic action.",
     "solution": "PoC (`hpc.foundups.com`): curated Shorts floating player, WikiTube queue, and Contact Congress bridge.",
-    "pain": "Out-of-context clips and bot-gated feeds sever political commentary from verifiable civic follow-through.",
-    "canonical_foundup_id": "hpc"
+    "pain": "Out-of-context clips and bot-gated feeds sever political commentary from verifiable civic follow-through."
   },
   {
     "foundup_id": "voteballots",

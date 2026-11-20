@@ -95,6 +95,7 @@ def discovery_records(count=14, videos=13):
         "title": f"Public source {record}",
         "description": "Reviewed public description",
         "one_sentence_pitch": "One public pitch",
+        "hero_label": "Reviewed public hero label",
         "outcome": "Reviewed public outcome",
         "solution": "Reviewed public solution",
         "pain": "Reviewed public pain",
@@ -159,7 +160,7 @@ class TestPublicDiscoveryPages:
         assert candidate["public_plan_url"] == source[1]["public_plan_url"]
         assert candidate["lifecycle_stage"] == "incubating"
         assert candidate["launch_readiness"] == "discoverable_only"
-        for field in ["outcome", "solution", "pain", "linkedin_url", "creator_display",
+        for field in ["outcome", "solution", "pain", "linkedin_url", "creator_display", "hero_label",
                       "source_handle", "topic_family", "geo", "tags", "related_lanes", "display_order"]:
             assert candidate[field] == source[1][field]
         assert candidate["video_count"] == 13
