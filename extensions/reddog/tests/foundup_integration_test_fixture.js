@@ -4,11 +4,13 @@ const cp = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { isTargetReadPathDenied } = require('../target_read_path_policy');
 
-const ENTITY_IDS = new Set(['trade', 'antifafm_001', 'agent_market']);
+const ENTITY_IDS = new Set(['trade', 'antifafm_001', 'agent_market', 'hpc']);
 const FIXED_EVIDENCE = [
   'modules/foundups/foundup_registry.json',
   'modules/foundups/foundup_registry.schema.json',
+  'modules/foundups/brand_context.schema.json',
   'modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md',
   'modules/infrastructure/wre_core/skillz/skills_registry_v2.json'
 ];
@@ -86,6 +88,16 @@ function copyCanonicalEvidence(sourceRoot, targetRoot) {
   const registry = JSON.parse(fs.readFileSync(
     confinedFile(sourceRoot, 'modules/foundups/foundup_registry.json', true), 'utf8'
   ));
+  for (const entity of registry.entities) {
+    if (entity && entity.brand_context_path != null) {
+      const relative = entity.brand_context_path;
+      if (typeof relative !== 'string' || isTargetReadPathDenied(relative)
+        || !relative.startsWith('modules/foundups/') || path.posix.basename(relative) !== 'brand_context.json') {
+        throw new Error('foundup_fixture_brand_path_invalid');
+      }
+      copyEvidence(sourceRoot, targetRoot, relative, true);
+    }
+  }
   for (const entity of registry.entities.filter((item) => ENTITY_IDS.has(item.foundup_id))) {
     if (typeof entity.module_path === 'string' && entity.module_path) {
       ensureConfinedParent(targetRoot, entity.module_path + '/.reddog-fixture-placeholder');

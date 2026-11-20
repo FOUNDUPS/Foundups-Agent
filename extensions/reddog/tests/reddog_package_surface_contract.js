@@ -38,6 +38,8 @@ const EXPECTED_RUNTIME_FILES = Object.freeze([
   'foundup_target_phrase.js',
   'foundup_work_grounding.js',
   'foundup_work_runtime_binding.js',
+  'fractal_focus_front.js',
+  'fractal_focus_host.js',
   'fusion_progress_receipt.js',
   'governed_git_context.js',
   'governed_git_executable.js',

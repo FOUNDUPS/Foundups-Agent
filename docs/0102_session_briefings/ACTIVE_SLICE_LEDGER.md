@@ -1,3 +1,22 @@
+## RedDog extension front / first Mall adapter — 2026-11-20
+
+012 redirected development to the existing RedDog extension as the owner of
+the front end. EXTEND its panel; REUSE the Mall guest transport delivered by
+[#2435](https://github.com/FOUNDUPS/Foundups-Agent/pull/2435). Source:
+`193f4fe4a`. The smallest shared piece is the current FoundUp breadcrumb and
+an explicit action to stage a question. The VSIX and HPC guest dialog supply
+their own independently qualified focus. Neither host imports the other's
+credentials, conversations, code execution capability, or graph data.
+
+Native WSP 00 tracker passed. The Holo owner returned an index gap/UNKNOWN
+freshness; the lexical bundle identified the checked-out head but did not
+cover the newly merged guest flow. Directly compared the panel, grounding
+owner, published catalog, guest client, previous receipt and navigation
+contract. No independent popup, registry, graph branch, or public deployment.
+The graph team's local source drawer is not a released adapter. The next
+graph increment needs a permitted tile/revision from that owner, plus
+caller restoration; a FoundUp ID alone cannot stand in for those.
+
 ## RedDog guest conversation in the HPC Mall — 2026-11-20
 
 012 requested an OpenRouter-backed RedDog, quiet voice intake, and a public

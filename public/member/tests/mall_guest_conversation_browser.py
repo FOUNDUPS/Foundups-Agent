@@ -55,11 +55,26 @@ def run():
             assert calls == []
             dialog.get_by_role("checkbox").check()
             dialog.get_by_role("button", name="Start guest session").click()
-            dialog.get_by_role("textbox").fill("What is this?")
+            focus = dialog.get_by_role("group", name="Fractal Mall focus")
+            expect(focus).to_be_visible()
+            expect(focus.locator("[data-reddog-fractal-path]")).to_have_text("Mall › hpc")
+            ask = focus.locator("[data-reddog-fractal-ask]")
+            expect(ask).to_be_visible()
+            ask.click()
+            question = dialog.get_by_role("textbox")
+            expect(question).to_have_value("What should I know about hpc?")
+            assert question.evaluate("element => document.activeElement === element") is True
+            assert calls == ["encounter"], calls
+            question.fill("Keep this local draft")
+            ask.click()
+            expect(question).to_have_value("Keep this local draft")
+            assert calls == ["encounter"], calls
+            question.fill("What is this?")
             dialog.get_by_role("button", name="Send", exact=True).click()
             expect(dialog.get_by_text("Hasan Piker Coalition", exact=True)).to_be_visible()
             dialog.get_by_role("button", name="End session").click()
             expect(dialog.get_by_text("Hasan Piker Coalition", exact=True)).to_have_count(0)
+            expect(focus).to_be_hidden()
             assert calls == ["encounter", "turn", "withdraw"], calls
         finally:
             browser.close()

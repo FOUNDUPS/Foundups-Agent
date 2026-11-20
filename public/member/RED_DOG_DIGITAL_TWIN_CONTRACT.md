@@ -69,6 +69,11 @@ account entry. Membership can unlock member presentation after verification.
 The member account, any future paid compute allowance, and a signed work order
 are three separate decisions. Buying more turns cannot authorize an edit.
 
+The Mall hosts the [RedDog extension's focus component](../../extensions/reddog/ARCHITECTURE.md#fractal-mall-focus-front)
+inside its existing guest dialog. The editor and Mall render the same code,
+not two copies of conversational state. Staging a question does not send it
+and does not establish a graph revision or permission to perform work.
+
 The FoundUps.com landing page served a chat widget targeting
 `https://chat-3wqfxfmvuq-uc.a.run.app` on November 20. Its source sends
 `message` and a browser-generated `sessionId`. Firebase Hosting serves the
