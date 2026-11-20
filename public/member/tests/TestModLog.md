@@ -1,10 +1,10 @@
-## 2026-11-20 - Phone startup and floating-clearance candidate
+## 2026-11-20 - Phone startup and floating-clearance hosted qualification
 
 Source base: `75c838b6eab19807487ee02c4b2f9367e580547e` plus the bounded
 player/CSS repair. The existing `mall_scoped_video_browser.py --player-policy`
 runner now includes `verify_phone_muted_autoplay_retry()` at 390 x 844.
 
-Prepared assertions cover one tile tap with unmuted rejection then muted
+Passing assertions cover one tile tap with unmuted rejection then muted
 success; two total requests when both starts are blocked; genuine error 150;
 late blocked callbacks preserving playing, paused and provider-error states;
 computed scroll padding matching floating clearance; scrolling a lower tile
@@ -18,19 +18,48 @@ reproduced the late-callback status overwrite using the actual handler in a
 Node VM, which prompted the early pending-start guard. That focused review is
 not a browser-suite pass.
 
-Browser result: BLOCKED / UNEXECUTED. The default Playwright Chromium executable
-was absent; an attempt with existing `/usr/bin/chromium` failed at its singleton
-socket before any page loaded. The workspace approval policy rejected escalation.
-Matching WebKit downloaded but required host libraries are absent. The selected
-Python runtime also has no pytest. These are environment failures, not app
-assertion failures or successful red/green results. No security restriction was
-removed and no private browser profile was used.
+Hosted browser result: PASS on exact commit
+`a882d6d40302a1f682b82d372575b20108ce9ef2`, tree
+`b659c4e40e00e162765f133b97562efc1ae0819a`, in
+[run 44666808469](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44666808469).
+The unchanged existing security gate passed before browser execution.
 
-Remaining qualification: run `--player-policy` and
-`mall_queue_callbacks_browser.py` in the established authorized runtime, then
-verify an isolated delivered preview and physical Safari/Home Screen playback
-with advancing media time. Bind every result to its actual source and delivered
-asset hashes. No new build version, CI pass or Hosting publication is implied.
+| Controlled fixture | Chromium | WebKit |
+| --- | --- | --- |
+| 390px one-tap muted retry, bounded rejection and provider-error preservation | PASS | PASS |
+| Floating-player clearance, independent scrolling and same iframe | PASS | PASS |
+| Retained 375px floating player, gestures and WikiTube sequential recovery | PASS | PASS |
+| Hidden/tucked pause, restore and stale callback policy | PASS | PASS |
+| Delayed queue continuation/cancellation | 9 cases PASS | 9 cases PASS |
+
+These suites overlap; their groups are not a unique aggregate assertion count.
+The [retained artifact](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44666808469/artifacts/14598316306)
+contains the exact source receipt, dependency versions, outcomes and browser logs.
+Verified runtime SHA-256 values:
+
+- Player: `eff7e52547c1d56b498f3adfa9b3348bd84c01c68a62bed1ee603a67480b2ba5`.
+- Tile CSS: `671a580fe6d46aa3e2bed771aa963c8dc9f2ab1a77ddf6b547924899c40391fa`.
+
+The isolated branch uses the official prepared Playwright Python 1.62.0 Noble
+container pinned to digest
+`sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d`
+and the matching Python package. It has read-only repository permissions and no
+deployment credentials. Receipt Git reads trust only this command's exact owned
+checkout and still verify the expected commit/tree. Existing security rules,
+scanner coverage and gate ordering remain intact. The metadata-review renewal
+is documented in `.github/security/reviewed-hpc-phone-evidence.json`.
+
+Earlier local Chromium socket denial/missing WebKit libraries, hosted OS-package
+download timeout and mounted-checkout ownership failures all occurred before
+application assertions. They are environment/setup history, not application
+failures. The successful hosted run supersedes the browser-execution block.
+No local security restriction was removed or private browser profile used.
+
+Remaining qualification: preserve and integrate the delivered v24 overlay,
+publish an isolated preview through the authorized Firebase publisher, verify
+delivered asset/version parity, and record physical Safari/Home Screen playback
+with advancing real YouTube media time. Those gates remain UNEXECUTED. This pass
+does not establish that the current public v24 URL contains the repair.
 
 ## 2026-11-16 - v23 root cache ownership and optional gateway opener
 

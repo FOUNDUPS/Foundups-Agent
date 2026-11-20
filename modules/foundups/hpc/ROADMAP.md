@@ -1,6 +1,6 @@
 # HPC roadmap
 
-## 2026-11-20 - Phone floating-player repair candidate
+## 2026-11-20 - Phone repair qualified; preview publication pending
 
 012's current prototype gate is one top-anchored shared player, the existing
 video field scrolling beneath it, and one tile tap requesting playback with
@@ -15,12 +15,17 @@ callbacks cannot replace playing, paused or provider-error status. The existing
 single player, visibility checks, native controls and bounded queue remain the
 owners of playback.
 
-Source syntax and diff checks pass. The new 390 x 844 controlled browser case
-is added but UNEXECUTED: bundled Chromium was absent, system Chromium failed
-before page load because local sockets are denied, and escalation was rejected
-by the workspace approval policy. Downloaded WebKit lacks host libraries.
-Physical iPhone Safari/PWA and real YouTube time progression are also UNEXECUTED.
-See `public/member/tests/TestModLog.md` for the current verification boundary.
+Source repair commit: `3f6dc9f550181864b6fdb6aaa7a9ca9a6f765128` on
+`fix/hpc-phone-start-scroll-20261120`. Hosted qualification PASS on exact commit
+`a882d6d40302a1f682b82d372575b20108ce9ef2`:
+[run 44666808469](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44666808469).
+The existing security gate and both Chromium/WebKit player-policy and delayed
+queue suites pass. This includes the new 390 x 844 startup/scroll case and the
+retained 375px floating-player, gesture and queue controls. The hosted runner
+resolves the earlier local browser-launch limitation without changing local
+permissions. Provider/network fixtures are controlled: integrated v24 delivery,
+real YouTube time progression and physical iPhone Safari/PWA are UNEXECUTED.
+See `public/member/tests/TestModLog.md` for source hashes and retained evidence.
 
 Publishing remains BLOCKED in this session. Firebase Hosting lists the existing
 `play-v24-iphone` channel, but its Cloud Shell returned Site Unavailable on the
@@ -28,13 +33,33 @@ initial attempt and one reload. The official Firebase plugin is available but
 not installed. No new Hosting release, production merge or build-label change
 is claimed. A new source commit alone does not update a phone's cached build.
 
-Next gate: execute the existing player-policy and queue-callback browser suites
-in an authorized runtime, retain the delivered v24 overlay, then publish an
-isolated phone preview with matching build label, worker generation, asset
-hashes and immutable Hosting version. Do not replace v24 with a plain v23 tree.
-Use `/member/?foundup=hpc` on the preview host; `/member/` alone is the general
-Mall. Record physical Safari/PWA results before production promotion. WSP 97
-requires source, validation, publication and device acceptance to remain distinct.
+Next work, in order:
+
+1. Recover the original v24 staging bundle or immutable Hosting version. Preserve
+   its six changed shell files (index, member worker, video projection JS/CSS,
+   tile-field JS/CSS), catalog metadata, discovery generation
+   `253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d`,
+   and diagnostic probe from `313d8168205178cf5387e1912bd5e462d1dafaa9`.
+   Fresh served-file comparisons establish these differences; the complete
+   derived video-page tree and immutable Hosting manifest remain unverified.
+2. Apply the qualified player patch and only the scroll-clearance CSS hunk to
+   that bundle. Do not replace v24 with this plain native v23 continuation or
+   overwrite its additional tile styles. Qualify the integrated bundle.
+3. Use an authorized Firebase publisher for the existing project/site. Advance
+   build label, versioned asset references and worker generation together;
+   preserve the explicit preview-host allowlist. Bind the release receipt to
+   actual delivered hashes and an immutable Hosting version.
+4. Publish an isolated preview and provide `/member/?foundup=hpc`; `/member/`
+   alone is the general Mall. Verify physical Safari/Home Screen playback,
+   advancing media time, scrolling, queue continuation and return/restore
+   before production promotion.
+
+The existing [v24 HPC preview](https://foundupscom--play-v24-iphone-3rrzxm0r.web.app/member/?foundup=hpc)
+still serves the previous runtime. A cloud-browser attempt timed out after its
+existing Play recovery; no explicit bot/sign-in challenge or advancing video
+time was observed. Do not label that timeout as a diagnosed authentication fault.
+WSP 97 keeps source, controlled validation, delivered version and device
+acceptance distinct. No production merge or owned open PR was created.
 
 ## 2026-11-16 - Build v22 direct continuation and policy qualification
 

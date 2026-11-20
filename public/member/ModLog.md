@@ -16,11 +16,20 @@ Repair candidate on `75c838b6eab19807487ee02c4b2f9367e580547e`:
   scroll clearance, fixed player position, same-iframe selection and queue end.
 
 Independent source review identified and corrected the late-callback defect.
-Node syntax, Python AST and whitespace checks pass. Browser execution is
-blocked before app load in this workspace, and physical iPhone playback remains
-unverified. No release or cache generation was advanced. The existing v24
-preview contains additional overlay work that must survive eventual publishing.
-See the HPC roadmap and member TestModLog for remaining gates and access limits.
+Node syntax, Python AST and whitespace checks pass. The source repair is commit
+`3f6dc9f550181864b6fdb6aaa7a9ca9a6f765128`; hosted qualification on exact commit
+`a882d6d40302a1f682b82d372575b20108ce9ef2` passed the existing security gate and
+both Chromium/WebKit suites in
+[run 44666808469](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44666808469).
+The tests exercise the actual native application shell/CSS with controlled
+providers, including 390px startup/scroll cases and delayed queue callbacks.
+This supersedes the earlier local browser-launch block, not the device gate.
+
+No release or cache generation was advanced. The public v24 overlay still needs
+integration without losing its six shell changes, discovery generation and
+newer diagnostic probe. Authorized Firebase publication remains unavailable;
+integrated-preview and physical iPhone/real YouTube acceptance are unexecuted.
+See the HPC roadmap and member TestModLog for exact remaining work and evidence.
 
 ## 2026-11-16 - Build v23 bounded public TV continuation
 
