@@ -1,6 +1,10 @@
 # HPC roadmap
 
-## 2026-11-20 - Integrated v25 rotation repair; qualification and publication pending
+## 2026-11-20 - Integrated v25 automated qualification PASS; publication pending
+
+Controlled runtime qualification is PASS on
+`472e3977d0cfc6948662b85de5161993eeb4faf4`. The preview is not published;
+real YouTube playback and physical iPhone acceptance remain UNEXECUTED.
 
 012's current prototype gate is one top-anchored shared player, the existing
 video field scrolling beneath it, and one tile tap requesting playback with
@@ -90,8 +94,18 @@ The current candidate adds one live media-query owner using the exact CSS
 predicate `(orientation: landscape) and (max-height: 500px)`. Its guarded change
 handler invokes the existing geometry calculation, which reads that query's
 `.matches` instead of duplicating viewport dimensions. Observer, resize/pause
-and media behavior remain unchanged. Five-cycle plain-control qualification at
-the original 90ms limit is PENDING; a causal fix is not yet established.
+and media behavior remain unchanged.
+
+Final controlled [run 44688858246](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44688858246)
+on `472e3977d0cfc6948662b85de5161993eeb4faf4` passed all five qualification
+gates and security (53 regression tests, zero unreviewed findings). Public TV passed 100/100,
+including all five plain WebKit portrait returns at the original 90ms limit,
+later paging and desktop checks. Queue callbacks passed 18/18, worker/state VM
+29 and static contracts 159. The plain-control test is byte-identical to the
+failed `ba11b0b4` run; only the player changed among their recorded source
+hashes. This qualifies the tested fix under controlled providers, without
+claiming a browser-engine cause or real YouTube/device acceptance. The
+documentation commit still requires its normal final exact-head gate.
 
 Publication remains BLOCKED by publisher access. Firebase CLI/API connectivity
 is available, but the publishing session is unauthenticated; the official
@@ -102,14 +116,17 @@ binding. A changed build label in source does not update a phone's cached app.
 
 Next work, in order:
 
-1. Qualify the exact media-query candidate with fresh security and browser/queue
-   CI, including five plain WebKit rotation cycles at the original 90ms limit.
-   Retain the failed controls and completed discovery/cache and SDK evidence;
-   keep native, instrumented and plain-control results distinct.
-2. Use an authenticated, authorized Firebase publisher for the existing
-   project/site. Bind the candidate receipt to the qualified source SHA,
-   actual delivered hashes and immutable Hosting version.
-3. Publish the isolated `play-v25-iphone` candidate and provide its verified
+1. Retain the completed qualification and pass the normal exact-head gate for
+   the documentation commit. No further runtime change is required by this
+   observed regression.
+2. Authenticate the authorized Firebase publisher for existing project
+   `gen-lang-client-0061781628`, site `foundupscom`. Read the old immutable
+   Hosting release, configuration and manifest, preserving unchanged assets
+   outside the recovered Mall/HPC scope. The public reconstruction is not a
+   complete Hosting clone; original ephemeral staging is no longer required.
+3. Publish only the isolated `play-v25-iphone` candidate. Bind the receipt to
+   the qualified source SHA and actual immutable release, then verify delivered
+   hashes, cache generation and Build v25. Provide the verified
    `/member/?foundup=hpc` URL; `/member/` alone is the general Mall.
 4. Record physical Safari/Home Screen results before production promotion.
    The phone must show **Build v25**; the player must stay anchored while tiles

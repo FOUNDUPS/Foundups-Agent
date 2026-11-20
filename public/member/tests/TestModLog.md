@@ -1,4 +1,10 @@
-## 2026-11-20 - Native repair qualified; plain rotation failure and media-query candidate
+## 2026-11-20 - Integrated v25 automated qualification PASS; publication pending
+
+Current controlled runtime qualification: PASS on
+`472e3977d0cfc6948662b85de5161993eeb4faf4`. The source-bound result below
+supersedes the failed rotation controls; it is not delivered-version, real
+YouTube or physical iPhone acceptance. The documentation commit still requires
+its normal exact-head gate.
 
 Source base: `75c838b6eab19807487ee02c4b2f9367e580547e` plus the bounded
 player/CSS repair. The existing `mall_scoped_video_browser.py --player-policy`
@@ -92,7 +98,7 @@ queue, visibility, admission and public-field exclusion assertions when running
 the existing suites on the final combined commit. The native-source PASS and
 derived-file parity do not replace that integrated result.
 
-**Integrated result: FAIL.**
+**Initial integrated result: FAIL (historical).**
 [Run 44684325801](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44684325801)
 tested exact commit `58627755e4942f72852367fb7be68790dca706e8`, tree
 `485b265ad119f66fe6287bbaba99d27f891b58d8`. Security passed. Its outcome receipt
@@ -157,13 +163,36 @@ instead of duplicated viewport dimensions. Existing ResizeObserver,
 resize/pause guards and media behavior are unchanged; no timer is added.
 Current player SHA-256:
 `743f821c08bc32120bac8b1ea1e7cd708d3d883ae64028f228369a3022e1fd7a`.
-Five-cycle plain-control qualification at the original 90ms limit and fresh
-security/browser CI remain PENDING. No causal fix, current combined PASS or
-physical iPhone success is claimed; earlier hashes and results remain historical.
+Final controlled qualification PASS:
+[run 44688858246](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44688858246)
+on exact source `472e3977d0cfc6948662b85de5161993eeb4faf4`, with
+[artifact 14607274280](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44688858246/artifacts/14607274280).
+All five qualification exit codes are 0; security passed with 53 regression tests and
+zero unreviewed. Public TV passed 100/100, including all five plain WebKit
+portrait returns at the original 90ms limit: player top 165px, bottom 428.375px,
+first tile top 436.578125px and no header overlap. Subsequent WebKit paging and
+desktop cases completed. Queue callbacks passed 18/18, worker/state VM 29 and
+static contracts 159. These are separate receipts, not a unique aggregate count.
+
+Compared with failed plain control `ba11b0b4`, only the player differs among
+the recorded source hashes. The unchanged plain public-TV fixture SHA-256 is
+`d41890b61ba7cdecdf6335f1148f2075d32ea45df432de2b96dcdc389348a94e`.
+It adds no startup diagnostic listeners or success-path viewport probes; later
+diagnostics remain failure-only and cannot rescue a failed check. The result
+qualifies the media-query fix under this controlled fixture, without asserting
+the browser engine's precise cause or physical iPhone playback. Historical
+native/observer hashes and failed controls remain evidence, not current status.
 
 Firebase CLI/API connectivity is available but the publishing session is
 unauthenticated; the official plugin is not installed. The staged v25 deployment
-receipt remains unpublished with no final source/Hosting binding. Publication,
+receipt remains unpublished with no final source/Hosting binding. The next
+publisher must authenticate to existing project `gen-lang-client-0061781628`,
+site `foundupscom`; read the old immutable release/configuration/manifest and
+preserve unchanged assets; publish only `play-v25-iphone`; then stamp the
+qualified source/actual release receipt and verify delivered hashes, cache and
+Build v25 before returning the `/member/?foundup=hpc` phone URL. Original
+ephemeral staging is no longer needed for the recovered Mall/HPC scope.
+Publication,
 delivered asset/cache/version parity, real YouTube advancing time and physical
 Safari/Home Screen acceptance remain UNEXECUTED. The next phone check requires
 Build v25, a stationary floating player, tiles scrolling beneath it, one-tap

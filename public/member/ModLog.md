@@ -1,6 +1,10 @@
 # Member Area Module Change Log
 
-## 2026-11-20 - Recovered v25 integration and WebKit rotation repair
+## 2026-11-20 - Integrated v25 automated qualification PASS; publication pending
+
+Controlled runtime qualification is PASS on
+`472e3977d0cfc6948662b85de5161993eeb4faf4`. Publishing and real-phone acceptance
+remain separate, unfinished gates.
 
 Repair candidate on `75c838b6eab19807487ee02c4b2f9367e580547e`:
 
@@ -85,14 +89,27 @@ The new candidate uses one persistent media query with the exact CSS compact
 landscape predicate. Its change handler, guarded by open floating/theater mode,
 calls the existing geometry function, and that function now reads the same
 query's `.matches`. Existing observer, resize/pause and media behavior remain
-unchanged. Five-cycle plain WebKit qualification at the original 90ms limit is
-PENDING; the instrumented passes do not qualify this candidate or a real phone.
+unchanged.
+
+Final controlled [run 44688858246](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44688858246)
+on `472e3977d0cfc6948662b85de5161993eeb4faf4` passed all five gates and security
+(53 regression tests, zero unreviewed findings). Public TV passed 100/100, including five plain
+WebKit portrait returns at the original 90ms limit plus subsequent paging and
+desktop coverage. Queue callbacks passed 18/18, worker/state VM 29 and static
+contracts 159. The test hash is identical to failed plain control `ba11b0b4`;
+only the player changed among recorded source hashes. These controlled results
+qualify the tested runtime, not real YouTube or physical Safari/Home Screen
+playback. The documentation commit retains its normal exact-head gate.
 
 Firebase CLI/API connectivity is available but publishing is unauthenticated,
 and the official plugin is not installed. The v25 receipt remains explicitly
-unpublished and unbound to a final commit/Hosting version. No release, delivered
-cache update, production merge or physical iPhone/real YouTube success is
-claimed. See the HPC roadmap and member TestModLog for remaining test gates.
+unpublished and unbound to a final commit/Hosting version. The publisher must use
+existing project `gen-lang-client-0061781628` / site `foundupscom`, read its old
+immutable release/configuration/manifest and preserve unchanged assets, then
+publish the isolated `play-v25-iphone` channel. Stamp the source/release receipt
+and verify delivered hashes, cache and build before supplying the phone HPC URL.
+No release, delivered cache update, production merge or physical iPhone/real
+YouTube success is claimed. See the HPC roadmap and member TestModLog.
 
 ## 2026-11-16 - Build v23 bounded public TV continuation
 
