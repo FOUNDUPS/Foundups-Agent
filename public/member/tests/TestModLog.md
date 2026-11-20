@@ -1,4 +1,4 @@
-## 2026-11-20 - Native repair qualified; integrated WebKit rotation failure and repair
+## 2026-11-20 - Native repair qualified; plain rotation failure and media-query candidate
 
 Source base: `75c838b6eab19807487ee02c4b2f9367e580547e` plus the bounded
 player/CSS repair. The existing `mall_scoped_video_browser.py --player-policy`
@@ -107,8 +107,8 @@ at 132px instead of the initial portrait 165px. Its bottom was 395.375px; the
 first tile began at the wrapper's 277.578125px with scrollTop 0, leaving
 117.797px overlap. The Member Portal control also intersected the player.
 The compact-landscape zero clearance and header-derived top survived the final
-portrait reflow because geometry was updated synchronously on window resize,
-without observing the later header/player box changes.
+portrait reflow. The snapshot established stale JS-owned geometry; callback
+delivery required further diagnosis.
 
 The follow-up repair adds one `ResizeObserver` in `ensureDOM()`, observing only
 the existing header and player. While open in floating/theater mode it calls
@@ -117,7 +117,7 @@ playback request, iframe replacement or timer is added, and the immediate
 resize/pause guards remain. The existing public-TV portrait clearance check is
 strengthened to reject header overlap too. Its 90ms wait, minimum dimensions,
 visibility, tile-clearance and same-iframe requirements are unchanged.
-Revised player SHA-256:
+Historical observer-candidate player SHA-256:
 `d2e1d6f9553e2d4e486644201bb7298ee679462be91b010cac7812bc24ac1db2`.
 Combined tile CSS remains
 `379cc77a236643da69b4c5b6547a97e224c28beb150815bc0feb8dfd1680ffac`.
@@ -125,13 +125,41 @@ Retest [44685419171](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/446
 on `9161711822556f3648968191348d30e053ef02f3` repeated the same WebKit rotation
 failure with unchanged measured geometry. Security and the other four gates
 passed. Its [artifact](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44685419171/artifacts/14606332302)
-retains the source-bound failure. The fixture now records viewport values and
-passive resize events, then samples later geometry and explicit geometry sync
-only after preserving the original 90ms failure. Those diagnostic observations
-cannot convert the failed acceptance result into a pass. Runtime is unchanged
-while the cause is investigated. The native
-qualification hashes and integrated failure receipt above are historical;
-neither qualifies the revised player or actual iPhone playback.
+retains the source-bound failure. Subsequent diagnostic instrumentation recorded
+viewport values and passive resize events, with later geometry and explicit
+geometry sync only after preserving the original 90ms failure. Those
+observations could not convert the failed acceptance result into a pass.
+
+With that same runtime, instrumented public-TV checks passed 92/92 on
+`a818ac1c6440560c07458f2c38f0bf043d39664b` in
+[44686567252](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44686567252),
+then 100/100 with five WebKit cycles on
+`c7de04bf0a9e46972d1c1294780734d7c7ebacd4` in
+[44687274822](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44687274822).
+Those passes included startup viewport listeners and additional success-path
+layout reads. Plain control `ba11b0b4f48355be50a2924c40a32ae99d0a4e3d` in
+[44687859449](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44687859449)
+restored the original geometry read order and removed those listeners, keeping
+five cycles and all 90ms assertions. It FAILED the first portrait return.
+
+After the frozen failure, JS/client/visual viewport measurements all showed
+390 x 844, the compact media query was false and header bottom was 159.1875px.
+Stored player top was still 132px and clearance 0; about 207ms later these
+corrected automatically to 165px and 159px, before manual synchronization.
+This establishes delayed geometry updating, not its precise cause. Detailed
+diagnostics now run only after failure and cannot rescue the original result.
+
+The current candidate adds one live media-query owner in `ensureDOM()` using
+the exact CSS predicate `(orientation: landscape) and (max-height: 500px)`.
+Its change listener calls `syncFloatingGeometry()` only while open in
+floating/theater mode; the geometry function uses that same query's `.matches`
+instead of duplicated viewport dimensions. Existing ResizeObserver,
+resize/pause guards and media behavior are unchanged; no timer is added.
+Current player SHA-256:
+`743f821c08bc32120bac8b1ea1e7cd708d3d883ae64028f228369a3022e1fd7a`.
+Five-cycle plain-control qualification at the original 90ms limit and fresh
+security/browser CI remain PENDING. No causal fix, current combined PASS or
+physical iPhone success is claimed; earlier hashes and results remain historical.
 
 Firebase CLI/API connectivity is available but the publishing session is
 unauthenticated; the official plugin is not installed. The staged v25 deployment

@@ -67,10 +67,26 @@ also rejects header overlap; all existing 90ms timing, size, visibility and
 tile-clearance requirements remain. Combined tile CSS is unchanged. Retest
 [44685419171](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44685419171)
 on `91617118` repeated the same WebKit portrait-return failure; security and the
-other four gates passed. Diagnostic fixture observations now distinguish
-viewport/event delivery from stale geometry without changing the failed result.
-The observer repair is not yet proven; the earlier native PASS and partially
-passing integrated run do not qualify the revised build or a real phone.
+other four gates passed.
+
+Instrumented public-TV results passed 92/92 at `a818ac1c`
+([44686567252](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44686567252))
+and 100/100 at `c7de04bf`
+([44687274822](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44687274822)).
+Plain control `ba11b0b4`
+([44687859449](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44687859449))
+still failed its first portrait return at 90ms. Immediate diagnostics showed
+390 x 844 viewport values and header bottom 159.1875px, but stored player top
+132px and clearance 0. They corrected automatically to 165px/159px about
+207ms later, before manual synchronization. The observation establishes a
+delayed update, not the cause or a proven observer fix.
+
+The new candidate uses one persistent media query with the exact CSS compact
+landscape predicate. Its change handler, guarded by open floating/theater mode,
+calls the existing geometry function, and that function now reads the same
+query's `.matches`. Existing observer, resize/pause and media behavior remain
+unchanged. Five-cycle plain WebKit qualification at the original 90ms limit is
+PENDING; the instrumented passes do not qualify this candidate or a real phone.
 
 Firebase CLI/API connectivity is available but publishing is unauthenticated,
 and the official plugin is not installed. The v25 receipt remains explicitly

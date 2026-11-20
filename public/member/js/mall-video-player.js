@@ -58,6 +58,7 @@
 
   var inline = false;
   var floating = false;
+  var floatingLandscapeQuery = null;
   var theater = false;
   var wikitube = false;
   var tucked = false;
@@ -408,7 +409,9 @@
       return;
     }
     var wrapper = document.querySelector('.mall-tile-field-wrapper');
-    var isLandscapeCompact = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
+    var isLandscapeCompact = floatingLandscapeQuery
+      ? floatingLandscapeQuery.matches
+      : window.innerWidth > window.innerHeight && window.innerHeight <= 500;
     if (!wrapper || isLandscapeCompact) {
       root.style.setProperty('--floating-player-clearance', '0px');
       return;
@@ -580,6 +583,15 @@
         pauseHiddenPlayback();
       }
     });
+    // Follow the same breakpoint as the floating-player and selected-grid CSS.
+    // Its change event updates geometry when the responsive mode changes, even
+    // when window resize/box observation is delivered later by WebKit.
+    if (typeof window.matchMedia === 'function') {
+      floatingLandscapeQuery = window.matchMedia('(orientation: landscape) and (max-height: 500px)');
+      floatingLandscapeQuery.addEventListener('change', function () {
+        if (isOpen && (floating || theater)) syncFloatingGeometry();
+      });
+    }
     // Responsive boxes can settle after the window resize event (notably on
     // WebKit rotation). Re-measure the existing layout without restarting media.
     // Observe only the header/player; grid padding is an output, not an input.

@@ -71,11 +71,27 @@ assertion now also rejects portrait header overlap; its 90ms wait, minimum
 stage size, visibility and tile-clearance checks are unchanged. Retest
 [44685419171](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44685419171)
 on `9161711822556f3648968191348d30e053ef02f3` repeated the same WebKit rotation
-failure; security and the other four gates passed. The fixture now captures
-viewport values, resize events and bounded later geometry on failure while
-retaining the original failed result. No further runtime change or passing
-rotation claim follows from the unproven observer repair. Neither the native PASS nor the partially
-passing integrated run qualifies the revised combined build or a real phone.
+failure; security and the other four gates passed.
+
+Instrumented public-TV runs then passed 92/92 at `a818ac1c`
+([44686567252](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44686567252))
+and 100/100 at `c7de04bf`
+([44687274822](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44687274822)).
+The plain control at `ba11b0b4`
+([44687859449](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44687859449))
+failed its first portrait return under the unchanged 90ms requirement. All
+viewport measurements were already 390 x 844 and the header bottom was
+159.1875px, but player top remained 132px and clearance 0. About 207ms later
+they corrected automatically to 165px/159px, before explicit synchronization.
+This proves delayed geometry updating; the earlier instrumented passes do not
+prove its cause or eliminate the plain-control failure.
+
+The current candidate adds one live media-query owner using the exact CSS
+predicate `(orientation: landscape) and (max-height: 500px)`. Its guarded change
+handler invokes the existing geometry calculation, which reads that query's
+`.matches` instead of duplicating viewport dimensions. Observer, resize/pause
+and media behavior remain unchanged. Five-cycle plain-control qualification at
+the original 90ms limit is PENDING; a causal fix is not yet established.
 
 Publication remains BLOCKED by publisher access. Firebase CLI/API connectivity
 is available, but the publishing session is unauthenticated; the official
@@ -86,10 +102,10 @@ binding. A changed build label in source does not update a phone's cached app.
 
 Next work, in order:
 
-1. Qualify the exact integrated rotation-repair commit with fresh security and
-   browser/queue CI, retaining the failed WebKit rotation receipt and completed
-   discovery/cache and SDK review evidence. Keep the historical native PASS,
-   failed integrated run and next qualification result distinct.
+1. Qualify the exact media-query candidate with fresh security and browser/queue
+   CI, including five plain WebKit rotation cycles at the original 90ms limit.
+   Retain the failed controls and completed discovery/cache and SDK evidence;
+   keep native, instrumented and plain-control results distinct.
 2. Use an authenticated, authorized Firebase publisher for the existing
    project/site. Bind the candidate receipt to the qualified source SHA,
    actual delivered hashes and immutable Hosting version.
