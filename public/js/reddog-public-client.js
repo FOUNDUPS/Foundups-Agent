@@ -5,6 +5,8 @@
  * explicitly supply the same-origin `/api/reddog/public` root. Session material
  * is held in memory only and no account, Mall, or private context is transmitted.
  */
+import './reddog-fractal-focus.js';
+
 export class PublicChatError extends Error {
   constructor(code, status = 0) {
     super(code);
@@ -37,7 +39,9 @@ export function encounterPayload() {
   };
 }
 export function normalizePublicFoundupId(value) {
-  return typeof value === 'string' && /^[a-z0-9][a-z0-9_-]{0,79}$/.test(value) ? value : '';
+  if (typeof value !== 'string') return '';
+  const match = /[a-z0-9][a-z0-9_-]{0,79}/.exec(value);
+  return match && match.index === 0 && match[0] === value ? value : '';
 }
 export function turnPayload(session, message, foundupId = '') {
   const payload = {
@@ -222,12 +226,15 @@ function element(doc, tag, className, text = '') {
 function buildDialog(doc) {
   const shell = element(doc, 'dialog', 'reddog-guest-dialog');
   shell.setAttribute('aria-label', 'Red Dog guest conversation');
-  const title = element(doc, 'h2', 'reddog-guest-title', 'Public guest conversation');
+  const title = element(doc, 'h2', 'reddog-guest-title', 'Red Dog · public guest chat');
   const disclosure = element(doc, 'p', 'reddog-guest-disclosure',
     'Text only. Public catalog context only. No account, private memory, tools, or work authority.');
   const account = element(doc, 'a', 'reddog-guest-account', 'Sign in or check account access');
   account.href = 'https://foundups.com/member/?account=1';
   account.textContent += ' (separate from this guest session)';
+  const fractalFocus = element(doc, 'section', 'reddog-guest-fractal-focus');
+  fractalFocus.setAttribute('aria-label', 'Selected public FoundUp');
+  fractalFocus.hidden = true;
   const consentLabel = element(doc, 'label', 'reddog-guest-consent');
   const consent = doc.createElement('input');
   consent.type = 'checkbox';
@@ -255,9 +262,12 @@ function buildDialog(doc) {
   for (const button of [start, check, end, close]) button.type = 'button';
   check.hidden = true; end.hidden = true;
   controls.append(start, check, end, close);
-  shell.append(title, disclosure, account, consentLabel, status, messages, form, controls);
+  shell.append(title, disclosure, account, fractalFocus, consentLabel, status, messages, form, controls);
   doc.body.appendChild(shell);
-  return { shell, consent, status, messages, form, input, send, start, check, end, close };
+  return {
+    shell, consent, status, messages, form, input, send, start, check, end, close,
+    fractalFocus,
+  };
 }
 
 /** Adapter for `window.redDog.registerConversationAdapter(...)`. */
@@ -274,6 +284,35 @@ export function createMemberConversationAdapter(options = {}) {
   let boundFoundupId = '';
   let returnFocus = null;
 
+  function askAboutFoundUp(foundupId) {
+    if (!view || !client?.session || foundupId !== boundFoundupId || view.form.hidden
+        || view.shell.open !== true || view.input.disabled) return false;
+    if (view.input.value === '') view.input.value = `What should I know about ${foundupId}?`;
+    view.input.focus();
+    return true;
+  }
+
+  function renderFractalFocus() {
+    if (!view) return;
+    const admitted = Boolean(client?.session);
+    view.fractalFocus.hidden = !admitted;
+    if (!admitted) {
+      view.fractalFocus.replaceChildren();
+      return;
+    }
+    const owner = globalThis.RedDogFractalFocus;
+    if (!owner || typeof owner.renderFractalFocus !== 'function') {
+      view.fractalFocus.hidden = true;
+      view.fractalFocus.replaceChildren();
+      return;
+    }
+    owner.renderFractalFocus(view.fractalFocus, {
+      state: boundFoundupId ? 'selected' : 'none',
+      foundupId: boundFoundupId || null,
+      canAsk: Boolean(boundFoundupId) && view.shell.open === true && !view.input.disabled,
+    }, askAboutFoundUp);
+  }
+
   function bindContext(context) {
     const candidate = context && typeof context === 'object' ? context : {};
     const revision = Number.isSafeInteger(candidate.bindingRevision)
@@ -289,6 +328,7 @@ export function createMemberConversationAdapter(options = {}) {
         view.consent.checked = false;
         view.form.hidden = true;
         view.status.textContent = 'Context changed. Start a new guest session after reviewing consent.';
+        renderFractalFocus();
       }
     }
     bindingKey = nextKey;
@@ -309,6 +349,7 @@ export function createMemberConversationAdapter(options = {}) {
   function render() {
     if (!view || !client) return;
     const active = Boolean(client.session);
+    view.start.hidden = active;
     view.start.disabled = !view.consent.checked || client.busy || active;
     view.consent.disabled = client.busy || active;
     view.form.hidden = !active;
@@ -317,6 +358,7 @@ export function createMemberConversationAdapter(options = {}) {
     view.send.disabled = view.input.disabled;
     view.check.hidden = !active || !client.needsStatus;
     view.end.hidden = !active;
+    renderFractalFocus();
   }
 
   function note(text) { view.status.textContent = text; }

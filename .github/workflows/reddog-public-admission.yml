@@ -4,6 +4,11 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'extensions/reddog/extension.js'
+      - 'extensions/reddog/fractal_focus_host.js'
+      - 'extensions/reddog/tests/test_fractal_focus_host.js'
+      - 'extensions/reddog/fractal_focus_front.js'
+      - 'public/js/reddog-fractal-focus.js'
       - 'requirements-trust-bootstrap.txt'
       - 'modules/communication/moltbot_bridge/src/reddog_public_*.py'
       - 'modules/communication/moltbot_bridge/tests/public_surface/**'
@@ -14,6 +19,11 @@ on:
   push:
     branches: [main]
     paths:
+      - 'extensions/reddog/extension.js'
+      - 'extensions/reddog/fractal_focus_host.js'
+      - 'extensions/reddog/tests/test_fractal_focus_host.js'
+      - 'extensions/reddog/fractal_focus_front.js'
+      - 'public/js/reddog-fractal-focus.js'
       - 'requirements-trust-bootstrap.txt'
       - 'modules/communication/moltbot_bridge/src/reddog_public_*.py'
       - 'modules/communication/moltbot_bridge/tests/public_surface/**'
@@ -31,6 +41,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Check Mall ships the extension-owned Fractal focus module
+        run: cmp extensions/reddog/fractal_focus_front.js public/js/reddog-fractal-focus.js
+      - name: Verify the editor host binds focus without granting work
+        run: node extensions/reddog/tests/test_fractal_focus_host.js
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'

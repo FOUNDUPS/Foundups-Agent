@@ -3,7 +3,15 @@ import { readFile } from 'node:fs/promises';
 
 const sourceUrl = new URL('../../../../public/js/reddog-public-client.js', import.meta.url);
 const source = await readFile(sourceUrl, 'utf8');
-const clientModule = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+const focusSourceUrl = new URL('../../../../public/js/reddog-fractal-focus.js', import.meta.url);
+const focusSource = await readFile(focusSourceUrl, 'utf8');
+const focusDataUrl = `data:text/javascript;base64,${Buffer.from(focusSource).toString('base64')}`;
+const resolvedSource = source.replace(
+  "import './reddog-fractal-focus.js';",
+  `import '${focusDataUrl}';`,
+);
+assert.notEqual(resolvedSource, source, 'fixture resolves the real side-effect dependency');
+const clientModule = await import(`data:text/javascript;base64,${Buffer.from(resolvedSource).toString('base64')}`);
 const {
   RedDogPublicClient,
   createMemberConversationAdapter,
@@ -49,7 +57,9 @@ assert.deepEqual(turnPayload(session, 'What is this?', 'hpc'), {
   foundup_id: 'hpc',
 });
 assert.equal(normalizePublicFoundupId('private/path'), '');
+assert.equal(normalizePublicFoundupId('hpc\n'), '', 'a trailing line terminator is not an exact ID');
 assert.throws(() => turnPayload(session, 'What is this?', 'private/path'), {code: 'input'});
+assert.throws(() => turnPayload(session, 'What is this?', 'hpc\n'), {code: 'input'});
 
 const calls = [];
 let queue = [];
@@ -212,6 +222,8 @@ assert.equal(dialog.tagName, 'DIALOG');
 assert.equal(dialog.open, true);
 assert.equal(uiCalls.length, 0, 'opening the modal must not start a guest session');
 assert.match(dialog.querySelector('.reddog-guest-disclosure').textContent, /FoundUp ID “hpc”/);
+const fractalFocus = dialog.querySelector('.reddog-guest-fractal-focus');
+assert.equal(fractalFocus.hidden, true, 'focus face waits for guest admission');
 const uiConsent = dialog.querySelector('[data-reddog-guest-consent]');
 const uiStart = dialog.querySelector('.reddog-guest-start');
 uiConsent.checked = true;
@@ -221,18 +233,82 @@ await uiStart.dispatch('click');
 assert.deepEqual(uiCalls[0].body, encounterPayload());
 assert.equal(dialog.querySelector('.reddog-guest-form').hidden, false);
 const uiDraft = dialog.querySelector('.reddog-guest-form').children.find(el => el.tagName === 'TEXTAREA');
+assert.equal(fractalFocus.hidden, false);
+assert.equal(fractalFocus.querySelector('[data-reddog-fractal-path]').textContent, 'Mall › hpc');
+const ask = fractalFocus.querySelector('[data-reddog-fractal-ask]');
+assert.ok(ask, 'selected admitted focus exposes the shared ask action');
+await ask.dispatch('click');
+assert.equal(uiDraft.value, 'What should I know about hpc?');
+assert.equal(uiDocument.activeElement, uiDraft, 'Ask focuses the live local question');
+assert.equal(uiCalls.length, 1, 'Ask neither sends nor starts another request');
 uiDraft.value = 'Unsent local question';
+await ask.dispatch('click');
+assert.equal(uiDraft.value, 'Unsent local question', 'Ask never overwrites an existing draft');
+assert.equal(uiCalls.length, 1);
+uiDraft.value = '';
 await dialog.querySelector('.reddog-guest-close').dispatch('click');
 assert.equal(dialog.open, false);
 assert.equal(uiDocument.activeElement, opener, 'modal close must return focus');
+await ask.dispatch('click');
+assert.equal(uiDraft.value, '', 'a hidden stale Ask control cannot stage a draft');
+assert.equal(uiCalls.length, 1);
+assert.equal(uiAdapter.open({ foundupId: 'hpc', bindingRevision: 1 }), true);
+assert.ok(fractalFocus.querySelector('[data-reddog-fractal-ask]'),
+  'render after showModal restores Ask when the same admitted session reopens');
+await dialog.querySelector('.reddog-guest-close').dispatch('click');
 uiAdapter.syncContext({ foundupId: 'hpc', bindingRevision: 2 });
 assert.equal(uiConsent.checked, false, 'principal/context rebind must clear consent');
 assert.equal(uiDraft.value, '', 'a new binding cannot recover a previous unsent question');
 assert.equal(dialog.querySelector('.reddog-guest-messages').children.length, 0);
+assert.equal(fractalFocus.hidden, true, 'rebind removes the admitted focus face');
+assert.equal(fractalFocus.children.length, 0);
 assert.equal(uiAdapter.open({ foundupId: 'hpc', access: 'unknown', bindingRevision: 3 }), false);
 assert.equal(uiAdapter.open({ selectionState: 'invalid', bindingRevision: 4 }), false);
 assert.equal(uiAdapter.open({ foundupId: 'private/path', bindingRevision: 5 }), false);
 assert.equal(uiCalls.length, 1, 'a blocked or changed binding must not start a session');
+
+const zeroDocument = new FakeDocument();
+const zeroAdapter = createMemberConversationAdapter({
+  apiRoot: ROOT,
+  origin: ORIGIN,
+  document: zeroDocument,
+  fetchImpl: async () => answer({ ...session, remaining_turns: 0 }),
+});
+assert.equal(zeroAdapter.open({ foundupId: 'hpc', bindingRevision: 1 }), true);
+const zeroDialog = zeroDocument.body.children.at(-1);
+const zeroConsent = zeroDialog.querySelector('[data-reddog-guest-consent]');
+zeroConsent.checked = true;
+await zeroConsent.dispatch('change');
+await zeroDialog.querySelector('.reddog-guest-start').dispatch('click');
+const zeroDraft = zeroDialog.querySelector('.reddog-guest-form').children.find(el => el.tagName === 'TEXTAREA');
+assert.equal(zeroDraft.disabled, true, 'zero allowance disables the authoritative input');
+assert.equal(zeroDialog.querySelector('[data-reddog-fractal-path]').textContent, 'Mall › hpc');
+assert.equal(zeroDialog.querySelector('[data-reddog-fractal-ask]'), null,
+  'zero allowance cannot expose Ask');
+
+const pureContainer = uiDocument.createElement('section');
+const selectedByAsk = [];
+globalThis.RedDogFractalFocus.renderFractalFocus(pureContainer, {
+  state: 'selected', foundupId: 'pottery-lab', canAsk: true,
+}, foundupId => selectedByAsk.push(foundupId));
+assert.equal(pureContainer.querySelector('[data-reddog-fractal-path]').textContent,
+  'Mall › pottery-lab', 'the shared face is not HPC-specific');
+const detachedAsk = pureContainer.querySelector('[data-reddog-fractal-ask]');
+globalThis.RedDogFractalFocus.renderFractalFocus(pureContainer, {
+  state: 'selected', foundupId: 'garden-lab', canAsk: true,
+}, foundupId => selectedByAsk.push(foundupId));
+await detachedAsk.dispatch('click');
+assert.deepEqual(selectedByAsk, [], 'a detached Ask cannot use its prior binding');
+await pureContainer.querySelector('[data-reddog-fractal-ask]').dispatch('click');
+assert.deepEqual(selectedByAsk, ['garden-lab']);
+globalThis.RedDogFractalFocus.renderFractalFocus(pureContainer, {
+  state: 'selected', foundupId: 'pottery-lab\n', canAsk: true,
+}, foundupId => selectedByAsk.push(foundupId));
+assert.equal(pureContainer.querySelector('[data-reddog-fractal-path]').textContent,
+  'Mall · Focus unavailable');
+assert.equal(pureContainer.querySelector('[data-reddog-fractal-ask]'), null);
+assert.equal(uiAdapter.open({ foundupId: 'pottery-lab\n', bindingRevision: 6 }), false,
+  'malformed selected context is unavailable, not generic');
 
 for (const forbidden of [
   'localStorage', 'sessionStorage', 'document.cookie', 'SpeechRecognition',

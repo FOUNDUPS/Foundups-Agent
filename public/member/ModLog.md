@@ -1,5 +1,11 @@
 # Member Area Module Change Log
 
+## 2026-11-20 — Host the extension-owned FoundUp focus component
+
+The guest dialog hosts RedDog's portable focus component through its existing
+conversation client. HPC is the mobile acceptance fixture, not a hard-coded
+destination. See the [extension interface](../../extensions/reddog/ARCHITECTURE.md#fractal-mall-focus-front).
+
 ## 2026-11-20 — Public HPC text conversation
 
 - Opt-in HPC dog entry opens a consented guest dialog. Without the guest API

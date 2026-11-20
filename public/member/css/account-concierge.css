@@ -495,6 +495,14 @@
   font-size: 0.8rem;
   line-height: 1.5;
 }
+.reddog-guest-dialog .reddog-fractal-focus {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 0.75rem;
+  overflow-wrap: anywhere;
+}
 .reddog-guest-messages {
   display: grid;
   gap: 0.5rem;

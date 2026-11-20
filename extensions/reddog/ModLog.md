@@ -1,3 +1,11 @@
+## 2026-11-20 — Reuse the extension front in the Mall
+
+One extension-owned focus component now serves the panel and the public Mall
+guest adapter. Each host owns its local selection and composer. The component
+renders a breadcrumb and offers a draft-only action. CI rejects drift in its
+published JS projection. WSP 11/22/50/97; no VSIX installation, production
+activation, graph promotion, or worker admission.
+
 ## 2026-11-18 - Bind operations pre-build guidance
 
 Refreshed the existing backend compatibility digest for the canonical
