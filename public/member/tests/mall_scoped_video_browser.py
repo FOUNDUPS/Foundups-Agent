@@ -36,7 +36,8 @@ provider = """(() => {
   const trace = window.fixturePlayback = {
     created: 0, destroyed: 0, pause: 0, plays: 0, events: [],
     error: null, errorsByVideo: {}, loadedIds: [], playedIds: [], cuedIds: [],
-    block: false, hang: false, holdReady: false, mutes: 0
+    block: false, blockUnmuted: false, hang: false, holdReady: false, mutes: 0,
+    playAttempts: 0, autoplayBlocks: 0, suppressReadyAutoplay: false
   };
   window.addEventListener('mallVideoPlayback', e => trace.events.push(e.detail));
   window.YT = {
@@ -61,7 +62,12 @@ provider = """(() => {
       this.getCurrentTime = () => elapsed + (startedAt === null ? 0 : (performance.now() - startedAt)/1000);
       this.seekTo = time => { elapsed = time; };
       this.playVideo = () => {
-        if (trace.block) { emit('onAutoplayBlocked'); return; }
+        trace.playAttempts++;
+        if (trace.block || (trace.blockUnmuted && !muted)) {
+          trace.autoplayBlocks++;
+          emit('onAutoplayBlocked');
+          return;
+        }
         trace.plays++;
         if (startedAt === null) startedAt = performance.now();
         state = 1;
@@ -108,10 +114,12 @@ provider = """(() => {
       this.mute = () => { muted = true; trace.mutes++; };
       this.unMute = () => { muted = false; };
       this.isMuted = () => muted;
+      trace.isMuted = () => muted;
       // Deliberately adversarial provider events: these are controlled fixture
       // events, never evidence of real YouTube or device visibility behavior.
       trace.forcePlaying = () => this.playVideo();
       trace.forceError = code => emit('onError', code);
+      trace.forceAutoplayBlocked = () => emit('onAutoplayBlocked');
       trace.finishCurrent = () => {
         elapsed = this.getCurrentTime();
         startedAt = null;
@@ -125,7 +133,7 @@ provider = """(() => {
         else {
           emit('onReady');
           const requested = new URL(frame.src).searchParams.get('autoplay') === '1' || options.playerVars?.autoplay === 1;
-          if (requested && state !== 1) this.playVideo();
+          if (requested && state !== 1 && !trace.suppressReadyAutoplay) this.playVideo();
         }
       };
       trace.deliverReady = deliverReady;
@@ -1264,6 +1272,115 @@ def dispatch_swipe(locator, dx, dy=4):
     }""", [dx, dy])
 
 
+def verify_phone_muted_autoplay_retry(browser_type):
+    """Controlled browser-policy rejection, not a YouTube challenge bypass."""
+    browser = browser_type.launch()
+    try:
+        for outcome in ("muted-allowed", "all-blocked", "provider-error"):
+            context = browser.new_context(
+                viewport={"width": 390, "height": 844}, is_mobile=True,
+                has_touch=True, service_workers="block", reduced_motion="reduce"
+            )
+            try:
+                context.add_init_script(provider)
+                context.route("**/*", route_local)
+                page = context.new_page()
+                page.set_default_timeout(10000)
+                page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
+                page.evaluate("""outcome => Object.assign(window.fixturePlayback, {
+                    blockUnmuted: outcome === 'muted-allowed',
+                    block: outcome === 'all-blocked',
+                    error: outcome === 'provider-error' ? 150 : null,
+                    // Isolate the app's play requests from the fixture's extra
+                    // simulated iframe-URL autoplay attempt after READY.
+                    suppressReadyAutoplay: true
+                })""", outcome)
+                tile_box = video(page, 0).bounding_box()
+                assert tile_box["width"] >= 120 and tile_box["height"] >= 70, tile_box
+                video(page, 0).tap(position={"x": 30, "y": 80})
+                player = page.locator("#videoPlayerFullscreen")
+                if outcome == "provider-error":
+                    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'embedding-disabled'")
+                    assert page.evaluate("window.fixturePlayback.playAttempts") == 0
+                    assert page.evaluate("window.fixturePlayback.mutes") == 0
+                    assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().code") == 150
+                    page.evaluate("window.fixturePlayback.forceAutoplayBlocked()")
+                    assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().state") == "embedding-disabled"
+                    continue
+                if outcome == "all-blocked":
+                    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'autoplay-blocked'")
+                    assert page.evaluate("window.fixturePlayback.playAttempts") == 2
+                    assert page.evaluate("window.fixturePlayback.autoplayBlocks") == 2
+                    assert page.evaluate("window.fixturePlayback.mutes") == 1
+                    snapshot = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
+                    assert snapshot["queueHalted"] is True and snapshot["queueIndex"] == 0, snapshot
+                    expect(player.get_by_role("button", name="Play video", exact=True)).to_be_visible()
+                    page.wait_for_timeout(180)
+                    assert page.evaluate("window.fixturePlayback.playAttempts") == 2
+                    assert page.evaluate("window.fixturePlayback.loadedIds") == []
+                    page.evaluate("window.fixturePlayback.block = false")
+                    player.get_by_role("button", name="Play video", exact=True).tap()
+                    expect_playing(page, 0)
+                    assert page.evaluate("window.fixturePlayback.created") == 1
+                    continue
+
+                expect_playing(page, 0)
+                assert page.evaluate("window.fixturePlayback.playAttempts") == 2
+                assert page.evaluate("window.fixturePlayback.autoplayBlocks") == 1
+                assert page.evaluate("window.fixturePlayback.mutes") == 1
+                assert page.evaluate("window.fixturePlayback.isMuted()") is True
+                page.evaluate("window.fixturePlayback.forceAutoplayBlocked()")
+                expect_playing(page, 0)
+                assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().queueHalted") is False
+                assert page.evaluate("window.fixturePlayback.playAttempts") == 2
+                page.evaluate("window.retryFrame = document.querySelector('#videoPlayerFullscreen iframe')")
+                top_y = player.bounding_box()["y"]
+                wrapper = page.locator(".mall-tile-field-wrapper")
+                clearance = wrapper.evaluate("""el => ({
+                    actual: parseFloat(getComputedStyle(el).scrollPaddingTop),
+                    expected: parseFloat(document.documentElement.style.getPropertyValue('--floating-player-clearance'))
+                })""")
+                assert clearance["expected"] > 0 and abs(clearance["actual"] - clearance["expected"]) <= 1, clearance
+                wrapper.evaluate("el => el.scrollTop = 520")
+                page.wait_for_function("document.querySelector('.mall-tile-field-wrapper').scrollTop > 0")
+                lower_tile = video(page, 11)
+                lower_tile.evaluate("el => el.scrollIntoView({block: 'start', behavior: 'instant'})")
+                page.wait_for_function("""() => {
+                    const tile = document.querySelector('#mallTileField .mall-tile[data-index="11"]');
+                    const player = document.querySelector('#videoPlayerFullscreen');
+                    return tile && tile.getBoundingClientRect().top >= player.getBoundingClientRect().bottom;
+                }""")
+                assert wrapper.evaluate("el => el.scrollTop") > 0
+                assert abs(player.bounding_box()["y"] - top_y) <= 1
+                lower_tile.tap(position={"x": 30, "y": 80})
+                expect_playing(page, 11)
+                page.evaluate("window.fixturePlayback.finishCurrent()")
+                expect_playing(page, 12)
+                assert page.evaluate("window.retryFrame === document.querySelector('#videoPlayerFullscreen iframe')")
+                assert page.evaluate("window.fixturePlayback.created") == 1
+                assert page.evaluate("window.fixturePlayback.autoplayBlocks") == 1
+
+                player.get_by_role("button", name="Tuck player", exact=True).tap()
+                assert wrapper.evaluate("el => parseFloat(getComputedStyle(el).scrollPaddingTop)") == 0
+                attempts = page.evaluate("window.fixturePlayback.playAttempts")
+                page.evaluate("window.fixturePlayback.forceAutoplayBlocked()")
+                assert page.evaluate("window.fixturePlayback.playAttempts") == attempts
+                assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().state") == "paused"
+                page.evaluate("window.mallVideoPlayer.close()")
+                assert wrapper.evaluate("el => parseFloat(getComputedStyle(el).scrollPaddingTop)") == 0
+                page.evaluate("window.fixturePlayback.forceAutoplayBlocked()")
+                assert page.evaluate("window.fixturePlayback.playAttempts") == attempts
+            finally:
+                context.close()
+    finally:
+        browser.close()
+    print(json.dumps({
+        "engine": browser_type.name, "one_tap_390px_muted_retry": True,
+        "blocked_retry_bounded": True, "provider_errors_unchanged": True,
+        "floating_scroll_clearance": True, "physical_iPhone": "UNEXECUTED"
+    }, sort_keys=True))
+
+
 def verify_floating_and_wikitube_gestures(browser_type):
     browser = browser_type.launch()
     try:
@@ -2222,6 +2339,7 @@ if __name__ == "__main__":
     if sys.argv[1:] == ["--player-policy"]:
         with sync_playwright() as p:
             for engine in (p.chromium,p.webkit):
+                verify_phone_muted_autoplay_retry(engine)
                 verify_hidden_playback_policy(engine)
                 verify_floating_and_wikitube_gestures(engine)
         raise SystemExit(0)
@@ -2247,6 +2365,8 @@ if __name__ == "__main__":
         verify_hpc_banner_header(p.webkit)
         verify_desktop(p.chromium)
         verify_member_entry(p.chromium)
+        verify_phone_muted_autoplay_retry(p.chromium)
+        verify_phone_muted_autoplay_retry(p.webkit)
         verify_floating_and_wikitube_gestures(p.chromium)
         verify_floating_and_wikitube_gestures(p.webkit)
         verify_desktop(p.webkit)

@@ -1,3 +1,37 @@
+## 2026-11-20 - Phone startup and floating-clearance candidate
+
+Source base: `75c838b6eab19807487ee02c4b2f9367e580547e` plus the bounded
+player/CSS repair. The existing `mall_scoped_video_browser.py --player-policy`
+runner now includes `verify_phone_muted_autoplay_retry()` at 390 x 844.
+
+Prepared assertions cover one tile tap with unmuted rejection then muted
+success; two total requests when both starts are blocked; genuine error 150;
+late blocked callbacks preserving playing, paused and provider-error states;
+computed scroll padding matching floating clearance; scrolling a lower tile
+below a stationary player; same iframe across selection/ended queue continuation;
+and clearance/start guards after tuck and close. Controlled provider events
+must not be reported as live YouTube or physical-device evidence.
+
+Executed and passed: `node --check public/member/js/mall-video-player.js`,
+Python AST parsing of the fixture, and `git diff --check`. A separate reviewer
+reproduced the late-callback status overwrite using the actual handler in a
+Node VM, which prompted the early pending-start guard. That focused review is
+not a browser-suite pass.
+
+Browser result: BLOCKED / UNEXECUTED. The default Playwright Chromium executable
+was absent; an attempt with existing `/usr/bin/chromium` failed at its singleton
+socket before any page loaded. The workspace approval policy rejected escalation.
+Matching WebKit downloaded but required host libraries are absent. The selected
+Python runtime also has no pytest. These are environment failures, not app
+assertion failures or successful red/green results. No security restriction was
+removed and no private browser profile was used.
+
+Remaining qualification: run `--player-policy` and
+`mall_queue_callbacks_browser.py` in the established authorized runtime, then
+verify an isolated delivered preview and physical Safari/Home Screen playback
+with advancing media time. Bind every result to its actual source and delivered
+asset hashes. No new build version, CI pass or Hosting publication is implied.
+
 ## 2026-11-16 - v23 root cache ownership and optional gateway opener
 
 Confirmed against clean `1b2551b69babd6e5d0eadcccaf033087c4f1520d` after the

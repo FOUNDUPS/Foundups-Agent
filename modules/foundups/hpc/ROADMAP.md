@@ -1,5 +1,41 @@
 # HPC roadmap
 
+## 2026-11-20 - Phone floating-player repair candidate
+
+012's current prototype gate is one top-anchored shared player, the existing
+video field scrolling beneath it, and one tile tap requesting playback with
+WikiTube queue continuation. HPC remains the shared Mall test pad. Cards,
+fractal navigation and another application are not prerequisites for this slice.
+
+The candidate is based on `75c838b6eab19807487ee02c4b2f9367e580547e`, the
+committed v23 continuation underlying the existing v24 preview. It repairs the
+wrapper's reset of floating-player scroll padding and adds one muted retry for
+an actual browser autoplay rejection during visible startup. Late rejection
+callbacks cannot replace playing, paused or provider-error status. The existing
+single player, visibility checks, native controls and bounded queue remain the
+owners of playback.
+
+Source syntax and diff checks pass. The new 390 x 844 controlled browser case
+is added but UNEXECUTED: bundled Chromium was absent, system Chromium failed
+before page load because local sockets are denied, and escalation was rejected
+by the workspace approval policy. Downloaded WebKit lacks host libraries.
+Physical iPhone Safari/PWA and real YouTube time progression are also UNEXECUTED.
+See `public/member/tests/TestModLog.md` for the current verification boundary.
+
+Publishing remains BLOCKED in this session. Firebase Hosting lists the existing
+`play-v24-iphone` channel, but its Cloud Shell returned Site Unavailable on the
+initial attempt and one reload. The official Firebase plugin is available but
+not installed. No new Hosting release, production merge or build-label change
+is claimed. A new source commit alone does not update a phone's cached build.
+
+Next gate: execute the existing player-policy and queue-callback browser suites
+in an authorized runtime, retain the delivered v24 overlay, then publish an
+isolated phone preview with matching build label, worker generation, asset
+hashes and immutable Hosting version. Do not replace v24 with a plain v23 tree.
+Use `/member/?foundup=hpc` on the preview host; `/member/` alone is the general
+Mall. Record physical Safari/PWA results before production promotion. WSP 97
+requires source, validation, publication and device acceptance to remain distinct.
+
 ## 2026-11-16 - Build v22 direct continuation and policy qualification
 
 012 explicitly authorized the existing v21 continuation through tests, push,

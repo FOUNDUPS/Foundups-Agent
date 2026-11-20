@@ -247,13 +247,12 @@
 .mall-tile-field-wrapper {
   flex: 1;
   overflow: auto;
-  scroll-padding-top: var(--floating-player-clearance, 0px);
+  /* Keep snapped rows below the floating player; other edges stay flush. */
+  scroll-padding: var(--floating-player-clearance, 0px) 0 0;
   scroll-snap-type: both mandatory;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  /* Smooth deceleration for phone-native feel */
-  scroll-padding: 0;
   /* Desktop drag affordance */
   cursor: grab;
   /* Touch gesture clarity */

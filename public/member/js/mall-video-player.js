@@ -62,6 +62,7 @@
   var wikitube = false;
   var tucked = false;
   var muteOnStart = false;
+  var mutedAutoplayRetryUsed = false;
   var onClose = null;
   var onSelectChange = null;
   var onQueueEnd = null;
@@ -205,6 +206,7 @@
 
   function resetPlayback(keepYouTubeInstance) {
     renderGeneration += 1;
+    mutedAutoplayRetryUsed = false;
     clearPlaybackTimers();
     playbackStatus = null;
     if (!keepYouTubeInstance) {
@@ -1484,8 +1486,27 @@
             failed(result[0], result[1] + ' Open the source to check it on YouTube.', ev.data);
           },
           onAutoplayBlocked: function () {
-            if (!current()) return;
+            // Iframe autoplay and API play can report independently. A late
+            // rejection must not overwrite successful, paused or failed playback.
+            if (!current() || !autoplayRequested || queueHalted || !canStartYouTube() ||
+                !['loading', 'ready', 'starting'].includes(playbackStatus?.state)) return;
             clearPlaybackTimers();
+            // A browser can reject audible play after asynchronous iframe READY.
+            // Retry this visible, still-requested start once with sound muted;
+            // provider errors, paused/hidden playback and stale frames never retry.
+            if (!mutedAutoplayRetryUsed && !muteOnStart && ytReady && requestYouTubePlay &&
+                ['starting', 'ready'].includes(playbackStatus?.state) &&
+                typeof ytPlayer?.mute === 'function') {
+              mutedAutoplayRetryUsed = true;
+              try {
+                if (!ytPlayer.isMuted?.()) {
+                  muteOnStart = true;
+                  ytPlayer.mute();
+                  requestYouTubePlay();
+                  return;
+                }
+              } catch (e) { /* retain truthful manual recovery if muting fails */ }
+            }
             autoplayRequested = false;
             queueHalted = true;
             reportYouTube('autoplay-blocked', 'Your browser blocked automatic playback. Use Play video to try again.');

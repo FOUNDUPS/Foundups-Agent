@@ -1,5 +1,27 @@
 # Member Area Module Change Log
 
+## 2026-11-20 - Floating scroll clearance and bounded muted startup
+
+Repair candidate on `75c838b6eab19807487ee02c4b2f9367e580547e`:
+
+- Consolidated wrapper scroll padding so its later shorthand cannot erase the
+  clearance calculated from the top-anchored floating player.
+- On an actual `onAutoplayBlocked` callback during an active visible startup,
+  try the same player once with muted audio. A second rejection retains the
+  existing manual Play recovery. Provider errors and timeouts keep their own
+  classification; pause, tuck, close and visibility guards still govern starts.
+- Ignore late blocked callbacks after success, pause or provider failure so
+  they cannot halt a healthy queue or overwrite the actual player status.
+- Extended the existing scoped browser fixture at 390 x 844 for these states,
+  scroll clearance, fixed player position, same-iframe selection and queue end.
+
+Independent source review identified and corrected the late-callback defect.
+Node syntax, Python AST and whitespace checks pass. Browser execution is
+blocked before app load in this workspace, and physical iPhone playback remains
+unverified. No release or cache generation was advanced. The existing v24
+preview contains additional overlay work that must survive eventual publishing.
+See the HPC roadmap and member TestModLog for remaining gates and access limits.
+
 ## 2026-11-16 - Build v23 bounded public TV continuation
 
 Preserved native v22 commit `155a89c281c06d84776a7f5f6ea718bd382f0395`
