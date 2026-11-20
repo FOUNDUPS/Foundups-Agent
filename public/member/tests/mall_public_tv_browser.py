@@ -111,6 +111,18 @@ def expect_ids(page, ids):
 
 def geometry(page):
     return page.evaluate("""() => {
+      const p=document.querySelector('#videoPlayerFullscreen'),s=p.querySelector('.video-player-stage'),f=s.querySelector('iframe'),t=document.querySelector('#mallTileField .mall-tile'),w=document.querySelector('#mallTileField').parentElement;
+      const r=f.getBoundingClientRect(),b=p.getBoundingClientRect(),g=t.getBoundingClientRect(),wr=w.getBoundingClientRect();
+      const area=Math.max(0,Math.min(r.right,innerWidth)-Math.max(r.left,0))*Math.max(0,Math.min(r.bottom,innerHeight)-Math.max(r.top,0));
+      const overlapping=[...p.querySelectorAll('.video-player-top-bar button,.video-player-top-bar a,.video-player-manual-play')].filter(x=>!x.hidden&&x.getClientRects().length).filter(x=>{const q=x.getBoundingClientRect();return Math.min(q.right,r.right)>Math.max(q.left,r.left)&&Math.min(q.bottom,r.bottom)>Math.max(q.top,r.top)}).length;
+      const visibleTiles=[...document.querySelectorAll('#mallTileField .mall-tile')].map(el=>{const q=el.getBoundingClientRect(),v={left:Math.max(q.left,wr.left,0),right:Math.min(q.right,wr.right,innerWidth),top:Math.max(q.top,wr.top,0),bottom:Math.min(q.bottom,wr.bottom,innerHeight)};return {id:el.dataset.videoId,rect:q.toJSON(),visible:v,playerIntersection:Math.max(0,Math.min(v.right,b.right)-Math.max(v.left,b.left))*Math.max(0,Math.min(v.bottom,b.bottom)-Math.max(v.top,b.top)),iframeIntersection:Math.max(0,Math.min(v.right,r.right)-Math.max(v.left,r.left))*Math.max(0,Math.min(v.bottom,r.bottom)-Math.max(v.top,r.top))}});
+      const headerOverlap=[...document.querySelectorAll('.mall-header button,.mall-header a,.mall-header input')].filter(el=>!el.hidden&&el.getClientRects().length).map(el=>{const q=el.getBoundingClientRect();return {name:el.getAttribute('aria-label')||el.textContent.trim(),area:Math.max(0,Math.min(q.right,b.right)-Math.max(q.left,b.left))*Math.max(0,Math.min(q.bottom,b.bottom)-Math.max(q.top,b.top))}}).filter(x=>x.area>0);
+      return {iframe:{width:r.width,height:r.height,visible:area/(r.width*r.height)},player:b.toJSON(),tile:g.toJSON(),wrapper:wr.toJSON(),wrapperScrollTop:w.scrollTop,wrapperHeight:w.clientHeight,visibleTiles,headerOverlap,overlappingControls:overlapping,theater:window.mallVideoPlayer.isTheater(),floating:window.mallVideoPlayer.isFloating()};
+    }""")
+
+def diagnostic_geometry(page):
+    """Collect layout details only after the original acceptance snapshot fails."""
+    return page.evaluate("""() => {
       const beforeLayoutRead={at:performance.now(),innerWidth,innerHeight,compactLandscape:matchMedia('(orientation: landscape) and (max-height: 500px)').matches};
       const p=document.querySelector('#videoPlayerFullscreen'),s=p.querySelector('.video-player-stage'),f=s.querySelector('iframe'),t=document.querySelector('#mallTileField .mall-tile'),w=document.querySelector('#mallTileField').parentElement;
       const r=f.getBoundingClientRect(),b=p.getBoundingClientRect(),g=t.getBoundingClientRect(),wr=w.getBoundingClientRect();
@@ -145,16 +157,8 @@ def verify_boot_and_selection(engine):
         selected=[x for x in ledger.rows if x.get('kind')=='videos']
         check(engine.name+' selection fetches only six videos for selected lane',len(selected)==1 and selected[0]['record_id']=='move2japan' and selected[0]['count']==6,selected)
         page.evaluate('window.tvFrame=document.querySelector("#videoPlayerFullscreen iframe")')
-        page.evaluate("""() => {
-          window.fixtureViewportEvents=[];
-          const record=type=>window.fixtureViewportEvents.push({type,at:performance.now(),innerWidth,innerHeight});
-          window.addEventListener('resize',()=>record('window-resize'));
-          window.visualViewport?.addEventListener('resize',()=>record('visual-viewport-resize'));
-          matchMedia('(orientation: landscape) and (max-height: 500px)').addEventListener('change',()=>record('compact-landscape-change'));
-          record('observing');
-        }""")
-        # The unchanged runtime failed twice before one traced pass. Exercise
-        # repeated WebKit rotations to resolve that concrete intermittency.
+        # Plain control: preserve the original success-path geometry read order.
+        # Detailed layout diagnostics run only after a frozen 90ms failure.
         rotations=5 if engine.name=='webkit' else 1
         for width,height in [(390,844)]+[(844,390),(390,844)]*rotations:
             page.set_viewport_size({'width':width,'height':height})
@@ -165,16 +169,15 @@ def verify_boot_and_selection(engine):
             if not accepted:
                 # Preserve the original 90ms failure. Later observations diagnose
                 # delivery timing; neither waiting nor manual sync can turn it into a pass.
-                diagnostic={'engine':engine.name,'target':[width,height],'at_failure':g,'later':[]}
+                diagnostic={'engine':engine.name,'target':[width,height],'at_failure':g,
+                            'after_failure_diagnostics':diagnostic_geometry(page),'later':[]}
                 for delay in (200,800):
                     page.wait_for_timeout(delay)
-                    diagnostic['later'].append(geometry(page))
-                diagnostic['viewport_events']=page.evaluate('window.fixtureViewportEvents')
+                    diagnostic['later'].append(diagnostic_geometry(page))
                 page.evaluate('window.mallVideoPlayer.syncFloatingGeometry()')
-                diagnostic['after_explicit_sync']=geometry(page)
+                diagnostic['after_explicit_sync']=diagnostic_geometry(page)
                 REPORT.setdefault('layout_failure_diagnostics',[]).append(diagnostic)
             check(engine.name+f' {width}x{height} approved responsive player clearance',accepted,g)
-        REPORT.setdefault('viewport_event_ledgers',[]).append({'engine':engine.name,'events':page.evaluate('window.fixtureViewportEvents')})
         check(engine.name+' orientation keeps one iframe',page.evaluate('window.tvFrame===document.querySelector("#videoPlayerFullscreen iframe")&&window.fixturePlayback.created===1'))
         before=page.locator('#videoPlayerFullscreen').bounding_box()
         page.locator('#mallTileField').evaluate('el=>el.parentElement.scrollTop=el.parentElement.scrollHeight')
