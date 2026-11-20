@@ -121,7 +121,15 @@ Revised player SHA-256:
 `d2e1d6f9553e2d4e486644201bb7298ee679462be91b010cac7812bc24ac1db2`.
 Combined tile CSS remains
 `379cc77a236643da69b4c5b6547a97e224c28beb150815bc0feb8dfd1680ffac`.
-Fresh security and browser CI on this revision remain PENDING. The native
+Retest [44685419171](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44685419171)
+on `9161711822556f3648968191348d30e053ef02f3` repeated the same WebKit rotation
+failure with unchanged measured geometry. Security and the other four gates
+passed. Its [artifact](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44685419171/artifacts/14606332302)
+retains the source-bound failure. The fixture now records viewport values and
+passive resize events, then samples later geometry and explicit geometry sync
+only after preserving the original 90ms failure. Those diagnostic observations
+cannot convert the failed acceptance result into a pass. Runtime is unchanged
+while the cause is investigated. The native
 qualification hashes and integrated failure receipt above are historical;
 neither qualifies the revised player or actual iPhone playback.
 

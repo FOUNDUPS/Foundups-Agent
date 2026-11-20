@@ -68,8 +68,13 @@ one guarded `ResizeObserver`, then reruns the existing geometry calculation
 while floating/theater mode is open. It adds no playback request, timer or
 iframe and preserves the existing resize/pause guards. The existing public-TV
 assertion now also rejects portrait header overlap; its 90ms wait, minimum
-stage size, visibility and tile-clearance checks are unchanged. Fresh CI for
-this revised player remains PENDING. Neither the native PASS nor the partially
+stage size, visibility and tile-clearance checks are unchanged. Retest
+[44685419171](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44685419171)
+on `9161711822556f3648968191348d30e053ef02f3` repeated the same WebKit rotation
+failure; security and the other four gates passed. The fixture now captures
+viewport values, resize events and bounded later geometry on failure while
+retaining the original failed result. No further runtime change or passing
+rotation claim follows from the unproven observer repair. Neither the native PASS nor the partially
 passing integrated run qualifies the revised combined build or a real phone.
 
 Publication remains BLOCKED by publisher access. Firebase CLI/API connectivity

@@ -64,8 +64,12 @@ box changes rerun `syncFloatingGeometry()`. It does not observe the grid padding
 output or issue media commands, add timers or replace the iframe. Existing
 resize/pause and playback guards remain. The public-TV portrait assertion now
 also rejects header overlap; all existing 90ms timing, size, visibility and
-tile-clearance requirements remain. Combined tile CSS is unchanged. Fresh CI
-for this revision remains PENDING; the earlier native PASS and partially
+tile-clearance requirements remain. Combined tile CSS is unchanged. Retest
+[44685419171](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44685419171)
+on `91617118` repeated the same WebKit portrait-return failure; security and the
+other four gates passed. Diagnostic fixture observations now distinguish
+viewport/event delivery from stale geometry without changing the failed result.
+The observer repair is not yet proven; the earlier native PASS and partially
 passing integrated run do not qualify the revised build or a real phone.
 
 Firebase CLI/API connectivity is available but publishing is unauthenticated,
