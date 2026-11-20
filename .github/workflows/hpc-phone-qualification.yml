@@ -1,0 +1,90 @@
+name: HPC phone qualification
+
+on:
+  push:
+    branches: [fix/hpc-phone-start-scroll-20261120]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hpc-phone-qualification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    if: github.ref == 'refs/heads/fix/hpc-phone-start-scroll-20261120'
+    uses: ./.github/workflows/security-scan.yml
+
+  browser-policy:
+    needs: security
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Record exact source and qualification boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          export HPC_EVIDENCE_DIR="$RUNNER_TEMP/hpc-phone-qualification"
+          printf 'HPC_EVIDENCE_DIR=%s\n' "$HPC_EVIDENCE_DIR" >> "$GITHUB_ENV"
+          mkdir -p "$HPC_EVIDENCE_DIR"
+          python -B - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          files = [
+              'public/member/js/mall-video-player.js',
+              'public/member/css/mall-tile-field.css',
+              'public/member/tests/mall_scoped_video_browser.py',
+              'public/member/tests/mall_queue_callbacks_browser.py',
+              '.github/workflows/hpc-phone-qualification.yml',
+              'requirements-trust-bootstrap.txt',
+          ]
+          receipt = {
+              'source_sha': os.environ['GITHUB_SHA'],
+              'source_tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'run_id': os.environ['GITHUB_RUN_ID'],
+              'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'playwright_version': '1.62.0',
+              'source_sha256': {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in files},
+              'scope': 'Real shell and CSS; mocked provider and network routes in Chromium and WebKit.',
+              'real_youtube': 'UNEXECUTED', 'physical_iphone': 'UNEXECUTED', 'deployment': 'NONE',
+          }
+          pathlib.Path(os.environ['HPC_EVIDENCE_DIR'], 'source.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install pinned browser test runtime
+        timeout-minutes: 5
+        run: |
+          python -m pip --isolated install --only-binary=:all: playwright==1.62.0
+          python -m pip freeze > "$HPC_EVIDENCE_DIR/dependencies.txt"
+          python -m playwright install --with-deps chromium webkit
+      - name: Qualify player policy and delayed queue callbacks
+        timeout-minutes: 8
+        shell: bash
+        run: |
+          set -euo pipefail
+          policy_status=0
+          queue_status=0
+          python -B public/member/tests/mall_scoped_video_browser.py --player-policy 2>&1 | tee "$HPC_EVIDENCE_DIR/player-policy.log" || policy_status=$?
+          python -B public/member/tests/mall_queue_callbacks_browser.py 2>&1 | tee "$HPC_EVIDENCE_DIR/queue-callbacks.log" || queue_status=$?
+          printf 'player_policy_exit=%s\nqueue_callbacks_exit=%s\n' "$policy_status" "$queue_status" > "$HPC_EVIDENCE_DIR/outcomes.txt"
+          test "$policy_status" -eq 0 && test "$queue_status" -eq 0
+      - name: Retain source receipt and browser logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hpc-phone-qualification-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/hpc-phone-qualification
+          if-no-files-found: error
+          retention-days: 7
