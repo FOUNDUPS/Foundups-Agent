@@ -1,3 +1,30 @@
+## HPC phone candidate review renewal — 2026-11-20
+
+The isolated phone qualification run [44663491734](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44663491734)
+on `6d8d5ab3dab9e34db791ba9e0393a966184957fd` found 41 unreviewed
+whole-file bindings; its introduced-commit scan had zero findings. These are
+renewals of exact existing public metadata approvals, verified in
+[the source-bound review](reviewed-hpc-phone-evidence.json).
+
+All three flagged files are byte-identical to native `75c838b6`. All 41
+flagged lines match individually approved lines on main `06d0d813`; all 39
+backend-manifest path/checksum records also match freshly recomputed source
+SHA-256 values. Both complete Clerk frontend SDK elements match their existing
+publishable frontend classification, with independent element review.
+
+The candidate full-file digests are:
+
+- `public/index.html`: `8f97b7858ac46fd4eee3446a50a0312a1a2862889df1ecb19a488cb221bc7cd4`
+- `public/member/index.html`: `3a1edb1e729f1cdc3e2fb25ff1525c7bc5f7e856089f6bf375d5d5e3b579deab`
+- `scripts/reddog_backend_manifest.json`: `e0267cae429d3b70568fc6bbe49a34819a97243e3f9b6b7d8549b8d63fb2cd6d`
+
+Append exactly 41 bindings while preserving all 4,579 earlier entries and other
+fields (4,620 total). The sorted compact fingerprint-list SHA-256 is
+`2fdab5e90c25424a7cf65621b7cc970462ee906c6f39548a5951c3dd1ef0109e`.
+Scanner rules, exclusions, formula and coverage remain unchanged. A fresh
+exact-head gate and the browser suites are still required; this review is not
+physical-device or deployment acceptance.
+
 ## Storytime, Kids Episode, and UI-TARS coordinate-profile metadata review — 2026-11-16
 
 The backend manifest refreshes one runtime source checksum
