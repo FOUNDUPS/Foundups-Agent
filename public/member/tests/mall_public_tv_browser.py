@@ -153,7 +153,10 @@ def verify_boot_and_selection(engine):
           matchMedia('(orientation: landscape) and (max-height: 500px)').addEventListener('change',()=>record('compact-landscape-change'));
           record('observing');
         }""")
-        for width,height in ((390,844),(844,390),(390,844)):
+        # The unchanged runtime failed twice before one traced pass. Exercise
+        # repeated WebKit rotations to resolve that concrete intermittency.
+        rotations=5 if engine.name=='webkit' else 1
+        for width,height in [(390,844)]+[(844,390),(390,844)]*rotations:
             page.set_viewport_size({'width':width,'height':height})
             page.wait_for_timeout(90)
             g=geometry(page)
