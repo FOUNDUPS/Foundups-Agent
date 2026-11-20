@@ -6,6 +6,13 @@ renders a breadcrumb and offers a draft-only action. CI rejects drift in its
 published JS projection. WSP 11/22/50/97; no VSIX installation, production
 activation, graph promotion, or worker admission.
 
+Full-release testing exposed a stale synthetic repository: it copied the
+registry without the referenced brand evidence and rejected Trade before
+testing the panel. The fixture now brings in the declared, confined brand
+files and HPC's registered artifacts. The hosted front test obtains an HPC
+receipt from the real resolver, checks it again at use, and verifies it
+grants no work authority. The production grounding policy did not change.
+
 ## 2026-11-18 - Bind operations pre-build guidance
 
 Refreshed the existing backend compatibility digest for the canonical

@@ -4,6 +4,8 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const host = require('../fractal_focus_host');
+const foundupRuntime = require('../foundup_work_runtime_binding');
+const governedGit = require('../governed_git_context');
 
 function preflight(overrides) {
   const receipt = { applied: true, passed: true, foundup_id: 'hpc', receipt_id: 'receipt-1' };
@@ -86,5 +88,27 @@ assert(source.includes('<script nonce="${escapedCspNonce}">'));
 assert(hostSource.includes("composer.value !== ''"));
 assert(!hostSource.includes('composer.value.trim()'));
 assert(hostSource.includes('message.epoch !== epoch'));
+
+const repoRoot = path.resolve(__dirname, '..', '..', '..');
+const vscodeMock = { workspace: { workspaceFolders: [{ uri: { fsPath: repoRoot } }] } };
+const fixture = require('./foundup_integration_test_fixture').create(repoRoot, vscodeMock);
+try {
+  const receipt = foundupRuntime.resolve(fixture.root, 'work on HPC foundup',
+    governedGit.gitOutput, governedGit.GIT_OUTPUT_TRUNCATED_MARKER, governedGit.gitOutputs);
+  assert.strictEqual(receipt.passed, true);
+  assert.strictEqual(receipt.foundup_id, 'hpc');
+  assert.strictEqual(receipt.grants_authority, false);
+  assert.strictEqual(foundupRuntime.verifyAtUse(fixture.root, receipt,
+    governedGit.gitOutput, governedGit.GIT_OUTPUT_TRUNCATED_MARKER, governedGit.gitOutputs), true);
+  const verified = foundupRuntime.preflightState(fixture.root, receipt, null,
+    governedGit.gitOutput, governedGit.GIT_OUTPUT_TRUNCATED_MARKER, governedGit.gitOutputs);
+  assert.strictEqual(verified.verified, true);
+  assert.deepStrictEqual(verified.reasons, []);
+  const compatiblePreflight = Object.assign({ passed: true }, verified.fields, {
+    typed_targets: { foundup_work_grounding: receipt }
+  });
+  assert.deepStrictEqual(host.modelFromPreflight(compatiblePreflight, true),
+    { state: 'selected', foundupId: 'hpc', canAsk: true });
+} finally { fixture.restore(); }
 
 console.log('RedDog fractal focus host contract: PASS');
