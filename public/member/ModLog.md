@@ -1,5 +1,23 @@
 # Member Area Module Change Log
 
+## 2026-11-21 JST — v25 application qualified, publisher sign-in pending
+
+The final run passed on `bd0510c5c2e333d07b1bb02340ca91b291420164`. The
+release preparation checked all 243 source-file hashes in its artifact. The
+220 changed public payloads relative to the v23 application base include the
+worker, all three playback-probe files and all 206 reachable discovery files.
+The source for this build remains pinned while the publication record advances.
+[Run 44689762799](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44689762799)
+
+The Firebase plugin is installed. CLI 15.37.0 reported no authorized accounts
+and could not list Hosting channels for the specified project. The DAE's
+shared OAuth manager requests YouTube scopes. The native DAE also supports
+host-configured scopes and credential paths, which were absent in the delivery
+workspace. Publishing requires an authorized Firebase or Cloud Platform grant
+and Hosting access to `foundupscom`. The preview release and iPhone tests are
+pending. [DAE OAuth manager](../../modules/platform_integration/utilities/oauth_management/src/oauth_manager.py) ·
+[Hosting authorization scopes](https://firebase.google.com/docs/reference/hosting/rest/v1beta1/sites.versions/create)
+
 ## 2026-11-20 - Integrated v25 automated qualification PASS; publication pending
 
 Controlled runtime qualification is PASS on
@@ -99,10 +117,9 @@ desktop coverage. Queue callbacks passed 18/18, worker/state VM 29 and static
 contracts 159. The test hash is identical to failed plain control `ba11b0b4`;
 only the player changed among recorded source hashes. These controlled results
 qualify the tested runtime, not real YouTube or physical Safari/Home Screen
-playback. The documentation commit retains its normal exact-head gate.
+playback. The following documentation-head run passed as recorded above.
 
-Firebase CLI/API connectivity is available but publishing is unauthenticated,
-and the official plugin is not installed. The v25 receipt remains explicitly
+At handoff the publishing CLI required authentication. The v25 receipt remains explicitly
 unpublished and unbound to a final commit/Hosting version. The publisher must use
 existing project `gen-lang-client-0061781628` / site `foundupscom`, read its old
 immutable release/configuration/manifest and preserve unchanged assets, then

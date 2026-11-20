@@ -1,10 +1,38 @@
+## 2026-11-21 JST — final v25 qualification receipt and release preparation
+
+Run `44689762799`, attempt 1, passed on `bd0510c5c2e333d07b1bb02340ca91b291420164`,
+tree `695a78cd700ba2571592c1040a5967cc92f341ef`. Artifact ZIP SHA-256
+`6be42b0adfdce1535d851c290e54645a59d419ec46da59ee47d436da488e6fb9`
+matched GitHub's digest. All five gate exits were zero. Security passed 53
+regressions with zero unreviewed findings. Player policy passed all six result
+groups, queue callbacks 18/18, public TV 100/100 with stable source, worker/state
+29 and static contracts 159. The five original 90 ms WebKit rotation cycles
+and the subsequent desktop, navigation and paging cases passed.
+[Run](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44689762799) ·
+[Qualification artifact](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44689762799/artifacts/14608356242)
+
+Release preparation matched all 243 source-file hashes. Following the discovery
+root reached three catalog pages with 17 records and 203 video pages with
+1,205 videos, including all 86 pages under `videos/undaodu/`. The source
+worker names `pfmall-member-v25` and all four entry points reference v25 assets.
+Public v24 probe readback returned HTTP 200, `mall_build=v24` and
+`hosting_version=unverified`. The publisher's channel-list check failed
+authentication before baseline enumeration or allocation of a v25 version.
+
+Real YouTube time progression on v25, iPhone 12 Safari, installed Home Screen
+and live desktop WikiTube are unexecuted. For the phone run, use the Mall for
+`DDAfdpJeUP0`, `OTTz58wPi24` and `urXOSlVgPdk`. The existing probe also
+accepts `R7xm4MZ9N4w`, `TppBUj_7lC0`, `qNFSBWXhZSY` and `B0P1Zci5Pxo` as
+diagnostic-only selections. Record the release, device/mode, ID, initial tap,
+two observed media times, muted retry and any provider error for each actual run.
+
 ## 2026-11-20 - Integrated v25 automated qualification PASS; publication pending
 
 Current controlled runtime qualification: PASS on
 `472e3977d0cfc6948662b85de5161993eeb4faf4`. The source-bound result below
 supersedes the failed rotation controls; it is not delivered-version, real
-YouTube or physical iPhone acceptance. The documentation commit still requires
-its normal exact-head gate.
+YouTube or physical iPhone acceptance. The final documentation-head run passed
+as recorded above.
 
 Source base: `75c838b6eab19807487ee02c4b2f9367e580547e` plus the bounded
 player/CSS repair. The existing `mall_scoped_video_browser.py --player-policy`
@@ -183,8 +211,7 @@ qualifies the media-query fix under this controlled fixture, without asserting
 the browser engine's precise cause or physical iPhone playback. Historical
 native/observer hashes and failed controls remain evidence, not current status.
 
-Firebase CLI/API connectivity is available but the publishing session is
-unauthenticated; the official plugin is not installed. The staged v25 deployment
+At handoff the publishing CLI required authentication. The staged v25 deployment
 receipt remains unpublished with no final source/Hosting binding. The next
 publisher must authenticate to existing project `gen-lang-client-0061781628`,
 site `foundupscom`; read the old immutable release/configuration/manifest and

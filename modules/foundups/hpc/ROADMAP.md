@@ -1,5 +1,23 @@
 # HPC roadmap
 
+## 2026-11-21 JST — v25 phone preview awaiting publisher sign-in
+
+Build v25 passed security and all five qualification gates on
+`bd0510c5c2e333d07b1bb02340ca91b291420164`. The artifact binds the player,
+styles, worker, entry points and current discovery generation to that source.
+[Qualification run](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44689762799) ·
+[Artifact](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44689762799/artifacts/14608356242)
+
+**P0 under WSP 15 (3 complexity + 5 importance + 5 deferability + 4 impact = 17).**
+012 needs an isolated release to test the player. The Firebase plugin is enabled.
+The Firebase CLI returned `Failed to authenticate, have you run firebase login?`
+when listing channels on `foundupscom` in `gen-lang-client-0061781628`. The public
+`play-v24-iphone` probe still reports v24 and gives its Hosting version as
+`unverified`. The owner of this delivery is 0102. Resume at authenticated
+channel readback, preserve the complete baseline version and its configuration,
+then release and verify `play-v25-iphone`. The release ID, URL and expiry are
+pending. Physical Safari, Home Screen and real-provider acceptance follow publication.
+
 ## 2026-11-20 - Integrated v25 automated qualification PASS; publication pending
 
 Controlled runtime qualification is PASS on
@@ -105,30 +123,25 @@ later paging and desktop checks. Queue callbacks passed 18/18, worker/state VM
 failed `ba11b0b4` run; only the player changed among their recorded source
 hashes. This qualifies the tested fix under controlled providers, without
 claiming a browser-engine cause or real YouTube/device acceptance. The
-documentation commit still requires its normal final exact-head gate.
+subsequent documentation-head run passed as recorded above.
 
-Publication remains BLOCKED by publisher access. Firebase CLI/API connectivity
-is available, but the publishing session is unauthenticated; the official
-Firebase plugin is not installed. The earlier Cloud Shell attempt failed to
-open. No v25 Hosting release or production merge is claimed. Its staged
-deployment receipt is explicitly unpublished and has no final source/release
-binding. A changed build label in source does not update a phone's cached app.
+At handoff, the publishing CLI needed authentication and the Cloud Shell
+attempt had failed to open. The committed probe receipt identifies the
+unpublished candidate. Source and release fields are filled by the publisher
+after Hosting allocates the version.
 
 Next work, in order:
 
-1. Retain the completed qualification and pass the normal exact-head gate for
-   the documentation commit. No further runtime change is required by this
-   observed regression.
-2. Authenticate the authorized Firebase publisher for existing project
+1. Authenticate the authorized Firebase publisher for existing project
    `gen-lang-client-0061781628`, site `foundupscom`. Read the old immutable
    Hosting release, configuration and manifest, preserving unchanged assets
    outside the recovered Mall/HPC scope. The public reconstruction is not a
    complete Hosting clone; original ephemeral staging is no longer required.
-3. Publish only the isolated `play-v25-iphone` candidate. Bind the receipt to
+2. Publish only the isolated `play-v25-iphone` candidate. Bind the receipt to
    the qualified source SHA and actual immutable release, then verify delivered
    hashes, cache generation and Build v25. Provide the verified
    `/member/?foundup=hpc` URL; `/member/` alone is the general Mall.
-4. Record physical Safari/Home Screen results before production promotion.
+3. Record physical Safari/Home Screen results before production promotion.
    The phone must show **Build v25**; the player must stay anchored while tiles
    scroll beneath it; one tile tap must request playback and allow the bounded
    muted fallback; and the queue must continue without creating a second
