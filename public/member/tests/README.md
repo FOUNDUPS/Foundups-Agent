@@ -1,5 +1,12 @@
 # Member Mall tests
 
+With Chromium and Python Playwright installed, run
+`python -B public/member/tests/mall_guest_conversation_browser.py` from the
+repository root. It drives the HPC phone dock and real dialog at 390×844 using
+the scoped-video fixture's local assets. The guest API is intercepted. The
+test checks consent, the selected public FoundUp, visible response, withdrawal,
+and clearing the transcript. No provider or cloud service is required.
+
 Read [TestModLog.md](TestModLog.md) before extending a fixture. It records the
 existing suites, historical results and their limits; those results are not a
 fresh test run.

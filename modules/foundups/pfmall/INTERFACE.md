@@ -208,6 +208,15 @@ The dispatcher is not the resident RedDog conversation interface. It carries
 no durable conversation, identity proof, model credential, work order,
 OpenClaw policy, or Hermes execution authority.
 
+The distinct public guest client at `public/js/reddog-public-client.js` accepts
+only an explicitly configured same-origin `/api/reddog/public` root. Its member
+adapter exposes availability and opens a native consent dialog without issuing
+a request. A turn uses the canonical public nonce/revision/message contract and
+may add only the validated public route `foundup_id`; account and private context
+are never payload fields. Session and transcript state are cleared when the
+account/selection binding revision changes. This guest API has effect ceiling
+`NONE` and is not the authenticated resident interface below.
+
 ## RedDog integration seam
 
 A future production adapter may translate authenticated RedDog results into

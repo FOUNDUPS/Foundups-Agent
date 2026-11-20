@@ -1,5 +1,16 @@
 # Member Area Module Change Log
 
+## 2026-11-20 — Public HPC text conversation
+
+- Opt-in HPC dog entry opens a consented guest dialog. Without the guest API
+  configuration the existing FoundUp welcome route still works. The updated
+  service worker reloads the shell assets and precaches only the static client.
+- The [HPC hosting and admission contract](RED_DOG_DIGITAL_TWIN_CONTRACT.md#hpc-prototype-and-hosting-evidence-2026-11-20)
+  and [mobile browser check](tests/mall_guest_conversation_browser.py) cover
+  the public route, visible consent, scoped question, answer and withdrawal.
+  The browser fixture stays offline. The separate local ASGI/OpenRouter smoke
+  exercised one real GLM-5.2 turn. Production activation is pending.
+
 ## 2026-11-19 — Fractal member-view documentation reconciliation
 
 - Added link-first target guidance to README, INTERFACE and ROADMAP using the

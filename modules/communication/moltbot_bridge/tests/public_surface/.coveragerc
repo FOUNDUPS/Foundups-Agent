@@ -4,6 +4,7 @@ include =
     */reddog_public_policy.py
     */reddog_public_session_gate.py
     */reddog_public_http.py
+    */reddog_public_openrouter.py
 
 [report]
 fail_under = 90

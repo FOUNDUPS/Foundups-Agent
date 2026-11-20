@@ -1,3 +1,20 @@
+## 2026-11-20 — Bounded Red Dog guest conversation client
+
+- Reused the preserved #1648 guest-session client pattern against the current
+  canonical Python public-admission API. The browser client requires an explicit
+  same-origin `/api/reddog/public` deployment binding, performs no request on
+  import/open, retains bearer/nonce state only in memory, and never falls back to
+  the legacy homepage chat after consent or transport failure.
+- Added a quiet native-dialog adapter for the existing Mall Red Dog entry. It
+  requires explicit consent before `encounter`, defaults to text only, sends no
+  account/private context, and optionally sends only the validated public route
+  `foundup_id` so an HPC question such as “what is this?” is server-grounded.
+  Context/account binding revisions clear the local session, transcript, and
+  consent before another principal or public selection can reuse the surface.
+- The live homepage legacy chat remains unchanged. Endpoint installation,
+  provider credentials, durable production accounting, hosted acceptance, and
+  deployment remain separate gates. WSP 22, 50, 97, and 106 apply.
+
 ## 2026-11-19 — Fractal census and projection documentation reconciliation
 
 - Replaced the immediate graph-build sequence with inclusive census discovery,

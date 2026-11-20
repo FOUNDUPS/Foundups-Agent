@@ -37,6 +37,7 @@ const SHELL_ASSETS = [
   '/member/js/mall-video-player.js?v=6',
   '/member/js/mall-video-projection.js?v=12',
   '/member/js/account-concierge.js',
+  '/js/reddog-public-client.js',
   '/member/js/red-dog-concierge.js',
   '/member/js/mall-state-restore.js?v=12',
   '/move2japan/property-search.js',

@@ -16,6 +16,7 @@ package.__path__ = [str(SRC)]
 sys.modules[PACKAGE] = package
 policy = importlib.import_module(PACKAGE + ".reddog_public_policy")
 sessions = importlib.import_module(PACKAGE + ".reddog_public_session_gate")
+openrouter = importlib.import_module(PACKAGE + ".reddog_public_openrouter")
 
 
 @pytest.fixture
@@ -53,3 +54,8 @@ def database_store(tmp_path, monkeypatch):
 @pytest.fixture
 def api_module():
     return importlib.import_module(PACKAGE + ".reddog_public_http")
+
+
+@pytest.fixture
+def openrouter_module():
+    return openrouter

@@ -618,6 +618,7 @@
 
     async function initializeMall(clerkUserId, userData, clerkUser) {
       // The existing account gate consumes this only after actual admission.
+      window.redDog?.setMemberAdmission?.(true);
       const memberVideoScope = window.mallVideoProjection?.resolveMember?.(window.location);
       const productReturn = window.mallStateRestore?.consumeProductReturn();
       if (memberVideoScope) {
@@ -853,6 +854,7 @@
 
       // Initialize components with mock data
       if (window.redDog) {
+        window.redDog.setMemberAdmission(true);
         window.redDog.setIdentity(mockClerkUser, mockUserData);
         window.redDog.setFoundUps(mallCatalog);
       }

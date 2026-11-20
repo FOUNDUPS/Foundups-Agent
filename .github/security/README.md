@@ -1,3 +1,15 @@
+## HPC public guest review — 2026-11-20
+
+PR #2435 job 136139611051 on head `0d2c0fc20` reported 41 unreviewed
+current-tree findings and zero introduced-history findings. Against base
+`a9576b8e5`, the author and an independent reviewer found 39 unchanged
+manifest source digests, one unchanged public SDK identifier, and one existing
+bridge changelog line shifted from 4118 to 4126. Each previous fingerprint is
+in the base ledger. The manifest entries match their source Git blobs.
+Append only the 41 new whole-file, rule and line bindings; preserve the prior
+4,781 records. No rule, exclusion, history gate or scanning scope changes.
+Fresh hosted checks must accept the new head.
+
 ## Publishing/checkpoint documentation re-review — 2026-11-20
 
 PR2433 head `43b84a1be5a932095c3ce51bdb67cfa1edeaba96` failed security

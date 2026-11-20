@@ -227,6 +227,7 @@ function createFixture(mode = 'product-discovery', setup) {
     + '<div id="redDogSummary" hidden><div data-reddog-summary-content></div></div><div id="redDogListening" hidden></div></div></div>';
   const plane = doc.getElementById('accountPlane');
   if (mode) plane.setAttribute('data-reddog-mode', mode);
+  if (mode === 'product-discovery') doc.body.setAttribute('data-foundup-id', 'move2japan');
   if (mode === 'public-discovery') {
     for (const selector of ['[data-reddog-state]', '[data-reddog-identity]', '[data-reddog-foundups]', '[data-reddog-invites]', '[data-reddog-options]', '[data-reddog-concierge]']) {
       plane.querySelector(selector)?.remove();
@@ -250,8 +251,10 @@ function createFixture(mode = 'product-discovery', setup) {
     field[name] = (...args) => { effects.push([name, ...args]); return true; };
   }
   const windowEvents = new Map();
+  const fixtureURL = new URL('https://foundups.com/member/?foundup=move2japan&admitted=true');
   const sb = { document: doc, console: { log() {}, warn() {} }, URL,
-    location: { href: 'https://foundups.com/member/?foundup=move2japan&admitted=true' },
+    location: { href: fixtureURL.href, origin: fixtureURL.origin, hostname: fixtureURL.hostname,
+      pathname: fixtureURL.pathname, search: fixtureURL.search },
     Date: class extends Date { static now() { return clock; } },
     setTimeout: (fn, delay = 0) => { const id = ++timerID; timers.set(id, { fn, at: clock + delay }); return id; },
     clearTimeout: id => timers.delete(id),
@@ -328,6 +331,132 @@ test('product presentation starts as a guest even with Clerk user and query flag
   assert.equal(f.api.isOpen(), true, 'guest search does not wait for account initialization or a gesture timer');
   assert.equal(f.playerReads.length, 0);
   assert.deepEqual(f.effects, []);
+});
+
+test('guest conversation entry is quiet, public, route-bound and unavailable without an admitted endpoint', () => {
+  const f = createFixture(); register(f); f.api.open();
+  const context = f.api.getConversationContext();
+  assert.equal(context.surface, 'product-discovery');
+  assert.equal(context.access, 'public');
+  assert.equal(context.foundupId, 'move2japan', 'selection comes from the prepared product owner');
+  assert.equal(Number.isInteger(context.bindingRevision), true);
+  assert.deepEqual(Object.keys(context).sort(), ['access', 'bindingRevision', 'foundupId', 'selectionState', 'surface']);
+  assert.equal(f.$('[data-reddog-conversation-open]').disabled, true);
+  assert.equal(f.$('[data-reddog-conversation-availability]').textContent,
+    'Conversation is not available on this page.');
+  assert.equal(f.$('#redDogListening').hidden, true);
+  assert.deepEqual(f.effects, [], 'static availability does not call an API');
+});
+
+test('conversation adapter receives bounded context and opens without voice or network side effects', () => {
+  const f = createFixture(); register(f); f.api.open();
+  const observed = [];
+  assert.equal(f.api.registerConversationAdapter({
+    getAvailability(context) { observed.push(['availability', {...context}]); return { available: true }; },
+    open(context) { observed.push(['open', {...context}]); }
+  }), true);
+  assert.equal(f.$('[data-reddog-conversation-open]').disabled, false);
+  f.$('[data-reddog-conversation-open]').fire('click');
+  assert.equal(observed.at(-1)[0], 'open');
+  assert.deepEqual(Object.keys(observed.at(-1)[1]).sort(), ['access', 'bindingRevision', 'foundupId', 'selectionState', 'surface']);
+  assert.equal(observed.at(-1)[1].access, 'public');
+  assert.equal(f.$('#redDogListening').hidden, true);
+  assert.deepEqual(f.effects, [], 'opening the quiet adapter does not imply an API call');
+});
+
+test('username display never establishes conversation admission and revocation advances the binding', () => {
+  const f = createFixture(); register(f); f.api.open();
+  const guest = f.api.getConversationContext();
+  assert.equal(f.api.setIdentity(identity, { username: 'not-authority' }), false,
+    'guest API guard refuses identity enrichment');
+  assert.equal(f.api.getConversationContext().access, 'public');
+  f.api.setDiscoveryAdmission(true);
+  const admittedBeforeIdentity = f.api.getConversationContext();
+  assert.equal(admittedBeforeIdentity.access, 'member', 'the existing admission owner, not username, changes access');
+  assert.equal(admittedBeforeIdentity.foundupId, null, 'member context is never supplied to public guest chat');
+  f.api.setIdentity(identity, { username: 'aiko' });
+  const bound = f.api.getConversationContext();
+  assert.equal(bound.access, 'member');
+  assert.ok(bound.bindingRevision > admittedBeforeIdentity.bindingRevision);
+  f.api.setDiscoveryAdmission(false);
+  const revoked = f.api.getConversationContext();
+  assert.equal(revoked.access, 'public');
+  assert.ok(revoked.bindingRevision > bound.bindingRevision);
+  assert.ok(revoked.bindingRevision > guest.bindingRevision);
+});
+
+test('HPC context is resolved by the existing host owner rather than raw query text', () => {
+  const f = createFixture('', ({ sb, doc }) => {
+    doc.body.removeAttribute('data-foundup-id');
+    sb.location.href = 'https://hpc.foundups.com/member/?foundup=forged';
+    sb.location.origin = 'https://hpc.foundups.com';
+    sb.location.hostname = 'hpc.foundups.com';
+    sb.location.pathname = '/member/';
+    sb.location.search = '?foundup=forged';
+    sb.mallVideoProjection = { hostScope: () => 'hpc', resolveMember: () => null };
+  });
+  f.api.open();
+  const context = f.api.getConversationContext();
+  assert.equal(context.surface, 'public-video');
+  assert.equal(context.access, 'public');
+  assert.equal(context.foundupId, 'hpc');
+  assert.equal(context.foundupId === 'forged', false);
+});
+
+test('canonical scope grammar accepts hyphens through 80 characters', () => {
+  const canonical = 'a' + '-'.repeat(79);
+  const f = createFixture('', ({ sb }) => {
+    sb.mallVideoProjection = { hostScope: () => canonical, resolveMember: () => null };
+  });
+  const context = f.api.getConversationContext();
+  assert.equal(context.selectionState, 'bound');
+  assert.equal(context.foundupId, canonical);
+  assert.equal(context.foundupId.length, 80);
+});
+
+test('route-selected invalid scope fails closed instead of falling back to generic chat', () => {
+  let invalid = 'a' + '-'.repeat(80);
+  const f = createFixture('', ({ sb }) => {
+    sb.mallVideoProjection = { hostScope: () => invalid, resolveMember: () => null };
+  });
+  let opened = 0;
+  f.api.registerConversationAdapter({
+    getAvailability() { return { available: true }; },
+    open() { opened++; }
+  });
+  const context = f.api.getConversationContext();
+  assert.equal(context.selectionState, 'invalid');
+  assert.equal(context.foundupId, null);
+  assert.equal(f.$('[data-reddog-conversation-open]').disabled, true);
+  assert.equal(f.$('[data-reddog-conversation-availability]').textContent,
+    'Conversation is unavailable for this FoundUp route.');
+  assert.equal(f.api.openConversation(), false);
+  assert.equal(opened, 0);
+  const revision = context.bindingRevision;
+  invalid = 'UPPERCASE';
+  const rebound = f.api.getConversationContext();
+  assert.equal(rebound.selectionState, 'invalid');
+  assert.ok(rebound.bindingRevision > revision, 'invalid route A to invalid route B still rebinds');
+});
+
+test('ordinary shell remains unknown until the existing admission owner binds it', () => {
+  const f = createFixture('');
+  f.api.setIdentity(identity, { username: 'display-only' });
+  assert.equal(f.api.getConversationContext().access, 'unknown',
+    'identity and username presentation are not admission');
+  let opened = 0;
+  f.api.registerConversationAdapter({
+    getAvailability() { return { available: true }; },
+    open() { opened++; }
+  });
+  assert.equal(f.$('[data-reddog-conversation-open]').disabled, true);
+  assert.equal(f.api.openConversation(), false);
+  assert.equal(opened, 0);
+  assert.equal(f.api.setMemberAdmission(true), true);
+  assert.equal(f.api.getConversationContext().access, 'member');
+  assert.equal(f.$('[data-reddog-conversation-open]').disabled, false);
+  assert.equal(f.api.setMemberAdmission(false), false);
+  assert.equal(f.api.getConversationContext().access, 'unknown');
 });
 
 test('guest APIs and member DOM actions cannot acquire or display private state', async () => {
@@ -540,7 +669,7 @@ test('identity enrichment binds one profile action and releases modal before Cle
   assert.equal(f.effects.length, 1, 'revocation also guards an already-bound DOM handler');
 });
 
-test('admitted modes/hold use shared controller while revocation cancels pending work', () => {
+test('hold stays quiet without dictation and delegates only to a real bound dictation owner', () => {
   const f = createFixture(); register(f); f.api.setDiscoveryAdmission(true); f.api.open();
   f.api.openModes();
   assert.equal(f.api.isOpen(), false);
@@ -548,9 +677,21 @@ test('admitted modes/hold use shared controller while revocation cancels pending
   assert.equal(f.$('.mall-shell').hasAttribute('inert'), false);
   f.api.closeModes();
   f.$('#redDogBtn').fire('pointerdown'); f.advance(500);
-  assert.equal(f.$('#redDogListening').hidden, false);
+  assert.equal(f.$('#redDogListening').hidden, true, 'no provider means no fake listening state');
   f.$('#redDogBtn').fire('pointerup');
   assert.equal(f.$('#redDogListening').hidden, true);
+  f.advance(301); f.api.close();
+  const dictation = [];
+  assert.equal(f.api.bindSearchDictation({
+    start(fromHold) { dictation.push(['start', fromHold]); },
+    stop() { dictation.push(['stop']); },
+    cancel() { dictation.push(['cancel']); }
+  }), undefined);
+  f.$('#redDogBtn').fire('pointerdown'); f.advance(500);
+  assert.deepEqual(dictation, [['start', true]]);
+  assert.equal(f.$('#redDogListening').hidden, true, 'real dictation owns its own honest status');
+  f.$('#redDogBtn').fire('pointerup');
+  assert.deepEqual(dictation, [['start', true], ['stop']]);
   f.$('#redDogBtn').fire('pointerdown'); f.api.setDiscoveryAdmission(false); f.advance(1000);
   assert.equal(f.$('#redDogListening').hidden, true);
   assert.equal(f.$('#redDogSummary').hidden, true);

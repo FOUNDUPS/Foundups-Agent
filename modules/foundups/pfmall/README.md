@@ -119,6 +119,13 @@ can control existing Mall presentation APIs, but it is not a conversation
 transport and grants no resident identity, model credential, durable-session,
 work-order, OpenClaw-policy, or Hermes-execution authority.
 
+The bounded guest adapter is a separate prototype. It remains unavailable
+unless deployment explicitly supplies the same-origin canonical public API
+root. Opening it performs no request; explicit consent starts an in-memory,
+text-only public session. Only the question and canonical nonce/revision fields,
+plus an optional validated public route FoundUp ID, cross that boundary. Account
+identity, private context, browser storage, tools, and work authority do not.
+
 A production RedDog connection must arrive through a separately authenticated
 adapter. RedDog/0102 owns the continuous product identity and governed
 conversation state; OpenClaw supervises policy/control-plane admission; WRE
@@ -135,6 +142,7 @@ admitted leaf jobs. The browser remains an untrusted thin client. No text or
 | Optional state overlay | Implemented contract | Advisory provider data |
 | Member Mall UI and browser control dispatcher | Implemented | Presentation only |
 | Shell-local RedDog FAQ concierge | Implemented legacy shim | Static guidance only |
+| Bounded public RedDog guest adapter | Implemented source prototype; unconfigured by default | Canonical public admission API; effect ceiling NONE |
 | Authenticated resident RedDog conversation adapter | Specified, not implemented in p.fMALL | RedDog backend |
 | AutoPost Live mode and creator live-session service | Specified, not implemented | External AutoPost product/media adapter; separately authenticated durable creator backend |
 | Provider-confirmed live catalog projection | Planned | Scoped backend observation; public-safe fields only |

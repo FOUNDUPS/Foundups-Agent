@@ -1,5 +1,23 @@
 # p.fMALL Test ModLog
 
+## 2026-11-20 — Red Dog guest conversation client contract
+
+- Added `reddog_public_guest_client.mjs` for the actual browser module. It proves
+  explicit same-origin canonical endpoint admission, zero API requests on
+  construction/modal open, exact consent and generic/HPC turn payloads,
+  in-memory bearer use, no lost-turn replay or legacy fallback, native dialog
+  focus return, and transcript/consent clearing on context rebind.
+- Focused result: `node modules/foundups/pfmall/tests/reddog_public_guest_client.mjs`
+  passed. After the optional public FoundUp binding and exact HPC-origin policy
+  landed in the shared candidate, the canonical Python public-surface suite
+  passed 234 tests with two inherited pytest configuration warnings. The actual
+  member concierge VM passed 25 tests and its static boundary suite passed 9
+  tests with the same two inherited warnings. The offline Chromium oracle used
+  the actual HPC member shell at 390x844 and passed consent-before-network,
+  route-bound “What is this?”, reply display, transcript clearing, and
+  encounter/turn/withdraw order. These are local source/fixture checks, not live
+  provider, host, deployment, or physical-device proof.
+
 ## 2026-11-16 — Isolated HPC iPhone playback probe VM and delivery gates
 
 - Added `tests/fixtures/hpc_iphone_playback_probe_vm.mjs` (`6 passed`) wired into `public/member/tests/test_mall_product_state.py` verifying `public/member/playback-probe/` non-presence in git, strict `?v=` / `?host=` allowlists, 4 diagnostic-only Shorts isolation, controls outside `#hpc-probe-embed`, bidirectional `Mall <-> official embed` selection retention, `SW controller` vs cache provenance, and `101/150` vs `LOGIN_REQUIRED` error classification.
