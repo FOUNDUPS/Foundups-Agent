@@ -12,13 +12,19 @@ import unicodedata
 
 
 SURFACE_ORIGINS = MappingProxyType({
-    "foundups": frozenset({"https://foundups.com"}),
+    "foundups": frozenset({"https://foundups.com", "https://hpc.foundups.com"}),
     "esingularity": frozenset({"https://esingularity.ai"}),
     "autopost": frozenset({"https://autopost.foundups.com"}),
+})
+SURFACE_REFERERS = MappingProxyType({
+    "foundups": "https://foundups.com",
+    "esingularity": "https://esingularity.ai",
+    "autopost": "https://autopost.foundups.com",
 })
 CONSENT_VERSION = "reddog.public-guest.v1"
 LICK_CONSENT_VERSION = "reddog.lick.open.v1"
 HEX64 = re.compile(r"[0-9a-f]{64}\Z")
+FOUNDUP_ID = re.compile(r"[a-z0-9][a-z0-9_-]{0,79}\Z")
 
 
 class PublicAdmissionError(ValueError):
@@ -152,14 +158,19 @@ def lick_receipt(*, encounter: str, profile_id: str, claim: str,
     }
 
 
-def turn_request(body: dict, policy: PublicPolicy) -> tuple[str, int, str]:
-    if type(body) is not dict or set(body) != {"nonce", "revision", "message"}:
+def turn_request(body: dict, policy: PublicPolicy) -> tuple[str, int, str, str | None]:
+    required = {"nonce", "revision", "message"}
+    if type(body) is not dict or not required <= set(body) <= required | {"foundup_id"}:
         raise PublicAdmissionError("public_turn_shape_invalid")
     revision = body["revision"]
     if type(revision) is not int or not 0 <= revision <= policy.session_turns:
         raise PublicAdmissionError("public_revision_invalid")
+    foundup_id = body.get("foundup_id")
+    if foundup_id is not None and (
+            type(foundup_id) is not str or FOUNDUP_ID.fullmatch(foundup_id) is None):
+        raise PublicAdmissionError("public_foundup_id_invalid")
     return (checked_hex(body["nonce"], "nonce"), revision,
-            checked_text(body["message"], policy.input_chars))
+            checked_text(body["message"], policy.input_chars), foundup_id)
 
 
 def lick_verification_evidence(encounter: str, claim: str, expires: int) -> dict:

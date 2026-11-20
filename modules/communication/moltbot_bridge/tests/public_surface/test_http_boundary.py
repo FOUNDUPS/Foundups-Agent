@@ -15,6 +15,7 @@ NOW = 1800000000
 ORIGIN = "https://foundups.com"
 BASE = "/api/reddog/public/foundups/"
 HOST_OWNER = "f" * 64
+ADMITTED_MODEL = "google/gemma-4-26b-a4b-it:free"
 CONSENT = {"consent": True, "consent_version": p.CONSENT_VERSION, "actor_claim": "human"}
 
 
@@ -108,6 +109,22 @@ def test_preflight_is_narrow(api_module, store):
             assert "access-control-allow-credentials" not in response.headers
             assert (await c.options(BASE+"private")).status_code == 404
             assert (await c.post(BASE+"private")).status_code == 404
+    asyncio.run(run())
+
+
+def test_exact_hpc_origin_is_allowed_but_session_cannot_cross_origins(api_module, store):
+    async def run():
+        app, _, seen = host(api_module, store)
+        async with client(app) as c:
+            hpc = {"Origin": "https://hpc.foundups.com"}
+            preflight = await c.options(BASE+"turn", headers=hpc)
+            assert preflight.status_code == 200
+            assert preflight.headers["access-control-allow-origin"] == hpc["Origin"]
+            session = (await c.post(BASE+"encounter", headers=hpc, json=CONSENT)).json()
+            crossed = await c.post(BASE+"turn", headers=auth(session), json=payload(session))
+            assert crossed.status_code == 403 and not seen
+            accepted = await c.post(BASE+"turn", headers=hpc | auth(session), json=payload(session))
+            assert accepted.status_code == 200 and len(seen) == 1
     asyncio.run(run())
 
 
@@ -298,8 +315,202 @@ def test_http_status_uses_actual_database_manager(api_module, database_store):
     asyncio.run(run())
 
 
-def test_public_runtime_stays_within_wsp62_bounds(api_module):
-    for module in [p, s, api_module]:
+def _provider_turn(message="What is HPC?", foundup_id=None):
+    return s.PublicTurn(message, "foundups", "r"*64, 1, "n"*64, 9, 128, NOW+15,
+                        foundup_id=foundup_id)
+
+
+def _provider_response(content="HPC is a public catalog entry.", **extra):
+    message = {"content": content, "role": "assistant"} | extra.pop("message", {})
+    return {"model": ADMITTED_MODEL, "choices": [{"message": message}]} | extra
+
+
+def _provider(openrouter_module, handler, clock=lambda: NOW):
+    transport = httpx.MockTransport(handler)
+    client = httpx.AsyncClient(transport=transport)
+    root = Path(__file__).resolve().parents[5]
+    config = openrouter_module.PublicOpenRouterConfig("server-secret", ADMITTED_MODEL)
+    grounder = openrouter_module.PublicCatalogGrounder.from_repo(root)
+    return openrouter_module.PublicOpenRouterResponder(config, client, grounder, clock), client
+
+
+def test_openrouter_uses_host_model_caps_and_public_hpc_catalog(openrouter_module):
+    async def run():
+        seen = {}
+        def handler(request):
+            seen["headers"] = request.headers
+            seen["body"] = json.loads(request.content)
+            return httpx.Response(200, json=_provider_response())
+        responder, upstream = _provider(openrouter_module, handler)
+        try:
+            assert await responder(_provider_turn()) == "HPC is a public catalog entry."
+        finally:
+            await upstream.aclose()
+        body = seen["body"]
+        assert body["model"] == ADMITTED_MODEL and body["max_tokens"] == 128
+        assert body["provider"] == {"require_parameters": True, "data_collection": "deny", "allow_fallbacks": False}
+        assert "tools" not in body and "Hasan Piker Coalition" in body["messages"][1]["content"]
+        assert "Do not volunteer follow-up" in body["messages"][0]["content"]
+        assert seen["headers"]["authorization"] == "Bearer server-secret"
+        assert seen["headers"]["http-referer"] == ORIGIN
+    asyncio.run(run())
+
+
+def test_openrouter_exact_foundup_scope_handles_generic_question_only(openrouter_module):
+    async def run():
+        seen = {}
+        def handler(request):
+            seen.update(json.loads(request.content))
+            return httpx.Response(200, json=_provider_response())
+        responder, upstream = _provider(openrouter_module, handler)
+        try:
+            await responder(_provider_turn("What is this?", "hpc"))
+        finally:
+            await upstream.aclose()
+        context = seen["messages"][1]["content"]
+        assert "Hasan Piker Coalition" in context
+        assert "HoloIndex" not in context and "eSingularity" not in context
+    asyncio.run(run())
+
+
+def test_openrouter_unknown_foundup_scope_never_falls_back_to_other_entities(openrouter_module):
+    async def run():
+        seen = {}
+        def handler(request):
+            seen.update(json.loads(request.content))
+            return httpx.Response(200, json=_provider_response("Unknown."))
+        responder, upstream = _provider(openrouter_module, handler)
+        try:
+            await responder(_provider_turn("Tell me about HPC", "private_foundup"))
+        finally:
+            await upstream.aclose()
+        context = seen["messages"][1]["content"]
+        assert "UNKNOWN:" in context
+        assert "Hasan Piker Coalition" not in context and "HoloIndex" not in context
+    asyncio.run(run())
+
+
+def test_openrouter_config_repr_and_payload_never_expose_key(openrouter_module):
+    config = openrouter_module.PublicOpenRouterConfig("never-print-this", ADMITTED_MODEL)
+    assert "never-print-this" not in repr(config)
+    with pytest.raises(p.PublicAdmissionError) as caught:
+        openrouter_module.PublicOpenRouterConfig("", ADMITTED_MODEL)
+    assert "never-print-this" not in str(caught.value)
+
+
+@pytest.mark.parametrize("model", ["arbitrary/model", "openrouter/auto", "openrouter/fusion",
+                                   "nvidia/nemotron-3.5-lightning"])
+def test_openrouter_rejects_unreviewed_or_aggregate_model_routes(openrouter_module, model):
+    with pytest.raises(p.PublicAdmissionError, match="public_provider_model_denied"):
+        openrouter_module.PublicOpenRouterConfig("server-secret", model)
+
+
+def test_openrouter_accepts_exact_public_glm_evaluation_candidate(openrouter_module):
+    config = openrouter_module.PublicOpenRouterConfig("server-secret", "z-ai/glm-5.2")
+    assert config.model == "z-ai/glm-5.2"
+
+
+@pytest.mark.parametrize("mode", ["redirect", "tool", "model", "oversize"])
+def test_openrouter_denies_redirect_tools_model_substitution_and_large_body(openrouter_module, mode):
+    async def run():
+        def handler(_request):
+            if mode == "redirect":
+                return httpx.Response(307, headers={"Location": "https://evil.example"})
+            if mode == "tool":
+                return httpx.Response(200, json=_provider_response(message={"tool_calls": [{"id": "x"}]}))
+            if mode == "model":
+                return httpx.Response(200, json=_provider_response(model="fallback/model"))
+            return httpx.Response(200, content=b"x"*(openrouter_module.MAX_PROVIDER_BYTES+1))
+        responder, upstream = _provider(openrouter_module, handler)
+        try:
+            with pytest.raises(p.PublicAdmissionError, match="public_provider_failed"):
+                await responder(_provider_turn())
+        finally:
+            await upstream.aclose()
+    asyncio.run(run())
+
+
+def test_openrouter_cancellation_reaches_upstream(openrouter_module):
+    async def run():
+        started, cancelled = asyncio.Event(), asyncio.Event()
+        async def handler(_request):
+            started.set()
+            try:
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                cancelled.set()
+                raise
+        responder, upstream = _provider(openrouter_module, handler)
+        task = asyncio.create_task(responder(_provider_turn()))
+        await started.wait()
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+        assert cancelled.is_set()
+        await upstream.aclose()
+    asyncio.run(run())
+
+
+def test_openrouter_deadline_cancels_upstream_with_fixed_error(openrouter_module):
+    async def run():
+        cancelled = asyncio.Event()
+        async def handler(_request):
+            try:
+                await asyncio.Event().wait()
+            except asyncio.CancelledError:
+                cancelled.set()
+                raise
+        responder, upstream = _provider(openrouter_module, handler, lambda: NOW+14.99)
+        try:
+            with pytest.raises(p.PublicAdmissionError, match="public_provider_timeout") as caught:
+                await responder(_provider_turn())
+            assert caught.value.status == 504 and cancelled.is_set()
+        finally:
+            await upstream.aclose()
+    asyncio.run(run())
+
+
+def test_openrouter_failure_drops_sensitive_transport_exception_chain(openrouter_module):
+    async def run():
+        def handler(request):
+            raise httpx.ConnectError("server-secret https://private.invalid", request=request)
+        responder, upstream = _provider(openrouter_module, handler)
+        try:
+            with pytest.raises(p.PublicAdmissionError) as caught:
+                await responder(_provider_turn())
+            error = caught.value
+            assert error.__cause__ is None and error.__context__ is None
+            assert "server-secret" not in repr(error) and "private.invalid" not in repr(error)
+        finally:
+            await upstream.aclose()
+    asyncio.run(run())
+
+
+def test_openrouter_responder_runs_through_public_surface_binding(api_module, openrouter_module, store):
+    async def run():
+        seen = {}
+        def handler(request):
+            seen["referer"] = request.headers["http-referer"]
+            return httpx.Response(200, json=_provider_response("Bounded public reply."))
+        responder, upstream = _provider(openrouter_module, handler)
+        app, _, _ = host(api_module, store, responder)
+        try:
+            async with client(app) as c:
+                hpc = {"Origin": "https://hpc.foundups.com"}
+                session = (await c.post(BASE+"encounter", headers=hpc, json=CONSENT)).json()
+                body = payload(session, "What is this?") | {"foundup_id": "hpc"}
+                result = await c.post(BASE+"turn", headers=hpc | auth(session), json=body)
+            assert result.status_code == 200
+            assert result.json()["reply"] == "Bounded public reply."
+            assert result.json()["effect_ceiling"] == "NONE"
+            assert seen["referer"] == "https://foundups.com"
+        finally:
+            await upstream.aclose()
+    asyncio.run(run())
+
+
+def test_public_runtime_stays_within_wsp62_bounds(api_module, openrouter_module):
+    for module in [p, s, api_module, openrouter_module]:
         source = Path(module.__file__).read_text(encoding="utf-8")
         assert len(source.splitlines()) < 400
         for node in ast.walk(ast.parse(source)):

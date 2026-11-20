@@ -401,7 +401,11 @@
 
   function createPhoneDock(actions, scope, disclosure) {
     const field = window.mallTileField;
-    const dock = createMemberDock('Search videos', search, null, scopedRedDogPath(scope));
+    const conversationAvailable = window.redDog?.hasConversationEndpoint?.() === true;
+    const dock = createMemberDock('Search videos', search, conversationAvailable ? () => {
+        window.mallStateRestore?.save();
+        window.redDog.openConversation();
+      } : null, conversationAvailable ? null : scopedRedDogPath(scope));
     const { element, dialog, input } = dock;
     element.id = 'videoScopePhoneDock';
     element.hidden = true;

@@ -1,3 +1,32 @@
+## RedDog guest conversation in the HPC Mall — 2026-11-20
+
+012 requested an OpenRouter-backed RedDog, quiet voice intake, and a public
+guest-to-account path tested with HPC. The existing named Work handoff is
+[PR #2429](https://github.com/FOUNDUPS/Foundups-Agent/pull/2429).
+The product owner is the [member digital twin contract](../../public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md#hpc-prototype-and-hosting-evidence-2026-11-20).
+
+RECONCILE on main `06d0d8133`. The July 0.4.42 trace records a superseded
+Codex route. Current VSIX source is 0.4.141. Its advisory provider, resident
+read-only audit jobs and signed worker publication have distinct completion
+receipts. A signed queue entry alone does not show code changes or a passing
+test. Guest turns use the Python public boundary and the public catalog.
+The existing member account flow retains admission. Durable personal memory
+and code execution require authenticated principal-scoped contracts.
+
+[PR #1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) supplies
+prior client and provider work. Keep its D1, private Moshpit and other website
+changes in their existing lane. [PR #2431](https://github.com/FOUNDUPS/Foundups-Agent/pull/2431)
+owns voice arbitration design. The Fractal Mall projection and benchmark
+remain with their separate local owner, pending independent adjudication.
+The public and architect projections must remain distinct across the chat boundary.
+
+WSP 00 native bootstrap and strict tracker passed in the isolated worktree.
+Semantic Holo retrieval reported an index gap. The lexical fallback bound
+the module bundle to the workspace head with UNKNOWN freshness. Direct
+inspection supplied the missing November PR state, live landing-page route
+and host/client contracts. The earlier graph audit and July trace are
+historical evidence, not runtime verification for this release.
+
 ## PR #2427 fractal documentation reconciliation — 2026-11-19
 
 Owner: 0102 documentation lane; principal 012; origin external_principal.

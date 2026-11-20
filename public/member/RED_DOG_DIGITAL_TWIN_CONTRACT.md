@@ -61,6 +61,47 @@ automatic synchronization between separate chats, or authority to dispatch
 OpenClaw/Hermes/WRE. The [dated audit](../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
 separates copied PC reports from independently observed behavior.
 
+### HPC prototype and hosting evidence (2026-11-20)
+
+HPC is the first Mall context for this prototype. A visitor should be able to
+ask about the selected FoundUp, see the guest limit and find the existing
+account entry. Membership can unlock member presentation after verification.
+The member account, any future paid compute allowance, and a signed work order
+are three separate decisions. Buying more turns cannot authorize an edit.
+
+The FoundUps.com landing page served a chat widget targeting
+`https://chat-3wqfxfmvuq-uc.a.run.app` on November 20. Its source sends
+`message` and a browser-generated `sessionId`. Firebase Hosting serves the
+`foundupscom` site. There is no RedDog API rewrite in the tracked
+[hosting configuration](../../firebase.json). The public page establishes the
+client destination only. The service revision and provider require a
+deployment-owner readback.
+
+Build and test the new guest conversation through the existing
+[public admission suite](../../modules/communication/moltbot_bridge/tests/public_surface/README.md).
+For a cloud staging deployment, use a separately addressable service in the
+existing Firebase/Cloud Run environment. Route only the guest API through a
+[Hosting rewrite](https://firebase.google.com/docs/hosting/cloud-run) after
+the deployment owner verifies its revision, server-held OpenRouter configuration,
+trusted ingress, and shared budget store. Cloud Run's writable container
+filesystem is ephemeral. A SQLite file on each instance would reset allowances
+on restart and multiply them across replicas. The existing AgentDB gate needs
+durable, transactional accounting and verified host fencing before that cutover.
+See the [public host contract](../../extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md)
+and the [Cloud Run runtime contract](https://docs.cloud.google.com/run/docs/container-contract#filesystem).
+
+Only public catalog information for the selected tile can enter guest context.
+The graph owner controls publication of the public projection. Architect tiles,
+private socket metadata, principal Memex records and unpublished local graphs
+are outside the guest scope. The [navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+owns graph identity and caller restoration.
+
+Listening should be quiet by default. Spoken acknowledgments require an explicit
+presentation preference. Silence while someone speaks, microphone capture,
+search dictation and delivery of a substantive reply are independent. A listening
+indicator requires an actual input event. Ending voice leaves the written work
+thread available wherever a verified conversation binding exists.
+
 ## 3. Target hybrid topology
 
 ```text

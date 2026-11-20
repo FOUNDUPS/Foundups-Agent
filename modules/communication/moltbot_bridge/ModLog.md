@@ -1,3 +1,11 @@
+## 2026-11-20 — HPC public OpenRouter responder
+
+The [public admission owner](../../../extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md#hpc-guest-prototype-2026-11-20)
+now accepts a host-configured public catalog responder and optional public
+FoundUp ID. The guest API retains its lease, consent, deadline, replay and
+quota checks. The in-process HPC smoke completed one OpenRouter GLM-5.2 turn
+and withdrew its guest session. See the same contract for cloud staging gates.
+
 ## 2026-11-20 - Event-first bounded work checkpoints
 
 - EXTEND the existing Operations Skillz, with a LinkedIn continuity pointer;

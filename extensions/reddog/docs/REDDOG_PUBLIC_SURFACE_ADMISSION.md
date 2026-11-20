@@ -28,6 +28,39 @@ and public-only responder pass deployment review.
 
 ## Implemented ownership
 
+### HPC guest prototype (2026-11-20)
+
+The [HPC member-shell contract](../../../public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md#hpc-prototype-and-hosting-evidence-2026-11-20)
+identifies the existing landing chat, Firebase Hosting site and cloud staging
+target. The public guest adapter accepts the exact HPC and FoundUps origins.
+The server keeps their session/origin bindings distinct and uses the canonical
+FoundUps referrer for its upstream request.
+
+For integration tests, supply the existing `PublicSurfaceBinding` with a
+lease-backed gate and `PublicOpenRouterResponder` from
+[`reddog_public_openrouter.py`](../../../modules/communication/moltbot_bridge/src/reddog_public_openrouter.py).
+The host supplies the credential, an exact eligible model from the AI Gateway
+registry, an asynchronous HTTP client it owns and closes, and
+`PublicCatalogGrounder.from_repo(checkout)`. A turn may include a public
+`foundup_id`. With a selected ID, grounding is limited to that entry in
+`public/f/public_catalog.json`; a missing entry yields unknown context.
+Free-form questions without a selection retain public catalog search.
+
+The deployment can opt in its served member HTML with
+`<meta name="reddog-public-api-root" content="/api/reddog/public">` once it
+routes that same-origin path to the reviewed service. The tracked HTML omits
+this setting. A guest explicitly starts the session before a provider request.
+Closing voice, consenting to guest text, and signing in are distinct actions.
+Account sign-in uses the existing account gateway. It does not raise the guest
+quota or change the effect ceiling.
+
+One November 20 evaluation sent a public HPC question through local ASGI
+admission and OpenRouter to `z-ai/glm-5.2`. It returned the HPC display name,
+consumed one turn and accepted withdrawal. No graph or private work context
+entered the evaluation. The public cloud service revision, edge identity,
+durable cross-instance accounting and private resident execution still require
+their own deployment evidence.
+
 | Source | Responsibility |
 |---|---|
 | `modules/communication/moltbot_bridge/src/reddog_public_policy.py` | Exact public origins, strict inputs, bounded Lick consent/challenge/receipt schemas, unsigned Verification evidence |
@@ -54,7 +87,7 @@ it exactly once before a Lick-bound session may submit a turn.
 
 | Surface | Exact allowed browser origin |
 |---|---|
-| `foundups` | `https://foundups.com` |
+| `foundups` | `https://foundups.com`, `https://hpc.foundups.com` |
 | `esingularity` | `https://esingularity.ai` |
 | `autopost` | `https://autopost.foundups.com` |
 

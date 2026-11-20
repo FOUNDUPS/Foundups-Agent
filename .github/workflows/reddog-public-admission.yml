@@ -7,6 +7,9 @@ on:
       - 'requirements-trust-bootstrap.txt'
       - 'modules/communication/moltbot_bridge/src/reddog_public_*.py'
       - 'modules/communication/moltbot_bridge/tests/public_surface/**'
+      - 'public/js/reddog-public-client.js'
+      - 'public/member/js/account-concierge.js'
+      - 'modules/foundups/pfmall/tests/reddog_public_guest_client.mjs'
       - '.github/workflows/reddog-public-admission.yml'
   push:
     branches: [main]
@@ -14,6 +17,9 @@ on:
       - 'requirements-trust-bootstrap.txt'
       - 'modules/communication/moltbot_bridge/src/reddog_public_*.py'
       - 'modules/communication/moltbot_bridge/tests/public_surface/**'
+      - 'public/js/reddog-public-client.js'
+      - 'public/member/js/account-concierge.js'
+      - 'modules/foundups/pfmall/tests/reddog_public_guest_client.mjs'
       - '.github/workflows/reddog-public-admission.yml'
 
 permissions:
@@ -38,3 +44,5 @@ jobs:
         run: |
           python -m coverage run --rcfile=modules/communication/moltbot_bridge/tests/public_surface/.coveragerc -m pytest -q --confcutdir=modules/communication/moltbot_bridge/tests/public_surface modules/communication/moltbot_bridge/tests/public_surface
           python -m coverage report --rcfile=modules/communication/moltbot_bridge/tests/public_surface/.coveragerc
+      - name: Verify public guest browser protocol
+        run: node modules/foundups/pfmall/tests/reddog_public_guest_client.mjs
