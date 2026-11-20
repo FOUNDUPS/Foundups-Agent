@@ -19,8 +19,12 @@ jobs:
 
   browser-policy:
     needs: security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
+    container:
+      # Official v1.62.0-noble image; browsers and system libraries are prebuilt.
+      image: mcr.microsoft.com/playwright/python:v1.62.0-noble@sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d
+      options: --init --shm-size=1g
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       PYTHONUNBUFFERED: '1'
@@ -55,6 +59,7 @@ jobs:
               'run_id': os.environ['GITHUB_RUN_ID'],
               'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
               'playwright_version': '1.62.0',
+              'browser_image_digest': 'sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d',
               'source_sha256': {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in files},
               'scope': 'Real shell and CSS; mocked provider and network routes in Chromium and WebKit.',
               'real_youtube': 'UNEXECUTED', 'physical_iphone': 'UNEXECUTED', 'deployment': 'NONE',
@@ -63,12 +68,11 @@ jobs:
           PY
       - name: Bootstrap checksum-verified Python trust
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
-      - name: Install pinned browser test runtime
+      - name: Install matching Python browser package
         timeout-minutes: 5
         run: |
           python -m pip --isolated install --only-binary=:all: playwright==1.62.0
           python -m pip freeze > "$HPC_EVIDENCE_DIR/dependencies.txt"
-          python -m playwright install --with-deps chromium webkit
       - name: Qualify player policy and delayed queue callbacks
         timeout-minutes: 8
         shell: bash
