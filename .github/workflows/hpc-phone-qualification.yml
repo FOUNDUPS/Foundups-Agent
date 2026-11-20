@@ -39,7 +39,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          # Trust only this job's checked-out workspace, for this command.
+          test "$(git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD)" = "$GITHUB_SHA"
           export HPC_EVIDENCE_DIR="$RUNNER_TEMP/hpc-phone-qualification"
           printf 'HPC_EVIDENCE_DIR=%s\n' "$HPC_EVIDENCE_DIR" >> "$GITHUB_ENV"
           mkdir -p "$HPC_EVIDENCE_DIR"
@@ -55,7 +56,7 @@ jobs:
           ]
           receipt = {
               'source_sha': os.environ['GITHUB_SHA'],
-              'source_tree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'source_tree': subprocess.check_output(['git', '-c', 'safe.directory=' + os.environ['GITHUB_WORKSPACE'], 'rev-parse', 'HEAD^{tree}'], text=True).strip(),
               'run_id': os.environ['GITHUB_RUN_ID'],
               'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
               'playwright_version': '1.62.0',
