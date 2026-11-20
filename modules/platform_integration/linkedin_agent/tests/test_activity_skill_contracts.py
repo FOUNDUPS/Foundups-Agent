@@ -1,5 +1,7 @@
 """Offline documentation-contract checks; never import live LinkedIn executors."""
 
+import ast
+import json
 from pathlib import Path
 import re
 import unittest
@@ -38,6 +40,7 @@ class ActivitySkillContracts(unittest.TestCase):
         paths = [MODULE / "docs/LINKEDIN_ACTIVITY_ROUTING.md",
                  MODULE / "docs/LINKEDIN_REVIEW_WORKFLOW.md"]
         paths += list((MODULE / "skillz/linkedin_newsletters/references").glob("*.md"))
+        paths += [MODULE / "skillz/linkedin_newsletters/assets/issue-brief.md"]
         paths += [MODULE / "docs/audits/LINKEDIN_EDITORIAL_TREE_20260922.md"]
         paths += [MODULE / f"skillz/{name}/SKILLz.md"
                   for name in (*CHILDREN, "linkedin_engagement")]
@@ -130,6 +133,65 @@ class ActivitySkillContracts(unittest.TestCase):
                      "clean local tree", "no-change", "never"):
             # Instructions use imperative capitalization in some clauses.
             self.assertIn(term.lower(), text.lower())
+
+    def test_scheduled_release_contract_reaches_existing_routes(self):
+        publishing = self.text("skillz/linkedin_publishing/SKILLz.md")
+        for term in (
+            "scheduled ahead", "Never advise pressing **Publish now**",
+            "lacks supported scheduling", "one actual publisher",
+            "SCHEDULED_VERIFIED", "VERIFIED_LIVE", "queue URL/reference",
+            "separate actual live permalink", "SUBMITTED_UNVERIFIED",
+        ):
+            self.assertIn(term, publishing)
+        for relative in (
+            "docs/LINKEDIN_ACTIVITY_ROUTING.md",
+            "skillz/linkedin_article_targeting/SKILLz.md",
+            "skillz/linkedin_newsletters/SKILLz.md",
+            "skillz/openclaw_group_news/SKILLz.md",
+            "skillz/linkedin_newsletters/references/editorial-workflow.md",
+            "skillz/linkedin_newsletters/references/research-verification.md",
+        ):
+            with self.subTest(route=relative):
+                self.assertIn("scheduled-release-review-and-ownership", self.text(relative))
+        group = self.text("skillz/openclaw_group_news/SKILLz.md")
+        self.assertIn("without immediate posting", group)
+        self.assertIn("restricted", group)
+        mapping = json.loads(self.text("data/linkedin_publishing_map.json"))
+        self.assertIn("scheduled ahead", mapping["scope_note"])
+        self.assertIn("discovery", mapping["scope_note"])
+
+    def test_exact_review_assets_and_cross_series_release_evidence(self):
+        publishing = self.text("skillz/linkedin_publishing/SKILLz.md")
+        for term in (
+            "two reviewers", "same visible exact copy", "mobile-readable",
+            "per-asset provenance", "archived and generated", "confirmation",
+            "Reuse the recorded owner's confirmation", "unrelated works",
+            "all three illustrations", "explicitly authorized",
+            "decision owner's durable record", "Page in Dot", "ask once",
+            "superseding instruction", "self-approve", "cross-series Mosh Pit",
+            "Drafting / Under review / Scheduled / Published", "dates in JST",
+            "keep their own research histories", "rewrite historic Mosh Pits",
+            "Private calendar review", "Editorial sign-off", "Proposed slot",
+        ):
+            with self.subTest(term=term):
+                self.assertIn(term, publishing)
+        brief = self.text("skillz/linkedin_newsletters/assets/issue-brief.md")
+        for term in ("two reviewers", "release decision owner", "confirmation",
+                     "confirmed queue timestamp", "Live permalink"):
+            self.assertIn(term, brief)
+
+    def test_company_preparation_never_instructs_immediate_release(self):
+        owner = ROOT / "modules/ai_intelligence/ai_overseer/skillz/linkedin_company_poster"
+        skill = (owner / "SKILLz.md").read_text(encoding="utf-8")
+        self.assertIn("scheduled-release-review-and-ownership", skill)
+        self.assertIn("excluded here", skill)
+        # Parse only: importing this legacy helper would reach browser dependencies.
+        tree = ast.parse((owner / "executor.py").read_text(encoding="utf-8"))
+        messages = "\n".join(node.value for node in ast.walk(tree)
+                             if isinstance(node, ast.Constant) and isinstance(node.value, str))
+        self.assertNotIn("Review and click Publish", messages)
+        self.assertNotIn("review and publish", messages)
+        self.assertIn("schedule through linkedin_publishing; not scheduled or live", messages)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,38 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Residual PR #1762 qualification — 2026-11-19
+
+Reconciled the original lint-tooling proposal onto main `908b47b369bb`:
+`eslint-config-next` and `@next/eslint-plugin-next` now resolve to 16.3.4,
+and fastq to 1.20.3. Next 16.4.6, sharp 0.35.5, js-yaml 4.3.2 and all
+unrelated lockfile entries are preserved. The home header uses `next/link`
+to resolve the previously recorded lint error without changing authentication.
+
+On Node 24.22.1, strict `npm ci --ignore-scripts --strict-peer-deps
+--include=dev --include=optional --no-audit --no-fund`, dependency constraint
+checks, TypeScript and lint pass. Lint retains one unused StatCard warning.
+A separate npm audit reports zero vulnerabilities for this lockfile as of this
+observation; that is not a general security or deployed-runtime certification.
+
+The initial build without Clerk configuration compiled and typechecked but
+failed prerendering `/` with `Missing publishableKey`. A subsequent build passed
+using only the existing application's configured public publishable key in the
+otherwise sanitized child environment. No private dotenv file or secret key was
+copied into the qualification directory; keyless provisioning stayed disabled.
+No placeholder key, authentication bypass or lint-rule exception was introduced.
+This is successful source/build qualification, not a verified live Clerk session
+or deployment. The earlier failed build and October observations remain dated
+history. Draft/merge hold, independent final review, the recorded signed-head
+requirement, hosted checks, deployment and alert closure remain separate gates.
+
+Hosted verification on predecessor `c54a425ded480c242363bdd9f93f6524d811805a`
+completed successfully: [repository CI 44549031280](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44549031280)
+and [eSingularity validation 44549031511](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44549031511),
+with all five required contexts and 27 successful checks. GitGuardian returned
+a neutral size-limit result, which remains a scan-coverage gap. These are
+predecessor-head receipts; any new head requires its own hosted verification.
+The draft and independent acceptance hold remain in place.
+
 ## Dependency qualification — 2026-10-23
 
 PR #1457 reconciles the original proposal with Next 16.4.1 and preserves its

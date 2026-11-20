@@ -17,6 +17,18 @@ Provide one current index for:
 This document is the current FoundUps domain navigation layer.
 It does not replace core WSP documents.
 
+### Fractal system documentation — reconciled 2026-11-19
+
+Read the [plain-language description](../../../docs/foundups_vision.md#how-the-fractal-system-works),
+[master identity/evidence contract](FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work),
+[navigation contract](PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+and [Mall roadmap](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation).
+The [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+attaches original Tertia provenance, current source boundaries and unresolved
+count/receipt evidence. It is a dated audit, not a replacement schema or owner.
+The census includes unfinished and unregistered candidates; registry admission,
+public visibility, functionality, integration and venture maturity remain separate.
+
 ---
 
 ## WSP Baseline
@@ -107,7 +119,7 @@ Use four statuses:
 
 - `modules/foundups/ROADMAP.md`
 - `modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md`
-  - **master document**: five-layer funnel (Discovery → Welcome → Community → Gate → Interior), entitlement tiers, repeating unit per FoundUp, document map
+  - **master document**: five-layer funnel (Discovery → Welcome → Community → Gate → Interior), entitlement tiers, repeating unit, fractal identity/relationships/evidence and document map
 - `modules/foundups/docs/FOUNDUPS_DISCORD_BLUEPRINT.md`
   - embedded server layout (14 channels), role hierarchy, permission matrix, automation, onboarding flow, per-FoundUp category pattern
 - `modules/foundups/docs/FOUNDUPS_ENTITLEMENT_TIERS.md`
@@ -117,7 +129,7 @@ Use four statuses:
 - `modules/foundups/docs/FOUNDUP_EXFOLIATION_PROTOCOL.md`
 - `modules/foundups/docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md`
 - `modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md`
-  - runtime contract for Mall gesture grammar, field scope APIs
+  - runtime contract for Mall gesture grammar and field scope APIs; section 13 is the specified fractal drill-down/return contract, not a runtime completion claim
 - `modules/foundups/docs/PFMALL_VIDEO_MALL_RUNTIME_FOUNDATION_2026-04-02.md`
   - runtime foundation (phase 1 landed 2026-04-03)
 - `modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md`

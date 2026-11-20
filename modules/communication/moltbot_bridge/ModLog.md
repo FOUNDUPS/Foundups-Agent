@@ -1,3 +1,23 @@
+## 2026-11-20 - Event-first bounded work checkpoints
+
+- EXTEND the existing Operations Skillz, with a LinkedIn continuity pointer;
+  no duplicate coordinator skill, timer, scheduler or work ledger. Owner/CI events
+  precede the existing 15-minute fallback during active multi-lane work.
+- One existing-record entry binds owner, exact revision, evidence-or-none,
+  unchanged count and next trigger. Third unchanged due check requires one bounded
+  authorized action or parking with blocker/owner/exact restart event; no fourth
+  poll, echo reset, self-approval or automatic merge/release. Retain current holds
+  and requalify changed heads; ask a missing named-owner decision once.
+- Existing content-digest receipt binding rejects older instruction bytes; its
+  version/registry/runtime API remain unchanged. Three prompt-binding cases extend
+  existing tests; combined operations/control/targeting run passes 49. Independent
+  guidance exercises pass unchanged wakes, changed head and retained hold.
+- Base `908b47b369bb5c1f20478a751875617a51585108`; 2026-11-20 JST lexical
+  retrieval is local workspace context with UNKNOWN freshness/index gap true.
+  Reused canonical owner after bounded repo/host searches; no semantic acceptance
+  or live automation verification. 012's existing PC automation/Drive log are
+  reported context, not newly observed runtime. WSP 10/15/22/50/71/91/95/97.
+
 ## 2026-11-18 - Audit existing work before work orders and builds
 
 - Decision: EXTEND the existing `foundups-wsp` entry and `reddog_operations`

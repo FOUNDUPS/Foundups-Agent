@@ -8,6 +8,41 @@
 
 # HPC ModLog
 
+## 2026-11-19 · iPhone 12 preview feedback and shared-shell follow-up
+
+012 supplied `IMG_0515.jpeg` after opening the preview. Record H1G and the
+shared p.fMALL roadmap: one-line FoundUPS header without visible Member Portal
+text; existing discovery/filter controls inside the bottom plus sheet; tiles
+and player fitted to the phone viewport; existing single bottom dock retained.
+AutoPost bottom-right icon and bottom search remain explicit deferred TODOs,
+with the icon's precise action unresolved. Preserve account access and capture
+owners rather than removing their functions.
+
+Evidence is the supplied physical-phone screenshot, current GitHub source and
+direct browser inspection of
+`https://foundupscom--play-v24-iphone-3rrzxm0r.web.app/member/`.
+The preview's plus dialog reports Build v24 and already includes the AutoPost
+camera/photos link. The screenshot itself has no visible build label; 012's
+v21 wording is retained as a separate observation. Remote native head
+`75c838b6eab19807487ee02c4b2f9367e580547e` remains v23, while main is
+`7432d31e5a68544d2bbab6715f02f64b0b5b6f85`. The served
+`playback-probe/deployment.json` reports that base plus overlay digest
+`92e1e9338a8256328520546c89cc816563aee25f81b88214ade2fd8c87b67946`,
+Build v24 and `hosting_version: unverified`. The served worker cache is
+`pfmall-member-v24`; this does not establish the phone's active worker.
+Delivered CSS confirms the mobile column header rule; delivered JS confirms
+the portal label, existing plus dialog and unchanged phone density. Preserve
+the native owner and full overlay; complete patch/hosting parity remains open
+before a runtime edit.
+
+Scope is three existing documentation files, not application code. WSP 15/22/50/97:
+connector/source retrieval, screenshot and live-menu observation, independent
+read-only source review, and documentation diff review. Native bootstrap,
+semantic HoloIndex, WRE admission, automated UI tests, physical-device retest,
+preview update and production deployment were not executed in this slice.
+Exact PR-head checks, squash, main readback and resulting-main checks are
+separate completion receipts. The actual responsive correction remains open.
+
 ## 2026-11-18 · One viewport-bottom floating search dock
 
 012 clarified that the search, plus, microphone and Red Dog belong together

@@ -19,6 +19,12 @@ approval scope, last verified action and pending owner. Revalidate live state;
 historical receipts do not prove present state. Resume an interrupted submission
 with read-back, not a repeated send. Mark unknown when evidence is insufficient.
 
+During active multi-lane work, reuse the existing
+[bounded work checkpoints](../../../../communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md#bounded-work-checkpoints).
+Owner/CI events precede the 15-minute fallback; three unchanged due checks require
+one bounded authorized action or parking with owner/blocker/exact restart event,
+not another unchanged poll. Keep the existing private work/release record.
+
 At close record coverage, each action and verification, holds, failures, drafts,
 all requested publication lanes, exact next action/owner and relevant triggers.
 Use the existing authorized private journal/Moshpit; if unavailable provide a

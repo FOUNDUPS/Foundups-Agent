@@ -100,6 +100,59 @@ or conflicting role receipt blocks the stage.
    generation before recording the outcome.
 10. Admit only independently verified outcomes to PatternMemory.
 
+## Bounded work checkpoints
+
+Use this check during active multi-lane work, resuming the existing work record
+and accountable coordinator. Owner, CI, review and delivery events are the first
+triggers; use the existing **15-minute fallback** only while that work is active.
+012 reports this PC already has the working automation and shared Drive log. Reuse them;
+do not install a timer, create another scheduler/log or claim runtime verification
+from this guidance. Other hosts must verify their own trigger/persistence access.
+
+For each due check, inspect the item's current owner, exact revision, new evidence
+or explicitly **none**, current holds and next useful action. Record once in the
+existing record: item/owner, observed time with timezone, exact revision, evidence
+reference or none, consecutive unchanged count and next trigger. Deduplicate the
+same wake/event; a duplicate wake is neither another count nor another log entry.
+No-change means no material revision, evidence, decision or blocker change since
+the prior due check. Rephrased status, an echo or a fresh timestamp is not progress
+and cannot reset the count. Only a material change resets it, with evidence.
+
+On the **third consecutive unchanged due check**, take one bounded authorized
+action that can advance the item, or park it with the concrete blocker, accountable
+owner and exact restart event. There is **no fourth unchanged poll**: remove the
+parked item from fallback checks until that event occurs. An action without a
+material result does not reset the count; park instead of repeatedly retrying it.
+Advance a different authorized lane when another teammate owns the check.
+
+For a missing decision, ask the authorized named decision owner **once** in the
+responsible session, with exact revision, evidence, existing hold and concrete
+decision requested. Reuse a recorded request/decision rather than asking again
+on each wake. If that session is inaccessible, record the access blocker and
+restart event; never self-approve or circulate the same wait between surfaces.
+Decision-owner delegation still follows the actual messaging authorization.
+
+For PRs, retrieve current head/base and required CI/reviews; qualify reviews
+against the **current head** and preserve all retained holds. A changed head
+invalidates stale acceptance and requires applicable requalification. A green
+check, due wake or third-cycle action is not automatic merge/release authority.
+Use WSP 97's protected completion gate and the existing exact-head guard.
+
+### Focused checkpoint exercise
+
+Evaluate these instruction scenarios against the existing record, without
+starting a timer, dispatching work, sending messages or changing a live hold:
+
+| Scenario | Required next step |
+| --- | --- |
+| Same item/head, no new evidence on due wakes 1, 2, 3; duplicate of wake 2 | Count 1, 2, 3 only; ignore duplicate; at 3 one bounded action or park with blocker/owner/exact event; no wake 4 poll |
+| Reviewed head A changes to B | Record B and the material change; qualify CI/reviews for B; retain existing holds |
+| Same head with retained decision hold | Reuse one evidence-bearing request to the named owner; park until that owner's applicable decision; time/green CI cannot clear the hold |
+
+These are guidance acceptance exercises, not proof of runtime timer, counter,
+deduplication, CI watcher or hold enforcement. Report the actual exercise result
+separately from installed automation and real-work outcomes.
+
 ## Pre-build audit and decision
 
 Apply WSP 3, WSP 50, WSP 84 and WSP 97 before work-order creation and again

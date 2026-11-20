@@ -3,6 +3,31 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Fractal projection sequence — 2026-11-19
+
+**Specified; no implementation in this documentation slice.** Follow the
+[Mall roadmap](../../modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation):
+census first, with up to three eligible independent auditor packets in parallel
+(discovery, dependency, duplicate review or integration). Immature and unwired
+candidates remain discoverable with explicit evidence gaps. Keep functionality,
+integration, venture maturity and WSP_15 work priority separate.
+
+Sprint 2 reuses the reported local graph/projector/viewer once its pinned
+artifacts are recovered, for a Tools → Benchmark walkthrough and a separately
+evidenced builder-to-component path. One component
+ID can appear under several views. Retain graph and source revisions, caller,
+lens and selection; qualify Back, direct entry, stale/restricted evidence and
+public/architect boundaries under the [navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation).
+Record rendering, observed tool execution and live playback separately. When a
+render needs an unapproved code change, retain the query/path and mark visual
+acceptance pending.
+
+Historical lifecycle and economic reconciliation remain separate owners in
+Sprint 3; evidence closure follows in Sprint 4. This documentation update
+reconciles the existing owners now. The [documentation audit](../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+records inspected main, reported local `121c50666` evidence and unresolved gaps.
+This plan creates no new graph engine, model route or co-build write authority.
+
 ## Build v19 Mall Truth & Continuity — 2026-11-16
 
 - Reconciled `mall-video-catalog.json` (16 entries) with `foundup_registry.json` and `foundup_manifest.json` contracts: added `esingularity_001`, aligned `holoindex_prod_01` (`F3_INFRA` / `conditional` / `infrastructure`), `gotjunk_001` (`012` creator + `external_url`), and `autopost` (`external_url`), and normalized video `duration_seconds` and `YYYY-MM-DDTHH:MM:SSZ` timestamps.

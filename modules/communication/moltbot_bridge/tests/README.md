@@ -1,5 +1,9 @@
 ## Operations pre-build prompt and receipt contract
 
+The same suite binds the three checkpoint guidance scenarios into the real
+loaded prompt: unchanged/duplicate wakes, changed head and retained hold. These
+instruction assertions do not implement or verify a timer/counter/CI watcher.
+
 `test_reddog_operations_skill.py` checks that the full canonical Skillz content
 reaches the bound prompt. Its changed-content case checks that
 a persisted previous receipt fails against the freshly loaded Skillz receipt;

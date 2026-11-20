@@ -1,3 +1,19 @@
+## 2026-11-19 — Reconcile Play FoundUps fractal documentation
+
+Recover the copied Tertia specification and distinguish it from Carbon's
+reported local graph at `121c50666`. Extend existing PR #2427 and its canonical
+vision, architecture, navigation, module/member contracts and roadmaps.
+The census now retains unfinished candidates and separates functionality from
+integration; bounded model/scaffold comparisons are planned alongside it through
+research adapters whose compatibility must first be verified. Stable identity, pinned source/graph revisions, caller Back,
+public/architect scope and independent reference review are explicit.
+
+Attach the [documentation audit](docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+through existing indexes and owner ModLogs. Preserve historical evidence and
+unresolved tile-count differences. This is documentation reconciliation, not
+execution of Carbon's census, a new graph engine, runtime activation or merge.
+WSP 10/15/22/50/71/80/83/84/97/99/108 apply; WSP 110 is draft guidance.
+
 ## 2026-11-14 — Reconcile the nested Claude instruction pointer
 
 Complete the bounded PR #729 instruction consolidation using the existing

@@ -1,8 +1,8 @@
 # p.fMALL Navigation Contract
 
-**Version**: 2.1.0
-**Date**: 2026-11-16
-**Status**: Runtime baseline with explicitly pending HPC acceptance changes
+**Version**: 2.2.0
+**Date**: 2026-11-19
+**Status**: Runtime baseline with explicitly pending HPC and fractal acceptance changes
 
 ---
 
@@ -14,7 +14,9 @@ This document defines the Mall as **fixed navigation infrastructure**.
 
 The Mall is not a SoftProto customization surface.
 
-The Mall is a discovery map. Users navigate it. They do not edit it.
+The Mall is a discovery map with fixed navigation grammar. Browsing does not
+edit that grammar. The separately authorized graph-content proposals in
+section 13 do not create a free-layout shell edit mode.
 
 SoftProto customization begins **inside FoundUp interiors**, not in the Mall shell.
 
@@ -403,3 +405,81 @@ All FoundUps reuse this grammar and the catalog search/presentation APIs. A futu
 housing projection may group by location through a separately declared adapter;
 this slice groups by catalog category only. No unseen listings, location hierarchy,
 personalized ranking or voice runtime is claimed.
+
+## 13. Fractal work navigation
+
+**TARGET / SPECIFIED, reconciled 2026-11-19.** This section defines acceptance
+for the shared graph. It does not turn existing category-row or video-lane
+handlers into an implemented general graph renderer. The
+[master architecture](FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+owns entity identity, relationships, evidence and the current implementation
+boundary.
+
+### 13.1 Selection and drill-down
+
+Tap, keyboard activation and a supported RedDog navigation request resolve
+the same permitted stable tile ID. A container reveals its children; an
+actionable leaf opens its real artifact or entrypoint. A declared gap opens
+its expected contract and evidence status, not a fabricated working tool.
+The field remains usable in 2D, with keyboard controls and reduced motion.
+The 3D view is an alternative projection; spatial animation is not evidence
+that a component or worker ran. Voice is optional navigation input and cannot
+be the only way to select, return or recover.
+
+Search, sorting and lens changes retain stable IDs. A shared component can
+appear in several views without copying it or changing its primary owner.
+Reuse existing search, state-restoration and media owners. A graph view must
+not silently replace the current catalog if its graph is unavailable or invalid.
+Qualify the existing fallback behavior when the graph client is recovered.
+
+### 13.2 Caller restoration
+
+Record the actual caller, lens, selected tile, query and recoverable viewport
+and media state when entering a child or following a related-component edge.
+From HPC, entering AutoPost and pressing Back restores HPC and its selection;
+AutoPost's primary containment parent does not replace the caller. Direct
+entry without session history uses visible containment ancestors.
+
+Revalidate access on restoration, direct entry, search and context projection.
+If a caller has become inaccessible, return to a permitted ancestor or overview
+without leaking its private title, path or receipt. Retain a safe return path
+when evidence is missing. Preserve playback state through its existing owner
+where supported; real provider playback and autoplay recovery require separate
+live acceptance from DOM or mocked-media tests.
+
+### 13.3 Work and revision binding
+
+A request binds the selected entity, graph/projection revision and, where
+relevant, the work reference and exact artifact revision or base-plus-overlay
+digest. Source revision is not interchangeable with graph revision. An
+unavailable pinned file must not silently open the current `main` file as
+though it were the same evidence.
+
+Selecting a builder with a fresh, permitted work-to-tile association opens the
+referenced component. “What is this builder changing?” uses that same binding.
+Multiple builders may work on one component, and one work item may span several
+components. A builder label or animation cannot supply a missing mapping.
+Simulated, stale, ambiguous, unmapped and restricted evidence retains its
+status in the permitted view.
+
+The first Tools path is
+`Tools → Benchmark → harness/evaluator → module or model/scaffold configuration → run receipt → pinned test/source → Back`.
+Follow only supported relationships with real IDs. Show a missing adapter,
+receipt or source binding as a gap. Rendering the path does not establish
+that its represented tool ran.
+
+### 13.4 Co-building and acceptance
+
+Selection, conversation and camera movement grant no mutation or execution
+authority. A separately approved graph-content change uses the existing
+authenticated server owner, an expected graph revision, validated containment
+and typed references, and an attributable receipt. A stale write is rejected
+rather than overwriting another worker. Adding a proposed tile or socket does
+not implement it or promote its evidence status.
+
+Keep public and architect projections separate through navigation, search,
+history and agent context. The [Mall roadmap](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation)
+owns the bounded acceptance sequence. The
+[documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+records the reported local navigation test and its unproven live-media,
+voice and Simulator boundaries.

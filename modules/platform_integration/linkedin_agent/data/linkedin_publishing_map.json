@@ -1,7 +1,7 @@
 {
   "version": "2026-03-19",
   "source": "012-provided LinkedIn publishing map captured in-session for 0102 discovery and routing",
-  "scope_note": "This map is for discovery, historical search, and target recommendation. It does not imply live posting support for every entity.",
+  "scope_note": "This map is for discovery, historical search, and target recommendation. It does not imply live posting support, current identity or release approval. Follow linkedin_publishing: public releases are scheduled ahead; verify destination support and the named owner's exact release decision.",
   "routing_note": "Routing tags are conservative heuristics derived from entity names and published article titles.",
   "epoch_model": {
     "0102": "eSingularity (Educational Singularity) — current epoch, consciousness state",

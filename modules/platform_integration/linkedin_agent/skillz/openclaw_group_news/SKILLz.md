@@ -55,7 +55,14 @@ Keep a Foundups/eSingularity CTA optional and directly relevant. Do not make joi
 
 Use `DRAFT -> REVIEW -> APPROVED -> POSTED -> MONITORED`. Show exact draft, destination, APS components, sources and uncertainties. A relevance score is not authority. A request for a skill, research or a topic does not approve publication.
 
-After exact approval: verify account/group, inspect live composer, preserve formatting, check resolved links/mentions and deduplicate again. Submit once. Verify the rendered post and capture its actual permalink. An empty editor or simulated success is not publication evidence.
+Follow the [scheduled release contract](../linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership).
+After the exact release decision: verify account/group and intended audience,
+inspect the preview, preserve formatting, check links/mentions and deduplicate.
+Schedule once only if the verified group supports the authorized future slot;
+reopen its queue and retain the timestamp/URL. Otherwise retain the draft and
+report the scheduling limitation, without immediate posting or moving restricted
+material to a public surface. Later verify the separate live permalink.
+An empty editor or simulated success is not publication evidence.
 
 ## Cadence and follow-up
 

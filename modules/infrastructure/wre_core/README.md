@@ -249,6 +249,28 @@ and `researcher.working_target_path` to locate artifacts. Repository-local outpu
 parents reject before directory creation. The [current isolation checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14)
 records overlapping-run and filename-collision coverage; it does not activate a worker.
 
+## Fractal audit and researcher boundaries
+
+For ecosystem inventory and model/scaffold comparisons, reuse the
+[Fractal census and bounded comparison contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19).
+WRE owns admission/dispatch; OpenClaw and Hermes are execution scaffolding,
+separate from the models they invoke. The ROC Auto Researcher above and
+[AI Gateway model AutoResearch](../../ai_intelligence/ai_gateway/README.md#model-combination-benchmark-harness)
+have different targets, evaluators and receipt contracts. Do not treat either
+as an alias for a separately named Open Researcher without a source/caller trace.
+
+The [scientific repair canary](src/scientific_repair_canary_orchestrator.py)
+is a composition scaffold with an embedded `openresearch:internal_docs` sample,
+not evidence of an external research service. Without injected builder, test
+and verifier callbacks, its later stages use a canned diff, passing test result
+and accepting verifier disposition. Its model-independence policy evaluates
+supplied identity strings, and `staged_branch_name` records a proposed name;
+these do not prove independent inference or branch creation. Its baseline
+reproducer can execute a command and the canary can write scratch/outcomes, so
+the fixture defaults do not make invocation read-only. Keep fixture/source
+evidence separate from observed runtime in the
+[documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md).
+
 ## RSI at main.py launch
 
 The [existing launch/evaluation sequence](ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15)
