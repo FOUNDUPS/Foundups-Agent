@@ -2,7 +2,7 @@
 
 **Version**: 1.2.0
 **Status**: Active identity and surface contract; authenticated PFMall transport is specified, not implemented
-**Last updated**: 2026-11-19 (fractal context cross-reference; transport status unchanged)
+**Last updated**: 2026-11-20 (bounded public guest prototype; authenticated transport status unchanged)
 
 **Vision:** `docs/REDDOG_OUTCOME_VISION.md` defines the Red Dog north-star outcome. This contract defines current identity, authority, surface, and implementation truth; where the two differ, the difference is roadmap work rather than license to overstate current capability.
 
@@ -44,7 +44,7 @@ recommendations.
 The following are **not currently implemented** in PFMall:
 
 - an authenticated RedDog conversation transport;
-- backend inference or durable conversation memory;
+- authenticated backend inference or durable conversation memory;
 - OpenClaw, WRE, or Hermes dispatch;
 - compute accounting, wallet authority, or capability tiers;
 - action authorization or execution.
@@ -74,8 +74,10 @@ The FoundUps.com landing page served a chat widget targeting
 `message` and a browser-generated `sessionId`. Firebase Hosting serves the
 `foundupscom` site. There is no RedDog API rewrite in the tracked
 [hosting configuration](../../firebase.json). The public page establishes the
-client destination only. The service revision and provider require a
-deployment-owner readback.
+client destination only. A read-only Firebase inventory on November 20 also
+confirmed an ACTIVE Functions v2 `chat` function (Node.js 20, us-central1)
+in project `gen-lang-client-0061781628`. This identifies an existing cloud
+host, not the model serving that widget or a deployment of the new guest gate.
 
 Build and test the new guest conversation through the existing
 [public admission suite](../../modules/communication/moltbot_bridge/tests/public_surface/README.md).

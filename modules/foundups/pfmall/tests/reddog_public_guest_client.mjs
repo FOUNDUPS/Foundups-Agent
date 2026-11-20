@@ -220,12 +220,19 @@ assert.equal(uiStart.disabled, false);
 await uiStart.dispatch('click');
 assert.deepEqual(uiCalls[0].body, encounterPayload());
 assert.equal(dialog.querySelector('.reddog-guest-form').hidden, false);
+const uiDraft = dialog.querySelector('.reddog-guest-form').children.find(el => el.tagName === 'TEXTAREA');
+uiDraft.value = 'Unsent local question';
 await dialog.querySelector('.reddog-guest-close').dispatch('click');
 assert.equal(dialog.open, false);
 assert.equal(uiDocument.activeElement, opener, 'modal close must return focus');
-uiAdapter.getAvailability({ foundupId: 'hpc', bindingRevision: 2 });
+uiAdapter.syncContext({ foundupId: 'hpc', bindingRevision: 2 });
 assert.equal(uiConsent.checked, false, 'principal/context rebind must clear consent');
+assert.equal(uiDraft.value, '', 'a new binding cannot recover a previous unsent question');
 assert.equal(dialog.querySelector('.reddog-guest-messages').children.length, 0);
+assert.equal(uiAdapter.open({ foundupId: 'hpc', access: 'unknown', bindingRevision: 3 }), false);
+assert.equal(uiAdapter.open({ selectionState: 'invalid', bindingRevision: 4 }), false);
+assert.equal(uiAdapter.open({ foundupId: 'private/path', bindingRevision: 5 }), false);
+assert.equal(uiCalls.length, 1, 'a blocked or changed binding must not start a session');
 
 for (const forbidden of [
   'localStorage', 'sessionStorage', 'document.cookie', 'SpeechRecognition',

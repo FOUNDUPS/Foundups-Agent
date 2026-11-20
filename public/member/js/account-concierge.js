@@ -489,8 +489,9 @@
   }
 
   function renderConversationSurface() {
-    if (!conversationEl) return;
     var context = getConversationContext();
+    conversationAdapter?.syncContext?.(context);
+    if (!conversationEl) return;
     var availability = getConversationAvailability(context);
     var contextEl = conversationEl.querySelector('[data-reddog-conversation-context]');
     var availabilityEl = conversationEl.querySelector('[data-reddog-conversation-availability]');

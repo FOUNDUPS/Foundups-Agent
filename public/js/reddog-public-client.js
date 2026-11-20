@@ -283,7 +283,9 @@ export function createMemberConversationAdapter(options = {}) {
     if (bindingKey && bindingKey !== nextKey) {
       client?.clearLocal();
       if (view) {
+        closeDialog();
         view.messages.replaceChildren();
+        view.input.value = '';
         view.consent.checked = false;
         view.form.hidden = true;
         view.status.textContent = 'Context changed. Start a new guest session after reviewing consent.';
@@ -295,6 +297,10 @@ export function createMemberConversationAdapter(options = {}) {
 
   const availability = (context) => {
     bindContext(context);
+    if (context?.access === 'unknown' || context?.selectionState === 'invalid'
+        || (context?.foundupId != null && !normalizePublicFoundupId(context.foundupId))) {
+      return { available: false, reason: 'Guest conversation is unavailable in this context.' };
+    }
     return root
       ? { available: true }
       : { available: false, reason: 'Public guest conversation is not configured on this deployment.' };
@@ -369,6 +375,7 @@ export function createMemberConversationAdapter(options = {}) {
     view.end.addEventListener('click', async () => {
       const pending = client.end();
       view.messages.replaceChildren();
+      view.input.value = '';
       render(); note('Guest session ended; local session state was cleared.');
       try { await pending; }
       catch { note('Local state was cleared; the server session will expire automatically.'); }
@@ -377,10 +384,10 @@ export function createMemberConversationAdapter(options = {}) {
   }
 
   return {
+    syncContext: bindContext,
     getAvailability: availability,
     open(context) {
-      if (!root || !doc) return false;
-      bindContext(context);
+      if (!doc || !availability(context).available) return false;
       if (!client) client = new RedDogPublicClient('foundups', root, {
         origin, fetchImpl: options.fetchImpl,
       });

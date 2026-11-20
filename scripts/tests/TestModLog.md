@@ -1,3 +1,10 @@
+## 2026-11-20 - HPC guest model registry binding
+
+The hosted independent regeneration in PR #2435 agreed with the extension's
+new manifest digest but rejected the test's previous digest pin. Bind the
+independent assertion to that regenerated value. Keep the source-closure,
+staged-index and package checks unchanged.
+
 ## 2026-11-20 - Checkpoint guidance content binding
 
 The required CI correctly rejected the changed Operations Skillz's stale backend
