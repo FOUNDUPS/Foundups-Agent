@@ -102,6 +102,14 @@ async function stageWith(storage) {
   }, message, meta);
 }
 
+function recoveryHandlerSource(extension) {
+  // Bind the actual top-level handler. Its former neighbor now lives in the
+  // panel host, so using that neighbor as slice's end scans unrelated source.
+  const match = /^async function attemptBlockedRequestRecovery\(params\) \{[\s\S]*?^\}/m.exec(extension);
+  assert(match, 'the top-level recovery handler must be present');
+  return match[0];
+}
+
 async function main() {
   assert.strictEqual(recovery.eligible(meta, message), true);
   assert.strictEqual(recovery.eligible(meta, { ...message, useLastPacket: true }), false);
@@ -288,10 +296,7 @@ async function main() {
   assert(extension.includes('const bridgeState = bridgeStateForRequest(state, recoveryContext)'));
   assert(extension.includes('onBridgeProgress, bridgeState, promptConstruction'));
   assert(extension.includes("claim.reason !== 'recovery_secret_missing'"));
-  const attemptSource = extension.slice(
-    extension.indexOf('async function attemptBlockedRequestRecovery'),
-    extension.indexOf('function createFusionMessageReceiver')
-  );
+  const attemptSource = recoveryHandlerSource(extension);
   assert.strictEqual((attemptSource.match(/state\.disposed/g) || []).length, 1);
   assert(attemptSource.indexOf('state.disposed') < attemptSource.indexOf('holoBlockedRequestRecovery.claimAfterCompatibility('));
   assert(attemptSource.indexOf('blockIncompatibleBackend(') < attemptSource.indexOf("status === 'REJECTED'"));
