@@ -1,3 +1,14 @@
+## 2026-11-21 — H1H shared dock and player behavior correction
+
+H1H / PFDOCK-20261121 makes HPC the first qualification surface for the same
+dock/settings contract used by all FoundUps and fractal views. Capture the
+AI-first plus menu, Video settings, confirmed Floating tile-tap default,
+independent expansion/return gestures and rotation restoration; keep rotation
+lock and unspecified return defaults open. The [shared contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns details. Supersede HPC-only/deferred wording while retaining historical
+receipts. PR #2439 remains the existing runtime lane; documentation does not
+certify its preview or production. Root ModLog records validation and limits.
+
 ## 2026-11-16 — HPC return banners and changed phone acceptance (documentation candidate)
 
 - Record 012's entire top HPC banner on both existing Vote and Call Your Congressperson pages as one accessible return link to `https://hpc.foundups.com`; distinct existing Red Dog navigation identity returns to `https://play.foundups.com`.

@@ -35,6 +35,13 @@ Existing protected native-admission and completion gates below remain in force.
 
 ## WRE Git lifecycle and PC convergence — P0
 
+The [shared Search Dock and video-preference roadmap](modules/foundups/pfmall/ROADMAP.md#shared-search-dock-and-video-preferences--2026-11-21)
+records PFDOCK-20261121 across all FoundUps and fractal views. HPC is the first
+qualification surface for one shared implementation, including Play. Floating
+is the confirmed tile-tap default; independent gesture returns, rotation
+restoration and AI-first menu order are specified. Rotation lock remains open.
+This documentation correction does not close runtime, PC or release gates.
+
 Prioritize shared GitHub-to-PC completion before further HPC feature work.
 WSP 15 allocation scores are complexity 3, importance 5, deferability 5 and
 impact 5. The existing WRE and Codex startup paths share a deterministic

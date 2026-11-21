@@ -1,3 +1,15 @@
+## 2026-11-21 — Shared dock and configurable player acceptance
+
+PFDOCK-20261121 extends the same dock/settings requirement across all FoundUps,
+Play and fractal views. AI list precedes Video; tile tap defaults to Floating;
+expansion, pinch-in and video-swipe-up returns are independently configurable.
+Record orientation restoration and right tuck without losing context. Rotation
+lock remains open. The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns the matrix and provider boundary; roadmap owns staged qualification.
+Reconcile earlier fixed-gesture/HPC-only instructions without claiming shipped
+behavior. Root ModLog records source, runtime-lane preservation and retrieval
+limits. Documentation-only validation; no runtime or production change.
+
 ## 2026-11-20 — Bounded Red Dog guest conversation client
 
 - Reused the preserved #1648 guest-session client pattern against the current

@@ -33,12 +33,12 @@ Use the existing [strategic diligence skill](../../ai_intelligence/ai_overseer/s
 | PC / monitor | Centered main video, then a horizontal thumbnail queue, then **one viewport-bottom floating search dock below the thumbnails**. The dock remains reachable while content scrolls; the main player is not forced browser fullscreen. | Desktop screenshots and browser interaction tests must show this order and bottom anchoring; oversized three-column posters, search above the queue, or a duplicate dock do not satisfy it. See H1F. |
 | Desktop startup / queue | Request playback of the first eligible clip on entry, then advance through the queue. Preserve one active player and deliberate sound controls. | Test actual provider state and advancing time. Where the browser blocks startup, show a truthful user-activation recovery; never claim guaranteed audible autoplay. No duplicate or hidden players. |
 | Search | Reuse one floating bottom dock: left plus/options, editable scoped search, dictation mic, and right Red Dog action. Typing filters the scoped desktop queue; submit plays the next match or first available match. Phone search submits its grid filter. | Test exactly one visible and focusable search surface per active view, preserved query/selection, safe areas, keyboard clearance, no results, and return state. Dictation and Red Dog retain their actual capabilities; placement does not admit resident speech. |
-| Phone | Compact portrait grid below one shared, top-anchored floating player. One deliberate tile tap requests playback in that existing player; the grid scrolls independently beneath it. Preserve video identity, WikiTube transitions and queue, query, scroll, focus and close/back recovery. | Verify one iframe/audio session, advancing media time, provider minimum size, unobscured provider controls, repeated selection, rotation and return. Provide truthful recovery when autoplay or the provider blocks playback; one tap is not a bypass guarantee. |
+| Phone | Compact portrait grid below one shared, top-anchored floating player by default. One deliberate tile tap requests playback using the H1H destination preference; the grid scrolls independently beneath Floating mode. Preserve video identity, WikiTube transitions and queue, query, scroll, focus and close/back recovery. | Verify one iframe/audio session, advancing media time, provider minimum size, unobscured provider controls, repeated selection, rotation and return. Provide truthful recovery when autoplay or the provider blocks playback; one tap is not a bypass guarantee. |
 | Breakpoint / rotation | Change presentation without duplicating the media session or losing video identity, queue, query and browsing position. | Test desktop, phone portrait/landscape, resizing and keyboard access independently. Do not classify all large tablets by pointer alone without testing. |
 | Entry and membership | Guests browse on `hpc.foundups.com`. `foundups.com/members` leads to the existing member gate. Admitted members can select HPC from the Mall or return to the same selection after sign-in. | Guest, uninvited and admitted browser cases. The `/f/hpc` landing links to the dedicated host. `/f/hpc/app` retains its protected handoff. |
 | Shared-regression guard | Preserve ordinary Mall channel expansion, other FoundUp projections, guest/member boundaries, provider diagnostics, save/history and return navigation. | Reuse the existing tests and fixtures for the shared grid, player and account boot. |
 
-This request supersedes earlier hidden-search wording only for **HPC-scoped bottom search**. The master-Mall logo link and independent-site disclosure remain. The 2026-11-16 navigation matrix below now defines portrait/HPC and Red Dog/Mall destinations explicitly. **012's latest floating-bottom clarification in H1F supersedes the previous search-above-thumbnails order.** It is a requested acceptance change, not evidence that production already renders it.
+The November 11 request initially superseded hidden-search wording for **HPC-scoped bottom search**. **H1H / PFDOCK-20261121 now supersedes that scope restriction: the same dock and player preferences belong to all FoundUps and their fractal views.** The master-Mall logo link and independent-site disclosure remain. The 2026-11-16 navigation matrix below defines portrait/HPC and Red Dog/Mall destinations. H1F supersedes the previous search-above-thumbnails order; H1H adds the latest shared behavior acceptance. These are requirements, not evidence that production already renders them.
 
 ### H1C · Evidence and recovery before implementation
 
@@ -82,10 +82,16 @@ Prototype work includes an admitted device-compatible agent selector, Red
 Dog press-and-hold speech, and camera handoff to AutoPost. Reuse existing
 identity, admission and capture owners. Verify consent, cancellation,
 supported device models and return context before exposing actions.
+H1H now specifies shared AI-list placement in the next iteration; actual model
+qualification and resident-agent authority remain separate acceptance gates.
 Seven-level preferences, community nominations, comics/story panels and
 whole-Mall discovery keep their existing stages.
 
 ### H1F · Single floating bottom dock — 012 clarification, 2026-11-18
+
+**Scope update, 2026-11-21:** H1H and the shared navigation contract now own
+cross-FoundUp scope and configurable player behavior. The layout and continuity
+requirements below remain; HPC-first qualification does not mean HPC-only design.
 
 **CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED by this documentation slice.**
 The requested composition is **main video -> video thumbnails/queue -> one
@@ -202,9 +208,72 @@ preview publication, physical-device acceptance and production launch require
 distinct receipts. 012's preview review precedes production launch; this
 feedback is not production approval.
 
+### H1H · Shared dock and configurable video behavior — 2026-11-21
+
+**PFDOCK-20261121 / CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.**
+012's latest correction makes the floating Search Dock a shared FoundUps
+component across the Mall, every FoundUp and their fractal views, including
+`https://play.foundups.com`. HPC is the first qualification surface, not a
+separate owner or the limit of the requirement. The authoritative behavior
+matrix is [shared navigation contract section 14](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences).
+This supersedes HPC-only wording, the formerly deferred shared-dock scope,
+forced WikiTube entry and fixed player up/down behavior where they conflict.
+The prior [Mosh Pit](https://docs.google.com/document/d/1a4TqtdnCKiQMx36hw2uObQ0YX3XGw66bDY09_vBWEm8/edit)
+entry `HPC-SEARCH-DOCK-PILOT-20261121` is the pilot history; this correction
+extends its scope and finalizes the default tile-tap behavior.
+
+- The thumb-accessible `+` menu shows the **AI list first**, then a visible
+  top-level **Video** entry, followed by functional actions for the current
+  scope. Video settings must not require finding an About or unrelated tool
+  submenu. The grid's trailing contribution `+` remains a separate control.
+- Video tile tap offers **Floating / WikiTube / Fullscreen**, with **Floating
+  the confirmed default**. A selected Fullscreen action can skip WikiTube.
+- Configure expansion and return independently: pinch-out goes to WikiTube
+  or directly Fullscreen; pinch-in from Fullscreen returns to WikiTube or
+  **Mall (tiles)**; swipe-up on the video returns to WikiTube or Mall. Pinch
+  and swipe return defaults are not finalized. The designated element-type
+  selector, ordinary grid/queue scrolling and modal dismissal retain their
+  own contexts; do not turn every upward grid swipe into type selection.
+- Rotate an active Floating player to landscape Fullscreen and restore
+  Floating on return to portrait. Explicit intervening navigation or mode
+  selection takes precedence over an automatic restore. **Rotation lock is
+  an open design idea**, not an approved setting or implementation gate.
+- Retain right-swipe tuck and accessible restore, compact app-owned controls,
+  native provider controls/fullscreen, useful blocked-play recovery and one
+  player. Keep queue, clip, playback position, captions, zoom, query, scroll
+  and focus across presentation changes. Fully hidden YouTube playback pauses.
+  Native fullscreen capability and app Full Video remain distinct, as defined
+  in the shared contract; do not mask provider controls to simulate either.
+
+Local settings are available while signed out and do not grant contribution,
+membership, editor or agent execution authority. Share one preference schema
+and defaults across FoundUps; origin-local browser storage alone does not
+synchronize HPC and Play subdomains. The AI list must reflect supported,
+qualified choices, show download size and require deliberate selection and
+confirmation. Preserve lightweight startup, Cancel/Unload and truthful absence
+of eligible models; no automatic model download or hosted fallback.
+
+**Implementation evidence:** [v26 PR #2439](https://github.com/FOUNDUPS/Foundups-Agent/pull/2439)
+was inspected at `5be6f3b7bd9eb3c24c39210e74fada8e773a97c7`, open draft and
+unmerged. It has only WikiTube/app Full Video frame options, a shared collapse
+choice, fixed pinch/queue gestures and a 41-byte WASM compatibility fixture,
+not an AI model. It does not satisfy this new matrix or prove physical-device
+acceptance. Reconcile the latest main and that existing implementation lane;
+do not overwrite its newer work or turn this documentation edit into a release.
+
+**Allocation and acceptance:** documentation reconciliation is C2, I4, D4,
+Impact4 = **14/P1** under WSP 15: needed to prevent repeat drift, affordable as
+a bounded update to existing owners, and required before the next behavior
+change. Reassess implementation and device-verification cost in the shared
+owner. Qualify each option and same-player transition in HPC first, then the
+ordinary/public Mall and another FoundUp/fractal path; check guest/member
+boundaries, Back, keyboard/safe areas, rotation intent and stored preferences.
+Physical iPhone Safari/PWA, desktop, source merge and production release each
+need their own receipt. No runtime or deployment acceptance is closed here.
+
 ## 2026-11-16 — Return navigation, concise HPC identity and changed phone acceptance
 
-Source: 012's latest direction. **CHANGES_POC_ACCEPTANCE** for the top-anchored phone player and return navigation; the larger shared floating dock is **LATER_STAGE**. The previous selected-tile/original-row phone placement is superseded, with desktop and ordinary Mall behavior retained. These requirements are specified, not an implementation or deployment receipt.
+Historical source: 012's November 16 direction. **CHANGES_POC_ACCEPTANCE** for the top-anchored phone player and return navigation; the larger shared floating dock was **LATER_STAGE** at that time. H1H / PFDOCK-20261121 supersedes that deferral and defines the current cross-FoundUp requirement. The previous selected-tile/original-row phone placement is superseded, with desktop and ordinary Mall behavior retained except for the explicit H1H changes. These requirements are specified, not an implementation or deployment receipt.
 
 The functional Vote/Contact return links now have a source candidate on existing draft PR #2411, with fixture tests recorded in [Vote's TestModLog](../voteballots/tests/TestModLog.md). Hosted release and physical-phone acceptance remain open; this does not implement the separate phone-player placement or new portrait artwork.
 
@@ -220,7 +289,7 @@ Source audit at main `72a3182c70974f0523be91d5ce4bd32808d824bc`: HPC's Voice CTA
 
 Acceptance remains open until tests show HPC -> Vote/Contact -> whole-banner HPC return on **both** surfaces, plus the distinct Red Dog -> Mall route, keyboard activation, header fit, reduced-motion/hidden behavior and preserved form/install/admission flows. Source, staging navigation, physical-phone results and production release are separate states. No production deployment is authorized by this record.
 
-Deferred roadmap: one shared floating Red Dog and bottom FoundUps search dock across the existing PWA surfaces. Reuse current anchors, state and search rather than duplicate controls or shells. `https://play.foundups.com` is the intended public Mall entry; existing admission remains in force. **144 FoundUps is a product target, not a verified current inventory.** This deferred dock must not block the immediate return links or absorb the existing playback slice.
+Historical deferred roadmap, now superseded by H1H / PFDOCK-20261121: one shared floating Red Dog and bottom FoundUps search dock across existing PWA surfaces. Reuse current anchors, state and search rather than duplicate controls or shells. `https://play.foundups.com` is the intended public Mall entry; existing admission remains in force. **144 FoundUps is a product target, not a verified current inventory.** Preserve the separate return-link work while the shared owner implements the current behavior contract.
 
 ## 2026-11-11 reconciliation receipt
 
