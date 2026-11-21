@@ -29,7 +29,8 @@
     </a>
   </nav>
   <header class="site-header">
-    <a class="brand" href="./" aria-label="Vote home"><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M8 15 20 32 37 8"/><circle cx="35" cy="33" r="4"/></svg><span>VOTE<small>A CIVIC FOUNDUP</small></span></a>
+    <a class="brand" href="https://hasan4speaker.com/" aria-label="Vote: Hasan for Speaker"><svg viewBox="0 0 44 44" aria-hidden="true"><path d="M8 15 20 32 37 8"/><circle cx="35" cy="33" r="4"/></svg><span>VOTE<small>A CIVIC FOUNDUP</small></span></a>
+    <a class="back-to-hpc" href="https://hpc.foundups.com/" aria-label="Back to HPC" title="Back to HPC"><img src="icons/red-dog.png" width="30" height="30" alt=""></a>
     <nav class="header-nav" aria-label="Main navigation">
       <a href="./#oversight">Oversight Blueprint</a><a href="evidence">Funding evidence</a><a href="contact" aria-current="page">Contact Congress</a><a href="coalition">Coalition</a>
     </nav>
@@ -39,11 +40,40 @@
     <section class="contact-intro section-shell" aria-labelledby="contact-title">
       <p class="eyebrow">PUBLIC OFFICE DIRECTORY</p>
       <h1 id="contact-title">Contact Congress.</h1>
+      <figure class="hpc-skin-art"><img src="comics/hpc-campaign.jpg" width="1280" height="709" alt="HPC political satire poster with a caricature at a podium, navy and red campaign lettering, and cream paper artwork."><figcaption>HPC · Independent political satire. Artwork is commentary, not verified policy or election data.</figcaption></figure>
       <p>Choose a state or territory and find an office in the official House and Senate directories. You can prepare a private list of offices and open your phone’s dialer for each call.</p>
       <div class="contact-source-links">
         <a href="https://www.house.gov/representatives">House directory</a>
         <a href="https://www.senate.gov/senators/contact/">Senate directory</a>
         <a href="tel:+12022243121">Capitol Switchboard · (202) 224-3121</a>
+      </div>
+    </section>
+    <section class="script-section section-shell" aria-labelledby="script-title">
+      <div class="contact-panel script-panel">
+        <div class="script-heading"><div><p class="eyebrow">MAKE IT YOURS</p><h2 id="script-title">Your voice. Your words.</h2></div>
+          <div><label for="script-skin">Choose your skin</label><select id="script-skin"><option value="vote">Vote · Classic</option><option value="hpc">Hasan / HPC</option></select></div>
+        </div>
+        <p id="script-hpc-help" class="contact-helper" hidden>Independent HPC campaign, not endorsed by Hasan Piker. This is a personal request, not an official ballot or a claim of candidate eligibility.</p>
+        <label for="script-request">What do you want them to do?</label>
+        <textarea id="script-request" rows="3" maxlength="700" placeholder="Please record my position on…" autocomplete="off"></textarea>
+        <details class="script-details"><summary>Your introduction and reasons</summary>
+          <label for="script-intro">Introduce yourself</label><textarea id="script-intro" rows="2" maxlength="300" autocomplete="off" placeholder="Your name and the role you actually hold"></textarea>
+          <label for="script-callback">Your callback number <span>(optional)</span></label><input id="script-callback" type="tel" maxlength="60" autocomplete="off">
+          <label for="script-reason">Why this matters to you</label><textarea id="script-reason" rows="3" maxlength="700" autocomplete="off"></textarea>
+          <div id="script-spokesperson" hidden><p class="contact-helper">HPC spokesperson draft supplied by the campaign. Confirm your role and the coalition-size claim before using it.</p><label class="script-confirm"><input id="script-authorized" type="checkbox"> I am authorized to speak for HPC and can substantiate the 2,000+ streamer claim.</label><button id="script-director" type="button" disabled>Use HPC director draft</button></div>
+          <p class="contact-helper">Use your own role and only facts you can support. Your introduction and reasons stay the same when you regenerate.</p>
+        </details>
+        <fieldset class="script-tones"><legend>How mad are you?</legend>
+          <button type="button" data-script-tone="0" aria-pressed="true"><span aria-hidden="true">🙂</span> Calm</button>
+          <button type="button" data-script-tone="1" aria-pressed="false"><span aria-hidden="true">😠</span> Frustrated</button>
+          <button type="button" data-script-tone="2" aria-pressed="false"><span aria-hidden="true">😡</span> Furious</button>
+        </fieldset>
+        <label for="contact-notes">Your call script <span>· ready to read, yours to edit</span></label>
+        <textarea id="contact-notes" aria-describedby="script-status script-privacy" rows="10" maxlength="2400" autocomplete="off" placeholder="Choose a skin or add your request to get started."></textarea>
+        <div class="contact-controls"><button id="script-regenerate" type="button">↻ Regenerate</button><button id="script-copy" type="button">Copy script</button></div>
+        <p id="script-status" class="contact-helper" role="status"></p>
+        <p id="script-privacy" class="contact-helper">Stays on this page. Reloading clears personal edits. Regenerating replaces edits in the script box; keep your core wording in the fields above.</p>
+        <noscript><p>Write your script in the box above. Automatic drafting needs JavaScript.</p></noscript>
       </div>
     </section>
     <section class="contact-content section-shell" aria-label="Office selection and call list">
@@ -89,11 +119,8 @@
           <button id="contact-next" type="button" disabled>Next office</button>
           <button id="contact-remove" type="button" disabled>Remove current office</button>
         </div>
-        <label for="contact-notes">Notes for yourself <span>(optional)</span></label>
-        <p class="contact-helper" id="contact-notes-help">Consider noting your question, a bill number or public source, and what response you are requesting. Avoid private information.</p>
-        <textarea id="contact-notes" aria-describedby="contact-notes-help" rows="3" maxlength="1000" autocomplete="off" disabled></textarea>
-        <button id="contact-clear" type="button" disabled>Clear list and notes</button>
-        <p class="contact-helper">Your choices and notes stay on this page. Reloading clears them. After using your dialer, return here and choose the next office yourself.</p>
+        <button id="contact-clear" type="button">Clear list and script</button>
+        <p class="contact-helper">Your choices stay on this page. Reloading clears them. After using your dialer, return here and choose the next office yourself.</p>
       </div>
     </section>
   </main>
@@ -103,5 +130,6 @@
   </footer>
   <script src="app.js" defer></script>
   <script type="module" src="contact.js"></script>
+  <script type="module" src="contact-script.js"></script>
 </body>
 </html>

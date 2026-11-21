@@ -10,7 +10,7 @@ const origin = 'https://vote.test';
 const MIME = {
   css: 'text/css', js: 'text/javascript', mjs: 'text/javascript',
   json: 'application/json', webmanifest: 'application/manifest+json',
-  svg: 'image/svg+xml', png: 'image/png', webp: 'image/webp',
+  svg: 'image/svg+xml', png: 'image/png', webp: 'image/webp', jpg: 'image/jpeg',
 };
 
 function worker() {
@@ -60,10 +60,11 @@ function worker() {
 test('canonical and prior HTML navigation use the same cached document offline', async () => {
   const sw = worker();
   await sw.event('install', '/');
-  assert.equal(sw.contents.size, 29);
+  assert.equal(sw.contents.size, 32);
   assert.ok(sw.requests.every(({options}) => options.redirect === 'error'));
   await sw.event('activate', '/');
-  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9']);
+  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9', 'vote-public-guide-v10']);
+  for (const asset of ['contact-script.js', 'contact-script.mjs']) assert.ok(sw.contents.has(origin + '/' + asset));
   sw.changeResponse(() => { throw new TypeError('offline'); });
   for (const path of ['/guide', '/contact', '/evidence', '/coalition']) {
     assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
