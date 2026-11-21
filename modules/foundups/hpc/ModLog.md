@@ -1,3 +1,19 @@
+## 2026-11-22 — Source-selected Vote skin handoff
+
+- 012 clarified that the originating FoundUp should select Vote's skin. Set the
+  canonical and public `voice_resource_url` to `https://vote.mtrout.com/contact#hpc`.
+  Reuse Vote's existing allowlisted fragment resolver and preserve no-referrer.
+- Canonical projection generator matches the checked-in public projection;
+  Vote contact/coalition/worker tests: 136 passed. Update the existing scoped
+  browser fixture destination; no full player-suite execution claimed here.
+- Live browser testing found HPC actually enters `/member/hpc-v25/`. Reconcile
+  that deployed snapshot's catalog too; do not replace its newer player with
+  older main-source assets. Exact release/readback evidence is in Vote's
+  `docs/RELEASE_ACCOUNTING.md` source-selected-skin entry.
+- WSP 50/84/97: lexical Holo retrieval remained UNKNOWN/index-gap; verified
+  canonical paths and live button behavior directly. No inferred browser history,
+  new permissions, models, resident workers or independent RSI promotion.
+
 ## 2026-11-21 — H1H shared dock and player behavior correction
 
 H1H / PFDOCK-20261121 makes HPC the first qualification surface for the same

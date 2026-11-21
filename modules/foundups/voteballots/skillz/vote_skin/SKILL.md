@@ -15,6 +15,15 @@ initial fragments fall back to Vote; ordinary later anchors must preserve drafts
 Match the selector and explicit CSS skin rules when
 adding a preset. Keep the existing HPC/Mall return links and independent-site notice.
 
+Source-aware entry: the originating FoundUp's existing outbound link carries the
+registered skin fragment (`/contact#hpc` for HPC). Set its canonical projection
+and regenerate/verify the public projection through its existing owner. Keep
+`referrerpolicy="no-referrer"`; do not use cookies, browser history, URL text
+matching or referrer inference to choose political content. The fragment is a
+public presentation preset, not authenticated origin, identity or authorization.
+Other FoundUps get a registered preset before their link selects it. Missing or
+unknown presets remain Vote Classic; the selector remains an optional override.
+
 Templates consume only caller-edited introduction, callback, request and reason.
 Tone/regeneration may vary phrasing, never membership numbers, identity, endorsements,
 election results, eligibility or the core request. Do not infer persuasion from
