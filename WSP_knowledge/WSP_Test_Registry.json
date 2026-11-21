@@ -15596,6 +15596,19 @@
       "description": "Desired persistence-only verification acceptance; synthetic disposable fixtures."
     },
     {
+      "id": "test::modules::foundups::entity_management::tests::test_corp_mgmt",
+      "path": "modules/foundups/entity_management/tests/test_corp_mgmt.py",
+      "owner": "modules/foundups/entity_management",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-entity-management-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
       "id": "test::modules::foundups::esingularity::jhr::tests::test_jhr_agent",
       "path": "modules/foundups/esingularity/jhr/tests/test_jhr_agent.py",
       "owner": "modules/foundups/esingularity",
