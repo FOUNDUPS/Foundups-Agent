@@ -56,6 +56,8 @@ jobs:
               'public/member/member-sw.js', 'public/member/mall-video-catalog.json',
               'public/member/discovery/catalog.json',
               'scripts/refresh_mall_catalog.py',
+              'scripts/hpc_preview_metadata.cjs',
+              'scripts/tests/hpc_preview_metadata_vm.cjs',
               'public/member/tests/mall_scoped_video_browser.py',
               'public/member/tests/mall_queue_callbacks_browser.py',
               'public/member/tests/mall_public_tv_browser.py',
@@ -119,6 +121,7 @@ jobs:
           run_gate queue-callbacks python -B public/member/tests/mall_queue_callbacks_browser.py
           run_gate public-tv python -B public/member/tests/mall_public_tv_browser.py --worker
           run_gate phone-ui python -B public/member/tests/mall_phone_ui_browser.py
+          run_gate probe-release-metadata node scripts/tests/hpc_preview_metadata_vm.cjs
           run_gate worker-state node public/member/tests/mall_product_state_vm.mjs
           run_gate admission-preferences node public/member/tests/mall_admission_preferences_vm.mjs
           run_gate admission-routing node public/member/tests/mall_projection_routing_vm.mjs

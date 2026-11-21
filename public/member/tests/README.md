@@ -149,3 +149,23 @@ and Back. Then use one genuine tap and three distinct real YouTube clips with
 two natural transitions. Record IDs, advancing time, sound/mute, provider errors,
 Safari versus installed PWA and network context. A fallback tap is not a
 continuous-playback pass. Fully hidden/dismissed playback must pause.
+
+## Playback-probe release metadata
+
+Use `node scripts/tests/hpc_preview_metadata_vm.cjs` from the repository root.
+The pure `scripts/hpc_preview_metadata.cjs` factory/validator derives the build,
+discovery generation and probe digest from actual candidate assets and binds both
+source fields to the resolved commit. A tracked JSON cannot contain its own
+commit SHA: generate the staged record after resolving that commit, then include
+its bytes/hash as explicit derived release metadata in the reviewed manifest.
+Always regenerate it, even when it is unchanged in the Git diff from a preserved
+Hosting baseline. Never substitute an old channel, source, build or Hosting ID.
+
+`hostingVersion` must come from the new allocation when known; otherwise the
+record says `unverified`. `validateMetadata(..., {requireHosting:true})` refuses
+an unknown identity. This contract checks coherence, not the authenticity of a
+caller-supplied release identity or successful publication. Retain independent
+Hosting/readback and unsigned asset-parity receipts. Compare served runtime,
+metadata, worker and release receipt separately before investigating phone cache.
+The frozen v26 discrepancy and exact historical provenance are recorded in the
+TestModLog; no physical-iPhone result is inferred from those HTTP observations.

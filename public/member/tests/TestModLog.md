@@ -1,3 +1,29 @@
+## 2026-11-21 — frozen v26 diagnostic metadata discrepancy
+
+At 09:45:18 UTC, two anonymous HTTPS GETs confirmed the frozen v26 preview serves
+runtime `mallBuild = 'v26'` alongside `/member/playback-probe/deployment.json`
+containing `mall_build: v25`, `channel_id: play-v25-iphone`,
+`hosting_version: unpublished`, and null source/app-source SHAs. Both byte streams
+match the existing frozen manifest; the JSON response is `Cache-Control: no-cache`.
+This is server-served release-metadata drift, not evidence that a phone cached v25.
+Physical browser/PWA/cache state remains unverified.
+
+The already delivered preview remains pinned to source
+`9aabf2e97545d8c1c64d2834285a18fc4a0ce618`, Hosting version
+`3288e5d7bf410758` and release `1795252849853000` under `play-v26-iphone`.
+Those historical values are not defaults for future candidates. The stale JSON
+was inherited unchanged from the v25 baseline; byte hashing alone did not verify
+its semantic consistency. No newer fix was found in this branch or current main.
+
+The next-candidate metadata contract is `scripts/hpc_preview_metadata.cjs`, with
+Node regressions in `scripts/tests/hpc_preview_metadata_vm.cjs`. A staged metadata
+record must be generated outside Git from the resolved source commit, target
+channel and actual runtime/catalog/probe bytes, including when the tracked JSON
+has no source diff. Missing Hosting identity stays explicitly `unverified`;
+requiring Hosting verification rejects it until a separately supplied real
+allocation is checked. Metadata validation is not proof of publication or device
+acceptance. The current preview, v25 and production are not changed by this fix.
+
 ## 2026-11-21 — CodeQL 319 test-fixture hardening
 
 Replace the routing VM's permissive HTML regex with a fail-closed extractor for

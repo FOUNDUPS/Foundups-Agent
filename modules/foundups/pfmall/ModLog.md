@@ -1,3 +1,15 @@
+## 2026-11-21 — next-candidate playback metadata coherence
+
+Recorded the frozen v26 server/diagnostic mismatch in the existing member test
+record. Added a pure release-metadata factory/validator and regression gate for
+source/build/channel/catalog/probe coherence. The existing offline export owner
+regenerates metadata independently of Git diff selection; no self-referential
+commit stamp is written into tracked JSON. Unknown Hosting identity is explicit,
+and requiring it rejects the unknown case. No probe/player replacement, new
+preview, deployment, merge or physical-device acceptance is included. See
+[member TestModLog](../../../public/member/tests/TestModLog.md) and the
+[metadata test instructions](../../../public/member/tests/README.md#playback-probe-release-metadata).
+
 ## 2026-11-21 - v26 phone and service-boundary reconciliation
 
 Recorded the v26 working subset on base `9b85e9cbb874b3720e453d3e3d3a3974dca53504`,
