@@ -1,3 +1,16 @@
+## 2026-11-21 - Nested attribution fixture and default-path regression
+
+- Windows focused baseline: 45 passed. Candidate: 58 passed, including 13
+  attribution tests; no failures or skips. The default scenario's four
+  baseline/candidate frame digests match with fixed `PYTHONHASHSEED=0`:
+  `94355f26bc7a8065895ca0da3e6e04e31b2bd3d78316d072695cee0430460d87`.
+- Existing cross-process Python salted hashes made an unpinned baseline
+  comparison inconclusive; no default calculation, seed policy or existing
+  assertion was changed. Default runner tests execute the existing model;
+  the opt-in path asserts zero model runs and no created output directory.
+- Direct CLI returned the synthetic report on stdout. This is not full CI,
+  actual adoption evidence, a financial policy or chain-parity testing.
+
 ## 2026-11-15 — Observable Swarm Orchestration telemetry tests
 - Added and expanded `modules/foundups/simulator/tests/test_observable_swarm_telemetry.py` (`11 passed, 0 skipped`) covering `work_telemetry_provider.py` (including context lineage `parent_task_id` / `depends_on` / `work_order_id` / `swarm_lane`, `lease_active`, and 64-char endpoint redaction/deduplication), deterministic clean-checkout seeded SQLite SHA-256 invariance + sidecar (`-wal`/`-shm`/`-journal`) checks, conditional live Sprint 4/5 DB SHA-256 invariance, `/api/work-telemetry`, `frame_schema.py`, and `public/js/foundup-cube.js` HUD/ticker assertions via Node VM.
 
