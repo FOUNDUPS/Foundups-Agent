@@ -724,3 +724,12 @@
 .mall-video-options label { display: flex; align-items: center; justify-content: space-between; gap: .65rem; min-height: 44px; }
 .mall-video-options select { max-width: 55%; min-height: 44px; color: inherit; background: #21182c; border: 1px solid #d1bbff55; border-radius: .35rem; }
 .mall-video-options input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }
+
+/* Keep the existing Red Dog button and its listeners; the creation action is last. */
+.red-dog-anchor:has(> .mall-member-search-dock) { grid-template-columns: minmax(0, 1fr) 44px 44px; }
+.red-dog-anchor > .mall-member-search-dock .mall-search-add {
+  position: absolute;
+  right: var(--mall-dock-inset);
+  bottom: var(--mall-dock-inset);
+}
+.red-dog-listening[hidden] { display: none; }

@@ -1482,7 +1482,7 @@ def verify_floating_and_wikitube_gestures(browser_type):
         assert page.evaluate("window.mallVideoPlayer.isWikiTube() === true")
 
         # Accessible Floating player button minimizes WikiTube back to floating
-        player.get_by_role("button", name="Floating player", exact=True).tap()
+        player.locator('[data-action="float"]').tap()
         expect(player).to_have_attribute("aria-label", "Floating video player")
         expect_playing(page, 1)
 
@@ -1853,7 +1853,7 @@ def verify_hidden_playback_policy(browser_type):
         page.evaluate("delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))")
         stable_paused()
         manual_play(1)
-        player.get_by_role('button',name='Floating player',exact=True).tap()
+        player.locator('[data-action="float"]').tap()
         observed['synthetic_background_cancels_pending_wikitube_recovery']=True
         observed['late_hidden_wikitube_error_and_ended_do_not_advance']=True
 

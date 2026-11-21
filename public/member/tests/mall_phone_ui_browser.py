@@ -89,11 +89,14 @@ def checkpoint(page, name):
         return !e.hidden&&s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0; };
       const docks=[...document.querySelectorAll('.mall-member-search-dock')].filter(visible);
       const dock=docks[0],input=dock?.querySelector('textarea'),r=input?.getBoundingClientRect();
+      const add=dock?.querySelector('.mall-search-add'),ar=add?.getBoundingClientRect();
       return {count:docks.length,same:!window.independentDock||dock===window.independentDock,
         inert:!!dock?.closest('[inert]'),inputRect:r?.toJSON(),
         inputHit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===input:false,
         sameFrame:!window.independentFrame||document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame,
         created:window.fixturePlayback.created,state:window.mallVideoPlayer?.getPlaybackSnapshot?.(),
+        addRect:ar?.toJSON(),addPosition:add?getComputedStyle(add).position:null,
+        modalDock:!!dock?.closest('.video-player-shared-dock-host'),
         scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
     }""")
     REPORT.setdefault('checkpoints', []).append({'engine': REPORT['engine'],
@@ -103,6 +106,34 @@ def checkpoint(page, name):
     assert_true(value['inputHit'], {'checkpoint': name, 'input_obscured': value})
     assert_true(value['scrollWidth'] <= value['clientWidth'] + 1,
                 {'checkpoint': name, 'horizontal_overflow': value})
+    assert_true(value['addRect']['width'] >= 44 and value['addRect']['height'] >= 44,
+                {'checkpoint': name, 'small_add_target': value})
+    assert_true(not value['modalDock'] or value['addPosition'] != 'absolute',
+                {'checkpoint': name, 'modal_add_left_absolute': value})
+    return value
+
+
+def public_action_layout(page, name):
+    value = page.evaluate("""() => {
+      const anchor=document.querySelector('#redDogAnchor'),
+        dock=anchor.querySelector(':scope > .mall-member-search-dock'),
+        dog=anchor.querySelector(':scope > .red-dog-btn'),add=dock.querySelector('.mall-search-add'),
+        input=dock.querySelector('.mall-member-search-bar textarea');
+      const d=dog.getBoundingClientRect(),a=add.getBoundingClientRect(),i=input.getBoundingClientRect();
+      const hit=(e,r)=>e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));
+      return {dog:d.toJSON(),add:a.toJSON(),input:i.toJSON(),dogHit:hit(dog,d),addHit:hit(add,a),
+        inputHit:hit(input,i),expanded:dock.querySelector('form').hasAttribute('data-expanded'),
+        viewportWidth:innerWidth,scrollWidth:document.documentElement.scrollWidth};
+    }""")
+    assert_true(value['dog']['width'] >= 44 and value['dog']['height'] >= 44 and
+                value['add']['width'] >= 44 and value['add']['height'] >= 44,
+                {'layout': name, 'small_touch_target': value})
+    assert_true(value['dog']['x'] + value['dog']['width'] <= value['add']['x'] + 1,
+                {'layout': name, 'dog_not_before_add': value})
+    assert_true(value['dogHit'] and value['addHit'] and value['inputHit'],
+                {'layout': name, 'controls_obscured': value})
+    assert_true(value['scrollWidth'] <= value['viewportWidth'] + 1,
+                {'layout': name, 'overflow': value})
     return value
 
 
@@ -113,10 +144,18 @@ def public_header(page):
     account = header.locator('.mall-self-anchor')
     expect(brand).to_be_visible()
     expect(page.locator('#mallAvatarTrigger')).to_be_visible()
+    expect(page.locator('#redDogListening')).to_have_count(1)
+    expect(page.locator('#redDogListening')).not_to_be_visible()
     b, a = brand.bounding_box(), account.bounding_box()
     assert_true(abs(b['y'] + b['height']/2 - a['y'] - a['height']/2) <= 12,
                 {'header_not_compact_one_row_at414': {'brand': b, 'account': a}})
     page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-public-header.png')))
+    layouts = [public_action_layout(page, 'default-414')]
+    search = page.locator('.mall-member-search-dock:visible .mall-member-search-bar textarea')
+    search.fill('A viewport-sized Mall query for checking wrapped input and both trailing actions. ' * 3)
+    expect(page.locator('.mall-member-search-dock:visible .mall-member-search-bar')).to_have_attribute('data-expanded', '')
+    layouts.append(public_action_layout(page, 'expanded-query-414'))
+    search.fill('')
     expect(page.locator('#mallProjection')).to_have_count(1)
     expect(page.locator('#mallProjection')).not_to_be_visible()
     dock = page.locator('.mall-member-search-dock:visible')
@@ -138,13 +177,20 @@ def public_header(page):
     expect(page.locator('.mall-brand-cluster')).to_be_visible()
     assert_true(page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),
                 'Narrow large-text public header overflows')
+    layouts.append(public_action_layout(page, 'large-text-320'))
+    search.fill('A viewport-sized Mall query for checking wrapped input and both trailing actions. ' * 3)
+    expect(page.locator('.mall-member-search-dock:visible .mall-member-search-bar')).to_have_attribute('data-expanded', '')
+    layouts.append(public_action_layout(page, 'expanded-query-large-text-320'))
+    page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-public-narrow-query.png')))
+    search.fill('')
     page.evaluate("document.documentElement.style.fontSize=''")
     page.set_viewport_size(REPORT['viewport'])
     page.locator('#mallAvatarTrigger').tap()
     page.wait_for_url('https://play.foundups.com/?signin=required')
     return {'header': header.bounding_box() if page.locator('.mall-header').count() else None,
             'branding_account_initial': {'brand': b, 'account': a},
-            'filters_moved_once_and_operable': True, 'account_destination': page.url}
+            'filters_moved_once_and_operable': True, 'account_destination': page.url,
+            'idle_listening_hidden': True, 'action_layouts': layouts}
 
 
 def hpc_branding(page):
