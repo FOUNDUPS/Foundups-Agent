@@ -1,5 +1,70 @@
 # p.fMALL Roadmap
 
+## Shared Search Dock and video preferences — 2026-11-21
+
+**PFDOCK-20261121 / CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.**
+The floating Search Dock and its menu/settings belong to **all FoundUps and
+all fractal views**, including the public Mall at `https://play.foundups.com`.
+HPC qualifies the same shared implementation first; it must not become an
+HPC-only component copied into other skins later. The
+[navigation contract section 14](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns the behavior matrix; [HPC H1H](../hpc/ROADMAP.md#h1h--shared-dock-and-configurable-video-behavior--2026-11-21)
+owns the first acceptance surface. This supersedes the earlier deferred
+cross-FoundUp dock scope and fixed video-gesture assumptions where they conflict.
+
+The `+` menu orders the **AI list first**, **Video** next, then existing
+functional scope actions. Video is a visible top-level choice within thumb
+reach. Deliberate tile tap offers Floating / WikiTube / Fullscreen, with
+**Floating the confirmed default**. Separate preferences control pinch-out
+(WikiTube or direct Fullscreen), pinch-in from Fullscreen (WikiTube or Mall
+tiles), and swipe-up on the video (WikiTube or Mall tiles). No forced WikiTube
+intermediate is required when Fullscreen is selected. Pinch/collapse defaults
+remain undecided. The designated type-selector gesture and trailing
+contribution `+` remain separate from the dock menu and player gestures;
+ordinary grid scrolling keeps its existing owner.
+
+Floating portrait playback changes to landscape Fullscreen on rotation, then
+returns to Floating on portrait restoration unless a newer deliberate action
+changed the intended mode. Rotation lock remains an open idea. Preserve the
+existing player and dock owners, right-swipe tuck/restore, native provider
+controls, compact app chrome, blocked-play recovery and view state. Qualify
+native fullscreen independently of app Full Video; fully hidden YouTube
+playback pauses. Local preferences do not grant editor, contribution, agent
+execution or membership authority. They remain origin-local until a separate
+cross-origin synchronization mechanism is qualified.
+
+### Ordered delivery in the existing shared owner
+
+1. **Reconcile the contract and current lane.** Documentation allocation:
+   C2, I4, D4, Impact4 = **14/P1**. It prevents repeated drift, is affordable
+   within existing documents, and precedes the next behavior change. Pin main
+   and the retained v26 lane before edits. PR #2439 at
+   `5be6f3b7bd9eb3c24c39210e74fada8e773a97c7` is an unmerged partial candidate:
+   two frame destinations, one collapse choice, fixed pinch/queue gestures and
+   a 41-byte WASM fixture. It is not the requested configurable matrix or a
+   qualified AI model list.
+2. **Extend shared preferences and input owners.** Reuse
+   `mall-state-restore.js`, `mall-video-projection.js`, `mall-tile-field.js`
+   and `mall-video-player.js`; preserve versioned validation, stored-choice
+   migration, one media instance, scoped search and accessible gesture
+   equivalents. All skins consume the same contract and defaults. Keep AI
+   startup thin; list only eligible browser-supported choices with truthful
+   qualification state, download size, explicit confirmation and Cancel/Unload.
+   Model loading remains explicit under its existing admission; this requirement
+   adds no automatic model download or hosted fallback.
+3. **Qualify and promote the same implementation.** Extend existing tests for
+   all tap destinations, independent pinch/swipe choices, right tuck/restore,
+   rotation and intervening intent, one dock, provider visibility, focus and
+   state. Exercise HPC, public Play, an admitted Mall view and another FoundUp
+   with fractal drill-down/Back. Prove ordinary non-video/product routes and
+   contribution gates still work. Physical iPhone Safari/PWA, desktop and
+   source/deployment receipts remain distinct; no universal composition or
+   native fullscreen pass follows from emulated layout tests.
+
+Implementation cost and platform-specific acceptance must be rescored by the
+existing owner. This roadmap update changes no runtime, model installation,
+authentication, public route or production deployment.
+
 ## iPhone 12 review correction — 012 feedback, 2026-11-19
 
 **CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.** The opened review
@@ -93,6 +158,11 @@ live Simulator wiring and the full Tools branch remain unproven by this edit.
 
 ## Single floating bottom dock — 012 clarification, 2026-11-18
 
+**Scope update, 2026-11-21:** PFDOCK-20261121 and navigation contract section 14
+now govern the dock across all FoundUps/fractal views and its Video preferences.
+The layout requirements below remain; HPC-first qualification is sequencing,
+not a restriction of the shared component to HPC.
+
 **CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED by this documentation slice.**
 The current target is **main video -> video thumbnails/queue -> one floating
 bottom search dock**, not search between the player and thumbnails. The dock
@@ -115,7 +185,9 @@ anchoring during scroll, narrow/rotated layouts, keyboard and transcript growth,
 one-dock visibility, Back, query/selection and one-player continuity. Native
 resident speech is not admitted by a Red Dog button or its placement.
 
-The detailed contract is [HPC H1F](../hpc/ROADMAP.md#h1f--single-floating-bottom-dock--012-clarification-2026-11-18).
+The retained layout detail is [HPC H1F](../hpc/ROADMAP.md#h1f--single-floating-bottom-dock--012-clarification-2026-11-18);
+current scope and behavior are owned by
+[shared navigation section 14](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences).
 This supersedes earlier above-rail placement in PFWD-1B and the November 14
 viewer reference. It does not revert the separately owned top-anchored phone
 player, alter other FoundUps' admission, create a separate HPC runtime, waive
@@ -126,13 +198,16 @@ implementation and verification cost must be revalidated in its owned slice.
 
 ## HPC return navigation and deferred shared dock — 012 direction 2026-11-16
 
+**Historical deferral:** PFDOCK-20261121 now supersedes the shared-dock deferral
+in this dated slice. Preserve its separate return-navigation work and evidence.
+
 **Vote/Contact navigation source candidate in PR #2411; release/device acceptance open.** The separate player-layout and new-artwork requirements remain specified. Reconcile [HPC H1](../hpc/ROADMAP.md#2026-11-16--return-navigation-concise-hpc-identity-and-changed-phone-acceptance) and the [navigation matrix](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#47-hpc-vote-and-contact-congress-return-navigation--012-request-2026-11-16) before the next owner slice. Main source inspected: `72a3182c70974f0523be91d5ce4bd32808d824bc`; existing probe draft [#2405](https://github.com/FOUNDUPS/Foundups-Agent/pull/2405) remains a separate playback baseline, not implementation of this navigation.
 
 - Immediate: preserve the HPC -> existing Vote/Contact routes and add one whole top HPC banner link on **both** Vote and Call Your Congressperson returning to `https://hpc.foundups.com`. The animated portrait sits inside the same accessible anchor; no nested links. Distinct existing Red Dog navigation icons return to `https://play.foundups.com`.
 - Reuse the existing illustrated Hasan portrait and Red Dog asset. Keep concise HPC identity, satire/non-affiliation disclosure, comfortable touch targets, keyboard focus, reduced-motion static fallback and no motion while hidden. Crown of thorns/optional halo adaptation requires actual reference inspection; it is not a completed asset.
 - Preserve existing PWA/tile architecture, Vote/Contact source and Sites mirror owners, admission, forms and service-worker behavior. No conventional replacement page or Voice tenant. Extend existing route/browser fixtures for both complete return loops; source links alone do not verify live navigation.
 - Existing playback slice: one shared top-anchored floating phone video above an independently scrolling grid, one deliberate selection tap, WikiTube transitions/queue and truthful provider failure states. This explicitly changes the earlier selected-tile placement acceptance without rebuilding the shell.
-- Deferred: shared floating Red Dog and bottom FoundUps search dock across existing surfaces. Reuse the existing anchors/search/state owner, keep current controls usable, and avoid duplicate search or concierge controls. `https://play.foundups.com` is the intended public Mall; **144 FoundUps is a product target, not a measured current catalog**.
+- Deferred in this historical slice, now required by PFDOCK-20261121: shared floating Red Dog and bottom FoundUps search dock across existing surfaces. Reuse the existing anchors/search/state owner, keep current controls usable, and avoid duplicate search or concierge controls. `https://play.foundups.com` is the intended public Mall; **144 FoundUps is a product target, not a measured current catalog**.
 
 No production deployment, security change or merge authority is created by this specification. Owner delivery, source implementation, automated checks, staging/device navigation and release require separate receipts.
 

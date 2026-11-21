@@ -1,7 +1,28 @@
 # Member Area Interface
 
 **Module**: `public/member/`
-**Version**: 2.3.0
+**Version**: 2.4.0
+
+## Shared dock and player preferences — 2026-11-21
+
+**PFDOCK-20261121 / SPECIFIED_NOT_IMPLEMENTED.** All FoundUp and fractal views
+consume one shell-owned floating bottom Search Dock, including HPC and
+`play.foundups.com`. Its `+` menu puts the AI list first and Video settings
+second. The [shared navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns the full behavior matrix: Floating is the confirmed video-tile tap
+default; WikiTube/Fullscreen are selectable; expansion, pinch-in return and
+video-swipe-up return have independent preferences. Rotate Floating to
+landscape fullscreen and restore it on portrait subject to later deliberate
+navigation. Rotation lock remains an open idea.
+
+Reuse `mall-video-projection.js` for dock/menu composition,
+`mall-tile-field.js` for selection, `mall-video-player.js` for transitions and
+`mall-state-restore.js` for validated preferences. Native fullscreen may hide
+the dock; preserve and restore its state. Keep tile tap, app-frame action,
+provider controls, video gestures and grid/type gestures distinct. Shared
+preferences are origin-local until an authenticated sync owner is qualified.
+This defines no new public API or dispatcher authority. Earlier runtime
+observations below must not override this newer acceptance contract.
 
 ## Proposed fractal view contract — 2026-11-19
 
@@ -191,8 +212,10 @@ Release a hold or press the square Stop in Red Dog's position to finish
 dictation. The result stays editable, and hiding the dock or backgrounding
 the page cancels capture. Tap Red Dog at rest to open the existing concierge.
 
-The shared full viewer puts the same floating dock between the video and
-horizontal queue on PC and phone. A query filters the current lane while
+The older runtime placed the dock between video and queue. The accepted
+target is video, scrolling queue/tiles, then one viewport-bottom floating dock
+across shared views (see the contract above); deployed parity is unverified.
+A query filters the current lane while
 the active clip continues. Selecting a result or submitting an idle queue
 starts a matching clip. The media area can scroll independently on short
 screens. Escape first dismisses options or leaves the input, then returns
@@ -436,6 +459,11 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 | `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp, playbackPosition? }, ...]` — `playbackPosition` is shell-local seconds for **direct file** (`<video>`) items only; omitted or cleared when below resume threshold or near end; **not** set for iframe embeds (cannot read time truthfully). |
 
 **Gesture Semantics**:
+
+The following table records the older runtime. The planned configurable
+video-return bindings and Floating default are owned by the shared contract
+above; do not treat this table as the next-iteration acceptance matrix.
+
 | Gesture | Action |
 |---------|--------|
 | swipe-up | Next video |

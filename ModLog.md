@@ -1,3 +1,37 @@
+## 2026-11-21 — Shared Search Dock and player behavior requirements
+
+PFDOCK-20261121 records 012's correction across all FoundUps/fractal views,
+including Play, with HPC as first qualification surface. The existing
+[navigation contract](modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns AI-first/Video menu order, Floating as default tile-tap destination,
+independent expansion/pinch/swipe settings, orientation restoration, right
+tuck/restore and provider/state boundaries. Rotation lock and new return
+defaults remain undecided. Reconcile HPC/Mall/member roadmaps, master
+architecture, player contract and member interface; preserve dated runtime
+history and explicitly supersede conflicting next-iteration instructions.
+
+Documentation lane: `docs/shared-foundups-dock-behavior-20261121`, owner 0102
+documentation coordinator, intended destination MERGE_TO_MAIN, base
+`9f2b785b4045ca4d8975910d95a2e0467006db71`. WSP 15 allocation C2/I4/D4/Impact4
+= 14/P1. Preserve active runtime PR #2439 at observed head
+`5be6f3b7bd9eb3c24c39210e74fada8e773a97c7`; its 41-byte WASM fixture is not
+a model and its current settings/gestures are only partial implementation.
+No runtime branch takeover, production deployment, model install or auth change.
+
+WSP 00 V2 was attempted in the isolated checkout and failed because torch is
+unavailable. The documented section 3.3.1 tracker fallback opened the gate with
+`execution_method=mathematical_formulas`; detector witness remains absent.
+The lexical Holo bridge failed on missing `holo_index.query_receipt` in this
+sparse checkout. Direct exact-source/rg reads were used; semantic freshness
+is UNKNOWN and no reindex or WRE runtime dispatch was performed. Retrieval
+was narrowed from repeated historical plans to current contracts plus pinned
+v26 source; public source links retain provider evidence separately.
+
+Validation is a scoped documentation diff, changed-link/anchor checks and
+independent review. Hosted checks and merge are recorded on the resulting PR;
+rollback is a scoped documentation revert. Runtime implementation and physical
+Safari/PWA acceptance remain in the existing owner and are not closed here.
+
 ## 2026-11-19 — Reconcile Play FoundUps fractal documentation
 
 Recover the copied Tertia specification and distinguish it from Carbon's

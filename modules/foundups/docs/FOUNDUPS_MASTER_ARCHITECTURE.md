@@ -1,8 +1,8 @@
 # FoundUps Master Architecture
 
-**Version**: 1.2.0
+**Version**: 1.3.0
 
-**Updated**: 2026-11-19 (fractal identity, evidence and document map; lifecycle gates unchanged)
+**Updated**: 2026-11-21 (shared dock and player-preference ownership; lifecycle gates unchanged)
 
 **Status**: Canonical lifecycle and surface contract
 
@@ -28,6 +28,17 @@ separately authenticated authority boundaries; they are not browser features.
 The target is a reusable shell and governed services with per-FoundUp skins, task-specific AI context, entry routes, capabilities and isolated namespaces. Reuse gestures (touch/swipe/pinch/zoom), navigation, accessibility and shared platform adapters; backend agent, memory, RSI/WRE and optional blockchain services remain permissioned and server-side. Manifest capability declarations are requests/contracts, not proof of authorization. Existing separate PWAs and sites may remain independent deployments while the unified runtime is built; never claim universal composition is implemented.
 
 FoundUps may connect through explicit, consented, versioned context and capability contracts while preserving separate identity and authorization. Refer to [manifest schema](PFMALL_FOUNDUP_MANIFEST_SCHEMA.md) and [Mall runtime](../pfmall/README.md).
+
+**Shared interaction requirement, PFDOCK-20261121:** every FoundUp and fractal
+view consumes the same floating Search Dock and player-preference contract,
+including Play and HPC. The dock's `+` exposes the AI list first, then Video
+settings; deliberate video-tile tap defaults to Floating, with selectable
+WikiTube/Fullscreen destinations and configurable expansion/return gestures.
+Rotation restores the originating Floating presentation; rotation lock is an
+open proposal. The [shared navigation contract, section 14](PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns the exact decisions, unresolved defaults, state/provider boundaries and
+acceptance. HPC qualifies this common behavior first; current v26 work is
+partial, and universal integration or cross-origin settings sync is not proved.
 
 ### Fractal views of the same work
 

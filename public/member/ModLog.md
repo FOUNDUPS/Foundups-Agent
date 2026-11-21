@@ -1,5 +1,15 @@
 # Member Area Module Change Log
 
+## 2026-11-21 — Shared dock and player preference contract
+
+Link roadmap and interface to PFDOCK-20261121 across HPC, Play and all
+FoundUp/fractal views. Preserve existing dock, tile-selection, player and
+state owners; record Floating tile-tap default, AI-first/Video ordering,
+independent gesture returns and orientation restoration. Mark the old dock
+placement/gesture table as runtime history instead of competing acceptance.
+Rotation lock stays undecided; no new API, model, permission or runtime change.
+Root ModLog records source, retrieval limitations and documentation validation.
+
 ## 2026-11-20 — Host the extension-owned FoundUp focus component
 
 The guest dialog hosts RedDog's portable focus component through its existing
