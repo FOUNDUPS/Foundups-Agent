@@ -1,5 +1,33 @@
 # HPC roadmap
 
+## 2026-11-21 - v26 phone candidate; v25 frozen comparison
+
+Current work starts from `9b85e9cbb874b3720e453d3e3d3a3974dca53504`.
+Keep v25 and its exact-source artifact/results frozen for comparison. The
+changed v26 source has no combined runtime, deployment or physical PASS recorded
+by this entry; dated results below remain bound to their original SHAs.
+
+The phone subset reuses the shared player and existing bottom dock. Its leading
+`+` holds Video Options and a separate on-demand Browse AI pilot; the trailing
+`+` opens contribution review. One visible dock, player/grid clearance, hidden
+playback pause, rotation/return and desktop preservation remain acceptance gates.
+Compact Play chrome and the HPC banner reuse the existing identity owner. The
+banner targets `https://hasan4speaker.com/`, with a distinct Play Mall return.
+These are [source destinations](../../../public/member/js/mall-video-projection.js),
+not deployed navigation receipts.
+
+Browse AI is a confirmed 41-byte WASM addition compatibility test, not an AI
+model/runtime. No preload or cloud fallback; WebGPU remains UNQUALIFIED until
+the exact physical Safari/PWA cases are tested. See the
+[member roadmap](../../../public/member/ROADMAP.md).
+
+Graph work referenced as `22374b` is not integrated. Depth access and backend
+writer actions stay unavailable/fail closed pending their service owner;
+sign-in/invite continuity grants no editor permission. Paid access is proposed.
+Next: qualify combined v26 source, verify isolated HTTPS assets/worker, then
+capture real media advancement on physical iPhone Safari and installed PWA
+on Wi-Fi and cellular.
+
 ## 2026-11-21 JST — v25 phone preview awaiting publisher sign-in
 
 Build v25 passed security and all five qualification gates on

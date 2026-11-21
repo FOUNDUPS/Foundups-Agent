@@ -120,10 +120,10 @@ class TestQuickSummary:
             "window.redDog must expose showSummary"
 
 
-# -- 4. press-and-hold placeholder --
+# -- 4. press-and-hold dictation handoff --
 
 
-class TestPushToTalk:
+class TestDictationHandoff:
 
     def test_listening_element_exists(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
@@ -140,13 +140,13 @@ class TestPushToTalk:
         assert match, "Listening element must exist"
         assert "hidden" in match.group(), "Listening indicator must be hidden by default"
 
-    def test_listening_label_exists(self):
-        content = INDEX_HTML.read_text(encoding="utf-8")
-        assert "Listening" in content, "Listening label must exist"
+    def test_legacy_indicator_is_never_shown_without_provider_evidence(self):
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "listeningEl.hidden = false" not in content
 
-    def test_listening_waves_exist(self):
-        content = INDEX_HTML.read_text(encoding="utf-8")
-        assert "red-dog-listening-waves" in content, "Wave animation elements must exist"
+    def test_hold_has_no_fake_listening_fallback(self):
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "else startListening()" not in content
 
     def test_js_has_hold_threshold(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
@@ -154,7 +154,8 @@ class TestPushToTalk:
 
     def test_js_has_start_listening(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "startListening" in content
+        assert "if (!searchDictation || typeof searchDictation.start !== 'function') return false" in content
+        assert "searchDictation.start(false)" in content
 
     def test_js_has_stop_listening(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
@@ -164,8 +165,8 @@ class TestPushToTalk:
         content = MEMBER_CSS.read_text(encoding="utf-8")
         assert ".red-dog-listening" in content, "Listening CSS must exist"
 
-    def test_no_transcription_backend(self):
-        """Push-to-talk is visual placeholder only."""
+    def test_concierge_does_not_own_transcription_backend(self):
+        """The bound search owner, not the concierge shell, owns speech capture."""
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         lower = content.lower()
         assert "websocket" not in lower, "No WebSocket for voice"

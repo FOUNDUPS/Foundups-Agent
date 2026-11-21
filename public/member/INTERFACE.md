@@ -1,5 +1,48 @@
 # Member Area Interface
 
+## 2026-11-21 — v26 phone candidate (unreleased)
+
+Build v25 remains the frozen comparison at its existing preview. Build v26 uses a
+separate source receipt and preview channel; no production redirect or release is
+part of this change. Phone-layout browser fixtures are separate from physical
+Safari and installed-PWA evidence. The principal has opened v25 on an iPhone 11;
+v26 physical playback, audio and uninterrupted three-clip transitions are NOT_RUN.
+
+The shared pre-Fractal shell keeps one provider and one actionable bottom Search
+Dock while entering/leaving WikiTube or app Full Video. A fully hidden parked
+player pauses. Native YouTube controls and native fullscreen are not intercepted.
+The leading + retains discovery controls, AutoPost and Video Options; the trailing
++ is Add FoundUp on Play and Add Video in the HPC pilot. Video preferences affect
+app controls and qualified visible playback, never promise provider autoplay.
+
+Play public browsing and static FoundUp details correspond to the currently
+available public discovery surfaces. The requested future levels 1–2 public /
+level 3+ member policy is not a deployed graph ACL. The separate Fractal runtime
+`22374b161570b2cd0e265e1c2b8c1009fb599394` is not imported. Contributions remain
+unavailable until an authoritative service verifies current identity, membership
+and per-FoundUp editor permission (012 initially for HPC). A successful existing
+invite check only restores a manual review; it does not publish or grant editor
+permission. No six-month checkout is activated. Cross-origin HPC-to-Play
+contribution return is not connected and fails closed.
+
+The existing same-origin Play `/?signin=required` gate and `/sso-callback/` are
+preserved. Valid legacy `enter` links resolve public metadata rather than being
+silently intercepted as a Mall view. Auth/callback, deep links and existing invite
+flows are excluded from public landing normalization. Apex-to-Play routing is a
+pure tested plan only; no live apex redirect is installed.
+
+The full HPC banner opens <https://hasan4speaker.com/>. The distinct Mall return
+opens Play; Voice Your Opinion / Contact Congress retains
+<https://vote.mtrout.com/contact>. Vote/Contact whole-banner return links to HPC
+remain a different navigation contract.
+
+Browse AI is a separate compatibility pilot: no model is preloaded, no automatic
+cloud fallback, and no model capability is claimed. The explicit, checksum-bound
+41-byte WASM addition fixture is not an AI model. Actual model selection/download
+and WebGPU qualification remain later work, including same-runtime Safari/PWA
+checks. This dependency does not block the phone UI candidate.
+
+
 **Module**: `public/member/`
 **Version**: 2.3.0
 
@@ -683,7 +726,7 @@ The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideApplie
 
 | Rule | Enforcement |
 |------|-------------|
-| No playability claim without API confirmation | `play_tile` reports `applied`, not `playing`; only the `videoPlayerOpen` event (emitted by `mallVideoPlayer`) is proof playback began. |
+| No playability claim without API confirmation | `play_tile` reports `applied`, not `playing`; `videoPlayerOpen` confirms the view opened. Provider `playing` plus advancing media time is required to establish playback. |
 | Policy denial is `status:"denied"`, not `"error"` | `set_layout` against a tier-disallowed preset returns `denied` with `error.code:"unsupported_density_for_device"`. |
 | Missing API is `api_unavailable`, not fabricated success | All seven commands return `error`/`api_unavailable` when their target API is absent; none synthesize DOM-based fallbacks. |
 | No silent canonical catalog mutation | `load_videos` requires API-confirmed `session_mode:true`; otherwise `error`/`session_mode_required`. |

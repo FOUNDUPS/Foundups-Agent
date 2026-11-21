@@ -1,5 +1,28 @@
 # Member Area Module Change Log
 
+## 2026-11-21 - v26 candidate and separate Browse AI compatibility phase
+
+Reconciled the working source on base `9b85e9cbb874b3720e453d3e3d3a3974dca53504`;
+v25 remains frozen for comparison. Projection/state/player source exposes
+leading-`+` Video Options, lazy Browse AI, trailing-`+` contribution review and
+compact Play/HPC navigation. One visible dock, safe player visibility and
+desktop continuity are required combined checks, not document-certified results.
+
+The pilot's focused local Node run passed 16 checks on module SHA-256
+`12cdb5455d0407f239ddf079ee46177266b675dbef7f82573286293f262df507`.
+Its exact 41-byte WASM hash is
+`f61fd62f57c41269c3c23f360eeaf1090b1db9c38651106674d48bc65dba88ba`:
+valid, import-free and memory-free addition. This component evidence does not
+test integrated dock behavior, deployed MIME/CSP, real Safari/PWA or WebGPU.
+No AI model/runtime, preload, model download, reload or cloud fallback follows.
+
+Graph `22374b` is not integrated. Review/admission does not grant graph-depth
+access or backend writer/editor authority; submission remains unavailable
+pending service verification. Paid access is proposed. Combined v26 checks,
+deployment/worker parity, real-provider and physical Wi-Fi/cellular gates remain
+outstanding. This lane performed source/documentation/link checks only and
+preserved prior history. See [current roadmap](ROADMAP.md).
+
 ## 2026-11-21 JST — v25 application qualified, publisher sign-in pending
 
 The final run passed on `bd0510c5c2e333d07b1bb02340ca91b291420164`. The

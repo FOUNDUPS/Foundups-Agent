@@ -2172,7 +2172,8 @@
 
   function setScopedPhoneQuery(query) {
     if (!fixedVideoField || scopedTheaterRequested || typeof query !== 'string') return;
-    window.mallVideoPlayer.close();
+    // Filtering the browsing field must not dismiss its separate shared player.
+    // Its existing queue remains scoped until a deliberate new selection.
     updateScopedPhoneQuery(query);
     replaceScopedTiles();
     tileFieldWrapper.scrollTop = 0;

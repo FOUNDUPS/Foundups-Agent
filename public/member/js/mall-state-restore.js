@@ -149,6 +149,193 @@
     } catch (e) { return null; }
   }
 
+  // Admission intent is navigation context only. It never grants membership,
+  // editor capability or permission to submit. Browse state stays with save().
+  var ADMISSION_KEY = 'pfmall_admission_intent_v1';
+  var VIDEO_OPTIONS_KEY = 'pfmall_video_options_v1';
+  var admissionStorageFailed = false;
+  var videoOptionsMemory = defaultVideoOptions();
+  var videoOptionsStorageFailed = false;
+  var videoOptionSubscribers = [];
+
+  function ownDataRecord(value, keys) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    var prototype = Object.getPrototypeOf(value);
+    if (prototype !== null) {
+      var constructor = Object.getOwnPropertyDescriptor(prototype, 'constructor');
+      if (Object.getPrototypeOf(prototype) !== null || !constructor ||
+          !Object.prototype.hasOwnProperty.call(constructor, 'value') ||
+          typeof constructor.value !== 'function' ||
+          Function.prototype.toString.call(constructor.value) !== Function.prototype.toString.call(Object) ||
+          constructor.value.prototype !== prototype) return false;
+    }
+    return Reflect.ownKeys(value).every(function(key) {
+      var descriptor = Object.getOwnPropertyDescriptor(value, key);
+      return typeof key === 'string' && keys.indexOf(key) !== -1 && descriptor &&
+        Object.prototype.hasOwnProperty.call(descriptor, 'value') && descriptor.enumerable;
+    });
+  }
+
+  function safeIntentFoundUp(value) {
+    return typeof value === 'string' && /^[a-z][a-z0-9_-]{0,63}$/.test(value) &&
+      ['__proto__', 'constructor', 'prototype'].indexOf(value) === -1;
+  }
+
+  function safeAdmissionPath(value) {
+    if (typeof value !== 'string' || value.length > 512 || /[\\\u0000-\u0020\u007f]/.test(value) ||
+        !/^\/member(?:\/|\/index\.html)?(?:[?#]|$)/.test(value)) return null;
+    try {
+      var url = new URL(value, window.location.origin);
+      if (url.origin !== window.location.origin ||
+          ['/member', '/member/', '/member/index.html'].indexOf(url.pathname) === -1 ||
+          ['','#account','#red-dog'].indexOf(url.hash) === -1) return null;
+      var keys = Array.from(url.searchParams.keys());
+      if (keys.length > 1 || keys.some(function(key) { return key !== 'foundup' && key !== 'creator'; })) return null;
+      if (keys.length) {
+        var key = keys[0];
+        var target = url.searchParams.get(key);
+        if (!safeIntentFoundUp(target) || (key === 'creator' && target !== 'move2japan')) return null;
+      }
+      return url.pathname + url.search + url.hash;
+    } catch (error) { return null; }
+  }
+
+  function validAdmissionRecord(record) {
+    if (!ownDataRecord(record, ['version', 'createdAt', 'action', 'foundupId', 'videoId', 'returnPath']) ||
+        !['version', 'createdAt', 'action', 'returnPath'].every(function(key) { return Object.prototype.hasOwnProperty.call(record, key); }) ||
+        record.version !== 1 || !Number.isSafeInteger(record.createdAt) || record.createdAt < 0 ||
+        Date.now() < record.createdAt || Date.now() - record.createdAt >= RETURN_TTL_MS ||
+        ['add-foundup', 'add-video', 'account'].indexOf(record.action) === -1 ||
+        typeof record.returnPath !== 'string' || safeAdmissionPath(record.returnPath) !== record.returnPath) return false;
+    if (Object.prototype.hasOwnProperty.call(record, 'foundupId') && !safeIntentFoundUp(record.foundupId)) return false;
+    if (record.action === 'add-video' && !safeIntentFoundUp(record.foundupId)) return false;
+    if (Object.prototype.hasOwnProperty.call(record, 'videoId') &&
+        (!record.foundupId || typeof record.videoId !== 'string' || !/^[A-Za-z0-9_-]{11}$/.test(record.videoId))) return false;
+    var scope = new URL(record.returnPath, window.location.origin).searchParams.get('foundup');
+    return !scope || !record.foundupId || scope === record.foundupId;
+  }
+
+  function copyAdmission(record) {
+    return record ? JSON.parse(JSON.stringify(record)) : null;
+  }
+
+  function rememberAdmissionIntent(input) {
+    try { save(); } catch (error) { /* Discovery storage is optional. */ }
+    try {
+      if (!ownDataRecord(input, ['action', 'foundupId', 'videoId', 'returnPath']) ||
+          !Object.prototype.hasOwnProperty.call(input, 'action')) return false;
+      var path = Object.prototype.hasOwnProperty.call(input, 'returnPath') ? input.returnPath :
+        window.location.pathname + window.location.search + window.location.hash;
+      var record = { version: 1, createdAt: Date.now(), action: input.action, returnPath: safeAdmissionPath(path) };
+      ['foundupId', 'videoId'].forEach(function(key) {
+        if (Object.prototype.hasOwnProperty.call(input, key)) record[key] = input[key];
+      });
+      if (!validAdmissionRecord(record)) return false;
+      try {
+        sessionStorage.setItem(ADMISSION_KEY, JSON.stringify(record));
+        admissionStorageFailed = false;
+      } catch (error) {
+        admissionStorageFailed = true;
+        try { sessionStorage.removeItem(ADMISSION_KEY); } catch (removeError) { /* Failed handoff stays blocked. */ }
+        return false;
+      }
+      return true;
+    } catch (error) { return false; }
+  }
+
+  function peekAdmissionIntent() {
+    if (admissionStorageFailed) return null;
+    var raw;
+    try { raw = sessionStorage.getItem(ADMISSION_KEY); }
+    catch (error) { return null; }
+    if (!raw || raw.length > 2048) return null;
+    try {
+      var record = JSON.parse(raw);
+      return validAdmissionRecord(record) ? copyAdmission(record) : null;
+    } catch (error) { return null; }
+  }
+
+  function consumeAdmissionIntent() {
+    var record = peekAdmissionIntent();
+    if (!admissionStorageFailed) {
+      try { sessionStorage.removeItem(ADMISSION_KEY); }
+      catch (error) { admissionStorageFailed = true; return null; }
+    }
+    return record;
+  }
+
+  function defaultVideoOptions() {
+    return { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true };
+  }
+
+  function validVideoOptions(options, partial) {
+    if (!ownDataRecord(options, ['autoplayNext', 'frameDestination', 'collapseDestination', 'revealSelectedPlayer'])) return false;
+    if (!partial && Object.keys(options).length !== 4) return false;
+    return Object.keys(options).every(function(key) {
+      if (key === 'autoplayNext' || key === 'revealSelectedPlayer') return typeof options[key] === 'boolean';
+      return (key === 'frameDestination' ? ['wikitube', 'full-video'] : ['wikitube', 'mall']).indexOf(options[key]) !== -1;
+    });
+  }
+
+  function decodeVideoOptions(raw) {
+    if (typeof raw !== 'string' || raw.length > 1024) return null;
+    try {
+      var record = JSON.parse(raw);
+      return ownDataRecord(record, ['version', 'options']) && Object.keys(record).length === 2 && record.version === 1 &&
+        validVideoOptions(record.options, false) ? record.options : null;
+    } catch (error) { return null; }
+  }
+
+  function getVideoOptions() {
+    if (videoOptionsStorageFailed) return Object.assign({}, videoOptionsMemory);
+    try {
+      var raw = localStorage.getItem(VIDEO_OPTIONS_KEY);
+      var options = raw === null ? defaultVideoOptions() : decodeVideoOptions(raw);
+      if (options) videoOptionsMemory = Object.assign({}, options);
+    } catch (error) { videoOptionsStorageFailed = true; }
+    return Object.assign({}, videoOptionsMemory);
+  }
+
+  function notifyVideoOptions() {
+    videoOptionSubscribers.slice().forEach(function(subscriber) {
+      try { subscriber.callback(Object.assign({}, videoOptionsMemory)); } catch (error) { /* Isolate consumers. */ }
+    });
+  }
+
+  function setVideoOptions(patch) {
+    try {
+      if (!validVideoOptions(patch, true)) return false;
+      var before = getVideoOptions();
+      var next = Object.assign({}, before, patch);
+      videoOptionsMemory = next;
+      try {
+        localStorage.setItem(VIDEO_OPTIONS_KEY, JSON.stringify({ version: 1, options: next }));
+        videoOptionsStorageFailed = false;
+      } catch (error) { videoOptionsStorageFailed = true; }
+      if (Object.keys(next).some(function(key) { return next[key] !== before[key]; })) notifyVideoOptions();
+      return true;
+    } catch (error) { return false; }
+  }
+
+  function subscribeVideoOptions(callback) {
+    if (typeof callback !== 'function') return null;
+    var subscriber = { callback: callback };
+    videoOptionSubscribers.push(subscriber);
+    return function() {
+      var index = videoOptionSubscribers.indexOf(subscriber);
+      if (index !== -1) videoOptionSubscribers.splice(index, 1);
+    };
+  }
+
+  window.addEventListener('storage', function(event) {
+    if (event.key !== VIDEO_OPTIONS_KEY) return;
+    var options = event.newValue === null ? defaultVideoOptions() : decodeVideoOptions(event.newValue);
+    if (!options) return;
+    videoOptionsMemory = Object.assign({}, options);
+    videoOptionsStorageFailed = false;
+    notifyVideoOptions();
+  });
+
   // ─── Storage Helpers ───
 
   function loadState() {
@@ -448,6 +635,12 @@
     /** Remember this product's filters for an explicit account handoff. */
     rememberProductReturn: rememberProductReturn,
     rememberMemberVideoReturn: rememberMemberVideoReturn,
+    rememberAdmissionIntent: rememberAdmissionIntent,
+    peekAdmissionIntent: peekAdmissionIntent,
+    consumeAdmissionIntent: consumeAdmissionIntent,
+    getVideoOptions: getVideoOptions,
+    setVideoOptions: setVideoOptions,
+    subscribeVideoOptions: subscribeVideoOptions,
 
     /** Consume a safe, short-lived product return after real member admission. */
     consumeProductReturn: consumeProductReturn,

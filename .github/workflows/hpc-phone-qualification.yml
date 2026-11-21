@@ -59,6 +59,11 @@ jobs:
               'public/member/tests/mall_scoped_video_browser.py',
               'public/member/tests/mall_queue_callbacks_browser.py',
               'public/member/tests/mall_public_tv_browser.py',
+              'public/member/tests/mall_phone_ui_browser.py',
+              'public/member/tests/mall_projection_routing_vm.mjs',
+              'public/member/tests/mall_admission_preferences_vm.mjs',
+              'public/member/tests/mall_browser_ai_pilot_vm.mjs',
+              'public/member/wasm/pilot-add.wasm',
               'public/member/tests/mall_product_state_vm.mjs',
               'public/member/tests/test_mall_tile_field.py',
               'public/member/tests/test_refresh_catalog_safety.py',
@@ -80,10 +85,10 @@ jobs:
               'run_id': os.environ['GITHUB_RUN_ID'],
               'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
               'playwright_version': '1.62.0',
-              'mall_build': 'v25', 'discovery_generation': generation,
+              'mall_build': 'v26', 'discovery_generation': generation,
               'browser_image_digest': 'sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d',
               'source_sha256': {p: hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in files},
-              'scope': 'Integrated v25 shell, recovered v24 discovery data and CSS; controlled provider/network fixtures in Chromium and WebKit; actual worker/state VM and targeted static contracts.',
+              'scope': 'Integrated v26 shell, recovered v24 discovery data and CSS; controlled provider/network fixtures in Chromium and WebKit; actual worker/state VM and targeted static contracts.',
               'real_youtube': 'UNEXECUTED', 'physical_iphone': 'UNEXECUTED', 'deployment': 'NONE',
           }
           pathlib.Path(os.environ['HPC_EVIDENCE_DIR'], 'source.json').write_text(json.dumps(receipt, indent=2) + '\n')
@@ -113,7 +118,13 @@ jobs:
           run_gate player-policy python -B public/member/tests/mall_scoped_video_browser.py --player-policy
           run_gate queue-callbacks python -B public/member/tests/mall_queue_callbacks_browser.py
           run_gate public-tv python -B public/member/tests/mall_public_tv_browser.py --worker
+          run_gate phone-ui python -B public/member/tests/mall_phone_ui_browser.py
           run_gate worker-state node public/member/tests/mall_product_state_vm.mjs
+          run_gate admission-preferences node public/member/tests/mall_admission_preferences_vm.mjs
+          run_gate admission-routing node public/member/tests/mall_projection_routing_vm.mjs
+          run_gate member-boot node public/member/tests/member_product_boot_vm.mjs
+          run_gate browser-ai-compatibility node public/member/tests/mall_browser_ai_pilot_vm.mjs
+          run_gate public-concierge node public/member/tests/public_discovery_concierge_vm.mjs
           run_gate static-contracts python -B -m pytest -q -c /dev/null --noconftest -p no:cacheprovider \
             public/member/tests/test_mall_tile_field.py \
             modules/foundups/pfmall/tests/test_member_pwa_hardening.py \
@@ -123,8 +134,8 @@ jobs:
         if: always()
         shell: bash
         run: |
-          if [ -f "$GITHUB_WORKSPACE/../mall_v25_public_tv_qa.json" ]; then
-            cp "$GITHUB_WORKSPACE/../mall_v25_public_tv_qa.json" "$HPC_EVIDENCE_DIR/"
+          if [ -f "$GITHUB_WORKSPACE/../mall_v26_public_tv_qa.json" ]; then
+            cp "$GITHUB_WORKSPACE/../mall_v26_public_tv_qa.json" "$HPC_EVIDENCE_DIR/"
           fi
       - name: Retain source receipt and browser logs
         if: always()

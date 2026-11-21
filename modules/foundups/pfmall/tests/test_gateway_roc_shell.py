@@ -559,14 +559,15 @@ class TestMemberHandoffPhase4:
         block = html[start:start + 400]
         assert "navigateToMember" in block
 
-    def test_no_direct_member_redirect_outside_handoff(self):
-        """Only navigateToMember should contain direct /member/ redirect."""
+    def test_member_completion_remains_owned_by_the_handoff(self):
+        """Same-host admission resumes through the one existing gateway owner."""
         html = GATEWAY.read_text(encoding="utf-8")
-        import re
-        # Find all window.location.href = '/member/' occurrences
-        matches = [m.start() for m in re.finditer(r"window\.location\.href\s*=\s*'/member/'", html)]
-        # Should be exactly 1 (inside navigateToMember)
-        assert len(matches) == 1, f"Expected 1 direct /member/ redirect, found {len(matches)}"
+        start = html.index("function navigateToMember")
+        block = html[start:html.index("function ", start + 10)]
+        assert "authCompletionPath" in block
+        assert "window.location.href" in block
+        # Route behavior and callback exclusions execute in the projection VM.
+        assert "plannedApexLandingUrl(window.location)" not in html
 
     def test_terms_gate_still_works_for_unsigned(self):
         """Unsigned ENTER must still show disclaimerModal, not handoff."""

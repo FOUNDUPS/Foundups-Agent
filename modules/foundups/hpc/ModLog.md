@@ -1,5 +1,23 @@
 # HPC ModLog
 
+## 2026-11-21 - v26 phone scope reconciliation
+
+Documented the working v26 continuation of `9b85e9cbb874b3720e453d3e3d3a3974dca53504`,
+with v25 frozen for comparison. Source reuses the dock's leading `+` for Video
+Options/Browse AI and trailing `+` for contribution review, with compact Play
+chrome and distinct Hasan-banner/Play Mall destinations. One visible dock,
+shared player and hidden-playback safety remain required runtime checks.
+
+Browse AI is the pinned 41-byte WASM addition test; no approved model/runtime,
+preload or cloud fallback. WebGPU and physical Safari/PWA are unqualified.
+Graph `22374b` is not integrated; depth-specific access and backend writes
+remain unavailable. Review/sign-in does not submit a contribution or grant
+editor authority. Paid access remains proposed.
+
+Source/documentation/link checks only in this slice. Combined exact-head tests,
+deployed bytes/worker, real YouTube playback and physical Wi-Fi/cellular gates
+remain separate. See [roadmap](ROADMAP.md). Prior history is preserved.
+
 ## 2026-11-16 - Build v22 direct continuation and policy qualification
 
 012 explicitly authorized the existing v21 continuation through tests, push,

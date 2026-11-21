@@ -3,6 +3,41 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## v26 phone subset and Browse AI compatibility pilot - 2026-11-21
+
+Current work starts from `9b85e9cbb874b3720e453d3e3d3a3974dca53504`.
+v25 remains the frozen comparison; its tests/artifact do not qualify the changed
+v26 shell. Build label, versioned assets and member worker request v26 in source.
+Combined exact-head/browser tests, deployed parity and physical acceptance
+remain pending in this entry.
+
+The [projection/dock owner](js/mall-video-projection.js) puts Video Options in
+the leading `+`: next-clip autoplay while visible, the app frame's WikiTube or
+Full Video destination, collapse destination and selected-player reveal.
+Native YouTube taps/fullscreen remain provider-owned. The same menu lazily
+imports [Browse AI](js/mall-browser-ai-pilot.js); trailing `+` opens contribution
+review. Preserve one visible bottom dock and the existing player/state owners.
+Compact Play chrome and the Hasan-banner link are distinct from Play Mall
+return navigation; qualify layout, focus, scroll and return behavior together.
+
+Browse AI has **no approved model or AI runtime**. Its sole pilot is
+[`pilot-add.wasm`](wasm/pilot-add.wasm), exactly 41 bytes, SHA-256
+`f61fd62f57c41269c3c23f360eeaf1090b1db9c38651106674d48bc65dba88ba`.
+It computes `add(2, 40) = 42`, with no imports or memory. Explicit Review/Confirm
+precedes bounded same-origin fetching and size/hash verification before execution.
+Cancellation, timeout and unsupported states are explicit; no artifact/model
+preload, reload or cloud fallback. The [component VM](tests/mall_browser_ai_pilot_vm.mjs)
+covers controlled local behavior. Browser-reported standalone mode and detected
+WebGPU APIs do not qualify a physical device or model; WebGPU is UNQUALIFIED.
+
+Graph `22374b` is not integrated. Depth-specific access and writer actions stay
+unavailable/fail closed pending backend membership/editor checks; browser
+state, sign-in or an invite result grants no writer authority. Contribution
+review does not publish. The [shared roadmap](../../modules/foundups/pfmall/ROADMAP.md)
+owns the proposed paid-service phase. Next: combined source/CI, isolated
+HTTPS/worker parity, then real YouTube time advancement and physical iPhone
+Safari plus installed PWA on Wi-Fi/cellular, retaining v25 for comparison.
+
 ## Build v22 Brand Chrome, Canonical Catalog, OSP Tile Flip & Phone Patch-Load — 2026-11-16
 
 - Updated top-left `.mall-brand-cluster` to `/logo-foundups.svg` + FoundUPS LinkedIn link while keeping Red Dog in the bottom-right anchor; consolidated redundant `linkedin_*` pseudo-tiles into header/About/`linkedin_url` links, reconciled `voteballots`, `trade`, `magadoom_001`, and `kids_episodes` from `foundup_registry.json`, and grounded `foundups.com` `#foundupTicker` in real catalog count.

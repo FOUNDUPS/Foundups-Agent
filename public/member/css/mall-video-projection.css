@@ -21,6 +21,72 @@
   margin-bottom: 0.75rem;
 }
 
+/* Keep public discovery compact without changing the admitted or HPC headers. */
+[data-mall-open-landing="play"] .mall-header {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.65rem;
+  margin-bottom: 0.35rem;
+  padding-block: calc(0.25rem + var(--safe-top)) 0.25rem;
+}
+
+[data-mall-open-landing="play"] .mall-brand-cluster {
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  gap: 0.4rem;
+}
+
+[data-mall-open-landing="play"] .mall-brand-minimal {
+  min-height: 44px;
+  max-width: 100%;
+}
+
+[data-mall-open-landing="play"] .mall-brand-logo-sm {
+  height: 24px;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+[data-mall-open-landing="play"] .mall-self-anchor {
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  min-width: 0;
+  max-width: 100%;
+  margin-inline-start: auto;
+  gap: 0.4rem;
+}
+
+[data-mall-open-landing="play"] .mall-user-handle {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+[data-mall-open-landing="play"] .mall-avatar-trigger {
+  flex: 0 0 44px;
+}
+
+.mall-member-search-options .mall-open-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-width: 100%;
+  margin: 0 0 0.35rem;
+  padding: 0.35rem 0 0.6rem;
+  border-bottom: 1px solid #ffffff24;
+}
+
+.mall-member-search-options .mall-open-filter-options .mall-projection-chip {
+  flex: 1 1 7rem;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 [data-mall-video-scope] :is(.mall-self-anchor, #mallProjection, #redDogAnchor > :not(#videoScopeActions),
     #accountPlane, #accountPlaneScrim, #gestureHints) {
   display: none !important;
@@ -99,6 +165,34 @@
   font-size: 0.7rem;
   line-height: 1.2;
 }
+
+.mall-hpc-mall-return {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #ffffff38;
+  border-radius: 0.65rem;
+  background: #ffffff0d;
+  color: #f5eeff;
+  font-size: 0.8rem;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+.mall-hpc-mall-return :is(img, svg) {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.mall-hpc-mall-return:hover { background: #ffffff18; }
+.mall-hpc-mall-return:focus-visible { outline: 2px solid #d1bbff; outline-offset: 2px; }
 
 .mall-hpc-banner-metadata {
   position: absolute;
@@ -315,8 +409,10 @@
   line-height: 1.25;
 }
 
-.mall-video-scope-voice svg {
-  width: 1.05rem;
+#videoScopeVoice svg {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -500,9 +596,21 @@
 .mall-member-search-bar .mall-search-dog:not([hidden]) { background: #ffffff10; }
 .mall-member-search-bar .mall-search-mic[aria-pressed="true"] { color: #edb6ff; }
 
+.mall-member-search-bar .mall-search-add:not([hidden]) {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #d1bbff55;
+  background: #d1bbff20;
+  color: #eadfff;
+  font-size: 1.5rem;
+}
+
+.mall-member-search-bar .mall-search-add:focus-visible { outline-offset: 2px; }
+
 .mall-member-search-bar .mall-search-stop:not([hidden]) {
   position: absolute;
-  inset: auto var(--mall-dock-inset) var(--mall-dock-inset) auto;
+  inset: auto calc(var(--mall-dock-inset) + 44px + .5rem) var(--mall-dock-inset) auto;
   z-index: 1;
   background: #e6a5f2;
   color: #211328;
@@ -610,3 +718,9 @@
     backdrop-filter: blur(12px);
   }
 }
+
+/* Preferences reuse the leading + dialog; native provider controls remain untouched. */
+.mall-video-options { display: grid; gap: .65rem; min-width: 0; margin: .75rem 0; padding: .75rem; border: 1px solid #d1bbff55; border-radius: .6rem; }
+.mall-video-options label { display: flex; align-items: center; justify-content: space-between; gap: .65rem; min-height: 44px; }
+.mall-video-options select { max-width: 55%; min-height: 44px; color: inherit; background: #21182c; border: 1px solid #d1bbff55; border-radius: .35rem; }
+.mall-video-options input[type="checkbox"] { width: 22px; height: 22px; flex-shrink: 0; }

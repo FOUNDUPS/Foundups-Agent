@@ -1,0 +1,376 @@
+"""Independent controlled phone UI checks; no real provider/device claims."""
+import argparse
+import hashlib
+import importlib.metadata
+import json
+import os
+from pathlib import Path
+import sys
+import time
+import traceback
+
+sys.dont_write_bytecode = True
+parser = argparse.ArgumentParser()
+parser.add_argument('--root', type=Path, default=Path.cwd())
+parser.add_argument('--out', type=Path)
+args = parser.parse_args()
+ROOT = args.root.resolve()
+EVIDENCE = Path(os.environ.get('HPC_EVIDENCE_DIR', str(ROOT.parent / 'hpc-phone-ui-evidence'))).resolve()
+OUT = args.out.resolve() if args.out else EVIDENCE / 'mall-phone-ui-qa.json'
+OUT.parent.mkdir(parents=True, exist_ok=True)
+os.chdir(ROOT)
+sys.path.insert(0, str(ROOT / 'public/member/tests'))
+import mall_scoped_video_browser as fixture
+from playwright.sync_api import expect, sync_playwright
+
+REPORT = {
+    'provider': 'Existing controlled YT API fixture; all requests intercepted',
+    'physical_iPhone': 'UNEXECUTED',
+    'viewport': {'width': 414, 'height': 896},
+    'playwright': importlib.metadata.version('playwright'),
+    'root': str(ROOT), 'cases': [], 'started_epoch': time.time(),
+}
+
+
+def hashes():
+    return {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in sorted((ROOT / 'public').rglob('*')) if p.is_file()
+            and '/tests/' not in p.as_posix() and '__pycache__' not in p.parts}
+
+
+def save():
+    OUT.write_text(json.dumps(REPORT, indent=2) + '\n', encoding='utf-8')
+
+
+def assert_true(condition, detail):
+    if not condition:
+        raise AssertionError(detail)
+
+
+def make_page(browser, block=False, block_storage=False, silent_start=False):
+    context = browser.new_context(viewport=REPORT['viewport'], is_mobile=True,
+                                  has_touch=True, service_workers='block',
+                                  reduced_motion='reduce')
+    init = fixture.provider + ('\nif(window.fixturePlayback)window.fixturePlayback.block=true;' if block else '')
+    if block_storage:
+        init += """\n(() => {const original=Storage.prototype.setItem;
+          Storage.prototype.setItem=function(...args){
+            if(this===window.sessionStorage)throw new DOMException('Controlled storage quota failure','QuotaExceededError');
+            return original.apply(this,args);
+          };})();"""
+    if silent_start:
+        init += """\nif(window.YT&&window.fixturePlayback){
+          const Original=window.YT.Player;
+          window.YT.Player=function(...args){
+            const api=new Original(...args), play=api.playVideo;
+            api.playVideo=()=>{window.fixturePlayback.playAttempts++};
+            window.fixturePlayback.releaseSilentStart=()=>{api.playVideo=play};
+            return api;
+          };
+        }"""
+    context.add_init_script(init)
+    context.route('**/*', fixture.route_local)
+    page = context.new_page()
+    page.set_default_timeout(3500)
+    page.set_default_navigation_timeout(8000)
+    return context, page
+
+
+def boot(page, hpc=False):
+    page.goto('https://hpc.foundups.com/member/' if hpc else
+              'https://play.foundups.com/member/', wait_until='domcontentloaded')
+    expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
+    expect(page.locator('.mall-member-search-dock:visible')).to_have_count(1)
+
+
+def checkpoint(page, name):
+    value = page.evaluate("""() => {
+      const visible = e => { const s=getComputedStyle(e),r=e.getBoundingClientRect();
+        return !e.hidden&&s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0; };
+      const docks=[...document.querySelectorAll('.mall-member-search-dock')].filter(visible);
+      const dock=docks[0],input=dock?.querySelector('textarea'),r=input?.getBoundingClientRect();
+      return {count:docks.length,same:!window.independentDock||dock===window.independentDock,
+        inert:!!dock?.closest('[inert]'),inputRect:r?.toJSON(),
+        inputHit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===input:false,
+        sameFrame:!window.independentFrame||document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame,
+        created:window.fixturePlayback.created,state:window.mallVideoPlayer?.getPlaybackSnapshot?.(),
+        scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
+    }""")
+    REPORT.setdefault('checkpoints', []).append({'engine': REPORT['engine'],
+        'case': REPORT.get('active_case'), 'name': name, 'value': value})
+    assert_true(value['count'] == 1 and value['same'] and not value['inert'],
+                {'checkpoint': name, **value})
+    assert_true(value['inputHit'], {'checkpoint': name, 'input_obscured': value})
+    assert_true(value['scrollWidth'] <= value['clientWidth'] + 1,
+                {'checkpoint': name, 'horizontal_overflow': value})
+    return value
+
+
+def public_header(page):
+    boot(page)
+    header = page.locator('.mall-header')
+    brand = header.locator('.mall-brand-cluster')
+    account = header.locator('.mall-self-anchor')
+    expect(brand).to_be_visible()
+    expect(page.locator('#mallAvatarTrigger')).to_be_visible()
+    b, a = brand.bounding_box(), account.bounding_box()
+    assert_true(abs(b['y'] + b['height']/2 - a['y'] - a['height']/2) <= 12,
+                {'header_not_compact_one_row_at414': {'brand': b, 'account': a}})
+    page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-public-header.png')))
+    expect(page.locator('#mallProjection')).to_have_count(1)
+    expect(page.locator('#mallProjection')).not_to_be_visible()
+    dock = page.locator('.mall-member-search-dock:visible')
+    dock.locator('.mall-search-plus').tap()
+    menu = page.locator('dialog.mall-member-search-options[open]')
+    expect(menu).to_be_visible()
+    expect(menu.locator('#mallProjection')).to_be_visible()
+    for name in ['All', 'A-Z', 'Readiness', 'Category']:
+        expect(menu.get_by_role('button', name=name, exact=True)).to_be_visible()
+    category = menu.get_by_role('button', name='Category', exact=True)
+    category.tap()
+    expect(category).to_have_class(__import__('re').compile(r'\bactive\b'))
+    page.keyboard.press('Escape')
+    expect(menu).not_to_be_visible()
+    # No physical accessibility-zoom claim: enlarge text and narrow the CSS viewport.
+    page.set_viewport_size({'width': 320, 'height': 896})
+    page.evaluate("document.documentElement.style.fontSize='24px'")
+    expect(page.locator('#mallAvatarTrigger')).to_be_visible()
+    expect(page.locator('.mall-brand-cluster')).to_be_visible()
+    assert_true(page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),
+                'Narrow large-text public header overflows')
+    page.evaluate("document.documentElement.style.fontSize=''")
+    page.set_viewport_size(REPORT['viewport'])
+    page.locator('#mallAvatarTrigger').tap()
+    page.wait_for_url('https://play.foundups.com/?signin=required')
+    return {'header': header.bounding_box() if page.locator('.mall-header').count() else None,
+            'branding_account_initial': {'brand': b, 'account': a},
+            'filters_moved_once_and_operable': True, 'account_destination': page.url}
+
+
+def hpc_branding(page):
+    boot(page, True)
+    banner = page.locator('.mall-hpc-banner-link')
+    expect(banner).to_have_attribute('href', 'https://hasan4speaker.com/')
+    image = banner.locator('.mall-hpc-banner-image')
+    expect(image).to_be_visible()
+    expect(image).to_have_attribute('src', '/member/hpc-banner.webp')
+    expect(page.locator('.mall-hpc-mall-return')).to_have_attribute('href', 'https://play.foundups.com/')
+    expect(page.locator('.mall-hpc-mall-return')).to_contain_text('Play Mall')
+    assert_true(page.locator('.mall-hpc-mall-return a, .mall-hpc-banner-link a').count() == 0,
+                'Nested conflicting header links')
+    build = page.locator('.mall-hpc-banner > .mall-build-label').bounding_box()
+    art = image.bounding_box()
+    assert_true(build['y'] + build['height'] <= art['y'] + 1, {'build': build, 'art': art})
+    assert_true(abs(art['width']/art['height']-1280/353) < .03, {'art_cropped_ratio': art})
+    voice = page.locator('#videoScopeVoice')
+    expect(voice).to_have_attribute('href', fixture.catalog['hpc']['voice_resource_url'])
+    expect(voice).to_contain_text('Voice Your Opinion')
+    expect(voice).to_contain_text('Contact Congress')
+    expect(voice.locator('svg')).to_have_attribute('aria-hidden', 'true')
+    icon, button = voice.locator('svg').bounding_box(), voice.bounding_box()
+    assert_true(24 <= icon['width'] <= 28 and button['height'] >= 44,
+                {'voice_icon': icon, 'voice_button': button})
+    page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-hpc.png')))
+    page.locator('.mall-hpc-mall-return').tap()
+    page.wait_for_url('https://play.foundups.com/member/')
+    expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
+    return {'art': art, 'build': build, 'voice_icon': icon,
+            'mall_return_navigated': page.url, 'external_banner_href': 'https://hasan4speaker.com/'}
+
+
+def blocked_account_storage(page):
+    boot(page)
+    initial = page.url
+    page.locator('#mallAvatarTrigger').tap()
+    status = page.locator('#mallAccountReturnStatus[role="alert"]')
+    expect(status).to_be_visible()
+    expect(status).to_contain_text('safe account return could not be saved')
+    assert_true(page.url == initial, {'unexpected_navigation': page.url})
+    expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
+    assert_true(page.evaluate('window.mallStateRestore.peekAdmissionIntent()===null'),
+                'Failed handoff retained an admission intent')
+    assert_true(not page.locator('#accountPlane').evaluate("e=>e.classList.contains('open')"),
+                'Blocked account action opened conversation drawer')
+    return {'no_navigation': True, 'visible_safe_return_error': status.inner_text(),
+            'no_admission_intent': True}
+
+
+def dock_flow(page, hpc):
+    boot(page, hpc)
+    page.evaluate("window.independentDock=document.querySelector('.mall-member-search-dock:not([hidden])')")
+    if hpc:
+        query = page.locator('#videoScopePhoneDock .mall-member-search-bar textarea')
+        query.fill('Fixture')
+        query.press('Enter')
+        page.locator('.mall-tile[data-video-id="HPC00000000"]').tap(position={'x': 25, 'y': 75})
+    else:
+        page.locator('#mallTileField [data-foundup-id="move2japan"]').tap(position={'x': 30, 'y': 50})
+    player = page.locator('#videoPlayerFullscreen')
+    expect(player).to_have_attribute('aria-label', 'Floating video player')
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    page.evaluate("window.independentFrame=document.querySelector('#videoPlayerFullscreen iframe')")
+    points = [checkpoint(page, 'floating')]
+    expect(player.get_by_role('button', name='Play video', exact=True)).not_to_be_visible()
+    for cycle in range(2):
+        player.get_by_role('button', name='Open WikiTube', exact=True).tap()
+        expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+        points.append(checkpoint(page, 'expanded-' + str(cycle)))
+        queue = page.locator('.mall-member-search-dock:visible .mall-member-search-bar textarea')
+        expect(queue).to_have_attribute('aria-label', 'Search this queue')
+        queue.fill('nonmatching queue query')
+        queue.press('Enter')
+        assert_true(page.evaluate("document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame"),
+                    'Queue search replaced provider frame')
+        page.locator('.mall-member-search-dock:visible .mall-search-plus').tap()
+        expect(page.locator('.mall-member-search-options[open]')).to_be_visible()
+        page.keyboard.press('Escape')
+        expect(page.locator('.mall-member-search-options[open]')).to_have_count(0)
+        expect(player).to_be_visible()
+        queue.fill('')
+        queue.press('Enter')
+        player.locator('[data-action="float"]').tap()
+        expect(player).to_have_attribute('aria-label', 'Floating video player')
+        expect(player.locator('[data-action="expand"]')).to_be_focused()
+        points.append(checkpoint(page, 'restored-' + str(cycle)))
+        if hpc:
+            expect(page.locator('#videoScopePhoneDock .mall-member-search-bar textarea')).to_have_value('Fixture')
+    assert_true(all(p['sameFrame'] and p['created'] == 1 for p in points), points)
+    # Exercise the existing options through UI, including Full Video -> WikiTube.
+    page.locator('.mall-member-search-dock:visible .mall-search-plus').tap()
+    menu = page.locator('.mall-member-search-options[open]')
+    menu.locator('[data-video-option="frameDestination"]').select_option('full-video')
+    menu.locator('[data-video-option="collapseDestination"]').select_option('wikitube')
+    # A native select can consume Escape; focus a dialog control first.
+    menu.get_by_role('button', name='Close', exact=True).focus()
+    page.keyboard.press('Escape')
+    expect(menu).not_to_be_visible()
+    player.locator('[data-action="expand"]').tap()
+    expect(player).to_have_attribute('aria-label', 'Full Video in app')
+    expect(player.locator('.video-player-queue-rail')).not_to_be_visible()
+    points.append(checkpoint(page, 'full-video'))
+    player.locator('[data-action="float"]').tap()
+    expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+    points.append(checkpoint(page, 'full-video-to-wikitube'))
+    player.locator('[data-action="float"]').tap()
+    expect(player).to_have_attribute('aria-label', 'Floating video player')
+    expect(player.locator('[data-action="expand"]')).to_be_focused()
+    points.append(checkpoint(page, 'full-video-restored'))
+    assert_true(all(p['sameFrame'] and p['created'] == 1 for p in points), points)
+    page.locator('.mall-member-search-dock:visible .mall-search-plus').tap()
+    menu = page.locator('.mall-member-search-options[open]')
+    menu.locator('[data-video-option="frameDestination"]').select_option('wikitube')
+    menu.get_by_role('button', name='Close', exact=True).focus()
+    page.keyboard.press('Escape')
+    expect(menu).not_to_be_visible()
+    player.locator('[data-action="expand"]').tap()
+    if hpc:
+        # Only the existing fixed-HPC scope pushes a player history entry.
+        page.go_back(wait_until='domcontentloaded')
+    else:
+        # Public browsing preserves its existing native history. Use its UI Back.
+        player.locator('[data-action="back"]').tap()
+    expect(player).not_to_be_visible()
+    final = checkpoint(page, 'closed')
+    expect(player.locator('iframe')).to_have_count(0)
+    return {'checkpoints': points, 'closed': final,
+            'provider_fixture_frame_reused': True, 'history_back': hpc,
+            'player_back': not hpc}
+
+
+def blocked_recovery(page):
+    boot(page, True)
+    page.locator('.mall-tile[data-video-id="HPC00000000"]').tap(position={'x': 25, 'y': 75})
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='autoplay-blocked'")
+    player = page.locator('#videoPlayerFullscreen')
+    play = player.get_by_role('button', name='Play video', exact=True)
+    expect(play).to_be_visible()
+    frame = player.locator('iframe')
+    expect(frame).to_have_count(1)
+    page.evaluate("window.independentFrame=document.querySelector('#videoPlayerFullscreen iframe');window.fixturePlayback.block=false")
+    play.tap()
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    expect(play).not_to_be_visible()
+    assert_true(page.evaluate("document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame"),
+                'Manual recovery replaced provider frame')
+    return {'positive_blocked_fallback': True, 'successful_fallback_hidden': True,
+            'fixture_snapshot': page.evaluate('window.mallVideoPlayer.getPlaybackSnapshot()')}
+
+
+def silent_start_unknown(page):
+    boot(page, True)
+    page.locator('.mall-tile[data-video-id="HPC00000000"]').tap(position={'x': 25, 'y': 75})
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='provider-unknown'", timeout=7000)
+    player = page.locator('#videoPlayerFullscreen')
+    snapshot = page.evaluate('window.mallVideoPlayer.getPlaybackSnapshot()')
+    message = player.locator('.video-player-status').inner_text()
+    assert_true('blocked' not in message.lower(), {'snapshot': snapshot, 'rendered_message': message})
+    play = player.get_by_role('button', name='Play video', exact=True)
+    expect(play).to_be_visible()
+    page.evaluate("window.independentFrame=document.querySelector('#videoPlayerFullscreen iframe');window.fixturePlayback.releaseSilentStart()")
+    play.tap()
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    expect(play).not_to_be_visible()
+    assert_true(page.evaluate("document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame"),
+                'Unknown-start manual recovery replaced provider frame')
+    return {'silent_start': snapshot, 'rendered_message': message, 'manual_recovery': True,
+            'qualification': 'Synthetic API emitted READY then remained silent; no observed browser onAutoplayBlocked event.'}
+
+
+def run_case(browser, name, fn, block=False, block_storage=False, silent_start=False):
+    REPORT['active_case'] = name
+    context, page = make_page(browser, block, block_storage, silent_start)
+    row = {'engine': REPORT['engine'], 'case': name, 'passed': False}
+    try:
+        row['evidence'] = fn(page)
+        row['passed'] = True
+    except Exception as exc:
+        row['error'] = str(exc)
+        row['traceback'] = traceback.format_exc()
+        row['url'] = page.url
+        try:
+            row['diagnostic'] = page.evaluate("""() => ({
+              playerClass:document.querySelector('#videoPlayerFullscreen')?.className,
+              playerHidden:document.querySelector('#videoPlayerFullscreen')?.hidden,
+              state:window.mallVideoPlayer?.getPlaybackSnapshot?.(),
+              dialogs:[...document.querySelectorAll('dialog[open]')].map(x=>x.getAttribute('aria-label')),
+              accountPlane:document.querySelector('#accountPlane')?.className,
+              focused:document.activeElement?.outerHTML?.slice(0,400)})""")
+        except Exception:
+            pass
+        try:
+            page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-' + name + '-failure.png')))
+        except Exception:
+            pass
+    finally:
+        REPORT['cases'].append(row)
+        context.close()
+        save()
+        print(json.dumps({'engine': row['engine'], 'case': name, 'passed': row['passed'],
+                          'error': row.get('error', '')[:240]}), flush=True)
+
+
+REPORT['source_sha256_before'] = hashes()
+save()
+try:
+    with sync_playwright() as playwright:
+        for name in ['chromium', 'webkit']:
+            REPORT['engine'] = name
+            browser = getattr(playwright, name).launch()
+            try:
+                run_case(browser, 'public-header-filters-account', public_header)
+                run_case(browser, 'account-blocked-storage', blocked_account_storage, block_storage=True)
+                run_case(browser, 'hpc-banner-voice-navigation', hpc_branding)
+                run_case(browser, 'hpc-one-dock-player', lambda page: dock_flow(page, True))
+                run_case(browser, 'public-one-dock-player', lambda page: dock_flow(page, False))
+                run_case(browser, 'conditional-manual-recovery', blocked_recovery, True)
+                run_case(browser, 'silent-start-provider-unknown', silent_start_unknown, silent_start=True)
+            finally:
+                browser.close()
+finally:
+    REPORT['source_sha256_after'] = hashes()
+    REPORT['source_stable'] = REPORT['source_sha256_before'] == REPORT['source_sha256_after']
+    REPORT['elapsed_seconds'] = round(time.time() - REPORT['started_epoch'], 3)
+    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == 14 and
+        all(row['passed'] for row in REPORT['cases']) and REPORT['source_stable']) else 'FAIL'
+    save()
+sys.exit(0 if REPORT['status'] == 'PASS' else 1)

@@ -546,6 +546,25 @@
 
 .video-player-queue-panel .mall-member-search-bar { max-width: 100%; }
 
+/* Last flex child of the fixed player: same phone dock, below the queue. */
+.video-player-shared-dock-host {
+  flex: 0 0 auto;
+  margin: .25rem max(.65rem, var(--safe-right)) calc(.5rem + var(--safe-bottom)) max(.65rem, var(--safe-left));
+}
+
+.video-player-shared-dock-host .mall-member-search-bar { max-width: 100%; }
+
+/* On short viewports, scroll the queue rather than clipping native player controls. */
+.video-player-queue-docked:has(> .video-player-shared-dock-host) .video-player-media-panel {
+  flex: 1 0 auto;
+}
+
+.video-player-queue-docked:has(> .video-player-shared-dock-host) .video-player-queue-panel {
+  flex-shrink: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .video-player-queue-docked .video-player-queue-track {
   position: relative;
   touch-action: pan-x;
@@ -804,3 +823,8 @@
     width: 80px;
   }
 }
+
+/* App Full Video shares the WikiTube shell and provider, without its queue panel. */
+.video-player-full-video :is(.video-player-queue-rail, .video-player-queue-empty) { display: none; }
+.video-player-full-video .video-player-media-panel { flex: 1 1 0; min-height: 0; }
+.video-player-full-video .video-player-stage { flex: 1 1 200px; min-height: 200px; }

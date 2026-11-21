@@ -462,16 +462,13 @@ class TestKoseiTenantBinding:
         # entry_url should be present after iframe verification
         assert '"entry_url": "https://foundupscom.web.app/kosei/app/"' in kosei_entry
 
-    def test_kosei_launch_readiness_is_ready(self):
-        """Kosei is ready after iframe embed verification (BX4)."""
-        catalog = _read("mall-video-catalog.json")
-        idx = catalog.find('"foundup_id": "kosei"')
-        assert idx > 0
-        next_entry = catalog.find('"foundup_id":', idx + 20)
-        if next_entry < 0:
-            next_entry = len(catalog)
-        kosei_entry = catalog[idx:next_entry]
-        assert '"ready"' in kosei_entry
+    def test_kosei_projection_keeps_current_conditional_readiness(self):
+        """An old iframe check does not upgrade the recovered catalog's stage."""
+        import json
+        catalog = json.loads(_read("mall-video-catalog.json"))
+        kosei = next(item for item in catalog if item["foundup_id"] == "kosei")
+        assert kosei["launch_readiness"] == "conditional"
+        assert kosei["entry_url"] == "https://foundupscom.web.app/kosei/app/"
 
 
 class TestPublicProjectionHandling:

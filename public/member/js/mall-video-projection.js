@@ -4,20 +4,21 @@
   // Dedicated public hosts start guest discovery without member account reads.
   // hpc.foundups.com mounts the single-FoundUp HPC Shorts projection;
   // play.foundups.com mounts the open p.fMALL discovery landing for all FoundUps,
-  // while entering any FoundUp passes through the foundups.com Member Portal.
-  const MEMBER_PORTAL_ORIGIN = 'https://foundups.com';
+  // Public cards/video stay readable. Account and contribution intents use the
+  // existing same-host sign-in/invite flow; this is not a graph ACL or writer.
   const OPEN_MALL_ORIGIN = 'https://play.foundups.com';
   const dedicatedHosts = new Map([
     ['hpc.foundups.com', 'hpc'],
     ['play.foundups.com', 'mall']
   ]);
-  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v25-iphone)-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
+  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone)-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
     dedicatedHosts.set(window.location.hostname, 'mall');
   }
   const publicScopes = new Set(['hpc']);
+  let scopedPhoneDock = null;
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
-  const mallBuild = 'v25';
+  const mallBuild = 'v26';
   const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
 
   function hostScope(location) {
@@ -26,6 +27,60 @@
 
   function isOpenMallHost(location) {
     return hostScope(location) === 'mall';
+  }
+
+  function isAdmissionRequest(location) {
+    if (!location) return false;
+    if (/^\/sso-callback\/?$/.test(location.pathname || '')) return true;
+    const query = new URLSearchParams(location.search || '');
+    return [...query.keys()].some(key =>
+      ['signin', 'auth', 'admission', 'invite', 'invitation', 'code', 'state', 'error'].includes(key) ||
+      key.startsWith('__clerk'));
+  }
+
+  function publicEntryPath(location) {
+    if (!isOpenMallHost(location) || !memberPaths.has(location?.pathname) || isAdmissionRequest(location)) return null;
+    const entries = new URLSearchParams(location.search || '').getAll('enter');
+    return entries.length === 1 ? memberEntryPath(entries[0]) : null;
+  }
+
+  function shouldLoadMemberAuth(location) {
+    return !hostScope(location) || isAdmissionRequest(location) ||
+      (new URLSearchParams(location?.search || '').has('enter') && !publicEntryPath(location));
+  }
+
+  function dedicatedLandingPath(location) {
+    if (!hostScope(location) || !['/', '/index.html'].includes(location?.pathname) || isAdmissionRequest(location)) return null;
+    const query = new URLSearchParams(location.search || '');
+    // An old entry link must resolve its intended read-only card, not disappear.
+    if (query.has('enter')) {
+      const entries = query.getAll('enter');
+      return entries.length === 1 ? memberEntryPath(entries[0]) : null;
+    }
+    return '/member/' + (location.search || '') + (location.hash || '');
+  }
+
+  // Planning/test seam only. The apex does not invoke this redirect in v26.
+  function plannedApexLandingUrl(location) {
+    if (location?.hostname !== 'foundups.com' || !['/', '/index.html'].includes(location.pathname) ||
+        isAdmissionRequest(location)) return null;
+    const query = new URLSearchParams(location.search || '');
+    if (['enter', 'foundup', 'return_to', 'next'].some(key => query.has(key))) return null;
+    return OPEN_MALL_ORIGIN + '/' + (location.search || '') + (location.hash || '');
+  }
+
+  function portalOrigin(location = window.location) {
+    // A preview remains isolated, including its auth callback. The production
+    // HPC site uses Play's existing gate; no provider configuration is changed.
+    return isOpenMallHost(location) && location.origin ? location.origin : OPEN_MALL_ORIGIN;
+  }
+
+  function signInUrl(location = window.location) {
+    return portalOrigin(location) + '/?signin=required';
+  }
+
+  function authCompletionPath(location = window.location) {
+    return hostScope(location) ? '/member/?admission=resume' : '/member/';
   }
 
   function validFoundUpId(value) {
@@ -40,6 +95,7 @@
 
   function resolve(location) {
     if (!location || !memberPaths.has(location.pathname)) return null;
+    if (isAdmissionRequest(location) || new URLSearchParams(location.search || '').has('enter')) return null;
     const scope = hostScope(location);
     if (scope === 'mall') {
       const requested = new URLSearchParams(location.search).getAll('foundup');
@@ -52,13 +108,13 @@
 
   // Member boot uses this presentation selection after checking admission.
   function resolveMember(location) {
-    if (!location || !memberPaths.has(location.pathname) || hostScope(location)) return null;
+    if (!location || !memberPaths.has(location.pathname) || (hostScope(location) && !isAdmissionRequest(location))) return null;
     const requested = new URLSearchParams(location.search).getAll('foundup');
     return requested.length === 1 && publicScopes.has(requested[0]) ? requested[0] : null;
   }
 
   function resolveMemberEntry(location) {
-    if (!location || !memberPaths.has(location.pathname) || hostScope(location)) return null;
+    if (!location || !memberPaths.has(location.pathname) || (hostScope(location) && !isAdmissionRequest(location))) return null;
     const requested = new URLSearchParams(location.search).getAll('enter');
     return requested.length === 1 ? validFoundUpId(requested[0]) : null;
   }
@@ -75,8 +131,68 @@
   function memberPortalUrl(foundupId) {
     const clean = validFoundUpId(foundupId);
     return clean
-      ? MEMBER_PORTAL_ORIGIN + '/member/?enter=' + encodeURIComponent(clean)
-      : MEMBER_PORTAL_ORIGIN + '/member/';
+      ? portalOrigin() + memberEntryPath(clean)
+      : signInUrl();
+  }
+
+  function isPhoneDockLayout() {
+    return document.documentElement.dataset.mallVideoLayout === 'phone' ||
+      !window.matchMedia?.('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches;
+  }
+
+  function showContributionReview(intent, admitted = false, returnFocusTo = document.activeElement) {
+    if (!intent || !['add-foundup', 'add-video'].includes(intent.action)) return false;
+    const old = document.getElementById('mallContributionReview');
+    if (old?.open) return false;
+    old?.remove();
+    const dialog = document.createElement('dialog');
+    dialog.id = 'mallContributionReview';
+    dialog.className = 'mall-member-search-options mall-contribution-review';
+    dialog.setAttribute('aria-labelledby', 'mallContributionTitle');
+    const title = document.createElement('h2');
+    title.id = 'mallContributionTitle';
+    title.textContent = intent.action === 'add-video' ? 'Add Video' : 'Add FoundUp';
+    const status = document.createElement('p');
+    status.setAttribute('role', 'status');
+    status.textContent = admitted
+      ? 'Sign-in and the existing invite check completed. Submission is unavailable until the owning service verifies current membership and editor permission. No contribution has been submitted.'
+      : 'Sign-in and membership are required for contributions at every level. Video curation starts with 012 as the HPC editor. The browser cannot grant editor permission.';
+    const detail = document.createElement('p');
+    detail.textContent = intent.action === 'add-video'
+      ? 'Video is the current HPC type. This pilot restores a review step; it does not publish to the curated catalog.'
+      : 'The trailing + adds a FoundUp. Registration/publication requires the existing owning service; this pilot does not create a parallel registry.';
+    const signIn = document.createElement('button');
+    signIn.type = 'button';
+    signIn.className = 'mall-search-option';
+    signIn.textContent = admitted ? 'Contribution service not enabled' : 'Sign in and check membership';
+    const sameHostReturn = new URL(signInUrl(), window.location.href).origin === window.location.origin;
+    signIn.disabled = admitted || !sameHostReturn;
+    if (!admitted && !sameHostReturn) {
+      signIn.textContent = 'Contribution return not connected';
+      status.textContent = 'HPC contribution sign-in return is not connected. Keep browsing; no contribution has been submitted.';
+    }
+    signIn.addEventListener('click', () => {
+      if (admitted || !sameHostReturn) return;
+      if (!window.mallStateRestore?.rememberAdmissionIntent?.(intent)) {
+        status.textContent = 'The safe return could not be saved. No sign-in or submission was started.';
+        return;
+      }
+      window.mallStateRestore.save();
+      window.location.assign(signInUrl());
+    });
+    const close = document.createElement('button');
+    close.type = 'button'; close.textContent = 'Back to browsing';
+    close.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('keydown', event => { if (event.key === 'Escape') event.stopPropagation(); });
+    dialog.addEventListener('close', () => {
+      if (returnFocusTo?.isConnected && !returnFocusTo.closest('[inert]')) returnFocusTo.focus({ preventScroll: true });
+      dialog.remove();
+    }, { once: true });
+    dialog.append(title, status, detail, signIn, close);
+    document.body.append(dialog);
+    dialog.showModal();
+    (signIn.disabled ? close : signIn).focus({ preventScroll: true });
+    return true;
   }
 
   function canonicalEntryId(item) {
@@ -112,10 +228,7 @@
   // Select install metadata in the head, before the public catalog loads.
   const hpcTitle = 'HPC';
   const hpcPortrait = '/member/hpc-icon-192.png';
-  const playLocation = window.location;
-  if (playLocation?.hostname === 'play.foundups.com' && playLocation.pathname === '/') {
-    playLocation.replace('/member/' + playLocation.search + playLocation.hash);
-  }
+  // Root navigation is owned by the gateway's dedicatedLandingPath guard.
   if (typeof document !== 'undefined' && window.location && resolve(window.location) === 'hpc') {
     document.title = hpcTitle;
     document.querySelector('link[rel="manifest"]').href = '/member/hpc.webmanifest';
@@ -296,6 +409,7 @@
   }
 
   function createMemberDock(label, submit, openRedDog, redDogHref) {
+    let contextual = false;
     const element = document.createElement('div');
     element.className = 'mall-member-search-dock';
     const optionsLabel = redDogHref ? 'More options' : 'Search options';
@@ -317,6 +431,7 @@
           </svg>
         </button>
         ${dogAction}
+        <button class="mall-search-add" type="button" aria-label="Add FoundUp" title="Add FoundUp">+</button>
         <button class="mall-search-stop" type="button" aria-label="Stop dictation" hidden>
           <span class="mall-dictation-stop" aria-hidden="true"></span>
         </button>
@@ -331,10 +446,17 @@
         <a class="mall-search-option" href="https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/" target="_blank" rel="noopener noreferrer">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/></svg>AutoPost camera and photos
         </a>
-        <label class="mall-search-option">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 3v3m6-3v3M9 18v3m6-3v3M3 9h3m-3 6h3m12-6h3m-3 6h3"/></svg>
-          <span>Browser AI <select aria-label="Browser AI" disabled><option>No device model connected</option></select></span>
-        </label>
+        <fieldset class="mall-video-options">
+          <legend>Video Options</legend>
+          <label><input type="checkbox" data-video-option="autoplayNext"> Autoplay next clip while visible</label>
+          <label>Frame action <select data-video-option="frameDestination"><option value="wikitube">WikiTube</option><option value="full-video">Full Video in app</option></select></label>
+          <small>Uses the app frame control. Native YouTube taps and fullscreen stay with YouTube.</small>
+          <label>Collapse Full Video to <select data-video-option="collapseDestination"><option value="mall">Mall</option><option value="wikitube">WikiTube</option></select></label>
+          <label><input type="checkbox" data-video-option="revealSelectedPlayer"> Show parked player when I select a clip</label>
+          <small>A fully hidden player stays paused. Browser/provider playback rules still apply.</small>
+        </fieldset>
+        <button class="mall-search-option" type="button" data-action="browse-ai">Browse AI pilot</button>
+        <div data-browse-ai-pilot hidden></div>
         ${buildLabel}
         <form method="dialog"><button type="submit">Close</button></form>
       </dialog>`;
@@ -343,6 +465,17 @@
     const submitButton = form.querySelector('.mall-search-submit');
     const dialog = element.querySelector('dialog');
     const options = form.querySelector('.mall-search-plus');
+    const add = form.querySelector('.mall-search-add');
+    add.addEventListener('click', () => {
+      const scope = document.documentElement.dataset.mallVideoScope;
+      const intent = { action: scope === 'hpc' ? 'add-video' : 'add-foundup' };
+      if (scope === 'hpc') {
+        intent.foundupId = 'hpc';
+        const videoId = window.mallVideoPlayer?.getCurrentVideoId?.();
+        if (/^[A-Za-z0-9_-]{11}$/.test(videoId || '')) intent.videoId = videoId;
+      }
+      showContributionReview(intent, false, add);
+    });
     options.setAttribute('aria-label', optionsLabel);
     dialog.setAttribute('aria-label', optionsLabel);
     form.setAttribute('aria-label', label);
@@ -392,6 +525,13 @@
     function showOptions() {
       if (dialog.open || element.hidden) return;
       dictation.cancel();
+      const prefs = window.mallStateRestore?.getVideoOptions?.();
+      for (const input of dialog.querySelectorAll('[data-video-option]')) {
+        if (!prefs) continue;
+        const value = prefs[input.dataset.videoOption];
+        if (input.type === 'checkbox') input.checked = value;
+        else input.value = value;
+      }
       options.focus({ preventScroll: true });
       dialog.showModal();
       placeOptions();
@@ -400,6 +540,33 @@
     window.visualViewport?.addEventListener('resize', placeOptions);
     window.visualViewport?.addEventListener('scroll', placeOptions);
     bindOptions(options, showOptions);
+    for (const input of dialog.querySelectorAll('[data-video-option]')) {
+      input.addEventListener('change', () => {
+        const value = input.type === 'checkbox' ? input.checked : input.value;
+        window.mallStateRestore?.setVideoOptions?.({ [input.dataset.videoOption]: value });
+      });
+    }
+    let browsePilot = null;
+    const browseHost = dialog.querySelector('[data-browse-ai-pilot]');
+    dialog.querySelector('[data-action="browse-ai"]').addEventListener('click', async event => {
+      const button = event.currentTarget;
+      browseHost.hidden = false;
+      button.disabled = true;
+      try {
+        const { mountBrowseAiPilot } = await import('/member/js/mall-browser-ai-pilot.js?v=26');
+        if (!dialog.open) return;
+        browsePilot?.destroy();
+        browsePilot = mountBrowseAiPilot(browseHost, { returnFocusTo: button });
+        placeOptions();
+      } catch (_) {
+        browseHost.textContent = 'Browse AI pilot is unavailable in this runtime. No model was loaded.';
+      } finally {
+        dialog.querySelector('[data-action="browse-ai"]').disabled = false;
+      }
+    });
+    dialog.addEventListener('close', () => {
+      browsePilot?.destroy(); browsePilot = null; browseHost.hidden = true;
+    });
     dialog.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') event.stopPropagation();
     });
@@ -426,8 +593,42 @@
     }
     return {
       element, input, dialog, dictation, fitInput,
-      setScoped(scoped) { autoPost.hidden = scoped; },
+      setScoped(scoped) {
+        // AutoPost is a working existing action, not a model placeholder.
+        autoPost.hidden = false;
+        const hpc = document.documentElement.dataset.mallVideoScope === 'hpc';
+        add.setAttribute('aria-label', hpc ? 'Add Video' : 'Add FoundUp');
+        add.title = hpc ? 'Add Video' : 'Add FoundUp';
+      },
       setValue(value) { input.value = value; fitInput(); },
+      isDefaultContext() { return !contextual; },
+      useSearchContext(nextSubmit, nextLabel, value) {
+        const previous = { submit, label: input.getAttribute('aria-label'), value: input.value,
+          start: input.selectionStart, end: input.selectionEnd };
+        const scopeOptions = [...dialog.querySelectorAll('[data-action="home"], [data-action="about"]')]
+          .map((option) => ({ option, hidden: option.hidden }));
+        cancelHold?.(); dialog.close(); dictation.cancel();
+        contextual = true;
+        submit = nextSubmit;
+        form.setAttribute('aria-label', nextLabel);
+        input.setAttribute('aria-label', nextLabel);
+        input.placeholder = nextLabel;
+        input.value = value;
+        scopeOptions.forEach(({ option }) => { option.hidden = true; });
+        fitInput();
+        return () => {
+          cancelHold?.(); dialog.close(); dictation.cancel();
+          submit = previous.submit;
+          contextual = false;
+          form.setAttribute('aria-label', previous.label);
+          input.setAttribute('aria-label', previous.label);
+          input.placeholder = previous.label;
+          input.value = previous.value;
+          input.setSelectionRange(previous.start, previous.end);
+          scopeOptions.forEach(({ option, hidden }) => { option.hidden = hidden; });
+          fitInput();
+        };
+      },
       hide() { cancelHold?.(); dialog.close(); dictation.cancel(); element.hidden = true; }
     };
   }
@@ -447,6 +648,13 @@
       }
     });
     anchor.prepend(dock.element);
+    scopedPhoneDock = { scope: null, dock };
+    dock.setScoped(false);
+    const filters = document.getElementById('mallProjection');
+    if (document.documentElement.dataset.mallOpenLanding === 'play' && filters) {
+      filters.classList.add('mall-open-filter-options');
+      dock.dialog.prepend(filters);
+    }
     dock.setValue(field.getFieldScope()?.query || '');
     window.redDog.bindSearchDictation?.(dock.dictation);
     window.visualViewport?.addEventListener('resize', () => {
@@ -460,7 +668,12 @@
 
   function createPhoneDock(actions, scope, disclosure) {
     const field = window.mallTileField;
-    const dock = createMemberDock('Search videos', search, null, scopedRedDogPath(scope));
+    const conversationAvailable = window.redDog?.hasConversationEndpoint?.() === true;
+    const dock = createMemberDock('Search HPC Mall', search, conversationAvailable ? () => {
+      window.mallStateRestore?.save();
+      window.redDog.openConversation();
+    } : null, conversationAvailable ? null : scopedRedDogPath(scope));
+    scopedPhoneDock = { scope, dock };
     const { element, dialog, input } = dock;
     element.id = 'videoScopePhoneDock';
     element.hidden = true;
@@ -484,7 +697,9 @@
       dock.setValue(field.getScopedPhoneQuery());
       window.mallStateRestore.save();
     }
-    input.addEventListener('input', () => { if (!input.value && field.getScopedPhoneQuery()) search(''); });
+    input.addEventListener('input', () => {
+      if (dock.isDefaultContext() && !input.value && field.getScopedPhoneQuery()) search('');
+    });
     const home = dialog.querySelector('[data-action="home"]');
     const about = dialog.querySelector('[data-action="about"]');
     home.hidden = about.hidden = false;
@@ -492,6 +707,7 @@
     about.addEventListener('click', () => { dialog.close(); disclosure.showModal(); });
     return {
       show(visible) {
+        if (!dock.isDefaultContext()) return;
         if (!visible) return dock.hide();
         element.hidden = false;
         dock.setValue(field.getScopedPhoneQuery());
@@ -510,26 +726,40 @@
 
     const home = document.querySelector('.mall-header .mall-brand-minimal');
     if (home) {
-      home.href = MEMBER_PORTAL_ORIGIN + '/';
-      home.setAttribute('aria-label', 'FoundUPS Member Portal');
+      home.href = '/member/';
+      home.setAttribute('aria-label', 'Return to Play FoundUps Mall');
       home.addEventListener('click', () => window.mallStateRestore?.save?.());
     }
 
     const handle = element('mallUserHandle');
     const avatarTrigger = element('mallAvatarTrigger');
     const selfAnchor = document.querySelector('.mall-self-anchor');
-    if (handle) handle.textContent = 'Member Portal \u2197';
+    if (handle) handle.textContent = 'Member Portal';
     if (avatarTrigger) {
-      avatarTrigger.setAttribute('aria-label', 'Sign in at FoundUPS Member Portal');
-      avatarTrigger.title = 'Sign in at FoundUPS Member Portal';
+      avatarTrigger.setAttribute('aria-label', 'Open Play account');
+      avatarTrigger.title = 'Open Play account';
+    }
+    function openPlayAccount(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!window.mallStateRestore?.rememberAdmissionIntent?.({ action: 'account' })) {
+        let status = element('mallAccountReturnStatus');
+        if (!status) {
+          status = document.createElement('p');
+          status.id = 'mallAccountReturnStatus';
+          status.setAttribute('role', 'alert');
+          document.querySelector('.mall-header')?.after(status);
+        }
+        status.textContent = 'The safe account return could not be saved. Keep browsing; sign-in has not started.';
+        return;
+      }
+      window.location.assign(memberPortalUrl());
     }
     if (selfAnchor) {
       selfAnchor.classList.add('open-mall-portal-cta');
-      selfAnchor.addEventListener('click', (event) => {
-        event.preventDefault();
-        window.mallStateRestore?.save?.();
-        window.location.assign(memberPortalUrl());
-      });
+      // The existing avatar owns a bubbling panel handler. This public account
+      // action uses capture so it reaches the same-host sign-in gate once.
+      selfAnchor.addEventListener('click', openPlayAccount, true);
     }
 
     const plane = element('accountPlane');
@@ -539,13 +769,14 @@
         if (section) section.hidden = true;
       }
       const greeting = plane.querySelector('[data-reddog-greeting]');
-      if (greeting) greeting.textContent = 'Open Mall guide \u00b7 Member Portal on FoundUps.com';
+      if (greeting) greeting.textContent = 'Play Mall guide · Sign in for account actions';
       const concierge = plane.querySelector('[data-reddog-concierge]');
       if (concierge && !concierge.querySelector('.open-mall-portal-link')) {
         const portalLink = document.createElement('a');
         portalLink.className = 'm2j-account open-mall-portal-link';
         portalLink.href = memberPortalUrl();
-        portalLink.textContent = 'Sign in at FoundUps.com to Enter FoundUps \u2197';
+        portalLink.textContent = 'Open Play account \u2197';
+        portalLink.addEventListener('click', openPlayAccount);
         concierge.prepend(portalLink);
       }
     }
@@ -640,6 +871,15 @@
         image.height = 353;
         image.classList.replace('mall-brand-logo-sm', 'mall-hpc-banner-image');
         home.classList.add('mall-hpc-banner-link');
+        home.href = 'https://hasan4speaker.com/';
+        home.setAttribute('aria-label', 'Visit Hasan for Speaker');
+        const mallReturn = document.createElement('a');
+        mallReturn.className = 'mall-hpc-mall-return';
+        mallReturn.href = isOpenMallHost(window.location) ? '/member/' : OPEN_MALL_ORIGIN + '/';
+        mallReturn.setAttribute('aria-label', 'Return to Play FoundUps Mall');
+        mallReturn.innerHTML = '<img src="/logo-dog.png" alt="" width="24" height="24"><span>Play Mall</span>';
+        mallReturn.addEventListener('click', () => window.mallStateRestore?.save());
+        banner.append(mallReturn);
         const brandCluster = home.closest('.mall-brand-cluster');
         banner.appendChild(home);
         // The ordinary Mall keeps its logo and LinkedIn cluster. HPC uses the
@@ -692,6 +932,14 @@
     mallBuild,
     hostScope,
     isOpenMallHost,
+    isAdmissionRequest,
+    shouldLoadMemberAuth,
+    publicEntryPath,
+    dedicatedLandingPath,
+    plannedApexLandingUrl,
+    authCompletionPath,
+    signInUrl,
+    showContributionReview,
     resolve,
     resolveMember,
     resolveMemberEntry,
@@ -702,6 +950,11 @@
     discoveryPath,
     mount,
     createMemberDock,
+    getScopedPhoneDock(scope) {
+      return isPhoneDockLayout() && scopedPhoneDock && (scopedPhoneDock.scope === null || scopedPhoneDock.scope === scope)
+        ? scopedPhoneDock.dock : null;
+    },
+    isPhoneDockLayout,
     mountMemberDock,
     openScopedRedDog
   };

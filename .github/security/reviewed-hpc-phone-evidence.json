@@ -894,5 +894,67 @@
     ],
     "scanner_rules_exclusions_formula_and_coverage": "UNCHANGED",
     "required_next_gate": "Fresh exact-head tracked-tree and introduced-history security scans."
+  },
+  "v26_phone_sdk_renewal": {
+    "reviewer": "/root/v26_security_review",
+    "scope": "independent source-bound classification proposal only; no ledger/application edits",
+    "reviewed_at_utc": "2026-11-21T08:54:41.508186+00:00",
+    "approved_base_sha": "bd0510c5c2e333d07b1bb02340ca91b291420164",
+    "ledger_before_sha256": "62cb2b30c3ce2d63b6bcb6c999a0ab0ae98a22c51c84b8ab44fc98311384319c",
+    "ledger_before_count": 4622,
+    "appended_count_proposed": 3,
+    "appended_fingerprints_sorted_compact_json_sha256": "e6cc8a00be10d8ac8a194954e7c1f965a10fea4d59eaf46b18c147d377ff57b8",
+    "findings": [
+      {
+        "file": "public/index.html",
+        "rule": "generic-api-key",
+        "line": 81,
+        "candidate_git_blob": "e46a6159fcecfeee311040295646efce871579ef",
+        "candidate_file_sha256": "5f8fe8669ddc59419779f650bd1c3a10bf44d9b37a1db547f8672fbb940c52a4",
+        "prior_file_sha256": "f23e68ae06256b6c1b38b0ea039d914b6cbf0755255cb6ccebaebe38d1deed38",
+        "prior_line": 80,
+        "prior_approved_fingerprint": "7500d05026bcee9473e6e25ad1efeb5d3082f2bbefd95101c34909eabfff9720",
+        "candidate_fingerprint": "0fbe458e265d5d3ea6876ac31ec35412b43fba229c9f9077d756b8a8ae4d62b7",
+        "prior_approval_present": true,
+        "flagged_line_byte_identical": true,
+        "complete_sdk_byte_identical_after_git_clean_normalization": true,
+        "complete_sdk_sha256": "3a6a4376ce75609ee13168f405fa9a825e4db536e6170cce049287fdf6846fe4",
+        "classification": "previously_reviewed_clerk_publishable_frontend_sdk"
+      },
+      {
+        "file": "public/member/index.html",
+        "rule": "generic-api-key",
+        "line": 28,
+        "candidate_git_blob": "4e6a657904cd5d710d999a13a3dea7bd306721ed",
+        "candidate_file_sha256": "205b5b85981f07d88888d3ab936d1b398f8cdaf301921e307b03c837b24851c6",
+        "prior_file_sha256": "6c2e3bea8a9431c70fdea5bf579d25856bddee5fa6ac42e5633e5997ce29ad5f",
+        "prior_line": 28,
+        "prior_approved_fingerprint": "e702ad9788c7f4b9cd398ff14d52c60481c383817876690c50179be478244aa9",
+        "candidate_fingerprint": "ea4aeda2e82ed655dcfe5b1b0594c1cc5fb117e457da388c4b393eba9c4bebcb",
+        "prior_approval_present": true,
+        "flagged_line_byte_identical": true,
+        "complete_sdk_byte_identical_after_git_clean_normalization": true,
+        "complete_sdk_sha256": "3a6a4376ce75609ee13168f405fa9a825e4db536e6170cce049287fdf6846fe4",
+        "classification": "previously_reviewed_clerk_publishable_frontend_sdk"
+      },
+      {
+        "file": "public/sso-callback/index.html",
+        "rule": "generic-api-key",
+        "line": 57,
+        "candidate_git_blob": "39ed9e0573f065eccbc20a43bda2f500d45f8892",
+        "candidate_file_sha256": "7cb79f4297738fc3b374c62f435bcf53430e51180e3aff770ef578f65f6d1a93",
+        "prior_file_sha256": "db200f477e8bf44a08f66e273bf3934ed5c7bda722ecbfee09327ccb1b09bb8f",
+        "prior_line": 56,
+        "prior_approved_fingerprint": "55f66d777612ffc19c2f58bc4f857d3d55dafc1c4fc95b28269f2e47c3eaadfa",
+        "candidate_fingerprint": "4e69f2b997fa74216d3b5dfe9537152eb64c091e41a9a2cd898c9de1af27251e",
+        "prior_approval_present": true,
+        "flagged_line_byte_identical": true,
+        "complete_sdk_byte_identical_after_git_clean_normalization": true,
+        "complete_sdk_sha256": "3a6a4376ce75609ee13168f405fa9a825e4db536e6170cce049287fdf6846fe4",
+        "classification": "previously_reviewed_clerk_publishable_frontend_sdk"
+      }
+    ],
+    "scanner_rules_exclusions_formula_and_coverage": "UNCHANGED",
+    "required_next_gate": "Root recheck exact clean-filter canonical bytes at adoption; preserve every previous ledger entry; fresh exact committed-head full tracked tree and introduced-history scans remain required. Not deployment/device acceptance."
   }
 }

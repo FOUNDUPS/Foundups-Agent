@@ -1,3 +1,23 @@
+## 2026-11-21 - v26 phone and service-boundary reconciliation
+
+Recorded the v26 working subset on base `9b85e9cbb874b3720e453d3e3d3a3974dca53504`,
+retaining v25 as a frozen comparison. Leading-`+` Video Options/lazy Browse AI,
+trailing-`+` contribution review, compact Play chrome and distinct Hasan/Mall
+destinations reuse the existing owners. Combined layout, focus, player and
+navigation checks remain pending.
+
+The 41-byte WASM compatibility phase has no approved AI model/runtime, preload
+or cloud fallback. WebGPU is unqualified. Graph `22374b` is not integrated;
+no depth ACL or backend writer is claimed. Contribution UI remains review and
+sign-in continuity with submission unavailable pending service-side membership
+and editor verification. Paid access/usage remains proposed.
+
+Only source/documentation/link checks belong to this update. Dated test results
+retain their original source boundaries. Combined v26 tests, preview/worker
+parity, real-provider advancement and physical Safari/PWA Wi-Fi/cellular
+acceptance are outstanding. No commit or publication by this documentation
+lane. See [roadmap](ROADMAP.md); prior entries are preserved.
+
 ## 2026-11-16 - v23 root cache ownership and optional gateway opener
 
 Confirmed against clean `1b2551b69babd6e5d0eadcccaf033087c4f1520d` after the

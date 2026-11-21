@@ -16,7 +16,7 @@ import mall_scoped_video_browser as base
 
 ROOT = Path.cwd()
 PUBLIC = ROOT / 'public'
-OUT = ROOT.parent / 'mall_v25_public_tv_qa.json'
+OUT = ROOT.parent / 'mall_v26_public_tv_qa.json'
 REPORT = {'provider': 'existing controlled YT API fixture', 'physical_iPhone': 'UNEXECUTED',
           'landscape_acceptance':'Explicit root update: 390px-high phone landscape may reserve a left grid and right player; all visible tiles/header/CTAs must avoid player, retain >=200 stage. Portrait remains player above grid. Initial collision receipts retained.',
           'cases': [], 'started_epoch': time.time(), 'source_sha256_before': {}}

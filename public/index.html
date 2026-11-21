@@ -3,9 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <script src="/member/js/mall-video-projection.js?v=25"></script>
+  <script src="/member/js/mall-video-projection.js?v=26"></script>
   <script>
-    if (window.mallVideoProjection?.hostScope(window.location)) window.location.replace('/member/');
+    const publicLanding = window.mallVideoProjection?.dedicatedLandingPath(window.location);
+    if (publicLanding) window.location.replace(publicLanding);
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <title>FoundUPS — Where Will You Aim Your Compute?</title>
@@ -83,7 +84,7 @@
   ></script>
   </template>
   <script>
-    if (!window.mallVideoProjection?.hostScope(window.location)) {
+    if (window.mallVideoProjection?.shouldLoadMemberAuth(window.location) !== false) {
       document.head.appendChild(document.getElementById('gatewayClerkSdk').content.cloneNode(true));
     }
   </script>
@@ -1680,7 +1681,7 @@
     function navigateToMember(statusText) {
       handoffStatus.textContent = statusText || 'Opening FoundUPS Mall...';
       handoffOverlay.classList.add('show');
-      setTimeout(() => { window.location.href = '/member/'; }, 600);
+      setTimeout(() => { window.location.href = window.mallVideoProjection?.authCompletionPath(window.location) || '/member/'; }, 600);
     }
 
     // ─── ENTER BUTTON LOGIC ───
@@ -1782,7 +1783,7 @@
       const inviteInput = document.getElementById('disclaimerInviteCode');
       if (inviteInput && inviteInput.value.length >= 10) {
         localStorage.setItem('pendingInviteCode', inviteInput.value.toUpperCase());
-        console.log('[Clerk] Cached invite code:', inviteInput.value);
+        console.log('[Clerk] Invite code cached for admission');
       }
 
       // Visual feedback
@@ -1810,13 +1811,13 @@
         await window.Clerk.client.signIn.authenticateWithRedirect({
           strategy: strategy,
           redirectUrl: window.location.origin + '/sso-callback/',
-          redirectUrlComplete: window.location.origin + '/member/'
+          redirectUrlComplete: window.location.origin + (window.mallVideoProjection?.authCompletionPath(window.location) || '/member/')
         });
       } catch (err) {
         console.error('[Clerk] OAuth error:', err);
         // Fallback to generic sign-in if direct OAuth fails
         window.Clerk.redirectToSignIn({
-          redirectUrl: window.location.origin + '/member/'
+          redirectUrl: window.location.origin + (window.mallVideoProjection?.authCompletionPath(window.location) || '/member/')
         });
       }
     }

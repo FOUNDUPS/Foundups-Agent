@@ -404,26 +404,26 @@ await check('install reloads only explicit public shell and product assets', asy
     assert.equal(request.credentials, 'omit');
     return url.pathname + url.search;
   });
-  for (const path of ['/member/js/mall-tile-field.js?v=25', '/member/js/mall-video-player.js?v=25', '/member/js/mall-video-projection.js?v=25', '/member/js/mall-state-restore.js?v=25', '/member/js/mall-planes.js?v=25', '/member/js/mall-discovery-pager.js?v=25', '/logo-foundups.svg', '/member/hpc-banner.webp', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
+  for (const path of ['/member/js/mall-tile-field.js?v=26', '/member/js/mall-video-player.js?v=26', '/member/js/mall-video-projection.js?v=26', '/member/js/mall-state-restore.js?v=26', '/member/js/mall-planes.js?v=26', '/member/js/mall-discovery-pager.js?v=26', '/logo-foundups.svg', '/member/hpc-banner.webp', '/member/hpc.webmanifest', '/member/hpc-icon-180.png', '/member/hpc-icon-192.png', '/member/hpc-icon-512.png', '/move2japan/property-search.js', '/move2japan/move2japan.css']) {
     assert.equal(installed.includes(path), true, 'missing precached asset: ' + path);
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
   for (const path of installed.filter(path => /[?&]v=/.test(path))) {
-    assert.equal(new URL(path, ORIGIN).searchParams.get('v'), '25',
+    assert.equal(new URL(path, ORIGIN).searchParams.get('v'), '26',
       'all versioned precache assets must agree with the displayed build: ' + path);
   }
   assert.equal(installed.some(path => path.startsWith('/member/discovery/')), false,
     'install must not fetch the metadata/video page graph');
-  assert.equal(h.stores.has('pfmall-member-v25'), true);
+  assert.equal(h.stores.has('pfmall-member-v26'), true);
   const build = videoProjectionSource.match(/const mallBuild = '(v\d+)';/)?.[1];
-  assert.equal('pfmall-member-' + build, 'pfmall-member-v25');
+  assert.equal('pfmall-member-' + build, 'pfmall-member-v26');
 });
 
 await check('activation retires only obsolete caches owned by this Mall', async () => {
   const h = swRuntime();
-  const obsoleteVersions = Array.from({ length: 23 }, (_, index) => `pfmall-member-v${index + 2}`);
-  for (const name of [...obsoleteVersions, 'pfmall-member-v25', 'pfmall-properties-v1',
+  const obsoleteVersions = Array.from({ length: 24 }, (_, index) => `pfmall-member-v${index + 2}`);
+  for (const name of [...obsoleteVersions, 'pfmall-member-v26', 'pfmall-properties-v1',
     'pfmall-posters-v1', 'gotjunk-offline-v1', 'other-app-cache']) {
     await h.caches.open(name);
   }
@@ -434,7 +434,7 @@ await check('activation retires only obsolete caches owned by this Mall', async 
   assert.equal(h.stores.has('pfmall-member-v22'), false);
   assert.equal(h.stores.has('pfmall-member-v23'), false);
   assert.equal(h.stores.has('pfmall-member-v24'), false);
-  assert.equal(h.stores.has('pfmall-member-v25'), true);
+  assert.equal(h.stores.has('pfmall-member-v26'), true);
   assert.equal(h.stores.has('gotjunk-offline-v1'), true);
   assert.equal(h.stores.has('other-app-cache'), true);
 });
@@ -470,7 +470,7 @@ await check('product navigation shares one static member shell without query cac
   assert.equal(online.response.status, 200);
   assert.equal(h.calls.at(-1).request, '/member/');
   assert.equal(h.calls.at(-1).options.credentials, 'omit');
-  const cache = await h.caches.open('pfmall-member-v25');
+  const cache = await h.caches.open('pfmall-member-v26');
   assert.equal((await cache.keys()).some(key => {
     const url = new URL(key.url);
     return url.pathname === '/member/' && !!url.search;
@@ -499,11 +499,11 @@ await check('private routes, query assets, foreign origins and non-GET remain un
 
 await check('declared static assets keep cache-first behavior and video fallback stays explicit', async () => {
   const h = swRuntime();
-  const first = await h.request('/member/js/mall-tile-field.js?v=25');
+  const first = await h.request('/member/js/mall-tile-field.js?v=26');
   const body = await first.response.text();
   assert.equal(h.calls.length, 1);
   h.setNetwork(async () => { throw new Error('offline'); });
-  const cached = await h.request('/member/js/mall-tile-field.js?v=25');
+  const cached = await h.request('/member/js/mall-tile-field.js?v=26');
   assert.equal(await cached.response.text(), body);
   assert.equal(h.calls.length, 1);
   const video = await h.request('/member/mall-video-catalog.json');
@@ -550,7 +550,7 @@ await check('public discovery caches only requested generation-bound pages and r
     assert.deepEqual(h.calls.at(-1).options, { cache: 'no-cache', credentials: 'omit' });
   }
   assert.equal(h.calls.length, 2, 'requesting two pages must not prefetch successors');
-  const cache = await h.caches.open('pfmall-member-v25');
+  const cache = await h.caches.open('pfmall-member-v26');
   assert.deepEqual((await cache.keys()).map(x => new URL(x.url).pathname).sort(), [root, selected].sort());
   h.setNetwork(async () => { throw new Error('offline fixture'); });
   for (const path of [root, selected]) {
@@ -575,7 +575,7 @@ await check('public discovery rejects hosting fallbacks and leaves queries/priva
   const html = await h.request(root);
   assert.equal(html.response.status, 503);
   assert.notEqual(await html.response.text(), '[]');
-  const cache = await h.caches.open('pfmall-member-v25');
+  const cache = await h.caches.open('pfmall-member-v26');
   assert.equal(await cache.match(root), undefined);
   h.setNetwork(async () => { throw new Error('offline fixture'); });
   assert.equal((await h.request(root)).response.status, 503);
@@ -638,7 +638,7 @@ await check('ordinary Mall persists and restores activeVideo without touching HP
   assert.equal(hpc.session.has('pfmall_video_scope_hpc_v1'), false);
 });
 
-await check('play.foundups.com resolves open Mall discovery and gates FoundUp entry through foundups.com Member Portal', () => {
+await check('Play public details and same-host sign-in remain distinct', () => {
   const window = { location: new URL(ORIGIN) };
   runInNewContext(videoProjectionSource, { window, URLSearchParams });
   const route = window.mallVideoProjection;
@@ -649,8 +649,8 @@ await check('play.foundups.com resolves open Mall discovery and gates FoundUp en
   assert.equal(route.resolve(new URL('https://play.foundups.com/member/?foundup=hpc')), 'hpc');
   assert.equal(route.resolve(new URL('https://play.foundups.com/member/?foundup=move2japan')), null);
   assert.equal(route.resolveMember(new URL('https://play.foundups.com/member/?foundup=hpc')), null);
-  assert.equal(route.memberPortalUrl('gotjunk_001'), 'https://foundups.com/member/?enter=gotjunk_001');
-  assert.equal(route.memberPortalUrl('../evil'), 'https://foundups.com/member/');
+  assert.equal(route.memberPortalUrl('gotjunk_001'), 'https://play.foundups.com/member/foundup.html?id=gotjunk_001');
+  assert.equal(route.memberPortalUrl('../evil'), 'https://play.foundups.com/?signin=required');
   assert.equal(route.resolveMemberEntry(new URL('https://foundups.com/member/?enter=gotjunk_001')), 'gotjunk_001');
   assert.equal(route.resolveMemberEntry(new URL('https://play.foundups.com/member/?enter=gotjunk_001')), null);
   assert.equal(route.resolveMemberEntry(new URL('https://foundups.com/member/?enter=__proto__')), null);

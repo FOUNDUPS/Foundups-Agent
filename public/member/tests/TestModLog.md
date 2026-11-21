@@ -1,3 +1,20 @@
+## 2026-11-21 — v26 continuation qualification (candidate)
+
+Preserve the v25 source/preview as the comparison. New source tests execute typed
+single-use admission returns, persistence failures, same-host OAuth/callback
+exclusions, public metadata entry, and Video Options. The WASM fixture tests an
+explicit 41-byte compatibility download, not a model. Physical iPhone v26 and
+real-provider continuous playback remain NOT_RUN. Hosted exact-head and assembled
+preview receipts are required before publication; local fixture checks do not
+substitute for them.
+
+The initial static run passed 157 cases but hit a Windows long-path temp failure;
+a short Temp root rerun passed 158, with one platform-specific skip. The broader
+legacy suite exposed an old Kosei ready claim inconsistent with the frozen
+phone catalog's conditional stage and an obsolete literal member-redirect test.
+The catalog was preserved; assertions now retain conditional readiness and
+execute the shared auth-completion owner instead of requiring a hard-coded path.
+
 ## 2026-11-21 JST — final v25 qualification receipt and release preparation
 
 Run `44689762799`, attempt 1, passed on `bd0510c5c2e333d07b1bb02340ca91b291420164`,

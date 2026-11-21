@@ -132,3 +132,20 @@ python -B -m pytest public/member/tests/test_route_contract_bridge.py modules/fo
 Use a scratch `--basetemp` outside the checkout. These controlled local tests do
 not prove deployed routing, real browser layout, authentication-provider
 availability, token deployment, liquidity or trading.
+
+## v26 phone qualification
+
+The v26 candidate freezes v25 as a comparison. `mall_product_state_vm.mjs`
+executes the actual v26 worker, including direct v18/v25 cache retirement while
+preserving unrelated cache bytes. `mall_admission_preferences_vm.mjs` tests typed,
+expiring single-use review intents and video preferences; it grants no authority.
+`mall_browser_ai_pilot_vm.mjs` verifies the explicitly confirmed 41-byte WASM
+fixture and cancellation/hash limits; this is not a model or device qualification.
+
+Physical iPhone 11 acceptance uses a fresh v26 origin: compact Play header and
+filters/account access; HPC banner to Hasan's campaign, separate Mall return,
+Voice Contact Congress; exactly one bottom Search Dock through expand/collapse
+and Back. Then use one genuine tap and three distinct real YouTube clips with
+two natural transitions. Record IDs, advancing time, sound/mute, provider errors,
+Safari versus installed PWA and network context. A fallback tap is not a
+continuous-playback pass. Fully hidden/dismissed playback must pause.

@@ -1,5 +1,37 @@
 # p.fMALL Roadmap
 
+## 2026-11-21 - v26 phone subset and deferred service phases
+
+The v26 working candidate starts from `9b85e9cbb874b3720e453d3e3d3a3974dca53504`.
+Preserve v25 as the frozen comparison. Historical v23-v25 results remain tied
+to their recorded source; combined v26 tests, publication and device acceptance
+are not closed by this documentation.
+
+Reuse the existing catalog, player, state and bottom dock. Leading `+` exposes
+Video Options and lazy Browse AI; trailing `+` retains contribution review.
+Compact Play chrome, Hasan's `https://hasan4speaker.com/` banner link and a
+separate Play Mall return are source changes awaiting combined qualification.
+Require one visible dock, unobscured native controls, fully hidden playback
+pause, scroll clearance, orientation/return and desktop regression checks.
+The [member roadmap](../../../public/member/ROADMAP.md) owns the phone details.
+
+Browse AI is a separate phase: explicit confirmation of one pinned 41-byte
+WASM addition test. Approved AI model/runtime choices remain empty. No model
+preload, reload or cloud fallback; API detection does not qualify WebGPU or a
+physical Safari/PWA environment.
+
+Graph revision `22374b` is not integrated. Existing public discovery and
+sign-in/invite checks are not a graph-depth ACL or writer. Depth-specific
+access and new writer actions stay unavailable/fail closed until the backend
+verifies membership, editor scope and resource. Add FoundUp/Add Video currently
+restore review and safe return only, with submission unavailable.
+
+Paid access/usage is proposed. An enabled service requires real entitlement,
+payment/settlement, delivery, expiry/refund and operational cost evidence; no
+price, charge flow or subscription grant is introduced here. Next: independent
+combined-source/CI checks, isolated HTTPS/worker parity, then real-provider and
+physical iPhone Safari/installed-PWA tests on Wi-Fi and cellular.
+
 ## v23 source qualification checkpoint
 
 Root-shell preservation repair: obsolete root caches now retire within their
