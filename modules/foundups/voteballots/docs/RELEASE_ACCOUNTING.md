@@ -22,6 +22,11 @@ Firebase Hosting project `gen-lang-client-0061781628`, site `foundupscom`:
 - Actual live HPC Voice click reached Vote's HPC skin at 390px without manual
   selection. 136 targeted Node tests passed; source projection equals canonical
   generator output. The broader player browser fixture was not rerun.
+- PR #2444's first CI run found a stale destination assertion in pfMALL's
+  generator contract. It was corrected to the requested fragment, retaining
+  exact destination and idempotency checks; all 33 catalog tests then passed
+  locally. Initial CI result: 1 failed, 1856 passed, followed by a dependent
+  missing-artifact error because later steps had been skipped.
 - Deployment-helper repairs: accept Firebase's short version resource names;
   use the installed CLI's compatible AbortController for its upload client.
   Failed attempts did not publish. The extra unmodified, unpublished candidate

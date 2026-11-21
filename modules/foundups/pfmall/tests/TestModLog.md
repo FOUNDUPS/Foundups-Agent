@@ -1,5 +1,11 @@
 # p.fMALL Test ModLog
 
+## 2026-11-22 — HPC source-selected Vote skin
+
+- Reconciled the catalog rebuild assertion to `/contact#hpc`; it retains the exact destination and full projection/idempotency checks.
+- Initial PR #2444 CI found this cross-owner stale expectation (1 failed, 1856 passed). The earlier bounded search covered HPC and public member tests but missed pfMALL's generator contract. Include the projection producer's tests when changing shared catalog fields.
+- After correction, the complete `test_mall_video_catalog.py` suite passed locally: 33/33. The dependent missing-artifact CI error followed skipped later steps; no upload or acceptance gate was weakened.
+
 ## 2026-11-20 — Red Dog guest conversation client contract
 
 - Added `reddog_public_guest_client.mjs` for the actual browser module. It proves
