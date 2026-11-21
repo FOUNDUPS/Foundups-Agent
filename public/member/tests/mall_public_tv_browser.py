@@ -260,7 +260,7 @@ def verify_paging_return_and_gestures(engine):
         expect(page.locator('.mall-selected-controls')).to_be_hidden()
         expect(page.locator('#mallTileField [data-foundup-id="move2japan"]')).to_be_focused()
         check(engine.name+' selected logo returns without navigation',page.url=='https://play.foundups.com/member/' and page.evaluate('!window.mallVideoPlayer.isOpen()'))
-        expect(page.locator('.mall-header .mall-brand-minimal')).to_have_attribute('href','https://foundups.com/')
+        expect(page.locator('.mall-header .mall-brand-minimal')).to_have_attribute('href','/member/')
         # Pinch is a synthetic gesture fixture, not physical Safari proof.
         dispatch_tile_pinch(page.locator('#mallTileField [data-foundup-id="move2japan"]'),40,105)
         expect_ids(page,ids0);base.expect_playing_id(page,ids0[0])
