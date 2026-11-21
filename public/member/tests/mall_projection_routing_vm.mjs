@@ -20,12 +20,42 @@ const canonicalHtml = readFileSync(join(publicRoot, 'f/index.html'), 'utf8');
 const preview = 'https://foundupscom--play-v26-iphone-review.web.app';
 const clone = value => JSON.parse(JSON.stringify(value));
 
+// Extract fixed repository fixtures, not arbitrary HTML or a sanitised fragment.
+// Only the two literal opening tags used by these boot owners are admitted.
 function inlineScript(html, marker) {
-  const matches = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
-    .filter(match => !/\bsrc\s*=/.test(match[1]) && match[2].includes(marker));
-  assert.equal(matches.length, 1, 'one actual inline script must contain ' + marker);
-  return matches[0][2];
+  const markerAt = html.indexOf(marker);
+  assert.ok(markerAt >= 0 && markerAt === html.lastIndexOf(marker),
+    'one fixed repository marker must exist: ' + marker);
+  const openingAt = html.lastIndexOf('<script', markerAt);
+  assert.ok(openingAt >= 0 && openingAt > html.lastIndexOf('</script>', markerAt),
+    'the fixed marker must be inside an open script');
+  const preceding = html.slice(0, openingAt);
+  assert.ok(preceding.lastIndexOf('<script') === -1 ||
+    preceding.lastIndexOf('<script') < preceding.lastIndexOf('</script>'),
+    'a preceding script must be closed before this fixed owner');
+  assert.ok(html.lastIndexOf('<!--', openingAt) <= html.lastIndexOf('-->', openingAt),
+    'a commented script is not an executable fixture');
+  const openingEnd = html.indexOf('>', openingAt);
+  const openingTag = html.slice(openingAt, openingEnd + 1);
+  assert.ok(['<script>', '<script id="productDiscoveryBoot">'].includes(openingTag),
+    'only literal inline repository script tags are supported');
+  const closingAt = html.indexOf('</script>', openingEnd + 1);
+  const nestedAt = html.indexOf('<script', openingEnd + 1);
+  assert.ok(openingEnd < markerAt && closingAt > markerAt &&
+    (nestedAt === -1 || nestedAt > closingAt), 'one complete unnested script owns the marker');
+  return html.slice(openingEnd + 1, closingAt);
 }
+assert.equal(inlineScript('<script>fixtureMarker</script>', 'fixtureMarker'), 'fixtureMarker');
+for (const invalid of [
+  '<script src="fixture.js">fixtureMarker</script>',
+  '<script data-note=">">fixtureMarker</script>',
+  '<script>fixtureMarker',
+  '<script>fixtureMarker</script >',
+  '<script>fixtureMarker</script><script>fixtureMarker</script>',
+  '<!--<script>fixtureMarker</script>-->',
+  '<script>fixtureMarker<script>nested</script></script>',
+  '<script><script>fixtureMarker</script></script>',
+]) assert.throws(() => inlineScript(invalid, 'fixtureMarker'));
 const landingBoot = inlineScript(rootHtml, 'const publicLanding');
 const gatewaySdkBoot = inlineScript(rootHtml, "getElementById('gatewayClerkSdk')");
 const memberSdkBoot = inlineScript(memberHtml, 'const dedicatedVideoHost');

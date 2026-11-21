@@ -1,3 +1,16 @@
+## 2026-11-21 — CodeQL 319 test-fixture hardening
+
+Replace the routing VM's permissive HTML regex with a fail-closed extractor for
+its fixed repository script owners. It accepts only the two literal opening
+tags used by those fixtures, rejects ambiguous/duplicate markers, external or
+quoted-attribute tags, comments, nested scripts and missing/noncanonical closing
+tags. It is not a general HTML sanitizer. All 15 routing groups and explicit
+malformed-fixture rejection checks pass locally. Hosted analysis and alert
+resolution must be observed separately; no alert is dismissed.
+
+This test-only change does not alter the frozen v26 preview's runtime payload.
+No new publication is included in the hardening handoff.
+
 ## 2026-11-21 — v26 continuation qualification (candidate)
 
 Preserve the v25 source/preview as the comparison. New source tests execute typed
