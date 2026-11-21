@@ -8,7 +8,7 @@
 | `foundups.com/member/?foundup=hpc` | Same collection for admitted members. The existing sign-in, invitation and username checks run before the projection mounts. |
 | `hpc.foundups.com/` | Public entrance. The dedicated host selects the guest projection at `/member/`. |
 | `/f/hpc/app` | Existing protected tenant handoff. HPC declares no tenant bundle, account grant or agent routes. |
-| Voice Your Opinion | The phone header's right action opens Vote's manual [Contact Congress](https://vote.mtrout.com/contact). Desktop keeps the action in the bottom anchor. Back restores the video anchor and offset. |
+| Voice Your Opinion | The phone header's right action opens Vote's manual [Contact Congress with the HPC skin](https://vote.mtrout.com/contact#hpc). The public projection carries the registered skin fragment; no browser referrer is required. Desktop keeps the action in the bottom anchor. Back restores the video anchor and offset. |
 | Hasan portrait | The header portrait opens the master Mall at `https://foundups.com/member/`. Ordinary member admission still applies there. |
 | HPC Home Screen app | `hpc.webmanifest` registers **Hasan Piker Coalition**, short name **HPC**, with a scoped launch URL and standalone display. The supplied satirical artwork provides the portrait and 180 px Apple touch icon. |
 

@@ -11,6 +11,18 @@ const boundaries = JSON.parse(await readFile(new URL('../oversight/public/states
 const houseOffice = roster.offices.find((office) => office.id === 'J000294');
 const senateOffice = roster.offices.find((office) => office.id === 'S000148');
 
+test('HPC handoff carries its registered skin without needing a browser referrer', async () => {
+  const canonical = JSON.parse(await readFile(new URL('../../hpc/mall_projection.json', import.meta.url), 'utf8'));
+  const publicProjection = JSON.parse(await readFile(new URL('../../../../public/member/mall-public-video-catalog.json', import.meta.url), 'utf8'));
+  assert.equal(publicProjection.hpc.voice_resource_url, canonical.voice_resource_url);
+  const entry = new URL(canonical.voice_resource_url);
+  assert.equal(entry.origin, 'https://vote.mtrout.com');
+  assert.equal(entry.pathname, '/contact');
+  assert.equal(resolveSkin(entry.hash.slice(1)), 'hpc');
+  assert.equal(entry.search, '');
+  assert.equal(resolveSkin('unregistered-foundup'), 'vote');
+});
+
 test('every tone and regeneration preserves supplied identity, callback, request and reason', () => {
   const core = { intro: 'I am Alex.', callback: '555-0100', request: 'Please record my objection.', reason: 'Public accountability matters.' };
   const variants = new Set();

@@ -150,7 +150,7 @@ def main():
         build = page.locator("#videoScopeHeader .mall-build-label")
         expect(build).to_have_text("Build v19")
         expect(build).to_be_visible()
-        expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
+        expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact#hpc")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
         expect(page).to_have_title("Hasan Piker Coalition")
         expect(page.locator('meta[name="apple-mobile-web-app-title"]')).to_have_attribute("content", "Hasan Piker Coalition")

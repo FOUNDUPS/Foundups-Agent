@@ -4,6 +4,11 @@
 
 Open `/contact#hpc` for the independent HPC skin; `/contact` starts with Vote
 Classic. The selector switches the presentation without forking the directory.
+Originating FoundUps select the skin in their outbound link: HPC's existing
+Voice action carries `#hpc`. This works with its `no-referrer` policy and adds
+no cookies or source tracking. Other sources need a registered preset before
+their link selects it; missing/unknown presets use Vote Classic. A skin tag is
+presentation context, never proof of origin, identity or permission.
 The supplied HPC poster sets the cream/navy/red palette. Its satire is not a
 source of policy facts; the supplied seat-count screenshot is not published.
 

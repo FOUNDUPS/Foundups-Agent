@@ -1,3 +1,9 @@
+## 2026-11-22 — HPC Voice link selects the Vote skin
+
+- Updated the scoped browser fixture's expected Voice link to `/contact#hpc`.
+- Vote's 136 targeted Node tests passed, including canonical/public projection equality for this link. The full projection matches generator output.
+- A live Chrome click from HPC v25 at 390px selected the HPC skin automatically. The broader player browser fixture was not rerun; no physical-device or player qualification is claimed.
+
 ## 2026-11-16 — Isolated iPhone YouTube baseline probe parameterization and Build v19 browser alignment
 
 - Extended `modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_{probe.js,reference.html}` with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts) and `?host=youtube|nocookie` official-host comparison, bidirectional `Mall <-> official embed` selection retention, controls strictly below `#hpc-probe-embed`, sanitized `deployment.json` + `SW controller` provenance receipt, and explicit separation of IFrame `101/150` from screen-observed `LOGIN_REQUIRED` prompts.

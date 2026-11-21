@@ -2,6 +2,20 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-22] — Source-selected HPC handoff
+
+- 136 passed across existing contact, coalition and public-worker suites.
+  Added one cross-owner contract: canonical HPC entry equals public projection,
+  selects the registered `hpc` preset without query data, and unknown presets
+  fall back to Classic. Canonical projection generator equality also passed.
+- Real Chrome at 390px: live HPC v25 Voice anchor carried `contact#hpc`; clicking
+  it loaded Vote's HPC dataset, selected preset and heading without selector
+  interaction. Initial HTML briefly showed Classic before modules loaded; final
+  initialized state was verified. Source retains explicit no-referrer.
+- Media requests were blocked only in the test tab while inspecting HPC and
+  restored before navigation. Viewport reset and test tab closed afterward.
+  This is entry verification, not media/player or physical-phone qualification.
+
 ## [2026-11-22] — Local script composer and HPC skin
 
 - Existing contact, coalition and public-worker suites: **135 passed, 0 failed**.
