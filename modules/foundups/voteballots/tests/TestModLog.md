@@ -2,6 +2,26 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-22] — Local script composer and HPC skin
+
+- Existing contact, coalition and public-worker suites: **135 passed, 0 failed**.
+  Six added contact cases exercise all nine wording/tone combinations, core-fact
+  preservation, bounds, unknown skins, defaults without invented role/size/phone,
+  actual controller events without a directory, skip-link draft retention,
+  explicit spokesperson template selection, skin/clear privacy and copy fallback.
+- Public-worker fixture now verifies 32 exact assets, v11 retirement and JPEG
+  MIME validation. No new test framework, model or provider dependency.
+- Real Chrome via CUA: desktop poster render; 390px control layout; 320px
+  width check (document 306px within 320px viewport); Furious + Regenerate,
+  editable draft surviving keyboard skip-link navigation, both skin selections,
+  disabled director button before explicit confirmation, supplied template after
+  confirmation, and clearing script/callback/confirmation verified. No calls made.
+- A Playwright role locator did not match native details/summary; fresh AX state
+  and its exposed button opened it. This was a locator failure, not a page defect.
+- Local Python preview serves literal HTML paths; canonical clean-route offline
+  installation is covered by the worker fixture, not claimed from that preview.
+  No physical-phone, Safari or independent model verification is claimed.
+
 ## [2026-11-16] — Whole HPC banner return and distinct Play Mall link
 
 - Extended existing `test_public_sw.mjs`: both pages retain one native whole-banner

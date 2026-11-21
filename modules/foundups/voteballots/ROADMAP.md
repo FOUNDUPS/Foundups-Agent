@@ -25,6 +25,15 @@ implemented Poly Vote office-verification or anonymity system.
 
 ## Current State
 
+### Contact skin micro-slice — 2026-11-22
+
+Browser-local HPC presentation and editable script templates reuse the existing
+manual contact page. No paid model, new caller backend or independent RSI runtime
+is claimed. Reuse [vote-skin](skillz/vote_skin/SKILL.md) for later skins; preserve
+core facts across tone/regeneration. Tests and release status belong to
+`tests/TestModLog.md` and `docs/RELEASE_ACCOUNTING.md`.
+
+
 ### MAGA/Oversight Phase One
 
 The [landing contract](oversight/README.md#phase-one-landing-contract) owns
