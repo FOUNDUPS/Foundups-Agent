@@ -1,3 +1,12 @@
+## 2026-11-21 - Nested attribution reporting fixture
+
+- Added an opt-in, stdout-only scenario-runner diagnostic using the existing
+  static HPC → VoteBallots ancestry plus synthetic outcomes, observations and
+  an independently registered-in-fixture tool.
+- Clarified direct versus inclusive points, idempotent receipts and distinct
+  exposure/qualified counts. No changes to default simulation or its economics,
+  token terms, CABR, PoB, issuance, treasury, authority or deployment.
+
 ## 2026-11-19 — Fractal work-navigation roadmap reconciliation
 
 - Linked the work-to-component target to the census-first Mall roadmap and
