@@ -1,3 +1,10 @@
+## 2026-11-22 - Final v26 URL assertion and completed-query fixture readiness
+
+- Exact input `a0fb0f026bf0ef10b0306358f8c8a18ead3af457` passed all five protected contexts and broader CI. HPC qualification retained 13 passing gates; phone UI was 53/54 because the fixture measured a detached tile during asynchronous query hydration. The preserved traceback identifies geometry access, with no page error. CodeQL separately flagged a weak catalog-test URL substring assertion, not a production sanitization finding.
+- Replace that one predicate with parsed HTTPS, exact GitHub hostname and absent-userinfo assertions; the existing 25-case test passes. The canonical registry honestly adds its conservative `network` import capability while preserving process, all entries, owners, shards and quarantine state. No network call is introduced by parsing.
+- The borrowed-query fixture now waits for the actual submitted query and exact metadata hydration total before its original genuine pointer input. Every queue/query, same-dock, playback and return assertion remains; no sleep, retry, missing-geometry bypass or timeout relaxation. Immediate tapping during hydration is a separate unqualified interaction, not established by this completed-query case.
+- Both source-bound changes were independently proposed and reviewed before adoption. Application/provider source, all backend manifest members, security approval/rule sets and CI gates are unchanged. Fresh local Chromium/WebKit and hosted exact-head checks remain required; no alert dismissal, release or physical-device pass is claimed.
+
 ## 2026-11-22 — Catalog test dependency manifest alignment
 
 - Source `6dc81d8358b8c66c131172e5b1094d4ae740e1b6` passed all fourteen hosted HPC gates. Required broader CI then found two manifest self-consistency assertions: the manifest still pinned the catalog truth test's earlier source digest.

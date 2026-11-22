@@ -723,6 +723,20 @@ def borrowed_queue_keeps_mall_query(page, desktop=False):
     page.evaluate("window.loanFixtureDock=document.querySelector('.mall-member-search-dock:not([hidden])');window.mallStateRestore.setVideoOptions({tileTapDestination:'full-video'})")
     mall_input=page.locator('.mall-member-search-dock:visible textarea')
     mall_input.fill('move2japan');mall_input.press('Enter')
+    # This case tests borrowing a completed Mall query, not a pointer race
+    # while explicit search hydrates the remaining bounded metadata pages.
+    # The matching tile is already present at boot, so visibility alone cannot
+    # establish that the last search-owned DOM replacement has completed.
+    expected_total=json.loads((fixture.public/'member/discovery/catalog.json').read_text(encoding='utf-8'))['total']
+    page.wait_for_function("""total => {
+      const field=window.mallTileField, scope=field.getFieldScope();
+      return scope?.type==='query' && scope.query==='move2japan' &&
+        field.getLoadedCatalog().length===total;
+    }""",arg=expected_total)
+    readiness=page.evaluate("""() => ({scope:window.mallTileField.getFieldScope(),
+      loaded:window.mallTileField.getLoadedCatalog().length})""")
+    assert_true(readiness['scope']=={'type':'query','query':'move2japan'} and
+                readiness['loaded']==expected_total,{'search_readiness':readiness,'expected_total':expected_total})
     tile=page.locator('#mallTileField [data-foundup-id="move2japan"]')
     expect(tile).to_be_visible()
     scope=page.evaluate('window.mallTileField.getFieldScope()')

@@ -25081,6 +25081,7 @@
       "suite_class": "unit",
       "shard_id": "public-unit",
       "capabilities": [
+        "network",
         "process"
       ],
       "execution_type": "unit",

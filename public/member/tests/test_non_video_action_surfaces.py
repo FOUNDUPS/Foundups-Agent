@@ -12,6 +12,7 @@ Slice: PFMALL_NON_VIDEO_ACTION_SURFACE_PHASE1
 import json
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -215,7 +216,10 @@ class TestCatalogNonVideoTruth:
         catalog = _catalog()
         entry = next(e for e in catalog if e["foundup_id"] == "science_swarm")
         assert entry["source_type"] == "github_repo"
-        assert "github.com" in entry["external_url"]
+        external_url = urlsplit(entry["external_url"])
+        assert external_url.scheme == "https"
+        assert external_url.hostname == "github.com"
+        assert external_url.username is None and external_url.password is None
 
     def test_autopost_is_external_app(self):
         """autopost is source_type external_app."""
