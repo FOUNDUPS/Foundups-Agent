@@ -180,9 +180,11 @@ Before assigning the lane, compare the same repository and work scope:
   deltas. Distinguish GitHub from any cloud editor or deployed site. Do not compare
   unrelated histories by timestamp; note an inaccessible lane as unknown.
 
+Ask 0102 explicitly to execute the authorized objective, not merely to advise.
 0102 decides which evidence is current for the task and whether PC, cloud or a
 bounded reconciliation is the right execution lane. Reuse the capable existing owner,
-keep one write lane, and perform the next authorized action when possible.
+keep one write lane, and execute there within authorization; otherwise return the
+concrete blocker. Record verified launch separately from brief delivery or preparation.
 [WSP_10 convergence](../../../../../../WSP_framework/src/WSP_10_State_Save_Protocol.md#9a-github-to-pc-convergence-gate-chat--work--codex)
 owns any actual synchronization; never blindly overwrite, reset, clean or stash,
 or infer PC convergence from GitHub. Do not treat an unavailable thread as absent.
