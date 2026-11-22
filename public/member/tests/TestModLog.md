@@ -1,3 +1,9 @@
+## 2026-11-22 — Catalog test dependency manifest alignment
+
+- Source `6dc81d8358b8c66c131172e5b1094d4ae740e1b6` passed all fourteen hosted HPC gates. Required broader CI then found two manifest self-consistency assertions: the manifest still pinned the catalog truth test's earlier source digest.
+- The existing deterministic generator changes exactly that one digest. Runtime membership, schema, executable/bridge lists and all other source bindings remain unchanged. Exact independent review checks all 1,494 digests and the 39 known checksum metadata bindings; all previous approvals and checks are retained.
+- The consumer constant and strict test digest pin both update to the independently verified canonical manifest digest; all budgets, validators and exact assertions remain. Focused manifest/compatibility tests, actual tree/history scans and fresh final-head CI are required. Application behavior, discovery data, registry source, preview publication and physical-device acceptance remain unchanged.
+
 ## 2026-11-22 — Composed v26 full Mall contract reconciliation
 
 - Required broader CI at `4b43712e378d0dc09906dc97ee1740702474f30c` reached the Mall truth selection after the registry repair. The local Mall slice reproduced its 13 failures with 1,819 passes; unchanged simulator/stream suites remain hosted CI coverage because the local simulator dependency is unavailable.

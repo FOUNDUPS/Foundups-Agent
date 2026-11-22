@@ -1576,3 +1576,11 @@ Independent review verified that the existing public client SDK/configuration
 line is byte-identical. One exact-file binding was appended; all 4,908 prior
 approvals, scanner rules, history coverage and protected checks are retained.
 The source and review hashes are recorded in the existing HPC evidence file.
+
+### 2026-11-22 — Catalog test dependency digest refresh
+
+The deterministic backend manifest now pins the updated catalog truth test.
+Runtime membership, bridge bindings and schema remain unchanged. Independent
+review validated all 1,494 source digests and renewed the 39 known checksum
+metadata bindings for this exact snapshot. All 4,909 prior approvals and every
+scanner rule, ignore policy, history boundary and required check are retained.
