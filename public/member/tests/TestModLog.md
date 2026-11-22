@@ -1,3 +1,9 @@
+## 2026-11-22 — Composed v26 canonical registry refresh
+
+- Exact merge candidate `cd472b1654b088036ea41210990550411c22b5f3` passed the hosted HPC security and browser gates. The broader required `test (3.12)` stopped at the canonical registry check.
+- Independently generated the deterministic registry and reconciled only the existing product-state wrapper description with its module docstring. All 1,852 entries, 260 quarantines, owners, capabilities, shards and execution boundaries remain unchanged; no test, classification or CI gate was disabled.
+- The generated-byte check and fresh follow-up-head hosted CI remain required. This correction does not publish a preview or claim real YouTube or physical iPhone acceptance.
+
 ## 2026-11-22 - composed main and v26 reconciliation candidate
 
 Source inputs: `2a65e7983acb489084cecf1229fcfd582f68f19b` plus current main

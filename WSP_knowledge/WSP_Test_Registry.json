@@ -25033,7 +25033,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Behavioral storage and worker-cache boundaries for a product in the Mall shell."
+      "description": "Private selective union of existing main policy and head runtime cases."
     },
     {
       "id": "test::public::member::tests::test_mall_tile_field",
