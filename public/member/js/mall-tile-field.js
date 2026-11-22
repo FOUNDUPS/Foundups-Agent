@@ -2846,6 +2846,10 @@
     if (samePlayer && player.isMallHidden?.() && player.getCurrentIndex() === index) {
       return player.resumeFromMall({ tileActivation: tileActivation, autoplay: autoplay });
     }
+    // A new deliberate selection owns the visible grid caller. Resuming the
+    // old retained theater first can hide/reflow that grid before capture.
+    var activationCaller = tileActivation && player.isMallHidden?.()
+      ? capturePlayerCaller(lane, tile) : null;
     if (player.isMallHidden?.()) {
       if (!samePlayer || player.resumeFromMall({ fromHistory: true, autoplay: false }) === false) {
         player.close({ restore: false });
@@ -2886,7 +2890,7 @@
     syncScopedActiveTile(index);
 
     player.open(lane.foundup_id, lane.videos, index, {
-      ...preparePlayerReturn(lane, tile),
+      ...preparePlayerReturn(lane, tile, activationCaller),
       tileActivation: tileActivation,
       floating: !immersive && !theater,
       scoped: true,
@@ -3020,6 +3024,11 @@
     if (!tile || !lane?.videos?.[videoIndex]) return false;
     var targetFoundUpId = lane.foundup_id || lane.id;
     var autoplay = opts?.autoplay !== undefined ? opts.autoplay : canAutoplayFromTile(tile);
+    var activationCaller = opts?.caller;
+    if (!activationCaller && opts?.tileActivation && player.isMallHidden?.() &&
+        (player.getFoundUpId?.() !== targetFoundUpId || player.getCurrentIndex() !== videoIndex)) {
+      activationCaller = capturePlayerCaller(lane, tile);
+    }
     if (player.isMallHidden?.() && player.getFoundUpId?.() === targetFoundUpId) {
       if (player.getCurrentIndex() === videoIndex) {
         return player.resumeFromMall({ tileActivation: opts?.tileActivation === true, autoplay: autoplay });
@@ -3047,7 +3056,7 @@
       desktopInlineTile.removeAttribute('aria-current');
       desktopInlineTile = null;
     }
-    var returnOptions = preparePlayerReturn(lane, tile, opts?.caller);
+    var returnOptions = preparePlayerReturn(lane, tile, activationCaller);
     tile.setAttribute('aria-current', 'true');
     desktopInlineTile = tile;
     tileFieldWrapper.classList.add('member-inline-open');

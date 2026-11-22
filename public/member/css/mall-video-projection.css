@@ -451,18 +451,18 @@
 }
 
 /* The active player stays in the same root container when switching presentations. */
-[data-mall-video-scope] .mall-tile-field:has(.video-player-theater),
-[data-mall-video-scope] body:has(> #videoPlayerFullscreen.video-player-theater) .mall-tile-field {
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater:not(.video-player-mall)),
+[data-mall-video-scope] body:has(> #videoPlayerFullscreen.video-player-theater:not(.video-player-mall)) .mall-tile-field {
   display: flex;
   height: 100%;
 }
 
-[data-mall-video-scope] .mall-tile-field:has(.video-player-theater) > :is(.mall-tile, .mall-video-grid-tail),
-[data-mall-video-scope] body:has(> #videoPlayerFullscreen.video-player-theater) .mall-tile-field > :is(.mall-tile, .mall-video-grid-tail) {
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater:not(.video-player-mall)) > :is(.mall-tile, .mall-video-grid-tail),
+[data-mall-video-scope] body:has(> #videoPlayerFullscreen.video-player-theater:not(.video-player-mall)) .mall-tile-field > :is(.mall-tile, .mall-video-grid-tail) {
   display: none;
 }
 
-[data-mall-video-scope] .mall-tile-field:has(.video-player-theater) > .mall-inline-player-slot {
+[data-mall-video-scope] .mall-tile-field:has(.video-player-theater:not(.video-player-mall)) > .mall-inline-player-slot {
   width: 100%;
   min-height: 0;
 }

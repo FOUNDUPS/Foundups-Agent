@@ -34,6 +34,22 @@ The existing workflow now includes the two defensive history cases through
 `mall_phone_ui_browser.py --include-defensive`; runtime pins/gates are preserved.
 Hosted CodeQL resolution is never inferred from these local results.
 
+The first committed-head rerun caught a ready desktop-theater return defect
+before push: the paused retained player kept its theater class, and the old
+scoped theater CSS hid the caller grid even while the player was Mall-hidden.
+The earlier passing setup had returned before provider READY and exercised
+disposal instead. The desktop test now explicitly waits for playing/READY,
+requires the same retained frame, and then requires the actual grid visible.
+Scoped theater selectors exclude only the Mall-hidden state; active theater
+layout remains intact. The failing receipt is retained, and final exact-head
+qualification is recorded separately from that superseded candidate.
+The now-deterministic case also caught a two-engine scroll regression when
+selecting a different clip from a retained desktop theater: caller capture ran
+after resuming the old mode and measured its reflow. Capture the visible new
+selection before resume, retaining explicit callers and same-clip/history
+semantics. Both failing engine receipts remain evidence; the original two-pixel
+scroll/focus assertions are unchanged.
+
 Browsers use the existing synthetic official-API fixture and intercepted files;
 all runs bind source hashes before/after. No actual YouTube, physical iPhone,
 member authorization, new HTTPS deployment or production acceptance is claimed.

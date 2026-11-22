@@ -413,7 +413,14 @@ def reversible_mall_return(page, hpc, desktop=False, lane=False):
         # before choosing a scrolled grid caller for this transition test.
         page.wait_for_function('window.mallVideoPlayer?.isOpen()')
         assert_true(page.evaluate('window.mallVideoPlayer.isTheater()'), 'Desktop entry did not open TV')
+        # Exercise the retained READY theater, not the separate unready-disposal
+        # path. Its hidden theater class must no longer hide the actual grid.
+        page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+        page.evaluate('window.readyTheaterFrame=document.querySelector("#videoPlayerFullscreen iframe")')
         page.evaluate('window.mallVideoPlayer.returnToMall()')
+        page.wait_for_function("window.mallVideoPlayer.isMallHidden()&&window.mallVideoPlayer.getPlaybackSnapshot()?.state==='paused'")
+        assert_true(page.evaluate('window.readyTheaterFrame===document.querySelector("#videoPlayerFullscreen iframe")'),
+                    'Ready desktop theater return replaced its provider')
     expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
     page.evaluate("window.mallStateRestore.setVideoOptions({tileTapDestination:'full-video',collapseDestination:'mall'})")
     if lane:
