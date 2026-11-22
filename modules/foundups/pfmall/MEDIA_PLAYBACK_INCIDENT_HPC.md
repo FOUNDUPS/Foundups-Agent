@@ -1,5 +1,56 @@
 # Shared Mall media incident · HPC-P01–P08
 
+## Floating control continuation — 2026-11-22
+
+- incident_id: `PFMALL-MEDIA-20261111-HPC` (same shared owner)
+- affected_owner / foundup_id: `public/member` player, dock and state / `hpc` first
+- symptom: 012 reports working v25 playback on iPhone 16, with scrolling under
+  the player, but a disappearing gesture target, extra app Play/expand chrome,
+  short restore handle, missing main camera button and Red Dog leaving HPC.
+- environment: phone OS, standalone mode and delivered fingerprints UNKNOWN;
+  preserve USER_REPORTED. Source audit baseline `a3ea82607498651e903c685796693e855c87413a`.
+  Served v25 projection SHA-256 `e595f508f857de37bf8216365b7b4d0869c819b6cce2f26c8674bbac19d125f0`
+  at `/member/hpc-v25/js/mall-video-projection.js?v=25`. Generic `/member/`
+  assets are a different snapshot and do not identify this live app.
+- confirmed causes: floating geometry had no drag state; Restore was only
+  92px tall; app pinch hardcoded WikiTube; swipe-up hardcoded Next; the dock
+  microphone dictated search, and unavailable Red Dog became a Mall link.
+- fix: extend shared owners with clamped drag and permanent surrounding frame
+  targets, full-height inert tuck/restore, independent validated gesture options,
+  menu playback/expand/return alternatives, canonical camera handoff and in-page
+  conversation availability. Initial controlled Chromium/WebKit cases reproduce
+  the new behavior; final exact-source qualification remains separate.
+- provider boundary: fully hidden YouTube audio/video must pause. The frame
+  remains at least 200x200 with native input/controls. A rail is not a player.
+  Parent gestures do not capture inside cross-origin iframes. Reject cropping,
+  gesture shields, invisible audio and speculative OAuth as workarounds.
+- AI delivery boundary: live Hosting `2a4d064fac8b3170` has no guest API rewrite;
+  GET status paths return HTML and v25 has no API-root meta. The canonical
+  Python guest router is unmounted. Existing Gemini `chat` is not proof of
+  equivalent OpenRouter/session accounting. Mount the admitted host with durable
+  accounting, trusted ingress/visitor identity and server-held credentials before
+  enabling the client. No secret values or provider calls were inspected.
+- browser model boundary: no admitted language-model runtime exists. SmolLM2-360M
+  via WebLLM is a future opt-in benchmark, with runtime/model pinning, download
+  size, Cancel/Unload and physical-device measurements required. The 41-byte
+  WASM arithmetic fixture is not model inference. iPhone keyboard dictation is
+  distinct from qualified local in-browser speech recognition.
+- regression: extend `mall_phone_ui_browser.py`, preference VM and existing
+  media-policy/queue/guest-conversation suites; keep all prior lifecycle and
+  protected/public assertions. AutoPost tests independently own its bounded
+  `return_to` and capture-safe footer. Physical Safari/PWA and actual composed
+  camera return remain NOT_VERIFIED.
+- status: IMPLEMENTED_PENDING_VERIFICATION; no new release or phone pass.
+  Next: exact-source independent qualification and isolated preview readback.
+- references, accessed 2026-11-22:
+  [YouTube policy III.I.9](https://developers.google.com/youtube/terms/developer-policies/),
+  [player visibility/dimensions](https://developers.google.com/youtube/terms/required-minimum-functionality),
+  [iframe gesture boundary](https://www.w3.org/TR/pointerevents/latest/#the-touch-action-css-property),
+  [Safari 26 WebGPU](https://webkit.org/blog/17333/webkit-features-in-safari-26-0/),
+  [WebLLM model estimates](https://webllm.mlc.ai/models/).
+
+Earlier observations below retain their original sources and timestamps.
+
 - Incident ID: PFMALL-MEDIA-20261111-HPC
 - Retrieval terms: HPC YouTube bot sign-in, Mall inline playback, fixedVideoField, PWA embed failure.
 - Affected owner: shared Play FoundUps Mall member field, player, and state; FoundUp `hpc`

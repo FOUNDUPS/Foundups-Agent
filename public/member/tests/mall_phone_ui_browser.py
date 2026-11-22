@@ -99,6 +99,19 @@ def boot(page, hpc=False):
     expect(page.locator('.mall-member-search-dock:visible')).to_have_count(1)
 
 
+def video_action(page, action):
+    # The existing desktop theater retains its own Back control; it has no
+    # floating phone dock. Do not change input capabilities to manufacture a tap.
+    if action == 'close' and page.evaluate('window.mallVideoPlayer.isTheater()'):
+        page.locator('#videoPlayerFullscreen [data-action="back"]').click()
+        return
+    if page.evaluate('window.mallVideoPlayer.isFloating()'):
+        page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
+    else:
+        page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
+    page.locator('.mall-member-search-options[open] [data-player-action="' + action + '"]').click()
+
+
 def checkpoint(page, name):
     value = page.evaluate("""() => {
       const visible = e => { const s=getComputedStyle(e),r=e.getBoundingClientRect();
@@ -234,13 +247,15 @@ def hpc_branding(page):
                 {'voice_icon': icon, 'voice_button': button})
     page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-hpc.png')))
     dog = page.locator('#videoScopePhoneDock .mall-search-dog')
-    expect(dog).to_have_attribute('href', 'https://play.foundups.com/')
-    expect(dog).to_have_attribute('aria-label', 'Return to Play FoundUps Mall')
-    assert_true(dog.evaluate("e=>e.tagName==='A'&&!e.hasAttribute('aria-haspopup')"),
-                'Unavailable conversation must expose a direct Mall link')
+    expect(dog).to_have_attribute('aria-label', 'Open Red Dog conversation')
+    assert_true(dog.evaluate("e=>e.tagName==='BUTTON'&&!e.hasAttribute('href')"),
+                'Conversation availability must not become a Mall redirect')
     expect(page.locator('#videoScopePhoneDock .mall-search-plus')).to_be_visible()
     expect(page.locator('dialog[open]')).to_have_count(0)
     dog.tap()
+    expect(page.get_by_role('dialog', name='Red Dog conversation', exact=True)).to_be_visible()
+    page.get_by_role('button', name='Back to browsing', exact=True).click()
+    page.locator('.mall-hpc-mall-return').tap()
     page.wait_for_url('https://play.foundups.com/member/')
     expect(page.locator('dialog[open]')).to_have_count(0)
     expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
@@ -280,7 +295,7 @@ def tile_tap_choices(page, hpc):
         if not menu.is_visible():
             dock.locator('.mall-search-plus').tap()
         choice.select_option(destination)
-        expect(group.locator('[data-video-option="frameDestination"]')).to_have_value('wikitube')
+        expect(group.locator('[data-video-option="pinchOutDestination"]')).to_have_value('wikitube')
         menu.get_by_role('button', name='Close', exact=True).click()
         # Keyboard activation shares the tile action; other choices use a pointer.
         if destination == 'wikitube':
@@ -294,7 +309,8 @@ def tile_tap_choices(page, hpc):
         assert_true(page.locator('#videoPlayerFullscreen iframe').count() == 1, 'Duplicate provider frame')
         selected = page.evaluate('window.mallStateRestore.getVideoOptions()')
         assert_true(selected['tileTapDestination'] == destination and selected['frameDestination'] == 'wikitube', selected)
-        for key in ['pinchOutDestination', 'pinchInDestination', 'swipeUpDestination']:
+        assert_true(selected['pinchOutDestination'] == 'wikitube', selected)
+        for key in ['pinchInDestination', 'swipeUpDestination']:
             assert_true(key not in selected, 'Unconfirmed initial default was seeded: ' + key)
         result = {'destination': destination, 'mode': mode,
                   'activation': 'keyboard' if destination == 'wikitube' else 'pointer'}
@@ -330,11 +346,13 @@ def preview_dog_return(page):
     page.goto(origin + '/member/?foundup=hpc', wait_until='domcontentloaded')
     expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
     dog = page.locator('#videoScopePhoneDock .mall-search-dog')
-    expect(dog).to_have_attribute('href', '/member/')
-    expect(dog).to_have_attribute('aria-label', 'Return to Play FoundUps Mall')
+    expect(dog).not_to_have_attribute('href', '/member/')
+    expect(dog).to_have_attribute('aria-label', 'Open Red Dog conversation')
     expect(page.locator('#videoScopePhoneDock .mall-search-plus')).to_be_visible()
     dog.tap()
-    page.wait_for_url(origin + '/member/')
+    expect(page.get_by_role('dialog', name='Red Dog conversation', exact=True)).to_be_visible()
+    page.get_by_role('button', name='Back to browsing', exact=True).click()
+    assert_true(page.url == origin + '/member/?foundup=hpc', 'Dog left the current preview')
     expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
     expect(page.locator('dialog[open]')).to_have_count(0)
     return {'origin_preserved': page.url, 'popup': False, 'network': 'intercepted fixture only'}
@@ -523,7 +541,7 @@ def reversible_mall_return(page, hpc, desktop=False, lane=False):
     resumed=retained_snapshot(page)
     assert_true(resumed['sameFrame'] and resumed['id']==before['id'] and resumed['loads']==before['loads'] and resumed['query']==before['query'] and resumed['length']==before['length'], {'resume':resumed})
     assert_true(resumed['playback']['positionSeconds']>=before['playback']['positionSeconds']-.05, {'resume_reset_time':resumed})
-    player.locator('[data-action="back"]').click()
+    video_action(page, 'close')
     expect(player).not_to_be_visible()
     expect(player.locator('iframe')).to_have_count(0)
     assert_true(page.evaluate('window.mallVideoPlayer.getQueueLength()===0'),'Final Close retained live resources')
@@ -534,7 +552,7 @@ def reversible_mall_return(page, hpc, desktop=False, lane=False):
         assert_true(page.evaluate('!window.mallVideoPlayer.isOpen()'),'Resize resurrected explicitly closed playback')
         tile.scroll_into_view_if_needed();activate_visible_tile(page,tile,desktop)
         page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
-        player.locator('[data-action="back"]').click()
+        video_action(page, 'close')
         expect(player.locator('iframe')).to_have_count(0)
 
     return {'caller':initial,'active':before,'returned':after,'forward':forward,'resumed':resumed,
@@ -572,7 +590,7 @@ def retained_pending_page(page, close_instead=False):
     expect(player).to_have_attribute('aria-label','Full Video in app')
     before=retained_snapshot(page)
     if close_instead:
-        player.locator('[data-action="back"]').click()
+        video_action(page, 'close')
         expect(player).not_to_be_visible()
         expect(player.locator('iframe')).to_have_count(0)
     else:
@@ -598,12 +616,12 @@ def retained_pending_page(page, close_instead=False):
     page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
     resumed=retained_snapshot(page)
     assert_true(resumed['sameFrame'] and resumed['length']==length+len(batch) and resumed['id']==before['id'], resumed)
-    player.locator('[data-action="expand"]').click()
+    video_action(page, 'expand')
     player.locator('[data-action="next"]').click()
     page.wait_for_function('id=>window.mallVideoPlayer.getCurrentVideoId()===id',arg=batch[0]['video_id'])
     page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
     assert_true(page.evaluate('document.querySelector("#videoPlayerFullscreen iframe")===window.returnFixtureFrame'),'Pending-page continuation recreated the provider')
-    player.locator('[data-action="back"]').click()
+    video_action(page, 'close')
     expect(player.locator('iframe')).to_have_count(0)
     return {'pending_request':request_path,'before':before,'hidden':hidden,'resumed':resumed,
             'first_new_clip':batch[0]['video_id'],'page_appended_once':True,'same_provider':True}
@@ -620,7 +638,7 @@ def selected_lane_close_reopen_paging(page):
     initial=page.evaluate('window.mallVideoPlayer.getQueueLength()')
     assert_true(initial==6,{'fixture_initial_page':initial})
     player=page.locator('#videoPlayerFullscreen')
-    player.locator('[data-action="back"]').click()
+    video_action(page, 'close')
     expect(player.locator('iframe')).to_have_count(0)
     assert_true(page.evaluate('!window.mallVideoPlayer.isOpen()&&window.mallVideoPlayer.getQueueLength()===0'),
                 'Final Close retained player queue')
@@ -635,7 +653,7 @@ def selected_lane_close_reopen_paging(page):
     after=page.evaluate('({id:window.mallVideoPlayer.getCurrentVideoId(),length:window.mallVideoPlayer.getQueueLength(),created:window.fixturePlayback.created,destroyed:window.fixturePlayback.destroyed})')
     assert_true(after['length']>initial and after['created']==2 and after['destroyed']==1,after)
     expect(player.locator('iframe')).to_have_count(1)
-    player.locator('[data-action="back"]').click()
+    video_action(page, 'close')
     expect(player.locator('iframe')).to_have_count(0)
     return {'next_page_requests':requests,'previous_last_clip':last,'continued':after,
             'scope':'Controlled selected-field continuation after final player Close'}
@@ -661,7 +679,7 @@ def early_repeated_selection(page, hpc):
         page.evaluate('window.mallVideoPlayer.goToVideo(window.mallVideoPlayer.getQueueLength()-1);window.fixturePlayback.finishCurrent()')
         page.wait_for_function('window.mallVideoPlayer.getQueueLength()>=12')
     created=page.evaluate('window.fixturePlayback.created')
-    page.locator('#videoPlayerFullscreen [data-action="back"]').click()
+    video_action(page, 'close')
     expect(page.locator('#videoPlayerFullscreen iframe')).to_have_count(0)
     return {'provider_created_before_ready':created,'active_marker':True,'pending_pager_preserved':not hpc}
 
@@ -713,7 +731,7 @@ def unready_mall_return_stays_closed(page):
     tile=page.locator('.mall-tile[data-video-id="HPC00000000"]')
     expect(tile).to_be_visible();activate_visible_tile(page,tile,True)
     page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
-    player.locator('[data-action="back"]').click()
+    video_action(page, 'close')
     expect(player.locator('iframe')).to_have_count(0)
     return {'unready_disposed':True,'resize_stayed_closed':True,'deliberate_reopen':True,'event':event}
 
@@ -807,7 +825,7 @@ def dock_flow(page, hpc):
     points = [checkpoint(page, 'floating')]
     expect(player.get_by_role('button', name='Play video', exact=True)).not_to_be_visible()
     for cycle in range(2):
-        player.get_by_role('button', name='Open WikiTube', exact=True).tap()
+        video_action(page, 'expand')
         expect(player).to_have_attribute('aria-label', 'WikiTube video player')
         points.append(checkpoint(page, 'expanded-' + str(cycle)))
         queue = page.locator('.mall-member-search-dock:visible .mall-member-search-bar textarea')
@@ -835,13 +853,13 @@ def dock_flow(page, hpc):
     # Exercise the existing options through UI, including Full Video -> WikiTube.
     page.locator('.mall-member-search-dock:visible .mall-search-plus').tap()
     menu = page.locator('.mall-member-search-options[open]')
-    menu.locator('[data-video-option="frameDestination"]').select_option('full-video')
+    menu.locator('[data-video-option="pinchOutDestination"]').select_option('full-video')
     menu.locator('[data-video-option="collapseDestination"]').select_option('wikitube')
     # A native select can consume Escape; focus a dialog control first.
     menu.get_by_role('button', name='Close', exact=True).focus()
     page.keyboard.press('Escape')
     expect(menu).not_to_be_visible()
-    player.locator('[data-action="expand"]').tap()
+    video_action(page, 'expand')
     expect(player).to_have_attribute('aria-label', 'Full Video in app')
     expect(player.locator('.video-player-queue-rail')).not_to_be_visible()
     points.append(checkpoint(page, 'full-video'))
@@ -857,11 +875,11 @@ def dock_flow(page, hpc):
     assert_true(all(p['sameFrame'] and p['created'] == 1 for p in points), points)
     page.locator('.mall-member-search-dock:visible .mall-search-plus').tap()
     menu = page.locator('.mall-member-search-options[open]')
-    menu.locator('[data-video-option="frameDestination"]').select_option('wikitube')
+    menu.locator('[data-video-option="pinchOutDestination"]').select_option('wikitube')
     menu.get_by_role('button', name='Close', exact=True).focus()
     page.keyboard.press('Escape')
     expect(menu).not_to_be_visible()
-    player.locator('[data-action="expand"]').tap()
+    video_action(page, 'expand')
     if hpc:
         # Only the existing fixed-HPC scope pushes a player history entry.
         page.go_back(wait_until='domcontentloaded')
@@ -886,11 +904,11 @@ def blocked_recovery(page):
     page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='autoplay-blocked'")
     player = page.locator('#videoPlayerFullscreen')
     play = player.get_by_role('button', name='Play video', exact=True)
-    expect(play).to_be_visible()
+    expect(play).not_to_be_visible()
     frame = player.locator('iframe')
     expect(frame).to_have_count(1)
     page.evaluate("window.independentFrame=document.querySelector('#videoPlayerFullscreen iframe');window.fixturePlayback.block=false")
-    play.tap()
+    video_action(page, 'play')
     page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
     expect(play).not_to_be_visible()
     assert_true(page.evaluate("document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame"),
@@ -908,15 +926,118 @@ def silent_start_unknown(page):
     message = player.locator('.video-player-status').inner_text()
     assert_true('blocked' not in message.lower(), {'snapshot': snapshot, 'rendered_message': message})
     play = player.get_by_role('button', name='Play video', exact=True)
-    expect(play).to_be_visible()
+    expect(play).not_to_be_visible()
     page.evaluate("window.independentFrame=document.querySelector('#videoPlayerFullscreen iframe');window.fixturePlayback.releaseSilentStart()")
-    play.tap()
+    video_action(page, 'play')
     page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
     expect(play).not_to_be_visible()
     assert_true(page.evaluate("document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame"),
                 'Unknown-start manual recovery replaced provider frame')
     return {'silent_start': snapshot, 'rendered_message': message, 'manual_recovery': True,
             'qualification': 'Synthetic API emitted READY then remained silent; no observed browser onAutoplayBlocked event.'}
+
+
+def floating_frame_controls(page):
+    boot(page, True)
+    page.locator('.mall-tile[data-video-id="HPC00000000"]').tap(position={'x': 25, 'y': 75})
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    player = page.locator('#videoPlayerFullscreen')
+    grip = player.locator('.video-player-gesture-grip')
+    expect(grip).to_be_visible()
+    expect(player.locator('.video-player-top-bar')).not_to_be_visible()
+    expect(player.locator('.video-player-manual-play')).not_to_be_visible()
+    page.evaluate("window.independentFrame=document.querySelector('#videoPlayerFullscreen iframe')")
+    for width, height in [(390, 844), (414, 896), (320, 690)]:
+        page.set_viewport_size({'width': width, 'height': height})
+        rect = player.locator('iframe').bounding_box()
+        assert_true(rect['width'] >= 200 and rect['height'] >= 200, rect)
+        assert_true(rect['x'] >= 0 and rect['x'] + rect['width'] <= width + 1, rect)
+    before = player.bounding_box()
+    rect = grip.bounding_box()
+    x, y = rect['x'] + rect['width'] / 2, rect['y'] + rect['height'] / 2
+    page.mouse.move(x, y)
+    page.mouse.down()
+    page.mouse.move(x - 12, y + 65, steps=8)
+    page.mouse.up()
+    after = player.bounding_box()
+    assert_true(after['y'] > before['y'] + 30, {'before': before, 'after': after})
+    assert_true(page.evaluate("document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame"), 'Drag reloaded iframe')
+    rect = grip.bounding_box()
+    x, y = rect['x'] + rect['width'] / 2, rect['y'] + rect['height'] / 2
+    page.mouse.move(x, y)
+    page.mouse.down()
+    page.mouse.move(x + 85, y, steps=3)
+    page.mouse.up()
+    page.wait_for_function('window.mallVideoPlayer.isTucked()')
+    rail = page.locator('.video-player-tuck-handle')
+    expect(rail).to_be_visible()
+    assert_true(page.evaluate('document.querySelector("#videoPlayerFullscreen").inert'), 'Tucked controls remain focusable')
+    box = rail.bounding_box()
+    assert_true(abs(box['height'] - after['height']) <= 1, {'rail': box, 'player': after})
+    assert_true(page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()?.state!=='playing'"), 'Hidden playback continued')
+    rail.tap(position={'x': 18, 'y': box['height'] - 15})
+    page.wait_for_function('!window.mallVideoPlayer.isTucked()')
+    assert_true(page.evaluate('!document.querySelector("#videoPlayerFullscreen").inert'), 'Restored player remains inert')
+    video_action(page, 'play')
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3")
+    page.evaluate("window.mallStateRestore.setVideoOptions({pinchOutDestination:'full-video',pinchInDestination:'wikitube',swipeUpDestination:'mall'})")
+    # App-owned grip, not the inaccessible provider document, receives this gesture.
+    grip.evaluate("e=>{const g=new Event('gesturechange',{bubbles:true,cancelable:true});Object.defineProperty(g,'scale',{value:1.4});e.dispatchEvent(g)}")
+    expect(player).to_have_attribute('aria-label', 'Full Video in app')
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    page.evaluate("window.__pfmallWikiTubeSkipDelayMs=40;window.fixturePlayback.errorsByVideo={HPC00000001:100};window.fixturePlayback.finishCurrent()")
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&window.mallVideoPlayer.getCurrentVideoId()==='HPC00000002'")
+    assert_true(page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().failedIndices.includes(1)"), 'Full Video did not retain failed-clip diagnosis')
+    player.locator('.video-player-top-bar').evaluate("e=>{e.dispatchEvent(new Event('gestureend',{bubbles:true}));}")
+    # Start a fresh pinch only after the controller's documented consumption fence.
+    page.wait_for_timeout(100)
+    player.locator('.video-player-top-bar').evaluate("e=>{const g=new Event('gesturechange',{bubbles:true,cancelable:true});Object.defineProperty(g,'scale',{value:.6});e.dispatchEvent(g)}")
+    expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+    player.locator('.video-player-top-bar').evaluate("""e=>{
+      for(const [name,touches,changedTouches] of [
+        ['touchstart',[{clientX:80,clientY:150}],[]],
+        ['touchend',[],[{clientX:80,clientY:60}]]]){
+        const event=new Event(name,{bubbles:true,cancelable:true});
+        Object.defineProperties(event,{touches:{value:touches},changedTouches:{value:changedTouches}});e.dispatchEvent(event);
+      }
+    }""")
+    page.wait_for_function('window.mallVideoPlayer.isMallHidden()')
+    assert_true(page.evaluate("document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame"), 'Gesture return recreated iframe')
+    assert_true(page.evaluate('window.fixturePlayback.created===1'), 'More than one player created')
+    return {'responsive_provider_minimum': True, 'drag': {'before': before, 'after': after},
+            'restore_rail': box, 'hidden_paused': True, 'independent_gesture_destinations': True,
+            'same_iframe': True, 'cross_origin_touches': 'NOT_CAPTURED', 'physical_iPhone': 'UNEXECUTED'}
+
+
+def dog_and_camera_actions(page):
+    boot(page, True)
+    dock = page.locator('#videoScopePhoneDock')
+    url = page.url
+    dog_box = dock.locator('.mall-search-dog').bounding_box()
+    camera_box = dock.locator('.mall-search-camera').bounding_box()
+    add_box = dock.locator('.mall-search-add').bounding_box()
+    assert_true(dog_box['x'] > camera_box['x'] > add_box['x'], 'Dog must be the rightmost primary dock action')
+    dock.locator('.mall-search-dog').tap()
+    dialog = page.get_by_role('dialog', name='Red Dog conversation', exact=True)
+    expect(dialog).to_be_visible()
+    expect(dialog.get_by_text('Conversation is not connected on this build. No microphone is recording.')).to_be_visible()
+    dialog.get_by_role('button', name='Back to browsing', exact=True).click()
+    assert_true(page.url == url, 'Dog navigated away')
+    expect(dock.locator('.mall-search-dog')).to_be_focused()
+    dock.locator('.mall-search-plus').tap()
+    menu = page.locator('#videoScopeOptions[open]')
+    expect(menu.locator('[data-action="browse-ai"]')).to_be_visible()
+    assert_true(menu.locator(':scope > button').first.get_attribute('data-action') == 'browse-ai', 'AI was not first')
+    menu.get_by_role('button', name='Close', exact=True).click()
+    page.context.route('https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/**',
+                       lambda route: route.fulfill(content_type='text/html', body='<title>Controlled AutoPost destination</title>'))
+    dock.get_by_role('button', name='Open AutoPost camera', exact=True).tap()
+    page.wait_for_url('https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/**')
+    from urllib.parse import parse_qs
+    assert_true(parse_qs(urlsplit(page.url).query) == {'return_to': [url]}, page.url)
+    return {'dog_stays_in_context': True, 'unavailable_is_truthful': True, 'camera_same_tab': True,
+            'camera_destination': page.url, 'actual_camera': 'UNEXECUTED'}
 
 
 def run_case(browser, name, fn, block=False, block_storage=False, silent_start=False, desktop=False, hold_ready=False):
@@ -995,6 +1116,8 @@ try:
                 run_case(browser, 'public-tile-tap-choices', lambda page: tile_tap_choices(page, False))
                 run_case(browser, 'hpc-one-dock-player', lambda page: dock_flow(page, True))
                 run_case(browser, 'public-one-dock-player', lambda page: dock_flow(page, False))
+                run_case(browser, 'floating-frame-controls', floating_frame_controls)
+                run_case(browser, 'dog-and-camera-actions', dog_and_camera_actions)
                 run_case(browser, 'conditional-manual-recovery', blocked_recovery, True)
                 run_case(browser, 'silent-start-provider-unknown', silent_start_unknown, silent_start=True)
             finally:

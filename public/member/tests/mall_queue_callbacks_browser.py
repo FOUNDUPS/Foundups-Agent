@@ -226,7 +226,7 @@ def verify_gesture_boundaries(browser):
             page.wait_for_timeout(100)
         assert page.evaluate("probeWheel('body')") is False
         assert page.evaluate("probeWheel('.video-player-queue-rail')") is False
-        flags = page.evaluate("probePinch('.video-player-title')")
+        flags = page.evaluate("probePinch('.video-player-gesture-grip')")
         assert flags[1:3] == [True,True], flags
         assert page.evaluate("queueProbe.pinches") == 1
         assert page.evaluate("mallVideoPlayer.isOpen() && mallVideoPlayer.isFloating()")

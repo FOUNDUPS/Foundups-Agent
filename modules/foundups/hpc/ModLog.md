@@ -1,3 +1,17 @@
+## 2026-11-22 — Shared floating controls and camera follow-through
+
+012 reports v25 working on iPhone 16 and requests movable/tuckable video,
+minimal app chrome, configurable pinch/return, full-view autoplay, camera and
+conversational Red Dog. Extend the existing #2439 shared owners and contracts;
+retain the report as USER_REPORTED, with OS/PWA/source details unknown.
+
+Candidate adds persistent external frame targets, bounded drag, full-height
+restore/inert tuck, independent preferences, Video menu alternatives and
+canonical AutoPost caller return. Dock dog stays in-page and reports unavailable
+AI truthfully. Preserve native controls and hidden-YouTube pause policy. The
+incident/roadmap record backend, local-model, speech and physical-device gaps.
+Local/independent controlled results do not establish production or phone passes.
+
 ## 2026-11-22 - source reconciliation with current main
 
 Reconcile existing phone head `2a65e7983` with main `dc7c34aa6`, preserving

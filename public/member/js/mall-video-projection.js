@@ -11,7 +11,7 @@
     ['hpc.foundups.com', 'hpc'],
     ['play.foundups.com', 'mall']
   ]);
-  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone)-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
+  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-controls)-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
     dedicatedHosts.set(window.location.hostname, 'mall');
   }
   const publicScopes = new Set(['hpc']);
@@ -209,10 +209,23 @@
   }
 
   function openScopedRedDog(scope) {
-    const path = scopedRedDogPath(scope);
-    if (!path) return;
+    if (!publicScopes.has(scope)) return;
     window.mallStateRestore?.save();
-    window.location.assign(path);
+    return window.redDog?.openConversation?.();
+  }
+
+  function cameraDestination() {
+    const target = new URL('https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/');
+    const caller = new URL(window.location.href);
+    const hosts = new Set(['hpc.foundups.com', 'play.foundups.com', 'foundups.com']);
+    const paths = new Set(['/', '/member', '/member/', '/member/index.html']);
+    const snapshot = caller.hostname === 'hpc.foundups.com' && /^\/member\/hpc-v(?:25|26)\/$/.test(caller.pathname);
+    const queries = [...caller.searchParams];
+    if (caller.protocol === 'https:' && !caller.port && !caller.username && !caller.password &&
+        hosts.has(caller.hostname) && (paths.has(caller.pathname) || snapshot) && !caller.hash &&
+        (queries.length === 0 || (queries.length === 1 && queries[0][0] === 'foundup' && queries[0][1] === 'hpc')) &&
+        caller.href.length <= 1024) target.searchParams.set('return_to', caller.href);
+    return target.href;
   }
 
   function discoveryPath(foundupId, pocUrl) {
@@ -378,21 +391,21 @@
       pressed = false;
       held = false;
     }
-    trigger.title = 'Hold to dictate a search';
+    trigger.title = 'Open Red Dog conversation';
     trigger.addEventListener('pointerdown', (event) => {
       if (!event.isPrimary || event.button !== 0) return;
       held = false;
       pressed = true;
       timer = setTimeout(() => {
         held = true;
-        dictation.start(true);
+        window.redDog?.openConversation?.();
       }, 500);
     });
     trigger.addEventListener('pointerup', () => {
       if (!pressed) return;
       pressed = false;
       clearTimeout(timer);
-      if (held) dictation.stop();
+      // Speech transport is independently admitted by the conversation owner.
     });
     trigger.addEventListener('pointerleave', cancel);
     trigger.addEventListener('pointercancel', cancel);
@@ -414,9 +427,8 @@
     element.className = 'mall-member-search-dock';
     const optionsLabel = redDogHref ? 'More options' : 'Search options';
     const dogLogo = '<img src="/logo-dog.png" alt="" width="30" height="30">';
-    const dogAction = redDogHref
-      ? `<a class="mall-search-dog" aria-label="Red Dog">${dogLogo}</a>`
-      : openRedDog ? `<button class="mall-search-dog" type="button" aria-label="Open Red Dog">${dogLogo}</button>` : '';
+    const dogAction = redDogHref || openRedDog
+      ? `<button class="mall-search-dog" type="button" aria-label="Open Red Dog conversation">${dogLogo}</button>` : '';
     element.innerHTML = `
       <form class="mall-member-search-bar" role="search">
         <p role="status"></p>
@@ -425,13 +437,13 @@
         <button class="mall-search-submit" type="submit" aria-label="Search" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 4 4"/></svg>
         </button>
-        <button class="mall-search-mic" type="button" aria-label="Dictate search" aria-pressed="false">
+        <button class="mall-search-add" type="button" aria-label="Add FoundUp" title="Add FoundUp">+</button>
+        <button class="mall-search-camera" type="button" aria-label="Open AutoPost camera">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11v1a7 7 0 0 0 14 0v-1m-7 8v3m-3 0h6"/>
+            <path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/>
           </svg>
         </button>
         ${dogAction}
-        <button class="mall-search-add" type="button" aria-label="Add FoundUp" title="Add FoundUp">+</button>
         <button class="mall-search-stop" type="button" aria-label="Stop dictation" hidden>
           <span class="mall-dictation-stop" aria-hidden="true"></span>
         </button>
@@ -443,21 +455,31 @@
         <button class="mall-search-option" type="button" data-action="about" hidden>
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-9v1"/></svg>About this FoundUp
         </button>
-        <a class="mall-search-option" href="https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/" target="_blank" rel="noopener noreferrer">
+        <button class="mall-search-option" type="button" data-action="browse-ai">AI / Browse AI</button>
+        <div data-browse-ai-pilot hidden></div>
+        <a class="mall-search-option" data-action="camera" href="https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/></svg>AutoPost camera and photos
         </a>
         <fieldset class="mall-video-options">
           <legend>Video</legend>
           <label>Tap a video tile <select data-video-option="tileTapDestination"><option value="floating">Floating</option><option value="wikitube">WikiTube</option><option value="full-video">Fullscreen in app</option></select></label>
           <label><input type="checkbox" data-video-option="autoplayNext"> Autoplay next clip while visible</label>
-          <label>Frame action <select data-video-option="frameDestination"><option value="wikitube">WikiTube</option><option value="full-video">Full Video in app</option></select></label>
-          <small>Uses the app frame control. Native YouTube taps and fullscreen stay with YouTube.</small>
+          <label>Pinch out <select data-video-option="pinchOutDestination"><option value="wikitube">WikiTube</option><option value="full-video">Fullscreen in app</option></select></label>
+          <label>Pinch in return <select data-video-option="pinchInDestination"><option value="" disabled>Keep current return</option><option value="wikitube">WikiTube</option><option value="mall">Mall tiles</option></select></label>
+          <label>Swipe up return <select data-video-option="swipeUpDestination"><option value="" disabled>Keep current gesture</option><option value="wikitube">WikiTube</option><option value="mall">Mall tiles</option></select></label>
+          <small>Use the frame edges for app gestures. Gestures inside YouTube belong to YouTube.</small>
           <label>Collapse Full Video to <select data-video-option="collapseDestination"><option value="mall">Mall</option><option value="wikitube">WikiTube</option></select></label>
           <label><input type="checkbox" data-video-option="revealSelectedPlayer"> Show parked player when I select a clip</label>
           <small>A fully hidden player stays paused. Browser/provider playback rules still apply.</small>
+          <a data-player-source target="_blank" rel="noopener noreferrer" hidden></a>
+          <div class="mall-video-actions">
+            <button type="button" data-player-action="play">Play / resume video</button>
+            <button type="button" data-player-action="expand">Expand video</button>
+            <button type="button" data-player-action="hide">Hide video</button>
+            <button type="button" data-player-action="return">Return to tiles</button>
+            <button type="button" data-player-action="close">Close video</button>
+          </div>
         </fieldset>
-        <button class="mall-search-option" type="button" data-action="browse-ai">Browse AI pilot</button>
-        <div data-browse-ai-pilot hidden></div>
         ${buildLabel}
         <form method="dialog"><button type="submit">Close</button></form>
       </dialog>`;
@@ -466,6 +488,8 @@
     const submitButton = form.querySelector('.mall-search-submit');
     const dialog = element.querySelector('dialog');
     const options = form.querySelector('.mall-search-plus');
+    dialog.prepend(dialog.querySelector('[data-action="browse-ai"]'),
+      dialog.querySelector('[data-browse-ai-pilot]'), dialog.querySelector('.mall-video-options'));
     const add = form.querySelector('.mall-search-add');
     add.addEventListener('click', () => {
       const scope = document.documentElement.dataset.mallVideoScope;
@@ -482,8 +506,18 @@
     form.setAttribute('aria-label', label);
     input.setAttribute('aria-label', label);
     input.placeholder = label;
-    const dictation = bindDictation(form, input, form.querySelector('.mall-search-mic'),
+    const dictation = bindDictation(form, input, document.createElement('button'),
       form.querySelector('.mall-search-stop'), form.querySelector('[role="status"]'));
+    const camera = form.querySelector('.mall-search-camera');
+    const cameraLink = dialog.querySelector('[data-action="camera"]');
+    const openCamera = (event) => {
+      event.preventDefault();
+      dictation.cancel(); dialog.close();
+      window.mallStateRestore?.save();
+      window.location.assign(cameraDestination());
+    };
+    camera.addEventListener('click', openCamera);
+    cameraLink.addEventListener('click', openCamera);
 
     function fitInput() {
       if (element.hidden) return;
@@ -523,20 +557,57 @@
       dialog.style.bottom = (window.innerHeight - (fitsAbove ? barTop : top + height) + 8) + 'px';
       dialog.style.maxHeight = Math.max(0, Math.min(height * .65, fitsAbove ? above : height - 16)) + 'px';
     }
-    function showOptions() {
-      if (dialog.open || element.hidden) return;
+    let detachedOptionsParent = null;
+    let optionsReturnFocus = null;
+    function showOptions(fromPlayer = false) {
+      if (dialog.open || (element.hidden && fromPlayer !== true)) return;
+      optionsReturnFocus = fromPlayer === true ? document.activeElement : options;
+      if (element.hidden) {
+        // Reuse this dialog for a floating card on a desktop whose search dock
+        // is hidden. Never clone the dock or move/reload the provider frame.
+        detachedOptionsParent = dialog.parentElement;
+        document.body.append(dialog);
+      }
       dictation.cancel();
       const prefs = window.mallStateRestore?.getVideoOptions?.();
       for (const input of dialog.querySelectorAll('[data-video-option]')) {
         if (!prefs) continue;
         const value = prefs[input.dataset.videoOption];
         if (input.type === 'checkbox') input.checked = value;
-        else input.value = value;
+        else input.value = value === undefined ? '' : value;
       }
-      options.focus({ preventScroll: true });
+      for (const button of dialog.querySelectorAll('[data-player-action]')) {
+        button.disabled = window.mallVideoPlayer?.isOpen?.() !== true || window.mallVideoPlayer?.isMallHidden?.() === true;
+      }
+      const source = dialog.querySelector('[data-player-source]');
+      const attribution = window.mallVideoPlayer?.getAttribution?.();
+      source.hidden = true;
+      source.removeAttribute('href');
+      if (attribution) {
+        try {
+          const url = new URL(attribution.url);
+          if (url.protocol === 'https:' && !url.username && !url.password) {
+            source.href = url.href;
+            source.textContent = [attribution.title, attribution.label].filter(Boolean).join(' · ');
+            source.hidden = false;
+          }
+        } catch { /* Untrusted catalog links never become menu navigation. */ }
+      }
+      if (!element.hidden) options.focus({ preventScroll: true });
       dialog.showModal();
       placeOptions();
     }
+    dialog.querySelector('.mall-video-actions').addEventListener('click', event => {
+      const action = event.target.closest('[data-player-action]')?.dataset.playerAction;
+      if (!action) return;
+      dialog.close();
+      const player = window.mallVideoPlayer;
+      if (action === 'play') { player?.untuck?.(); player?.requestPlay?.(); }
+      else if (action === 'expand') player?.openPinchDestination?.();
+      else if (action === 'hide') player?.tuck?.();
+      else if (action === 'return') player?.returnToMall?.();
+      else if (action === 'close') player?.close?.();
+    });
     window.addEventListener('resize', () => { fitInput(); placeOptions(); });
     window.visualViewport?.addEventListener('resize', placeOptions);
     window.visualViewport?.addEventListener('scroll', placeOptions);
@@ -567,6 +638,13 @@
     });
     dialog.addEventListener('close', () => {
       browsePilot?.destroy(); browsePilot = null; browseHost.hidden = true;
+      if (detachedOptionsParent?.isConnected) detachedOptionsParent.append(dialog);
+      detachedOptionsParent = null;
+      const returnFocus = optionsReturnFocus;
+      optionsReturnFocus = null;
+      if (returnFocus?.isConnected && !returnFocus.closest('[inert]') && returnFocus.getClientRects().length) {
+        returnFocus.focus({ preventScroll: true });
+      }
     });
     dialog.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') event.stopPropagation();
@@ -582,18 +660,22 @@
       if (event.clientX < rect.left || event.clientX > rect.right ||
           event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
     });
-    const autoPost = dialog.querySelector('a');
+    const autoPost = cameraLink;
     autoPost.addEventListener('click', () => dialog.close());
     const dog = form.querySelector('.mall-search-dog');
     const cancelHold = dog && bindDictationHold(dog, dictation);
     if (redDogHref) {
-      dog.href = redDogHref;
-      dog.addEventListener('click', () => window.mallStateRestore.save());
+      dog.addEventListener('click', () => { dog.focus({ preventScroll: true }); window.mallStateRestore?.save(); window.redDog?.openConversation?.(); });
     } else if (openRedDog) {
-      dog.addEventListener('click', openRedDog);
+      dog.addEventListener('click', () => {
+        dog.focus({ preventScroll: true });
+        window.mallStateRestore?.save();
+        window.redDog?.openConversation?.();
+      });
     }
     return {
       element, input, dialog, dictation, fitInput,
+      showVideoOptions() { showOptions(true); dialog.querySelector('.mall-video-options')?.scrollIntoView({ block: 'nearest' }); },
       setScoped(scoped) {
         // AutoPost is a working existing action, not a model placeholder.
         autoPost.hidden = false;
@@ -654,7 +736,7 @@
     const filters = document.getElementById('mallProjection');
     if (document.documentElement.dataset.mallOpenLanding === 'play' && filters) {
       filters.classList.add('mall-open-filter-options');
-      dock.dialog.prepend(filters);
+      dock.dialog.insertBefore(filters, dock.dialog.querySelector('.mall-build-label'));
     }
     dock.setValue(field.getFieldScope()?.query || '');
     window.redDog.bindSearchDictation?.(dock.dictation);
@@ -669,20 +751,10 @@
 
   function createPhoneDock(actions, scope, disclosure) {
     const field = window.mallTileField;
-    const conversationAvailable = window.redDog?.hasConversationEndpoint?.() === true;
-    // An unavailable HPC conversation is a Mall doorway, not a briefing popup.
-    const unavailableDogHref = scope === 'hpc'
-      ? (isOpenMallHost(window.location) ? '/member/' : OPEN_MALL_ORIGIN + '/')
-      : scopedRedDogPath(scope);
-    const dock = createMemberDock('Search HPC Mall', search, conversationAvailable ? () => {
+    const dock = createMemberDock('Search HPC Mall', search, () => {
       window.mallStateRestore?.save();
       window.redDog.openConversation();
-    } : null, conversationAvailable ? null : unavailableDogHref);
-    if (scope === 'hpc' && !conversationAvailable) {
-      const dog = dock.element.querySelector('.mall-search-dog');
-      dog.setAttribute('aria-label', 'Return to Play FoundUps Mall');
-      dog.title = 'Play FoundUps Mall';
-    }
+    });
     scopedPhoneDock = { scope, dock };
     const { element, dialog, input } = dock;
     element.id = 'videoScopePhoneDock';
@@ -713,6 +785,7 @@
     const home = dialog.querySelector('[data-action="home"]');
     const about = dialog.querySelector('[data-action="about"]');
     home.hidden = about.hidden = false;
+    about.lastChild.textContent = 'Site information';
     home.addEventListener('click', () => { dialog.close(); search(''); });
     about.addEventListener('click', () => { dialog.close(); disclosure.showModal(); });
     return {
@@ -960,6 +1033,7 @@
     discoveryPath,
     mount,
     createMemberDock,
+    cameraDestination,
     getScopedPhoneDock(scope, options) {
       const sharedMallDock = options?.includeDesktop === true && scopedPhoneDock?.scope === null;
       return (isPhoneDockLayout() || sharedMallDock) && scopedPhoneDock && (scopedPhoneDock.scope === null || scopedPhoneDock.scope === scope)

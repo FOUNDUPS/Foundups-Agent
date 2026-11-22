@@ -1,5 +1,16 @@
 # HPC interface
 
+## 2026-11-22 — Phone control clarification
+
+HPC consumes the shared [floating control contract](../../../public/member/INTERFACE.md#2026-11-22--floating-controls-and-camera-candidate).
+The player can be moved using persistent app-owned frame targets, tucked to a
+video-height restore rail and expanded by the configured outward pinch. Its
+YouTube interior retains native input. Hidden playback pauses; visible autoplay
+and reveal-on-selection remain separate settings. The dock camera delegates to
+AutoPost, and the dock dog opens canonical conversation/availability in-place.
+An unavailable service is not a voice or browser-model implementation. Current
+candidate qualification and phone evidence are recorded in the roadmap/incident.
+
 ## Entry and authority
 
 | Surface | Contract |

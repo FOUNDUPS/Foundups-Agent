@@ -1,5 +1,31 @@
 # Member Area Interface
 
+## 2026-11-22 — Floating controls and camera candidate
+
+The shared floating player has a persistent external grip and side edges.
+Drag within the available viewport; keyboard arrows move the focused grip.
+Enter/click opens `+` → Video, which provides Play, Expand, Hide, Return and
+Close alternatives. The app floating title/expand row and app Play strip are
+removed. Provider controls remain exposed, and recovery remains available in
+Video. App gestures never intercept the cross-origin iframe interior.
+
+Outward pinch defaults to WikiTube; direct app Full Video is configurable.
+Separate optional inward-pinch and video-swipe-up return choices are stored in
+`pfmall_video_options_v1` without coupling the old frame/collapse fields. Until
+chosen, return gestures retain their current behavior. Full Video entry requests
+playback through the existing provider guard. Hidden/tucked YouTube pauses;
+its full-height rail restores the same paused player. Selection reveal remains
+an existing independent preference. No native-fullscreen pass is implied.
+
+The dock camera opens canonical public AutoPost in the same tab after saving
+Mall state. `cameraDestination()` includes only an allowlisted `return_to` URL,
+matching AutoPost's own parser. Red Dog on this dock stays in-page and calls the
+canonical conversation owner. Missing backend admission produces a closable
+availability message, not a Mall redirect or search dictation. Existing account
+avatar, product and legacy mode-sheet owners retain their separate behavior.
+No new AI model, voice capture, backend deployment or permission is introduced.
+See [the incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
 ## 2026-11-21 — v26 phone candidate (unreleased)
 
 Build v25 remains the frozen comparison at its existing preview. Build v26 uses a

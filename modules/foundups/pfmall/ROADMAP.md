@@ -1,5 +1,23 @@
 # p.fMALL Roadmap
 
+## 2026-11-22 — Shared floating control continuation
+
+**IMPLEMENTED_PENDING_VERIFICATION / 15-P1.** Reuse #2439 and the current shared
+player/state/dock owners for the [HPC phone feedback](../hpc/ROADMAP.md#2026-11-22--floating-controls-and-camera-continuation).
+The next acceptance layer adds bounded dragging and permanent surrounding
+gesture surfaces, a full-height tuck/restore rail, independent validated gesture
+choices, menu-based accessible playback actions and the existing AutoPost camera
+destination. Native provider input and hidden-playback restrictions remain.
+
+Red Dog stays in the same browsing context, including when the canonical
+conversation service is not configured. This UI recovery does not mount the
+backend or qualify a speech/model runtime. The real browser-model benchmark
+candidate is SmolLM2-360M through WebLLM, pending pinned artifacts, explicit
+download/Cancel/Unload and physical iPhone measurements; no model is loaded by
+startup or represented as approved. AutoPost's companion footer uses its own
+existing capture/navigation owner; shared search/AI transport integration is
+still open. Preserve all dated source and device receipts.
+
 ## Shared Search Dock and video preferences — 2026-11-21
 
 **PFDOCK-20261121 / CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.**

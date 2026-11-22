@@ -454,5 +454,40 @@ await check('admitted review remains unavailable and cannot auto-submit or grant
   assert.equal(h.document.activeElement.textContent, 'Back to browsing');
 });
 
+await check('camera handoff carries only bounded canonical public caller URLs and no admission state', () => {
+  const camera = 'https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/';
+  for (const caller of ['https://hpc.foundups.com/member/', 'https://hpc.foundups.com/member/hpc-v25/',
+    'https://hpc.foundups.com/member/hpc-v26/', 'https://play.foundups.com/member/?foundup=hpc', 'https://foundups.com/member/']) {
+    const h = runtime(caller), url = new URL(h.api.cameraDestination());
+    assert.equal(url.origin + url.pathname, camera);
+    assert.deepEqual([...url.searchParams], [['return_to', caller]]);
+    assert.deepEqual(h.calls.assign, []); assert.deepEqual(h.calls.intents, []); assert.deepEqual(h.calls.fetches, []);
+  }
+  for (const caller of ['http://hpc.foundups.com/member/', 'https://user@hpc.foundups.com/member/',
+    'https://hpc.foundups.com:444/member/', 'https://hpc.foundups.com/member/?token=private',
+    'https://play.foundups.com/member/?foundup=hpc&foundup=hpc', 'https://hpc.foundups.com/member/#private',
+    'https://hpc.foundups.com/member/hpc-v27/', 'https://hpc.foundups.com/private/',
+    'https://other.example/member/', preview + '/member/?foundup=hpc']) {
+    assert.equal(runtime(caller).api.cameraDestination(), camera, caller);
+  }
+});
+
+await check('isolated v26 controls preview is read-only while unrelated preview hosts remain unselected', () => {
+  for (const domain of ['web.app', 'firebaseapp.com']) {
+    const location = new URL('https://foundupscom--play-v26-controls-abc123.' + domain + '/member/?foundup=hpc');
+    const h = runtime(location.href);
+    assert.equal(h.api.hostScope(location), 'mall');
+    assert.equal(h.api.publicEntryPath(location), null, 'foundup projection is not an enter handoff');
+    assert.equal(h.api.shouldLoadMemberAuth(location), false);
+    h.api.mount = scope => h.calls.mounts.push(scope);
+    h.run(memberSdkBoot, 'member.html#sdk'); h.run(productBoot, 'member.html#productDiscoveryBoot');
+    assert.deepEqual(h.calls.mounts, ['hpc']);
+    assert.deepEqual(h.calls.sdk, []);
+    assert.deepEqual(h.calls.fetches, []); assert.deepEqual(h.calls.intents, []);
+  }
+  assert.equal(runtime('https://foundupscom--random-controls-abc123.web.app/member/').api.hostScope(
+    new URL('https://foundupscom--random-controls-abc123.web.app/member/')), null);
+});
+
 console.log(JSON.stringify({ checks, real_auth: 'UNEXECUTED', membership_editor: 'UNEXECUTED',
   browser_layout: 'UNEXECUTED', physical_phone: 'UNEXECUTED', external_requests: 0, submitted: false }));

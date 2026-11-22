@@ -1,3 +1,14 @@
+## 2026-11-22 — Floating control continuation
+
+Use the same player/state/dock for HPC-first qualification of drag, persistent
+frame gesture targets, full-height tuck/restore, independent preferences and
+accessible Video actions. Camera reuses external AutoPost; its companion footer
+owns safe return and capture lifecycle. No duplicate capture, search, model or
+conversation engine is added. The source review corrected Full Video timeout
+advancement and focus, and the wide-floating menu now reuses its existing dialog.
+See the member test log, HPC roadmap and canonical media incident for source,
+provider, delivery and physical-device distinctions under WSP 00/10/15/22/30/97.
+
 ## 2026-11-21 — Shared dock and configurable player acceptance
 
 PFDOCK-20261121 extends the same dock/settings requirement across all FoundUps,

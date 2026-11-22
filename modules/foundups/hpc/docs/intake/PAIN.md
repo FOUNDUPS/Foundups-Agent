@@ -1,5 +1,18 @@
 # HPC pain
 
+## Phone control feedback — 012, 2026-11-22
+
+USER_REPORTED: v25 works on iPhone 16, but the floating player's app controls
+consume space, its swipe target disappears, the restore rail is too small,
+and Red Dog leaves the current view rather than conversing. The camera is
+missing from the main dock. OS/mode and phone asset receipts are unprovided.
+
+Confirmed source gaps and bounded repairs belong to the
+[shared media incident](../../../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md), not a
+second HPC media or voice implementation. Continued fully hidden YouTube audio
+conflicts with provider policy. Browser AI and real speech remain qualification
+dependencies, distinct from responsive layout or successful thumbnail rendering.
+
 ## Primary pain point and audience
 
 People looking for political-media commentary and its underlying context must cross independent feeds, reposts and civic information sites. 012's manual clipping and tagging on Move2Japan is evidence of that workflow. The PoC addresses a curated audience interested in that topic.

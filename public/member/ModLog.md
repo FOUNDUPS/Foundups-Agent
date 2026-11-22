@@ -1,5 +1,22 @@
 # Member Area Module Change Log
 
+## 2026-11-22 — Floating control and camera continuation
+
+Extend the shared player/state/dock from #2439 a3ea8260. Add viewport-clamped
+drag, permanent surrounding gesture targets, video-height Restore and inert
+hidden controls. Route outward pinch through its confirmed WikiTube default
+or direct app Full Video, with independent optional return choices. Move
+floating app controls into Video and preserve explicit blocked-play recovery.
+Keep native provider controls and hidden-playback pause guards.
+
+Restore camera in the dock with canonical AutoPost and bounded same-tab
+`return_to`; source search and caller state stay local. Dock Red Dog opens its
+own conversation/availability surface and returns without leaving HPC. Existing
+product/account gesture owners remain. No fake listening, approved browser
+model, public backend host, voice engine or production release is claimed.
+Fresh regression and independent review receipts belong in the test log and
+[shared incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
 ## 2026-11-22 - selective v26 return/navigation and defensive rendering
 
 Reused the existing player/field/history/dock for a paused reversible Mall

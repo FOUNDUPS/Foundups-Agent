@@ -189,10 +189,10 @@
       e.stopPropagation();
       // Start hold timer
       holdTimer = setTimeout(function () {
-        if (searchDictation) {
-          isHolding = true;
-          searchDictation.start(true);
-        } else isHolding = true; // consume the hold without claiming capture
+          if (searchDictation) {
+            isHolding = true;
+            searchDictation.start(true);
+          } else isHolding = true; // consume the hold without claiming capture
       }, HOLD_THRESHOLD);
     });
 
@@ -585,17 +585,58 @@
     return true;
   }
 
+  var unavailableConversationDialog = null;
+  function showUnavailableConversation() {
+    if (unavailableConversationDialog?.open) return;
+    var returnFocus = document.activeElement;
+    var dialog = document.createElement('dialog');
+    dialog.className = 'reddog-unavailable-dialog';
+    dialog.setAttribute('aria-label', 'Red Dog conversation');
+    var heading = document.createElement('h2');
+    heading.textContent = 'Red Dog';
+    var message = document.createElement('p');
+    message.textContent = 'Conversation is not connected on this build. No microphone is recording.';
+    var back = document.createElement('button');
+    back.type = 'button';
+    back.textContent = 'Back to browsing';
+    back.addEventListener('click', function () { dialog.close(); });
+    dialog.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') event.stopPropagation();
+    });
+    dialog.addEventListener('close', function () {
+      dialog.remove();
+      unavailableConversationDialog = null;
+      if (returnFocus?.isConnected && !returnFocus.closest('[inert]')) returnFocus.focus({ preventScroll: true });
+    }, { once: true });
+    dialog.appendChild(heading);
+    dialog.appendChild(message);
+    dialog.appendChild(back);
+    document.body.appendChild(dialog);
+    unavailableConversationDialog = dialog;
+    if (typeof dialog.showModal === 'function') dialog.showModal();
+    else dialog.setAttribute('open', '');
+    back.focus();
+  }
+
   function openConversation() {
     var context = getConversationContext();
+    if (context.access === 'unknown' || context.selectionState === 'invalid') return false;
     if (conversationAdapter && getConversationAvailability(context).available) {
       conversationAdapter.open(context);
       return true;
     }
+    if (!getConfiguredConversationApiRoot()) {
+      showUnavailableConversation();
+      return false;
+    }
     var requestedRevision = context.bindingRevision;
     loadConversationAdapter().then(function (adapter) {
       var latest = getConversationContext();
-      if (!adapter || latest.bindingRevision !== requestedRevision ||
-          !getConversationAvailability(latest).available) return;
+      if (latest.bindingRevision !== requestedRevision) return;
+      if (!adapter || !getConversationAvailability(latest).available) {
+        showUnavailableConversation();
+        return;
+      }
       adapter.open(latest);
     });
     return false;

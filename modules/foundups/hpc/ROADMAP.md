@@ -1,5 +1,43 @@
 # HPC roadmap
 
+## 2026-11-22 — Floating controls and camera continuation
+
+**CHANGES_POC_ACCEPTANCE / IMPLEMENTED_PENDING_VERIFICATION** in the existing
+#2439 continuation. 012 reports v25 playback working on an iPhone 16; the OS,
+standalone mode and delivered phone fingerprints were not supplied. Preserve
+that USER_REPORTED result separately from controlled browser/device acceptance.
+
+- Extend the shared player with viewport-clamped dragging, persistent frame-edge
+  gesture targets and a video-height Restore rail. Scrolling continues beneath
+  it. Native YouTube input remains unobstructed. App gestures cannot capture
+  touches inside the cross-origin provider document.
+- Remove the redundant floating title/expand row and persistent app Play strip.
+  Keep single-pointer/keyboard actions in `+` → Video and native provider Play.
+  Outward pinch defaults to WikiTube as confirmed by this feedback; direct app
+  Full Video is selectable. Pinch-in and swipe-up returns are independent saved
+  choices. Existing return behavior remains until a return choice is selected.
+- Fully hidden YouTube playback pauses, as required by provider policy. A larger
+  restore rail is not a visible player and cannot justify background audio.
+  Keep `revealSelectedPlayer` and visible sequential playback settings.
+- Replace the separate dock microphone with the canonical public AutoPost
+  camera handoff, saving Mall state and passing only an allowlisted `return_to`.
+  The companion AutoPost owner supplies Camera/Preview/Options/Return. Its full
+  shared search/conversation dock remains a separately missing connector.
+- Red Dog tap/hold opens its existing conversation owner without navigating to
+  another FoundUp or dictating into search. An unavailable service stays in-page
+  with Back to browsing. This is not delivered spoken AI: the qualified public
+  backend host, durable accounting/ingress/secret bindings and browser speech
+  path are missing. No browser language model is admitted. The existing 41-byte
+  WASM test is only compatibility evidence.
+
+Allocation: C3/I4/D4/Impact4 = **15/P1**, extending existing owners. Accept only
+after independent source review, shared browser/VM regressions, exact-head CI,
+source-bound preview and physical Safari/Home Screen testing. No production
+deployment, new calling engine, automatic model download or lifecycle promotion
+follows from this record. The [shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+owns evidence and the [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns shared behavior.
+
 ## 2026-11-22 - main reconciliation candidate in existing PR #2439
 
 Inputs are phone head `2a65e7983acb489084cecf1229fcfd582f68f19b` and main

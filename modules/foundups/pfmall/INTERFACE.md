@@ -1,5 +1,32 @@
 # p.fMALL Interface
 
+## 2026-11-22 — Floating controls, preferences and camera contract
+
+Candidate additions to the existing shared owners, pending final qualification:
+
+- `mallVideoPlayer.openPinchDestination()` selects WikiTube (default) or app
+  Full Video from `pinchOutDestination`. `requestPlay()` refuses hidden playback
+  and reuses the existing provider recovery command. These APIs do not request
+  native YouTube/iOS fullscreen.
+- `pfmall_video_options_v1` preserves existing fields and gains validated
+  `pinchOutDestination` (`wikitube`/`full-video`), optional `pinchInDestination`
+  and optional `swipeUpDestination` (`wikitube`/`mall`). Old records migrate on
+  read without writes. Unselected return choices retain existing behavior.
+- The persistent app-owned grip/side edges support drag and application gestures
+  without overlaying the iframe. Keyboard arrows move the floating card; Enter
+  opens shared Video actions. Right tuck pauses and makes the player inert;
+  its video-height rail restores the same paused provider. Reveal-on-selection
+  remains a separate existing preference.
+- `mallVideoProjection.cameraDestination()` produces the canonical public
+  AutoPost URL. Only bounded canonical HTTPS Mall callers become `return_to`.
+  No account, token, media bytes or private state crosses the handoff.
+- Red Dog opens the canonical conversation owner; unavailable builds show an
+  in-page return control. No alternate navigation or false microphone capture
+  is substituted for an unavailable AI service.
+
+See [the incident](MEDIA_PLAYBACK_INCIDENT_HPC.md) for provider, deployment and
+device limits. AutoPost owns its separately tested return parser and footer.
+
 ## 2026-11-21 — v26 phone candidate (unreleased)
 
 Build v25 remains the frozen comparison at its existing preview. Build v26 uses a

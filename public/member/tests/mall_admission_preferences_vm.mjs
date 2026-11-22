@@ -12,7 +12,7 @@ const OPTIONS = 'pfmall_video_options_v1';
 const TTL = 15 * 60 * 1000;
 const copy = value => JSON.parse(JSON.stringify(value));
 const legacyDefaults = { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true };
-const defaults = { ...legacyDefaults, tileTapDestination: 'floating' };
+const defaults = { ...legacyDefaults, tileTapDestination: 'floating', pinchOutDestination: 'wikitube' };
 let checks = 0;
 function check(name, fn) { fn(); checks++; console.log('PASS ' + name); }
 
@@ -168,19 +168,19 @@ check('legacy v1 frame and collapse choices never become tile-tap defaults', () 
     collapseDestination: 'wikitube', revealSelectedPlayer: false };
   const raw = JSON.stringify({ version: 1, options: legacy });
   const h = runtime({ local: new Map([[OPTIONS, raw]]) });
-  assert.deepEqual(copy(h.api.getVideoOptions()), { ...legacy, tileTapDestination: 'floating' });
+  assert.deepEqual(copy(h.api.getVideoOptions()), { ...legacy, tileTapDestination: 'floating', pinchOutDestination: 'wikitube' });
   assert.deepEqual(h.writes, [], 'migration reads do not write browser storage');
   assert.equal(h.local.get(OPTIONS), raw);
   for (const destination of ['floating', 'wikitube', 'full-video']) {
     assert.equal(h.api.setVideoOptions({ tileTapDestination: destination }), true);
     const saved = JSON.parse(h.local.get(OPTIONS));
     assert.equal(saved.version, 1);
-    assert.deepEqual(saved.options, { ...legacy, tileTapDestination: destination });
+    assert.deepEqual(saved.options, { ...legacy, tileTapDestination: destination, pinchOutDestination: 'wikitube' });
     assert.deepEqual(copy(runtime({ local: h.local }).api.getVideoOptions()), saved.options);
   }
   assert.equal(h.api.setVideoOptions({ frameDestination: 'wikitube', collapseDestination: 'mall' }), true);
   assert.equal(h.api.getVideoOptions().tileTapDestination, 'full-video');
-  assert.equal('pinchOutDestination' in h.api.getVideoOptions(), false);
+  assert.equal(h.api.getVideoOptions().pinchOutDestination, 'wikitube');
   assert.equal('pinchInDestination' in h.api.getVideoOptions(), false);
   assert.equal('swipeUpDestination' in h.api.getVideoOptions(), false);
 });
@@ -190,7 +190,7 @@ check('invalid stored tile choice falls back independently of valid legacy prefe
     const legacy = { ...legacyDefaults, autoplayNext: false, frameDestination: 'full-video' };
     const local = new Map([[OPTIONS, JSON.stringify({ version: 1, options: { ...legacy, tileTapDestination: invalid } })]]);
     const h = runtime({ local });
-    assert.deepEqual(copy(h.api.getVideoOptions()), { ...legacy, tileTapDestination: 'floating' });
+    assert.deepEqual(copy(h.api.getVideoOptions()), { ...legacy, tileTapDestination: 'floating', pinchOutDestination: 'wikitube' });
     assert.deepEqual(h.writes, []);
   }
 });
@@ -251,9 +251,23 @@ check('legacy storage event migrates one shared snapshot without writing or new 
   const raw = JSON.stringify({ version: 1, options: legacy });
   h.local.set(OPTIONS, raw);
   h.fire({ key: OPTIONS, newValue: raw });
-  assert.deepEqual(snapshots, [{ ...legacy, tileTapDestination: 'floating' }]);
+  assert.deepEqual(snapshots, [{ ...legacy, tileTapDestination: 'floating', pinchOutDestination: 'wikitube' }]);
   assert.deepEqual(h.writes, []);
   assert.equal(h.local.get(OPTIONS), raw);
+});
+
+check('pinch and swipe choices persist independently of frame, tile and collapse choices', () => {
+  const h = runtime();
+  assert.equal(h.api.setVideoOptions({ pinchOutDestination: 'full-video', pinchInDestination: 'mall', swipeUpDestination: 'wikitube' }), true);
+  const expected = { ...defaults, pinchOutDestination: 'full-video', pinchInDestination: 'mall', swipeUpDestination: 'wikitube' };
+  assert.deepEqual(copy(runtime({ local: h.local }).api.getVideoOptions()), expected);
+  assert.equal(h.api.setVideoOptions({ pinchInDestination: 'wikitube' }), true);
+  assert.equal(h.api.getVideoOptions().swipeUpDestination, 'wikitube');
+  assert.equal(h.api.getVideoOptions().pinchOutDestination, 'full-video');
+  assert.equal(h.api.getVideoOptions().frameDestination, 'wikitube');
+  const before = h.local.get(OPTIONS);
+  assert.equal(h.api.setVideoOptions({ swipeUpDestination: 'mall', pinchInDestination: 'account' }), false);
+  assert.equal(h.local.get(OPTIONS), before);
 });
 
 console.log(JSON.stringify({ checks, real_auth: 'UNEXECUTED', graph_runtime_imported: false, writes_or_publication: false }));

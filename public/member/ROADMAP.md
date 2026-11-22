@@ -1,5 +1,17 @@
 # Member Area Roadmap
 
+## 2026-11-22 — Floating controls and camera follow-through
+
+**IMPLEMENTED_PENDING_VERIFICATION.** The existing #2439 owner supplies bounded
+drag/frame gestures, a video-height restore rail, independent video preferences,
+accessible actions in the shared menu and the canonical AutoPost camera handoff.
+The dock dog stays in context when conversation is unavailable. Preserve the
+ordinary account/product controller and native provider controls. Qualify both
+browser engines, shared regressions and exact-source preview before phone
+acceptance. The [HPC acceptance record](../../modules/foundups/hpc/ROADMAP.md#2026-11-22--floating-controls-and-camera-continuation)
+and [incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+retain the backend, browser-model, speech and physical-device blockers.
+
 ## 2026-11-22 - selective shared return and tile-tap continuation
 
 The existing #2439 owner selectively adopts the private review's reversible
@@ -13,7 +25,7 @@ The guest Fractal prototype, new lenses/face loans and unresolved gesture
 defaults are excluded. Frame destination is independent of tile-tap preference;
 no legacy field seeds the three held gesture choices. Existing AI pilot and
 fail-closed contribution/admission boundaries are preserved. See the current
-[HPC reconciliation](../../../modules/foundups/hpc/ROADMAP.md) and
+[HPC reconciliation](../../modules/foundups/hpc/ROADMAP.md) and
 [test log](tests/TestModLog.md) for source-bound controlled evidence. Conflict,
 hosted review, deployment and physical/real-provider gates remain open.
 

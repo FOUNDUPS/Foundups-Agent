@@ -427,14 +427,43 @@
 }
 
 .video-player-floating .video-player-top-bar {
-  position: relative;
-  flex-shrink: 0;
-  padding: 0.4rem 0.6rem;
-  background: #171224;
-  opacity: 1;
-  pointer-events: auto;
-  cursor: grab;
+  display: none;
 }
+
+.video-player-gesture-grip,
+.video-player-gesture-side { display: none; }
+.video-player-stage-frame { display: contents; }
+.video-player-floating .video-player-stage-frame { display: flex; flex: 0 0 auto; min-width: 0; }
+.video-player-floating .video-player-stage-frame > .video-player-stage { flex: 1 1 auto; min-width: 200px; }
+.video-player-floating .video-player-gesture-side {
+  display: block;
+  flex: 0 0 12px;
+  background: #171224;
+  touch-action: none;
+  cursor: move;
+}
+.video-player-floating .video-player-gesture-grip {
+  display: flex;
+  flex: 0 0 24px;
+  min-height: 24px;
+  align-items: center;
+  justify-content: center;
+  background: #171224;
+  cursor: grab;
+  touch-action: none;
+}
+.video-player-gesture-grip::after { content: ''; width: 36px; height: 4px; border-radius: 3px; background: #d6bdf888; }
+.video-player-gesture-grip:focus-visible { outline: 2px solid #d6bdf8; outline-offset: -2px; }
+.video-player-floating.has-floating-position {
+  left: var(--floating-left);
+  right: auto;
+  width: min(25rem, calc(100vw - 1rem));
+  margin-inline: 0;
+}
+@media (min-width: 720px) {
+  .video-player-fullscreen.video-player-floating.has-floating-position { width: min(24rem, calc(100vw - 2rem)); }
+}
+.video-player-floating .video-player-manual-play { display: none; }
 
 .video-player-floating .video-player-stage,
 .video-player-inline .video-player-stage {
@@ -453,7 +482,7 @@
 /* Tucked state is fully hidden; the player controller pauses media before hiding. */
 .video-player-fullscreen.video-player-floating.is-tucked {
   transform: translateX(calc(100% + 2.5rem));
-  opacity: 0.01;
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -468,7 +497,8 @@
   justify-content: center;
   gap: 0.35rem;
   width: 42px;
-  min-height: 92px;
+  height: var(--floating-height, 224px);
+  min-height: 200px;
   padding: 0.5rem 0.25rem;
   border: 1px solid rgba(214, 189, 248, 0.55);
   border-right: 0;
@@ -819,6 +849,8 @@
     height: 200px;
     min-height: 200px;
   }
+
+  .video-player-fullscreen.video-player-floating.has-floating-position { width: min(312px, 48vw); }
 
   .video-player-queue-rail {
     padding: 0.25rem;

@@ -1,5 +1,24 @@
 # Member Mall tests
 
+## Floating control continuation — 2026-11-22
+
+`mall_phone_ui_browser.py --case floating-frame-controls --case dog-and-camera-actions`
+checks responsive minimum provider size, moving the same frame, full-height
+restore, hidden pause, direct Full Video and unavailable-next-clip recovery,
+independent gesture returns, in-page unavailable Red Dog and the bounded camera
+caller URL. The desktop unready-return case also exercises the same options
+dialog while its regular dock is hidden. Use the full `--include-defensive`
+selection for shared shell/desktop/phone regression.
+
+Playback actions relocated from floating chrome are exercised through Video,
+including its persistent grip alternative; desktop theater retains its existing
+Back owner. The media-policy fixture still forces actual sub-200px geometry and
+asserts start refusal, preserving its original acceptance. The preference and
+routing VMs qualify read-only migration, independent choices, camera URL bounds
+and the explicit controls-preview host family. Existing account/product modes
+remain separate regressions. All provider and camera requests are controlled;
+these commands do not qualify real speech, AI, iPhone playback or camera return.
+
 With Chromium and Python Playwright installed, run
 `python -B public/member/tests/mall_guest_conversation_browser.py` from the
 repository root. It drives the HPC phone dock and real dialog at 390×844 using

@@ -570,6 +570,15 @@ voice and Simulator boundaries.
 
 ## 14. Shared Search Dock and video preferences
 
+2026-11-22 candidate update: the shared #2439 continuation implements clamped
+floating drag/frame targets, a video-height tuck/restore rail, independent
+validated options and menu-based accessible actions. Outward pinch now defaults
+to WikiTube by 012's clarification. Return defaults remain open; an unselected
+return choice preserves its existing behavior. Dock camera delegates to AutoPost
+with a bounded caller return. Dock Red Dog stays in-page when unavailable; no
+public backend, STT or language model is thereby activated. Final source/preview
+and physical-device qualification remain separate from this candidate.
+
 **PFDOCK-20261121 / CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.**
 012's 2026-11-21 correction applies to **all FoundUps and every fractal view**,
 including `play.foundups.com`, HPC, nested FoundUp interiors, the tile field,
@@ -625,7 +634,7 @@ requested immersive destination, subject to the mechanism boundary in 14.4.
 | Interaction / Video setting | Required choices and behavior | Decision boundary |
 | --- | --- | --- |
 | Deliberate video-tile activation from the Mall/FoundUp field (tap or Enter/Space) | **Floating / WikiTube / Fullscreen**. Selection loads/plays the chosen clip in that presentation without a compulsory WikiTube stop. | **Floating is the confirmed default.** Field selection is distinct from queue thumbnails, an app-frame action and taps inside provider controls. |
-| Pinch outward to expand the active video | WikiTube or direct Fullscreen, allowing Floating to skip WikiTube. WikiTube can expand to Fullscreen. | Configurable expansion is required; an initial preference value has not been finalized. |
+| Pinch outward to expand the active video | WikiTube or direct Fullscreen, allowing Floating to skip WikiTube. WikiTube can expand to Fullscreen. | WikiTube is the default confirmed by 012 on 2026-11-22; direct Fullscreen remains selectable. |
 | Pinch inward from Fullscreen | Return to **WikiTube / Mall tiles** according to its own preference. | Do not bind this to the swipe-up preference; initial return default is unresolved. |
 | Swipe up on the active video | Return to **WikiTube / Mall tiles** according to a separate preference. | This changes the older video swipe-up-to-next acceptance. It must not also advance the queue or trigger grid/type navigation. Initial return default is unresolved. |
 | Rotate an active Floating video portrait to landscape | Enter the supported fullscreen presentation; portrait rotation restores the prior Floating presentation. | Required behavior. Track whether rotation caused expansion; a later deliberate view selection takes precedence over automatic restoration. |

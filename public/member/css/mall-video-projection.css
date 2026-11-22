@@ -594,6 +594,7 @@
 }
 
 .mall-member-search-bar .mall-search-dog:not([hidden]) { background: #ffffff10; }
+.mall-member-search-bar:has(.mall-search-dog) .mall-search-stop:not([hidden]) { right: var(--mall-dock-inset); }
 .mall-member-search-bar .mall-search-mic[aria-pressed="true"] { color: #edb6ff; }
 
 .mall-member-search-bar .mall-search-add:not([hidden]) {
@@ -691,6 +692,13 @@
 
 .mall-member-search-options :is(a, button):hover { background: #ffffff13; }
 .mall-member-search-options :is(a, button) { cursor: pointer; }
+
+.mall-video-actions { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; }
+.mall-video-actions button { min-height: 44px; border: 1px solid #d1bbff55; border-radius: .65rem; background: #ffffff0c; color: inherit; padding: .4rem .6rem; font: inherit; }
+.mall-video-actions button:disabled { opacity: .45; cursor: default; }
+.reddog-unavailable-dialog { max-width: min(28rem, calc(100vw - 2rem)); border: 1px solid #d1bbff66; border-radius: 1rem; padding: 1.25rem; background: #171224; color: #fff4dc; }
+.reddog-unavailable-dialog::backdrop { background: #0008; }
+.reddog-unavailable-dialog button { min-height: 44px; padding: .5rem .9rem; border-radius: .65rem; font: inherit; }
 .mall-search-option svg { flex: 0 0 20px; }
 .mall-search-option > span { min-width: 0; }
 

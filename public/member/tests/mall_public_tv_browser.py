@@ -303,7 +303,7 @@ def verify_paging_return_and_gestures(engine):
         base.dispatch_pinch(page.locator('#videoPlayerFullscreen .video-player-stage'),120,48)
         check(engine.name+' player surface pinch is reserved for provider/browser',page.evaluate('window.mallTileField.isExpanded()&&window.mallVideoPlayer.isOpen()'))
         retained=capture_return_session(page)
-        base.dispatch_pinch(page.locator('#videoPlayerFullscreen .video-player-top-bar'),120,48)
+        base.dispatch_pinch(base.app_gesture_target(page),120,48)
         expect(page.locator('.mall-selected-controls')).to_be_hidden()
         expect(page.locator('#mallTileField [data-foundup-id="move2japan"]')).to_be_focused()
         check(engine.name+' application pinch restores Mall field',page.evaluate('!window.mallTileField.isExpanded()'))
@@ -362,7 +362,7 @@ def verify_pending_selection_failures(engine):
         check(engine.name+' same card resumes retry without refetching',
               page.evaluate('window.publicTVReturnFrame===document.querySelector("#videoPlayerFullscreen iframe")') and
               len([x for x in ledger.rows if x['path']==target])==2)
-        page.locator('#videoPlayerFullscreen').get_by_role('button',name='Close player',exact=True).click()
+        base.player_menu_action(page, 'close')
         check(engine.name+' explicit Close destroys ready player before pending selection',
               page.evaluate('!window.mallVideoPlayer.isOpen()&&window.mallVideoPlayer.getQueueLength()===0') and
               page.locator('#videoPlayerFullscreen iframe').count()==0)
@@ -392,7 +392,7 @@ def verify_pending_selection_failures(engine):
         expect_ids(page,expected)
         check(engine.name+' stale initial selection cannot replace newer lane',page.evaluate('window.mallVideoPlayer.getFoundUpId()==="undaodu"&&window.staleFrame===document.querySelector("#videoPlayerFullscreen iframe")'))
         check(engine.name+' actual fetch signals were aborted for superseded scope',target in page.evaluate('window.fixtureDiscoveryAbort'))
-        page.locator('#videoPlayerFullscreen').get_by_role('button',name='Close player',exact=True).click()
+        base.player_menu_action(page, 'close')
         check(engine.name+' final Close destroys provider before accessible Watch',
               page.evaluate('!window.mallVideoPlayer.isOpen()&&window.mallVideoPlayer.getQueueLength()===0') and
               page.locator('#videoPlayerFullscreen iframe').count()==0)

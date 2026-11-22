@@ -1,5 +1,14 @@
 # FoundUPS Member Mall
 
+Phone control candidate: move the floating video using its permanent top grip
+or frame edges; swipe the frame right to tuck it, then tap anywhere on its
+video-height edge rail to restore. YouTube pauses while fully hidden. Use
+`+` → Video for independent gesture choices and accessible playback actions.
+The camera opens AutoPost with a bounded return destination. Red Dog stays in
+the current view and reports unavailable conversation truthfully until its
+canonical backend is qualified. Device/provider evidence remains separate from
+the controlled [test inventory](tests/README.md).
+
 **Status**: Shared p.fMALL shell; ordinary Mall admission plus registered public product discovery
 **Location**: `public/member/`
 

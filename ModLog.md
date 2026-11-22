@@ -1,3 +1,14 @@
+## 2026-11-22 — Shared Mall floating control continuation
+
+Extend the existing v26 lane under WSP 00/10/15/22/30/97, with shared ownership,
+preserved provider controls and public/protected boundaries. HPC qualifies
+bounded drag, persistent frame gestures, full-height restore, independent Video
+settings, canonical camera handoff and in-page Red Dog availability. The external
+AutoPost owner supplies its separately reviewed capture-safe footer. Existing
+roadmaps/interfaces/intake and one canonical incident retain implementation,
+test, preview, backend/model/speech and physical-device distinctions. Production
+and formal lifecycle promotion remain separate acceptance gates.
+
 ## 2026-11-21 — Shared Search Dock and player behavior requirements
 
 PFDOCK-20261121 records 012's correction across all FoundUps/fractal views,

@@ -333,7 +333,7 @@ def main():
         }""")
         assert frame_clear, "Floating player controls are covered"
         observed["floating"] = {**state["stage"], "nine_unobstructed_points": frame_clear}
-        player.get_by_role("button", name="Open WikiTube", exact=True).tap()
+        player_menu_action(page, "expand")
         expect(player).to_have_attribute("aria-label", "WikiTube video player")
         assert page.evaluate("window.originalFixtureIframe === document.querySelector('#videoPlayerFullscreen iframe')")
         assert page.evaluate("window.fixturePlayback.created") == 1
@@ -1242,6 +1242,22 @@ def verify_desktop(browser_type):
                       "coarse_pointer_stays_grid": True}, sort_keys=True))
 
 
+def player_menu_action(page, action):
+    """Use the current shared single-pointer alternative, keeping native input free."""
+    if page.evaluate('window.mallVideoPlayer.isFloating()'):
+        page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
+    else:
+        page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
+    page.locator('.mall-member-search-options[open] [data-player-action="' + action + '"]').click()
+
+
+def app_gesture_target(page):
+    selector = '.video-player-gesture-grip' if page.evaluate('window.mallVideoPlayer.isFloating()') else '.video-player-top-bar'
+    target = page.locator('#videoPlayerFullscreen ' + selector)
+    expect(target).to_be_visible()
+    return target
+
+
 def dispatch_pinch(locator, start_dist, end_dist):
     locator.evaluate("""(el, [d0, d1]) => {
       for (const [type, dist] of [['touchstart', d0], ['touchmove', d1]]) {
@@ -1315,12 +1331,15 @@ def verify_phone_muted_autoplay_retry(browser_type):
                     assert page.evaluate("window.fixturePlayback.mutes") == 1
                     snapshot = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
                     assert snapshot["queueHalted"] is True and snapshot["queueIndex"] == 0, snapshot
-                    expect(player.get_by_role("button", name="Play video", exact=True)).to_be_visible()
+                    expect(player.get_by_role("button", name="Play video", exact=True)).not_to_be_visible()
+                    page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
+                    expect(page.locator('.mall-member-search-options[open] [data-player-action="play"]')).to_be_enabled()
+                    page.locator('.mall-member-search-options[open]').get_by_role('button', name='Close', exact=True).click()
                     page.wait_for_timeout(180)
                     assert page.evaluate("window.fixturePlayback.playAttempts") == 2
                     assert page.evaluate("window.fixturePlayback.loadedIds") == []
                     page.evaluate("window.fixturePlayback.block = false")
-                    player.get_by_role("button", name="Play video", exact=True).tap()
+                    player_menu_action(page, 'play')
                     expect_playing(page, 0)
                     assert page.evaluate("window.fixturePlayback.created") == 1
                     continue
@@ -1361,7 +1380,7 @@ def verify_phone_muted_autoplay_retry(browser_type):
                 assert page.evaluate("window.fixturePlayback.created") == 1
                 assert page.evaluate("window.fixturePlayback.autoplayBlocks") == 1
 
-                player.get_by_role("button", name="Tuck player", exact=True).tap()
+                player_menu_action(page, "hide")
                 assert wrapper.evaluate("el => parseFloat(getComputedStyle(el).scrollPaddingTop)") == 0
                 attempts = page.evaluate("window.fixturePlayback.playAttempts")
                 page.evaluate("window.fixturePlayback.forceAutoplayBlocked()")
@@ -1428,7 +1447,7 @@ def verify_floating_and_wikitube_gestures(browser_type):
         assert page.evaluate("window.fixturePlayback.created") == 1
 
         # 3. Hidden tuck must pause; restoring is visible and paused until explicit Play.
-        dispatch_swipe(player.locator(".video-player-top-bar"), 95, 4)
+        dispatch_swipe(app_gesture_target(page), 95, 4)
         assert page.evaluate("window.mallVideoPlayer.isTucked() === true")
         handle = page.locator(".video-player-tuck-handle")
         expect(handle).to_be_visible()
@@ -1447,32 +1466,32 @@ def verify_floating_and_wikitube_gestures(browser_type):
         expect(handle).to_be_hidden()
         assert page.evaluate("window.floatingFrameRef === document.querySelector('#videoPlayerFullscreen iframe')")
         assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().state === 'paused'")
-        player.get_by_role("button", name="Play video", exact=True).tap()
+        player_menu_action(page, "play")
         expect_playing(page, 11)
         # Accessible Tuck button + tap on Restore handle
-        player.get_by_role("button", name="Tuck player", exact=True).tap()
+        player_menu_action(page, "hide")
         assert page.evaluate("window.mallVideoPlayer.isTucked() === true")
         expect(handle).to_be_visible()
         handle.tap()
         assert page.evaluate("window.mallVideoPlayer.isTucked() === false")
         assert page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().state === 'paused'")
-        player.get_by_role("button", name="Play video", exact=True).tap()
+        player_menu_action(page, "play")
         expect_playing(page, 11)
 
         # 4. Gesture disambiguation: tiny 2-finger jitter (<26px delta) must NOT trigger pinch
-        dispatch_pinch(player.locator(".video-player-top-bar"), 45, 53)
+        dispatch_pinch(app_gesture_target(page), 45, 53)
         assert page.evaluate("window.mallVideoPlayer.isFloating() === true && window.mallVideoPlayer.isOpen() === true")
         page.wait_for_timeout(100)
 
         # 5. Autoplay-blocked truth + Pinch-out into WikiTube immediately attempts playback
-        player.get_by_role("button", name="Close player", exact=True).tap()
+        player_menu_action(page, "close")
         expect(player).to_be_hidden()
         page.evaluate("window.fixturePlayback.block = true")
         video(page, 1).tap(position={"x": 30, "y": 80})
         page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'autoplay-blocked'")
-        expect(player.get_by_role("button", name="Play video", exact=True)).to_be_visible()
+        expect(player.get_by_role("button", name="Play video", exact=True)).not_to_be_visible()
         page.evaluate("window.fixturePlayback.block = false")
-        dispatch_pinch(player.locator(".video-player-top-bar"), 40, 105)
+        dispatch_pinch(app_gesture_target(page), 40, 105)
         expect(player).to_have_attribute("aria-label", "WikiTube video player")
         expect_playing(page, 1)
         assert page.evaluate("window.mallVideoPlayer.getCurrentIndex()") == 1
@@ -1499,10 +1518,10 @@ def verify_floating_and_wikitube_gestures(browser_type):
         assert page.evaluate("!window.mallVideoPlayer.isMallHidden() && window.gestureReturnFrame === document.querySelector('#videoPlayerFullscreen iframe')")
 
         # Pinch-out back to WikiTube, then Pinch-in on WikiTube returns directly to grid
-        dispatch_pinch(player.locator(".video-player-top-bar"), 40, 105)
+        dispatch_pinch(app_gesture_target(page), 40, 105)
         expect(player).to_have_attribute("aria-label", "WikiTube video player")
         page.wait_for_timeout(100)
-        dispatch_pinch(player.locator(".video-player-top-bar"), 120, 48)
+        dispatch_pinch(app_gesture_target(page), 120, 48)
         expect(player).to_be_hidden()
         assert page.evaluate("window.mallVideoPlayer.isOpen() === false")
         expect(player.locator("iframe")).to_have_count(0)
@@ -1512,13 +1531,13 @@ def verify_floating_and_wikitube_gestures(browser_type):
         video(page, 2).tap(position={"x": 30, "y": 80})
         expect_playing(page, 2)
         page.wait_for_timeout(100)
-        dispatch_pinch(player.locator(".video-player-top-bar"), 120, 48)
+        dispatch_pinch(app_gesture_target(page), 120, 48)
         expect(player).to_be_hidden()
 
         # 6. WikiTube sequential auto-advance + bounded error skip & halt recovery (zero infinite loops)
         video(page, 0).tap(position={"x": 30, "y": 80})
         expect_playing(page, 0)
-        player.get_by_role("button", name="Open WikiTube", exact=True).tap()
+        player_menu_action(page, "expand")
         expect(player).to_have_attribute("aria-label", "WikiTube video player")
         page.evaluate("window.wikitubeFrameRef = document.querySelector('#videoPlayerFullscreen iframe')")
         page.evaluate("window.fixturePlayback.finishCurrent()")
@@ -1749,7 +1768,7 @@ def verify_hidden_playback_policy(browser_type):
             assert abs(after-before) <= .02, (before,after)
 
         def manual_play(index):
-            player.get_by_role("button",name="Play video",exact=True).tap()
+            player_menu_action(page, "play")
             expect_playing(page,index)
 
         def visible_geometry():
@@ -1806,7 +1825,7 @@ def verify_hidden_playback_policy(browser_type):
         # Scripted starts require >=200 each dimension and strictly >half visible.
         # Ongoing playback may remain partially visible; only fully hidden pauses.
         for case,changes in [
-            ("width199", "s.style.setProperty('width','199px','important')"),
+            ("width199", "s.style.setProperty('min-width','0','important');s.style.setProperty('flex','0 0 auto','important');s.style.setProperty('width','199px','important')"),
             ("height199", "s.style.setProperty('min-height','0','important');s.style.setProperty('height','199px','important')"),
             ("half_visible", "p.style.setProperty('transform',`translateX(${innerWidth-r.left-r.width/2}px)`,'important')"),
             ("display_none", "p.style.setProperty('display','none','important')"),
@@ -1842,7 +1861,7 @@ def verify_hidden_playback_policy(browser_type):
 
         # A provider refusal may have armed a delayed WikiTube skip before the
         # page becomes hidden. Backgrounding cancels that pending intention.
-        player.get_by_role('button',name='Open WikiTube',exact=True).tap()
+        player_menu_action(page, "expand")
         expect_playing(page,1)
         before_recovery=page.evaluate("""() => {
           window.__pfmallWikiTubeSkipDelayMs=250;
@@ -1882,7 +1901,7 @@ def verify_hidden_playback_policy(browser_type):
         observed['mall_return_paused_retains_same_provider_and_tile_tap_resumes']=True
 
         # onReady and provider-autoplay can arrive after a user has tucked.
-        player.get_by_role('button',name='Close player',exact=True).tap()
+        player_menu_action(page, "close")
         page.evaluate("window.fixturePlayback.holdReady=true")
         video(page,2).tap(position={"x":30,"y":80})
         page.wait_for_function("window.fixturePlayback.created===2")
@@ -1894,7 +1913,7 @@ def verify_hidden_playback_policy(browser_type):
         observed["late_ready_and_provider_autoplay_cannot_play_tucked"]=True
 
         # Stale callback delivery after dismissal may not recreate or navigate.
-        player.get_by_role('button',name='Close player',exact=True).tap()
+        player_menu_action(page, "close")
         events=page.evaluate("window.fixturePlayback.events.length")
         page.evaluate("window.fixturePlayback.forcePlaying();window.fixturePlayback.finishCurrent();window.fixturePlayback.forceError(150);window.fixturePlayback.deliverReady()")
         page.wait_for_timeout(120)
@@ -1917,7 +1936,7 @@ def verify_hidden_playback_policy(browser_type):
             snapshot=page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
             assert snapshot["code"]==code,snapshot
             expect(player.locator('.video-player-source')).to_have_attribute('href',videos[0]['source_url'])
-            player.get_by_role('button',name='Close player',exact=True).tap()
+            player_menu_action(page, "close")
         observed['provider_error_classification']=errors
     finally:
         context.close()

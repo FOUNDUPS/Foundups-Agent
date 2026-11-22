@@ -1,3 +1,33 @@
+## 2026-11-22 — Floating controls and camera follow-through
+
+Baseline a3ea8260 passed 16 preference cases, 29 worker/state groups and six
+selected Chromium/WebKit phone cases. The continuation adds independent gesture
+preferences (17 groups), bounded camera/preview routing (19), external drag and
+restore targets, direct app Full Video recovery and in-page dog availability.
+
+Independent source review found and corrected the Full Video recovery timer's
+remaining WikiTube-only guard, hidden floating focus targets, and first-drag
+desktop width drift. The broader desktop unready-return case exposed a hidden
+dock whose settings were inaccessible; the same dialog is now temporarily moved
+and returned, without cloning a dock or reparenting media. Independent Chromium
+and WebKit then passed four focused phone/dog/camera cases and four wide-floating
+cases, with stable source hashes and fixture media time advancing above 0.3s.
+
+Local VM/admission/boot/property/legacy/compatibility checks and 160 targeted
+Python cases passed. Queue callback coverage passed 18/18; the six controlled
+playback-policy groups and public-TV suite passed at their recorded source.
+The larger phone fixture initially retained old chrome/Mall-link interactions;
+move them to the actual shared menu, preserve every lifecycle/state assertion,
+and use click on desktop rather than enabling touch. Final-head CI and the full
+source-bound phone run qualify the final composition separately. Historical
+failures and receipts are retained in the existing work record.
+
+The new geometry guard fixture explicitly overrides its new CSS minimum/flex
+constraints to measure 199px, then retains the original refusal assertions.
+No provider-input shield, missing-geometry bypass, weakened timeout, reduced
+collection or ignored failure is introduced. Real YouTube, physical Safari/PWA,
+microphone/model execution and actual AutoPost return remain UNEXECUTED.
+
 ## 2026-11-22 - Final v26 URL assertion and completed-query fixture readiness
 
 - Exact input `a0fb0f026bf0ef10b0306358f8c8a18ead3af457` passed all five protected contexts and broader CI. HPC qualification retained 13 passing gates; phone UI was 53/54 because the fixture measured a detached tile during asynchronous query hydration. The preserved traceback identifies geometry access, with no page error. CodeQL separately flagged a weak catalog-test URL substring assertion, not a production sanitization finding.

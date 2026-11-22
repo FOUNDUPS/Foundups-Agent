@@ -1,5 +1,11 @@
 # HPC solution
 
+2026-11-22 continuation: qualify the same shared floating player and dock with
+movable frame controls, independent Video preferences, canonical AutoPost camera
+return and in-page Red Dog availability. These are PoC acceptance refinements.
+Actual conversational backend, browser model and speech qualification remain
+dependencies, with evidence and limitations in the owning roadmap/incident.
+
 ## Core solution
 
 Use Play FoundUps Mall to organize attributed political-media Shorts into topic collections. Vote supplies civic context and official-contact links. The separately governed Voice experience can become a destination through a qualified interface.
