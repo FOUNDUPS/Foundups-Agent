@@ -189,6 +189,17 @@ concrete blocker. Record verified launch separately from brief delivery or prepa
 owns any actual synchronization; never blindly overwrite, reset, clean or stash,
 or infer PC convergence from GitHub. Do not treat an unavailable thread as absent.
 
+
+**Choose the evidence destination before staging or sharing.** Keep identifiable
+contacts, private correspondence and activity details in the existing restricted
+project Mosh Pit. Existing audience-appropriate Docs or a website may carry only
+a redacted general overview, and only within their approved scope. Git receives
+only sanitized technical contracts, code and reusable guidance. Exclude private
+local artifacts before staging; use a narrowly scoped `.gitignore` rule only when
+relevant, and inspect the staged files and diff. Ignore rules do not untrack or
+remove anything already committed. Stop and use the existing remediation path if
+private material is already tracked; do not silently rewrite history.
+
 Return the evidence, decision, current action/result or specific blocker and next
 step now, not a routine recap. When 012 requests the full architect result, relay
 it faithfully with its limitations instead of improvising a proxy response.
