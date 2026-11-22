@@ -303,8 +303,10 @@ header repeats it beside the topic. Update the build and shell cache
 generation together. The runtime tests check their agreement.
 Search and dictated text wrap into a bounded editable field above the
 controls when they outgrow the compact pill. Enter or the search icon
-submits. The mic or a hold on Red Dog dictates into the search field using
-an installed local recognizer.
+submits. In ordinary Mall browse, the existing account avatar hold retains
+search dictation through an installed local recognizer. The separate dock
+microphone is replaced by Camera. In HPC and the shared player dock, Red Dog
+instead calls the canonical conversation owner and does not dictate search.
 On unsupported devices the control focuses the input for keyboard dictation.
 Release a hold or press the square Stop in Red Dog's position to finish
 dictation. The result stays editable, and hiding the dock or backgrounding
@@ -317,8 +319,9 @@ A query filters the current lane while
 the active clip continues. Selecting a result or submitting an idle queue
 starts a matching clip. The media area can scroll independently on short
 screens. Escape first dismisses options or leaves the input, then returns
-to the originating card. In the ordinary viewer, tapping Red Dog returns
-to the card and opens the concierge. In HPC it opens the public briefing.
+to the originating card. In HPC and the shared player dock, tapping Red Dog
+keeps this browsing context and opens the conversation owner or its closable
+availability message. Ordinary Mall account-avatar timing remains separate.
 Device model selection and resident speech follow the shared roadmap.
 
 It owns:

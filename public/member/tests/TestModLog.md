@@ -22,6 +22,14 @@ and use click on desktop rather than enabling touch. Final-head CI and the full
 source-bound phone run qualify the final composition separately. Historical
 failures and receipts are retained in the existing work record.
 
+Final full-fixture qualification also exposed an outdated expected case count
+after adding two cases per engine, and a keyboard race with the native options
+dialog's queued close/focus restoration. The fixture now requires all 58
+defensive cases and waits for that actual close event before tile activation;
+it additionally asserts the saved tile destination before activation. Provider,
+state, focus and lifecycle assertions remain in place. These are test repairs,
+not evidence of physical-device playback.
+
 The new geometry guard fixture explicitly overrides its new CSS minimum/flex
 constraints to measure 199px, then retains the original refusal assertions.
 No provider-input shield, missing-geometry bypass, weakened timeout, reduced

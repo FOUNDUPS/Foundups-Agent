@@ -290,13 +290,25 @@ def tile_tap_choices(page, hpc):
                 ['floating', 'wikitube', 'full-video'], 'Missing deliberate tap choices')
     modes = {'floating': 'Floating video player', 'wikitube': 'WikiTube video player',
              'full-video': 'Full Video in app'}
+    def close_choices():
+        # Native dialog.close() queues its close/focus-restoration event. Await
+        # that event before assigning keyboard focus to a tile, so this test
+        # cannot send Enter to the restored plus button instead of the tile.
+        closing_dialog = menu.element_handle()
+        closing_dialog.evaluate("d=>{delete d.dataset.fixtureClosed;d.addEventListener('close',()=>{d.dataset.fixtureClosed='yes'},{once:true})}")
+        menu.get_by_role('button', name='Close', exact=True).click()
+        page.wait_for_function("d=>d.dataset.fixtureClosed==='yes'", arg=closing_dialog)
+        closing_dialog.dispose()
+        expect(menu).not_to_be_visible()
     results = []
     for destination, mode in modes.items():
         if not menu.is_visible():
             dock.locator('.mall-search-plus').tap()
         choice.select_option(destination)
         expect(group.locator('[data-video-option="pinchOutDestination"]')).to_have_value('wikitube')
-        menu.get_by_role('button', name='Close', exact=True).click()
+        assert_true(page.evaluate('window.mallStateRestore.getVideoOptions().tileTapDestination') == destination,
+                    'Tile setting did not persist before activation')
+        close_choices()
         # Keyboard activation shares the tile action; other choices use a pointer.
         if destination == 'wikitube':
             tile.focus()
@@ -320,7 +332,7 @@ def tile_tap_choices(page, hpc):
             page.evaluate('window.independentFrame=document.querySelector("#videoPlayerFullscreen iframe")')
             dock.locator('.mall-search-plus').tap()
             choice.select_option('full-video')
-            menu.get_by_role('button', name='Close', exact=True).click()
+            close_choices()
             tile.focus()
             tile.press('Enter')
             expect(player).to_have_attribute('aria-label', 'Full Video in app')
@@ -1126,7 +1138,7 @@ finally:
     REPORT['source_sha256_after'] = hashes()
     REPORT['source_stable'] = REPORT['source_sha256_before'] == REPORT['source_sha256_after']
     REPORT['elapsed_seconds'] = round(time.time() - REPORT['started_epoch'], 3)
-    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (54 if args.include_defensive else 52)) and
+    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (58 if args.include_defensive else 56)) and
         all(row['passed'] for row in REPORT['cases']) and REPORT['source_stable']) else 'FAIL'
     save()
 sys.exit(0 if REPORT['status'] == 'PASS' else 1)
