@@ -6,6 +6,21 @@
 
 ---
 
+## 2026-11-22 Browser-local contact skins
+
+`/contact#hpc` selects the independent HPC preset; unrecognized initial fragments
+select Vote Classic. Ordinary later page anchors do not reset a draft. The skin
+selector, three emoji tone controls and regeneration write an editable script to
+the existing `contact-notes` textarea. Core fields remain invariant across tone
+and wording changes. No audience or directory data enters the generator.
+
+`createCallScript({intro, callback, request, reason, tone, variant})` returns
+bounded plain text, or an empty string without a request. `resolveSkin(value)`
+admits only known presets. Output uses textarea values; no HTML evaluation,
+provider, persistence, submission or calling authority is introduced.
+An opt-in spokesperson template is a caller assertion, not verified membership.
+
+
 ## 2026-11-12 Vote cover and guide routes
 
 The Vote Site's root presents the responsive, installable Vote cover. The cover

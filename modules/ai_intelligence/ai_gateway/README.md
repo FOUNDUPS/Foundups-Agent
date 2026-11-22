@@ -510,6 +510,30 @@ commands, promote champions, write PatternMemory, or bind RedDog runtime model
 defaults. Panel benchmark evidence remains panel evidence; a later promotion
 gate must decide how, or whether, panel combinations become production choices.
 
+### Fractal auditor comparison boundary
+
+The [Fractal census and bounded comparison contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19)
+owns the single census, up to three preselected packets, independently checked
+Carbon reference and parallel job admission. The harness itself sorts candidate
+IDs and runs samples serially. An incumbent-first comparison therefore uses a
+separate incumbent invocation; scheduling independent admitted jobs afterwards
+does not change that API or prove native runtime availability.
+
+Keep the common packet digest separate from each actual input digest: the
+[configured runner](src/model_autoresearch_configured_gateway_runner.py) adds
+task/candidate/role wrappers. Its reserved cost estimate and the
+[configured callers'](src/model_autoresearch_configured_gateway_callers.py)
+whitespace-based token estimates are not measured provider cost/token usage.
+Report unavailable actual usage as `UNKNOWN`. Record evidence delivery and
+truncation, not just a source manifest. The current term/digest verifiers do not
+score source-anchor accuracy, recovered links, unsupported claims and missed
+links; a qualified source-aware verifier/adapter remains a separate requirement.
+The [repair verifier](src/independent_repair_verifier.py) supplies evidence
+projection and model-identity policy, not that scoring adapter or proof of a
+model call. See the [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+for source pins and outstanding runtime evidence. No campaign, promotion or
+model-default change is performed by this documentation reconciliation.
+
 ## Champion/Challenger Promotion Gate
 
 `src/model_promotion_gate.py` validates benchmark-run evidence against an
@@ -663,3 +687,67 @@ result = gateway.call_with_fallback("Analyze this code", task_type="code_review"
 - DU (Emergence): Collapse into 0102 resonance and emit next prompt
 
 wsp_cycle(input="012", log=True)
+
+## Offline audio word-timing evaluation
+
+`src/model_audio_timing_benchmark.py` supplies pure structural diagnostics and a
+verifier adapter for the existing model-combination benchmark harness. It keeps
+lyric accuracy, alignment and timing provenance unknown. A valid timing shape
+returns SKIPPED rather than accepted transcription quality. No provider call,
+subtitle timing synthesis, scheduler or production promotion is added.
+
+Cases bind the audio, preprocessing and agent configuration independently from
+model candidate identity. One SharedAttemptBudget instance must cover every
+candidate and diagnostic in an initial two-attempt evaluation. It is a count
+guard only; monetary authorization and durable live admission remain separate.
+
+The 2026-11-15 operator-authorized smoke test used the same 75-second original
+Antifa FM cache excerpt for both requests: source offset 15 seconds, mono 16 kHz
+PCM WAV, no reference lyrics or language hints in either request. The existing
+account's configured cap was checked privately before execution. Both requests
+used `/api/v1/audio/transcriptions`, `verbose_json`, word granularity and
+`provider={data_collection: deny, zdr: true}`, with no provider routing controls.
+
+| Requested model | HTTP seconds | Returned words | Zero-duration words | Reported USD cost |
+| --- | ---: | ---: | ---: | ---: |
+| `qwen/qwen3-asr-0.6b` | 3.750 | 222 | 21 | 0.00024975 |
+| `nvidia/parakeet-tdt-0.6b-v3` | 3.485 | 217 | 1 | 0.0012500025 |
+
+Both supplied lists passed finite, nonnegative, monotonic and excerpt-bound
+checks with no adjacent overlaps. Total inference attempts: **2/2**, exhausted;
+reported total cost: **$0.0014997525**. These are single-sample connectivity and
+format observations. Serving provider and timestamp implementation were absent
+from the transcription responses. A separate read-only generation-metadata GET
+resolved both providers to PrimeIntellect and Qwen's serving model to
+`qwen/qwen3-asr-0.6b-20260813`; Parakeet's serving model matched the request.
+Reported gateway latency was 2018/2463 ms; model-only time was unavailable.
+Metadata reported Parakeet cost $0.001250002, a $0.0000000005 difference from
+transcription usage.cost. Both reports are retained; settlement is unmeasured.
+Independent listening, performed-word truth,
+timing accuracy, instrumental hallucinations and a quality winner remain unknown.
+
+Private diagnostic SRT files preserve every returned interval, including zero
+durations, using the existing broadcaster SRT generator. They are not validated
+usable captions or lip sync. Audio, reference text, raw responses, generation
+IDs, original source/hash/offset and detailed receipts stay in the retained
+private run evidence; none belongs in public fixture commits by default.
+
+This source layer adds no live STT transport. The smoke transaction was a bounded
+operator-directed adapter, not automatic WRE admission or production promotion.
+The existing harness remains the shared evaluation owner for future audio and
+comment task families; each needs its own frozen references and scorer contract.
+
+For multiple offline observations, register by full identity:
+
+```python
+verifier = build_timing_verifier(
+    {case.task_id: case for case in cases},
+    {observation.lookup_key: observation for observation in observations},
+)
+```
+
+`lookup_key` binds case, candidate topology and response digest. Identical response
+bytes may belong to different cases or candidates. Legacy output-digest keys remain
+supported; a digest-only dictionary can already have discarded repeated outputs
+before this API is called. Duplicate full identities are rejected. This changes
+registration safety, not transcription quality or the SKIPPED acceptance boundary.

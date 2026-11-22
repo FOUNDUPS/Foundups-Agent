@@ -1,15 +1,19 @@
 'use strict';
 
 // Only this public guide's exact same-origin shell paths are eligible for caching.
-const CACHE = 'vote-public-guide-v9';
+const CACHE = 'vote-public-guide-v11';
 const PAGES = ['guide', 'coalition', 'evidence', 'contact'];
 const SHELL = [
   './', ...PAGES.map((page) => './' + page),
   './cover.css', './cover.js',
+  './hpc-navigation.css', './hpc-navigation.js',
+  './icons/hpc-portrait.png', './icons/red-dog.png',
   ...[1, 2, 3, 4, 5].map((photo) => `./comics/photo-${photo}.webp`),
   './style.css', './app.js', './manifest.webmanifest',
   './coalition.js', './coalition-draft.mjs', './evidence.css',
   './contact.js', './contact.css', './contact-queue.mjs', './contact-roster.json',
+  './contact-script.js', './contact-script.mjs',
+  './comics/hpc-campaign.jpg',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',
 ];
 const scopeURL = (path) => new URL(path, self.registration.scope).href;
@@ -28,6 +32,7 @@ const CONTENT_TYPES = new Map([
   ['svg', 'image/svg+xml'],
   ['png', 'image/png'],
   ['webp', 'image/webp'],
+  ['jpg', 'image/jpeg'],
 ]);
 
 function isShellResponse(response, url) {

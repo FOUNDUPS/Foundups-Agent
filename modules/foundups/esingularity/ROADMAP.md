@@ -36,7 +36,7 @@ These are continuing acceptance gates, not completed features that may later be 
 ## Phase 3 — Campaign operations
 
 - [x] Bind LinkedIn company page ID `2199715` to `esingularity_001` as the canonical eSingularity.ai social/publishing surface; route AI Koban, JHR amplification, regional AI infrastructure and partner-development content here rather than treating `linkedin_esingularity` as a separate venture. Keep live signed-in page-name verification as a publication gate.
-- [x] Centralize approved YUMORI.me / guardian / JHR branding in the shared website skill, with eSingularity and YUMORI.me entrypoints plus ticker/report cross-references. This records the language contract; it does not publish or certify live compliance.
+- [x] Centralize eSingularity.ai / YUMORI.me FoundUp identity, aliases, domains, JOIN and guardian copy in `brand_context.json`; website/ticker/report Skillz consume that context while retaining their own surface-specific JHR behavior. This records the identity contract; it does not publish or certify live compliance.
 - [ ] Focus eSingularity.ai navigation on three to four primary tabs; determine labels/grouping in the active redesign, preserve JHR and participation access, and verify desktop/mobile consistency. Keep YUMORI.me's movement funnel intact.
 - [x] Make the website skill resolve the target site, purpose, visitor goal and edit boundary before each change.
 - [x] Add the FoundUp-owned [website operations skill](skills/website-update/SKILL.md), with history-backed shared-ticker checks and registry/agent discovery.
@@ -70,6 +70,19 @@ These are continuing acceptance gates, not completed features that may later be 
 - [ ] Add confirmed community events through structured event data.
 - [ ] Add a real member calendar only when authentication exists.
 - [ ] Keep LINE as the primary participation conversion.
+
+### Repository-first project materials — partial consolidation
+
+Read [docs/materials/README.md](docs/materials/README.md) and its source registry before creating Drive documents.
+
+- [x] Text-review all 23 supplied CCP v2 documents and the existing 03; record all source IDs and dispositions.
+- [x] Stage a claim audit and Japanese-first proposed 03 source unit; preserve YUMORI.info as the eSingularity.ai alias.
+- [ ] MATERIALS-02: Complete the remaining legacy documents, native 03 assets/links, committee charter and actual FIN formula audit.
+- [ ] MATERIALS-03: Reconcile existing claim/vision/JHR/finance owners, including historical financial-publication restrictions versus newer deck claims.
+- [ ] MATERIALS-04: Complete required review/runtime gates and publish accepted changes to existing Drive IDs with revision-controlled readback; do not create replacements.
+- [ ] MATERIALS-05: Reuse an existing publishing integration where available and implement anti-duplication, language-parity and provenance preflight after test-inventory retrieval.
+
+These completed items are intake/documentation only. The full source migration, automated export, WSP_00 runtime gate, HoloIndex owner-query and repository tests were not completed in the 2026-09-12 intake slice.
 
 ## Phase 4 — Exfoliation review
 

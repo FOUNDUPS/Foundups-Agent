@@ -1,3 +1,94 @@
+## 2026-11-20 — HPC public OpenRouter responder
+
+The [public admission owner](../../../extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md#hpc-guest-prototype-2026-11-20)
+now accepts a host-configured public catalog responder and optional public
+FoundUp ID. The guest API retains its lease, consent, deadline, replay and
+quota checks. The in-process HPC smoke completed one OpenRouter GLM-5.2 turn
+and withdrew its guest session. See the same contract for cloud staging gates.
+
+## 2026-11-20 - Event-first bounded work checkpoints
+
+- EXTEND the existing Operations Skillz, with a LinkedIn continuity pointer;
+  no duplicate coordinator skill, timer, scheduler or work ledger. Owner/CI events
+  precede the existing 15-minute fallback during active multi-lane work.
+- One existing-record entry binds owner, exact revision, evidence-or-none,
+  unchanged count and next trigger. Third unchanged due check requires one bounded
+  authorized action or parking with blocker/owner/exact restart event; no fourth
+  poll, echo reset, self-approval or automatic merge/release. Retain current holds
+  and requalify changed heads; ask a missing named-owner decision once.
+- Existing content-digest receipt binding rejects older instruction bytes; its
+  version/registry/runtime API remain unchanged. Three prompt-binding cases extend
+  existing tests; combined operations/control/targeting run passes 49. Independent
+  guidance exercises pass unchanged wakes, changed head and retained hold.
+- Base `908b47b369bb5c1f20478a751875617a51585108`; 2026-11-20 JST lexical
+  retrieval is local workspace context with UNKNOWN freshness/index gap true.
+  Reused canonical owner after bounded repo/host searches; no semantic acceptance
+  or live automation verification. 012's existing PC automation/Drive log are
+  reported context, not newly observed runtime. WSP 10/15/22/50/71/91/95/97.
+
+## 2026-11-18 - Audit existing work before work orders and builds
+
+- Decision: EXTEND the existing `foundups-wsp` entry and `reddog_operations`
+  Skillz. Existing WSP 3/50/84/97 and WSP 110 draft handoff guidance already own
+  reuse, preservation and lifecycle discipline; no new skill, queue, dispatcher,
+  memory store or authority was needed. The reusable planning note now records
+  REUSE/EXTEND/RECONCILE/CREATE/BLOCKED with source/time, owner/session/holds,
+  overlap/preservation, alternatives/invariants/tests and authorized next action.
+- Discovery source: initially current GitHub main and isolated base
+  `70e991b3ae9d669663cb05e514df7de598c69fe0`, observed 2026-11-18 07:59 UTC.
+  Bounded open-PR and local workflow-branch searches found no dedicated competing
+  pre-build owner. Shared checkout `45267ddabb1e714aca6cfe6233f5a2daf5b836ca`
+  has unrelated WRE lifecycle edits; preserve that lane and all other worktrees.
+  HPC and its active owner are outside this slice and were not modified.
+  Main was rechecked at 2026-11-18 08:09 UTC and had advanced one commit to
+  `c8978bb8ba8772bb193cd07b494f8cb32a0ce52f`. The complete compare changed only
+  GotJunk frontend `package.json`/`package-lock.json` (Vite); no slice overlap.
+  Tests below remain bound to the isolated `70e991b3` base plus this overlay,
+  not relabeled as results for the newer main. Refresh/reconcile before promotion.
+- Known coverage: local skill inventory, supplied task/hold history, current
+  main, worktree/branch inventory, related PR search, module contracts and closest
+  tests. No current cross-host owner/queue/lease census was available. The local
+  Codex memories directory supplied no files; history is not a current queue.
+  Source-bound Holo lexical bundle succeeded with zero owner attempts and
+  `workspace_head`; semantic freshness remains UNKNOWN/index gap true. Direct
+  reads supplemented capped bundle excerpts; no reindex or authority change.
+- Compared reusing only the workspace entry with extending its authenticated
+  canonical Skillz. The latter supplies the existing model-prompt path and
+  use-time content/registry receipts; the former stays a thin pointer. Neither
+  is proof of automatic audit enforcement, native dispatch or deployment.
+- Local owner is this delegated 0102 implementer on isolated branch
+  `codex/prebuild-evidence-gate-20261118`; no other lane's write lease was taken.
+  Added conditional Antigravity handoff guidance to the existing workspace
+  owner: preserve the requested model, verify target/composer/readiness and
+  delivery, stop disabled intake, and independently review requested Carbon
+  proposals before canonical admitted swarm handoff. Existing WSP 00/97/99 and
+  dispatch owners remain authoritative. No Antigravity UI or external handoff
+  was attempted; the active publishing worker's UI was left untouched.
+- Memory discovery reused WSP 60, its FoundUp Memex addendum and the Second
+  Brain architecture map. Actual snapshot/source-supply and Start Operations
+  prompt consumers exist; ticket and PR lifecycle owners remain separate.
+  Build swarm adapters explicitly simulate/scaffold execution. PatternMemory's
+  verified sink still reports activation unready and rejects direct admission;
+  staged outcomes outside recall do not qualify RSI.
+- Separate bounded architecture reconciliation is warranted: the Memex addendum
+  lists automatic resident supply as deferred, while newer resident source-supply
+  adapters/tests exist. Reconcile those existing owners with exact runtime
+  evidence later; this slice creates no new memory WSP or runtime integration.
+- Validation: native WSP_00 awakening and strict tracker check passed locally;
+  baseline operations/control tests passed 39; final operations/control,
+  WRE role-loader and manifest/index selection passed 58 in 94.20 seconds.
+  The tests validate full prompt propagation and content-revision refusal;
+  five independent synthetic scenarios validate written workflow decisions.
+  JavaScript backend contract and blocked-request recovery commands passed.
+  Broader backend preflight exceeded the first 45-second supervisor limit;
+  its 120-second rerun reached the existing symlink fixture and failed with
+  Windows `EPERM` at `test_backend_compatibility_preflight.js:172`. That broader
+  check remains UNVERIFIED in this environment; no assertion was weakened.
+  Publication, CI/main convergence, production and
+  retained RSI benefit remain unverified. Authorization is local preparation
+  only; next promotion requires exact-head review/security/CI under current
+  ownership and separately authorized publication.
+
 ## 2026-11-05 — Lightweight supervisor advisory analysis
 
 The background supervisor was acquiring a second native model owner while main
@@ -2570,6 +2661,12 @@ Final-head/main checks and owned closure remain bound to the canonical backlog p
 - Independent review rejected wildcard/deny overlap and non-plain ancestor coercion; both were repaired, with path-alias cases and three unchanged legacy byte oracles. Two final 395-case reviews overlap; backend fake persistence adds 14 bounded checks. Reviewed normalized hashes survive reconciliation from 46f656033 onto main 123d86263.
 - Current-main validation: 524 passes/five filesystem failures/one platform skip; all 64 serial cases pass/one skip using a short external temp root. Eight manifest tests, 15 fast groups and registry 1651/269 pass. The 1400-member closure retains every member; four runtime hashes and existing digest pins change. Original test/review failures, stale digest assertion and a packaging write/test overlap are preserved in the existing backlog observation.
 - Next 18/P0: qualify the receipt-to-seed provenance/consistency contract before forwarding. AmIBot registration remains in draft PR1751 (detect_ai); protected eSingularity CI still fails. No live build, public route, provider/runtime update or retained-improvement claim.
+
+## 2026-09-19: FoundUp branding becomes grounded identity data
+
+- Updated RedDog Operations so named-FoundUp work loads optional registry `brand_context_path` before Skillz selection.
+- Child brand inheritance is explicitly identity-only and cannot widen token, routing, credential, finance, safe-mutation, or governance authority.
+- The existing registered-FoundUp target verifier now fails closed on stale, forged, schema-invalid, wrong-parent, or invented-child brand context. WSP 00/15/22/50/95/97.
 
 ## 2026-09-18: Fail closed on sent-only recipient evidence
 
@@ -13467,3 +13564,30 @@ openclaw onboard
 - Reused the existing raw determination read, typed plan snapshot and candidate-lineage validator. Omitted input selects the declared plan; explicit None/empty retains lower-supplier semantics. Freeze legacy absence too before later receipt callbacks; wrappers remain rejected and execution scope is never inferred. WSP00/15/22/50/62/84/97/99.
 - Nonplain ancestors reject before methods/copy. Independent review first exposed copy coercion; two red regressions precede the repair. Final638 connected tests pass; independent43 overlapping tests and69 boundary cases/191assertions qualify exact source. Existing legacy bytes remain unchanged.
 - Source220→215, public function111 unchanged; tests383 and interface1592. No new module, skill, main.py read or effect authority. Existing manifest membership/pins remain unchanged;8 packaging tests,15 fast groups and registry1651/269 pass. Exact artifacts and PR closure: root backlog current_observation.
+
+## 2026-10-23 — Scheduled read-only resident FoundUp reconciliation
+
+WSP00/15/22/50/60/62/77/84/97. Reused the existing resident client, AgentDB cycle,
+model-binding loader, transport-neutral grounding and operational FoundUp Memex owner.
+Brain/Breadcrumb/workspace-note readers are extracted from `main.py` into a reusable
+read-only owner; `main.py` delegates to it without changing the public bootstrap surface.
+The new generic schedule adapter requires authenticated principal identity, exactly one
+authorized FoundUp, explicit work focus, current model bindings, Brain and Breadcrumbs,
+and the registered FoundUp manifest/ROADMAP-backed Memex config. Principal Memex stays
+separate. Success requires every resident no-effect flag; no Gmail/LinkedIn mutation,
+shell, repository write, Holo reindex, Hermes execution, worktree, PR or merge is
+introduced. YUMORI is configuration-only at deployment; no FoundUp-specific branch exists
+in the infrastructure code.
+
+## 2026-11-15 - Browser outcome verification guidance
+
+Extend the existing managed `foundups-wsp` workspace skill: discover available
+browser/vision access and authorized read-only delegation before declaring a
+visibility gap; retain URL/time/environment/assertion evidence and distinguish
+DOM checks, captured images and observed visual results. Missing or unrun checks
+remain UNVERIFIED. Preserve browser ownership, auth/permission gates and uncertain
+UI effects; verification failure grants no replay authority. Refresh only this
+skill's hash through the existing manifest owner, retaining all other entries.
+This is repository guidance, not proof of installed use, live vision wiring or
+production RSI. WSP22/50/71/95/97; offline manifest integrity is checked separately
+from scanner, CI and runtime acceptance.

@@ -1,3 +1,20 @@
+## HPC v26 main reconciliation metadata renewal - 2026-11-22
+
+The normal main-into-feature reconciliation preserves all 4,822 main and
+4,626 phone-branch approvals, with a 4,869-record union. The composed backend
+manifest retains all 1,494 main runtime entries and the verified phone shell
+checksum. Independent review and root verification matched every source digest.
+The new exact manifest SHA-256 is
+`0572ba8fe349b57595f68e0a4e5301d6e05586a7a63cb459f457d399ec7a1ed1`.
+
+Append only the 39 individually reviewed public source-path/checksum metadata
+bindings in `reviewed-hpc-phone-evidence.json` under
+`v26_main_reconciliation_manifest_renewal_20261122`, preserving every prior ID
+(4,908 total). These are exact-file renewals, not new credential classifications.
+Rules, exclusions, scanner, formula and coverage remain unchanged. Fresh exact
+candidate tree/history scans and hosted checks remain required; this review
+does not establish publication, merge-to-main or physical-phone acceptance.
+
 ## HPC v26 defensive DOM renewal - 2026-11-22
 
 Run44975930482 on9327ad18 reported one tracked-tree generic-api-key binding at
@@ -64,6 +81,141 @@ Scanner rules, exclusions, formula and coverage remain unchanged. A fresh
 exact-head gate and the browser suites are still required; this review is not
 physical-device or deployment acceptance.
 
+## HPC public guest review — 2026-11-20
+
+PR #2435 job 136139611051 on head `0d2c0fc20` reported 41 unreviewed
+current-tree findings and zero introduced-history findings. Against base
+`a9576b8e5`, the author and an independent reviewer found 39 unchanged
+manifest source digests, one unchanged public SDK identifier, and one existing
+bridge changelog line shifted from 4118 to 4126. Each previous fingerprint is
+in the base ledger. The manifest entries match their source Git blobs.
+Append only the 41 new whole-file, rule and line bindings; preserve the prior
+4,781 records. No rule, exclusion, history gate or scanning scope changes.
+Fresh hosted checks must accept the new head.
+
+## Publishing/checkpoint documentation re-review — 2026-11-20
+
+PR2433 head `43b84a1be5a932095c3ce51bdb67cfa1edeaba96` failed security
+job `135682223255`: three unreviewed current-tree findings, 213 already reviewed,
+zero introduced-history findings. New guidance/log prefixes changed whole-file
+digests and moved three unchanged, previously approved lines. Author and independent
+read-only verifier compared canonical Git LF bytes against base
+`908b47b369bb5c1f20478a751875617a51585108`; all flagged lines and their contexts
+are identical and all three prior fingerprints exist in the base approval list.
+
+| Existing file | Rule | Base → head line | Canonical head file SHA256 |
+| --- | --- | --- | --- |
+| `modules/communication/moltbot_bridge/ModLog.md` | generic-api-key | 4098 → 4118 | `55e039261fc2a941060ff907b16117f8aaff5c9901b88321feb301c30de4fe26` |
+| `modules/platform_integration/linkedin_agent/README.md` | linkedin-client-secret | 279 → 283 | `13e0fed2c18cdfc8aba29dabdd02251b544d7022e0d94338699d9101f90807a9` |
+| `modules/platform_integration/linkedin_agent/ModLog.md` | linkedin-client-secret | 1097 → 1123 | `593e020327d2c601dd98f82395334d31c00173e20b85d13f9a957724ff923193` |
+
+Append only these three independently recomputed current-file/rule/line bindings,
+preserving all 4,739 earlier entries and their order (4,742 at this step).
+
+The same PR's required manifest/index checks then rejected the Operations Skillz's
+stale content binding. The existing generator refreshed that one source hash;
+all 1,494 runtime members and every other source hash remain unchanged. Both
+consumer pins now bind canonical payload
+`63dfca54a090d275e0aabcf7e8a272e393abc275498a5b9d0ee2a7578d6d049a`;
+LF manifest file SHA256 is
+`d1b1a0b010c13f25aff12fffc54b0f1e5518436dbd4583d607314aa23c40cdfb`.
+Independent re-review against current main
+`cb4d60482cf412bb570502d3edc399ef9ddccd83` rehashed all 39 existing approved
+manifest source-path/SHA rows (37 generic-api-key, 2 discord-api-token): unchanged
+lines, prior approvals present, each source digest verified from staged Git bytes.
+The independently derived renewal recordset matched the author's (sorted canonical
+recordset SHA256 `992c718fe4990c91b988c35a16d721d954d78f8b0fdef6677b595f24b7caae15`).
+Append those 39 exact renewals too: 42 new bindings, 4,781 total.
+
+No credential values, new finding classification, scanner rule/exclusion,
+fingerprint formula, scope or failure handling changes. Retain the failed evidence;
+fresh exact-head tracked-tree/introduced-history scans and main checks remain
+required. All 53 existing security-gate regressions pass locally with UTF-8 and
+the existing Git Bash route; no fixture/assertion was weakened. WSP 71/97.
+
+## Pre-build workflow metadata re-review - 2026-11-18
+
+Reconciled source `58500850772e17e0a4cb9d3c7f57f8afcd0d42be` onto main
+`c8978bb8ba8772bb193cd07b494f8cb32a0ce52f`. The generated backend closure
+retains all 1,494 members and every unrelated source hash. Its canonical
+payload SHA256 is `916bbfb60bbb3c089457670fde29b117d29c4eaa999f29ac1480379c91e5d6b5`;
+entire LF manifest SHA256 is
+`c365653f16172d6bb503d2d206696571c5a4e04b58d11a574b7c1088a7343837`.
+
+The unchanged Gitleaks 8.30.1 gate observed 40 unreviewed current-tree findings,
+176 existing exact reviews, and zero introduced-history findings. Independent
+exact-Git review accepted only the 39 unchanged public source-path/SHA rows
+(37 generic-api-key, 2 discord-api-token) plus the unchanged approved bridge
+ModLog prose line shifted from 4035 to 4098 by the 63-line prefix. Every row
+retains its exact prior approval and matches independently rehashed source.
+The bridge ModLog LF SHA256 is
+`5ef0fe2a8ef2aaae7c88be08b509084eef86ead2d60ef9224fe0a9b92da3f338`.
+
+Append only those 40 independently reviewed fingerprints to the existing list,
+preserving all 4,699 prior entries and their order (4,739 total). No scanner
+rule, exclusion, fingerprint formula, failure gate or scan scope changes.
+The Windows archive initially converted files to CRLF and invalidated all 216
+fingerprints; a byte probe proved the difference. Local scans now explicitly
+select canonical Git archive bytes, matching Linux CI semantics. That is an
+archive-source correction, not an approval of those 216 mismatches. Fresh
+exact-head tree/history and separate GitGuardian checks remain required.
+
+## PR1792 main-reconciled manifest and ModLog metadata re-review — 2026-11-18
+
+PR1792 regenerated `scripts/reddog_backend_manifest.json` after updating
+`modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md` and
+`modules/infrastructure/wre_core/skillz/skills_registry_v2.json` within the
+existing 1,494-member closure (canonical payload SHA256
+`cb7f5970b56ed261b92e4df2775ab30961da80187b351833f356f5ad7bb55aa4`, entire
+LF file SHA256 `f53dce84909e22cdf559db0c7ffdaf55c9763cf68b8ee5915d9902928f082146`).
+The 39 unchanged flagged public source-path/SHA256 rows (`37` `generic-api-key`
+and `2` `discord-api-token` matches) plus the unchanged `generic-api-key`
+prose line `4035` in `modules/communication/moltbot_bridge/ModLog.md` (LF SHA256
+`2ff21d608383ec975b21d2e84961da112ad5f166b6fa231b3375e59863a643e4`, binding
+`1c2cd2bba3a0ec1cb38cb244dd57a9edac1c148bef01274a5faa6be5bd4e74b1`) were
+recomputed and appended while preserving all 4,659 prior entries (`4,699` total).
+No Gitleaks rule, exclusion, fingerprint formula, or failure gate changed.
+
+## PR2178 main-reconciled manifest and ModLog metadata re-review — 2026-11-18
+
+PR2178 regenerated `scripts/reddog_backend_manifest.json` after four read-only
+resident/schedule runtime modules plus two transitive existing modules
+(`extract_brain_artifacts.py`, `utils/markdown_sanitizer.py`) entered the
+1,494-member closure (canonical payload SHA256
+`026c309159d37feb55d4666288c52316c31c06ec1f9ee3a866e67dc86bf31068`, entire
+LF file SHA256 `0e9f81f00542fe2dab413d94bc04245cb18759a91214994017c5859044e4b6dd`).
+The 39 unchanged flagged public source-path/SHA256 rows (`37` `generic-api-key`
+and `2` `discord-api-token` matches) plus the unchanged `generic-api-key`
+prose line `4029` in `modules/communication/moltbot_bridge/ModLog.md` (LF SHA256
+`4c11f7b775cb10b2ec937e46c041db1945c77ea8e5e87e34c5c91fa9d9883010`, binding
+`224283b5d03b355c2d0260dead97bdf83c4ed12936fec08f24747dbdf1b9d9b5`) were
+recomputed and appended while preserving all 4,619 prior entries (`4,659` total).
+No Gitleaks rule, exclusion, fingerprint formula, or failure gate changed.
+
+## Generated RedDog manifest metadata re-review — 2026-10-23 (historical PR2178 baseline)
+
+Original PR2178 baseline recorded 38 manifest metadata matches (`b5041a21...`)
+and line `3667` in `modules/communication/moltbot_bridge/ModLog.md` (`d54f91cb...`);
+both sets are superseded on current main by the 4,659-entry binding above.
+
+## JHR reconciliation helper source metadata review — 2026-11-16
+
+PR2414's regenerated backend manifest adds exactly one publication reconciler
+and updates the planner checksum. Hosted job133347432000 reports39 current-tree
+metadata findings (37 generic-api-key,2 discord-api-token), zero introduced-history
+findings. Every flagged complete path/SHA row is byte-identical to its reviewed
+b0b81bf5 row and was independently source-rehashed at exact1fea63dc; no credential
+literal is approved. The new entire-manifest Git-byte SHA256 is
+`1edde361ddea9165c8b31b39d0e3a672bac55324fd7f2ceb57faf0abde4df80f`.
+
+Independent per-finding review approved only39 exact whole-file/rule/line
+bindings, preserving all4579 prior entries/order and other fields (4618 total);
+composed onto main (preserving PR #2403's 4,580th bridge-ModLog binding), the
+union preserves all 4,580 main entries plus these 39 bindings (4,619 total).
+See [per-finding evidence](reviewed-jhr-manifest-evidence.json). Scanner rules,
+exclusions, fingerprint formula and complete-tree/introduced-history coverage
+remain unchanged; scanner errors remain blocking. Fresh hosted scans required.
+
 ## Storytime, Kids Episode, and UI-TARS coordinate-profile metadata review — 2026-11-16
 
 The backend manifest refreshes one runtime source checksum
@@ -104,6 +256,20 @@ Appending this 1 renewed binding alongside the 39 manifest bindings preserves
 all 4,500 earlier entries (`4,540` total). Scanner rules, exclusions,
 fingerprint formula, and scan coverage stay the same. Fresh full-tree and
 introduced-history checks remain required.
+
+## Visual verification guidance documentation review - 2026-11-15
+
+PR #2403 head `441009c9c` failed security job132951848778 on one
+`generic-api-key` Markdown-prose finding in the existing bridge ModLog.
+Author and independent verifier confirmed the flagged line is identical to
+base `e62e9eb` line4029 and already has an exact prior approved binding.
+The new log entry now follows the unchanged base bytes, retaining that line's
+location. Its changed whole-file digest still requires one renewed binding.
+Append exactly that independently recomputed current-file/rule/line record;
+preserve all 4,500 earlier records (4,501 total), rules, fingerprint formula,
+scan coverage and failure handling. No credential or unknown finding is approved.
+The failed run is retained; fresh final-tree and introduced-history checks remain
+required. The scoped source test suite does not substitute for those scans.
 
 ## WRE/RSI bounded improvement and rollback backend manifest review — 2026-11-15
 

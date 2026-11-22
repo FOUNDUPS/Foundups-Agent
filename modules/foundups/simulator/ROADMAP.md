@@ -1,5 +1,26 @@
 # ROADMAP - FoundUps Simulator
 
+## Linking observed work to Mall tiles
+
+**Planned, 2026-11-19.** The [telemetry contract](INTERFACE.md#observable-swarm-orchestration-telemetry-interface--2026-11-15) exposes work units, lineage and freshness. The [website cube](../../../public/js/foundup-cube.js) consumes a work summary and also supports simulation. The proposed bridge resolves a work unit to one or more authorized component tiles using explicit, revision-bound evidence. Preserve the unit's `work_id`, source mode, freshness and effect evidence. An aggregate count, lease, role color or animated block is insufficient to identify a changed file.
+
+Qualify one recorded work item with a verified destination and one without a mapping. Exercise two builders on one component, a stale snapshot, a simulated frame and a restricted destination. Only an authorized association offers drill-down. A source or test leaf identifies its revision and evidence status. Keep `observation_only=true` and `authority="none"` throughout. [Mall interaction and return behavior](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation).
+
+Follow the [Mall census-first sequence](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation):
+discovery and bounded parallel auditor samples precede the Sprint 2 visualization
+slice. Keep one component ID across views, the graph snapshot revision separate
+from the source commit or base-plus-overlay identity, and functionality evidence
+separate from integration evidence. A missing mapping remains an explicit gap;
+it does not remove the component from the census or imply that its code fails.
+The [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+separates inspected telemetry source from reported local `121c50666` graph work;
+live Simulator-to-graph wiring is not proven here.
+
+Historical lifecycle and financial equation reconciliation are separate Sprint 3
+owners. This work-navigation target does not change simulation parameters,
+funding/settlement gates or the dated economic evidence below. A graph render or
+animated builder is not a receipt for an economic operation.
+
 ## 2026-11-15 — Observable Swarm Orchestration vertical slice
 - Added read-only telemetry bridge (`adapters/work_telemetry_provider.py`), `WorkUnitFrame`/`WorkTelemetrySnapshot` schema additions (`frame_schema.py`), GET-only `/api/work-telemetry` and `work_telemetry_sync` SSE contract (`sse_server.py`), and `FoundupCube` `observationOnly` / non-monotonic `filledBlocks` / TTL stale rendering (`public/js/foundup-cube.js`).
 - Extended lineage/lease telemetry (`parent_work_id`, `work_order_id`, `swarm_lane`, `lease_active`, deduplicated redacted `depends_on`/`parent_task` edges, `active_lease_count`, `swarm_lanes`), `FoundupCube` HUD/ticker summary (`DEPS`, `LEASES`, `LANES`, `VERIF`), and zero-skip seeded + live SQLite SHA-256 invariance tests (`11/11 passed, 0 skipped`).

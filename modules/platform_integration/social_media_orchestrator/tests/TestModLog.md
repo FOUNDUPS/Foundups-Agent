@@ -1,3 +1,103 @@
+## 2026-11-18 - Canonical registry correction after hosted failure
+
+CI44186084958/test134403133146 correctly stopped at stale test registry before
+campaign tests ran. Recovered exact 11daee701 into an isolated cloud checkout
+following host disconnect. Ran existing generate_test_registry.py --write then
+--check:1848 tests,260 quarantined,current. Diff is one added collectable unit
+fixture and total1847->1848; no classification, quarantine or gate changed.
+Linux stdlib editorial/compiler/verified-X suite:55 passed in0.672s, including
+both tests that failed on Windows. Full cloud pytest was unavailable (pytest
+not installed), not passed. Existing hosted workflow will validate the new head.
+No implementation bytes changed; preserve original failure and review receipts.
+
+## 2026-11-18 - Editorial revision contract tests
+
+Source baseline 20a7044c018fcd4a033226db644360cd9b216242; owned feature lane
+feature/editorial-review-cycle-20261118. Frozen acceptance: stale source/copy/
+asset/rubric review rejection, four required lenses, independent-ID check,
+bounded refinement, oscillation rejection, separate golden benchmark target,
+no effects or publication authority. Independent review repaired two findings.
+
+Vetted host Python with plugin/conftest isolation: editorial tests + existing
+compiler + tooling projection: 53 passed, 1 skipped, 122 subtests passed in
+1.65s. The skip is an existing unavailable-symlink projection case, not a pass.
+Python exit0 included a pyreadline3 console-destructor Windows warning after
+pytest completion; no test failure was hidden. Independent focused unittest:
+13 passed in 0.153s; git diff --check passed. Source SHA256
+3cecb41c3c0979cb7f7b1ccb9e1c8b03d0ed2611169da64acda3d593efaa611b;
+test SHA256 a029bf37a3bd9f8e4c0b03c68536262dfeb7bf54227f18dd721b995f64330117.
+
+The existing contextual-campaign CI job includes the new fixture. These are
+synthetic contract tests, not Gemini/OpenRouter calls, writing-quality benchmarks,
+provider posts, metrics or RSI transfer. Full hosted exact-head/main CI and secret
+scan are separate gates. No local gitleaks binary was available; do not claim full
+security certification. Manual scope review: stdlib validation/hash/copy only;
+no new dependencies, file/network/process effects or credential reads. The lazy
+benchmark import uses the existing pure task contract.
+
+## 2026-11-16 — Exact generated-manifest security metadata re-review
+
+The replacement head's scanner reported39 manifest metadata rows after the
+whole-file digest changed. Each row matches prior reviewed bytes and actual
+immutable source SHA256; independent review approved only39 exact new bindings,
+preserving4579 entries/order (4618 total). No scanner policy, exclusions, raw
+credentials or fingerprint algorithm changed. Public per-row proof is in
+`.github/security/reviewed-jhr-manifest-evidence.json`; fresh tree/history/hosted
+checks remain required. Original failed security result retained. Existing exact-fingerprint/scanner-error contracts:10 passed (43 unrelated deselected); actual fresh scans remain required.
+
+## 2026-11-16 — Publication reconciliation dependency binding repair
+
+The first PR2414 hosted Python job correctly rejected a stale generated backend
+manifest and staged-index checksum after the new content helper/import. Refresh
+the existing generator output: exactly one added runtime member,
+`social_media_orchestrator/src/content/publication_reconciliation.py`, no removals,
+and only `campaign_planner.py` changes an existing source digest. Both canonical
+pins are `a511d3efb70cf88f1f15700db6128f4bd97487469d1879d729267abf6bca031b`.
+The exact count boundary accepts1488 and rejects1489; all existing assertions,
+schema/API/graph and byte caps remain enforced. Measured manifest336692 LF /
+339741 CRLF bytes fits332KiB (339968); runtime20567270 bytes / maxfile184403 fits
+32MiB / 2MiB. No installed activation or provider/memory claim.
+
+Local validation: all eight existing Python generator/index cases pass in102.51s;
+Node compatibility contract, preflight (including imported async/query owners),
+async, package-manifest and package-surface commands pass. The Windows sandbox
+denied preflight's temporary junction setup; the same unmodified fixture passes
+outside that boundary. Package surface remains70files/979415bytes under1MiB.
+Independent read-only packaging review recomputed the digest and exact added/
+changed membership and found no blocker. Hosted checks must qualify the new head;
+the original failed run is retained, with no unchanged rerun or check bypass.
+WSP11/22/50/84/97; no generator/validator algorithm or publication code changed.
+
+## 2026-11-16: Publication reconciliation and existing route validation
+
+Extended the existing content fixture after inspecting its README/TestModLog;
+no parallel test owner or quarantined scaffold replacement. The immutable
+b0b81bf5 route rejects the new reconcile action (source-bound characterization).
+The initial sandbox run stalled in Windows asyncio fallback_socketpair accept;
+owned runs were terminated. A bounded offline run outside that loopback boundary
+found four test-harness TypeErrors from a helper parameter collision; renamed the
+helper parameter without removing an assertion. Final real content plus existing
+SOCIAL adapter selection: **36 passed,119 subtests passed** in1.30s. Application
+environment/file/network/subprocess effects are denied in the route fixtures.
+
+Coverage includes merged/saved versus exact live issue, wrong host/anchor/issue/
+revision/hash and stale/future observations, archive/build commit binding,
+platform/locale/destination/source-scoped approvals, delivery artifact/identity,
+private queues unknown, known permalink no-repost, stale unknown-send readback
+only, old open-work preservation, requested editions before amplification,
+strict malformed JSON/authority rejection, detached memory receipts/age/owner and
+changed provenance changing the review revision. No host/provider/model call,
+publication or memory write is qualified by these fixtures.
+
+A supplied current JHR #003 packet returns BLOCKED_OPEN_WORK, website release
+gaps, READBACK_EXISTING_NO_REPOST and PROPOSED_NOT_WRITTEN; it admits no effect.
+Static archive validation passes four unique issues, three immutable manuscript
+owners and23 local links. Canonical skill/projection parity, Skill Creator quick
+validation, registry check (1845files/260quarantines) and git diff --check pass.
+Independent code and documentation reviews have no blocking findings after
+receipt/approval/amplification fixes. Hosted checks and main acceptance remain
+separate PR gates. No Brain/Memex sink acknowledgement or live delivery claimed.
+
 ## 2026-10-29: Current reconciliation local validation
 
 Existing Python manifest suite: eight passed after the measured 330 KiB

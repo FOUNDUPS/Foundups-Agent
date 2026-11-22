@@ -47,6 +47,8 @@ const repoAuditGrounding = require('./repo_audit_grounding');
 const localDiagnosticRouter = require('./local_diagnostic_router');
 const foundupWorkRuntime = require('./foundup_work_runtime_binding');
 const groundingFailureDialogue = require('./grounding_failure_dialogue');
+const { renderFractalFocus } = require('./fractal_focus_front');
+const fractalFocusHost = require('./fractal_focus_host');
 const orchestrationPromptRoutes = require('./orchestration_prompt_routes').create({
   orchestrationPromptTrace, groundingFailureDialogue, postStatusAndProgress
 });
@@ -4986,6 +4988,8 @@ async function openFusionEditor(context, installState) {
     holoLifecycleRegistry: holoGenerationBoundQuery.createProcessLifecycleRegistry(),
     holoRecoveryTimer: null,
     liveEnqueueKeys: new Set(),
+    fractalFocusBinding: null,
+    fractalFocusEpoch: 0,
     operationsIntentId: String(
       context.workspaceState.get('reddog.operationsIntentId', '') || ''
     )
@@ -5164,6 +5168,7 @@ async function attemptBlockedRequestRecovery(params) {
     // READY is the durable at-most-once admission point. A panel disposal that
     // races the bridge must not consume the claim and then abandon the retry.
     postStatusAndProgress(webview, null, 'HoloIndex repair verified at the bound generation. Retrying the original request once.');
+    fractalFocusHost.post(webview, state, fractalFocusHost.NONE);
     const retryResult = await executeAsk(claim.request, {
       recoveryId: claim.recovery_id,
       generationId: claim.generation_id,
@@ -5171,36 +5176,12 @@ async function attemptBlockedRequestRecovery(params) {
     });
     return retryResult ? 'COMPLETED' : 'FAILED';
   } catch (err) {
+    fractalFocusHost.post(webview, state, fractalFocusHost.UNAVAILABLE);
     postStatusAndProgress(webview, 'error', 'HoloIndex request recovery failed closed.');
     return 'FAILED';
   } finally {
     state.requestInFlight = false;
   }
-}
-
-function createFusionMessageReceiver(webview, state, executeAsk) {
-  return async (message) => {
-    if (!message || typeof message !== 'object') return;
-    if (message.command === 'copyReview') {
-      if (state.lastReviewPacket) {
-        await vscode.env.clipboard.writeText(JSON.stringify(state.lastReviewPacket, null, 2));
-        webview.postMessage({ command: 'status', text: 'Copied redacted review packet for 0102.' });
-      } else webview.postMessage({ command: 'status', text: 'No review packet available yet.' });
-      return;
-    }
-    if (message.command === 'copyMarkdown' && typeof message.text === 'string') {
-      await vscode.env.clipboard.writeText(message.text);
-      webview.postMessage({ command: 'status', text: 'Copied assistant markdown.' });
-      return;
-    }
-    if (message.command !== 'ask' || typeof message.text !== 'string') return;
-    if (state.requestInFlight) {
-      postStatusAndProgress(webview, null, 'RedDog is already processing one request.');
-      return;
-    }
-    state.requestInFlight = true;
-    try { await executeAsk(message, null); } finally { state.requestInFlight = false; }
-  };
 }
 
 function scheduleBlockedRecoveryPoll(state, attempt, delayMs) {
@@ -5328,8 +5309,14 @@ function buildContextForRequest(state, input) {
     plain: () => buildBoundedRepoContext(input.contextMode, input.workFocus)
   });
 }
+
+const bindFusionMessageReceiver = (params) => fractalFocusHost.bindReceiverLifecycle({
+  clipboard: vscode.env.clipboard, postStatusAndProgress,
+  attemptBlockedRequestRecovery, startBlockedRecoveryPolling
+}, params);
 function wireFusionWebview(context, webview, worker, state) {
   const recoveryOptions = holoBlockedRecoveryOptions(context);
+  let attempt;
   const executeAsk = async (message, recoveryContext) => {
     if (state.disposed) return { ok: false, reason: 'request_cancelled' };
     const actionStageEnabled = progressiveActionStageEnabled();
@@ -5392,6 +5379,7 @@ function wireFusionWebview(context, webview, worker, state) {
     enforceBlockedRecoveryGeneration(
       groundingPreflight, contextPacket.holoindex_meta, recoveryContext
     );
+    fractalFocusHost.postPreflight(webview, state, groundingPreflight);
     const blockedRequestRecoveryStage = recoveryContext ? null : await stageBlockedRequestRecovery(
       recoveryOptions, message, contextPacket, groundingPreflight, webview
     );
@@ -5901,13 +5889,11 @@ function wireFusionWebview(context, webview, worker, state) {
       // Only pass the summary for Copy MD inclusion when appended this run (fail-closed).
       continuationSummary: continuationTelemetry.continuation_appended ? continuationSummary : null
     });
+    fractalFocusHost.postOutcome(webview, state, groundingPreflight, result);
     webview.postMessage({ command: 'result', result });
     return result;
   };
-  const attempt = () => attemptBlockedRequestRecovery({
-    context, state, options: recoveryOptions, executeAsk, webview });
-  webview.onDidReceiveMessage(createFusionMessageReceiver(webview, state, executeAsk));
-  startBlockedRecoveryPolling(state, attempt);
+  attempt = bindFusionMessageReceiver({ context, state, options: recoveryOptions, executeAsk, webview });
 }
 
 function killBridgeChild(state) {
@@ -7807,6 +7793,8 @@ function renderHtml(worker, surface, logoUri, installState, security) {
   const escapedLogoUri = escapeHtml(logoUri || '');
   const escapedCspPolicy = escapeHtml(security && security.policy || '');
   const escapedCspNonce = escapeHtml(security && security.nonce || '');
+  const fractalFocusRendererSource = renderFractalFocus.toString();
+  const fractalFocusPanelSource = fractalFocusHost.bindPanel.toString();
   const state = installState && typeof installState === 'object' ? installState : {};
   const escapedInstall = escapeHtml(backendCompatibility.installStatusMessage(state));
   return `<!DOCTYPE html>
@@ -7844,6 +7832,7 @@ function renderHtml(worker, surface, logoUri, installState, security) {
     textarea { resize: none; min-height: 74px; max-height: 180px; padding: 8px; color: var(--vscode-input-foreground); background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border); font-family: var(--vscode-editor-font-family); }
     textarea:focus { outline: 1px solid var(--vscode-focusBorder); }
     .hint { color: var(--vscode-descriptionForeground); font-size: 11px; }
+    .reddog-fractal-focus { display: flex; align-items: center; gap: .5em; flex-wrap: wrap; }
     .reddog-working-trail {
       display: flex;
       align-items: center;
@@ -7871,6 +7860,7 @@ function renderHtml(worker, surface, logoUri, installState, security) {
       <div class="entry status"><span class="label">status</span>OPENROUTER_API_KEY must be set in the environment used to launch Cursor. Do not paste secrets.</div>
     </main>
     <form id="form">
+      <div id="fractalFocus" aria-live="polite"></div>
       <div id="reddogWorkingTrail" class="reddog-working-trail" aria-live="polite" aria-atomic="false">
         <span data-reddog-pixel>~~~</span>
         <span data-reddog-action>idle</span>
@@ -7890,6 +7880,8 @@ function renderHtml(worker, surface, logoUri, installState, security) {
   </div>
   <script nonce="${escapedCspNonce}">
     const vscode = acquireVsCodeApi();
+    const renderFractalFocus = ${fractalFocusRendererSource};
+    const bindFractalFocusPanel = ${fractalFocusPanelSource};
     const TRAIL = ${reddogTrailWebviewBootstrapJson()};
     const form = document.getElementById('form');
     const workFocus = document.getElementById('workFocus');
@@ -7898,9 +7890,12 @@ function renderHtml(worker, surface, logoUri, installState, security) {
     const copyMd = document.getElementById('copyMd');
     const useLastPacket = document.getElementById('useLastPacket');
     const trailEl = document.getElementById('reddogWorkingTrail');
+    const fractalFocus = document.getElementById('fractalFocus');
     let lastAssistantMarkdown = '';
     const log = document.getElementById('log');
     let running = false;
+    const handleFractalFocusMessage = bindFractalFocusPanel(fractalFocus, workFocus,
+      renderFractalFocus, (message) => vscode.postMessage(message), () => running);
     let startedAt = 0;
     let lastTrailUpdate = 0;
     let elapsedTimer = null;
@@ -8143,6 +8138,7 @@ function renderHtml(worker, surface, logoUri, installState, security) {
       if (msg.command === 'status') addStatus(msg.text);
       if (msg.command === 'progress') applyProgressEvent(msg);
       if (msg.command === 'orchestrationPrompt') addOrchestrationPrompt(msg.text);
+      handleFractalFocusMessage(msg);
       if (msg.command === 'result') {
         setRunning(false, msg.result);
         const copyPayload = (msg.result && msg.result.copy_markdown) || (msg.result && msg.result.content) || '';

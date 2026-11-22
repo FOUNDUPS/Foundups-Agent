@@ -28,7 +28,7 @@ LinkedIn mutation still requires live signed-in identity verification. Public na
 
 ## Website operations skill
 
-For “apply the website skill” or “eSingularity skill”, use [esingularity-website](skills/website-update/SKILL.md). For “YUMORI.me skill”, use the [yumori-website entrypoint](../../../.agents/skills/yumori-website/SKILL.md); both read the same FoundUp-owned workflow. Its [shared branding and language rules](skills/website-update/SKILL.md#shared-branding-and-language--both-sites) preserve the `.me` brand, JOIN label, Japanese-first guardian lockup and katakana JHR name across both sites. Context supports those brands instead of replacing them.
+For “apply the website skill” or “eSingularity skill”, use [esingularity-website](skills/website-update/SKILL.md). For “YUMORI.me skill”, use the [yumori-website entrypoint](../../../.agents/skills/yumori-website/SKILL.md); both read the same FoundUp-owned workflow. FoundUp identity and child-brand rules come from [brand_context.json](brand_context.json); the website workflow applies that identity to the two sites and separately preserves JHR presentation rules. Context supports those brands instead of replacing them.
 
 The WSP 97 workflow also covers bounded history/research, distinct homepage ownership, shared ticker preservation, validation and publication. Codex/Claude entrypoints and the existing FoundUp registry expose it to agent and Red Dog discovery. Skill updates alone do not publish website or form changes.
 
@@ -134,6 +134,12 @@ Use the module-owned [YUMORI Moshpit Skillz](skillz/yumori_moshpit/SKILLz.md) fo
 
 The campaign Moshpit is reverse chronological within each JST day. Agent-internal repairs and learning belong in the private 0102 Moshpit unless the same event materially changes campaign history.
 
+## Project materials and Drive outputs
+
+Start with [docs/materials/README.md](docs/materials/README.md) before creating or revising a project document. It links the 23-document CCP v2 intake registry, claim-disposition audit and Japanese-first proposed 03 integration source. Accepted project material belongs in this module; Drive documents are derived outputs with stable existing file IDs, not independent factual masters.
+
+012 clarified on 2026-09-12 that **YUMORI.info redirects to eSingularity.ai**. It is an alias for the same project publication destination, not a separate content source. YUMORI.me remains the movement surface. The materials migration is partial; the registry records unread legacy records, unpublished outputs and runtime checks not performed. No automatic Drive synchronization is activated.
+
 ## Campaign ticker updates
 
 Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. A routine verbal update becomes one Japanese/English/Portuguese `frontend/content/current-field-status.json` payload on the dedicated `live/yumori-field-status` branch; the deployed shared `CampaignTicker.tsx` polls it for both eSingularity.ai and YUMORI.me. Each item is explicitly time-limited in Japan time and falls back safely after expiry.
@@ -152,6 +158,18 @@ JHR is the eSingularity research/publication lane for tracking Japan's hyperscal
 
 JHR is significance-gated. A research cycle may return `NO_REPORT`; no publication is implied merely because a cycle ran. Public claims require provenance and WSP_97 evidence.
 
+## Canonical narrative spine
+
+The project-wide experiment thesis is:
+
+**Can compute save an onsen, revitalize a region, and help transform Japan?**
+
+The canonical narrative contract lives in [`docs/YUMORI_EXPERIMENT_THESIS.md`](docs/YUMORI_EXPERIMENT_THESIS.md).
+
+That document defines how the thesis concatenates across the local-resident website, national/media Document 01, mayoral Document 02, evidence Document 03, founder/background Document 04, YouTube, and RedDog communications context. The central recursive fact is that compute is not merely proposed as future infrastructure; AI compute is already being used to create and test the project.
+
+The website should use a short local/action-oriented expression of the thesis rather than copying the full national/media narrative onto the homepage.
+
 ## Module structure
 
 ```text
@@ -167,7 +185,8 @@ modules/foundups/esingularity/
 │   └── tests/              # Publish/no-publish gate tests
 ├── src/                    # Stable FoundUp identity contract
 ├── tests/                  # Manifest, registry, route, and hosting checks
-├── docs/                   # Migration, architecture, Drive index, grant and evidence records
+├── docs/                   # Migration, architecture, narrative contracts, Drive index, grant and evidence records
+│   └── materials/          # Research intake, source registry and derived-document source units
 ├── memory/                 # WSP 60 module memory documentation
 ├── foundup_manifest.json   # p.fMALL/FoundUps discovery contract
 ├── module.json             # Module discovery metadata

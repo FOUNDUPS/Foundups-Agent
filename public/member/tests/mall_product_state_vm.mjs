@@ -408,6 +408,8 @@ await check('install reloads only explicit public shell and product assets', asy
     assert.equal(installed.includes(path), true, 'missing precached asset: ' + path);
   }
   assert.equal(installed.includes('/move2japan/properties.json'), false);
+  assert.ok(installed.includes('/js/reddog-public-client.js'));
+  assert.ok(installed.includes('/js/reddog-fractal-focus.js'));
   assert.equal(installed.includes('/member/js/mall-video-projection.js'), false);
   for (const path of installed.filter(path => /[?&]v=/.test(path))) {
     assert.equal(new URL(path, ORIGIN).searchParams.get('v'), '26',

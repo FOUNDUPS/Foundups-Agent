@@ -15,6 +15,17 @@ The shell is p.fMALL's **thin platform layer** — it provides discovery, naviga
 
 **Registry Boundary**: Canonical FoundUp identity is registry-backed; pFMALL catalogs render and route FoundUps but do not replace the canonical FoundUp registry. See `docs/audits/architecture/FOUNDUP_CANONICAL_REGISTRY_POPULATION_PHASE1.md` for boundary definition.
 
+**Fractal boundary, 2026-11-19:** the shell presents permitted projections of
+identified entities; it does not become the inventory, benchmark, research or
+economic execution owner. Unfinished candidates and declared sockets can be
+represented without being registered or activated FoundUps. Follow the
+[master identity/evidence contract](FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+and [navigation contract](PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation).
+The responsibility and boot tables below are architectural targets. Current
+implemented APIs remain in the [module interface](../pfmall/INTERFACE.md);
+authenticated conversation and worker transport retain their separate gates in
+the [RedDog contract](../../../public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md).
+
 ---
 
 Companion note:

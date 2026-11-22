@@ -68,6 +68,11 @@ jobs:
               'public/member/tests/mall_browser_ai_pilot_vm.mjs',
               'public/member/wasm/pilot-add.wasm',
               'public/member/tests/mall_product_state_vm.mjs',
+              'public/member/tests/test_mall_product_state.py',
+              'modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_probe.js',
+              'modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_reference.html',
+              'modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_probe_vm.mjs',
+              'modules/foundups/pfmall/tests/fixtures/hpc_preview_metadata_stale_v25.json',
               'public/member/tests/test_mall_tile_field.py',
               'public/member/tests/test_refresh_catalog_safety.py',
               'modules/foundups/pfmall/tests/test_member_pwa_hardening.py',
@@ -77,7 +82,6 @@ jobs:
           generation = json.loads(pathlib.Path('public/member/discovery/catalog.json').read_text())['generation']
           for pattern in [
               'public/member/js/*.js', 'public/member/css/*.css',
-              'public/member/playback-probe/*',
               f'public/member/discovery/{generation}/**/*.json',
           ]:
               files.extend(str(p) for p in pathlib.Path('.').glob(pattern) if p.is_file())
@@ -131,6 +135,7 @@ jobs:
           run_gate public-concierge node public/member/tests/public_discovery_concierge_vm.mjs
           run_gate static-contracts python -B -m pytest -q -c /dev/null --noconftest -p no:cacheprovider \
             public/member/tests/test_mall_tile_field.py \
+            public/member/tests/test_mall_product_state.py \
             modules/foundups/pfmall/tests/test_member_pwa_hardening.py \
             public/member/tests/test_refresh_catalog_safety.py
           exit "$combined_status"

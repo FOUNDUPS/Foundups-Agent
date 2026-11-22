@@ -4,16 +4,34 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'extensions/reddog/extension.js'
+      - 'extensions/reddog/fractal_focus_host.js'
+      - 'extensions/reddog/tests/test_fractal_focus_host.js'
+      - 'extensions/reddog/tests/foundup_integration_test_fixture.js'
+      - 'extensions/reddog/fractal_focus_front.js'
+      - 'public/js/reddog-fractal-focus.js'
       - 'requirements-trust-bootstrap.txt'
       - 'modules/communication/moltbot_bridge/src/reddog_public_*.py'
       - 'modules/communication/moltbot_bridge/tests/public_surface/**'
+      - 'public/js/reddog-public-client.js'
+      - 'public/member/js/account-concierge.js'
+      - 'modules/foundups/pfmall/tests/reddog_public_guest_client.mjs'
       - '.github/workflows/reddog-public-admission.yml'
   push:
     branches: [main]
     paths:
+      - 'extensions/reddog/extension.js'
+      - 'extensions/reddog/fractal_focus_host.js'
+      - 'extensions/reddog/tests/test_fractal_focus_host.js'
+      - 'extensions/reddog/tests/foundup_integration_test_fixture.js'
+      - 'extensions/reddog/fractal_focus_front.js'
+      - 'public/js/reddog-fractal-focus.js'
       - 'requirements-trust-bootstrap.txt'
       - 'modules/communication/moltbot_bridge/src/reddog_public_*.py'
       - 'modules/communication/moltbot_bridge/tests/public_surface/**'
+      - 'public/js/reddog-public-client.js'
+      - 'public/member/js/account-concierge.js'
+      - 'modules/foundups/pfmall/tests/reddog_public_guest_client.mjs'
       - '.github/workflows/reddog-public-admission.yml'
 
 permissions:
@@ -25,6 +43,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Check Mall ships the extension-owned Fractal focus module
+        run: cmp extensions/reddog/fractal_focus_front.js public/js/reddog-fractal-focus.js
+      - name: Verify the editor host binds focus without granting work
+        run: node extensions/reddog/tests/test_fractal_focus_host.js
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -38,3 +60,5 @@ jobs:
         run: |
           python -m coverage run --rcfile=modules/communication/moltbot_bridge/tests/public_surface/.coveragerc -m pytest -q --confcutdir=modules/communication/moltbot_bridge/tests/public_surface modules/communication/moltbot_bridge/tests/public_surface
           python -m coverage report --rcfile=modules/communication/moltbot_bridge/tests/public_surface/.coveragerc
+      - name: Verify public guest browser protocol
+        run: node modules/foundups/pfmall/tests/reddog_public_guest_client.mjs

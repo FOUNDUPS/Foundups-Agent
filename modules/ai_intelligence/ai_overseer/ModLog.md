@@ -1,3 +1,14 @@
+## 2026-11-20: Company article preparation follows scheduled release
+
+- Replace the legacy article helper's two immediate-publication messages with
+  exact-copy/asset review and the existing LinkedIn scheduled-release route.
+  Preparation is explicitly neither scheduled nor live; no browser function ran.
+- The company Skillz excludes its immediate `post_update` helper from this
+  workflow and grants no daily/Git-hook trigger. No scheduling executor, signature
+  behavior, authentication or live-action guard is changed or certified.
+- AST-only regression in the existing LinkedIn activity suite passes (12 cases),
+  independently replayed; no company executor import. WSP 22/50/71/95/97.
+
 ## 2026-10-26: Qualify patched optional HTTP dependencies
 
 Initial profile metadata exposed published Starlette/cryptography advisories;

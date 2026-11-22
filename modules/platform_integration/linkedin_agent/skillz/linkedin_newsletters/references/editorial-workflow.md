@@ -89,8 +89,16 @@ invalidate an approval that no longer covers the exact action.
 
 ## Collaborative issue development
 
+Use the [scheduled release contract](../../linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership)
+for one existing cross-series Mosh Pit in Drive: Drafting / Under review /
+Scheduled / Published, exact revision, destination/audience, responsible owners,
+JST dates and evidence. The ROC, Eat the Startup, OpenClaw and JHR masters retain
+their research histories and link that release row. Do not move private files,
+rewrite historic Mosh Pits or expose their pointers in Git. This task changes
+guidance only; it does not update Drive or confirm a scheduled release.
+
 Use the lane's stable Google Docs master moshpit for newest-first issue history
-and private session decisions; each linked issue retains its own manuscript Doc.
+and private research decisions; each linked issue retains its own manuscript Doc.
 The current shared Drive home for these mutable artifacts is
 `CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents/EDITORIAL — Newsletters & Articles`.
 Discover it live by name rather than storing a personal Drive folder ID in Git.

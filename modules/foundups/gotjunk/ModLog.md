@@ -1,3 +1,19 @@
+## 2026-11-19 — Intelligent camera and Mall convergence roadmap
+
+WSP 22/50/97. Documentation-only update recording the direction that AutoPost
+remains the shared camera owner and GotJunk becomes a destination workflow in
+the existing Play FoundUps Mall.
+
+- Added a current GotJunk roadmap for image-plus-intent routing, user
+  confirmation/correction, GotJunk report handoff, authorized intake, Mall
+  presentation, and migration/release gates.
+- Clarified in README and INTERFACE that capture, routing, report intake, shared
+  identity, and production convergence are planned or unverified, not implemented.
+- Preserved the old standalone roadmap as historical context and linked it to the
+  current plan.
+- No runtime source, data, provider settings, deployments, or production state
+  changed. No tests or deployment verification were run.
+
 ## 2026-11-09 — Mesh validator JavaScript syntax repair
 
 WSP 22/50/84/97; base `6cfd3fbadc7ee59238ef9412ab03c0753874841f`.

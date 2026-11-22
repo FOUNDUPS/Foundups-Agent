@@ -36,6 +36,7 @@ class PublicTurn:
     deadline_epoch: int
     disclosure: str = "public"
     effect_ceiling: str = "NONE"
+    foundup_id: str | None = None
 
 
 class PublicSessionGate:
@@ -288,7 +289,7 @@ class PublicSessionGate:
 
     def reserve_turn(self, *, surface: str, origin: str, subject: str,
                      token: str, body: dict, now: int) -> PublicTurn:
-        nonce, revision, message = turn_request(body, self.policy)
+        nonce, revision, message, foundup_id = turn_request(body, self.policy)
         reservation, next_nonce = secrets.token_hex(32), secrets.token_hex(32)
         with self._transaction(now) as conn:
             self._require_host(conn, now)
@@ -306,10 +307,12 @@ class PublicSessionGate:
             conn.execute("""UPDATE reddog_public_session_v1 SET revision=revision+1,
                 nonce=?,busy=?,busy_owner=?,last_seen=? WHERE token_hash=?""",
                          (next_nonce, reservation, self._owner_or_none(), now, self._hash(token)))
-        return PublicTurn(message, surface, reservation, revision + 1, next_nonce,
-                          self.policy.session_turns - revision - 1, self.policy.output_tokens,
-                          min(now + self.policy.request_seconds, row["created"] + self.policy.session_seconds,
-                              now + self.policy.idle_seconds))
+        return PublicTurn(
+            message, surface, reservation, revision + 1, next_nonce,
+            self.policy.session_turns - revision - 1, self.policy.output_tokens,
+            min(now + self.policy.request_seconds, row["created"] + self.policy.session_seconds,
+                now + self.policy.idle_seconds), foundup_id=foundup_id,
+        )
 
     def _check_active(self, row, now: int) -> None:
         if now < row["last_seen"]:

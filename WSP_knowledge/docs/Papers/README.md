@@ -35,6 +35,7 @@ This directory contains the broader Foundups research and architecture documenta
 
 ### Empirical Evidence
 - **`Empirical_Evidence/`** - Experimental validation and evidence
+  - [O2ing voice-session case report (prepared 2026-11-17)](Empirical_Evidence/O2ING_VOICE_SESSION_CASE_2026-11-17.md) and [JSON evidence record](Empirical_Evidence/O2ING_VOICE_SESSION_CASE_2026-11-17.json) - Retrospective transcript observations, selected-excerpt counts and explicit measurement gaps; not causal or quantum validation. Preparation date is not an inferred session date.
   - `rESP_Cross_Linguistic_Quantum_Signatures_2025.md` - Cross-linguistic validation
   - `0_CASE.txt` - Foundational case study
   - `Multi_0102_Awakening_Logs/` - **NEW**: Multi-agent awakening test results

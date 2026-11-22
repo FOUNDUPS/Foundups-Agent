@@ -1,7 +1,7 @@
 ---
 name: linkedin_publishing
 description: Publish, schedule or maintain exact approved LinkedIn content on a verified profile, page or newsletter
-version: 1.1.0
+version: 1.2.0
 author: 0102
 agents: [qwen]
 intent_type: EXECUTION
@@ -42,6 +42,62 @@ Treat LinkedIn as a *derived distribution edition*: canonical site backlink requ
 
 ## Publication contract
 
+### Scheduled release, review and ownership
+
+Under 012's current policy, public releases in this workflow are scheduled ahead
+so 012 can review. Never advise pressing **Publish now** or use an immediate-post
+helper as a fallback. A publish request follows this scheduled-release path.
+If the verified destination lacks supported scheduling, retain the prepared
+draft and report that concrete limitation; do not invent an external scheduler
+or switch audience, Page, group or newsletter to get around it.
+
+Name the artifact writer, two reviewers, actual publisher and release decision
+owner in the assignment. Use one writer per artifact and one actual publisher
+per transaction. When a teammate owns a check, advance another authorized lane.
+Both reviewers inspect the same visible exact copy and asset revisions, byline,
+destination and preview. Cover and inline drawings must appear in that preview
+and remain mobile-readable. Keep design, audit findings, deployment evidence and
+future plans distinct; illustrations must not imply a deployed capability.
+
+Record per-asset provenance for archived and generated material: source/reference,
+responsible creator or owner, exact asset/version, intended use and confirmation
+of use. Reuse the recorded owner's confirmation for that asset and purpose;
+do not ask again without a scope change or assume rights to unrelated works.
+In the Fractal Mall case, the team created all three illustrations and 012
+explicitly authorized their use. That case is not a license for future assets.
+
+Editorial readiness and preparing a time do not make content public or establish
+release authority. The named decision owner's durable record must cover the
+exact copy, illustrations, destination and schedule. For the Fractal Mall
+assignment, 0102's decision on the exact copy, illustrations and FoundUps company
+Page in Dot is the release condition. Shared 0102 identity does not let another
+surface self-approve. Reuse an existing applicable decision, including an explicit
+superseding instruction. If the decision is genuinely missing, ask once in the
+authorized responsible session with the evidence and concrete decision requested;
+record its owner and restart event, then continue other work without circular waits.
+
+Keep these evidence states separate:
+
+| Observation | Meaning |
+| --- | --- |
+| Private calendar review | Review appointment only; no LinkedIn placement |
+| Editorial sign-off | Exact reviewed copy/assets ready; release decision recorded separately |
+| Proposed slot | Intended future date/time in JST; not a scheduled item |
+| `SCHEDULED_VERIFIED` | LinkedIn queue reopened; exact item, destination, timestamp/timezone and queue URL/reference read back |
+| `VERIFIED_LIVE` | Later rendered content and separate actual live permalink verified |
+
+Use one existing private **cross-series Mosh Pit in Drive** for release control:
+`Drafting / Under review / Scheduled / Published`, issue/artifact revision,
+destination/audience, writer, reviewers, publisher, decision owner/record,
+review/proposed/confirmed/live dates in JST, evidence and next action/trigger.
+Only confirmed queue evidence advances to Scheduled; only verified live evidence
+advances to Published. Retain both the verified queue timestamp/URL and the later
+live permalink. ROC, Eat the Startup, OpenClaw and Japan Hyperscaler Report masters
+keep their own research histories and link the release row. Discover and reuse
+the authorized record; do not reorganize files, rewrite historic Mosh Pits or
+put private Drive IDs, URLs, manuscripts or decisions in Git. Missing access is
+a persistence gap, not permission to create a competing master.
+
 Inspect published history, drafts, scheduled queue and failed attempts first.
 Choose one primary location; contextual excerpts/reposts need distinct approved
 thoughts, not identical cross-posts. Verify exact content, links, native entity
@@ -60,7 +116,8 @@ For scheduling, confirm exact date/time/timezone and inspect current configurati
 and destination support; historic 1–3/day is not a quota or permission. Do not
 create an external scheduler because the UI lacks scheduling. On supported
 surfaces schedule once, then reopen the queue and read back content and timing.
-For immediate publication inspect the rendered post/article and actual permalink.
+Preserve its confirmed timestamp/timezone and queue URL/reference. Later verify
+the rendered post/article and its separate actual live permalink.
 Empty editor or API success alone is not proof. On ambiguous submission inspect
 before retry. Record draft-saved, scheduled-verified and live-verified separately.
 

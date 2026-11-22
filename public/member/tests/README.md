@@ -1,5 +1,13 @@
 # Member Mall tests
 
+With Chromium and Python Playwright installed, run
+`python -B public/member/tests/mall_guest_conversation_browser.py` from the
+repository root. It drives the HPC phone dock and real dialog at 390×844 using
+the scoped-video fixture's local assets. The guest API is intercepted. The
+test checks consent, the extension-owned FoundUp breadcrumb, draft staging
+without sending or overwriting text, the visible reply after Send, withdrawal,
+and clearing the transcript. No provider or cloud service is required.
+
 Read [TestModLog.md](TestModLog.md) before extending a fixture. It records the
 existing suites, historical results and their limits; those results are not a
 fresh test run.
@@ -87,11 +95,19 @@ origin with YouTube's Play control. Copying is an explicit user action.
 
 For an isolated Hosting preview, stage
 `modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_probe.js` as
-`public/member/playback-probe/probe.js` and
+`public/member/playback-probe/probe.js`,
 `modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_reference.html` as
-`public/member/playback-probe/reference.html`. Load the deferred probe
-script in the staged member document. The fixture sources live outside
-the Hosting public root. Use an online device and hold the phone and
+`public/member/playback-probe/reference.html`, and a sanitized
+`public/member/playback-probe/deployment.json` (`source_sha`, `channel_id`,
+`hosting_version`, `mall_build`). Load the deferred probe
+script in the staged member document. `reference.html` accepts strictly
+allowlisted `?v=<11-char Short ID>` (8 admitted HPC Shorts + 4 diagnostic-only
+Shorts) and `?host=youtube|nocookie` (`https://www.youtube.com` vs
+`https://www.youtube-nocookie.com`), retains selection across `Mall <-> official
+embed`, keeps all probe controls below `#hpc-probe-embed`, and separates
+`SW controller` from `Mall caches seen` and official `101/150` embed refusal
+from screen-observed `LOGIN_REQUIRED` prompts. The fixture sources live outside
+the Hosting public root. Hold the phone and
 network constant across the browser, Home Screen and official-embed cases.
 
 Let the first Short advance for a few seconds. If it fails, capture the

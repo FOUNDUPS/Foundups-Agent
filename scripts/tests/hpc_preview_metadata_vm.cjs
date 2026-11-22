@@ -147,12 +147,12 @@ check('invalid context, live IDs, accessors and prototype fields fail closed', (
 });
 
 check('frozen stale v25 repo metadata rejects against actual current source assets', () => {
-  const stale = JSON.parse(readFileSync(resolve(root, 'public/member/playback-probe/deployment.json'), 'utf8'));
+  const stale = JSON.parse(readFileSync(resolve(root, 'modules/foundups/pfmall/tests/fixtures/hpc_preview_metadata_stale_v25.json'), 'utf8'));
   const actual = context({
     channelId: 'preview-current-fixture',
     projectionSource: readFileSync(resolve(root, 'public/member/js/mall-video-projection.js'), 'utf8'),
     discoveryCatalog: JSON.parse(readFileSync(resolve(root, 'public/member/discovery/catalog.json'), 'utf8')),
-    probeSource: readFileSync(resolve(root, 'public/member/playback-probe/probe.js'))
+    probeSource: readFileSync(resolve(root, 'modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_probe.js'))
   });
   const expected = buildMetadata(actual);
   assert.equal(stale.mall_build, 'v25', 'frozen regression input is not stamped with a cyclic source SHA');

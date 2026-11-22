@@ -52,6 +52,29 @@ The [member shell](../../../public/member/INTERFACE.md#public-video-projection)
 owns the shared video UI. The [HPC media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md)
 records provider and layout constraints, reproduction and regression evidence.
 
+## Fractal projection seam — specified 2026-11-19
+
+The [master architecture](../docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+and [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+own the proposed shared graph projection. This section adds no Python export,
+HTTP route or browser command. Reuse the recovered graph schema and projector
+when their pinned evidence is available; missing graph artifacts remain an
+explicit gap in the [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md).
+
+The projection must retain a component's stable ID across views and distinguish
+its primary containment from dependency, reuse and work relationships. Record
+the graph snapshot revision separately from the artifact's source commit or
+base commit plus overlay digest. An unavailable pinned artifact stays
+unavailable rather than silently opening current main. Functionality and
+integration evidence are independent; census inclusion does not require either
+to be proven.
+
+Public projections expose approved fields and artifacts. Architect projections
+may link private PC paths or receipts only within authorized scope. Navigation
+retains the caller, lens and selection and rechecks access on return. A Tools →
+Benchmark path or builder selection is a navigation target, not execution or
+mutation authority. Existing read/write boundaries below remain authoritative.
+
 ## Python package exports
 
 `modules.foundups.pfmall` exports the following shell-core surface:
@@ -235,6 +258,15 @@ success.
 The dispatcher is not the resident RedDog conversation interface. It carries
 no durable conversation, identity proof, model credential, work order,
 OpenClaw policy, or Hermes execution authority.
+
+The distinct public guest client at `public/js/reddog-public-client.js` accepts
+only an explicitly configured same-origin `/api/reddog/public` root. Its member
+adapter exposes availability and opens a native consent dialog without issuing
+a request. A turn uses the canonical public nonce/revision/message contract and
+may add only the validated public route `foundup_id`; account and private context
+are never payload fields. Session and transcript state are cleared when the
+account/selection binding revision changes. This guest API has effect ceiling
+`NONE` and is not the authenticated resident interface below.
 
 ## RedDog integration seam
 

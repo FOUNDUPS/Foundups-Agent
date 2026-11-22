@@ -1,6 +1,7 @@
 # Newsletter issue brief — {{issue_key}}
 
 - Lane master moshpit Doc ID/URL (private continuity only):
+- Existing cross-series release Mosh Pit / row (private continuity only):
 - Existing issue history checked / missing-history scope:
 - Newest-first master entry and issue backlink verified:
 
@@ -44,11 +45,16 @@ JHR = significance, provenance, local implications and disclosed project interes
 - Claim, link, duplication, identity, language and formatting checks: {{results}}
 - 012 feedback addressed / unresolved choices: {{revision_notes}}
 - Exact approval scope / revision / destination / timing: {{approval_or_none}}
+- Writer / two reviewers / actual publisher / named release decision owner: {{owners}}
+- Durable release decision for exact copy/assets/destination: {{decision_reference}}
+- Each archived/generated asset: source, creator/owner, version, intended use and confirmation: {{provenance}}
+- Same visible copy/assets reviewed; cover and inline mobile preview checked: {{preview_evidence}}
 
 ## Delivery receipt and next action
 
 - Saved-draft reference and read-back: {{evidence_or_not_placed}}
 - Scheduled entry / timezone / read-back: {{evidence_or_not_scheduled}}
+- Separate private review / editorial sign-off / proposed slot / confirmed queue timestamp and URL in JST: {{release_evidence}}
 - Live permalink / rendered byline-series-body / checked time: {{evidence_or_not_live}}
 - Unknown submission or blocker: {{blocker_or_none}}
 - Next action / owner / trigger: {{next_step}}

@@ -20,6 +20,78 @@ hosted review, deployment and physical/real-provider gates remain open.
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Shared Search Dock and player behavior — 2026-11-21
+
+**PFDOCK-20261121 / CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.**
+This shell must supply the same floating Search Dock for the public Mall,
+admitted views, every FoundUp and fractal navigation. HPC is the first
+qualification surface. The authoritative acceptance matrix is
+[navigation contract section 14](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences);
+the [shared roadmap](../../modules/foundups/pfmall/ROADMAP.md#shared-search-dock-and-video-preferences--2026-11-21)
+owns delivery order and [HPC H1H](../../modules/foundups/hpc/ROADMAP.md#h1h--shared-dock-and-configurable-video-behavior--2026-11-21)
+owns the first device acceptance. This replaces HPC-only scope and fixed
+video-gesture assumptions where they conflict, without changing runtime here.
+
+- `mall-video-projection.js`: one active, thumb-accessible dock; the `+` menu
+  lists AI choices first, then a visible top-level **Video** entry, then
+  functional current-scope actions. Keep contribution `+` separate, including
+  its existing permission checks. Native fullscreen remains provider-owned.
+- `mall-state-restore.js` and `mall-tile-field.js`: share validated preferences
+  and tile selection across skins. Tap destinations are Floating, WikiTube and
+  Fullscreen; **Floating is the confirmed default**. Migrate existing stored
+  options without claiming cross-origin synchronization. Signed-out local
+  settings confer no contribution or execution authority.
+- `mall-video-player.js`: separate pinch-out, pinch-in return and video-swipe-up
+  return choices; allow direct Fullscreen expansion. Pinch-in from Fullscreen
+  and video swipe-up each choose WikiTube or Mall tiles, independently. Their
+  default values are not finalized. Preserve grid/queue/modal gesture contexts.
+  Rotate Floating into landscape Fullscreen and back to Floating, respecting
+  intervening deliberate mode/navigation changes. Rotation lock is an open
+  design idea. Preserve same-player state, right tuck/restore and compact
+  recovery; fully hidden YouTube playback pauses.
+- Existing AI owner: lightweight startup and a real supported-model list only
+  after qualification, with download size, explicit selection/confirmation,
+  Cancel/Unload and truthful unavailable states. The v26 41-byte WASM fixture
+  tests compatibility only; it does not implement model selection or inference.
+
+Reconcile current main with the existing PR #2439 implementation lane; extend
+its partial Video Options and shared dock instead of replacing its work.
+Documentation allocation is C2, I4, D4, Impact4 = **14/P1**; runtime and device
+costs require separate owner scoring. Reuse existing browser/VM fixtures for
+each destination, migration, intent-preserving rotation, one dock/player,
+keyboard/safe areas and Back. Qualify HPC, Play, another FoundUp/fractal path,
+non-video products and guest/member boundaries. Physical Safari/PWA and desktop
+acceptance, merge and release remain separate from this documentation change.
+
+## Fractal projection sequence — 2026-11-19
+
+**Specified; no implementation in this documentation slice.** Follow the
+[Mall roadmap](../../modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation):
+census first, with up to three eligible independent auditor packets in parallel
+(discovery, dependency, duplicate review or integration). Immature and unwired
+candidates remain discoverable with explicit evidence gaps. Keep functionality,
+integration, venture maturity and WSP_15 work priority separate.
+
+Sprint 2 reuses the reported local graph/projector/viewer once its pinned
+artifacts are recovered, for a Tools → Benchmark walkthrough and a separately
+evidenced builder-to-component path. One component
+ID can appear under several views. Retain graph and source revisions, caller,
+lens and selection; qualify Back, direct entry, stale/restricted evidence and
+public/architect boundaries under the [navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation).
+Record rendering, observed tool execution and live playback separately. When a
+render needs an unapproved code change, retain the query/path and mark visual
+acceptance pending.
+
+Historical lifecycle and economic reconciliation remain separate owners in
+Sprint 3; evidence closure follows in Sprint 4. This documentation update
+reconciles the existing owners now. The [documentation audit](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+records inspected main, reported local `121c50666` evidence and unresolved gaps.
+This plan creates no new graph engine, model route or co-build write authority.
+
+The dated v26 subset below records implementation at `2a65e7983acb489084cecf1229fcfd582f68f19b`;
+it does not close the broader shared contract above. Requalify the reconciled
+head separately; physical Safari/PWA and publication remain distinct.
+
 ## v26 phone subset and Browse AI compatibility pilot - 2026-11-21
 
 Current work starts from `9b85e9cbb874b3720e453d3e3d3a3974dca53504`.

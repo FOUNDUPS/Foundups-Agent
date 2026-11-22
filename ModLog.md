@@ -1,3 +1,53 @@
+## 2026-11-21 — Shared Search Dock and player behavior requirements
+
+PFDOCK-20261121 records 012's correction across all FoundUps/fractal views,
+including Play, with HPC as first qualification surface. The existing
+[navigation contract](modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns AI-first/Video menu order, Floating as default tile-tap destination,
+independent expansion/pinch/swipe settings, orientation restoration, right
+tuck/restore and provider/state boundaries. Rotation lock and new return
+defaults remain undecided. Reconcile HPC/Mall/member roadmaps, master
+architecture, player contract and member interface; preserve dated runtime
+history and explicitly supersede conflicting next-iteration instructions.
+
+Documentation lane: `docs/shared-foundups-dock-behavior-20261121`, owner 0102
+documentation coordinator, intended destination MERGE_TO_MAIN, base
+`9f2b785b4045ca4d8975910d95a2e0467006db71`. WSP 15 allocation C2/I4/D4/Impact4
+= 14/P1. Preserve active runtime PR #2439 at observed head
+`5be6f3b7bd9eb3c24c39210e74fada8e773a97c7`; its 41-byte WASM fixture is not
+a model and its current settings/gestures are only partial implementation.
+No runtime branch takeover, production deployment, model install or auth change.
+
+WSP 00 V2 was attempted in the isolated checkout and failed because torch is
+unavailable. The documented section 3.3.1 tracker fallback opened the gate with
+`execution_method=mathematical_formulas`; detector witness remains absent.
+The lexical Holo bridge failed on missing `holo_index.query_receipt` in this
+sparse checkout. Direct exact-source/rg reads were used; semantic freshness
+is UNKNOWN and no reindex or WRE runtime dispatch was performed. Retrieval
+was narrowed from repeated historical plans to current contracts plus pinned
+v26 source; public source links retain provider evidence separately.
+
+Validation is a scoped documentation diff, changed-link/anchor checks and
+independent review. Hosted checks and merge are recorded on the resulting PR;
+rollback is a scoped documentation revert. Runtime implementation and physical
+Safari/PWA acceptance remain in the existing owner and are not closed here.
+
+## 2026-11-19 — Reconcile Play FoundUps fractal documentation
+
+Recover the copied Tertia specification and distinguish it from Carbon's
+reported local graph at `121c50666`. Extend existing PR #2427 and its canonical
+vision, architecture, navigation, module/member contracts and roadmaps.
+The census now retains unfinished candidates and separates functionality from
+integration; bounded model/scaffold comparisons are planned alongside it through
+research adapters whose compatibility must first be verified. Stable identity, pinned source/graph revisions, caller Back,
+public/architect scope and independent reference review are explicit.
+
+Attach the [documentation audit](docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+through existing indexes and owner ModLogs. Preserve historical evidence and
+unresolved tile-count differences. This is documentation reconciliation, not
+execution of Carbon's census, a new graph engine, runtime activation or merge.
+WSP 10/15/22/50/71/80/83/84/97/99/108 apply; WSP 110 is draft guidance.
+
 ## 2026-11-16 - v23 root cache ownership and optional gateway opener
 
 Confirmed against clean `1b2551b69babd6e5d0eadcccaf033087c4f1520d` after the
@@ -6451,6 +6501,33 @@ Route matrix table in doc. `json.load(firebase.json)` valid.
 artifacts touched; no secrets read.
 **Next**: after this lands, re-run PFMALL_PUBLIC_BROWSE_HOSTING_DEPLOY_PHASE1 (finalization will now accept
 the config). Optional preview-channel deploy confirms server-side header emission before touching live.
+
+## [2026-06-13] GetK FoundUp Monorepo PoC Bootstrap Phase 1 (Lane W6/AUTHOR, CODE_NON_SPINE)
+
+**Change Type**: Additive FoundUp bootstrap -- new module scaffold + registry entry +
+pure-Python PoC contracts + WRE dry-run proof + audit doc. STOP at MERGE_READY (not self-merged).
+**By**: 0102 (Worker-Lane W6 / AUTHOR) | Commander: 012 | Gate: external 0102
+**WSP References**: WSP 3, WSP 11, WSP 22, WSP 49, WSP 50, WSP 55, WSP 97, WSP 109
+**Slice**: GETK_FOUNDUP_MONOREPO_POC_BOOTSTRAP_PHASE1
+**Base**: `20c26b7d4` (origin/main after #799)
+
+- Proves the operational-WRE build path by adding GetK ("Get a Kei Truck") to the roster: registry
+  entry + valid manifest + WSP-49 module (README/INTERFACE/ROADMAP/src/tests/memory/requirements) +
+  pure-Python PoC contract model (capture/listing/estimate/stakeholder-gate/token-utility/deferred-auction).
+- WRE/OpenClaw/Hermes dry-run PROOF passes via the EXISTING create+drain seam (no new wiring): GetK
+  reaches SIMULATED, source_authority monorepo_poc, resolved_module_path modules/foundups/getk from the
+  shared validated resolver, readiness false, real-exec sinks asserted not-called. No seam gap.
+- Tests: getk contracts 16, getk manifest 11, WRE dry-run proof 2 (29 new); cross-checks registry schema
+  46 + catalog projector 42 still pass. No skips/xfail. No network, no real execution.
+- Boundaries: no auction lookup/scraping/login, no bidding, no payments, no token economics, no PFmall
+  wiring, no AutoPost integration, no regulatory claims as truth, no source_authority promotion, no
+  CABR/PAYOUT/DAO/MVP claim. GETK token is internal utility only (TOKEN_DEFERRED).
+- SKILLz-gap assessment (per 012): RAILS exist (registry, manifest, dry-run seam, autonomous_slice_worker
+  meta-skill) but (a) no FoundUp product SKILLz exist, (b) no end-to-end WRE FoundUp-onboarding BUILD skill
+  (onboarding was manual here), (c) the registry is not HoloIndex-indexed (remembered via README only).
+  Named follow-ups: GETK_IMPORT_REGULATORY_PROVIDER_AUDIT_PHASE1, the GETK product SKILLz,
+  WRE_FOUNDUP_ONBOARDING_BUILDER_SKILL_PHASE1, FOUNDUP_REGISTRY_HOLOINDEX_BRIDGE_PHASE1.
+- Doc: docs/audits/architecture/GETK_FOUNDUP_MONOREPO_POC_BOOTSTRAP_PHASE1.md (11 sections, WSP_97 18/18).
 
 ## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
 

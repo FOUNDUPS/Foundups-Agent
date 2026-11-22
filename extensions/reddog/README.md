@@ -24,6 +24,8 @@ CPython 3.12.10 remains qualified last-official-3.12 Windows evidence with known
 Foreground provider turns discard raw history; durable VSIX/PFMall/phone conversation adapters and ChatGPT-like cross-session memory remain missing.
 OpenClaw is the resident 0102 execution/supervision layer and Hermes is bounded. Backend modules now authenticate and reserve existing requests, persist a trusted new FoundUp scope, and durably bind the original empty-ID first TURN to its resolved ID/revision 0. The VSIX still has no service caller, so no first-turn handler or conversation CAS executes.
 
+Multi-voice arbitration is proposed in the [dual-loop coordination contract](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md#multi-voice-coordination-task-ownership-and-affect-separation-2026-11-19-proposal): one committing 0102 task owner and one authorized RedDog speaking path, with independent reasoning shade, measured activity dot, and optional consented affect. See the [roadmap](ROADMAP.md#single-owner-multi-voice-coordination--proposed-2026-11-19). This is documentation, not running orchestration.
+
 ## Model-routing authority
 
 The routing plane represents work as `ModelTaskRequirements`; AI Gateway owns
@@ -636,7 +638,10 @@ query-time repair and editor-side indexing remain forbidden.
 
 Version 0.4.46 resolves named FoundUp work through the canonical registry and
 requires current registry, manifest, module, Skillz, and status evidence before
-Fusion. Identity and safe mutation scope remain bound through continuity,
+Fusion. When a registry entry declares `brand_context_path`, the current brand
+schema/context also become mandatory grounding evidence. Parent and child brand
+identity can be concatenated into the receipt, but branding never widens the
+registered FoundUp's execution or safe-mutation authority. Identity and safe mutation scope remain bound through continuity,
 wardrobe, work-order, WRE, OpenClaw, and resident-intent handoffs. The generic
 grounding receipt grants no execution authority. The checked-in JSON schema is
 evaluated directly, dirty evidence is labeled as workspace-current, and every
@@ -1008,3 +1013,7 @@ vsce package --no-dependencies --baseContentUrl https://github.com/FOUNDUPS/Foun
 ```
 
 From Cursor, run `Extensions: Install from VSIX...`, choose `reddog-0.4.141.vsix` (or the current version), reload the window, then run `RedDog: Open`; do not use workspace-extension install for normal operation.
+
+## Reasoning shade and 0102 activity indicator (proposed; 2026-11-19)
+
+RedDog's visual shade expresses the selected reasoning depth, independently of measured 0102 workload. The three user-facing labels are Quick (`FAST`), Contemplative (`CRITIC`), and Deep (`PANEL`); labels do not change the existing conversation intent or effect-ceiling contract. The background 0102 dot represents processing activity only when backed by valid workload telemetry. Size and pulse may respond to measured load; they must not be inferred from reasoning mode, response latency, or cosmetic animation. Once measured processing ends, the dot settles even if Deep remains selected. With missing, stale, or unsupported telemetry, render a neutral non-quantitative idle/unknown animation; never simulate a load measurement. Theme inversion (dark dot on light surface, light dot on dark surface) is purely presentational, not a processing state. This is a proposed UI contract, not a claim of implemented compute telemetry or live dual-loop integration. See [architecture](../../docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md) and [roadmap](ROADMAP.md).

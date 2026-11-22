@@ -1,5 +1,11 @@
 # GotJUNK? FoundUp
 
+## Current product direction — intelligent camera and FoundUps Mall
+
+GotJunk is planned as a domain workflow inside the existing Play FoundUps Mall. AutoPost owns the reusable camera, capture, media, and perception pipeline. The intended intelligent camera uses image evidence together with spoken or selected user intent to propose a destination such as a GotJunk dumping report or a Shop listing. The user can confirm or correct the proposal before handoff. GotJunk will not add a separate camera stack.
+
+A confirmed GotJunk report is distinct from a reuse, giveaway, or sale listing. Report submission, administrator notification, and public status display are planned capabilities, not implemented services. The receiving organization and accepted intake channel remain to be identified. See the [current roadmap](ROADMAP.md) and [Mall migration handoff](PFMALL_MIGRATION_HANDOFF.md).
+
 ## Mall migration evidence stage — 2026-10-12
 
 GotJunk remains an **offline-first** source. Its actual browser database is
@@ -195,7 +201,7 @@ const nearbyItems = allItems.filter(item => {
 
 ## Development Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for PoC → Prototype → MVP progression.
+See [ROADMAP.md](ROADMAP.md) for the current intelligent-camera routing and Play FoundUps Mall convergence plan. The legacy PoC → Prototype → MVP material remains there as historical context.
 
 ### Phase 1: PoC (COMPLETE)
 - ✅ Photo capture with geolocation
@@ -236,7 +242,7 @@ This FoundUp leverages WRE-built platform modules:
 
 ---
 
-**Remember**: This is a **standalone FoundUp application**, not infrastructure. Platform definitions live in WSP_framework/, this implements them.
+**Architecture status**: This is a legacy standalone application planned for convergence into the existing Play FoundUps Mall. The Mall owns discovery, AutoPost owns camera/capture/perception, and GotJunk owns its domain workflows. Convergence is not implemented.
 
 ---
 

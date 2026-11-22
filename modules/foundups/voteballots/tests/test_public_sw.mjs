@@ -10,14 +10,14 @@ const origin = 'https://vote.test';
 const MIME = {
   css: 'text/css', js: 'text/javascript', mjs: 'text/javascript',
   json: 'application/json', webmanifest: 'application/manifest+json',
-  svg: 'image/svg+xml', png: 'image/png', webp: 'image/webp',
+  svg: 'image/svg+xml', png: 'image/png', webp: 'image/webp', jpg: 'image/jpeg',
 };
 
 function worker() {
   const handlers = {};
   const contents = new Map();
   const requests = [];
-  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9'];
+  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9', 'vote-public-guide-v10'];
   const deleted = [];
   const cache = {
     match: async (url) => contents.get(url),
@@ -60,10 +60,11 @@ function worker() {
 test('canonical and prior HTML navigation use the same cached document offline', async () => {
   const sw = worker();
   await sw.event('install', '/');
-  assert.equal(sw.contents.size, 25);
+  assert.equal(sw.contents.size, 32);
   assert.ok(sw.requests.every(({options}) => options.redirect === 'error'));
   await sw.event('activate', '/');
-  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8']);
+  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9', 'vote-public-guide-v10']);
+  for (const asset of ['contact-script.js', 'contact-script.mjs']) assert.ok(sw.contents.has(origin + '/' + asset));
   sw.changeResponse(() => { throw new TypeError('offline'); });
   for (const path of ['/guide', '/contact', '/evidence', '/coalition']) {
     assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
@@ -168,4 +169,50 @@ test('failed precache rejects redirects and misleading MIME without writing', as
     await assert.rejects(sw.event('install', '/'), /Invalid Vote shell response/);
     assert.equal(sw.contents.size, 0);
   }
+});
+
+test('both whole HPC banners and separate Mall links remain native anchors without script', () => {
+  for (const name of ['index.html', 'contact.html']) {
+    const markup = readFileSync(new URL('../web/' + name, import.meta.url), 'utf8');
+    const navigation = markup.match(/<nav class="hpc-navigation"[\s\S]*?<\/nav>/)?.[0];
+    assert.ok(navigation, name);
+    const links = [...navigation.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)];
+    assert.equal(links.length, 2, name);
+    assert.match(links[0][1], /href="https:\/\/hpc\.foundups\.com"/);
+    assert.match(links[0][1], /aria-label="HPC — return to HPC"/);
+    assert.match(links[0][2], /icons\/hpc-portrait\.png/);
+    assert.match(links[0][2], /Return to HPC/);
+    assert.doesNotMatch(links[0][2], /<(?:a|button)\b/);
+    assert.match(links[1][1], /href="https:\/\/play\.foundups\.com"/);
+    assert.match(links[1][2], /icons\/red-dog\.png/);
+    assert.match(markup, /href="hpc-navigation\.css"/);
+    assert.match(markup, /src="hpc-navigation\.js" defer/);
+  }
+});
+
+test('portrait motion starts only while visible and stops on hidden-page changes', () => {
+  const listeners = {};
+  const classes = new Set();
+  const doc = {
+    hidden: true,
+    documentElement: {classList: {toggle: (name, enabled) => enabled ? classes.add(name) : classes.delete(name)}},
+    addEventListener: (name, callback) => { listeners[name] = callback; },
+  };
+  vm.runInNewContext(readFileSync(new URL('../web/hpc-navigation.js', import.meta.url), 'utf8'), {document: doc});
+  assert.ok(!classes.has('hpc-navigation-motion'));
+  doc.hidden = false; listeners.visibilitychange();
+  assert.ok(classes.has('hpc-navigation-motion'));
+  doc.hidden = true; listeners.visibilitychange();
+  assert.ok(!classes.has('hpc-navigation-motion'));
+});
+
+test('new navigation assets are available offline but external destinations never enter the cache', async () => {
+  const sw = worker();
+  await sw.event('install', '/');
+  sw.changeResponse(() => { throw new TypeError('offline'); });
+  for (const path of ['/hpc-navigation.css', '/hpc-navigation.js', '/icons/hpc-portrait.png', '/icons/red-dog.png']) {
+    assert.ok(sw.contents.has(origin + path), path);
+    assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
+  }
+  for (const url of ['https://hpc.foundups.com', 'https://play.foundups.com']) assert.equal(sw.event('fetch', url), undefined);
 });

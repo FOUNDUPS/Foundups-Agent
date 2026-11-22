@@ -1,3 +1,59 @@
+## 2026-11-21 — Shared dock and configurable player acceptance
+
+PFDOCK-20261121 extends the same dock/settings requirement across all FoundUps,
+Play and fractal views. AI list precedes Video; tile tap defaults to Floating;
+expansion, pinch-in and video-swipe-up returns are independently configurable.
+Record orientation restoration and right tuck without losing context. Rotation
+lock remains open. The [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns the matrix and provider boundary; roadmap owns staged qualification.
+Reconcile earlier fixed-gesture/HPC-only instructions without claiming shipped
+behavior. Root ModLog records source, runtime-lane preservation and retrieval
+limits. Documentation-only validation; no runtime or production change.
+
+## 2026-11-20 — Bounded Red Dog guest conversation client
+
+- Reused the preserved #1648 guest-session client pattern against the current
+  canonical Python public-admission API. The browser client requires an explicit
+  same-origin `/api/reddog/public` deployment binding, performs no request on
+  import/open, retains bearer/nonce state only in memory, and never falls back to
+  the legacy homepage chat after consent or transport failure.
+- Added a quiet native-dialog adapter for the existing Mall Red Dog entry. It
+  requires explicit consent before `encounter`, defaults to text only, sends no
+  account/private context, and optionally sends only the validated public route
+  `foundup_id` so an HPC question such as “what is this?” is server-grounded.
+  Context/account binding revisions clear the local session, transcript, and
+  consent before another principal or public selection can reuse the surface.
+- The live homepage legacy chat remains unchanged. Endpoint installation,
+  provider credentials, durable production accounting, hosted acceptance, and
+  deployment remain separate gates. WSP 22, 50, 97, and 106 apply.
+
+## 2026-11-19 — Fractal census and projection documentation reconciliation
+
+- Replaced the immediate graph-build sequence with inclusive census discovery,
+  parallel samples of up to three eligible auditor packets, then separately
+  scoped visualization, historical/economic owners and evidence closure.
+- Linked README and INTERFACE to existing architecture/navigation owners and the
+  [documentation audit](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md).
+  Kept identity across views, graph/source revisions, functionality/integration,
+  public/architect scope and future co-build authority distinct.
+- Documentation only. Inspected main source and reported local `121c50666`
+  evidence retain separate status; graph counts, PC runtime, live playback and
+  Simulator wiring are not certified by these edits. Validation is scoped diff
+  and link review; no runtime tests or worker dispatch were performed here.
+
+## 2026-11-16 · Isolated HPC iPhone official YouTube baseline probe extension
+
+- Extended `tests/fixtures/hpc_iphone_playback_probe.js` and `tests/fixtures/hpc_iphone_playback_reference.html` (kept outside `public/` in git) with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts), allowlisted `?host=youtube|nocookie` (`https://www.youtube.com` vs `https://www.youtube-nocookie.com`), `Mall <-> official embed` selection retention, sanitized `deployment.json` + `SW controller` provenance receipt, and distinct `101/150` vs `LOGIN_REQUIRED` vs `autoplay-blocked` reporting, with all controls outside `#hpc-probe-embed`.
+- Added deterministic Node VM regression `tests/fixtures/hpc_iphone_playback_probe_vm.mjs` wired into `public/member/tests/test_mall_product_state.py`. WSP 22, 50, 97, 99, and 104 apply.
+
+## 2026-11-16 — HPC return banners and changed phone acceptance (documentation candidate)
+
+- Record 012's entire top HPC banner on both existing Vote and Call Your Congressperson pages as one accessible return link to `https://hpc.foundups.com`; distinct existing Red Dog navigation identity returns to `https://play.foundups.com`.
+- Reconcile HPC/pfMALL roadmaps and navigation contract: top-anchored shared phone player above independently scrolling tiles explicitly supersedes selected-tile/original-row acceptance. Preserve desktop, queue/transitions, state, PWA shell and provider evidence boundaries.
+- Record concise HPC identity, reuse of existing illustrated portrait/Red Dog assets, requested satire adaptation, single-link accessibility and reduced-motion/hidden animation behavior. Larger shared floating dog/search dock is deferred; 144 FoundUps is a target, not inventory.
+- Inspected main `72a3182c70974f0523be91d5ce4bd32808d824bc` and preserved separate draft probe PR #2405 at `313d8168205178cf5387e1912bd5e462d1dafaa9`. No implementation-branch mutation, runtime code, image creation, build, production deployment or merge in this documentation slice. Native WSP bootstrap/Holo/WRE execution and device acceptance were not performed; document reads do not establish runtime compliance.
+- Validation: exact-source reconciliation, relevant asset inspection, static diff/link review and independent documentation review. Hosted exact-head checks and owner acceptance remain separate. Stopped native UI was not resumed; no Antigravity delivery or receipt is inferred from saved GitHub documentation.
+
 ## 2026-11-21 — next-candidate playback metadata coherence
 
 Recorded the frozen v26 server/diagnostic mismatch in the existing member test

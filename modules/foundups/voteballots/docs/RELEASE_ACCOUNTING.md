@@ -1,5 +1,71 @@
 # Vote release accounting and launch checklist
 
+## 2026-11-22 Source-selected skin handoff
+
+HPC's Voice link now carries `https://vote.mtrout.com/contact#hpc`, selecting
+the existing Vote skin automatically without referrer access. Vote itself stays
+at Sites version 11. The public tag conveys presentation context, not identity.
+
+Firebase Hosting project `gen-lang-client-0061781628`, site `foundupscom`:
+
+- Pinned original live version `e8d8961e7c139c79`; authenticated custom-domain
+  binding confirmed HPC belongs to this site.
+- Version `cfc547e3558f4433` / release `1795302953440000` changed only the root
+  `/member/mall-public-video-catalog.json` Voice link.
+- Live click verification revealed the deployed HPC v25 snapshot. Version
+  `2a4d064fac8b3170` / release `1795303104510000` additionally changed only
+  `/member/hpc-v25/mall-public-video-catalog.json` Voice link.
+- Each release cloned the current live version, compared configuration and all
+  178 file hashes, changed one admitted catalog field, rechecked the live head
+  before publication and read back the resulting release. Other 177 files were
+  unchanged in each release; newer player assets and hosting rules were retained.
+- Actual live HPC Voice click reached Vote's HPC skin at 390px without manual
+  selection. 136 targeted Node tests passed; source projection equals canonical
+  generator output. The broader player browser fixture was not rerun.
+- PR #2444's first CI run found a stale destination assertion in pfMALL's
+  generator contract. It was corrected to the requested fragment, retaining
+  exact destination and idempotency checks; all 33 catalog tests then passed
+  locally. Initial CI result: 1 failed, 1856 passed, followed by a dependent
+  missing-artifact error because later steps had been skipped.
+- Deployment-helper repairs: accept Firebase's short version resource names;
+  use the installed CLI's compatible AbortController for its upload client.
+  Failed attempts did not publish. The extra unmodified, unpublished candidate
+  `fb07d096478b2ce8` was verified against its source then deleted. No credentials
+  were exported and no permission/security settings were changed.
+
+The existing [Vote skin skill](../skillz/vote_skin/SKILL.md) records the same
+outbound-link convention for other registered skins. Missing/unknown tags remain
+Vote Classic. This does not implement or claim another FoundUp's skin.
+
+## 2026-11-22 HPC contact skin
+
+- Source: [PR #2441](https://github.com/FOUNDUPS/Foundups-Agent/pull/2441),
+  implementation commit `7d42d4b5265900bee4c12430c52bfc313dc384c2`.
+  GitHub integration/check status is recorded on that PR, separately from Sites.
+- Existing public Vote Sites project `appgprj_6aee6646e6ac81918ac2624d5d1db413`:
+  **version 11 deployed successfully** at 2026-11-21 22:47 UTC / November 22 JST.
+  Site source `ba616749273598614166e054b9dfe76f75e4d8ed`, deployment
+  `appgdep_6b021f68dc88819193b8c481f9330c61`.
+- [Live HPC contact page](https://vote.foundups.com/contact#hpc): actual Chrome
+  readback confirmed the HPC preset, 1280px supplied poster, generated script,
+  preserved Hasan-for-Speaker brand link, and working regeneration. Live 390px
+  screenshot confirmed the readable script controls. Audience remains public.
+- Source/fixture result: **135 passed, 0 failed**; browser checks and limitations
+  are in `tests/TestModLog.md`. No independent model review or physical-phone
+  qualification is claimed. Provider execution is unnecessary for fixed templates.
+- Publication reconciled Sites base `459f25ba56100da4510e47f23acc1e33586fb0a3`:
+  Contact files, required HPC navigation assets, poster and v11 worker only.
+  Other deployed pages were preserved. The deployment archive's 11 scoped assets
+  matched their recorded SHA-256 hashes; no Git, credentials or provenance file
+  entered the public archive. The supported helper places hosting metadata under
+  `dist/.openai/hosting.json`; an initial root-only archive assertion was corrected.
+- The supplied director/2,000+ coalition/callback draft is opt-in and caller
+  asserted. It is not verified membership or endorsement. The separate supplied
+  seat-count screenshot is not published as current election evidence.
+- No automated calls, messages, model spend, new subscriptions or RSI promotion.
+  The direct skin link is available; this release does not redeploy the separate
+  HPC/Mall app or change its existing outbound link.
+
 ## 2026-11-09 documentation audit
 
 The [Oversight landing contract](../oversight/README.md#phase-one-landing-contract)

@@ -157,7 +157,7 @@ clearButton.addEventListener('click', () => {
   queue = [];
   cursor = 0;
   notes.value = '';
-  showQueue('List and notes cleared.');
+  showQueue('List and script cleared.');
 });
 
 async function loadDirectory() {

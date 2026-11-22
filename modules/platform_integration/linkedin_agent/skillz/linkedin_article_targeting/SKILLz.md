@@ -24,6 +24,12 @@ Use this skill when 0102 needs to answer:
 - Which LinkedIn entity has already published work on this topic?
 - What articles already exist across the LinkedIn publishing ecosystem?
 
+A recommended target grants no release authority. Pass the verified destination
+and intended audience to the [scheduled release contract](../linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership);
+the assignment's named decision owner and durable decision cover that exact
+destination. Do not substitute another Page, newsletter or group to bypass a
+scheduling limitation or an unresolved decision.
+
 ## Supported Actions
 
 | Action | Description |

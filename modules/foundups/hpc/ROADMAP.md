@@ -1,5 +1,33 @@
 # HPC roadmap
 
+## 2026-11-22 - main reconciliation candidate in existing PR #2439
+
+Inputs are phone head `2a65e7983acb489084cecf1229fcfd582f68f19b` and main
+`dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b`. 012 permits a normal main-into-
+feature reconciliation; landing the PR and publication remain unauthorized.
+Preserve the tested v26 return/navigation/player and current main contracts,
+all dated Canvas decisions and accepted main-only work. No Fractal runtime or
+held gesture defaults are imported.
+
+Diagnostic probe code remains in existing test fixtures, not committed public
+Hosting paths. Preview assembly must explicitly copy the canonical fixtures and
+generate fresh source/build/catalog/probe/Hosting metadata outside Git. The
+candidate reuses the 29 worker cases, six existing probe cases and ten metadata
+groups, with additive source-hash and guard coverage in the existing workflow.
+Exact composed-source tests, independent review, security/CodeQL and hosted CI
+must qualify the eventual head. No new preview, live change, physical Safari/PWA
+or real YouTube/sound result is claimed by this reconciliation entry.
+
+## 2026-11-22 - main reconciliation candidate
+
+Reconcile canonical main `dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b` with the
+qualified phone source `2a65e7983acb489084cecf1229fcfd582f68f19b` in existing
+PR #2439. Preserve current shared acceptance and the dated source receipts
+below. Prior exact-head tests qualify their recorded sources only; the resulting
+candidate needs its own validation. No publication or physical iPhone result
+follows from conflict resolution, and the separate Fractal runtime is not a
+phone-release prerequisite.
+
 ## 2026-11-22 - selective v26 reversible return; existing PR #2439
 
 0102 resumes the existing clean #2439 source lane at
@@ -522,7 +550,7 @@ feedback is not production approval.
 component across the Mall, every FoundUp and their fractal views, including
 `https://play.foundups.com`. HPC is the first qualification surface, not a
 separate owner or the limit of the requirement. The authoritative behavior
-matrix is [shared navigation contract section 14](https://github.com/FOUNDUPS/Foundups-Agent/blob/f71dc2477e7d55f65600b87ebde1489f78adf98a/modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences).
+matrix is [shared navigation contract section 14](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences).
 This supersedes HPC-only wording, the formerly deferred shared-dock scope,
 forced WikiTube entry on a deliberate tile tap and fixed player up/down
 behavior where they conflict. The default-entry decision below is distinct
@@ -623,7 +651,7 @@ The functional Vote/Contact return links now have a source candidate on existing
 
 Immediate owner slice: reuse the existing HPC projection, Vote landing and Contact Congress page. Keep the existing PWA/tile shell and sole Mall implementation owner (`pfmall-truth-author`; existing probe draft [#2405](https://github.com/FOUNDUPS/Foundups-Agent/pull/2405)). Coordinate adjacent Vote source and its existing Sites mirror; do not create another page, tenant, Voice shell or implementation swarm. Contact Congress is an existing manual resource; independently admitted Voice remains later work.
 
-Use the [cross-surface navigation matrix](https://github.com/FOUNDUPS/Foundups-Agent/blob/f71dc2477e7d55f65600b87ebde1489f78adf98a/modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#47-hpc-vote-and-contact-congress-return-navigation--012-request-2026-11-16). The **entire HPC banner at the top of both Vote and Call Your Congressperson** must be one coherent accessible link to `https://hpc.foundups.com`. Put the small top-corner animated Hasan/HPC portrait inside that anchor; this supersedes an icon-only tap target. Do not nest another link or conflicting button in the banner. Retain the existing Vote/Contact navigation, forms, install controls and independent-site disclosure.
+Use the [cross-surface navigation matrix](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#47-hpc-vote-and-contact-congress-return-navigation--012-request-2026-11-16). The **entire HPC banner at the top of both Vote and Call Your Congressperson** must be one coherent accessible link to `https://hpc.foundups.com`. Put the small top-corner animated Hasan/HPC portrait inside that anchor; this supersedes an icon-only tap target. Do not nest another link or conflicting button in the banner. Retain the existing Vote/Contact navigation, forms, install controls and independent-site disclosure.
 
 Use concise **HPC** for the banner, scoped heading and install identity. Reuse `public/member/hpc-icon-{180,192,512}.png` and the illustrated character supplied by 012: laughing, curly-haired, bespectacled and bearded at a microphone. The desired crown of thorns and optional halo are a satirical adaptation, not present in the inspected portrait. Materialize 012's supplied placement screenshot and illustrated poster through the supported Library flow and inspect actual pixels before image-dependent work. Do not recreate the full poster inside a small icon or substitute an unrelated face; no endorsement by Hasan or referenced organizations is implied.
 

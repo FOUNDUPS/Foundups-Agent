@@ -302,6 +302,47 @@ approval of hidden audio. No deployment or physical-device pass is claimed.
 - **Shell Generation & Cache Freshness (`member-sw.js`, `js/mall-video-projection.js`, `index.html`, `firebase.json`)**:
   - Advanced `mallBuild` to `'v20'`, `CACHE_NAME` to `'pfmall-member-v20'`, `?v=20` asset URLs with `updateViaCache: 'none'`, and `Cache-Control: no-cache` HTML/SW hosting headers. WSP 22, 49, 50, 97, and 104 apply.
 
+## 2026-11-21 — Shared dock and player preference contract
+
+Link roadmap and interface to PFDOCK-20261121 across HPC, Play and all
+FoundUp/fractal views. Preserve existing dock, tile-selection, player and
+state owners; record Floating tile-tap default, AI-first/Video ordering,
+independent gesture returns and orientation restoration. Mark the old dock
+placement/gesture table as runtime history instead of competing acceptance.
+Rotation lock stays undecided; no new API, model, permission or runtime change.
+Root ModLog records source, retrieval limitations and documentation validation.
+
+## 2026-11-20 — Host the extension-owned FoundUp focus component
+
+The guest dialog hosts RedDog's portable focus component through its existing
+conversation client. HPC is the mobile acceptance fixture, not a hard-coded
+destination. See the [extension interface](../../extensions/reddog/ARCHITECTURE.md#fractal-mall-focus-front).
+
+## 2026-11-20 — Public HPC text conversation
+
+- Opt-in HPC dog entry opens a consented guest dialog. Without the guest API
+  configuration the existing FoundUp welcome route still works. The updated
+  service worker reloads the shell assets and precaches only the static client.
+- The [HPC hosting and admission contract](RED_DOG_DIGITAL_TWIN_CONTRACT.md#hpc-prototype-and-hosting-evidence-2026-11-20)
+  and [mobile browser check](tests/mall_guest_conversation_browser.py) cover
+  the public route, visible consent, scoped question, answer and withdrawal.
+  The browser fixture stays offline. The separate local ASGI/OpenRouter smoke
+  exercised one real GLM-5.2 turn. Production activation is pending.
+
+## 2026-11-19 — Fractal member-view documentation reconciliation
+
+- Added link-first target guidance to README, INTERFACE and ROADMAP using the
+  existing architecture, navigation and Mall planning owners. Census includes
+  immature candidates; bounded auditor samples run in parallel before the
+  separately scoped graph visualization slice.
+- Distinguished shared identity, caller/lens/selection return, graph/source
+  revisions and public/architect scope from current catalog and dispatcher
+  behavior. Local dictation does not establish resident voice or PC relay.
+- Documentation-only diff/link review; no browser implementation, live playback,
+  PC runtime or graph execution is asserted. See the
+  [documentation audit](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+  for inspected-main versus reported-local evidence and unresolved gaps.
+
 ## 2026-11-16 · Build v19 catalog truth, HPC tile routing, and activeVideo continuity
 
 - **Catalog Truth & Schema Normalization (`mall-video-catalog.json`)**:

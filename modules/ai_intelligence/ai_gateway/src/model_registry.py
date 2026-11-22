@@ -357,6 +357,14 @@ OPENROUTER_MODELS: Dict[str, ModelInfo] = {
     ),
 }
 
+# Exact open-weight models eligible for the separately gated public RedDog
+# prototype. Registry presence alone is not eligibility, and this subset is not
+# promotion, a default, a fallback chain, or proof of hosted availability.
+PUBLIC_OPEN_WEIGHT_OPENROUTER_MODELS = frozenset({
+    "google/gemma-4-26b-a4b-it:free",
+    "z-ai/glm-5.2",
+})
+
 # =============================================================================
 # LOCAL MODELS (LM Studio / Ollama / llama.cpp)
 # =============================================================================

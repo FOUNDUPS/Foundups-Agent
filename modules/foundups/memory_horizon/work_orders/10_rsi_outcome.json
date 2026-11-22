@@ -1,0 +1,103 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "validator",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "SENTINEL",
+  "S": {
+    "owner": "0102_rsi_evaluator",
+    "read": [
+      "modules/foundups/memory_horizon",
+      "modules/foundups/memory_horizon/work_orders/results",
+      "docs/operations/RSI_SWARM_DISPATCH.md",
+      "docs/roadmaps/rsi_swarm_backlog.json",
+      "ROADMAP.md"
+    ],
+    "write": [
+      "modules/foundups/memory_horizon/docs/launch",
+      "modules/foundups/memory_horizon/ModLog.md",
+      "modules/foundups/memory_horizon/work_orders/results/MH-RSI-10.json"
+    ]
+  },
+  "M": "qa",
+  "T": "MH-RSI-10",
+  "A": "EVALUATE autonomous-build experiment and produce next-cycle RSI evidence",
+  "R": [
+    0,
+    5,
+    6,
+    15,
+    22,
+    46,
+    48,
+    50,
+    60,
+    84,
+    97,
+    99,
+    109
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "depends_on": [
+      "MH-RSI-08"
+    ],
+    "observed_evidence_only": true,
+    "automation_not_equal_rsi": true,
+    "no_self_promotion": true,
+    "preserve_rejections": true,
+    "effect_boundary": "Experiment evaluation/docs only; no automatic promotion, payout or new runtime authority."
+  },
+  "O": [
+    "ticket/admission/worker/verifier outcome matrix",
+    "cost/time/retry/intervention metrics where evidenced",
+    "reusable lessons and observed production-line defects",
+    "next-cycle WSP 15 rescore",
+    "work_orders/results/MH-RSI-10.json"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Overlapping writer ownership",
+    "Credential or private-data disclosure risk",
+    "Attempt to claim unobserved completion",
+    "Medical/diagnostic claim outside approved boundary"
+  ],
+  "X": {
+    "status": "waiting_MH-RSI-08",
+    "depends_on": [
+      "MH-RSI-08"
+    ],
+    "objective": "Determine what the production line actually accomplished and whether any retained verified lesson improves the next Memory Horizon or FoundUp build cycle.",
+    "steps": [
+      "Aggregate only actual signed/verified ticket evidence and blockers.",
+      "Measure 0102 intervention, worker retries, defects caught, conflicts avoided and available cost/latency.",
+      "Separate automation success from recursive self-improvement.",
+      "Propose reusable skill/contract changes only where evidence supports them.",
+      "Re-observe current backlog and score the next eligible repair/improvement."
+    ],
+    "wsp15": {
+      "complexity": 3,
+      "importance": 5,
+      "deferability": 4,
+      "impact": 5,
+      "total": 17,
+      "priority": "P0"
+    },
+    "requirements": {
+      "compute_class": "HIGH",
+      "reasoning_depth": "DEEP",
+      "tools": [
+        "repository_read"
+      ],
+      "verification_class": "RSI_EVIDENCE"
+    },
+    "acceptance": [
+      "No planned ticket is counted as executed.",
+      "Blocked/rejected work remains visible.",
+      "Any RSI claim identifies a later-cycle measured improvement.",
+      "No automatic promotion or authority widening follows from the report."
+    ],
+    "rollback": "Documentation/evaluation only; preserve prior receipts and rejected candidates."
+  }
+}

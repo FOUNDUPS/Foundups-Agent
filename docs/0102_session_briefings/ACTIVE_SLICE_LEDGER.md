@@ -1,3 +1,182 @@
+## RedDog extension front / first Mall adapter — 2026-11-20
+
+012 redirected development to the existing RedDog extension as the owner of
+the front end. EXTEND its panel; REUSE the Mall guest transport delivered by
+[#2435](https://github.com/FOUNDUPS/Foundups-Agent/pull/2435). Source:
+`193f4fe4a`. The smallest shared piece is the current FoundUp breadcrumb and
+an explicit action to stage a question. The VSIX and HPC guest dialog supply
+their own independently qualified focus. Neither host imports the other's
+credentials, conversations, code execution capability, or graph data.
+
+Native WSP 00 tracker passed. The Holo owner returned an index gap/UNKNOWN
+freshness; the lexical bundle identified the checked-out head but did not
+cover the newly merged guest flow. Directly compared the panel, grounding
+owner, published catalog, guest client, previous receipt and navigation
+contract. No independent popup, registry, graph branch, or public deployment.
+The graph team's local source drawer is not a released adapter. The next
+graph increment needs a permitted tile/revision from that owner, plus
+caller restoration; a FoundUp ID alone cannot stand in for those.
+
+## RedDog guest conversation in the HPC Mall — 2026-11-20
+
+012 requested an OpenRouter-backed RedDog, quiet voice intake, and a public
+guest-to-account path tested with HPC. The existing named Work handoff is
+[PR #2429](https://github.com/FOUNDUPS/Foundups-Agent/pull/2429).
+The product owner is the [member digital twin contract](../../public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md#hpc-prototype-and-hosting-evidence-2026-11-20).
+
+RECONCILE on main `06d0d8133`. The July 0.4.42 trace records a superseded
+Codex route. Current VSIX source is 0.4.141. Its advisory provider, resident
+read-only audit jobs and signed worker publication have distinct completion
+receipts. A signed queue entry alone does not show code changes or a passing
+test. Guest turns use the Python public boundary and the public catalog.
+The existing member account flow retains admission. Durable personal memory
+and code execution require authenticated principal-scoped contracts.
+
+[PR #1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) supplies
+prior client and provider work. Keep its D1, private Moshpit and other website
+changes in their existing lane. [PR #2431](https://github.com/FOUNDUPS/Foundups-Agent/pull/2431)
+owns voice arbitration design. The Fractal Mall projection and benchmark
+remain with their separate local owner, pending independent adjudication.
+The public and architect projections must remain distinct across the chat boundary.
+
+WSP 00 native bootstrap and strict tracker passed in the isolated worktree.
+Semantic Holo retrieval reported an index gap. The lexical fallback bound
+the module bundle to the workspace head with UNKNOWN freshness. Direct
+inspection supplied the missing November PR state, live landing-page route
+and host/client contracts. The earlier graph audit and July trace are
+historical evidence, not runtime verification for this release.
+
+## PR #2427 fractal documentation reconciliation — 2026-11-19
+
+Owner: 0102 documentation lane; principal 012; origin external_principal.
+Resume existing `docs/pfmall-fractal-work-navigation-20261119`, observed open
+head `b90a1b01f4caa478f8f1d8f7dc154c67a26fcdd4` on main
+`7432d31e5a68544d2bbab6715f02f64b0b5b6f85`. Preserve the prior five-document
+navigation changes and extend the existing owners with recovered Tertia
+provenance, inclusive census, separate functionality/integration, bounded
+parallel comparisons and explicit source/reported-local/target labels.
+The [documentation audit](../audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+owns coverage, corrections and unresolved evidence; no competing Carbon run.
+
+Current authorization is documentation update/review only. No merge, deployment,
+production routing or financial change is claimed or authorized by this entry.
+Validate the resulting exact head, read hosted checks, and retain the open PR as
+the reviewable handoff. Main and PC convergence remain separate later gates.
+Recheck this entry against the live PR before a subsequent mutation.
+
+Next evidence dependency: the existing Carbon/PC owner supplies the inaccessible
+local `121c5066687c5ab7571ef52382e5d9c68494cc36` graph, schemas and receipt
+bindings; reconcile 430/431 and 209/211 by ID. Proposed bounded WSP_15 next
+slice C2/I4/D4/Impact3 = 13/P1. Protected native-admission gates are unchanged.
+
+## PR #2403 convergence and qualified merge - 2026-11-16
+
+012 now authorizes reconciliation of the existing PR, independent exact-head
+review, applicable hosted checks and qualified merge/main readback under the
+existing workflow. This supersedes the earlier draft-only scope for this work;
+it grants no runtime activation or bypass of current authorization gates.
+Owner remains the same 0102 worker/worktree. WSP15 C2/I4/D4/Impact3 = 13/P1.
+
+Inputs: owned head `137c7b60e08ea12892126b9bddf374f32eb49353`, main
+`87787840233c8660b1612873bfe99a027f68c772`, common base `e62e9ebaf5`.
+Four paths overlap; automatic CI composition retains main plus the PR's offline
+step. Resolve the three conflicts by preserving both security-note prefixes,
+all 4,579 main security records plus the one owned binding (4,580 total), and
+regenerating the canonical test registry (1,846 entries; 260 quarantined).
+Independent review must verify all main-only and PR-only paths, actual resulting
+head, tests and gates before merge. Original shared checkout and other sessions
+remain outside the write scope. Recovery is the preserved parent commits and a
+scoped revert, not a reset of another lane or a replay of UI actions.
+
+The incoming UI-TARS bridge remains unchanged: driver handoff is compatible,
+verification is localization-only, and the runner retains legacy_1000 rather
+than claiming admission of the new coordinate profile. Installed Red Dog wiring,
+live browser/model checks and measured RSI transfer remain unverified.
+
+Combined local validation passes 122 offline cases with one Windows
+directory-link skip; 40 CI composition contracts, registry and projection checks
+pass. Independent staged-tree inspection preserves all 158 main-only paths and
+all 15 unchanged PR-only paths, with only this ledger's new receipt intentionally
+extended. Security-note composition, all 4,580 review records, all 1,846 registry
+rows and the canonical read-only/gate files are verified. Exact committed-head
+review and hosted checks remain the next gates; no merge or activation is yet
+claimed by this prepublication receipt.
+
+Main advanced during publication to cac0129ad6ce1a92fdc4548f852ba30f1cc8ba9e
+(PR #2407, three scheduler documentation paths). A second normal merge
+preserves its remote scheduling/runbook bytes and composes both ModLog
+entries under the existing heading. The accepted e329db6 visual/code/CI,
+registry, security and skill bytes remain unchanged. Independent review
+and current-head hosted gates must qualify this final composition.
+
+## Execution/delegation guidance follow-up - 2026-11-16
+
+Owner: same delegated 0102 worker and existing PR #2403/worktree; origin
+internal_handoff from 012. Reconciled clean head `3d1a6283cbc8d70860328172cb435c992213689a`
+with current main `87787840233c8660b1612873bfe99a027f68c772`. Main has no changes
+to foundups-wsp or its workspace manifest; no competing exact-path owner was
+found in the bounded PR/session check. Canonical operations Skillz, role binding
+and read-only Start Operations profile are unchanged at these revisions.
+
+WSP15 C1/I3/D3/Impact3 = 10/P2; docs/prompt plane. Reuse existing skill and local
+continuity file; one editor and an independent read-only verifier, no live team
+dispatch/provider/browser work. Scope: concise architect discretion, qualified
+execution/team choice, existing owner/session inspection, bounded handoff and
+return receipts. Preserve visual repair, runtime admission, security and user
+holds. Acceptance: manifest/projection/scanner integrity, unchanged operations
+and visual regressions, independent decision review and exact save readback.
+Canonical operations/runtime files are outside this write scope. The local skill
+is a repository pointer, not another authority or cross-host installation.
+
+Validated locally: 73 offline regressions passed; one directory-link case is
+skipped because this Windows host cannot create directory links. The strict
+workspace manifest verifies all 10 files with only the foundups-wsp digest
+changed; existing safety scanner and Codex projection checks pass. The existing
+personal continuity file was updated in place with expected-original-hash and
+exact readback checks (saved SHA256
+`6e12027074346cc9a543fcd899ac0e31c34c9a9006b392abb717ad1380e67273`);
+the skill validator passes. Independent review accepts all links, role/admission
+boundaries and six offline decision scenarios. Canonical operations, runtime
+profile and visual repair bytes remain unchanged from the prior accepted head.
+These are source/guidance checks, not worker admission or runtime activation.
+
+PR #2403 is currently unmergeable against newer main; no merge/rebase or runtime
+activation is part of this follow-up. Preserve the draft and report that
+pre-existing convergence limitation separately from local validation.
+
+## Visual verification evidence correction — 2026-11-15
+
+Owner: delegated 0102 worker, origin internal_handoff from 012's Red Dog task.
+Base: `e62e9ebaf5583655d4855960723ee627d19b07a4`; lane
+`fix/wre-visual-verification-evidence-20261115`, isolated task worktree.
+Destination: proposed main change through draft PR only; no merge/deploy/activation.
+WSP15 allocation: C2/I4/D4/Impact3 = 13/P1. Correct the observed false-success
+path in the existing Selenium visual runner, observation retry semantics, its
+manual harness consumer, and existing guidance. Other lanes and the separately
+owned SUNVISTA browser/site are excluded. Recovery: retain/revert the scoped
+commit; never replay uncertain UI effects to recover verification.
+Acceptance: unavailable/error/unrun evidence cannot pass; explicit DOM evidence
+remains distinct; one action per step; evidence provenance survives summary and
+PatternMemory; offline regressions plus independent review. Native bootstrap
+and strict tracker check ran in this worktree. Lexical Holo bundle is source-bound
+to the base with UNKNOWN freshness/index gap; semantic owner was not started.
+No related open vision/runner/Selenium PR or named worktree overlap was found in
+the bounded ownership check. Original checkout's unrelated dirty WRE lifecycle
+work is preserved. Independent review accepts the bounded correction after
+repairing CLI failure exit status. Local evidence: runner25/caller3; final focused
+registry/import-safety selection71; prior adjacent selection118 (overlapping);
+CI contracts40; canonical registry/projection and managed skill manifest/safety
+scan passed. Exact-base negative controls expose both false passes. Sandbox
+asyncio/Bash runtime blocks and bounded outside-sandbox reruns are retained in
+TestModLog. Draft [PR #2403](https://github.com/FOUNDUPS/Foundups-Agent/pull/2403)
+is published. First-head hosted CI exposed bounded-runner dependency collection
+and one changed-whole-file binding for already reviewed ModLog prose. Defer the
+manual DOM import and add a fourth import guard; independently review and renew
+only that exact security binding, preserving all existing records/rules/gates.
+Fresh corrective-head hosted CI remains required. Installed/live vision and
+measured RSI transfer are unrun. Retain this clean owned lane for draft review;
+no merge or deployment is authorized in this assignment.
+
 ## Vote public release and next gates — 2026-11-07
 
 Vote v2 and Oversight v5 are live. PRs #2312, #2313 and #2317 are merged.

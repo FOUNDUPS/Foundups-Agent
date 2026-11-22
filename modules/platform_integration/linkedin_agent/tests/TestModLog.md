@@ -1,5 +1,16 @@
 ﻿# LinkedIn Agent Test Module Log
 
+## 2026-11-20 — Scheduled release and exact-review contracts
+
+- Extended the existing activity suite with three cases for shared scheduled
+  release routing, exact review/provenance/control evidence and AST-only company
+  preparation messages. Existing tests remain intact; no live helper import.
+- All 12 cases pass locally and in independent replay. The existing publishing
+  router's six historical discovery/targeting cases also pass in the 49-case
+  combined selection. These are offline contracts, not scheduled/live delivery.
+- Link coverage now includes the existing issue-brief template. No new test file,
+  browser, timer or external mutation. WSP 22/50/84/97.
+
 ## 2026-09-28 — Contact-diligence contract regression and CI coverage
 
 Fresh RSI observation of PR1927 reproduced seven passing cases and one failure:

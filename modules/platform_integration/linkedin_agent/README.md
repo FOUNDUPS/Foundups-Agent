@@ -1,5 +1,9 @@
 # LinkedIn Agent
 
+Public releases follow the [scheduled release contract](skillz/linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership):
+exact-copy/asset review, named release decision, one private cross-series control
+record, verified future queue entry and separate later live permalink.
+
 Research uses [lane-specific verification](skillz/linkedin_newsletters/references/research-verification.md): original sources before claims, WSP 15 editorial priorities, Google Docs collaboration and private learning records. Gemini summaries remain retrieval leads, not proof or verbatim training data.
 
 

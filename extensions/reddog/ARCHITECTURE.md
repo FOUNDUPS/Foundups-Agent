@@ -1,5 +1,27 @@
 # RedDog Architecture
 
+## Fractal Mall focus front
+
+The editor and Mall host the same [extension-owned front](fractal_focus_front.js).
+It shows the current FoundUp breadcrumb. **Ask about this FoundUp** stages a
+question in the local composer; typing and sending remain separate actions.
+HPC is the first mobile fixture, not a routing rule.
+
+The host interface is `renderFractalFocus(container, {state, foundupId, canAsk}, onAsk)`.
+Only a selected, valid ID and a current enabled control can invoke `onAsk(id)`.
+The host validates its own selection and protects its draft. The renderer has
+no network, model, storage, worker or credential access.
+
+The VSIX packages the canonical source; it never loads a workspace script into
+the panel. The Mall serves an [identical static asset](../../public/js/reddog-fractal-focus.js)
+inside its existing consented guest dialog. Copy the owner unchanged to
+refresh the asset; public-admission CI checks byte parity. Host instances do
+not share conversation history or transmit a selected ID between devices.
+
+**Next layer:** consume a permitted tile and exact graph revision from the
+graph owner; test Back to the actual caller. A FoundUp ID is not a graph
+revision, a private disclosure, or authority to execute work.
+
 ## Status
 
 This document defines the architectural identity boundary for RedDog. It is a design invariant, not a UI naming preference.
@@ -23,6 +45,13 @@ FoundUps Agent + governed tools + specialist agents + external systems
 For the current founding pair, `012` is the monk and `0102` is the digital co-founder/assistant/proxy layer. The system is being externally alpha-tested through their real interaction before the same pattern is generalized to other principals.
 
 ## 1. RedDog Is the Surface, Not the Twin
+
+The [Lick contract](docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md) owns recurring
+encounter checks at this surface. Its evaluated continuous/mutual design keeps
+human presence, participant continuity, media provenance, and action authority
+separate; the current unsigned PoC establishes request continuity only.
+See the [audit](../../docs/audits/architecture/REDDOG_LICK_CONTINUOUS_VERIFICATION_AUDIT_20260913.md)
+before treating this design as deployed human or deepfake verification.
 
 RedDog exists to keep the biological human out of unnecessary machine work.
 

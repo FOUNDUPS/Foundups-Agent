@@ -25,8 +25,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-# Production DOM layer (single source of truth)
-from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import YouTubeStudioDOM
+def _create_studio_dom(driver):
+    """Load the production DOM owner only when a manual path needs it."""
+    from modules.platform_integration.youtube_shorts_scheduler.src.dom_automation import YouTubeStudioDOM
+    return YouTubeStudioDOM(driver)
 
 def _ascii_safe(text) -> str:
     """
@@ -685,7 +687,7 @@ def set_schedule_date_time(driver, date_str, time_str):
     - Uses human_behavior for natural mouse movements
     """
     try:
-        dom = YouTubeStudioDOM(driver)
+        dom = _create_studio_dom(driver)
         logger.info(f"[LAYER 3] Setting schedule inputs (production DOM): {date_str} @ {time_str}")
 
         # Ensure dialog + schedule section are open
@@ -780,7 +782,7 @@ def main():
             raise SystemExit(1)
 
         # Validate by reading back the visible date trigger text and time input value.
-        dom = YouTubeStudioDOM(driver)
+        dom = _create_studio_dom(driver)
         date_text = driver.execute_script(
             "const el=document.querySelector(arguments[0]); return el? (el.textContent||'').trim(): null;",
             dom.selectors.DATE_TRIGGER_CSS,
@@ -856,22 +858,45 @@ def run_with_visual_verification():
     time_str = "5:30 PM"
     
     # Step-by-step with visual verification
-    runner.step(
+    if not runner.step(
         "L3.1 Click Visibility",
         action=lambda: click_visibility_status(driver),
-        verify_prompt="Is a visibility dialog or panel open showing visibility options?"
-    )
+        verify_prompt="visibility dialog or panel showing visibility options"
+    ):
+        runner.print_summary()
+        return runner.get_summary()
     
-    runner.step(
+    if not runner.step(
         "L3.2 Expand Schedule",
         action=lambda: select_schedule_option(driver),
-        verify_prompt="Is the Schedule section expanded showing date and time input fields?"
-    )
+        verify_prompt="expanded Schedule section with date and time input fields"
+    ):
+        runner.print_summary()
+        return runner.get_summary()
+
+    # Coordinate localization cannot assert field values. Reuse the DOM selectors
+    # already used by main() for an explicit, read-only input-value assertion.
+    dom = _create_studio_dom(driver)
+
+    def verify_schedule_inputs():
+        date_text = driver.execute_script(
+            "const el=document.querySelector(arguments[0]); return el? (el.textContent||'').trim(): null;",
+            dom.selectors.DATE_TRIGGER_CSS,
+        )
+        time_value = driver.execute_script(
+            "const el=document.querySelector(arguments[0]); return el? (el.value||'').trim(): null;",
+            dom.selectors.TIME_OF_DAY_INPUT_CSS,
+        )
+        if not isinstance(date_text, str) or not isinstance(time_value, str):
+            return False
+        # Studio can use narrow or nonbreaking spaces around AM/PM.
+        return date_text.strip() == date_str and " ".join(time_value.split()) == time_str
     
     runner.step(
         "L3.3 Set Date",
         action=lambda: set_schedule_date_time(driver, date_str, time_str),
-        verify_prompt=f"Does the date input show '{date_str}' and time show '{time_str}'?"
+        verify_prompt=f"DOM date text equals '{date_str}' and time value equals '{time_str}'",
+        dom_verify=verify_schedule_inputs,
     )
     
     # Print summary
@@ -880,11 +905,153 @@ def run_with_visual_verification():
     return runner.get_summary()
 
 
+def _visual_summary_exit_code(summary):
+    """A missing, empty, failed or inconsistent run cannot exit successfully."""
+    if not isinstance(summary, dict):
+        return 1
+    total = summary.get("total_steps")
+    passed = summary.get("passed")
+    failed = summary.get("failed")
+    return 0 if (
+        type(total) is int and total > 0
+        and type(passed) is int and passed == total
+        and type(failed) is int and failed == 0
+    ) else 1
+
+
+def test_visual_harness_stops_after_failed_step(monkeypatch):
+    """Offline caller contract: an unverified step blocks later UI actions."""
+    from types import SimpleNamespace
+    from modules.infrastructure.foundups_selenium.src import wre_visual_runner
+
+    actions = []
+    driver = object()
+    monkeypatch.setitem(globals(), "connect_chrome", lambda: driver)
+    monkeypatch.setitem(globals(), "navigate_to_first_unlisted_video", lambda _driver: True)
+    monkeypatch.setitem(globals(), "click_visibility_status", lambda _driver: actions.append("visibility"))
+    monkeypatch.setitem(globals(), "select_schedule_option", lambda _driver: actions.append("schedule"))
+    monkeypatch.setitem(globals(), "set_schedule_date_time", lambda *_args: actions.append("date"))
+    monkeypatch.setitem(globals(), "_create_studio_dom", lambda _driver: SimpleNamespace(selectors=None))
+
+    for fail_at in (1, 2, 3):
+        actions.clear()
+        calls = []
+        summary = {"failed_step": fail_at}
+
+        def step(name, action, **kwargs):
+            calls.append((name, kwargs))
+            action()
+            return len(calls) != fail_at
+
+        runner = SimpleNamespace(step=step, print_summary=lambda: None, get_summary=lambda: summary)
+        monkeypatch.setattr(wre_visual_runner, "create_wre_runner", lambda **_kwargs: runner)
+        assert run_with_visual_verification() is summary
+        assert len(calls) == fail_at
+        assert actions == ["visibility", "schedule", "date"][:fail_at]
+        assert all("?" not in call[1]["verify_prompt"] for call in calls)
+
+
+def test_visual_harness_uses_dom_for_exact_schedule_values(monkeypatch):
+    """Synthetic date/time readback is distinct from visual localization."""
+    from types import SimpleNamespace
+    from modules.infrastructure.foundups_selenium.src import wre_visual_runner
+
+    observed = {}
+    selectors = SimpleNamespace(DATE_TRIGGER_CSS="date", TIME_OF_DAY_INPUT_CSS="time")
+    driver = SimpleNamespace(execute_script=lambda _script, selector: observed.get(selector))
+    monkeypatch.setitem(globals(), "connect_chrome", lambda: driver)
+    monkeypatch.setitem(globals(), "navigate_to_first_unlisted_video", lambda _driver: True)
+    monkeypatch.setitem(globals(), "click_visibility_status", lambda _driver: None)
+    monkeypatch.setitem(globals(), "select_schedule_option", lambda _driver: None)
+    monkeypatch.setitem(globals(), "_create_studio_dom", lambda _driver: SimpleNamespace(selectors=selectors))
+
+    for case in ("matching", "wrong_date", "wrong_time", "missing"):
+        calls = []
+        results = []
+
+        def set_inputs(_driver, date_text, time_value):
+            observed.update(date=date_text, time=time_value.replace(" ", "\u202f"))
+            if case == "wrong_date":
+                observed["date"] = "Jan 1, 2000"
+            elif case == "wrong_time":
+                observed["time"] = "4:00 PM"
+            elif case == "missing":
+                observed["date"] = None
+
+        def step(name, action, **kwargs):
+            calls.append((name, kwargs))
+            action()
+            result = kwargs["dom_verify"]() if "dom_verify" in kwargs else True
+            results.append(result)
+            return result
+
+        monkeypatch.setitem(globals(), "set_schedule_date_time", set_inputs)
+        runner = SimpleNamespace(step=step, print_summary=lambda: None, get_summary=lambda: results)
+        monkeypatch.setattr(wre_visual_runner, "create_wre_runner", lambda **_kwargs: runner)
+        assert run_with_visual_verification() == [True, True, case == "matching"]
+        assert "dom_verify" not in calls[0][1] and "dom_verify" not in calls[1][1]
+        assert callable(calls[2][1]["dom_verify"])
+
+
+def test_visual_harness_exit_status_requires_nonempty_verified_summary():
+    """CLI conversion preserves failure/absence instead of returning exit zero."""
+    assert _visual_summary_exit_code({"total_steps": 3, "passed": 3, "failed": 0}) == 0
+    for summary in (
+        None, {}, [],
+        {"total_steps": 0, "passed": 0, "failed": 0},
+        {"total_steps": 1, "passed": 0, "failed": 1},
+        {"total_steps": 3, "passed": 2, "failed": 1},
+        {"total_steps": 3, "passed": 2, "failed": 0},
+        {"total_steps": 3, "passed": 3},
+        {"total_steps": True, "passed": True, "failed": 0},
+    ):
+        assert _visual_summary_exit_code(summary) == 1
+
+
+def test_visual_harness_collection_defers_scheduler_and_model_imports(monkeypatch):
+    """Import the actual harness with the scheduler parent and pytz unavailable."""
+    import importlib.abc
+    import importlib.util
+    import sys
+    import pytest
+
+    blocked_prefixes = (
+        "modules.platform_integration.youtube_shorts_scheduler.src",
+        "modules.infrastructure.foundups_vision",
+        "pytz", "torch", "llama_cpp",
+    )
+
+    def blocked(name):
+        return any(name == prefix or name.startswith(prefix + ".") for prefix in blocked_prefixes)
+
+    class DenyRuntimeImports(importlib.abc.MetaPathFinder):
+        def find_spec(self, fullname, path=None, target=None):
+            if blocked(fullname):
+                raise AssertionError("bounded import attempted: " + fullname)
+            return None
+
+    # Remove real cached modules rather than replacing the owning package with a
+    # stub: a future eager import must reach the native parent-package guard.
+    for name in tuple(sys.modules):
+        if blocked(name):
+            monkeypatch.delitem(sys.modules, name)
+    monkeypatch.setattr(sys, "meta_path", [DenyRuntimeImports(), *sys.meta_path])
+    spec = importlib.util.spec_from_file_location("_layer3_offline_import_check", __file__)
+    harness = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(harness)
+    assert callable(harness.run_with_visual_verification)
+    assert not any(blocked(name) for name in sys.modules)
+    # Construction remains delegated to the actual owner; the guard stops it
+    # before any real browser or scheduler dependency can load.
+    with pytest.raises(AssertionError, match="youtube_shorts_scheduler.src"):
+        harness._create_studio_dom(object())
+
+
 if __name__ == "__main__":
     import sys
     
     if "--wre-tars" in sys.argv:
-        run_with_visual_verification()
+        raise SystemExit(_visual_summary_exit_code(run_with_visual_verification()))
     else:
         main()
 

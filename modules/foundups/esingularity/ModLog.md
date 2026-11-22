@@ -1,3 +1,96 @@
+## 2026-11-19 — Reconcile PR #1762 residual lint dependencies
+
+- Preserve current Next 16.4.6, React 19.3.1, sharp 0.35.5 and Cloudflare peer versions. Apply only the missing eslint-config-next/@next/eslint-plugin-next 16.3.4 graph, including two required nested utility packages; every unrelated lock entry is unchanged. The Clerk companion keeps its newer runtime and adds the proposed fastq 1.20.3 plus a standard home-link lint repair.
+- Retain main's byte-identical icon manifest and all six effective translation/deduplication fixes from the original proposal. Retire the dated, branch-scoped lock-preparation/validation workflows from the reconciled tree; preserve their source in the original PR ancestry.
+- Windows Node 24.22.1: strict clean install with lifecycle scripts disabled, dependency constraints, TypeScript, lint (seven existing image warnings) and complete Vinext build pass. Separate npm audit reports zero vulnerabilities at this observation. Candidate builds use sanitized environments and bounded Windows Jobs; no deployment, private credentials or provider actions.
+- Clerk installation, types and repaired lint pass. The initial unconfigured build failed at Missing publishableKey; a subsequent production build passed using only the existing application's public publishable-key configuration, without copying private environment files or passing secret keys. Preserve the initial failure. Keep PR #1762 draft and its explicit merge hold pending independent final acceptance, the recorded signed-head requirement and hosted checks. These local results do not certify live Clerk sessions, production remediation or alert closure. WSP 10/12/22/34/50/71/91/97.
+
+- Hosted qualification on `c54a425ded480c242363bdd9f93f6524d811805a`: all five required contexts, 27 checks and all applicable workflows passed, including repository CI44549031280 and eSingularity44549031511 (88 module cases and Linux build). GitGuardian's neutral size-limit response remains an explicit scan-coverage gap. This dated predecessor evidence does not accept a later head or release the draft/independent-review hold.
+
+## 2026-11-18 — Moshpit receipt privacy and event-date ordering
+
+- Extend the existing `skillz/yumori_moshpit/SKILLz.md`; no second skill, ledger, sender or runtime integration. Use compact action/result/source-link receipts and preserve private manuscripts in their existing owners. Check destination audience before linking.
+- Resolve the actual project/case destination and event's JST date rather than hardcoding YUMORI/today. Replace ambiguous learning-log append wording with evidence-based newest-first insertion; preserve generic conversation ordering.
+- Validation: isolated exact-source projection/renderer synthetic suite: 87 passed. Existing Moshpit registration/projection policy contract against candidate: 1 passed, 24 deselected. Independent scenario review covered late event versus body-only future deadline, distinct learning-log routing, private link scope and no runtime claims. This is source-policy/synthetic verification, not a live Google Docs mutation, production authorized-source admission or full repository test run. WSP 00/3/22/50/84/97; no case documents or private source identifiers added.
+
+## 2026-11-18 — Reconcile PR #1685 CCP v2 audit and repository-first material intake
+
+- Reconciled `PR #1685` onto current `main`: preserved the four byte-identical `docs/materials/` intake artifacts (`README.md`, `source_registry.json`, `YUMORI_CCP_V2_AUDIT.md`, and `YUMORI_03_RESEARCH_INTEGRATION.md` blob `215e6fb79071425b8ca034e0354cbb2004f57b00`) plus the chronological `2026-09-12` ModLog, README, and ROADMAP sections, subordinated to current canonical `docs/DRIVE_DOCUMENT_INDEX.md`, `docs/YUMORI_ECONOMIC_MODEL.md`, and `docs/GRANTS_AND_SUBSIDIES.md` authorities (`WSP 22`, `WSP 50`, `WSP 97`).
+- Executed local verification that had been deferred at original draft closeout (`WSP_00` tracker gate, HoloIndex lexical owner query, 23 unique source IDs / 11 language pairs / pitch subtraction arithmetic check, and `88/88` `esingularity/tests`). Remains a non-publishing documentation intake slice (`PUBLICATION_STATUS=NOT_PUBLISHED`).
+
+## 2026-11-18 — Reconcile PR #1906 STT normalization guard
+
+- Reconciled `PR #1906` onto current `main`: preserved both the canonical `Speech-to-text normalization guard` section and existing `STT / transcription protected vocabulary` in `frontend/audit/SOURCE_OF_TRUTH.md`, and integrated `test_stt_artifacts_are_rejected_from_current_public_surfaces` (extending STT corruption artifact rejection across `app/page.tsx`, `app/future/page.tsx`, `components/LanguageSwitcher.tsx`, and `content/yumori-vision.ts`) into `tests/test_contracts.py` (`WSP 22`, `WSP 50`, `WSP 97`).
+
+## 2026-11-18 — Reconcile PR #1792 eSingularity / YUMORI.me brand context
+
+- Reconciled `PR #1792` onto current `main`: added `brand_context.json` (`eSingularity.ai` parent identity, `YUMORI.me` movement/preparatory-committee child brand), bound `esingularity_001.brand_context_path` in `foundup_registry.json`, and updated eSingularity/YUMORI Skillz + contracts (`test_esingularity_brand_context_is_single_skill_brand_authority`) while preserving all `#2189`, `#2340`, `#2413`/`#2414`, and live-ticker work.
+
+## 2026-11-16 — Recover JHR release blocker and harden existing publication handoff
+
+Reconciled the relevant YUMORI history, existing issue2126 and read-only Sites
+metadata. Older records already separated merged code, blocked deployment and
+unverified #003 live readback; preserve that obligation and LinkedIn's existing
+edition. Added sanitized failure analysis/manifest open work; hardened JHR and
+website skills to read both ledgers, bind stage receipts, retain old blockers and
+require actual governed memory acknowledgements. The existing SOCIAL owner now
+provides a dry-run receipt reconciler. No manuscripts, frontend, deployment,
+mailbox, public post or running service changed. See JHR audit supplement and
+social content contract for evidence, limits and remaining owner work.
+
+## 2026-11-16 — JHR durable archive and Red Dog channel workflow
+
+- Index #001–004 in `jhr/manifest.json` with immutable existing source bindings,
+  platform-specific delivery evidence, languages, dates and explicit unknowns.
+  Keep #002 in its current reader owner and existing report manuscripts in place;
+  keep #004 as a draft pointer to the same native Doc. No editorial rewrite,
+  duplicated manuscript, new issue, public posting or website deployment.
+- Current website exposes #001/#002; public LinkedIn independently exposes
+  #001/#002/#003. Preserve the #003 historical website claim/current-source/live
+  discrepancy. #004 is DRAFTED v2 and unapproved in its source; both public
+  platforms were checked, while authenticated draft/schedule state is unverified.
+- Extend the existing canonical JHR skill and Codex projection for Red Dog modes,
+  website-first Japanese LinkedIn, separately approved English Substack and Reddit
+  research/discussion. Existing publisher, approval and uncertain-delivery gates
+  remain. This is instruction-level setup, not an installed autonomous publisher.
+- Read-only Gmail review corroborates historical #002 link sharing; no #004
+  publication receipt recovered. Keep private correspondence outside Git.
+- Validation and exact-head/main outcomes are recorded in the focused PR; the
+  dated `jhr/PUBLICATION_AUDIT_20261116.md` and manifest retain scope and gaps.
+  WSP00/10/15/22/34/50/84/97/99; WSP110 read as draft guidance.
+
+## 2026-11-15 — Partner qualification Skillz candidate
+
+- Extend the existing prototype `yumori_work_orchestrator` to distinguish
+  operators, demand customers and collaborators; qualify responsible-person
+  responses and concrete next exchanges rather than name/send counts.
+- Keep organizational survey interest separate from personal membership and
+  formal co-proposer/name-use consent. Reuse existing correspondence/Contacts/
+  Action Queue owners; preserve specific holds, follow-up counts and provider
+  receipts when diagnosing nonresponse or choosing a different action.
+- Compare demand-led existing-hosting/small-pilot options with school/onsen
+  reuse; retain unknown economics, data-control and funding inputs. Public-benefit
+  compute is a goal, not a funded service promise or blanket foreign-training claim.
+- Add partner-outcome baseline/alternative and regression-case requirements to
+  the existing independent review, promotion, rollback and later-cycle RSI gates.
+  This is a proposed prototype revision, not runtime activation or measured RSI.
+- Retrieval used GitHub at base `e2ac080f6cdbc6aa7d291f425c6feb0c878fdfdb`;
+  current module docs and related open PRs were inspected. No orchestrator overlap
+  was found in the bounded PR search; shared ModLog history is preserved.
+  A separate isolated branch avoids touching existing local worktrees.
+- Validation: existing resident-RSI source-contract function passed in isolation;
+  initial prefix/suffix check preserved the prior skill; final readback matches
+  the candidate. Independent source review found no authority weakening; its
+  campaign-wide-hold clarification and five frozen semantic review cases were
+  incorporated. Those cases are documented expectations, not executed tests.
+  Full checkout tests, WSP_00 runtime bootstrap, HoloIndex freshness and native
+  WRE evaluation were not run. Missing memory/README.md was recorded rather than
+  replaced. Exact-head hosted checks and independent review remain merge gates.
+- WSP 00/15/22/50/95/97: docs-candidate execution plane, no provider/runtime effects.
+  WSP15 C2/I4/D3/Impact4 = 13/P1. Smallest alternative was ledger-only guidance;
+  the existing skill is preferred for reusable retrieval, without another skill
+  framework, CRM or scheduler. No frontend, survey, FIN or recipient-state edit.
+
 ## 2026-11-15 — Align React 19.3.1 dependency cohort (PR #2351 resolution)
 
 - Dependabot PR #2351 (`53fb430ae893`) bumped only `react-server-dom-webpack` from `19.2.8` to `19.3.1` while leaving `react` and `react-dom` pinned at `19.2.8`, causing `Validate eSingularity` `npm ci` to fail with `ERESOLVE` (`react-server-dom-webpack@19.3.1` requires peer `react@"^19.3.1"` and `react-dom@"^19.3.1"`).
@@ -408,6 +501,18 @@
 - DNS was not changed. Sites already reported eSingularity.ai, www.eSingularity.ai, YUMORI.me and www.YUMORI.me active with active SSL; public YUMORI.me apex A and www CNAME records matched the platform-supplied targets. YUMORI.info was not modified.
 - Fresh cache-busted production checks returned the YUMORI page at YUMORI.me and www while retaining each hostname and query string, retained the project homepage at eSingularity.ai, and retained YUMORI.info's redirect to eSingularity.ai. Direct `/yumori`, JHR, signup destination, representative assets and mobile-user-agent responses remained healthy.
 
+## 2026-09-12 — CCP v2 audit and repository-first material intake
+
+- Text-reviewed all 23 documents in the supplied CCP v2 Drive folder and the current 03; recorded every source ID, language pair, disposition, coverage limit and known unread legacy record in `docs/materials/source_registry.json`.
+- Added `docs/materials/YUMORI_CCP_V2_AUDIT.md` with 20 claim-disposition findings, limited official-source checks and a reproducible diagnostic of the supplied investor pitch. This does not certify or replace the separate FIN workbook.
+- Added Japanese-first `docs/materials/YUMORI_03_RESEARCH_INTEGRATION.md` with a complete English review version. It is a proposed source unit, not the complete 03 source, and has not been published to Drive.
+- Reused existing public-claim, vision, JHR and private-contact ownership boundaries. Did not import raw contact directories or correspondence into public Git.
+- Recorded 012's correction that YUMORI.info redirects to eSingularity.ai, rather than treating the alias as another content source. No DNS or deployment change was made.
+- Connected the intake to this module's README and roadmap, with bounded MATERIALS-02 through MATERIALS-05 continuation work for legacy intake, reconciliation, existing-ID publication and anti-drift preflight.
+- Local static checks passed for 23 unique source IDs, 11 language pairs and the transcribed financial arithmetic. These are not repository tests.
+- Verification limits: WSP_00 runtime gate, HoloIndex owner-query and repository tests were not performed because no runnable checkout was obtained. Complete WSP_15 allocation verification also remains outstanding. GitHub retrieval was the fallback. This is a docs-only draft review slice, not a fully WSP-executed promotion.
+- Full project-material migration, native-layout audit, all-source verification, Drive publication and automated synchronization remain incomplete. Existing Drive documents, public site, runtime and tests were unchanged.
+
 ## 2026-09-11 — Real-building full-screen YUMORI vision deck
 
 - Replaced the presentation renderer with the revised ten-slide vision based on 012's photographs of the actual former Sukatto Land Kuzuryu building rather than a generic greenfield resort.
@@ -419,6 +524,15 @@
 - Kept Slide 02 accounting categories separate: reported ~¥1.58B demolition estimate, verified 129,649 FY2018 users, modeled ~¥5.37B five-year revenue and modeled ~¥1.94B cumulative five-year FCFE. These are not forecasts or guarantees and are not added together as one return measure.
 - Added `docs/YUMORI_VISION_DECK_20260911.md` and updated `INTERFACE.md` so future agents can recover the visual, domain, evidence, financial and D-K truth boundaries without relying on chat history.
 - Updated existing contract coverage for the sprite, full-screen/deep-link controls, current ten-slide spine and retained public-source boundaries.
+
+## 2026-09-09 — Canonical YUMORI experiment thesis
+
+- Added `docs/YUMORI_EXPERIMENT_THESIS.md` as the project-wide narrative spine: **Can compute save an onsen, revitalize a region, and help transform Japan?**
+- Made the recursive fact explicit: compute is not merely proposed as future infrastructure; AI compute is already being used to research, analyze, translate, organize, communicate, and test the project.
+- Defined surface ownership so the local-resident website remains concise, Drive Document 01 carries the national/media story, Document 02 carries the mayoral ask, Document 03 tests the evidence, Document 04 carries founder background, and YouTube documents the live experiment.
+- Clarified that Akira Hasegawa/D-K is a cultural proposal strand rather than the authorial frame of Document 01 unless a separate contribution is explicitly written and approved.
+- Preserved truth boundaries around building reuse, compute capacity, heat recovery, funding, stakeholder support, and national repeatability.
+- Added the canonical thesis pointer to the module README; no public frontend copy was changed in this documentation slice.
 
 ## 2026-09-06 — Japanese-first YUMORI cinematic presentation
 

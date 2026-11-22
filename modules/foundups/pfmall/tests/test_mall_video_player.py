@@ -535,5 +535,3 @@ class TestFloatingAndWikiTubeBuildV20:
         assert "function isOpenMallHost" in proj
         assert "function resolveMemberEntry" in proj
         assert "function memberPortalUrl" in proj
-
-

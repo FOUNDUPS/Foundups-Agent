@@ -1,3 +1,49 @@
+## 2026-11-22 - source reconciliation with current main
+
+Reconcile existing phone head `2a65e7983` with main `dc7c34aa6`, preserving
+history and the existing #2439 draft. Main admission/conversation corrections
+already present in the tested phone owner remain single and unchanged. Preserve
+both security approval sets and independently renew only source-bound metadata.
+Retain main's preview-only probe policy through existing fixtures and additive
+tests; no second player, graph runtime, gesture defaults, PR landing or Hosting
+publication. See [roadmap](ROADMAP.md) and member test log for the pending
+exact-composition gates; old source/device receipts retain their original scope.
+
+## 2026-11-22 — Source-selected Vote skin handoff
+
+- 012 clarified that the originating FoundUp should select Vote's skin. Set the
+  canonical and public `voice_resource_url` to `https://vote.mtrout.com/contact#hpc`.
+  Reuse Vote's existing allowlisted fragment resolver and preserve no-referrer.
+- Canonical projection generator matches the checked-in public projection;
+  Vote contact/coalition/worker tests: 136 passed. Update the existing scoped
+  browser fixture destination; no full player-suite execution claimed here.
+- Live browser testing found HPC actually enters `/member/hpc-v25/`. Reconcile
+  that deployed snapshot's catalog too; do not replace its newer player with
+  older main-source assets. Exact release/readback evidence is in Vote's
+  `docs/RELEASE_ACCOUNTING.md` source-selected-skin entry.
+- WSP 50/84/97: lexical Holo retrieval remained UNKNOWN/index-gap; verified
+  canonical paths and live button behavior directly. No inferred browser history,
+  new permissions, models, resident workers or independent RSI promotion.
+
+## 2026-11-21 — H1H shared dock and player behavior correction
+
+H1H / PFDOCK-20261121 makes HPC the first qualification surface for the same
+dock/settings contract used by all FoundUps and fractal views. Capture the
+AI-first plus menu, Video settings, confirmed Floating tile-tap default,
+independent expansion/return gestures and rotation restoration; keep rotation
+lock and unspecified return defaults open. The [shared contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns details. Supersede HPC-only/deferred wording while retaining historical
+receipts. PR #2439 remains the existing runtime lane; documentation does not
+certify its preview or production. Root ModLog records validation and limits.
+
+## 2026-11-16 — HPC return banners and changed phone acceptance (documentation candidate)
+
+- Record 012's entire top HPC banner on both existing Vote and Call Your Congressperson pages as one accessible return link to `https://hpc.foundups.com`; distinct existing Red Dog navigation identity returns to `https://play.foundups.com`.
+- Reconcile HPC/pfMALL roadmaps and navigation contract: top-anchored shared phone player above independently scrolling tiles explicitly supersedes selected-tile/original-row acceptance. Preserve desktop, queue/transitions, state, PWA shell and provider evidence boundaries.
+- Record concise HPC identity, reuse of existing illustrated portrait/Red Dog assets, requested satire adaptation, single-link accessibility and reduced-motion/hidden animation behavior. Larger shared floating dog/search dock is deferred; 144 FoundUps is a target, not inventory.
+- Inspected main `72a3182c70974f0523be91d5ce4bd32808d824bc` and preserved separate draft probe PR #2405 at `313d8168205178cf5387e1912bd5e462d1dafaa9`. No implementation-branch mutation, runtime code, image creation, build, production deployment or merge in this documentation slice. Native WSP bootstrap/Holo/WRE execution and device acceptance were not performed; document reads do not establish runtime compliance.
+- Validation: exact-source reconciliation, relevant asset inspection, static diff/link review and independent documentation review. Hosted exact-head checks and owner acceptance remain separate. Stopped native UI was not resumed; no Antigravity delivery or receipt is inferred from saved GitHub documentation.
+
 # HPC ModLog
 
 ## 2026-11-21 - v26 phone scope reconciliation
@@ -64,6 +110,82 @@ Source, test and release states are recorded in the shared
 Vote return-navigation implementation remains draft PR #2411, not deployed.
 Native player hidden playback remains a separately owned release blocker;
 this header change does not repair or qualify it. WSP 22, 50 and 97 apply.
+
+## 2026-11-19 · iPhone 12 preview feedback and shared-shell follow-up
+
+012 supplied `IMG_0515.jpeg` after opening the preview. Record H1G and the
+shared p.fMALL roadmap: one-line FoundUPS header without visible Member Portal
+text; existing discovery/filter controls inside the bottom plus sheet; tiles
+and player fitted to the phone viewport; existing single bottom dock retained.
+AutoPost bottom-right icon and bottom search remain explicit deferred TODOs,
+with the icon's precise action unresolved. Preserve account access and capture
+owners rather than removing their functions.
+
+Evidence is the supplied physical-phone screenshot, current GitHub source and
+direct browser inspection of
+`https://foundupscom--play-v24-iphone-3rrzxm0r.web.app/member/`.
+The preview's plus dialog reports Build v24 and already includes the AutoPost
+camera/photos link. The screenshot itself has no visible build label; 012's
+v21 wording is retained as a separate observation. Remote native head
+`75c838b6eab19807487ee02c4b2f9367e580547e` remains v23, while main is
+`7432d31e5a68544d2bbab6715f02f64b0b5b6f85`. The served
+`playback-probe/deployment.json` reports that base plus overlay digest
+`92e1e9338a8256328520546c89cc816563aee25f81b88214ade2fd8c87b67946`,
+Build v24 and `hosting_version: unverified`. The served worker cache is
+`pfmall-member-v24`; this does not establish the phone's active worker.
+Delivered CSS confirms the mobile column header rule; delivered JS confirms
+the portal label, existing plus dialog and unchanged phone density. Preserve
+the native owner and full overlay; complete patch/hosting parity remains open
+before a runtime edit.
+
+Scope is three existing documentation files, not application code. WSP 15/22/50/97:
+connector/source retrieval, screenshot and live-menu observation, independent
+read-only source review, and documentation diff review. Native bootstrap,
+semantic HoloIndex, WRE admission, automated UI tests, physical-device retest,
+preview update and production deployment were not executed in this slice.
+Exact PR-head checks, squash, main readback and resulting-main checks are
+separate completion receipts. The actual responsive correction remains open.
+
+## 2026-11-18 · One viewport-bottom floating search dock
+
+012 clarified that the search, plus, microphone and Red Dog belong together
+in one floating item at the visible viewport bottom, below the thumbnails.
+Update H1B/H1F and shared p.fMALL PFWD-1B rather than keeping contradictory
+search-above-queue instructions. Specify one visible/focusable dock, retained
+query/selection, scroll clearance, upward input/menu growth, keyboard and
+safe-area handling, provider-control clearance, and separate phone/PC tests.
+HPC qualifies the shared refinement first; no duplicate runtime is proposed.
+
+This is documentation-only CHANGES_POC_ACCEPTANCE, not implemented UI or a
+playback fix. Preserve the top-anchored native player owner, #2405 diagnostic
+work, #2411 Vote navigation and H2 campaign scope. The owned documentation
+slice starts at main `20a7044c018fcd4a033226db644360cd9b216242`; the native
+`feat/hpc-floating-wikitube-v20` head was read as
+`75c838b6eab19807487ee02c4b2f9367e580547e` and was not modified. No source,
+security rule, test expectation, hosting configuration or service worker changes.
+
+WSP 15/22/50/97: source-bound connector retrieval and diff/readback review.
+Native bootstrap, semantic HoloIndex, WRE admission, independent runtime tests,
+physical-device behavior, deployment and PC synchronization were not executed
+in this documentation session. Qualify exact-head checks/review and main
+readback separately; do not infer deployed completion from this record.
+
+## 2026-11-17 · Dream Team campaign source reconciliation
+
+012 supplied nine fictional basketball draft cards, press-wire satire, D.U.P.
+vocabulary and a three-lane worker plan. Extend existing README, INTERFACE,
+ROADMAP and intake SKILLS_MAP; no competing files or runtime implementation.
+Link the actual current Progressive Media sheet, older 18-entry workbook and
+existing outreach workflow. Current sheet has 33 populated rows including one
+explicit Zeteo alias; the named four-tab master and 34-outlet claim remain
+unverified. Preserve all nine card IDs and distinguish requested design,
+fictional casting, planned dispatch and published/admitted behavior.
+
+Scope is documentation only; WSP 15/22/50/97. Existing #2376/#2411/#2405/#2394
+lanes remain untouched. No native bootstrap/HoloIndex/WRE, local tests, live
+site check, sender change, external outreach or deployment is claimed. Check
+exact PR head and main separately. Missing workbook identity remains an
+explicit blocker; existing content and historical acceptance gates survive.
 
 ## 2026-11-13 · Public host and invited member entry
 

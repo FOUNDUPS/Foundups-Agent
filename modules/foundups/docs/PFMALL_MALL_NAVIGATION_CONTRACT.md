@@ -1,6 +1,15 @@
 # p.fMALL Navigation Contract
 
+**Version**: 2.3.0
+**Date**: 2026-11-21
+**Status**: Runtime baseline with explicitly pending shared dock, player and fractal acceptance changes
+
 ## 2026-11-21 — v26 phone candidate (unreleased)
+
+This dated phone-lane record is retained from source `2a65e7983acb489084cecf1229fcfd582f68f19b`.
+Its controlled results do not qualify the subsequent main reconciliation.
+Sections 13–14 below remain the broader canonical contract; the qualified
+phone subset does not implement that full matrix or finalize held defaults.
 
 Build v25 remains the frozen comparison at its existing preview. Build v26 uses a
 separate source receipt and preview channel; no production redirect or release is
@@ -65,11 +74,9 @@ or server metadata pagination. See [Mall roadmap](../pfmall/ROADMAP.md).
 The whole HPC left banner with build above remains separate from the right
 Voice CTA. Vote and Contact Congress each have one whole-banner return link
 to HPC and a distinct Red Dog Mall link in draft PR #2411; no deployed state
-is implied. Shared floating Red Dog/search changes remain deferred.
+is implied. That historical shared-dock deferral is superseded by section 14;
+other source, provider and device gates remain separate.
 
-**Version**: 2.0.0
-**Date**: 2026-04-03
-**Status**: Runtime Contract
 
 ---
 
@@ -81,7 +88,9 @@ This document defines the Mall as **fixed navigation infrastructure**.
 
 The Mall is not a SoftProto customization surface.
 
-The Mall is a discovery map. Users navigate it. They do not edit it.
+The Mall is a discovery map with fixed navigation grammar. Browsing does not
+edit that grammar. The separately authorized graph-content proposals in
+section 13 do not create a free-layout shell edit mode.
 
 SoftProto customization begins **inside FoundUp interiors**, not in the Mall shell.
 
@@ -132,13 +141,17 @@ The Mall has three fixed vertical zones:
 |-----------|------|------------------|
 | Customizable layout | NO | YES (SoftProto) |
 | Edit mode | NO | YES |
-| Gesture override | NO | YES (object-scoped) |
+| Gesture override | No arbitrary field remapping; planned shared video preferences in section 14 | YES (object-scoped); shared video preferences use section 14 |
 | Module repositioning | NO | YES |
 | AI projection | YES | YES |
 | User navigation | YES | YES |
 | Fixed grammar | YES | Partial (escape/close locked) |
 
 **Rule**: The Mall is infrastructure. The FoundUp interior is user-owned space.
+
+The shared Search Dock and video preferences in section 14 apply in both
+columns. They are bounded platform settings, not permission to redesign the
+Mall's axes, account anchors or non-video navigation.
 
 ---
 
@@ -163,7 +176,7 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap or click video tile | In the current v21 candidate, open one visible top-anchored shared player with the grid beneath. Earlier selected-row phone placement is superseded; hidden playback is blocked from release. Other category rows retain their existing preview behavior. A lane starts at its first clip. An expanded tile selects its own clip. | RUNTIME |
+| tap or click video tile | Inspected wide desktop and HPC phone runtime opens the shared player at the selected tile; ordinary category rows retain inline preview and lane/clip identity. The HPC phone target in section 4.7 instead uses one top-anchored player above the scrolling grid. | RUNTIME baseline; HPC target SPECIFIED |
 | tap or click non-video tile | Open the FoundUp quick view or the property listing detail. | RUNTIME |
 | hover tile on desktop | Show available tile controls. | RUNTIME |
 | Expand button | Open the shared full player for the selected video or lane. | RUNTIME |
@@ -196,8 +209,9 @@ Set via `mallTileField.setMotionMode('snap')` or `mallTileField.setMotionMode('g
 ### 4.5 What Users Cannot Do
 
 Users cannot:
-- Remap swipe directions in the Mall
-- Change what up/down/left/right mean
+- Arbitrarily remap field-navigation swipe directions in the Mall
+- Change the field axes; the approved video-object preferences in section 14
+  are a specific exception, not a general gesture editor
 - Hide Mall navigation controls
 - Move Mall anchor zones
 - Enter "edit mode" for the Mall itself
@@ -256,6 +270,28 @@ shared roadmap.
 [Desktop poster browsing PoC](../pfmall/ROADMAP.md#desktop-poster-browsing-poc)
 
 ---
+
+### 4.7 HPC, Vote and Contact Congress return navigation — 012 request 2026-11-16
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED, not a runtime or live-navigation claim.** The latest entire-banner request supersedes an icon-only return target. Preserve the existing PWA/tile architecture and existing Vote/Contact pages, with no parallel shell or new Voice tenant. The existing Mall implementation owner coordinates the Vote source and its existing Sites mirror.
+
+| Surface/control | Required destination or behavior | Current source at `72a3182c` |
+| --- | --- | --- |
+| HPC -> Vote / Contact Congress | Reach the existing Vote landing and Contact Congress resource; retain `https://vote.mtrout.com/contact` for the existing Voice CTA. Qualify the intended Vote host/alias independently. | Contact CTA exists; do not infer a separately admitted Voice runtime. |
+| Vote landing: entire top HPC banner | One accessible link to `https://hpc.foundups.com`, including banner text, padding and small top-corner animated Hasan icon in the same target. | `modules/foundups/voteballots/web/index.html` has no HPC banner. |
+| Call Your Congressperson: entire top HPC banner | The same single-link HPC return behavior, preserving contact forms and existing navigation. | `modules/foundups/voteballots/web/contact.html` has no HPC banner. |
+| Adjacent-surface Red Dog navigation icon | Reuse the existing Red Dog identity and link to `https://play.foundups.com`. Do not repurpose the portrait as Mall identity. | HPC scoped dog currently links to `/f/hpc#red-dog`; its portrait header currently links to `https://foundups.com/member/`. |
+| HPC phone video selection | One deliberate tile tap requests playback in the existing shared, top-anchored floating player by default; saved destinations follow section 14. The grid scrolls independently below; retain WikiTube transitions/queue and close/back/query/scroll/focus recovery. | Current selected-tile placement remains implementation evidence; this new target is not implemented by this contract. |
+
+The Vote/Contact banners and distinct Mall return links have a source candidate in [PR #2411](https://github.com/FOUNDUPS/Foundups-Agent/pull/2411), with fixture evidence in [Vote's TestModLog](../voteballots/tests/TestModLog.md). The table above records the inspected base; it is not an assertion that candidate navigation is live. Phone-player placement and new portrait artwork remain separate work.
+
+Use concise **HPC** branding. Reuse the existing `public/member/hpc-icon-{180,192,512}.png` portrait and `public/logo-dog.png` Red Dog asset. 012's existing illustrated poster is the character reference for a satirical crown-of-thorns/optional-halo adaptation; the inspected portrait has neither. Materialize the supplied reference images through the supported Library route, verify local bytes and inspect pixels before image-dependent work. Keep the small portrait artwork to the recognizable face rather than the whole poster, and preserve independent/non-affiliation framing with no implied Hasan or organizational endorsement. Host approved copies on the adjacent page's existing origin without weakening its image CSP.
+
+The entire banner is **one link** with one meaningful accessible name and visible focus, no nested anchor or competing clickable portrait. Provide at least a 44 CSS px touch target and avoid obscuring page navigation. A subtle wiggle must have a static `prefers-reduced-motion` fallback and stop when the document is hidden. Keep application controls outside the YouTube player rectangle and leave native YouTube controls unobscured.
+
+Acceptance: exercise HPC -> Vote -> banner -> HPC and HPC -> Contact Congress -> banner -> HPC, separately on both pages; activate text, padding and portrait areas, plus keyboard Enter. Verify the distinct Red Dog -> Mall destination, page fit, focus, reduced-motion/visibility behavior, form/install controls, admission and return state. Reuse existing tests. Source, preview route/asset parity, actual phone navigation/playback and production deployment are separate gates. A saved direction or a working href alone is not completion.
+
+Deferred, not part of this immediate return-link slice: the larger shared floating Red Dog and bottom FoundUps search dock across existing surfaces. Reuse current navigation/state/search owners and do not duplicate the dock. `https://play.foundups.com` is the intended public Mall entry with its existing access policy; **144 FoundUps is a product target, not a claimed current inventory**. The ordinary Mall's internal concierge keeps its existing semantics. No production deployment is authorized by this change.
 
 ## 5. AI Projection vs User Navigation
 
@@ -379,7 +415,12 @@ When an overlay is open (FoundUp view, account plane, concierge):
 | Scrim tap | Close overlay | LOCKED |
 | Close button | Close overlay | LOCKED |
 
-**LOCKED** = Cannot be overridden by any scope, including FoundUp interiors.
+**LOCKED** applies to these overlay dismissal controls, including inside
+FoundUps. A gesture owned by the active video uses section 14's planned
+video-return preference before an outer overlay handler; it must not also
+close that overlay or advance the queue. Escape, scrim and explicit Close
+retain their independent recovery roles. This is a specified exception, not
+evidence that the current runtime already arbitrates it.
 
 ---
 
@@ -448,3 +489,246 @@ All FoundUps reuse this grammar and the catalog search/presentation APIs. A futu
 housing projection may group by location through a separately declared adapter;
 this slice groups by catalog category only. No unseen listings, location hierarchy,
 personalized ranking or voice runtime is claimed.
+
+## 13. Fractal work navigation
+
+**TARGET / SPECIFIED, reconciled 2026-11-19.** This section defines acceptance
+for the shared graph. It does not turn existing category-row or video-lane
+handlers into an implemented general graph renderer. The
+[master architecture](FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+owns entity identity, relationships, evidence and the current implementation
+boundary.
+
+### 13.1 Selection and drill-down
+
+Tap, keyboard activation and a supported RedDog navigation request resolve
+the same permitted stable tile ID. A container reveals its children; an
+actionable leaf opens its real artifact or entrypoint. A declared gap opens
+its expected contract and evidence status, not a fabricated working tool.
+The field remains usable in 2D, with keyboard controls and reduced motion.
+The 3D view is an alternative projection; spatial animation is not evidence
+that a component or worker ran. Voice is optional navigation input and cannot
+be the only way to select, return or recover.
+
+Search, sorting and lens changes retain stable IDs. A shared component can
+appear in several views without copying it or changing its primary owner.
+Reuse existing search, state-restoration and media owners. A graph view must
+not silently replace the current catalog if its graph is unavailable or invalid.
+Qualify the existing fallback behavior when the graph client is recovered.
+
+### 13.2 Caller restoration
+
+Record the actual caller, lens, selected tile, query and recoverable viewport
+and media state when entering a child or following a related-component edge.
+From HPC, entering AutoPost and pressing Back restores HPC and its selection;
+AutoPost's primary containment parent does not replace the caller. Direct
+entry without session history uses visible containment ancestors.
+
+Revalidate access on restoration, direct entry, search and context projection.
+If a caller has become inaccessible, return to a permitted ancestor or overview
+without leaking its private title, path or receipt. Retain a safe return path
+when evidence is missing. Preserve playback state through its existing owner
+where supported; real provider playback and autoplay recovery require separate
+live acceptance from DOM or mocked-media tests.
+
+### 13.3 Work and revision binding
+
+A request binds the selected entity, graph/projection revision and, where
+relevant, the work reference and exact artifact revision or base-plus-overlay
+digest. Source revision is not interchangeable with graph revision. An
+unavailable pinned file must not silently open the current `main` file as
+though it were the same evidence.
+
+Selecting a builder with a fresh, permitted work-to-tile association opens the
+referenced component. “What is this builder changing?” uses that same binding.
+Multiple builders may work on one component, and one work item may span several
+components. A builder label or animation cannot supply a missing mapping.
+Simulated, stale, ambiguous, unmapped and restricted evidence retains its
+status in the permitted view.
+
+The first Tools path is
+`Tools → Benchmark → harness/evaluator → module or model/scaffold configuration → run receipt → pinned test/source → Back`.
+Follow only supported relationships with real IDs. Show a missing adapter,
+receipt or source binding as a gap. Rendering the path does not establish
+that its represented tool ran.
+
+### 13.4 Co-building and acceptance
+
+Selection, conversation and camera movement grant no mutation or execution
+authority. A separately approved graph-content change uses the existing
+authenticated server owner, an expected graph revision, validated containment
+and typed references, and an attributable receipt. A stale write is rejected
+rather than overwriting another worker. Adding a proposed tile or socket does
+not implement it or promote its evidence status.
+
+Keep public and architect projections separate through navigation, search,
+history and agent context. The [Mall roadmap](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation)
+owns the bounded acceptance sequence. The
+[documentation audit](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+records the reported local navigation test and its unproven live-media,
+voice and Simulator boundaries.
+
+## 14. Shared Search Dock and video preferences
+
+**PFDOCK-20261121 / CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.**
+012's 2026-11-21 correction applies to **all FoundUps and every fractal view**,
+including `play.foundups.com`, HPC, nested FoundUp interiors, the tile field,
+Floating, WikiTube and Fullscreen. HPC is the first qualification surface for
+the same shared behavior. It does not own a separate dock or settings fork.
+Existing independent sites need their owner's shared-shell integration before
+claiming parity; this contract does not change their deployments or admission.
+
+This supersedes HPC-only dock scope, a forced WikiTube intermediate and the
+older fixed video swipe-up-to-next rule as next-iteration acceptance. Earlier
+runtime tables remain historical implementation evidence until the shared
+owner is changed and qualified. Preserve field navigation, non-video actions,
+modal/account recovery and the existing fractal caller/identity rules.
+
+### 14.1 One shell-owned dock and menu order
+
+Keep one floating dock anchored to the visible app viewport bottom, below
+the scrolling tiles/queue, with safe-area and keyboard clearance. Retain
+query, selection, focus, preferences and caller when changing FoundUp, depth
+or media presentation. Focused input, dictation and an open menu pin the dock
+visible. No duplicate visible/focusable search bar or new dock per skin.
+
+The `+` opens upward. Its top-level reading order is:
+
+1. **AI / Browse AI**: the model list and current availability/selection.
+2. **Video**: player behavior settings, directly reachable from the same menu.
+3. Relevant existing discovery/filter actions, then secondary Tools/About.
+
+Use a compact expandable AI list so it does not push Video out of thumb reach.
+Do not bury either entry behind About or unrelated placeholders. Offer only
+real candidates compatible with the running browser; show download size,
+require deliberate selection and confirmation, and provide Cancel/Unload.
+Keep startup light, with no automatic model download, page reload or hosted
+fallback. An unavailable list says so. The v26 41-byte WASM arithmetic probe
+is a compatibility fixture, not an AI model or an approved model inventory.
+The existing small pinned WASM model benchmark on physical iPhone 11 Safari
+and installed PWA remains required before a model is qualified there.
+
+The dock `+` opens settings/tools. The grid's trailing `+` contributes the
+active element type (initially Video, under existing editor authorization).
+Swipe-up on the designated element-type selector changes element type;
+ordinary grid swipes retain their scrolling/navigation owner. Video-surface
+swipe-up uses the video-return setting below. Neither grants contribution, agent
+execution, member access or access to another FoundUp's protected context.
+
+### 14.2 Presentation and independently selectable behaviors
+
+**Mall** means the originating tile field, with its FoundUp/fractal context
+and scroll position. **Floating** is the shared player over that field.
+**WikiTube** is the main-video-and-queue presentation. **Fullscreen** is the
+requested immersive destination, subject to the mechanism boundary in 14.4.
+
+| Interaction / Video setting | Required choices and behavior | Decision boundary |
+| --- | --- | --- |
+| Deliberate video-tile activation from the Mall/FoundUp field (tap or Enter/Space) | **Floating / WikiTube / Fullscreen**. Selection loads/plays the chosen clip in that presentation without a compulsory WikiTube stop. | **Floating is the confirmed default.** Field selection is distinct from queue thumbnails, an app-frame action and taps inside provider controls. |
+| Pinch outward to expand the active video | WikiTube or direct Fullscreen, allowing Floating to skip WikiTube. WikiTube can expand to Fullscreen. | Configurable expansion is required; an initial preference value has not been finalized. |
+| Pinch inward from Fullscreen | Return to **WikiTube / Mall tiles** according to its own preference. | Do not bind this to the swipe-up preference; initial return default is unresolved. |
+| Swipe up on the active video | Return to **WikiTube / Mall tiles** according to a separate preference. | This changes the older video swipe-up-to-next acceptance. It must not also advance the queue or trigger grid/type navigation. Initial return default is unresolved. |
+| Rotate an active Floating video portrait to landscape | Enter the supported fullscreen presentation; portrait rotation restores the prior Floating presentation. | Required behavior. Track whether rotation caused expansion; a later deliberate view selection takes precedence over automatic restoration. |
+| Swipe right on the Floating player | Park/hide it with a visible restore action and supported leftward restore gesture; preserve the selected clip and browse context. | Fully hidden YouTube playback pauses. Do not restart a deliberate pause on restoration. |
+| Autoplay and parked-player selection | Retain autoplay/next-clip and reveal-versus-keep-parked preferences in Video. | Preserve their existing qualified behavior; this decision does not guarantee audible startup or change their defaults. |
+| Rotation lock | Possible opt-in lock / stay-landscape behavior. | **OPEN IDEA**, not an approved control, default, or implemented capability. |
+
+Queue-thumbnail selection and automatic advancement change the clip within
+the active presentation; they do not reapply the field-entry default or force
+Floating. Preserve the separately selected parked-player reveal behavior.
+
+Use one validated preference owner and schema across consumers. Reuse the
+existing `mall-state-restore.js` path, extending/migrating its v26
+`pfmall_video_options_v1` data. A missing **tile-tap** preference initializes to
+Floating; the old `frameDestination: 'wikitube'` describes a frame action and
+must not silently become a tile preference. Validate independent choices,
+ignore invalid values, and preserve valid existing preferences. Do not turn
+unresolved return defaults or the rotation-lock idea into approved decisions.
+Local storage is origin-local: common behavior/schema across HPC and Play
+does not itself synchronize saved choices between their hostnames. Any future
+cross-origin preference sync needs an explicit existing authenticated owner.
+
+### 14.3 Transition ownership and continuity
+
+Extend the existing tile-selection, player, dock and state owners. One action
+produces one transition. Scope gestures to their actual surface and active
+mode; keyboard, provider controls, modal input and ordinary page scroll must
+not be captured by competing global listeners. Keep a visible single-pointer
+and keyboard alternative for each application gesture and preserve page zoom.
+WikiTube next/previous and continuous queues remain usable through the queue
+and their existing explicit actions when swipe-up is assigned to return.
+
+Presentation changes keep the same active provider instance, clip, permitted
+queue, observed playback position, captions, zoom, query, scroll and focus.
+Keep native sound/fullscreen controls and compact blocked-play/resume recovery.
+Move app settings into the dock, remove redundant app Back/title/expand noise
+and the identified app-owned diagonal expand arrow, while retaining one clear
+accessible navigation path. Do not remove or mask provider controls.
+
+An explicit final Close is distinct from a reversible presentation change.
+Return to Mall restores the actual caller's tiles; it does not discard state
+or navigate to an unrelated FoundUp. Retaining state never authorizes invisible
+playback: pause when fully hidden and restore without overriding deliberate
+pause or provider policy. Source/graph identity and admission remain separate
+from player presentation and saved preferences.
+
+### 14.4 Fullscreen, gesture and orientation capability boundary
+
+Keep **app Full Video** (expanded viewport), browser DOM fullscreen and
+YouTube/iOS native video fullscreen distinct in implementation and evidence.
+The [YouTube IFrame API](https://developers.google.com/youtube/iframe_api_reference)
+has no documented native-fullscreen trigger; its
+[fs parameter](https://developers.google.com/youtube/player_parameters#fs)
+controls the native button. Keep that control available. A viewport expansion
+alone is not a native-fullscreen pass.
+
+The [Fullscreen Standard](https://fullscreen.spec.whatwg.org/#api) permits a
+request with transient activation or a user-generated orientation change;
+actual device support and permission still need qualification. Detect support,
+handle the returned outcome and observe the actual presentation. If a requested
+native path is unavailable, retain the provider control and an honestly labeled
+app-expansion alternative; do not claim the requested native path passed.
+
+The app cannot assume it receives pinch/swipe events inside a cross-origin
+YouTube player. Recognize app gestures on its owned surround or handle outside
+provider controls, without an intercepting overlay. Record that surface in
+acceptance; do not silently substitute surround evidence for an untested
+gesture inside the video. Follow the provider's
+[overlay requirements](https://developers.google.com/youtube/terms/required-minimum-functionality#overlays-and-frames)
+and provide [simple pointer alternatives](https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures.html).
+
+Native fullscreen may temporarily own the entire screen. Preserve dock state
+and restore the one dock on exit; do not overlay it on native player controls.
+Apply the saved return choice for a recognized initiating action when its exit
+is observable; an exit event alone does not identify pinch-in, swipe-up, native
+Done, Escape or rotation. Reading device
+orientation does not establish [orientation-lock support](https://www.w3.org/TR/screen-orientation/),
+and keyboard/viewport resizing must not be mistaken for physical rotation.
+
+### 14.5 Qualification and existing implementation lane
+
+At inspection, [v26 PR #2439](https://github.com/FOUNDUPS/Foundups-Agent/pull/2439)
+head `5be6f3b7bd9eb3c24c39210e74fada8e773a97c7` is an unmerged draft.
+Its menu places AI last; `frameDestination` allows WikiTube/app Full Video,
+tile selection does not read that setting, pinch-out opens WikiTube, and
+WikiTube swipe-up advances the queue. Its orientation listener adjusts geometry.
+This is partial implementation evidence, not the acceptance defined above.
+Reconcile in that existing owner before runtime changes; do not merge its
+unrelated history or overwrite an active worktree for this documentation task.
+
+Acceptance must cover fresh/default and saved/invalid preferences, all three
+tile destinations, direct fullscreen expansion, both pinch-in return choices,
+both video-swipe-up return choices independently, right tuck/restore, and
+landscape/portrait restoration with later deliberate navigation. Test ordinary
+Play, HPC and at least one other FoundUp plus nested fractal entry/Back; keep
+public/member/editor boundaries and caller context intact. Include keyboard,
+reduced motion, normal page zoom, safe areas, open keyboard/menu and no duplicate
+focusable dock or media instance.
+
+Physical iPhone 11 Safari and installed PWA, other supported phone paths and
+desktop must record requested destination, actual fullscreen mechanism,
+gesture surface, queue/time continuity and observed return. Browser emulation
+or the WASM fixture alone cannot qualify these provider/device behaviors.
+The [Mall roadmap](../pfmall/ROADMAP.md) and [HPC roadmap](../hpc/ROADMAP.md)
+own sequencing. Documentation, source merge, preview qualification and
+production release retain separate receipts.

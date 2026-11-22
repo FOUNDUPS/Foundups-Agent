@@ -1,3 +1,27 @@
+## 2026-11-22 - composed main and v26 reconciliation candidate
+
+Source inputs: `2a65e7983acb489084cecf1229fcfd582f68f19b` plus current main
+`dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b`. Resolve the actual checkout's
+17 conflicts (the object-only preview reported 16; security README also needed
+preserving both histories). Keep exact tested v26 runtime conflict owners while
+retaining main admission/conversation intent. Main's additional worker precache
+assertions remain. This entry does not claim acceptance from conflict removal.
+
+Remove the three committed public playback-probe artifacts. The no-public-path
+guard and exact existing six-case probe VM now run in the static gate alongside
+the retained 29 owner cases (those 29 overlap the direct worker gate). The stale
+v25 deployment JSON moves byte-for-byte to a test fixture; the unchanged metadata
+factory still rejects it in all ten groups. The workflow records canonical
+fixture/wrapper hashes explicitly and retains all previous gates, pins and
+deadlines. No test was skipped or weakened to compose this candidate.
+
+Preserve both historical security sets (4,869 IDs) and the 39 independently
+reviewed exact backend-manifest renewals (4,908 total). All 1,494 source bindings
+match the candidate generator's LF policy. New source hashes must pass actual
+tree/history scans and exact-head hosted CI; metadata review is not scanner,
+browser, deployment or physical-phone proof. Current head tests and private
+35+10 proof are historical inputs, not qualification of this composition.
+
 ## 2026-11-22 - selective v26 return qualification
 
 Hosted follow-up on9327ad18: run44975930482 stopped on one tracked-tree public
@@ -432,6 +456,17 @@ Mall roadmap for source ownership, retained actions and deferred artifact audit.
 - Updated `mall_scoped_video_browser.py`, `mall_product_state_vm.mjs`, and `test_mall_tile_field.py` for `Build v20` / `pfmall-member-v20` (`?v=20` shell assets, top-anchored `Floating video player`, `WikiTube video player`, and warm `YT.Player` `loadVideoById` / `cueVideoById` reuse).
 - Added `verify_floating_and_wikitube_gestures(browser_type)` and executed across **both Chromium and WebKit (iPhone Safari `375x812` and `844x390`)**: verified `375px` 3-column tile width `>= 120px` one-tap playback, top-anchored floating positioning while scrolling and selecting lower tiles, swipe-right edge tuck with continuous audio + `.video-player-tuck-handle` swipe-left/tap restore, accessible `Tuck player` / `Restore player` / `Open WikiTube` / `Floating player` / `Close player` / `Back` controls, intentional 2-finger pinch-out (`-> WikiTube` with immediate play attempt) and pinch-in (`-> Grid`) disambiguated from `<26px` jitter and horizontal rail scrolling, and bounded WikiTube sequential auto-advance + per-clip error skipping (`100`, `150`) + `MAX_CONSECUTIVE_AUTO_SKIPS = 5` halt (`queueHalted = true`) + truthful `autoplay-blocked` manual `Play video` button.
 - Verification: `C:\Python312\python.exe -B public/member/tests/mall_scoped_video_browser.py` (`EXIT=0`, all Chromium + WebKit suites green), all 6 Node VM suites (`EXIT=0`, including `mall_product_state_vm.mjs` 23 passed), and combined `pytest -q -p no:cacheprovider public/member/tests modules/foundups/pfmall/tests` (`2,288 passed, 0 failed`). Physical iPhone Safari/PWA verification on staged preview remains a separate gate.
+
+## 2026-11-22 — HPC Voice link selects the Vote skin
+
+- Updated the scoped browser fixture's expected Voice link to `/contact#hpc`.
+- Vote's 136 targeted Node tests passed, including canonical/public projection equality for this link. The full projection matches generator output.
+- A live Chrome click from HPC v25 at 390px selected the HPC skin automatically. The broader player browser fixture was not rerun; no physical-device or player qualification is claimed.
+
+## 2026-11-16 — Isolated iPhone YouTube baseline probe parameterization and Build v19 browser alignment
+
+- Extended `modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_{probe.js,reference.html}` with allowlisted `?v=` (8 admitted HPC Shorts + 4 diagnostic-only Shorts) and `?host=youtube|nocookie` official-host comparison, bidirectional `Mall <-> official embed` selection retention, controls strictly below `#hpc-probe-embed`, sanitized `deployment.json` + `SW controller` provenance receipt, and explicit separation of IFrame `101/150` from screen-observed `LOGIN_REQUIRED` prompts.
+- Reconciled remaining `"Build v18"` -> `"Build v19"` modal expectations in `mall_scoped_video_browser.py` (`lines 338, 506`). Physical iPhone Safari and Home Screen PWA gates across Wi-Fi and cellular remain `UNEXECUTED` pending real-device receipts from `012`.
 
 ## 2026-11-16 — Build v19 truth gates, activeVideo continuity, and test reconciliation
 
