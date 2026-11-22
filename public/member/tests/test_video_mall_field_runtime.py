@@ -134,10 +134,16 @@ class TestEnterFoundUpButton:
         assert "Enter FoundUp" in js
 
     def test_fullscreen_enter_action_handler(self):
-        """Fullscreen Enter action navigates to /f/{foundup_id}."""
-        js = _read("js/mall-video-player.js")
-        assert "case 'enter':" in js
-        assert "'/f/' + encodeURIComponent(currentFoundUpId)" in js
+        """Execute actual Enter with canonical identity, scoped guards and shared routes."""
+        from pathlib import Path
+        import subprocess
+
+        result = subprocess.run(
+            ["node", str(Path(__file__).with_name("legacy_navigation_runtime_vm.mjs")), "enter"],
+            text=True, encoding="utf-8", capture_output=True, timeout=20, check=False,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "Legacy navigation source VM: 4 enter checks passed." in result.stdout
 
     def test_fullscreen_enter_button_css(self):
         """Fullscreen Enter button has distinct styling."""

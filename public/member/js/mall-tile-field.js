@@ -3499,7 +3499,7 @@
   }
 
   // Bounded local catalog search, not semantic ranking or a conversation runtime.
-  async function searchCatalog(query) {
+  function searchCatalog(query) {
     // Geographic filters belong to the registered domain adapter, including
     // clearing a query. Preserve its form, URL and catalog as one state owner.
     if (groupDefinitions !== null) return false;
@@ -3508,11 +3508,13 @@
     if (!query) { clearFieldScope(); return; }
     var scope = { type: 'query', query: query };
     setFieldScope(scope);
-    // An explicit search may inspect small metadata pages, never other queues.
-    while (catalogPager?.hasMore && currentFieldScope === scope && !isSelectedEntityScope()) {
-      if (!(await loadCatalogPage()).length) break;
-    }
-    window.mallStateRestore?.save?.();
+    return (async function() {
+      // An explicit search may inspect small metadata pages, never other queues.
+      while (catalogPager?.hasMore && currentFieldScope === scope && !isSelectedEntityScope()) {
+        if (!(await loadCatalogPage()).length) break;
+      }
+      window.mallStateRestore?.save?.();
+    })();
   }
 
   function matchesCatalogQuery(item, query) {

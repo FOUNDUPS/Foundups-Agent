@@ -15966,7 +15966,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Catalog FoundUp Truth Gate \u2014 WSP 97 Validation\n\nEvery entry in mall-video-catalog.json is a FoundUp.\nSome FoundUps also have bound tenant manifests (foundup_manifest.json).\nThe catalog needs its own validator and must join against manifests when present.\n\nTruth labels:\n  BOUND_TENANT:       Has catalog entry + foundup_manifest.json + routing_prefix + data_namespace\n  DISCOVERABLE_ONLY:  Has catalog entry, no manifest binding required\n\nThis test module enforces:\n  - All catalog entries are valid "
+      "description": "Catalog FoundUp Truth Gate \u2014 WSP 97 Validation\n\nCatalog records include FoundUps plus explicitly approved, unregistered project-discovery cards.\nSome FoundUps also have bound tenant manifests (foundup_manifest.json).\nThe catalog needs its own validator and must join against manifests when present.\n\nTruth labels:\n  BOUND_TENANT:       Has catalog entry + foundup_manifest.json + routing_prefix + data_namespace\n  DISCOVERABLE_ONLY:  Has catalog entry, no manifest binding required\n\nThis test module "
     },
     {
       "id": "test::modules::foundups::pfmall::tests::test_clerk_proposal_intake",
@@ -25080,7 +25080,9 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -25339,7 +25341,9 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

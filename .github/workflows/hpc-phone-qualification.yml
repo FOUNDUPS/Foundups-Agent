@@ -68,6 +68,11 @@ jobs:
               'public/member/tests/mall_browser_ai_pilot_vm.mjs',
               'public/member/wasm/pilot-add.wasm',
               'public/member/tests/mall_product_state_vm.mjs',
+              'public/member/tests/mall_property_listing_vm.mjs',
+              'public/member/tests/legacy_navigation_runtime_vm.mjs',
+              'public/member/tests/test_localhost_dev_harness.py',
+              'public/member/tests/test_non_video_action_surfaces.py',
+              'public/member/tests/test_video_mall_field_runtime.py',
               'public/member/tests/test_mall_product_state.py',
               'modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_probe.js',
               'modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_reference.html',
@@ -133,6 +138,8 @@ jobs:
           run_gate member-boot node public/member/tests/member_product_boot_vm.mjs
           run_gate browser-ai-compatibility node public/member/tests/mall_browser_ai_pilot_vm.mjs
           run_gate public-concierge node public/member/tests/public_discovery_concierge_vm.mjs
+          run_gate property-navigation node public/member/tests/mall_property_listing_vm.mjs
+          run_gate entry-actions node public/member/tests/legacy_navigation_runtime_vm.mjs
           run_gate static-contracts python -B -m pytest -q -c /dev/null --noconftest -p no:cacheprovider \
             public/member/tests/test_mall_tile_field.py \
             public/member/tests/test_mall_product_state.py \

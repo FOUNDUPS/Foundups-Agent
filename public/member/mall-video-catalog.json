@@ -11426,9 +11426,7 @@
     "pain": "Opaque PAC money and unverified campaign rhetoric collapse evidence, persuasion, and identity together.",
     "canonical_foundup_id": "voteballots",
     "entry_copy": "Public informational Vote pages exist. The candidate and funding application remains an unfinished internal PoC. Enter uses the existing Member Portal.",
-    "entry_url": "",
-    "routing_prefix": "/f/voteballots",
-    "data_namespace": "idb_voteballots"
+    "entry_url": ""
   },
   {
     "foundup_id": "trade",
@@ -11469,9 +11467,7 @@
     "pain": "Retail participants face institutional information asymmetry and unverified hype signals.",
     "canonical_foundup_id": "trade",
     "entry_copy": "Incubating Phase 0: simulation and dry-run only. No launched trading app, live trades or capital execution is claimed.",
-    "entry_url": "",
-    "routing_prefix": "/f/trade",
-    "data_namespace": "idb_trade"
+    "entry_url": ""
   },
   {
     "foundup_id": "magadoom_001",
@@ -11514,9 +11510,7 @@
     "pain": "Volunteer stream moderators burn out fighting coordinated spam and harassment invisibly.",
     "canonical_foundup_id": "magadoom_001",
     "entry_copy": "MAGADOOM remains in shell discovery mode while its public-facing test expectations are brought back into line.",
-    "entry_url": "",
-    "routing_prefix": "/f/magadoom_001",
-    "data_namespace": "idb_magadoom_001"
+    "entry_url": ""
   },
   {
     "foundup_id": "kids_episodes",

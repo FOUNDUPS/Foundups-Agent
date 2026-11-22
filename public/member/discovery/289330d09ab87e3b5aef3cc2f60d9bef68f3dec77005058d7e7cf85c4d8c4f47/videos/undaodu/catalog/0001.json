@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/faqyaCC0IqU",
+      "source_url": "https://www.youtube.com/watch?v=faqyaCC0IqU",
+      "thumbnail_url": "https://i.ytimg.com/vi/faqyaCC0IqU/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:52:28Z",
+      "title": "✨ Breathe. Be. Become. #UnDaoDu #Mindful",
+      "video_id": "faqyaCC0IqU"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/4dk83psFsRU",
+      "source_url": "https://www.youtube.com/watch?v=4dk83psFsRU",
+      "thumbnail_url": "https://i.ytimg.com/vi/4dk83psFsRU/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:50:54Z",
+      "title": "🌿 Mindful Moments #UnDaoDu #Meditation #Peace",
+      "video_id": "4dk83psFsRU"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/O2fiLTWor50",
+      "source_url": "https://www.youtube.com/watch?v=O2fiLTWor50",
+      "thumbnail_url": "https://i.ytimg.com/vi/O2fiLTWor50/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:49:16Z",
+      "title": "☯️ Wu Wei: The Art of Non-Doing #UnDaoDu #Zen",
+      "video_id": "O2fiLTWor50"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/30hvvLAV3_k",
+      "source_url": "https://www.youtube.com/watch?v=30hvvLAV3_k",
+      "thumbnail_url": "https://i.ytimg.com/vi/30hvvLAV3_k/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:47:39Z",
+      "title": "☮️ Finding Calm in Chaos #UnDaoDu #Mindfulness",
+      "video_id": "30hvvLAV3_k"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/7MzxDKKUYKQ",
+      "source_url": "https://www.youtube.com/watch?v=7MzxDKKUYKQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/7MzxDKKUYKQ/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:46:00Z",
+      "title": "✨ Breathe. Be. Become. #UnDaoDu #Mindful",
+      "video_id": "7MzxDKKUYKQ"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/SOgAFc9QFBE",
+      "source_url": "https://www.youtube.com/watch?v=SOgAFc9QFBE",
+      "thumbnail_url": "https://i.ytimg.com/vi/SOgAFc9QFBE/hqdefault.jpg",
+      "timestamp": "2026-03-18T14:12:52Z",
+      "title": "☮️ Finding Calm in Chaos #UnDaoDu #Mindfulness",
+      "video_id": "SOgAFc9QFBE"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0002.json",
+  "order": "catalog",
+  "page": 1,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

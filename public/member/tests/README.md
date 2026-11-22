@@ -100,7 +100,9 @@ For an isolated Hosting preview, stage
 `public/member/playback-probe/reference.html`, and a sanitized
 `public/member/playback-probe/deployment.json` (`source_sha`, `channel_id`,
 `hosting_version`, `mall_build`). Load the deferred probe
-script in the staged member document. `reference.html` accepts strictly
+script only in the staged member document; the committed shared document has
+no probe loader. Staged probe files and that injection remain preview-only.
+`reference.html` accepts strictly
 allowlisted `?v=<11-char Short ID>` (8 admitted HPC Shorts + 4 diagnostic-only
 Shorts) and `?host=youtube|nocookie` (`https://www.youtube.com` vs
 `https://www.youtube-nocookie.com`), retains selection across `Mall <-> official

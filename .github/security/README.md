@@ -1568,3 +1568,11 @@ Root and independent review append one whole-file/rule/line fingerprint only,
 retaining all2261 ordered entries (2262 total). The format protocol receipt binds
 actual source/job/review evidence. No rule, scope, gate or history behavior changes.
 Fresh hosted acceptance and separate parent GitGuardian disposition remain required.
+
+### 2026-11-22 — Preview-only loader source binding
+
+The shared member document no longer requests the preview-only probe fixture.
+Independent review verified that the existing public client SDK/configuration
+line is byte-identical. One exact-file binding was appended; all 4,908 prior
+approvals, scanner rules, history coverage and protected checks are retained.
+The source and review hashes are recorded in the existing HPC evidence file.

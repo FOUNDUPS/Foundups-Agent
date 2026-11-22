@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 37,
+      "embed_url": "https://www.youtube.com/embed/K8UWeqbHx9E",
+      "source_url": "https://www.youtube.com/watch?v=K8UWeqbHx9E",
+      "thumbnail_url": "https://i.ytimg.com/vi/K8UWeqbHx9E/hqdefault.jpg",
+      "timestamp": "2026-01-13T02:12:19Z",
+      "title": "Going Swimming",
+      "video_id": "K8UWeqbHx9E"
+    },
+    {
+      "duration_seconds": 141,
+      "embed_url": "https://www.youtube.com/embed/K7oXjmOa3bk",
+      "source_url": "https://www.youtube.com/watch?v=K7oXjmOa3bk",
+      "thumbnail_url": "https://i.ytimg.com/vi/K7oXjmOa3bk/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:34:48Z",
+      "title": "Why OIF is important to an entrepreneur",
+      "video_id": "K7oXjmOa3bk"
+    },
+    {
+      "duration_seconds": 928,
+      "embed_url": "https://www.youtube.com/embed/K1iMN6pBbPU",
+      "source_url": "https://www.youtube.com/watch?v=K1iMN6pBbPU",
+      "thumbnail_url": "https://i.ytimg.com/vi/K1iMN6pBbPU/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:20:08Z",
+      "title": "Audio Problems - Call with Don",
+      "video_id": "K1iMN6pBbPU"
+    },
+    {
+      "duration_seconds": 342,
+      "embed_url": "https://www.youtube.com/embed/JWpgMux92dU",
+      "source_url": "https://www.youtube.com/watch?v=JWpgMux92dU",
+      "thumbnail_url": "https://i.ytimg.com/vi/JWpgMux92dU/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:19:07Z",
+      "title": "Michael Trost eRevolution Dictator on the Future of Learning",
+      "video_id": "JWpgMux92dU"
+    },
+    {
+      "duration_seconds": 615,
+      "embed_url": "https://www.youtube.com/embed/Jv1dNdljOsw",
+      "source_url": "https://www.youtube.com/watch?v=Jv1dNdljOsw",
+      "thumbnail_url": "https://i.ytimg.com/vi/Jv1dNdljOsw/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:19:37Z",
+      "title": "the GOLD RUSH Era for WEB 3.0 Global Education",
+      "video_id": "Jv1dNdljOsw"
+    },
+    {
+      "duration_seconds": 523,
+      "embed_url": "https://www.youtube.com/embed/JR_7biWI6fg",
+      "source_url": "https://www.youtube.com/watch?v=JR_7biWI6fg",
+      "thumbnail_url": "https://i.ytimg.com/vi/JR_7biWI6fg/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:33:51Z",
+      "title": "Will eSingularity Happen in 10 Years?",
+      "video_id": "JR_7biWI6fg"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0044.json",
+  "order": "catalog",
+  "page": 43,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

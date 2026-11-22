@@ -8,6 +8,7 @@ def test_mall_product_state_and_service_worker_runtime():
     member = Path(__file__).resolve().parent.parent
     repo_root = member.parent.parent
     assert not (member / "playback-probe").exists(), "Preview-only /member/playback-probe/ must not be committed under public/"
+    assert "/member/playback-probe/" not in (member / "index.html").read_text(encoding="utf-8"), "Only the preview exporter may inject its staged probe loader"
     for script, expected in [
         (Path(__file__).with_name("mall_product_state_vm.mjs"), "Mall product state and service worker runtime: 29 passed."),
         (repo_root / "modules/foundups/pfmall/tests/fixtures/hpc_iphone_playback_probe_vm.mjs", "HPC iPhone playback probe runtime: 6 passed.")

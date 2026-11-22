@@ -1786,5 +1786,18 @@
     ],
     "rules_exclusions_scanner_formula_and_coverage": "UNCHANGED",
     "next": "Exact frozen candidate tree and history scans must pass"
+  },
+  "preview_only_loader_binding_20261122": {
+    "source_parent": "4b43712e378d0dc09906dc97ee1740702474f30c",
+    "path": "public/member/index.html",
+    "rule": "generic-api-key",
+    "line": 28,
+    "before_sha256": "dda69e606301d6d6b292e61c042a412b5d1e1ac6dc5fd51544485ec09be1f6c4",
+    "after_sha256": "ae606a06cb56705dccf1b339a4b085c5e5803440151ccee2338cbd758be4a8d1",
+    "unchanged_client_line_sha256": "8d1f3c68c967a7eada0ee0a8b1771cb7ca3036f111c9c494a05923b79b9b3afd",
+    "prior_fingerprint_retained": "cc1b71b27a263933220fa8ab7aa58476b092f4a55d2d7251b53c4e06f0d7be19",
+    "reviewed_fingerprint": "3c9938f6c7751052abaa7fa236bebf003491bdca65f6e70cd638bbecf8940255",
+    "review_receipt_sha256": "000cc06ceaec4f4b88b860a4e114ab14c12fb5163f356da87bd4c47ac4073cd7",
+    "scope": "Delete only shared preview loader. Existing public client configuration and all auth/gate behavior unchanged. Exact-file binding only; no scanner rule, ignore, or history scope change."
   }
 }

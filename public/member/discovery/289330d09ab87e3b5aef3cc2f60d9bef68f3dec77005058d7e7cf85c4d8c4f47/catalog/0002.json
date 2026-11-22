@@ -1,0 +1,224 @@
+{
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "voteballots",
+      "category": "civic",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "Transparent civic intelligence separating identity, primary evidence, preference signaling, and future SmartDAO governance.",
+      "display_order": 50,
+      "entity": "Vote/Ballots",
+      "entry_copy": "Public informational Vote pages exist. The candidate and funding application remains an unfinished internal PoC. Enter uses the existing Member Portal.",
+      "external_url": "https://vote.mtrout.com/",
+      "foundup_id": "voteballots",
+      "geo": "United States",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "incubating",
+      "name": "Vote/Ballots",
+      "outcome": "Voters inspect primary candidate funding and factual-claim evidence before choosing how to signal mandates.",
+      "pain": "Opaque PAC money and unverified campaign rhetoric collapse evidence, persuasion, and identity together.",
+      "related_lanes": [
+        "hpc",
+        "antifafm"
+      ],
+      "solution": "Incubating PoC: funding/oversight maps + planned claim-verification rubric; Proto adds auditable preference signals.",
+      "source_type": "external_app",
+      "status": "active",
+      "tagline": "Follow the money. Know your candidates.",
+      "tags": [
+        "012-lane",
+        "civic",
+        "elections",
+        "transparency",
+        "governance",
+        "vote"
+      ],
+      "tier": "F0_DAE",
+      "title": "Vote/Ballots",
+      "topic_family": "resistance",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "trade",
+      "category": "trading",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "Agentic market research and structured signal evaluation discipline built on FoundUps compute.",
+      "display_order": 51,
+      "entity": "Trade",
+      "entry_copy": "Incubating Phase 0: simulation and dry-run only. No launched trading app, live trades or capital execution is claimed.",
+      "external_url": "https://github.com/FOUNDUPS/Foundups-Agent/tree/main/modules/foundups/trade",
+      "foundup_id": "trade",
+      "geo": "Global",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "incubating",
+      "name": "Trade",
+      "outcome": "Independent participants convert verifiable agent compute into disciplined, transparent market intelligence.",
+      "pain": "Retail participants face institutional information asymmetry and unverified hype signals.",
+      "related_lanes": [
+        "foundups_main",
+        "holoindex_prod_01"
+      ],
+      "solution": "Incubating spec & module scaffold: risk-bounded research agents and backtested signal evaluation.",
+      "source_type": "github_repo",
+      "status": "active",
+      "tagline": "Compute into market intelligence",
+      "tags": [
+        "012-lane",
+        "trading",
+        "compute",
+        "market-intelligence",
+        "agents"
+      ],
+      "tier": "F0_DAE",
+      "title": "Trade",
+      "topic_family": "commerce",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "magadoom_001",
+      "category": "games",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "Quake-style gamified stream moderation turning live-chat spam defense into community XP.",
+      "display_order": 52,
+      "entity": "MAGADOOM",
+      "entry_copy": "MAGADOOM remains in shell discovery mode while its public-facing test expectations are brought back into line.",
+      "external_url": "https://github.com/FOUNDUPS/Foundups-Agent/tree/main/modules/gamification/whack_a_magat",
+      "foundup_id": "magadoom_001",
+      "geo": "Global",
+      "hero_label": "FRAG",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "incubating",
+      "name": "MAGADOOM",
+      "outcome": "Live-stream communities turn toxic chat moderation into fast, transparent, collaborative play.",
+      "pain": "Volunteer stream moderators burn out fighting coordinated spam and harassment invisibly.",
+      "related_lanes": [
+        "move2japan",
+        "antifafm"
+      ],
+      "solution": "Incubating engine: YouTube Live moderation events mapped to Quake-style XP and leaderboards.",
+      "source_type": "github_repo",
+      "status": "active",
+      "tagline": "Gamified moderation for live streams",
+      "tags": [
+        "012-lane",
+        "games",
+        "moderation",
+        "livestream",
+        "gamification"
+      ],
+      "theme": "magadoom",
+      "tier": "F0_DAE",
+      "title": "MAGADOOM",
+      "topic_family": "media",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "kids_episodes",
+      "category": "ai-education",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "Linked 15-second educational story, music, and caption episodes paired with EDUIT play-based learning.",
+      "display_order": 53,
+      "entity": "Kids Episodes",
+      "external_url": "https://github.com/FOUNDUPS/Foundups-Agent/tree/main/modules/foundups/kids_episodes",
+      "foundup_id": "kids_episodes",
+      "geo": "Global",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "incubating",
+      "name": "Kids Episodes",
+      "outcome": "Educators and parents turn a teaching prompt into coherent 15-second musical story episodes with synced captions.",
+      "pain": "Short-form kids media optimizes for noisy watch-time loops rather than verified learning progression.",
+      "related_lanes": [
+        "eduit",
+        "undaodu"
+      ],
+      "solution": "Incubating PoC: local episode/caption renderer + story continuity contract linked to EDUIT games.",
+      "source_type": "github_repo",
+      "status": "active",
+      "tagline": "Stories become short learning episodes",
+      "tags": [
+        "012-lane",
+        "ai-education",
+        "stories",
+        "music",
+        "episodes",
+        "eduit"
+      ],
+      "tier": "F0_DAE",
+      "title": "Kids Episodes",
+      "topic_family": "ai-education",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": null,
+      "category": "housing",
+      "creator": "012",
+      "creator_display": "012",
+      "description": "Project candidate described in the public opportunity-instance plan. Canonical registration and the first public house record are unverified. This card is not a property listing.",
+      "discovery_kind": "candidate",
+      "display_order": 105,
+      "entity": "FoundUps House",
+      "entry_copy": "Join and add-a-house publishing are planned; their integration is not available. No working Join or Member Portal entry is claimed.",
+      "foundup_id": "foundups_house_project",
+      "geo": "Not specified",
+      "launch_readiness": "planning_only",
+      "lifecycle_stage": "Specified",
+      "poster_url": "",
+      "public_plan_url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md",
+      "related_lanes": [],
+      "source_id": "modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md",
+      "source_type": "project_candidate",
+      "status": "specified",
+      "tagline": "Explore a shared house project and future house opportunities.",
+      "tags": [
+        "012-lane",
+        "public-discovery",
+        "project-candidate"
+      ],
+      "title": "FoundUps House",
+      "topic_family": "life",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    }
+  ],
+  "kind": "catalog",
+  "next": null,
+  "order": "catalog",
+  "page": 2,
+  "page_size": 6,
+  "record_id": null,
+  "schema_version": 1,
+  "total": 17
+}

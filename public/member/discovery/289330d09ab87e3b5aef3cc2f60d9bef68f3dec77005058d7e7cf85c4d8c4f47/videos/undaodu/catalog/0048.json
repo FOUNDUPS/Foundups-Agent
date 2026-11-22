@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 457,
+      "embed_url": "https://www.youtube.com/embed/IeLgtL5owZw",
+      "source_url": "https://www.youtube.com/watch?v=IeLgtL5owZw",
+      "thumbnail_url": "https://i.ytimg.com/vi/IeLgtL5owZw/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:32:01Z",
+      "title": "The Most Unique Funding Strategy Ever",
+      "video_id": "IeLgtL5owZw"
+    },
+    {
+      "duration_seconds": 201,
+      "embed_url": "https://www.youtube.com/embed/iCObUNK95mM",
+      "source_url": "https://www.youtube.com/watch?v=iCObUNK95mM",
+      "thumbnail_url": "https://i.ytimg.com/vi/iCObUNK95mM/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:32:30Z",
+      "title": "Social Venture for Japan: Help Japan Co.",
+      "video_id": "iCObUNK95mM"
+    },
+    {
+      "duration_seconds": 113,
+      "embed_url": "https://www.youtube.com/embed/IbOrKJMwaR8",
+      "source_url": "https://www.youtube.com/watch?v=IbOrKJMwaR8",
+      "thumbnail_url": "https://i.ytimg.com/vi/IbOrKJMwaR8/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:56:27Z",
+      "title": "Amazing Full Double Rainbow in Japan",
+      "video_id": "IbOrKJMwaR8"
+    },
+    {
+      "duration_seconds": 118,
+      "embed_url": "https://www.youtube.com/embed/iBNDWbsoDQ8",
+      "source_url": "https://www.youtube.com/watch?v=iBNDWbsoDQ8",
+      "thumbnail_url": "https://i.ytimg.com/vi/iBNDWbsoDQ8/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:31:30Z",
+      "title": "Find Your Sales Leads: Business Feed Bus Feed",
+      "video_id": "iBNDWbsoDQ8"
+    },
+    {
+      "duration_seconds": 59,
+      "embed_url": "https://www.youtube.com/embed/iBdukilA64I",
+      "source_url": "https://www.youtube.com/watch?v=iBdukilA64I",
+      "thumbnail_url": "https://i.ytimg.com/vi/iBdukilA64I/hqdefault.jpg",
+      "timestamp": "2026-01-14T17:10:17Z",
+      "title": "Koh Lipe in Thailand",
+      "video_id": "iBdukilA64I"
+    },
+    {
+      "duration_seconds": 342,
+      "embed_url": "https://www.youtube.com/embed/i6C8xZkdYm8",
+      "source_url": "https://www.youtube.com/watch?v=i6C8xZkdYm8",
+      "thumbnail_url": "https://i.ytimg.com/vi/i6C8xZkdYm8/hqdefault.jpg",
+      "timestamp": "2026-01-14T17:18:15Z",
+      "title": "Christmas cake in Japan!",
+      "video_id": "i6C8xZkdYm8"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0049.json",
+  "order": "catalog",
+  "page": 48,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

@@ -151,9 +151,15 @@ class TestConciergeRecommendations:
         assert "source_type_action" in html
 
     def test_recommendation_opens_external_url(self):
-        """Source type recommendation opens external_url."""
-        html = _html()
-        assert "window.open(currentItem.external_url" in html
+        """Execute actual ready/information-only recommendation actions safely."""
+        import subprocess
+
+        result = subprocess.run(
+            ["node", str(Path(__file__).with_name("legacy_navigation_runtime_vm.mjs")), "recommendations"],
+            text=True, encoding="utf-8", capture_output=True, timeout=20, check=False,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "Legacy navigation source VM: 4 recommendations checks passed." in result.stdout
 
 
 # ---------------------------------------------------------------------------

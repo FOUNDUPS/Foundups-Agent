@@ -184,7 +184,7 @@ const sb = {
   mallVideoPlayer: { open: (...args) => fullscreenCalls.push(args) }
 };
 sb.window = sb;
-for (const filename of ['gesture-engine.js', 'mall-planes.js', 'mall-tile-field.js']) {
+for (const filename of ['gesture-engine.js', 'mall-planes.js', 'mall-tile-field.js', 'pfmall-control-dispatcher.js']) {
   runInNewContext(readFileSync(join(memberRoot, 'js', filename), 'utf8'), sb, { filename });
 }
 
@@ -368,8 +368,35 @@ assert.equal(sb.mallTileField.getMotionMode(), 'snap', 'entering grouped mode de
 assert.equal(wrapper.classList.contains('mall-field-grouped-wrapper'), true);
 assert.equal(wrapper.classList.contains('browse-rows'), false, 'category wrapper mode is cleared');
 assert.equal(wrapper.classList.contains('motion-glide'), false);
+// Exercise the real dispatcher/field boundary, not a stub returning false.
+const geographicCommandEvents = [];
+sb.pfmallControlDispatcher.registerEventListener({
+  postMessage(event) { geographicCommandEvents.push(event); }
+}, { origin: 'https://foundups.com' });
+function assertGeographicCommandRefused(query) {
+  const before = JSON.stringify({
+    html: field.innerHTML, scope: sb.mallTileField.getFieldScope(),
+    geographic: sb.mallTileField.getGeographicState(), href: sb.location.href
+  });
+  const focus = doc.activeElement;
+  const listeners = listenerCounts();
+  const imageCount = imageRequests.length;
+  const result = sb.pfmallControlDispatcher.dispatch('search_catalog', { query });
+  assert.equal(result.status, 'error', 'real geographic owner must refuse the dispatcher command');
+  assert.equal(result.error.code, 'incompatible_projection');
+  assert.equal(result.result, undefined, 'refusal cannot claim a changed catalog');
+  assert.equal(geographicCommandEvents.length, 0, 'refusal emits no state_changed event');
+  assert.equal(JSON.stringify({
+    html: field.innerHTML, scope: sb.mallTileField.getFieldScope(),
+    geographic: sb.mallTileField.getGeographicState(), href: sb.location.href
+  }), before, 'refused command preserves the geographic form projection and URL');
+  assert.equal(doc.activeElement, focus, 'refusal preserves focus');
+  assert.equal(listenerCounts(), listeners, 'refusal installs no page listeners');
+  assert.equal(imageRequests.length, imageCount, 'refusal does not request images');
+}
 const declaredGeographicMarkup = field.innerHTML;
 for (const query of ['show me houses', "I'm looking for clothing", 'Hey, Red Dog, show me clothes', '', '   ']) {
+  assertGeographicCommandRefused(query);
   assert.equal(sb.mallTileField.searchCatalog(query), false, 'global search cannot bypass the geographic form');
 }
 for (const layout of ['grid', 'rows']) assert.equal(sb.mallTileField.setLayoutMode(layout), false);
@@ -504,6 +531,7 @@ assert.equal(selectedId(), fifth.listing_id, 'removed selected listing falls bac
 assert.equal(groupTrack('wakasa').scrollLeft, 190, 'shorter filtered row clamps safely');
 sb.mallTileField.updateCatalog([], { groups: [] });
 assert.equal(tiles().length, 0);
+assertGeographicCommandRefused('');
 assert.equal(sb.mallTileField.searchCatalog(''), false, 'empty geographic projection still owns query clearing');
 assert.equal(sb.mallTileField.setLayoutMode('grid'), false);
 assert.deepEqual(Object.keys(sb.mallTileField.getTileLoadStates()), [], 'empty projection drops old tile load states');
@@ -782,5 +810,33 @@ assert.equal(desktopOpenCalls.length, 1);
 assert.equal(desktopOpenCalls[0][2], 1);
 assert.equal(desktopOpenCalls[0][3].queueQuery, 'onsen');
 assert.equal(desktopOpenCalls[0][3].autoplay, false, 'reload continuity restores video without forced autoplay');
+
+// Admitted search still awaits paging; clearing while it is in flight stops
+// the obsolete search loop without replacing the cleared navigation scope.
+let pageCalls = 0;
+let releaseSearchPage;
+const searchPager = {
+  hasMore: true,
+  loadNext() {
+    pageCalls++;
+    return new Promise(resolve => { releaseSearchPage = resolve; });
+  },
+  close() { this.hasMore = false; }
+};
+sb.mallTileField.updateCatalog([], { catalogPager: searchPager });
+const pendingSearch = sb.mallTileField.searchCatalog('Fukui');
+assert.equal(typeof pendingSearch.then, 'function', 'admitted paged search remains awaitable');
+assert.equal(pageCalls, 1);
+assert.equal(sb.mallTileField.getFieldScope().query, 'Fukui');
+sb.mallTileField.searchCatalog('');
+assert.equal(sb.mallTileField.getFieldScope(), null, 'clear applies before the pending page returns');
+releaseSearchPage([{ foundup_id: 'paged_fukui', name: 'Fukui page', category: 'travel', videos: [] }]);
+await pendingSearch;
+assert.equal(pageCalls, 1, 'cleared query cannot consume another page');
+assert.equal(sb.mallTileField.getFieldScope(), null, 'pending search cannot restore its old query');
+assert.deepEqual(tiles().map(tile => tile.dataset.foundupId), ['paged_fukui']);
+assert.equal(listenerCounts(), listenersBefore, 'paged search adds no page listeners');
+sb.mallTileField.updateCatalog([]);
+assert.equal(searchPager.hasMore, false, 'replacing the catalog closes the old pager');
 
 console.log('Mall property runtime: geographic/category projections, queries, both drag axes, stable indexes, restore, density, source facts, focus, URLs, and video compatibility passed.');

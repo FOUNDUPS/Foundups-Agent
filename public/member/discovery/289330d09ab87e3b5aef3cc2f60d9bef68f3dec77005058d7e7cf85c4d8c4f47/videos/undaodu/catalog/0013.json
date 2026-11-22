@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 61,
+      "embed_url": "https://www.youtube.com/embed/WI5h673owX4",
+      "source_url": "https://www.youtube.com/watch?v=WI5h673owX4",
+      "thumbnail_url": "https://i.ytimg.com/vi/WI5h673owX4/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:45:39Z",
+      "title": "English Teaching in Japan",
+      "video_id": "WI5h673owX4"
+    },
+    {
+      "duration_seconds": 247,
+      "embed_url": "https://www.youtube.com/embed/WHoyW5_4UJg",
+      "source_url": "https://www.youtube.com/watch?v=WHoyW5_4UJg",
+      "thumbnail_url": "https://i.ytimg.com/vi/WHoyW5_4UJg/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:55:34Z",
+      "title": "Foundups.com",
+      "video_id": "WHoyW5_4UJg"
+    },
+    {
+      "duration_seconds": 449,
+      "embed_url": "https://www.youtube.com/embed/wEm0g4G-g00",
+      "source_url": "https://www.youtube.com/watch?v=wEm0g4G-g00",
+      "thumbnail_url": "https://i.ytimg.com/vi/wEm0g4G-g00/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:37:40Z",
+      "title": "Startup Confessional, First Week",
+      "video_id": "wEm0g4G-g00"
+    },
+    {
+      "duration_seconds": 403,
+      "embed_url": "https://www.youtube.com/embed/WaP1GbC_cbo",
+      "source_url": "https://www.youtube.com/watch?v=WaP1GbC_cbo",
+      "thumbnail_url": "https://i.ytimg.com/vi/WaP1GbC_cbo/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:13:03Z",
+      "title": "Foundup Funding Talk",
+      "video_id": "WaP1GbC_cbo"
+    },
+    {
+      "duration_seconds": 360,
+      "embed_url": "https://www.youtube.com/embed/W9F2EIWKonI",
+      "source_url": "https://www.youtube.com/watch?v=W9F2EIWKonI",
+      "thumbnail_url": "https://i.ytimg.com/vi/W9F2EIWKonI/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:38:59Z",
+      "title": "Education system",
+      "video_id": "W9F2EIWKonI"
+    },
+    {
+      "duration_seconds": 106,
+      "embed_url": "https://www.youtube.com/embed/w7h3xH1xdI0",
+      "source_url": "https://www.youtube.com/watch?v=w7h3xH1xdI0",
+      "thumbnail_url": "https://i.ytimg.com/vi/w7h3xH1xdI0/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:24:18Z",
+      "title": "Flattening Global Education",
+      "video_id": "w7h3xH1xdI0"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0014.json",
+  "order": "catalog",
+  "page": 13,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

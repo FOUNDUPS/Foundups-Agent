@@ -1,3 +1,13 @@
+## 2026-11-22 — Composed v26 full Mall contract reconciliation
+
+- Required broader CI at `4b43712e378d0dc09906dc97ee1740702474f30c` reached the Mall truth selection after the registry repair. The local Mall slice reproduced its 13 failures with 1,819 passes; unchanged simulator/stream suites remain hosted CI coverage because the local simulator dependency is unavailable.
+- Restored the geographic search owner's synchronous refusal before asynchronous catalog paging. The real dispatcher now refuses incompatible searches without a state-change event; original geographic assertions remain, with added dispatcher and clear-in-flight regression coverage.
+- Removed six false tenant-binding fields from Vote, Trade and MAGADOOM while preserving canonical identity, discovery stages and Enter. FoundUps House stays an unregistered planning candidate, checked through a source-bound contract with one positive and sixteen negative cases; tenant enums are unchanged.
+- Rebuilt the existing offline discovery projection as generation `289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47`: 206 assets, with all 410 older-generation Git entries retained. No entity, house, address, video or launch was invented.
+- Replaced two stale routing-string checks with eight actual-owner recommendation/Enter groups and kept the exact 34-case boot check. Their two new process capabilities are recorded through the canonical generator. All twelve prior HPC gates remain, with property/navigation and entry-action gates added.
+- The shared member document no longer requests a preview-only probe file; the existing guard now rejects such a loader. Only a qualified preview exporter may copy the canonical fixtures and inject the loader. The unchanged public client SDK line receives exact-file review, without changing client configuration, scanner rules or prior approvals.
+- Composed source must pass frozen local QA, the canonical registry check, actual tree/history scans and fresh exact-head hosted CI. No new preview, main merge, production change, real YouTube/sound or physical iPhone result is claimed here.
+
 ## 2026-11-22 — Composed v26 canonical registry refresh
 
 - Exact merge candidate `cd472b1654b088036ea41210990550411c22b5f3` passed the hosted HPC security and browser gates. The broader required `test (3.12)` stopped at the canonical registry check.

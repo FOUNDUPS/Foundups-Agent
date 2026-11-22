@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 371,
+      "embed_url": "https://www.youtube.com/embed/sVGkEumR-W4",
+      "source_url": "https://www.youtube.com/watch?v=sVGkEumR-W4",
+      "thumbnail_url": "https://i.ytimg.com/vi/sVGkEumR-W4/hqdefault.jpg",
+      "timestamp": "2026-01-14T12:55:33Z",
+      "title": "LinkedIn's Pacifier",
+      "video_id": "sVGkEumR-W4"
+    },
+    {
+      "duration_seconds": 295,
+      "embed_url": "https://www.youtube.com/embed/sv3PyV1-fZU",
+      "source_url": "https://www.youtube.com/watch?v=sv3PyV1-fZU",
+      "thumbnail_url": "https://i.ytimg.com/vi/sv3PyV1-fZU/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:42:10Z",
+      "title": "What is Enlightenment?",
+      "video_id": "sv3PyV1-fZU"
+    },
+    {
+      "duration_seconds": 379,
+      "embed_url": "https://www.youtube.com/embed/steCeXbCRe0",
+      "source_url": "https://www.youtube.com/watch?v=steCeXbCRe0",
+      "thumbnail_url": "https://i.ytimg.com/vi/steCeXbCRe0/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:55:34Z",
+      "title": "20131205",
+      "video_id": "steCeXbCRe0"
+    },
+    {
+      "duration_seconds": 181,
+      "embed_url": "https://www.youtube.com/embed/Sn-gkdCcoTc",
+      "source_url": "https://www.youtube.com/watch?v=Sn-gkdCcoTc",
+      "thumbnail_url": "https://i.ytimg.com/vi/Sn-gkdCcoTc/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:27:48Z",
+      "title": "Flat Global Education 2010",
+      "video_id": "Sn-gkdCcoTc"
+    },
+    {
+      "duration_seconds": 599,
+      "embed_url": "https://www.youtube.com/embed/si3EaJwNRYg",
+      "source_url": "https://www.youtube.com/watch?v=si3EaJwNRYg",
+      "thumbnail_url": "https://i.ytimg.com/vi/si3EaJwNRYg/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:08:11Z",
+      "title": "Open Corporations are coming!!!",
+      "video_id": "si3EaJwNRYg"
+    },
+    {
+      "duration_seconds": 280,
+      "embed_url": "https://www.youtube.com/embed/shbfjnDIdJ4",
+      "source_url": "https://www.youtube.com/watch?v=shbfjnDIdJ4",
+      "thumbnail_url": "https://i.ytimg.com/vi/shbfjnDIdJ4/hqdefault.jpg",
+      "timestamp": "2026-01-12T20:08:29Z",
+      "title": "Foundups Week",
+      "video_id": "shbfjnDIdJ4"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0024.json",
+  "order": "catalog",
+  "page": 23,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

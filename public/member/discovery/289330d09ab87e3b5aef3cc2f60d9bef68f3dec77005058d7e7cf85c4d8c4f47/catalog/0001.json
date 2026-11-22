@@ -1,0 +1,294 @@
+{
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "autopost",
+      "category": "media",
+      "creator": "012",
+      "creator_display": "012",
+      "description": "AutoPost — AI-powered camera-to-post content engine. Externalized product FoundUp with own repo and domain.",
+      "display_order": 11,
+      "entity": "AutoPost",
+      "external_url": "https://foundup-japan-ai-autopost-camera-56566376153.us-west1.run.app/",
+      "foundup_id": "autopost",
+      "geo": "Global",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "externalized",
+      "outcome": "Field creators capture once on mobile and publish verified updates across channels without manual toil.",
+      "pain": "Repetitive formatting, captioning, and cross-posting drain time away from real-world action.",
+      "poster_url": "/media/posters/autopost.jpg",
+      "related_lanes": [
+        "foundups_main"
+      ],
+      "solution": "PoC camera & intake service live on Cloud Run; Prototype completes multi-channel connector auth.",
+      "source_handle": "autopost",
+      "source_id": "FOUNDUPS/autopost",
+      "source_type": "external_app",
+      "status": "active",
+      "tagline": "Camera-to-post AI content engine",
+      "tags": [
+        "012-lane",
+        "ai",
+        "automation",
+        "camera-to-post",
+        "content",
+        "media",
+        "social"
+      ],
+      "tier": "F0_DAE",
+      "title": "AutoPost",
+      "topic_family": "media",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "kosei",
+      "category": "media",
+      "creator": "012",
+      "creator_display": "012",
+      "description": "Kosei AI Systems — AI content automation service for businesses. Internal service FoundUp with planned production domain.",
+      "display_order": 12,
+      "entity": "Kosei AI Systems",
+      "external_url": "https://kosei.ai",
+      "foundup_id": "kosei",
+      "geo": "Global",
+      "launch_readiness": "conditional",
+      "lifecycle_stage": "incubating",
+      "outcome": "Small teams run multilingual AI content workflows with full human editorial control and auditability.",
+      "pain": "Generic AI content tools strip brand voice, mishandle Japanese/English nuance, and leak context.",
+      "poster_url": "/media/posters/kosei.jpg",
+      "related_lanes": [
+        "foundups_main",
+        "autopost"
+      ],
+      "routing_prefix": "/f/kosei",
+      "solution": "Proto workspace (`/kosei`): bilingual intake + app shell; MVP connects automated production queues.",
+      "source_handle": "kosei",
+      "source_id": "modules/foundups/kosei",
+      "source_type": "internal_service",
+      "status": "active",
+      "tagline": "AI content automation for businesses",
+      "tags": [
+        "012-lane",
+        "ai",
+        "automation",
+        "b2b",
+        "content",
+        "kosei",
+        "service"
+      ],
+      "tier": "F0_DAE",
+      "title": "Kosei AI Systems",
+      "topic_family": "media",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "gotjunk_001",
+      "category": "marketplace",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "Peer-to-peer marketplace for selling unwanted items. List it, price it, move it.",
+      "display_order": 100,
+      "entity": "GotJunk",
+      "external_url": "https://gotjunk-56566376153.us-west1.run.app/",
+      "foundup_id": "gotjunk_001",
+      "geo": "Global",
+      "hero_label": "SHOP",
+      "launch_readiness": "conditional",
+      "lifecycle_stage": "proto",
+      "name": "GotJunk",
+      "outcome": "Neighbors turn unused household items into local value in seconds instead of sending goods to landfill.",
+      "pain": "High listing friction and flaky classifieds make giving or selling everyday items harder than trashing them.",
+      "poster_url": "/media/posters/gotjunk.jpg",
+      "related_lanes": [
+        "foundups_main"
+      ],
+      "routing_prefix": "/f/gotjunk_001",
+      "solution": "Proto app on Cloud Run: photo capture, AI listing assist, and local pickup coordination.",
+      "source_type": "internal_app",
+      "status": "active",
+      "tagline": "Shop local peer-to-peer reuse.",
+      "tags": [
+        "012-lane",
+        "marketplace",
+        "peer-to-peer",
+        "selling",
+        "shop",
+        "local"
+      ],
+      "tier": "F0_DAE",
+      "title": "GotJunk",
+      "topic_family": "commerce",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "holoindex_prod_01",
+      "category": "infrastructure",
+      "creator": "012",
+      "creator_display": "012",
+      "description": "Enterprise-grade artifact and memory retrieval system for the p.fMALL shell.",
+      "display_order": 13,
+      "entity": "HoloIndex System",
+      "entry_copy": "HoloIndex connective retrieval surface is bound in conditional mode while live backend relay conditions clear.",
+      "external_url": "https://foundups.com/holoindex",
+      "foundup_id": "holoindex_prod_01",
+      "geo": "Global",
+      "hero_label": "INTELLIGENCE",
+      "launch_readiness": "conditional",
+      "lifecycle_stage": "incubating",
+      "outcome": "Human and 0102 agents retrieve exact architectural truth in milliseconds before writing a single line of code.",
+      "pain": "Context loss and blind vibecoding create duplicate modules, stale assumptions, and regressions.",
+      "poster_url": "/media/posters/holoindex.jpg",
+      "related_lanes": [
+        "foundups_main"
+      ],
+      "routing_prefix": "/f/holoindex_prod_01",
+      "solution": "Incubating F3_INFRA: governed semantic + lexical codebase memory bundle; MVP opens tenant relay.",
+      "source_handle": "holoindex",
+      "source_id": "holo_index",
+      "source_type": "internal_service",
+      "status": "active",
+      "tagline": "Intelligence search",
+      "tags": [
+        "012-lane",
+        "infrastructure",
+        "search",
+        "holoindex",
+        "knowledge",
+        "retrieval"
+      ],
+      "tier": "F3_INFRA",
+      "title": "HoloIndex",
+      "topic_family": "infrastructure",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "esingularity_001",
+      "category": "community",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "Regional AI infrastructure FoundUp for Fukui: AI Koban, three-site feasibility, Japan Hyperscaler Report research, and the YUMORI public-asset/community-reuse program.",
+      "display_order": 14,
+      "entity": "AI Koban",
+      "external_url": "https://esingularity.ai/",
+      "foundup_id": "esingularity_001",
+      "geo": "Fukui, Japan",
+      "hero_label": "AI KOBAN",
+      "launch_readiness": "conditional",
+      "lifecycle_stage": "proto",
+      "linkedin_url": "https://www.linkedin.com/company/esingularity/",
+      "name": "eSingularity.ai",
+      "one_sentence_pitch": "AI Koban / Compute for FoundUps — regional Japan onsen & clean AI infrastructure.",
+      "outcome": "Regional Japan revitalizes heritage onsen and public assets paired with clean local AI infrastructure.",
+      "pain": "Aging municipal facilities face closure while hyperscale AI compute concentrates away from local communities.",
+      "poster_url": "/media/posters/esingularity.jpg",
+      "related_lanes": [
+        "eduit",
+        "move2japan"
+      ],
+      "routing_prefix": "/f/esingularity_001",
+      "solution": "Proto (`esingularity.ai` & `YUMORI.me`): Fukui civicPPP/PFI research, AI Koban, and community stewardship.",
+      "source_handle": "esingularity",
+      "source_id": "modules/foundups/esingularity",
+      "source_type": "external_app",
+      "status": "active",
+      "tagline": "AI Koban / Compute for FoundUps",
+      "tags": [
+        "012-lane",
+        "ai-infrastructure",
+        "ai-koban",
+        "community",
+        "esingularity",
+        "fukui",
+        "onsen",
+        "yumori"
+      ],
+      "tier": "F0_DAE",
+      "title": "eSingularity.ai",
+      "topic_family": "startup",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "hpc",
+      "category": "media",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "derivation_method": "manual_curation",
+      "description": "A curated political-media FoundUp starting with the SchumerOUT collection of Move2Japan Shorts.",
+      "display_order": 101,
+      "entity": "Hasan Piker Coalition",
+      "foundup_id": "hpc",
+      "geo": "Global",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "incubating",
+      "outcome": "Open political-media community traces clips to primary sources and connects directly to civic action.",
+      "pain": "Out-of-context clips and bot-gated feeds sever political commentary from verifiable civic follow-through.",
+      "parent_channels": [
+        "move2japan"
+      ],
+      "poster_url": "https://i.ytimg.com/vi/iJuguXpbRR4/oardefault.jpg",
+      "public_poc_url": "https://hpc.foundups.com/",
+      "related_lanes": [
+        "move2japan"
+      ],
+      "solution": "PoC (`hpc.foundups.com`): curated Shorts floating player, WikiTube queue, and Contact Congress bridge.",
+      "source_handle": "@MOVE2JAPAN",
+      "source_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+      "source_type": "derived",
+      "status": "active",
+      "tagline": "Independent political commentary and satire",
+      "tags": [
+        "012-lane",
+        "political-media",
+        "schumerout"
+      ],
+      "tier": "F0_DAE",
+      "title": "Hasan Piker Coalition",
+      "topic_family": "media",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    }
+  ],
+  "kind": "catalog",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/catalog/0002.json",
+  "order": "catalog",
+  "page": 1,
+  "page_size": 6,
+  "record_id": null,
+  "schema_version": 1,
+  "total": 17
+}
