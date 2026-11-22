@@ -1686,6 +1686,20 @@
     return 'Continue at ' + m + ':' + (s < 10 ? '0' : '') + s;
   }
 
+  function historyThumbnailUrl(raw) {
+    if (typeof raw !== 'string' || !raw.trim() || raw.length > 2048) return '';
+    try {
+      var url = new URL(raw, window.location.href);
+      if (url.username || url.password) return '';
+      if (url.protocol === 'https:') return url.href;
+      // Local HTTP fixtures/dev retain relative images; public mixed content,
+      // data/javascript/blob/file and credential-bearing URLs get a placeholder.
+      if (url.protocol === 'http:' && url.origin === window.location.origin &&
+          ['localhost', '127.0.0.1', '[::1]'].indexOf(url.hostname) !== -1) return url.href;
+    } catch (error) {}
+    return '';
+  }
+
   function renderWatchHistory() {
     if (productDiscovery && !discoveryAdmitted) return;
     if (!historyEl) return;
@@ -1727,7 +1741,7 @@
     var list = document.createElement('div');
     list.className = 'reddog-history-list';
     entries.forEach(function (entry) {
-      var thumb = entry.thumbnail || '';
+      var thumb = historyThumbnailUrl(entry.thumbnail);
       var title = entry.title || 'Untitled';
       var foundupId = entry.foundupId || '';
       var videoId = entry.videoId || '';

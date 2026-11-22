@@ -1,3 +1,20 @@
+## HPC v26 defensive DOM renewal - 2026-11-22
+
+Run44975930482 on9327ad18 reported one tracked-tree generic-api-key binding at
+public/member/index.html:28 and zero introduced-history findings. Independent
+review and root verification confirmed the complete Clerk frontend SDK and
+flagged line unchanged from5e0f87e1 and the approved baseline. The two literal
+exception-message DOM repairs changed the exact whole-file digest to
+dda69e606301d6d6b292e61c042a412b5d1e1ac6dc5fd51544485ec09be1f6c4.
+
+Append only reviewed fingerprint
+cc1b71b27a263933220fa8ab7aa58476b092f4a55d2d7251b53c4e06f0d7be19,
+preserving all4,625 existing entries (4,626 total). Sanitized exact-source proof
+is in reviewed-hpc-phone-evidence.json under v26_defensive_dom_renewal_20261122.
+No matched value is recorded. Rules, exclusions, coverage and fingerprint
+formula remain unchanged. A new exact-head tracked-tree/history gate must pass;
+this renewal does not qualify CodeQL, browser/provider or device acceptance.
+
 ## HPC v25 integrated shell review renewal — 2026-11-20
 
 Recovering the served v24 shell and advancing its build/asset references to v25

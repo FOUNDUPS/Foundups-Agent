@@ -956,5 +956,39 @@
     ],
     "scanner_rules_exclusions_formula_and_coverage": "UNCHANGED",
     "required_next_gate": "Root recheck exact clean-filter canonical bytes at adoption; preserve every previous ledger entry; fresh exact committed-head full tracked tree and introduced-history scans remain required. Not deployment/device acceptance."
+  },
+  "v26_defensive_dom_renewal_20261122": {
+    "file": "public/member/index.html",
+    "rule": "generic-api-key",
+    "line": 28,
+    "exact_head_git_blob": "7379e5af242f3606303d97c1dd91469c1cc882e8",
+    "exact_head_git_file_sha256": "dda69e606301d6d6b292e61c042a412b5d1e1ac6dc5fd51544485ec09be1f6c4",
+    "prior5e_git_file_sha256": "205b5b85981f07d88888d3ab936d1b398f8cdaf301921e307b03c837b24851c6",
+    "current_flagged_line_sha256": "8d1f3c68c967a7eada0ee0a8b1771cb7ca3036f111c9c494a05923b79b9b3afd",
+    "flagged_line_byte_identical_prior": true,
+    "sdk_complete_element_sha256": "3a6a4376ce75609ee13168f405fa9a825e4db536e6170cce049287fdf6846fe4",
+    "sdk_element_byte_identical5e": true,
+    "sdk_element_byte_identical_approved_base": true,
+    "approved_base": "bd0510c5c2e333d07b1bb02340ca91b291420164",
+    "sdk_matches_existing_source_evidence": true,
+    "identifier_classification": "Previously reviewed Clerk publishable frontend SDK attribute with publishable prefix; no matched value disclosed",
+    "prior_fingerprint": "ea4aeda2e82ed655dcfe5b1b0594c1cc5fb117e457da388c4b393eba9c4bebcb",
+    "prior_fingerprint_present": true,
+    "new_exact_fingerprint": "cc1b71b27a263933220fa8ab7aa58476b092f4a55d2d7251b53c4e06f0d7be19",
+    "new_fingerprint_present_at9327": false,
+    "ledger_count_at9327": 4625,
+    "index_change_hunks": [
+      "@@ -973,7 +973,10 @@",
+      "@@ -1106,7 +1109,10 @@"
+    ],
+    "index_change_scope": "Exactly the reviewed two exception-message DOM textContent/replaceChildren repairs; SDK and flagged line unchanged.",
+    "index_changing_commit_after5e": "211b6272e71f013fb2f0b76e8359450cdf404d72",
+    "line_ending_caution": "The reviewed Git blob SHA is dda69e60..., while observed Windows raw CRLF file SHA62f36d09... is not the scanner archive input. Use exact Git byte binding.",
+    "root_independent_sdk_and_line_byte_comparison": true,
+    "independent_review_sha256": "08b4a16edfc7acaa1d013ee5238320c6b223c13a47a65b281ff391496391805a",
+    "prior_count": 4625,
+    "new_count": 4626,
+    "scanner_rules_exclusions_formula_coverage": "UNCHANGED",
+    "gate_next": "Fresh exact-head full tracked tree/history scan required; no credential value recorded"
   }
 }

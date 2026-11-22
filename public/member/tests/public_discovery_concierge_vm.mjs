@@ -19,6 +19,33 @@ const memberRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = readFileSync(join(memberRoot, 'js/account-concierge.js'), 'utf8');
 const gestureSource = readFileSync(join(memberRoot, 'js/gesture-engine.js'), 'utf8');
 const memberHTML = readFileSync(join(memberRoot, 'index.html'), 'utf8');
+
+test('actual history thumbnail URL owner accepts only qualified image schemes', () => {
+  const marker = '  function historyThumbnailUrl(raw) {';
+  const start = source.indexOf(marker);
+  const end = source.indexOf('  function renderWatchHistory()', start);
+  assert.ok(start > 0 && start === source.lastIndexOf(marker) && end > start && end-start < 1500);
+  function actual(href) {
+    const context = { URL, window: { location: new URL(href) } };
+    runInNewContext(source.slice(start, end) + '\nthis.actual = historyThumbnailUrl;', context);
+    return context.actual;
+  }
+  const safe = actual('https://play.foundups.com/member/');
+  assert.equal(safe('/logo-dog.png'), 'https://play.foundups.com/logo-dog.png');
+  assert.equal(safe('https://i.ytimg.com/vi/fixture/hqdefault.jpg'), 'https://i.ytimg.com/vi/fixture/hqdefault.jpg');
+  for (const value of [null, {}, 7, '', ' ', 'x'.repeat(2049), 'javascript:void(0)',
+      '\tJaVaScRiPt:void(0)', 'data:image/svg+xml,<svg/>', 'blob:https://play.foundups.com/fixture',
+      'file:///fixture.png', 'https://[invalid', 'https://fixture:fixture@example.invalid/image',
+      'http://play.foundups.com/image', 'http://example.invalid/image']) assert.equal(safe(value), '');
+  for (const base of ['http://localhost:9000/member/', 'http://127.0.0.1:9000/member/', 'http://[::1]:9000/member/']) {
+    const local = actual(base), url = new URL(base);
+    assert.equal(local('/image.png'), url.origin + '/image.png');
+    url.port = '9001';
+    assert.equal(local(url.href), '');
+    assert.equal(local('http://example.invalid/image'), '');
+  }
+  assert.equal(actual('http://public.example/member/')('/image.png'), '');
+});
 const planeHTML = memberHTML.match(/<aside\b[^>]*id="accountPlane"[^>]*>[\s\S]*?<\/aside>/)?.[0];
 const formHTML = memberHTML.match(/<template\b[^>]*id="move2japanSearchTemplate"[^>]*>([\s\S]*?)<\/template>/)?.[1];
 assert.ok(planeHTML && formHTML, 'fixture uses the real member plane and domain template');

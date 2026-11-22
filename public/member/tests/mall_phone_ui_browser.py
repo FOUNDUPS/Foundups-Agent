@@ -349,7 +349,11 @@ def history_literal_rendering(page):
       window.fixtureXss=0;
       localStorage.setItem('pfmall_watch_history',JSON.stringify([
         {foundupId:identity,videoId:'abc" onmouseover="window.fixtureXss=97',videoIndex:'0" autofocus onfocus="window.fixtureXss=96',title:payload,thumbnail:'x" onerror="window.fixtureXss=95',playbackPosition:67,timestamp:1},
-        {foundupId:'hpc',videoId:'HPC00000000',title:'Safe history',playbackPosition:7,timestamp:1}
+        {foundupId:'hpc',videoId:'HPC00000000',title:'Safe history',thumbnail:'/logo-dog.png',playbackPosition:7,timestamp:1},
+        {foundupId:'hpc',videoId:'HPC00000001',title:'Safe HTTPS image',thumbnail:'https://i.ytimg.com/vi/HPC00000001/hqdefault.jpg',timestamp:1},
+        ...['javascript:void(0)','data:image/svg+xml,<svg/>','https://user:pass@example.invalid/image',
+            'http://example.invalid/image','file:///fixture.png','blob:https://play.foundups.com/fixture']
+          .map((thumbnail,i)=>({foundupId:'hpc',videoId:'unsafe'+i,title:'Rejected thumbnail '+i,thumbnail,timestamp:1}))
       ]));
       // Existing presentation-only admission seam, with entirely synthetic data.
       // This does not authenticate an account or exercise real backend admission.
@@ -357,17 +361,24 @@ def history_literal_rendering(page):
     }""", {'payload': payload, 'identity': identity})
     history = page.locator('[data-reddog-history]')
     expect(history).to_be_visible()
-    expect(history.locator('.reddog-history-card')).to_have_count(2)
+    expect(history.locator('.reddog-history-card')).to_have_count(9)
     expect(history.locator('.reddog-history-title').first).to_have_text(payload)
     expect(history.locator('.reddog-history-card').first).to_have_attribute('data-history-foundup', identity)
     expect(history.locator('.reddog-history-continue-badge').first).to_have_text('Continue at 1:07')
     expect(history.locator('[data-fixture-injected], [onerror], [onfocus], [onmouseover], [autofocus], script')).to_have_count(0)
     assert_true(page.evaluate('window.fixtureXss===0'), 'History payload became executable markup')
+    cards=history.locator('.reddog-history-card')
+    expect(cards.nth(1).locator('img')).to_have_attribute('src','https://play.foundups.com/logo-dog.png')
+    expect(cards.nth(2).locator('img')).to_have_attribute('src','https://i.ytimg.com/vi/HPC00000001/hqdefault.jpg')
+    for index in range(3,9):
+        expect(cards.nth(index).locator('img')).to_have_count(0)
+        expect(cards.nth(index).locator('.reddog-history-thumb-empty')).to_have_count(1)
     history.get_by_role('button', name='Clear', exact=True).click()
     expect(history.locator('.reddog-history-count')).to_have_text('0')
     expect(history.locator('.reddog-history-empty')).to_be_visible()
     page.evaluate('window.redDog.close(); window.redDog.setDiscoveryAdmission(false)')
     return {'literal_text_and_attributes': True, 'continue_badge_and_clear': True,
+            'unsafe_thumbnail_schemes_and_userinfo_rejected':6,'https_and_relative_thumbnails_preserved':True,
             'admission': 'Synthetic presentation flag only; no real account/backend proof'}
 
 

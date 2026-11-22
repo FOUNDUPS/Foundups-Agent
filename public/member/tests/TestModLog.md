@@ -1,5 +1,20 @@
 ## 2026-11-22 - selective v26 return qualification
 
+Hosted follow-up on9327ad18: run44975930482 stopped on one tracked-tree public
+Clerk SDK metadata binding; introduced-history findings were zero. Independent
+review and root verification confirmed exact unchanged line/SDK bytes. Renew
+only that whole-file binding and preserve all4,625 previous records, scanner
+rules and scope. CodeQL320 identifies the remaining history image URL sink;
+validate schemes/userinfo before assigning its source and use the existing
+placeholder on rejection. Actual-source VM covers local loopback HTTP; both
+browser engines cover rejected URLs and HTTPS/relative images. A fresh hosted
+head must qualify these changes; no prior check or empty alert-list result is
+treated as clearance, and no alert is dismissed.
+Local security regressions passed 52 cases; their unchanged Bash-specific
+GotJunk fixture could not run successfully through this Windows environment's
+unconfigured WSL launcher. No assertion or test was skipped or weakened. The
+existing Linux hosted security job must supply the full 53-case qualification.
+
 Input is exact #2439 head `5e0f87e1d4faad4de8748e83c71d02953640cb40`.
 The private ZIP is SHA-256
 `f0df165781afdb6bf8129564f413dfcdd104cc19af567ed694c2012220f5574d`;
