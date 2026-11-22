@@ -1,5 +1,22 @@
 # Member Area Roadmap
 
+## 2026-11-22 - selective shared return and tile-tap continuation
+
+The existing #2439 owner selectively adopts the private review's reversible
+Mall return and confirmed Floating/WikiTube/app Full Video tile-tap choices.
+Use one shared player, state/history owner and bottom dock. Return pauses and
+retains a ready controllable session; Forward remains paused, deliberate
+selection may play, and final Close disposes playback. Field-owned pagination
+survives closing/reopening a selected lane; late pages cannot restart playback.
+
+The guest Fractal prototype, new lenses/face loans and unresolved gesture
+defaults are excluded. Frame destination is independent of tile-tap preference;
+no legacy field seeds the three held gesture choices. Existing AI pilot and
+fail-closed contribution/admission boundaries are preserved. See the current
+[HPC reconciliation](../../../modules/foundups/hpc/ROADMAP.md) and
+[test log](tests/TestModLog.md) for source-bound controlled evidence. Conflict,
+hosted review, deployment and physical/real-provider gates remain open.
+
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 

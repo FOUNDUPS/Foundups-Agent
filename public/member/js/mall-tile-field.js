@@ -100,6 +100,8 @@
   var discoveryError = '';
   var selectedNotice = '';
   var selectedVideoIndex = 0;
+  var playerCaller = null;
+  var retainedLane = null;
   var catalogLifetimeBound = false;
 
   var FIXED_VIDEO_COLUMNS = 3;
@@ -113,6 +115,7 @@
   var fixedTailObserver = null;
   var fixedBrowsePosition = null;
   var scopedTheaterRequested = false;
+  var scopedPlaybackDismissed = false;
   var scopedTheaterState = null;
   var scopedPlaybackPosition = null;
   var scopedPhoneQuery = '';
@@ -775,6 +778,7 @@
     }
     if (entityPortraitField) layoutMode = 'grid';
     scopedTheaterRequested = false;
+    scopedPlaybackDismissed = false;
     scopedTheaterState = null;
     if (fixedVideoField) {
       expandedFoundUp = 0;
@@ -844,6 +848,7 @@
       return;
     }
     stopInlinePreview();
+    window.mallVideoPlayer?.close?.({ restore: false });
     cancelEntitySelection();
     replaceCatalogPager(options?.catalogPager);
     if (window.mallPlanes && typeof window.mallPlanes.closeView === 'function') {
@@ -1368,6 +1373,141 @@
     return window.matchMedia?.('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches === true;
   }
 
+  function capturePlayerCaller(record, tile) {
+    var bounds = tileFieldWrapper.getBoundingClientRect();
+    return {
+      foundupId: record.foundup_id || record.id,
+      expandedId: expandedFoundUp === null ? null : mallCatalog[expandedFoundUp]?.foundup_id,
+      videoId: tile?.dataset.videoId || null,
+      scrollTop: tileFieldWrapper.scrollTop,
+      scrollLeft: tileFieldWrapper.scrollLeft,
+      offset: tile ? tile.getBoundingClientRect().top - bounds.top : null,
+      rows: captureRowOffsets(),
+      inlineOpen: tileFieldWrapper.classList.contains('member-inline-open'),
+      fieldScope: currentFieldScope,
+      projection: currentProjection,
+      catalogEpoch: catalogEpoch
+    };
+  }
+
+  function restorePlayerCaller(caller) {
+    if (!caller || caller.catalogEpoch !== catalogEpoch) return null;
+    var tile = null;
+    if (fixedVideoField) {
+      var queue = mallCatalog[0]?.videos || [];
+      tile = getScopedTile(queue.findIndex(function(video) { return video.video_id === caller.videoId; }));
+    } else if (caller.expandedId && expandedFoundUp !== null) {
+      var lane = mallCatalog[expandedFoundUp];
+      if (lane?.foundup_id === caller.expandedId) {
+        var videoIndex = lane.videos.findIndex(function(video) { return video.video_id === caller.videoId; });
+        if (videoIndex >= 0) tile = getTileElement(videoIndex);
+      }
+    } else {
+      var index = mallCatalog.findIndex(function(item) { return (item.foundup_id || item.id) === caller.foundupId; });
+      if (index >= 0) tile = getTileElement(index);
+    }
+    restoreRowOffsets(caller.rows);
+    if (!restoreBrowsePosition(caller.scrollTop, caller.scrollLeft)) {
+      tileFieldWrapper.scrollTo({ top: caller.scrollTop, left: caller.scrollLeft, behavior: 'instant' });
+    }
+    if (tile && Number.isFinite(caller.offset)) {
+      var rect = tile.getBoundingClientRect();
+      var bounds = tileFieldWrapper.getBoundingClientRect();
+      if (rect.bottom <= bounds.top || rect.top >= bounds.bottom) {
+        tileFieldWrapper.scrollTop += rect.top - bounds.top -
+          Math.max(1 - rect.height, Math.min(caller.offset, bounds.height - 1));
+      }
+    }
+    (tile || tileField.querySelector('.mall-tile'))?.focus({ preventScroll: true });
+    return tile;
+  }
+
+  // One ephemeral caller belongs to the existing player session. The catalog,
+  // pager and history owners remain authoritative; no second navigation stack.
+  function preparePlayerReturn(record, tile, caller) {
+    caller = caller || capturePlayerCaller(record, tile);
+    playerCaller = caller;
+    var foundupId = record.foundup_id || record.id;
+    var historyView = { type: 'video', foundupId: foundupId, retainedPlayer: true };
+    if (!fixedVideoField) window.mallStateRestore?.openView?.(historyView, caller);
+    return {
+      onReturnToMall: function(options) {
+        if (caller.catalogEpoch !== catalogEpoch) return false;
+        if (isSelectedEntityScope()) {
+          retainedLane = {
+            record: mallCatalog[expandedFoundUp], epoch: selectionEpoch, catalogEpoch: catalogEpoch,
+            scrollTop: tileFieldWrapper.scrollTop, scrollLeft: tileFieldWrapper.scrollLeft,
+            renderedCount: fixedRenderedCount, sourceIndex: expandSourceIndex,
+            sourceVisual: expandSourceVisual, browseScrollTop: browseScrollTop
+          };
+          if (!caller.expandedId) collapseFoundUp({ retainPlayback: true });
+        }
+        tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
+        // Restore the caller's original snap/anchor condition as well as its
+        // pixels. Enabling mandatory snap here shifts a lane captured while
+        // Floating by the player's former clearance height.
+        tileFieldWrapper.classList.toggle('member-inline-open', caller.inlineOpen === true);
+        desktopInlineTile = null;
+        var origin = restorePlayerCaller(caller);
+        if (!options?.fromHistory) {
+          if (fixedVideoField) {
+            if (window.history.state?.[SCOPED_PLAYER_HISTORY] === foundupId) window.history.back();
+          } else window.mallStateRestore?.closeView?.('video');
+        }
+        window.mallStateRestore?.save?.();
+        return origin;
+      },
+      onResumeFromMall: function(options) {
+        if (caller.catalogEpoch !== catalogEpoch ||
+            !fullCatalog.some(function(item) { return (item.foundup_id || item.id) === foundupId; })) return false;
+        if (!fixedVideoField && (currentFieldScope !== caller.fieldScope || currentProjection !== caller.projection)) {
+          setFieldScope(caller.fieldScope);
+          if (currentProjection !== caller.projection) setProjection(caller.projection, { preserveScope: true });
+        }
+        if (retainedLane) {
+          if (retainedLane.epoch !== selectionEpoch || retainedLane.catalogEpoch !== catalogEpoch ||
+              retainedLane.record.foundup_id !== foundupId) return false;
+          var index = mallCatalog.findIndex(function(item) { return item.foundup_id === foundupId; });
+          if (index < 0) return false;
+          expandedFoundUp = index;
+          expandSourceIndex = index;
+          expandSourceVisual = retainedLane.sourceVisual;
+          browseScrollTop = retainedLane.browseScrollTop;
+          renderTiles();
+          if (retainedLane.renderedCount > fixedRenderedCount) renderTiles(retainedLane.renderedCount);
+          bindInteractions();
+          tileFieldWrapper.scrollTo({ top: retainedLane.scrollTop, left: retainedLane.scrollLeft, behavior: 'instant' });
+          syncSelectedControls();
+        }
+        var player = window.mallVideoPlayer;
+        var currentId = player.getCurrentVideoId?.();
+        var currentTile;
+        if (fixedVideoField) {
+          currentTile = getScopedTile(mallCatalog[0].videos.findIndex(function(video) { return video.video_id === currentId; }));
+        } else if (isSelectedEntityScope()) {
+          var lane = mallCatalog[expandedFoundUp];
+          var currentIndex = lane.videos.findIndex(function(video) { return video.video_id === currentId; });
+          currentTile = currentIndex < 0 ? null : getTileElement(currentIndex);
+        } else {
+          var currentIndex = mallCatalog.findIndex(function(item) { return (item.foundup_id || item.id) === foundupId; });
+          currentTile = currentIndex < 0 ? null : getTileElement(currentIndex);
+        }
+        if (!currentTile) return false;
+        retainedLane = null;
+        currentTile.setAttribute('aria-current', 'true');
+        if (!fixedVideoField) {
+          desktopInlineTile = currentTile;
+          tileFieldWrapper.classList.add('member-inline-open');
+        }
+        if (!options?.fromHistory) {
+          if (fixedVideoField) pushScopedPlayerHistory(foundupId);
+          else window.mallStateRestore?.openView?.(historyView, caller);
+        }
+        return currentTile;
+      }
+    };
+  }
+
   function replaceCatalogPager(session) {
     if (catalogPager === (session || null)) return;
     catalogPager?.close();
@@ -1437,7 +1577,9 @@
   }
 
   function cancelEntitySelection() {
-    var owned = isSelectedEntityScope() || pendingEntityId !== null;
+    var owned = isSelectedEntityScope() || pendingEntityId !== null || retainedLane !== null;
+    retainedLane = null;
+    playerCaller = null;
     selectionEpoch++;
     selectionController?.abort();
     selectionController = null;
@@ -1455,6 +1597,9 @@
   }
 
   function returnEntityToMall() {
+    if (window.mallVideoPlayer?.isOpen?.() && !window.mallVideoPlayer.isMallHidden?.()) {
+      return window.mallVideoPlayer.returnToMall?.();
+    }
     var sourceId = mallCatalog[expandedFoundUp ?? expandSourceIndex]?.foundup_id;
     if (isSelectedEntityScope()) collapseFoundUp();
     else cancelEntitySelection();
@@ -1505,6 +1650,7 @@
   }
 
   async function loadSelectedPage() {
+    if (window.mallVideoPlayer?.isMallHidden?.()) return [];
     if (!isSelectedEntityScope() || !videoPager?.hasMore) return [];
     if (videoLoad) return videoLoad;
     var session = videoPager;
@@ -1513,20 +1659,25 @@
     videoLoad = (async function() {
       try {
         var batch = await session.loadNext();
-        if (session !== videoPager || epoch !== selectionEpoch || !isSelectedEntityScope()) return [];
+        if (session !== videoPager || epoch !== selectionEpoch ||
+            (!isSelectedEntityScope() && retainedLane?.record !== lane)) return [];
         discoveryError = '';
         var additions = batch.filter(function(video) {
           return !lane.videos.some(function(existing) { return existing.video_id === video.video_id; });
         });
         lane.videos.push.apply(lane.videos, additions);
-        renderTiles(fixedRenderedCount + FIXED_VIDEO_BATCH);
-        window.mallVideoPlayer?.refreshQueue?.();
+        if (!window.mallVideoPlayer?.isMallHidden?.()) {
+          renderTiles(fixedRenderedCount + FIXED_VIDEO_BATCH);
+          window.mallVideoPlayer?.refreshQueue?.();
+        }
         return additions;
       } catch (error) {
         if (session === videoPager && error.name !== 'AbortError') {
           discoveryError = 'Could not load the next videos. Use Load more videos to retry.';
-          tileField.querySelector('.mall-video-grid-tail')?.remove();
-          renderFixedTail(lane.videos.length, false, FIXED_VIDEO_BATCH);
+          if (!window.mallVideoPlayer?.isMallHidden?.()) {
+            tileField.querySelector('.mall-video-grid-tail')?.remove();
+            renderFixedTail(lane.videos.length, false, FIXED_VIDEO_BATCH);
+          }
         }
         return [];
       } finally { if (session === videoPager && epoch === selectionEpoch) videoLoad = null; }
@@ -1537,8 +1688,13 @@
   async function openEntityVideos(index, options) {
     var record = mallCatalog[index];
     if (!entityPortraitField || !record || isPropertyListing(record)) return false;
+    if (window.mallVideoPlayer?.isMallHidden?.() && window.mallVideoPlayer.getFoundUpId?.() === record.foundup_id) {
+      return window.mallVideoPlayer.resumeFromMall({ tileActivation: options?.tileActivation === true, autoplay: options?.autoplay !== false });
+    }
     if (isSelectedEntityScope() && expandedFoundUp === index) {
-      return openDesktopVideo(0, options?.immersive === true, { autoplay: options?.autoplay !== false });
+      return openDesktopVideo(0, options?.immersive === true, {
+        autoplay: options?.autoplay !== false, tileActivation: options?.tileActivation === true
+      });
     }
     if (pendingEntityId === record.foundup_id && pendingSelection) return pendingSelection;
     if (!record.videos?.length && !record.video_pages?.catalog) {
@@ -1549,6 +1705,9 @@
       return false;
     }
     if (isSelectedEntityScope()) collapseFoundUp();
+    var callerIndex = mallCatalog.findIndex(function(item) { return item.foundup_id === record.foundup_id; });
+    if (callerIndex < 0) return false;
+    var caller = capturePlayerCaller(record, getTileElement(callerIndex));
     cancelEntitySelection();
     var epoch = selectionEpoch;
     var controller = new AbortController();
@@ -1570,6 +1729,7 @@
         if (index < 0) { cancelEntitySelection(); syncSelectedControls(); return false; }
         pendingEntityId = null;
         expandFoundUp(index);
+        browseScrollTop = caller.scrollTop;
         tileFieldWrapper.scrollTop = 0;
         var selectedIndex = options?.videoId ? record.videos.findIndex(function(video) {
           return video.video_id === options.videoId;
@@ -1580,7 +1740,10 @@
         }
         selectedVideoIndex = selectedIndex;
         syncSelectedControls();
-        openDesktopVideo(selectedIndex, options?.immersive === true, { autoplay: options?.autoplay !== false, queueQuery: options?.queueQuery });
+        openDesktopVideo(selectedIndex, options?.immersive === true, {
+          autoplay: options?.autoplay !== false, queueQuery: options?.queueQuery,
+          tileActivation: options?.tileActivation === true, caller: caller
+        });
         window.mallStateRestore?.save?.();
         return true;
       } catch (error) {
@@ -1657,7 +1820,7 @@
       return;
     }
     var foundupId = item.foundup_id || item.id;
-    if (desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) window.mallVideoPlayer.close();
+    if (desktopInlineTile && !window.mallVideoPlayer?.isTucked?.() && !window.mallVideoPlayer?.isMallHidden?.()) window.mallVideoPlayer.close();
     if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
       window.mallPlanes.openFoundUpById(foundupId);
       return;
@@ -1818,7 +1981,7 @@
     var incremental = fixedVideoField || entityGrid || isSelectedEntityScope() || usesProgressivePatchGrid();
     var batchSize = activePatchBatchSize();
     var append = incremental && Number.isInteger(appendThrough);
-    if (!append && desktopInlineTile && !window.mallVideoPlayer?.isTucked?.()) {
+    if (!append && desktopInlineTile && !window.mallVideoPlayer?.isTucked?.() && !window.mallVideoPlayer?.isMallHidden?.()) {
       window.mallVideoPlayer.close({ restore: false });
     }
     syncSelectedControls();
@@ -2094,6 +2257,7 @@
 
   function rememberTheater() {
     var player = window.mallVideoPlayer;
+    if (player?.isMallHidden?.()) return;
     if (!player?.isTheater?.()) return;
     scopedTheaterState = {
       videoId: mallCatalog[0].videos[player.getCurrentIndex()].video_id,
@@ -2503,7 +2667,7 @@
    */
   function togglePlay(index) {
     if (fixedVideoField) {
-      openScopedVideo(index, false);
+      openScopedVideo(index, false, { tileActivation: true });
       return;
     }
     var targetTile = getTileElement(index);
@@ -2560,12 +2724,12 @@
     }
 
     if (entityPortraitField && expandedFoundUp === null && hasVideos) {
-      openEntityVideos(index);
+      openEntityVideos(index, { tileActivation: true });
       return;
     }
 
     if (memberPlayer) {
-      openDesktopVideo(index, false);
+      openDesktopVideo(index, false, { tileActivation: true });
       return;
     }
 
@@ -2615,6 +2779,7 @@
     if (!fixedVideoField) return;
     scopedTheaterRequested = enabled;
     var player = window.mallVideoPlayer;
+    if (player?.isMallHidden?.()) return;
     var lane = mallCatalog[0];
     // Keep the immersive WikiTube dialog's inert siblings mounted until it closes.
     if (document.getElementById('videoPlayerFullscreen')?.getAttribute('aria-modal') === 'true') return;
@@ -2629,6 +2794,7 @@
         tileField.querySelector('[data-video-replaced]')?.removeAttribute('data-video-replaced');
         player.setTheater?.(true);
       } else {
+        if (scopedPlaybackDismissed) return;
         var restoredIndex = lane.videos.findIndex(function(video) {
           return video.video_id === scopedTheaterState?.videoId;
         });
@@ -2664,17 +2830,29 @@
     return activeTile;
   }
 
-  function openScopedVideo(index, immersive) {
+  function openScopedVideo(index, immersive, options) {
     var player = window.mallVideoPlayer;
     var lane = mallCatalog[0];
     if (!player || !lane?.videos?.[index]) return;
     syncScopedTiles();
     var tile = getScopedTile(index);
     if (!tile) return;
-    var theater = scopedTheaterRequested && !immersive;
+    var tileActivation = options?.tileActivation === true;
+    if (tileActivation) scopedPlaybackDismissed = false;
+    var theater = !tileActivation && scopedTheaterRequested && !immersive;
     var autoplay = theater || canAutoplayFromTile(tile);
 
-    if (player.isOpen() && player.getFoundUpId() === lane.foundup_id) {
+    var samePlayer = player.isOpen() && player.getFoundUpId() === lane.foundup_id;
+    if (samePlayer && player.isMallHidden?.() && player.getCurrentIndex() === index) {
+      return player.resumeFromMall({ tileActivation: tileActivation, autoplay: autoplay });
+    }
+    if (player.isMallHidden?.()) {
+      if (!samePlayer || player.resumeFromMall({ fromHistory: true, autoplay: false }) === false) {
+        player.close({ restore: false });
+        samePlayer = false;
+      }
+    }
+    if (samePlayer && !tileActivation) {
       if (player.getCurrentIndex() === index) {
         if (immersive) {
         if (player.isTheater?.()) player.setTheater(false, tile);
@@ -2699,7 +2877,7 @@
       }
     }
 
-    player.close({ restore: false });
+    if (!samePlayer || !tileActivation) player.close({ restore: false });
     syncScopedTiles();
     tile = getScopedTile(index);
     if (!tile) return;
@@ -2707,8 +2885,9 @@
     if (!theater) pushScopedPlayerHistory(lane.foundup_id);
     syncScopedActiveTile(index);
 
-    var lastPlayedIndex = index;
     player.open(lane.foundup_id, lane.videos, index, {
+      ...preparePlayerReturn(lane, tile),
+      tileActivation: tileActivation,
       floating: !immersive && !theater,
       scoped: true,
       returnTile: tile,
@@ -2718,12 +2897,12 @@
       matchesQuery: matchesScopedVideo,
       autoplay: autoplay,
       onSelectChange: function(nextIdx) {
-        lastPlayedIndex = nextIdx;
         if (!fixedVideoField) return;
         var nextTile = syncScopedActiveTile(nextIdx);
         if (nextTile) scopedPlaybackPosition = captureFixedPosition(theater ? null : nextTile);
       },
-      onClose: function(restore) {
+      onClose: function(restore, lifecycle) {
+        if ((restore || lifecycle?.dismissPlayback) && !lifecycle?.preserveQueueOwner) scopedPlaybackDismissed = true;
         tileField.querySelector('[data-video-replaced]')?.removeAttribute('data-video-replaced');
         tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
         var hadFilterInjection = !!scopedPhonePlaybackIndices;
@@ -2734,9 +2913,6 @@
           syncScopedTiles();
           if (hadFilterInjection && position) restoreVideoGridState(position);
           if (window.history.state?.[SCOPED_PLAYER_HISTORY] === lane.foundup_id) window.history.back();
-          if (scopedTheaterRequested) queueMicrotask(function() {
-            if (scopedTheaterRequested && !player.isOpen()) openScopedVideo(lastPlayedIndex, false);
-          });
         }
       }
     });
@@ -2750,10 +2926,13 @@
       window.history.replaceState(state, '');
     }
     window.addEventListener('popstate', function() {
-      if (window.history.state?.[SCOPED_PLAYER_HISTORY] !== foundupId &&
+      if (window.history.state?.[SCOPED_PLAYER_HISTORY] === foundupId &&
+          window.mallVideoPlayer?.getFoundUpId() === foundupId && window.mallVideoPlayer.isMallHidden?.()) {
+        window.mallVideoPlayer.resumeFromMall({ fromHistory: true, autoplay: false });
+      } else if (window.history.state?.[SCOPED_PLAYER_HISTORY] !== foundupId &&
           window.mallVideoPlayer?.getFoundUpId() === foundupId &&
-          !window.mallVideoPlayer.isTheater?.()) {
-        window.mallVideoPlayer.close();
+          !window.mallVideoPlayer.isTheater?.() && !window.mallVideoPlayer.isMallHidden?.()) {
+        window.mallVideoPlayer.returnToMall({ fromHistory: true });
       }
     });
   }
@@ -2841,11 +3020,17 @@
     if (!tile || !lane?.videos?.[videoIndex]) return false;
     var targetFoundUpId = lane.foundup_id || lane.id;
     var autoplay = opts?.autoplay !== undefined ? opts.autoplay : canAutoplayFromTile(tile);
+    if (player.isMallHidden?.() && player.getFoundUpId?.() === targetFoundUpId) {
+      if (player.getCurrentIndex() === videoIndex) {
+        return player.resumeFromMall({ tileActivation: opts?.tileActivation === true, autoplay: autoplay });
+      }
+      if (player.resumeFromMall({ fromHistory: true, autoplay: false }) === false) return false;
+    }
     var selectedScope = isSelectedEntityScope();
     var scopeEpoch = selectionEpoch;
-    var wantTheater = !immersive && selectedScope && selectedDesktop();
+    var wantTheater = !opts?.tileActivation && !immersive && selectedScope && selectedDesktop();
 
-    if (desktopInlineTile === tile && opts?.videoIndex === undefined && player.isOpen() && player.getFoundUpId?.() === targetFoundUpId) {
+    if (!opts?.tileActivation && desktopInlineTile === tile && opts?.videoIndex === undefined && player.isOpen() && player.getFoundUpId?.() === targetFoundUpId) {
       if (immersive) {
         if (player.isTheater?.()) player.setTheater(false, tile);
         player.openWikiTube ? player.openWikiTube() : player.expandInline();
@@ -2862,11 +3047,14 @@
       desktopInlineTile.removeAttribute('aria-current');
       desktopInlineTile = null;
     }
+    var returnOptions = preparePlayerReturn(lane, tile, opts?.caller);
     tile.setAttribute('aria-current', 'true');
     desktopInlineTile = tile;
     tileFieldWrapper.classList.add('member-inline-open');
 
     player.openDesktopVideo(targetFoundUpId, lane.videos, videoIndex, {
+      ...returnOptions,
+      tileActivation: opts?.tileActivation === true,
       floating: !immersive && !wantTheater,
       theater: wantTheater,
       onQueueEnd: selectedScope ? async function() {
@@ -2891,10 +3079,18 @@
           }
         }
       },
-      onClose: function() {
-        tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
-        tileFieldWrapper.classList.remove('member-inline-open');
-        desktopInlineTile = null;
+      onClose: function(restore, lifecycle) {
+        if (!lifecycle?.preserveQueueOwner) {
+          tileField.querySelector('.mall-tile[aria-current]')?.removeAttribute('aria-current');
+          tileFieldWrapper.classList.remove('member-inline-open');
+          desktopInlineTile = null;
+        }
+        // Final player Close disposes playback, not the selected field's pager.
+        // The field remains browsable and owns cancellation on scope changes.
+        // Its bounded page may finish, but the player's generation/intent gate
+        // prevents that completion from recreating a closed provider/session.
+        if (!lifecycle?.preserveQueueOwner) retainedLane = null;
+        if (!lifecycle?.preserveQueueOwner) playerCaller = null;
       }
     });
     return true;
@@ -2903,7 +3099,7 @@
   function getActiveVideo() {
     if (fixedVideoField || groupDefinitions !== null) return null;
     var player = window.mallVideoPlayer;
-    if (player && typeof player.isOpen === 'function' && player.isOpen()) {
+    if (player && typeof player.isOpen === 'function' && player.isOpen() && !player.isMallHidden?.()) {
       var foundupId = player.getFoundUpId?.();
       var videoId = player.getCurrentVideoId?.();
       if (!videoId && foundupId) {
@@ -3150,9 +3346,9 @@
   /**
    * Collapse expanded video field back to Mall
    */
-  function collapseFoundUp() {
+  function collapseFoundUp(options) {
     if (expandedFoundUp === null || fixedVideoField) return;
-    if (entityPortraitField) cancelEntitySelection();
+    if (entityPortraitField && !options?.retainPlayback) cancelEntitySelection();
     stopInlinePreview();
 
     // Hide collapse hint first
@@ -3172,6 +3368,17 @@
     }
     var expandedRect = tileField.getBoundingClientRect();
     var reducedMotion = prefersReducedMotion();
+
+    if (options?.retainPlayback) {
+      expandedFoundUp = null;
+      playingIndex = null;
+      renderTiles();
+      bindInteractions();
+      if (playerCaller) restorePlayerCaller(playerCaller);
+      expandSourceIndex = null;
+      expandSourceVisual = null;
+      return;
+    }
 
     // FLIP animation (skip if reduced motion)
     if (sourceIndex !== null && expandSourceVisual && !reducedMotion) {
@@ -3275,7 +3482,7 @@
 
   // Projection changes invalidate index-based media state.
   function resetMediaScope() {
-    if (entityPortraitField) cancelEntitySelection();
+    if (entityPortraitField && !window.mallVideoPlayer?.isMallHidden?.()) cancelEntitySelection();
     stopInlinePreview();
     expandedFoundUp = null;
     expandSourceIndex = null;
@@ -3524,7 +3731,7 @@
       return;
     }
     autoSelectDensity();
-    if (isSelectedEntityScope() && window.mallVideoPlayer?.isOpen?.() && !window.mallVideoPlayer.isWikiTube?.()) {
+    if (isSelectedEntityScope() && window.mallVideoPlayer?.isOpen?.() && !window.mallVideoPlayer.isMallHidden?.() && !window.mallVideoPlayer.isWikiTube?.()) {
       window.mallVideoPlayer.setTheater?.(selectedDesktop());
     }
     if (desktopInlineTile || window.mallVideoPlayer?.isOpen?.()) {
@@ -3698,15 +3905,15 @@
    * Set projection mode and re-render tiles
    * @param {string} projection - Projection name: default, alpha, readiness, category
    */
-  function setProjection(projection) {
+  function setProjection(projection, options) {
     if (fixedVideoField) return;
     resetMediaScope();
     if (!['default', 'alpha', 'readiness', 'category'].includes(projection)) {
       projection = 'default';
     }
 
-    currentFieldScope = null;
-    mallCatalog = fullCatalog.slice();
+    if (!options?.preserveScope) currentFieldScope = null;
+    mallCatalog = options?.preserveScope ? filterByScope(currentFieldScope) : fullCatalog.slice();
     originalOrder = mallCatalog.slice();
     currentProjection = projection;
     mallCatalog = sortByProjection(projection);
@@ -4020,6 +4227,7 @@
     updateCatalog: updateCatalog,
     openEntityById: openEntityById,
     getLoadedCatalog: function() { return fullCatalog.slice(); },
+    preparePlayerReturn: preparePlayerReturn,
     getGeographicState: getGeographicState,
     restoreGeographicState: restoreGeographicState,
     getVideoGridState: getVideoGridState,

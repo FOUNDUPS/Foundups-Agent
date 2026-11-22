@@ -144,7 +144,8 @@ provider = """(() => {
 
 def route_local(route):
     u = urlsplit(route.request.url)
-    if u.hostname in {"hpc.foundups.com", "foundups.com", "play.foundups.com"}:
+    if u.hostname in {"hpc.foundups.com", "foundups.com", "play.foundups.com",
+                      "foundupscom--play-v26-iphone-jxbn78ue.web.app"}:
         if u.path == "/member/mall-public-video-catalog.json":
             route.fulfill(status=200, json=catalog)
             return
@@ -242,7 +243,7 @@ def verify_hpc_banner_header(browser_type):
                 page.set_default_timeout(8000)
                 page.goto("https://hpc.foundups.com/member/", wait_until="domcontentloaded")
                 observed[f"{width}x{height}"] = expect_hpc_banner_header(page)
-                expect(page.locator("#videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
+                expect(page.locator("#videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact#hpc")
                 expect(page.locator("#videoScopeDisclosureText")).to_contain_text("not affiliated")
                 assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
             finally:
@@ -267,7 +268,7 @@ def main():
         build = page.locator("#videoScopeHeader .mall-build-label")
         expect(build).to_have_text("Build v26")
         expect(build).to_be_visible()
-        expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact")
+        expect(page.locator("#videoScopeHeader #videoScopeVoice")).to_have_attribute("href", "https://vote.mtrout.com/contact#hpc")
         expect(page.locator("#videoScopeInfo")).to_be_hidden()
         expect(page).to_have_title("HPC")
         expect(page.locator('meta[name="apple-mobile-web-app-title"]')).to_have_attribute("content", "HPC")
@@ -1481,10 +1482,21 @@ def verify_floating_and_wikitube_gestures(browser_type):
         dispatch_swipe(player.locator(".video-player-queue-track"), -120, 3)
         assert page.evaluate("window.mallVideoPlayer.isWikiTube() === true")
 
-        # Accessible Floating player button minimizes WikiTube back to floating
+        # The existing app collapse action returns to the actual Mall, retaining
+        # the same provider paused. A deliberate same-video tile tap resumes it.
+        page.evaluate("window.gestureReturnFrame = document.querySelector('#videoPlayerFullscreen iframe')")
         player.locator('[data-action="float"]').tap()
+        page.wait_for_function("window.mallVideoPlayer.isMallHidden() && window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'paused'")
+        expect(player).to_be_hidden()
+        assert page.evaluate("window.mallVideoPlayer.isOpen() && window.mallVideoPlayer.getCurrentIndex() === 1")
+        assert page.evaluate("window.gestureReturnFrame === document.querySelector('#videoPlayerFullscreen iframe')")
+        mall_position = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds")
+        page.wait_for_timeout(130)
+        assert abs(page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds") - mall_position) <= .02
+        video(page, 1).tap(position={"x": 30, "y": 80})
         expect(player).to_have_attribute("aria-label", "Floating video player")
         expect_playing(page, 1)
+        assert page.evaluate("!window.mallVideoPlayer.isMallHidden() && window.gestureReturnFrame === document.querySelector('#videoPlayerFullscreen iframe')")
 
         # Pinch-out back to WikiTube, then Pinch-in on WikiTube returns directly to grid
         dispatch_pinch(player.locator(".video-player-top-bar"), 40, 105)
@@ -1556,6 +1568,7 @@ def verify_floating_and_wikitube_gestures(browser_type):
         "one_tap_375px_autoplay": True,
         "top_anchored_floating_scroll": True,
         "swipe_tuck_pauses_and_explicit_visible_restore": True,
+        "wikitube_return_mall_paused_and_same_video_tap_resumes": True,
         "pinch_transitions_and_jitter_guard": True,
         "wikitube_sequential_and_bounded_recovery": True
     }, sort_keys=True))
@@ -1854,8 +1867,19 @@ def verify_hidden_playback_policy(browser_type):
         stable_paused()
         manual_play(1)
         player.locator('[data-action="float"]').tap()
+        page.wait_for_function("window.mallVideoPlayer.isMallHidden()")
+        expect(player).to_be_hidden()
+        stable_paused()
+        assert page.evaluate("window.mallVideoPlayer.isOpen() && window.mallVideoPlayer.getCurrentIndex() === 1")
+        assert page.evaluate("window.policyFrame === document.querySelector('#videoPlayerFullscreen iframe')")
+        # Return is reversible rather than final Close. Use a real same-video
+        # tile tap before testing explicit dismissal and a fresh held-READY open.
+        video(page,1).tap(position={"x":30,"y":80})
+        expect_playing(page,1)
+        assert page.evaluate("!window.mallVideoPlayer.isMallHidden() && window.policyFrame === document.querySelector('#videoPlayerFullscreen iframe')")
         observed['synthetic_background_cancels_pending_wikitube_recovery']=True
         observed['late_hidden_wikitube_error_and_ended_do_not_advance']=True
+        observed['mall_return_paused_retains_same_provider_and_tile_tap_resumes']=True
 
         # onReady and provider-autoplay can arrive after a user has tucked.
         player.get_by_role('button',name='Close player',exact=True).tap()

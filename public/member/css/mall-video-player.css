@@ -37,6 +37,11 @@
   display: flex;
 }
 
+/* Retain the mounted provider session while the actual Mall caller is visible. */
+.video-player-fullscreen.video-player-mall {
+  display: none !important;
+}
+
 /* ─── Top Bar ─── */
 .video-player-top-bar {
   position: absolute;

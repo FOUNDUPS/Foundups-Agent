@@ -973,7 +973,10 @@
     if (isDevHarnessActive()) {
       initDevHarness().catch(error => {
         console.error('[DevHarness] Failed to initialize:', error);
-        loadingState.innerHTML = '<div style="text-align:center;color:#ff6b6b;padding:2rem;">Dev harness error: ' + error.message + '</div>';
+        const message = document.createElement('div');
+        message.style.cssText = 'text-align:center;color:#ff6b6b;padding:2rem;';
+        message.textContent = 'Dev harness error: ' + error.message;
+        loadingState.replaceChildren(message);
       });
     } else {
       initClerkAuth().catch(error => {
@@ -1106,7 +1109,10 @@
         }
       } catch (error) {
         console.error('[Member] Error verifying invite:', error);
-        gateInviteStatus.innerHTML = '<span style="color:#ff6b6b;">Error checking code: ' + (error.message || 'Unknown error') + '</span>';
+        const message = document.createElement('span');
+        message.style.color = '#ff6b6b';
+        message.textContent = 'Error checking code: ' + (error.message || 'Unknown error');
+        gateInviteStatus.replaceChildren(message);
       }
 
       gateVerifyBtn.disabled = false;

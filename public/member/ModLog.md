@@ -1,5 +1,22 @@
 # Member Area Module Change Log
 
+## 2026-11-22 - selective v26 return/navigation and defensive rendering
+
+Reused the existing player/field/history/dock for a paused reversible Mall
+session, caller restoration and independent confirmed tile-tap destinations.
+Final player Close no longer destroys the selected field's pager; a new
+two-engine regression proves Close/reopen crosses the next real fixture page
+without reviving a closed provider. Existing hidden-player, native-control and
+queue-intent protections remain required. The direct unavailable dog returns
+to Mall; the campaign and Voice links retain separate destinations.
+
+Construct history and exception messages with DOM/text APIs instead of parsing
+interpolated HTML. Independent defensive review and literal rendering tests
+remain distinct from backend authorization and hosted CodeQL resolution.
+Guest Fractal, held gesture defaults, live v25, previews and Hosting are not
+changed. Source base is `5e0f87e1d4faad4de8748e83c71d02953640cb40`; exact
+candidate qualification and remaining gates are in [TestModLog](tests/TestModLog.md).
+
 ## 2026-11-21 - v26 candidate and separate Browse AI compatibility phase
 
 Reconciled the working source on base `9b85e9cbb874b3720e453d3e3d3a3974dca53504`;

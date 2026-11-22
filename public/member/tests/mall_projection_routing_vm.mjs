@@ -71,6 +71,23 @@ const addEnd = projection.indexOf("options.setAttribute('aria-label'", addStart)
 assert.ok(addStart > 0 && addEnd > addStart && addEnd - addStart < 1500, 'actual bounded dock Add handler exists');
 const dockAddHandler = projection.slice(addStart, addEnd);
 
+// Fixed unique repository owners with bounded literal delimiters; no HTML filtering.
+function fixedOwnerBlock(source, startMarker, endMarker, maxLength) {
+  const start = source.indexOf(startMarker);
+  assert.ok(start >= 0 && start === source.lastIndexOf(startMarker),
+    'one fixed source owner must exist: ' + startMarker);
+  const end = source.indexOf(endMarker, start + startMarker.length);
+  assert.ok(end > start && end - start < maxLength, 'fixed source owner must stay bounded');
+  return source.slice(start, end);
+}
+const normalizedMemberHtml = memberHtml.replaceAll('\r\n', '\n');
+const devErrorOwner = fixedOwnerBlock(normalizedMemberHtml,
+  'initDevHarness().catch(error => {',
+  '\n    } else {\n      initClerkAuth().catch(error => {', 1200);
+const inviteErrorOwner = fixedOwnerBlock(normalizedMemberHtml,
+  "      } catch (error) {\n        console.error('[Member] Error verifying invite:', error);",
+  '\n\n      gateVerifyBtn.disabled = false;', 1200);
+
 function runtime(href, { remember = true, actualState = false, autoNodes = false, blockIntentWrite = false } = {}) {
   let page = new URL(href);
   const calls = { replace: [], assign: [], href: [], sdk: [], mounts: [], intents: [], saves: 0, fetches: [], errors: [] };
@@ -103,6 +120,11 @@ function runtime(href, { remember = true, actualState = false, autoNodes = false
       }
     }
     appendChild(child) { this.append(child); return child; }
+    replaceChildren(...children) {
+      for (const child of this.children) { child.parentElement = null; child.isConnected = false; }
+      this.children = [];
+      this.append(...children);
+    }
     addEventListener(type, callback, options) {
       const list = this.listeners.get(type) || []; list.push({ callback, once: options?.once }); this.listeners.set(type, list);
     }
@@ -170,6 +192,57 @@ function runtime(href, { remember = true, actualState = false, autoNodes = false
 
 let checks = 0;
 async function check(name, callback) { await callback(); checks++; console.log('PASS ' + name); }
+
+function forbidHtmlWrites(node) {
+  let writes = 0;
+  Object.defineProperty(node, 'innerHTML', {
+    set() { writes++; throw Error('Error text must not be interpreted as parent HTML'); },
+  });
+  return () => writes;
+}
+
+await check('actual dev harness catch renders hostile error text without parent HTML writes', async () => {
+  const h = runtime(preview + '/member/', { autoNodes: true });
+  const parent = h.document.getElementById('loadingState');
+  parent.appendChild(h.document.createElement('old-loading-state'));
+  const htmlWrites = forbidHtmlWrites(parent);
+  const hostileError = { message: '<img src=x onerror="fixtureAttack=1"> & "quoted" <b>unsafe</b>' };
+  h.win.fixtureError = hostileError;
+  h.run('var loadingState = document.getElementById("loadingState"); ' +
+    'function initDevHarness() { return Promise.reject(window.fixtureError); }');
+  await h.run(devErrorOwner, 'member.html#actual-dev-harness-catch');
+  assert.equal(parent.children.length, 1);
+  const message = parent.children[0];
+  assert.equal(message.tagName, 'DIV');
+  assert.equal(message.textContent, 'Dev harness error: ' + hostileError.message);
+  assert.equal(message.style.cssText, 'text-align:center;color:#ff6b6b;padding:2rem;');
+  assert.equal(message.children.length, 0);
+  assert.equal(htmlWrites(), 0);
+  assert.equal(h.win.fixtureAttack, undefined);
+  assert.deepEqual(h.calls.fetches, []);
+});
+
+await check('actual invite catch keeps hostile errors and fallback as literal styled text', () => {
+  const hostileError = { message: '<img src=x onerror="fixtureAttack=1"> & "quoted" <b>unsafe</b>' };
+  for (const error of [hostileError, { message: '' }]) {
+    const h = runtime(preview + '/member/', { autoNodes: true });
+    const parent = h.document.getElementById('gateInviteStatus');
+    parent.appendChild(h.document.createElement('old-invite-state'));
+    const htmlWrites = forbidHtmlWrites(parent);
+    h.win.fixtureError = error;
+    h.run('var gateInviteStatus = document.getElementById("gateInviteStatus"); ' +
+      'try { throw window.fixtureError;\n' + inviteErrorOwner, 'member.html#actual-invite-error-catch');
+    assert.equal(parent.children.length, 1);
+    const message = parent.children[0];
+    assert.equal(message.tagName, 'SPAN');
+    assert.equal(message.textContent, 'Error checking code: ' + (error.message || 'Unknown error'));
+    assert.equal(message.style.color, '#ff6b6b');
+    assert.equal(message.children.length, 0);
+    assert.equal(htmlWrites(), 0);
+    assert.equal(h.win.fixtureAttack, undefined);
+    assert.deepEqual(h.calls.fetches, []);
+  }
+});
 
 await check('public Mall and explicit read-only entries use actual member boot without auth SDK', () => {
   for (const origin of ['https://play.foundups.com', preview]) {

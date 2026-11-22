@@ -1694,48 +1694,87 @@
     var entries = (player && typeof player.getHistory === 'function') ? player.getHistory() : [];
     var count = entries.length;
 
-    var html = '<div class="reddog-history-header">';
-    html += '<span class="reddog-section-label">Recently Watched</span>';
-    html += '<span class="reddog-history-count">' + count + '</span>';
+    var content = document.createDocumentFragment();
+    var header = document.createElement('div');
+    header.className = 'reddog-history-header';
+    var label = document.createElement('span');
+    label.className = 'reddog-section-label';
+    label.textContent = 'Recently Watched';
+    var counter = document.createElement('span');
+    counter.className = 'reddog-history-count';
+    counter.textContent = String(count);
+    header.appendChild(label);
+    header.appendChild(counter);
     if (count > 0) {
-      html += '<button class="reddog-history-clear" data-reddog-history-clear type="button">Clear</button>';
+      var clearButton = document.createElement('button');
+      clearButton.className = 'reddog-history-clear';
+      clearButton.setAttribute('data-reddog-history-clear', '');
+      clearButton.type = 'button';
+      clearButton.textContent = 'Clear';
+      header.appendChild(clearButton);
     }
-    html += '</div>';
+    content.appendChild(header);
 
     if (count === 0) {
-      html += '<p class="reddog-history-empty">No watch history yet. Videos you play will appear here.</p>';
-      historyEl.innerHTML = html;
+      var empty = document.createElement('p');
+      empty.className = 'reddog-history-empty';
+      empty.textContent = 'No watch history yet. Videos you play will appear here.';
+      content.appendChild(empty);
+      historyEl.replaceChildren(content);
       return;
     }
 
-    html += '<div class="reddog-history-list">';
+    var list = document.createElement('div');
+    list.className = 'reddog-history-list';
     entries.forEach(function (entry) {
-      var thumb = esc(entry.thumbnail || '');
-      var title = esc(entry.title || 'Untitled');
-      var foundupId = esc(entry.foundupId || '');
-      var videoId = esc(entry.videoId || '');
+      var thumb = entry.thumbnail || '';
+      var title = entry.title || 'Untitled';
+      var foundupId = entry.foundupId || '';
+      var videoId = entry.videoId || '';
       var videoIndex = entry.videoIndex != null ? entry.videoIndex : 0;
       var watchDate = entry.timestamp ? new Date(entry.timestamp).toLocaleDateString() : '';
 
-      html += '<button class="reddog-history-card" data-history-foundup="' + foundupId + '" data-history-video="' + videoId + '" data-history-index="' + videoIndex + '" type="button">';
+      var card = document.createElement('button');
+      card.className = 'reddog-history-card';
+      card.dataset.historyFoundup = foundupId;
+      card.dataset.historyVideo = videoId;
+      card.dataset.historyIndex = videoIndex;
+      card.type = 'button';
       if (thumb) {
-        html += '<img class="reddog-history-thumb" src="' + thumb + '" alt="" loading="lazy">';
+        var image = document.createElement('img');
+        image.className = 'reddog-history-thumb';
+        image.src = thumb;
+        image.alt = '';
+        image.loading = 'lazy';
+        card.appendChild(image);
       } else {
-        html += '<div class="reddog-history-thumb reddog-history-thumb-empty"></div>';
+        var placeholder = document.createElement('div');
+        placeholder.className = 'reddog-history-thumb reddog-history-thumb-empty';
+        card.appendChild(placeholder);
       }
-      html += '<div class="reddog-history-info">';
-      html += '<span class="reddog-history-title">' + title + '</span>';
-      html += '<span class="reddog-history-meta">' + foundupId + (watchDate ? ' \u00b7 ' + watchDate : '') + '</span>';
+      var info = document.createElement('div');
+      info.className = 'reddog-history-info';
+      var titleLabel = document.createElement('span');
+      titleLabel.className = 'reddog-history-title';
+      titleLabel.textContent = title;
+      var meta = document.createElement('span');
+      meta.className = 'reddog-history-meta';
+      meta.textContent = foundupId + (watchDate ? ' \u00b7 ' + watchDate : '');
+      info.appendChild(titleLabel);
+      info.appendChild(meta);
       var contLabel = formatContinueAt(entry.playbackPosition);
       if (contLabel) {
-        html += '<span class="reddog-history-continue-badge">' + esc(contLabel) + '</span>';
+        var badge = document.createElement('span');
+        badge.className = 'reddog-history-continue-badge';
+        badge.textContent = contLabel;
+        info.appendChild(badge);
       }
-      html += '</div>';
-      html += '</button>';
+      card.appendChild(info);
+      list.appendChild(card);
     });
-    html += '</div>';
+    content.appendChild(list);
 
-    historyEl.innerHTML = html;
+    historyEl.replaceChildren(content);
 
     // Wire click handlers for re-entry
     historyEl.querySelectorAll('[data-history-foundup]').forEach(function (card) {

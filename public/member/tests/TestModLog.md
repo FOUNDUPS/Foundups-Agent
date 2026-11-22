@@ -1,3 +1,44 @@
+## 2026-11-22 - selective v26 return qualification
+
+Input is exact #2439 head `5e0f87e1d4faad4de8748e83c71d02953640cb40`.
+The private ZIP is SHA-256
+`f0df165781afdb6bf8129564f413dfcdd104cc19af567ed694c2012220f5574d`;
+the independent four-file defensive patch is
+`84ed50177e6360c1b73a598bb730879265a213e69fc7a80a944ada2c03467e8c`.
+Neither aggregate was adopted wholesale. The producer's initial 54/56 FAIL
+and later aggregate 56/56 PASS remain historical, separate receipts.
+
+Selective composition excludes four prototype cases (two graph/lens and
+nonvideo-face families across two engines) as NOT_APPLICABLE. It retains two
+actual-source hostile-history cases and adds two selected-lane Close/reopen
+pagination cases, for 54 controlled UI cases. The new paging regression failed
+in both engines before repair at the natural next-clip boundary. Keeping the
+existing field pager owner fixes it without weakening closed-player/frame,
+hidden-pause or queue-generation assertions. The pending-page Close receipt
+distinguishes field completion from forbidden playback resurrection.
+
+Root source-bound local qualification: 54/54 Chromium/WebKit UI cases, routing
+17, concierge 28, preferences 16, worker/state 29 and catalog 35 pass. The first
+private fixture export lacked unchanged root worker/registry dependencies;
+restoring their exact base blobs resolved those fixture-only failures. A root
+card-tail setup was made atomic to avoid racing the real observer; caller,
+scroll, focus and retained-session assertions are preserved. Existing player
+policy passes all six engine groups and delayed queue callbacks pass 18/18.
+The broader public-TV suite passes 138/138, strengthening its old destructive
+Back assertions to require a paused retained provider, queue, caller and stable
+media time. Explicit Close and pending cancellation stay destructive. Desktop
+tile entry uses the confirmed Floating default; the existing theater mode is
+tested explicitly through its public API. All request, paging, retry, filter,
+orientation and far-scroll checks remain. Targeted static contracts pass 159.
+The existing workflow now includes the two defensive history cases through
+`mall_phone_ui_browser.py --include-defensive`; runtime pins/gates are preserved.
+Hosted CodeQL resolution is never inferred from these local results.
+
+Browsers use the existing synthetic official-API fixture and intercepted files;
+all runs bind source hashes before/after. No actual YouTube, physical iPhone,
+member authorization, new HTTPS deployment or production acceptance is claimed.
+The canonical terminal receipt binds the final commit/tree and each test output.
+
 ## 2026-11-21 — frozen v26 diagnostic metadata discrepancy
 
 At 09:45:18 UTC, two anonymous HTTPS GETs confirmed the frozen v26 preview serves

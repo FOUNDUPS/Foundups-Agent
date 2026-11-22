@@ -1,5 +1,41 @@
 # HPC roadmap
 
+## 2026-11-22 - selective v26 reversible return; existing PR #2439
+
+0102 resumes the existing clean #2439 source lane at
+`5e0f87e1d4faad4de8748e83c71d02953640cb40`. Canonical main was inspected at
+`dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b`; the branch remains conflicting.
+This bounded continuation follows the current shared navigation contract's
+[section 14](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences).
+It preserves the Canvas funding/Voice decisions and all prior dated evidence.
+
+Adopt only reversible Mall return, confirmed video-tile tap destinations and
+navigation from the private review bundle. Floating is the confirmed tile-tap
+default; frame destination remains independent. No guest Fractal client,
+prototype lenses, face loans, or unresolved pinch/swipe defaults are adopted.
+The three gesture defaults remain open; no new gesture control is advertised.
+
+Mall return pauses a controllable ready provider behind the Mall while retaining
+the clip, queue/query and observed position. Existing history/field owners
+restore caller scroll and focus. Forward restores paused; a deliberate visible
+selection may request playback. Unsafe or unready providers are disposed with
+an honest continuity-unavailable state. Final Close destroys playback. The
+still-visible selected field retains its own pager until a scope change; late
+page completion cannot recreate a closed player. One bottom dock remains.
+
+The direct unavailable-conversation dog returns to Play Mall with an accessible
+Mall name; campaign banner and Voice destinations remain distinct. Separately
+reviewed DOM/text rendering repairs cover history and two exception messages.
+They do not change admission, membership, editor permissions or URL policy.
+
+Controlled Chromium/WebKit results, exact source hashes, independent reviews
+and the red-to-green Close/reopen paging case are recorded in the
+[member test log](../../../public/member/tests/TestModLog.md). The historical
+aggregate's 56-case PASS does not qualify this selective composition. Hosted
+checks/CodeQL, conflict reconciliation, preview parity, physical Safari/PWA and
+real-provider playback remain separate gates. No merge or publication is part
+of this change; live v25 and both frozen previews remain untouched.
+
 ## 2026-11-21 - v26 phone candidate; v25 frozen comparison
 
 Current work starts from `9b85e9cbb874b3720e453d3e3d3a3974dca53504`.

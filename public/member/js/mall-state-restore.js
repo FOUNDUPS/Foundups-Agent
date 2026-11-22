@@ -32,6 +32,11 @@
   var RETURN_TTL_MS = 15 * 60 * 1000;
   var FILTER_KEYS = ['q', 'country', 'prefecture', 'city', 'locality', 'max', 'land', 'sort', 'group', 'large', 'tour'];
   var SCROLL_DEBOUNCE_MS = 300;
+  // Reuse the ordinary Mall history contract from the existing restoration
+  // owner. These entries reference a live page-local player, never resources.
+  var BROWSE_HISTORY = 'pfmallMallBrowse';
+  var VIEW_HISTORY = 'pfmallMallView';
+  var restoringHistory = false;
 
   function browseWrapper() {
     // The property template also contains a wrapper; retain the active Mall's position.
@@ -265,14 +270,17 @@
   }
 
   function defaultVideoOptions() {
-    return { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true };
+    return { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true,
+      tileTapDestination: 'floating' };
   }
 
   function validVideoOptions(options, partial) {
-    if (!ownDataRecord(options, ['autoplayNext', 'frameDestination', 'collapseDestination', 'revealSelectedPlayer'])) return false;
-    if (!partial && Object.keys(options).length !== 4) return false;
+    var legacyKeys = ['autoplayNext', 'frameDestination', 'collapseDestination', 'revealSelectedPlayer'];
+    if (!ownDataRecord(options, legacyKeys.concat('tileTapDestination'))) return false;
+    if (!partial && !legacyKeys.every(function(key) { return Object.prototype.hasOwnProperty.call(options, key); })) return false;
     return Object.keys(options).every(function(key) {
       if (key === 'autoplayNext' || key === 'revealSelectedPlayer') return typeof options[key] === 'boolean';
+      if (key === 'tileTapDestination') return ['floating', 'wikitube', 'full-video'].indexOf(options[key]) !== -1;
       return (key === 'frameDestination' ? ['wikitube', 'full-video'] : ['wikitube', 'mall']).indexOf(options[key]) !== -1;
     });
   }
@@ -281,8 +289,13 @@
     if (typeof raw !== 'string' || raw.length > 1024) return null;
     try {
       var record = JSON.parse(raw);
-      return ownDataRecord(record, ['version', 'options']) && Object.keys(record).length === 2 && record.version === 1 &&
-        validVideoOptions(record.options, false) ? record.options : null;
+      if (!ownDataRecord(record, ['version', 'options']) || Object.keys(record).length !== 2 || record.version !== 1 ||
+          !ownDataRecord(record.options, ['autoplayNext', 'frameDestination', 'collapseDestination', 'revealSelectedPlayer', 'tileTapDestination'])) return null;
+      var options = Object.assign({}, record.options);
+      // Old frame/collapse settings describe different actions. Reading a v1
+      // record supplies only the confirmed tile default, without writing it.
+      if (['floating', 'wikitube', 'full-video'].indexOf(options.tileTapDestination) === -1) options.tileTapDestination = 'floating';
+      return validVideoOptions(options, false) ? options : null;
     } catch (error) { return null; }
   }
 
@@ -552,9 +565,63 @@
 
   // ─── Auto-Save Binding ───
 
+  function openView(view, caller) {
+    if (selectedProduct || selectedVideoScope || restoringHistory || view?.retainedPlayer !== true ||
+        view.type !== 'video' || typeof view.foundupId !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(view.foundupId) ||
+        !window.history?.pushState) return;
+    var prior = window.history.state || {};
+    var browse = prior[VIEW_HISTORY] ? prior[BROWSE_HISTORY] : captureState();
+    if (!browse) return;
+    browse = { ...browse };
+    delete browse.activeVideo;
+    if (caller && Number.isFinite(caller.scrollTop)) {
+      browse.scrollTop = caller.scrollTop;
+      browse.scrollLeft = caller.scrollLeft;
+    }
+    if (!prior[VIEW_HISTORY]) window.history.replaceState({ ...prior, [BROWSE_HISTORY]: browse }, '');
+    var next = { ...window.history.state, [BROWSE_HISTORY]: browse, [VIEW_HISTORY]: view };
+    if (prior[VIEW_HISTORY]?.retainedPlayer) window.history.replaceState(next, '');
+    else window.history.pushState(next, '');
+  }
+
+  function closeView(type) {
+    if (selectedProduct || selectedVideoScope || restoringHistory) return;
+    var view = window.history?.state?.[VIEW_HISTORY];
+    if (view?.retainedPlayer && view.type === type) window.history.back();
+  }
+
+  function restoreHistory() {
+    if (selectedProduct || selectedVideoScope) return;
+    var entry = window.history.state || {};
+    var view = entry[VIEW_HISTORY];
+    if (view && !view.retainedPlayer) return;
+    if (!entry[BROWSE_HISTORY] && !view?.retainedPlayer) return;
+    var player = window.mallVideoPlayer;
+    restoringHistory = true;
+    try {
+      if (view?.retainedPlayer && player?.isMallHidden?.() && player.getFoundUpId() === view.foundupId) {
+        if (player.resumeFromMall({ fromHistory: true, autoplay: false }) !== false) return;
+      } else if (!view?.retainedPlayer && player?.isOpen?.() && !player.isMallHidden?.()) {
+        player.returnToMall({ fromHistory: true });
+        return;
+      } else if (view?.retainedPlayer && player?.isOpen?.() &&
+                 player.getFoundUpId() === view.foundupId && !player.isMallHidden?.()) return;
+      // Reload, an explicitly closed session, or a removed caller cannot replay
+      // a retained iframe. Remove only our marker; never navigate to another ID.
+      if (view?.retainedPlayer) {
+        var surviving = { ...entry };
+        delete surviving[VIEW_HISTORY];
+        window.history.replaceState(surviving, '');
+      }
+    } finally { restoringHistory = false; }
+  }
+
   function bindAutoSave() {
     if (initialized) return;
     initialized = true;
+    window.addEventListener('popstate', restoreHistory);
+    // A reload does not reconstruct a hidden live session.
+    if (window.history?.state?.[VIEW_HISTORY]?.retainedPlayer) restoreHistory();
 
     // Save on projection chip clicks
     document.addEventListener('click', function(e) {
@@ -612,9 +679,10 @@
     });
 
     // Save on active video playback lifecycle in ordinary Mall (never in HPC/product)
-    ['videoPlayerOpen', 'videoPlayerNavigate', 'videoPlayerClose'].forEach(function(eventName) {
-      window.addEventListener(eventName, function() {
+    ['videoPlayerOpen', 'videoPlayerNavigate', 'videoPlayerModeChange', 'videoPlayerClose'].forEach(function(eventName) {
+      window.addEventListener(eventName, function(event) {
         if (selectedVideoScope || selectedProduct) return;
+        if (eventName === 'videoPlayerClose' && event.detail?.restore !== false) closeView('video');
         setTimeout(save, 50);
       });
     });
@@ -641,6 +709,8 @@
     getVideoOptions: getVideoOptions,
     setVideoOptions: setVideoOptions,
     subscribeVideoOptions: subscribeVideoOptions,
+    openView: openView,
+    closeView: closeView,
 
     /** Consume a safe, short-lived product return after real member admission. */
     consumeProductReturn: consumeProductReturn,

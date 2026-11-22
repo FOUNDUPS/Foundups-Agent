@@ -29,9 +29,9 @@ const decode = value => String(value).replace(/&#x([\da-f]+);/gi, (_, hex) => St
 const voidTags = new Set(['INPUT', 'IMG', 'BR', 'HR', 'META', 'LINK', 'PATH', 'POLYLINE', 'LINE']);
 
 class Element {
-  constructor(tag, document) {
+  constructor(tag, document, nodeType = 1) {
     this.tagName = tag.toUpperCase();
-    this.nodeType = 1;
+    this.nodeType = nodeType;
     this.ownerDocument = document;
     this.attributes = new Map();
     this.children = [];
@@ -76,7 +76,7 @@ class Element {
   get isConnected() { return !!this.ownerDocument && this.ownerDocument.contains(this); }
   get firstChild() { return this.children[0] || null; }
   get nextSibling() {
-    const siblings = this.parentElement?.children || [];
+    const siblings = this.parentNode?.children || [];
     return siblings[siblings.indexOf(this) + 1] || null;
   }
   get textContent() { return this._text + this.children.map(child => child.textContent).join(''); }
@@ -122,24 +122,31 @@ class Element {
   removeAttribute(name) { this.attributes.delete(name); }
   appendChild(child) { return this.insertBefore(child, null); }
   insertBefore(child, reference) {
+    if (child.nodeType === 11) {
+      for (const nested of [...child.children]) this.insertBefore(nested, reference);
+      return child;
+    }
     child.remove();
     const at = reference ? this.children.indexOf(reference) : this.children.length;
     assert.ok(at >= 0, 'insertBefore reference belongs to parent');
     this.children.splice(at, 0, child);
-    child.parentElement = child.parentNode = this;
+    child.parentNode = this;
+    child.parentElement = this.nodeType === 1 ? this : null;
     return child;
   }
   remove() {
-    if (!this.parentElement) return;
-    const parent = this.parentElement;
+    if (!this.parentNode) return;
+    const parent = this.parentNode;
     parent.children.splice(parent.children.indexOf(this), 1);
     this.parentElement = this.parentNode = null;
   }
-  replaceChildren() {
+  replaceChildren(...children) {
     if (this.children.some(child => child.contains(this.ownerDocument?.activeElement))) {
       this.ownerDocument.activeElement = this.ownerDocument.body;
     }
     for (const child of [...this.children]) child.remove();
+    this._text = '';
+    for (const child of children) this.appendChild(child);
   }
   contains(node) { return this === node || this.children.some(child => child.contains(node)); }
   matches(selector) {
@@ -216,6 +223,7 @@ function createFixture(mode = 'product-discovery', setup) {
   const doc = new Element('document');
   doc.ownerDocument = doc;
   doc.createElement = tag => new Element(tag, doc);
+  doc.createDocumentFragment = () => new Element('#document-fragment', doc, 11);
   doc.getElementById = id => doc.querySelector('#' + id);
   doc.body = doc.createElement('body');
   doc.appendChild(doc.body);

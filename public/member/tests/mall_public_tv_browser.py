@@ -109,6 +109,35 @@ def expect_ids(page, ids):
     actual=page.locator('#mallTileField .mall-tile').evaluate_all('els=>els.map(x=>x.dataset.videoId)')
     check('selected grid contains expected video IDs only',actual==ids,actual)
 
+def capture_return_session(page):
+    """Capture the ready, page-local provider before a reversible Mall return."""
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    return page.evaluate("""() => {
+      window.publicTVReturnFrame=document.querySelector('#videoPlayerFullscreen iframe');
+      return {id:window.mallVideoPlayer.getCurrentVideoId(),length:window.mallVideoPlayer.getQueueLength(),
+        query:window.mallVideoPlayer.getQueueQuery(),created:window.fixturePlayback.created,
+        loads:window.fixturePlayback.loadedIds.length};
+    }""")
+
+def expect_retained_mall_return(page, name, before, caller_id):
+    page.wait_for_function("window.mallVideoPlayer.isOpen() && window.mallVideoPlayer.isMallHidden() && window.mallVideoPlayer.getPlaybackSnapshot()?.state==='paused'")
+    player=page.locator('#videoPlayerFullscreen')
+    expect(player).to_be_hidden()
+    expect(player.locator('iframe')).to_have_count(1)
+    after=page.evaluate("""() => ({id:window.mallVideoPlayer.getCurrentVideoId(),
+      length:window.mallVideoPlayer.getQueueLength(),query:window.mallVideoPlayer.getQueueQuery(),
+      created:window.fixturePlayback.created,loads:window.fixturePlayback.loadedIds.length,
+      sameFrame:window.publicTVReturnFrame===document.querySelector('#videoPlayerFullscreen iframe'),
+      position:window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds,
+      caller:document.activeElement?.dataset?.foundupId})""")
+    check(name+' retains paused same provider, clip, queue and caller',
+          all(after[key]==before[key] for key in ('id','length','query','created','loads')) and
+          after['sameFrame'] and after['caller']==caller_id,{'before':before,'after':after})
+    page.wait_for_timeout(130)
+    current=page.evaluate('window.mallVideoPlayer.getPlaybackSnapshot().positionSeconds')
+    check(name+' hidden media time does not advance',abs(current-after['position'])<=.02,
+          {'before':after['position'],'after':current})
+
 def geometry(page):
     return page.evaluate("""() => {
       const p=document.querySelector('#videoPlayerFullscreen'),s=p.querySelector('.video-player-stage'),f=s.querySelector('iframe'),t=document.querySelector('#mallTileField .mall-tile'),w=document.querySelector('#mallTileField').parentElement;
@@ -183,10 +212,11 @@ def verify_boot_and_selection(engine):
         page.locator('#mallTileField').evaluate('el=>el.parentElement.scrollTop=el.parentElement.scrollHeight')
         after=page.locator('#videoPlayerFullscreen').bounding_box()
         check(engine.name+' grid scroll leaves player stationary',abs(before['y']-after['y'])<=1,{'before':before,'after':after})
+        retained=capture_return_session(page)
         page.get_by_role('button',name='Back to Mall',exact=True).click()
         expect(page.locator('.mall-selected-controls')).to_be_hidden()
         expect(page.locator('#mallTileField [data-foundup-id="move2japan"]')).to_be_focused()
-        check(engine.name+' Back to Mall closes player',page.evaluate('!window.mallVideoPlayer.isOpen()'))
+        expect_retained_mall_return(page,engine.name+' Back to Mall',retained,'move2japan')
         REPORT.setdefault('request_ledgers',[]).append({'engine':engine.name,'case':'native boot and normal tap','rows':ledger.rows})
     finally:
         ledger.release()
@@ -256,20 +286,28 @@ def verify_paging_return_and_gestures(engine):
         paths=[x['path'] for x in ledger.rows if x.get('kind')=='videos']
         check(engine.name+' failed cursor retries same page and never another lane',paths==[record['video_pages']['catalog'],p0['next'],p1['next'],p1['next']],paths)
         # Selected logo is a Mall return; outside selection it remains Portal.
+        retained=capture_return_session(page)
         page.locator('.mall-header .mall-brand-minimal').click()
         expect(page.locator('.mall-selected-controls')).to_be_hidden()
         expect(page.locator('#mallTileField [data-foundup-id="move2japan"]')).to_be_focused()
-        check(engine.name+' selected logo returns without navigation',page.url=='https://play.foundups.com/member/' and page.evaluate('!window.mallVideoPlayer.isOpen()'))
+        check(engine.name+' selected logo returns without navigation',page.url=='https://play.foundups.com/member/')
+        expect_retained_mall_return(page,engine.name+' selected logo return',retained,'move2japan')
         expect(page.locator('.mall-header .mall-brand-minimal')).to_have_attribute('href','/member/')
         # Pinch is a synthetic gesture fixture, not physical Safari proof.
+        requests_before=len(ledger.rows)
         dispatch_tile_pinch(page.locator('#mallTileField [data-foundup-id="move2japan"]'),40,105)
-        expect_ids(page,ids0);base.expect_playing_id(page,ids0[0])
+        expect_ids(page,ids0+ids1+ids2);base.expect_playing_id(page,retained['id'])
+        check(engine.name+' selected tile pinch reuses retained lane without fetching',
+              page.evaluate('window.publicTVReturnFrame===document.querySelector("#videoPlayerFullscreen iframe")') and
+              len(ledger.rows)==requests_before,{'request_count_before':requests_before,'request_count_after':len(ledger.rows)})
         base.dispatch_pinch(page.locator('#videoPlayerFullscreen .video-player-stage'),120,48)
         check(engine.name+' player surface pinch is reserved for provider/browser',page.evaluate('window.mallTileField.isExpanded()&&window.mallVideoPlayer.isOpen()'))
+        retained=capture_return_session(page)
         base.dispatch_pinch(page.locator('#videoPlayerFullscreen .video-player-top-bar'),120,48)
         expect(page.locator('.mall-selected-controls')).to_be_hidden()
         expect(page.locator('#mallTileField [data-foundup-id="move2japan"]')).to_be_focused()
-        check(engine.name+' application pinch returns to Mall',page.evaluate('!window.mallTileField.isExpanded()&&!window.mallVideoPlayer.isOpen()'))
+        check(engine.name+' application pinch restores Mall field',page.evaluate('!window.mallTileField.isExpanded()'))
+        expect_retained_mall_return(page,engine.name+' application pinch return',retained,'move2japan')
         # A real nonzero browse position and a source-group filter are restored.
         load_all_cards(page)
         page.locator('#mallTileField').evaluate('el=>el.parentElement.scrollTo({top:300,behavior:"instant"})')
@@ -279,16 +317,20 @@ def verify_paging_return_and_gestures(engine):
         check(engine.name+' return-position precondition is nonzero',saved>0,saved)
         eduit.tap(position={'x':30,'y':50})
         page.wait_for_function('window.mallTileField.isExpanded()&&window.mallVideoPlayer.isOpen()')
+        retained=capture_return_session(page)
         page.get_by_role('button',name='Back to Mall',exact=True).click()
         page.wait_for_function('top=>Math.abs(document.querySelector("#mallTileField").parentElement.scrollTop-top)<=2',arg=saved)
         expect(page.locator('#mallTileField [data-foundup-id="eduit"]')).to_be_focused()
         check(engine.name+' Back restores nonzero browse position and selected card',True,{'scrollTop':saved,'id':'eduit'})
+        expect_retained_mall_return(page,engine.name+' far-scroll Back',retained,'eduit')
         page.evaluate('window.mallTileField.filterBySourceGroup("videos")')
         scope=page.evaluate('window.mallTileField.getFieldScope()')
         page.locator('#mallTileField [data-foundup-id="move2japan"]').tap(position={'x':30,'y':50})
         page.wait_for_function('window.mallTileField.isExpanded()&&window.mallVideoPlayer.isOpen()')
+        retained=capture_return_session(page)
         page.get_by_role('button',name='Back to Mall',exact=True).click()
         check(engine.name+' Back preserves Mall source-group filter',page.evaluate('window.mallTileField.getFieldScope()')==scope,scope)
+        expect_retained_mall_return(page,engine.name+' filtered Back',retained,'move2japan')
         check(engine.name+' only Catalog order is claimed','popular' not in page.locator('.mall-selected-controls').inner_text().lower())
     finally:
         REPORT.setdefault('request_ledgers',[]).append({'engine':engine.name,'case':'manual paging, cursor retry, queue and return','rows':ledger.rows,'failed':ledger.failed})
@@ -308,8 +350,24 @@ def verify_pending_selection_failures(engine):
         check(engine.name+' failed first page does not create playback',page.evaluate('!window.mallVideoPlayer?.isOpen?.()'))
         page.locator('#mallTileField [data-foundup-id="move2japan"]').tap(position={'x':30,'y':50})
         expect_ids(page,ids0);base.expect_playing_id(page,ids0[0])
+        retained=capture_return_session(page)
         page.get_by_role('button',name='Back to Mall',exact=True).click()
+        expect_retained_mall_return(page,engine.name+' retried first-page return',retained,'move2japan')
         check(engine.name+' first page retry succeeds using same verified cursor',len([x for x in ledger.rows if x['path']==target])==2)
+        # A reversible return keeps this ready session. Explicitly resume and
+        # close its provider, then leave the selected field through its owner,
+        # before setting up an independent held first-page selection below.
+        page.locator('#mallTileField [data-foundup-id="move2japan"]').tap(position={'x':30,'y':50})
+        base.expect_playing_id(page,retained['id'])
+        check(engine.name+' same card resumes retry without refetching',
+              page.evaluate('window.publicTVReturnFrame===document.querySelector("#videoPlayerFullscreen iframe")') and
+              len([x for x in ledger.rows if x['path']==target])==2)
+        page.locator('#videoPlayerFullscreen').get_by_role('button',name='Close player',exact=True).click()
+        check(engine.name+' explicit Close destroys ready player before pending selection',
+              page.evaluate('!window.mallVideoPlayer.isOpen()&&window.mallVideoPlayer.getQueueLength()===0') and
+              page.locator('#videoPlayerFullscreen iframe').count()==0)
+        page.get_by_role('button',name='Back to Mall',exact=True).click()
+        check(engine.name+' selected field exits before fresh pending request',page.evaluate('!window.mallTileField.isExpanded()&&!window.mallVideoPlayer.isOpen()'))
         # Explicit lookup may fetch small metadata pages, but a zero-video card
         # must cancel a previously loading video selection and return false.
         ledger.hold_once.add(target)
@@ -335,6 +393,9 @@ def verify_pending_selection_failures(engine):
         check(engine.name+' stale initial selection cannot replace newer lane',page.evaluate('window.mallVideoPlayer.getFoundUpId()==="undaodu"&&window.staleFrame===document.querySelector("#videoPlayerFullscreen iframe")'))
         check(engine.name+' actual fetch signals were aborted for superseded scope',target in page.evaluate('window.fixtureDiscoveryAbort'))
         page.locator('#videoPlayerFullscreen').get_by_role('button',name='Close player',exact=True).click()
+        check(engine.name+' final Close destroys provider before accessible Watch',
+              page.evaluate('!window.mallVideoPlayer.isOpen()&&window.mallVideoPlayer.getQueueLength()===0') and
+              page.locator('#videoPlayerFullscreen iframe').count()==0)
         expect(page.locator('[data-selected-watch]')).to_be_visible()
         page.get_by_role('button',name='Watch',exact=True).click()
         base.expect_playing_id(page,expected[0])
@@ -352,11 +413,17 @@ def verify_desktop_selected_theater(engine):
         expected=[x['video_id'] for x in local_json(record['video_pages']['catalog'])['items']]
         page.locator('#mallTileField [data-foundup-id="move2japan"]').click(position={'x':30,'y':50})
         base.expect_playing_id(page,expected[0])
-        check(engine.name+' desktop keeps existing theater',page.evaluate('window.mallVideoPlayer.isTheater()&&!window.mallVideoPlayer.isFloating()'))
+        check(engine.name+' desktop tile uses confirmed Floating default',page.evaluate('window.mallVideoPlayer.isFloating()&&!window.mallVideoPlayer.isTheater()'))
+        # Exercise the existing public mode owner explicitly. This is API-level
+        # theater coverage, not evidence that a Watch button selects this mode.
+        page.evaluate('window.mallVideoPlayer.setTheater(true)')
+        check(engine.name+' explicit mode owner keeps desktop theater',page.evaluate('window.mallVideoPlayer.isTheater()&&!window.mallVideoPlayer.isFloating()'))
         frame=page.locator('#videoPlayerFullscreen iframe').bounding_box()
         check(engine.name+' desktop theater keeps minimum player dimensions',min(frame['width'],frame['height'])>=200,frame)
+        retained=capture_return_session(page)
         page.get_by_role('button',name='Back to Mall',exact=True).click()
-        check(engine.name+' desktop Back restores Mall discovery',page.evaluate('!window.mallTileField.isExpanded()&&!window.mallVideoPlayer.isOpen()'))
+        check(engine.name+' desktop Back restores Mall discovery',page.evaluate('!window.mallTileField.isExpanded()'))
+        expect_retained_mall_return(page,engine.name+' desktop Back',retained,'move2japan')
     finally:
         REPORT.setdefault('request_ledgers',[]).append({'engine':engine.name,'case':'desktop theater','rows':ledger.rows})
         ledger.release();context.close();browser.close()

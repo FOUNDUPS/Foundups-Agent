@@ -447,7 +447,8 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/></svg>AutoPost camera and photos
         </a>
         <fieldset class="mall-video-options">
-          <legend>Video Options</legend>
+          <legend>Video</legend>
+          <label>Tap a video tile <select data-video-option="tileTapDestination"><option value="floating">Floating</option><option value="wikitube">WikiTube</option><option value="full-video">Fullscreen in app</option></select></label>
           <label><input type="checkbox" data-video-option="autoplayNext"> Autoplay next clip while visible</label>
           <label>Frame action <select data-video-option="frameDestination"><option value="wikitube">WikiTube</option><option value="full-video">Full Video in app</option></select></label>
           <small>Uses the app frame control. Native YouTube taps and fullscreen stay with YouTube.</small>
@@ -642,7 +643,7 @@
       window.mallStateRestore?.save();
     });
     dock.input.addEventListener('input', () => {
-      if (!dock.input.value && field.getFieldScope()?.type === 'query') {
+      if (dock.isDefaultContext() && !dock.input.value && field.getFieldScope()?.type === 'query') {
         field.searchCatalog('');
         window.mallStateRestore?.save();
       }
@@ -669,10 +670,19 @@
   function createPhoneDock(actions, scope, disclosure) {
     const field = window.mallTileField;
     const conversationAvailable = window.redDog?.hasConversationEndpoint?.() === true;
+    // An unavailable HPC conversation is a Mall doorway, not a briefing popup.
+    const unavailableDogHref = scope === 'hpc'
+      ? (isOpenMallHost(window.location) ? '/member/' : OPEN_MALL_ORIGIN + '/')
+      : scopedRedDogPath(scope);
     const dock = createMemberDock('Search HPC Mall', search, conversationAvailable ? () => {
       window.mallStateRestore?.save();
       window.redDog.openConversation();
-    } : null, conversationAvailable ? null : scopedRedDogPath(scope));
+    } : null, conversationAvailable ? null : unavailableDogHref);
+    if (scope === 'hpc' && !conversationAvailable) {
+      const dog = dock.element.querySelector('.mall-search-dog');
+      dog.setAttribute('aria-label', 'Return to Play FoundUps Mall');
+      dog.title = 'Play FoundUps Mall';
+    }
     scopedPhoneDock = { scope, dock };
     const { element, dialog, input } = dock;
     element.id = 'videoScopePhoneDock';
@@ -950,8 +960,9 @@
     discoveryPath,
     mount,
     createMemberDock,
-    getScopedPhoneDock(scope) {
-      return isPhoneDockLayout() && scopedPhoneDock && (scopedPhoneDock.scope === null || scopedPhoneDock.scope === scope)
+    getScopedPhoneDock(scope, options) {
+      const sharedMallDock = options?.includeDesktop === true && scopedPhoneDock?.scope === null;
+      return (isPhoneDockLayout() || sharedMallDock) && scopedPhoneDock && (scopedPhoneDock.scope === null || scopedPhoneDock.scope === scope)
         ? scopedPhoneDock.dock : null;
     },
     isPhoneDockLayout,

@@ -39,7 +39,7 @@ def test_hpc_catalog_rebuild_is_isolated_and_idempotent(catalog):
     assert discovery["public_poc_url"] == "https://hpc.foundups.com/"
     assert lane["parent_channels"] == ["move2japan"]
     assert lane["source_id"] == "UC-LSSlOZwpGIRIYihaz8zCw"
-    assert projection["voice_resource_url"] == "https://vote.mtrout.com/contact"
+    assert projection["voice_resource_url"] == "https://vote.mtrout.com/contact#hpc"
     assert projection["topic"] == "#SchumerOUT"
     assert lane["video_count"] == len(lane["videos"]) == 8
     for video in lane["videos"]:

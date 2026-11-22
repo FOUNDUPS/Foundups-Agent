@@ -62,12 +62,18 @@
   var theater = false;
   var wikitube = false;
   var tucked = false;
+  // A live session can be paused behind the Mall without becoming a floating
+  // player or being destroyed. This state is page-local, never persisted.
+  var mallHidden = false;
+  var mallReturnMode = null;
   var muteOnStart = false;
   var mutedAutoplayRetryUsed = false;
   var onClose = null;
   var onSelectChange = null;
   var onQueueEnd = null;
   var onPinchReturn = null;
+  var onReturnToMall = null;
+  var onResumeFromMall = null;
   var queueContinuation = null;
   var playbackIntentEpoch = 0;
   var autoplayRequested = true;
@@ -226,6 +232,7 @@
 
   function currentModeName() {
     if (!isOpen) return 'closed';
+    if (mallHidden) return 'mall';
     if (theater) return 'theater';
     if (wikitube) return 'wikitube';
     if (floating) return tucked ? 'tucked' : 'floating';
@@ -234,7 +241,8 @@
 
   function videoOptions() {
     return window.mallStateRestore?.getVideoOptions?.() || {
-      autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true
+      autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true,
+      tileTapDestination: 'floating'
     };
   }
 
@@ -322,7 +330,7 @@
   }
 
   function displayedMediaArea() {
-    if (!isOpen || tucked || document.hidden || !stage?.isConnected ||
+    if (!isOpen || mallHidden || tucked || document.hidden || !stage?.isConnected ||
         !container.classList.contains('open')) return null;
     var style = window.getComputedStyle(container);
     if (style.display === 'none' || style.visibility === 'hidden') return null;
@@ -393,7 +401,7 @@
   function syncFloatingGeometry() {
     if (typeof document === 'undefined') return;
     var root = document.documentElement;
-    if (!isOpen || (!floating && !theater)) {
+    if (!isOpen || mallHidden || (!floating && !theater)) {
       root.style.removeProperty('--floating-player-clearance');
       root.removeAttribute('data-floating-player');
       return;
@@ -613,7 +621,7 @@
 
     // Keyboard: dismiss innermost control before shell Escape handler
     document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape' || !isOpen || e.isComposing) return;
+      if (e.key !== 'Escape' || !isOpen || mallHidden || e.isComposing) return;
       // The active native dialog owns its own Escape/cancel lifecycle.
       if (e.target?.closest?.('dialog[open]')) return;
       var cardBack = e.target?.closest?.('.mall-card-back');
@@ -650,10 +658,11 @@
     document.addEventListener('visibilitychange', function () {
       if (isOpen && document.hidden) pausePlayback();
     });
-    window.addEventListener('pagehide', function () {
+    window.addEventListener('pagehide', function (event) {
       if (!isOpen) return;
       flushCurrentPlaybackPosition();
       pausePlayback();
+      if (!event.persisted) close({ restore: false });
     });
   }
 
@@ -664,10 +673,11 @@
     container.style.setProperty('--video-player-keyboard', keyboard + 'px');
   }
 
-  // Loan only the shared dock; the mounted provider and player stage never move.
+  // Loan the existing shared dock on phone and ordinary Mall desktop. The
+  // mounted provider and player stage never move.
   function borrowScopedPhoneDock() {
     if (scopedDockLoan || !matchesQuery) return;
-    var dock = window.mallVideoProjection?.getScopedPhoneDock?.(currentFoundUpId);
+    var dock = window.mallVideoProjection?.getScopedPhoneDock?.(currentFoundUpId, { includeDesktop: true });
     if (!dock?.useSearchContext || !dock.element.isConnected) return;
     var marker = document.createComment('scoped phone dock return');
     var host = document.createElement('div');
@@ -700,7 +710,8 @@
     loan.dock.input.removeEventListener('blur', alignQueueKeyboard);
     loan.marker.replaceWith(loan.dock.element);
     loan.restoreContext();
-    loan.dock.element.hidden = loan.hidden || !window.mallVideoProjection?.isPhoneDockLayout?.();
+    loan.dock.element.hidden = loan.hidden || (loan.dock.element.id === 'videoScopePhoneDock' &&
+      !window.mallVideoProjection?.isPhoneDockLayout?.());
     loan.dock.fitInput?.();
     loan.host.remove();
     memberQueueDock = loan.previous;
@@ -798,18 +809,18 @@
     syncFloatingGeometry();
   }
 
-  function applyWikiTubePresentation(attemptImmediatePlay) {
+  function applyWikiTubePresentation(attemptImmediatePlay, fullVideo) {
     untuck({ silent: true });
     inline = false;
     floating = false;
     theater = false;
-    wikitube = true;
+    wikitube = fullVideo !== true;
     container.classList.remove('video-player-inline', 'video-player-floating', 'video-player-theater', 'chrome-hidden');
-    container.classList.add('video-player-wikitube');
-    container.classList.remove('video-player-full-video');
+    container.classList.toggle('video-player-wikitube', wikitube);
+    container.classList.toggle('video-player-full-video', fullVideo === true);
     queuePanel.hidden = false;
     container.setAttribute('role', 'dialog');
-    container.setAttribute('aria-label', 'WikiTube video player');
+    container.setAttribute('aria-label', fullVideo === true ? 'Full Video in app' : 'WikiTube video player');
     queueSearchForm.hidden = true;
 
     if (previousOverflow === null) previousOverflow = document.body.style.overflow;
@@ -863,12 +874,12 @@
       playbackStatus.tucked = tucked;
     }
     window.dispatchEvent(new CustomEvent('videoPlayerModeChange', {
-      detail: { mode: 'wikitube', foundupId: currentFoundUpId, videoIndex: currentIndex }
+      detail: { mode: currentModeName(), foundupId: currentFoundUpId, videoIndex: currentIndex }
     }));
   }
 
   function setTheater(enabled, tile) {
-    if (!isOpen) return false;
+    if (!isOpen || mallHidden) return false;
     if (tile) returnTile = tile;
     if (enabled) {
       releaseModalInert();
@@ -904,27 +915,16 @@
   }
 
   function openWikiTube() {
-    if (!isOpen || wikitube || theater) return false;
+    if (!isOpen || mallHidden || wikitube || theater) return false;
     applyWikiTubePresentation(true);
     return true;
   }
 
   function openFullVideo() {
-    if (!isOpen || theater) return false;
+    if (!isOpen || mallHidden || theater) return false;
     // Reuse the app's existing fixed player, provider frame and inert/focus owner.
     // This never requests or intercepts native YouTube/browser fullscreen.
-    applyWikiTubePresentation(false);
-    wikitube = false;
-    container.classList.remove('video-player-wikitube');
-    container.classList.add('video-player-full-video');
-    container.setAttribute('aria-label', 'Full Video in app');
-    queuePanel.hidden = false;
-    syncTopBarButtons();
-    syncFloatingGeometry();
-    if (playbackStatus) playbackStatus.mode = currentModeName();
-    window.dispatchEvent(new CustomEvent('videoPlayerModeChange', {
-      detail: { mode: 'full-video', foundupId: currentFoundUpId, videoIndex: currentIndex }
-    }));
+    applyWikiTubePresentation(false, true);
     return true;
   }
 
@@ -933,15 +933,99 @@
   }
 
   function collapseAppVideo() {
-    if (!isOpen) return false;
+    if (!isOpen || mallHidden) return false;
     if (container.classList.contains('video-player-full-video')) {
       if (videoOptions().collapseDestination === 'wikitube') {
         applyWikiTubePresentation(false);
         return true;
       }
-      return collapseToFloating();
+      return returnToMall();
     }
-    return collapseToFloating();
+    return returnToMall();
+  }
+
+  function returnToMall(options) {
+    if (!isOpen || mallHidden) return false;
+    flushCurrentPlaybackPosition();
+    var frame = stage.querySelector('iframe');
+    // An opaque provider (or a YouTube frame before its pause API is ready)
+    // cannot be kept hidden with a promise that its audio has stopped.
+    var retainProvider = !frame || (container.classList.contains('provider-youtube') && ytReady &&
+      typeof ytPlayer?.pauseVideo === 'function');
+    var unavailable = !retainProvider ? {
+      provider: 'unsupported', state: 'continuity-unavailable', mode: 'closed', retained: false,
+      foundupId: currentFoundUpId, videoId: getPlaybackSnapshot()?.videoId || currentQueue[currentIndex]?.video_id || null,
+      message: 'This provider cannot be paused safely in the Mall. Its player was closed; select the tile to reopen it.'
+    } : null;
+    mallReturnMode = currentModeName();
+    // Set the guard before the field renders its caller. A render must not
+    // mistake the retained session for a discarded inline player.
+    mallHidden = true;
+    pausePlayback();
+    // Remove unsupported frames before hiding any surface. Retention is refused
+    // rather than leaving an unobservable player running behind the Mall.
+    if (!retainProvider) resetPlayback(false);
+    clearTimeout(chromeTimer);
+    clearTimeout(railTimer);
+    untuck({ silent: true });
+    container.classList.add('video-player-mall');
+    container.hidden = true;
+    container.inert = true;
+    container.setAttribute('aria-hidden', 'true');
+    memberQueueDock?.hide();
+    releaseModalInert();
+    syncFloatingGeometry();
+    var caller = onReturnToMall?.(options || {});
+    if (caller === false) {
+      // The source owner changed generation; a stale caller is not a successful
+      // return. Dispose of its resources rather than focus a positional tile.
+      close({ restore: false });
+      return false;
+    }
+    if (caller?.nodeType === 1) returnTile = caller;
+    if (!onReturnToMall && returnTile?.isConnected) returnTile.focus({ preventScroll: true });
+    if (!retainProvider) {
+      close({ restore: false, dismissPlayback: true });
+      window.dispatchEvent(new CustomEvent('mallVideoPlayback', { detail: unavailable }));
+      return false;
+    }
+    if (playbackStatus) playbackStatus.mode = 'mall';
+    window.dispatchEvent(new CustomEvent('videoPlayerModeChange', {
+      detail: { mode: 'mall', foundupId: currentFoundUpId, videoIndex: currentIndex }
+    }));
+    return true;
+  }
+
+  function resumeFromMall(options) {
+    if (!isOpen || !mallHidden) return false;
+    // The field validates identity/generation and restores its selected lane
+    // while the player is still hidden. Missing callers never select by index.
+    var caller = onResumeFromMall?.(options || {});
+    if (caller === false) return false;
+    if (caller?.nodeType === 1) returnTile = caller;
+    var destination = options?.tileActivation ? videoOptions().tileTapDestination : mallReturnMode;
+    mallHidden = false;
+    container.classList.remove('video-player-mall');
+    container.hidden = false;
+    container.inert = false;
+    container.removeAttribute('aria-hidden');
+    if (destination === 'theater') setTheater(true, returnTile);
+    else if (destination === 'full-video') applyWikiTubePresentation(false, true);
+    else if (destination === 'wikitube') applyWikiTubePresentation(false);
+    else applyFloatingPresentation();
+    refreshQueue();
+    // Browser Forward is a paused restoration. An intentional selection may
+    // play through the existing provider guard, without reloading the iframe.
+    autoplayRequested = options?.autoplay === true;
+    if (autoplayRequested) {
+      if (requestYouTubePlay) requestYouTubePlay();
+      else stage.querySelector('video')?.play()?.catch(function() {});
+    }
+    if (playbackStatus) playbackStatus.mode = currentModeName();
+    window.dispatchEvent(new CustomEvent('videoPlayerModeChange', {
+      detail: { mode: currentModeName(), foundupId: currentFoundUpId, videoIndex: currentIndex }
+    }));
+    return true;
   }
 
   function expandInline() {
@@ -949,7 +1033,7 @@
   }
 
   function collapseToFloating() {
-    if (!isOpen || (!wikitube && !container.classList.contains('video-player-full-video'))) return false;
+    if (!isOpen || mallHidden || (!wikitube && !container.classList.contains('video-player-full-video'))) return false;
     applyFloatingPresentation();
     topBar.querySelector('[data-action="expand"]')?.focus({ preventScroll: true });
     if (playbackStatus) {
@@ -964,7 +1048,7 @@
 
   // ─── Tuck & Restore (Floating Player Edge Dock) ───
   function tuck() {
-    if (!isOpen || !floating || tucked) return false;
+    if (!isOpen || mallHidden || !floating || tucked) return false;
     tucked = true;
     pausePlayback();
     container.classList.add('is-tucked');
@@ -1014,42 +1098,99 @@
   function open(foundupId, queue, startIndex, resumeOpts) {
     if (!queue || !queue.length) return;
     ensureDOM();
+    // Account/history callers use this public entry directly, without field
+    // activation options. Validate and restore a hidden caller before changing
+    // callbacks or presentation; failed continuity becomes a fresh visible open.
+    var resumedHiddenSession = false;
+    if (mallHidden) {
+      if (currentFoundUpId === foundupId && resumeOpts?.preserveInstance !== false) {
+        resumedHiddenSession = resumeFromMall({ autoplay: false });
+      }
+      if (!resumedHiddenSession) close({ restore: false });
+    }
     if (foundupId !== currentFoundUpId) currentEntryIdentity = undefined;
 
     var targetIndex = Math.max(0, Math.min(startIndex || 0, queue.length - 1));
-    var wantTheater = resumeOpts?.theater === true;
-    var wantFloating = !wantTheater && (resumeOpts?.floating === true || !!resumeOpts?.inlineMount);
-    var keepParked = wantFloating && tucked && videoOptions().revealSelectedPlayer === false;
-    var canReuseOpenPlayer = isOpen && currentFoundUpId === foundupId && ytReady &&
+    var tileActivation = resumeOpts?.tileActivation === true;
+    var preferences = videoOptions();
+    var tileDestination = ['floating', 'wikitube', 'full-video'].indexOf(preferences.tileTapDestination) !== -1
+      ? preferences.tileTapDestination : 'floating';
+    var wantTheater = !tileActivation && resumeOpts?.theater === true;
+    // Field activation is distinct from queue selection, automatic startup and
+    // frame actions. Keep a deliberately parked player parked before applying it.
+    var keepParked = tucked && preferences.revealSelectedPlayer === false &&
+      (tileActivation || (!wantTheater && (resumeOpts?.floating === true || !!resumeOpts?.inlineMount)));
+    var wantFloating = keepParked || (!wantTheater && (tileActivation
+      ? tileDestination === 'floating' : (resumeOpts?.floating === true || !!resumeOpts?.inlineMount)));
+    var wantFullVideo = tileActivation && !keepParked && tileDestination === 'full-video';
+    var canReuseOpenPlayer = isOpen && currentFoundUpId === foundupId &&
+      (ytReady || (resumedHiddenSession && !stage.querySelector('iframe'))) &&
       (resumeOpts?.preserveInstance !== false);
+    // Compare actual provider identity while the old queue still names the
+    // playing clip. A reordered/refreshed queue can move it to another index.
+    var previousVideo = currentQueue[currentIndex];
+    var nextVideo = queue[targetIndex];
+    var previousVideoId = extractYouTubeVideoId(previousVideo?.embed_url || previousVideo?.embedUrl);
+    var nextEmbed = parseYouTubeEmbed(nextVideo?.embed_url || nextVideo?.embedUrl);
+    var nextVideoId = extractYouTubeVideoId(nextVideo?.embed_url || nextVideo?.embedUrl);
+    var sameRetainedFile = resumedHiddenSession && !stage.querySelector('iframe') &&
+      ((previousVideo?.source_url || previousVideo?.sourceUrl) &&
+       (previousVideo.source_url || previousVideo.sourceUrl) === (nextVideo?.source_url || nextVideo?.sourceUrl));
+    var sameTileMedia = (tileActivation || resumedHiddenSession) && canReuseOpenPlayer &&
+      ((previousVideoId && previousVideoId === nextVideoId && ytActiveVideoId === nextVideoId && ytHost === nextEmbed?.origin) || sameRetainedFile);
 
     // If switching videos within an already-open player for the same FoundUp, keep live <iframe>!
     if (canReuseOpenPlayer) {
       currentQueue = queue;
+      if (sameTileMedia) currentIndex = targetIndex;
       filteredIndices = null;
-      railQuery = null;
+      if (!resumedHiddenSession) railQuery = null;
       matchesQuery = resumeOpts?.matchesQuery || matchesQuery;
       if (resumeOpts?.returnTile || resumeOpts?.returnFocusTo) {
         returnTile = resumeOpts.returnTile || resumeOpts.returnFocusTo;
       }
       if (resumeOpts?.onClose) onClose = resumeOpts.onClose;
       if (resumeOpts?.onSelectChange) onSelectChange = resumeOpts.onSelectChange;
-      onQueueEnd = resumeOpts?.onQueueEnd || null;
-      onPinchReturn = resumeOpts?.onPinchReturn || null;
+      if (!resumedHiddenSession || Object.prototype.hasOwnProperty.call(resumeOpts || {}, 'onQueueEnd')) onQueueEnd = resumeOpts?.onQueueEnd || null;
+      if (!resumedHiddenSession || Object.prototype.hasOwnProperty.call(resumeOpts || {}, 'onPinchReturn')) onPinchReturn = resumeOpts?.onPinchReturn || null;
+      if (!resumedHiddenSession || Object.prototype.hasOwnProperty.call(resumeOpts || {}, 'onReturnToMall')) onReturnToMall = resumeOpts?.onReturnToMall || null;
+      if (!resumedHiddenSession || Object.prototype.hasOwnProperty.call(resumeOpts || {}, 'onResumeFromMall')) onResumeFromMall = resumeOpts?.onResumeFromMall || null;
       autoplayRequested = !keepParked && resumeOpts?.autoplay !== false;
       muteOnStart = wantTheater || resumeOpts?.muted === true;
       failedQueueIndices.clear();
       consecutiveAutoSkips = 0;
       queueHalted = false;
       if (tucked && !keepParked) untuck({ silent: true });
-      if (wantTheater && !theater) setTheater(true, returnTile);
+      if (wantFullVideo) {
+        if (!container.classList.contains('video-player-full-video')) applyWikiTubePresentation(false, true);
+      } else if (wantTheater && !theater) setTheater(true, returnTile);
       else if (wantFloating && !floating) applyFloatingPresentation();
       else if (!wantTheater && !wantFloating && !wikitube) applyWikiTubePresentation(false);
+      if (sameTileMedia) {
+        titleEl.textContent = nextVideo.title || '';
+        var sameFrame = stage.querySelector('iframe');
+        if (sameFrame) sameFrame.title = 'YouTube video \u2014 ' + titleEl.textContent;
+        if (playbackStatus) playbackStatus.videoId = nextVideo.video_id || nextVideo.videoId || nextVideo.id || null;
+        if (resumedHiddenSession) refreshQueue();
+        else renderRail();
+        updateRailSelection();
+        updateSaveButtonState(isVideoSaved(currentFoundUpId, nextVideo));
+        onSelectChange?.(currentIndex, nextVideo);
+        resetChromeTimer();
+        if (autoplayRequested && playbackStatus?.state !== 'playing') {
+          if (requestYouTubePlay) requestYouTubePlay();
+          else stage.querySelector('video')?.play()?.catch(function() {});
+        }
+        window.dispatchEvent(new CustomEvent('videoPlayerNavigate', {
+          detail: { foundupId: currentFoundUpId, videoIndex: currentIndex }
+        }));
+        return;
+      }
       goToVideo(targetIndex, { explicitUserSelect: true });
       return;
     }
 
-    if (isOpen) close({ restore: false });
+    if (isOpen) close({ restore: false, preserveQueueOwner: currentFoundUpId === foundupId });
 
     var rs = null;
     if (resumeOpts != null && resumeOpts !== undefined) {
@@ -1079,6 +1220,8 @@
     onSelectChange = resumeOpts?.onSelectChange || null;
     onQueueEnd = resumeOpts?.onQueueEnd || null;
     onPinchReturn = resumeOpts?.onPinchReturn || null;
+    onReturnToMall = resumeOpts?.onReturnToMall || null;
+    onResumeFromMall = resumeOpts?.onResumeFromMall || null;
     autoplayRequested = !keepParked && resumeOpts?.autoplay !== false;
     muteOnStart = wantTheater || resumeOpts?.muted === true;
     matchesQuery = resumeOpts?.matchesQuery ||
@@ -1103,7 +1246,10 @@
     isOpen = true;
     container.classList.add('open');
 
-    if (wantTheater) {
+    if (wantFullVideo) {
+      applyWikiTubePresentation(false, true);
+      filterRail();
+    } else if (wantTheater) {
       setTheater(true, returnTile);
     } else if (wantFloating) {
       applyFloatingPresentation();
@@ -1138,7 +1284,7 @@
   }
 
   function selectVideo(index, opts) {
-    if (!isOpen || index < 0 || index >= currentQueue.length) return false;
+    if (!isOpen || mallHidden || index < 0 || index >= currentQueue.length) return false;
     if (opts?.returnTile) returnTile = opts.returnTile;
     var keepParked = tucked && videoOptions().revealSelectedPlayer === false;
     if (tucked && !keepParked) untuck({ silent: true });
@@ -1160,12 +1306,18 @@
   function close(options) {
     if (!isOpen) return;
     var restore = options?.restore !== false;
+    var wasMallHidden = mallHidden;
 
     flushCurrentPlaybackPosition();
     pausePlayback();
     pendingResumeSeconds = null;
 
     isOpen = false;
+    mallHidden = false;
+    mallReturnMode = null;
+    container.hidden = false;
+    container.inert = false;
+    container.removeAttribute('aria-hidden');
     untuck({ silent: true });
     container.classList.remove(
       'open',
@@ -1174,6 +1326,7 @@
       'video-player-theater',
       'video-player-wikitube',
       'video-player-full-video',
+      'video-player-mall',
       'video-player-queue-docked',
       'chrome-hidden',
       'is-tucked'
@@ -1204,14 +1357,19 @@
     onSelectChange = null;
     onQueueEnd = null;
     onPinchReturn = null;
+    onReturnToMall = null;
+    onResumeFromMall = null;
     queueContinuation = null;
-    if (afterClose) afterClose(restore);
+    if (afterClose) afterClose(restore, { preserveQueueOwner: options?.preserveQueueOwner === true, dismissPlayback: options?.dismissPlayback === true });
 
     if (returnTile) {
-      var tile = returnTile.isConnected ? returnTile : document.querySelector(
-        '#mallTileField .mall-tile[data-index="' + Number(returnTile.dataset.index) + '"]'
-      );
-      if (restore) {
+      var tile = returnTile.isConnected ? returnTile : Array.from(document.querySelectorAll('#mallTileField .mall-tile')).find(function(candidate) {
+        return returnTile.dataset.videoId ? candidate.dataset.videoId === returnTile.dataset.videoId :
+          candidate.dataset.foundupId === returnTile.dataset.foundupId;
+      });
+      // Mall return already restored its caller. Closing a hidden session must
+      // not apply the selected-lane scroll snapshot to the visible root grid.
+      if (restore && !wasMallHidden) {
         tile?.focus({ preventScroll: true });
         if (returnScroll) {
           var field = returnScroll.field;
@@ -1229,7 +1387,7 @@
     }
     returnScroll = null;
 
-    window.dispatchEvent(new CustomEvent('videoPlayerClose'));
+    window.dispatchEvent(new CustomEvent('videoPlayerClose', { detail: { restore: restore } }));
   }
 
   // ─── Queue Navigation & Bounded Sequential Auto-Advance ───
@@ -1238,7 +1396,7 @@
   }
 
   function goToVideo(index, navOpts) {
-    if (index < 0 || index >= currentQueue.length) return;
+    if (mallHidden || index < 0 || index >= currentQueue.length) return;
     var explicitUserSelect = !!navOpts?.explicitUserSelect;
     var fromAutoAdvance = !!navOpts?.fromAutoAdvance;
     if (!navOpts?.preserveFailures) {
@@ -1300,7 +1458,7 @@
   }
 
   function refreshQueue() {
-    if (!isOpen) return;
+    if (!isOpen || mallHidden) return;
     if (railQuery && matchesQuery) {
       filteredIndices = currentQueue.reduce(function (indices, video, index) {
         if (matchesQuery(video, railQuery)) indices.push(index);
@@ -1317,6 +1475,7 @@
   }
 
   function nextVideo() {
+    if (mallHidden) return;
     var seq = activeSequence();
     var pos = seq.indexOf(currentIndex);
     var next = pos >= 0 ? seq[pos + 1] : currentIndex + 1;
@@ -1330,6 +1489,7 @@
   }
 
   function prevVideo() {
+    if (mallHidden) return;
     var seq = activeSequence();
     var pos = seq.indexOf(currentIndex);
     var previous = pos >= 0 ? seq[pos - 1] : currentIndex - 1;
@@ -1768,9 +1928,13 @@
 
   // ─── Render Rail ───
   function filterRail() {
+    if (mallHidden) return;
     var input = theater ? queueSearch : null;
     if (memberQueueDock && !memberQueueDock.element.hidden) input = memberQueueDock.input;
-    var query = input ? input.value.trim().slice(0, 300) : '';
+    var query = input ? input.value.trim().slice(0, 300) : scopedQueueQuery;
+    // This queue context is independent of the Mall's restored search input.
+    // Keep it even when the queue dock is released or hidden in Floating/Mall.
+    scopedQueueQuery = query;
     if (query === railQuery) return;
     playbackIntentEpoch++;
     railQuery = query;
@@ -2222,7 +2386,7 @@
   }
 
   function handleKeydown(e) {
-    if (!isOpen || theater) return;
+    if (!isOpen || mallHidden || theater) return;
     if (e.defaultPrevented || e.isComposing || e.target?.closest?.('dialog[open]')) return;
     if (e.target?.closest?.('.mall-card-back')) return;
     if (e.key !== 'Escape' && (inline || e.target?.closest?.('button, a, input, textarea, select'))) return;
@@ -2426,6 +2590,10 @@
     openFullVideo: openFullVideo,
     openFrameDestination: openFrameDestination,
     collapseAppVideo: collapseAppVideo,
+    returnToMall: returnToMall,
+    resumeFromMall: resumeFromMall,
+    isMallHidden: function () { return mallHidden; },
+    getMode: currentModeName,
     selectVideo: selectVideo,
     refreshQueue: refreshQueue,
     close: close,
@@ -2441,11 +2609,10 @@
     isTheater: function () { return theater; },
     syncFloatingGeometry: syncFloatingGeometry,
     getQueueQuery: function () {
-      if (scopedPlayer && !theater && !scopedDockLoan && window.mallVideoProjection?.getScopedPhoneDock?.(currentFoundUpId)) {
-        return scopedQueueQuery;
-      }
-      var input = (memberQueueDock && (!memberQueueDock.element.hidden || returnScroll)) ? memberQueueDock.input : queueSearch;
-      return input?.value.trim().slice(0, 300) || '';
+      if (mallHidden) return scopedQueueQuery;
+      var input = memberQueueDock && !memberQueueDock.element.hidden ? memberQueueDock.input :
+        theater && !queueSearchForm.hidden ? queueSearch : null;
+      return input ? input.value.trim().slice(0, 300) : scopedQueueQuery;
     },
     getCurrentVideoId: function () {
       var video = currentIndex >= 0 ? currentQueue[currentIndex] : null;
