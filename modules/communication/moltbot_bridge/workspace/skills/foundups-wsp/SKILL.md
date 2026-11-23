@@ -159,10 +159,10 @@ concept here, not a current named feature or available integration.
    distinct from Moshpit timeline order.
 
 
-### Little Dog → 0102: dorking across the Work lane and Codex
+### Request intake → 0102: reconcile the Work lane and Codex
 
 Use this mode when a request arrives in Talk/chat and must continue in existing Work
-or Codex. Little Dog locates the originating room and its exact message, then asks
+or Codex. The intake operator locates the originating room and its exact message, then asks
 the accountable 0102 architect to dork into the named Work lane and its Codex
 continuation. Preserve 012's exact words and authorized attachments by native
 source reference, separately from interpretation or later corrections; confirm the
