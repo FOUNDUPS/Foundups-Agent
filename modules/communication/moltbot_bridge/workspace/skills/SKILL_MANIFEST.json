@@ -40,6 +40,10 @@
     {
       "path": "launch-petition/SKILL.md",
       "sha256": "4b8b67b30258866cce7b1a1c7dbf7f373441b90664fc9d2bb4b667f2dc85974d"
+    },
+    {
+      "path": "organize-foundups-drive/SKILL.md",
+      "sha256": "0875b03f5d9b70eacc467971016afefc25155dcb162d84fafa3b88a488a5890f"
     }
   ]
 }
