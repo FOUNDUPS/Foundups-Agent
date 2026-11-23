@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ## 2026-11-22 — Floating control continuation
 
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
@@ -8,6 +9,24 @@ and opt-in bounded current-tab DAEmon. See the [shared member interaction contra
 [canonical media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md).
 Native provider controls and ordinary desktop theater remain; physical phone
 and production acceptance are open. No model, mic or backend service is added.
+=======
+## 2026-11-23 — Fractal Mall paper and experiment roadmap reference
+
+- Linked the Fractal work-navigation roadmap to the standalone notebook's
+  manuscript, PDF and public source-recovery experiment on main. Notebook PR
+  [#1](https://github.com/FOUNDUPS/fractal-mall/pull/1) merged at
+  `abaddcb3bb7c74f83f3813c84a1e459a93328740`; its tree matches reviewed head
+  `6468de2f818b03dcb4395d19f345744e16c3e26e`.
+- The notebook passed all five tests on Linux at both revisions; four
+  source-recovery tests passed on Windows, and both hosts reproduced the stored
+  receipt. Independently reviewed the manuscript and all nine rendered PDF
+  pages. GitGuardian passed on the PR head; no hosted checks ran on notebook
+  main. Private product observations and production behavior remain unverified.
+- Documentation scope: cite that bounded research baseline without closing
+  Sprint 2 navigation or Sprint 4 evidence milestones. Validated the citation
+  targets and preservation of existing roadmap content. WSP 10, 15, 22, 34,
+  50, 71 and 97 apply; no product runtime or deployment change.
+>>>>>>> origin/main
 
 ## 2026-11-21 — Shared dock and configurable player acceptance
 

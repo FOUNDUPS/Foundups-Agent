@@ -9,6 +9,20 @@ and opt-in bounded current-tab DAEmon. See the [shared member interaction contra
 Native provider controls and ordinary desktop theater remain; physical phone
 and production acceptance are open. No model, mic or backend service is added.
 
+HPC is an independent satirical FoundUp for discovering attributed political-media clips. The first collection is SchumerOUT, sourced from public Move2Japan Shorts. [Vote/Ballots](../voteballots/) is its civic parent in the FoundUp registry.
+
+The PoC is a public projection of the existing Play FoundUps Mall. It uses the
+shared grid, player, gestures and browsing state. On a phone, **Voice Your
+Opinion** opens Vote's [HPC contact skin](https://vote.mtrout.com/contact#hpc)
+automatically. The public projection carries the registered skin fragment;
+it does not depend on browser referrer data or tracking. The bottom microphone is for search dictation. Red Dog opens the
+public HPC briefing. A fresh Home Screen install uses the HPC name and portrait.
+
+- [Interface and source curation](INTERFACE.md)
+- [Roadmap and release gates](ROADMAP.md)
+- [WSP 109 intake](docs/intake/INTAKE_SOURCE.md)
+- [Change history](ModLog.md)
+
 ## Route Namespace
 
 `hpc.foundups.com` is the public video entrance. The public directory entry

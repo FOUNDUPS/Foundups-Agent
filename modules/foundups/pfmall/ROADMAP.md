@@ -8,24 +8,6 @@ full-height external grip, and opt-in current-tab DAEmon through the [shared mem
 No hidden YouTube audio, Voice/model delivery or lifecycle-stage promotion.
 Independent exact-source and phone evidence remain required.
 
-## 2026-11-22 — Shared floating control continuation
-
-**IMPLEMENTED_PENDING_VERIFICATION / 15-P1.** Reuse #2439 and the current shared
-player/state/dock owners for the [HPC phone feedback](../hpc/ROADMAP.md#2026-11-22--floating-controls-and-camera-continuation).
-The next acceptance layer adds bounded dragging and permanent surrounding
-gesture surfaces, a full-height tuck/restore rail, independent validated gesture
-choices, menu-based accessible playback actions and the existing AutoPost camera
-destination. Native provider input and hidden-playback restrictions remain.
-
-Red Dog stays in the same browsing context, including when the canonical
-conversation service is not configured. This UI recovery does not mount the
-backend or qualify a speech/model runtime. The real browser-model benchmark
-candidate is SmolLM2-360M through WebLLM, pending pinned artifacts, explicit
-download/Cancel/Unload and physical iPhone measurements; no model is loaded by
-startup or represented as approved. AutoPost's companion footer uses its own
-existing capture/navigation owner; shared search/AI transport integration is
-still open. Preserve all dated source and device receipts.
-
 ## Shared Search Dock and video preferences — 2026-11-21
 
 **PFDOCK-20261121 / CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.**
@@ -127,6 +109,15 @@ owns identity and scope; the [navigation contract](../docs/PFMALL_MALL_NAVIGATIO
 owns drill-down and return. This sequence supersedes the earlier immediate
 build plan and its verified-wiring admission gate.
 
+**Research baseline, 2026-11-23.** [From a Mall tile to its source](https://github.com/FOUNDUPS/fractal-mall/blob/main/paper/fractal-mall.md)
+([PDF](https://github.com/FOUNDUPS/fractal-mall/blob/main/paper/fractal-mall.pdf))
+and its [public source-recovery experiment](https://github.com/FOUNDUPS/fractal-mall/tree/main/cases/source-recovery)
+test historical evidence recovery, shared component identity and caller return
+in a small offline fixture. Use this evidence when planning Sprint 2 navigation
+and Sprint 4 evidence closure. The paper's dated product observations leave
+ordinary exact-source navigation and production qualification open; the fixture
+does not complete those product milestones.
+
 1. **Sprint 1 — Census and parallel auditor samples.** Inventory accessible
    FoundUps, modules, cubes, tools, artifacts, sockets and publications once,
    including immature, unwired, archived and proposed candidates. Preserve
@@ -176,7 +167,7 @@ not imply public exposure. Keep private PC references and receipts in architect
 scope. Authenticated, revision-checked co-build mutation remains a later,
 separately admitted capability.
 
-The [documentation audit](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+The [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
 pins inspected main at `7432d31e5a68544d2bbab6715f02f64b0b5b6f85`. The local
 `121c5066687c5ab7571ef52382e5d9c68494cc36` graph and HPC → AutoPost → Back result
 are reported evidence, not independently recovered or rerun here. Live playback,
@@ -236,208 +227,6 @@ in this dated slice. Preserve its separate return-navigation work and evidence.
 - Deferred in this historical slice, now required by PFDOCK-20261121: shared floating Red Dog and bottom FoundUps search dock across existing surfaces. Reuse the existing anchors/search/state owner, keep current controls usable, and avoid duplicate search or concierge controls. `https://play.foundups.com` is the intended public Mall; **144 FoundUps is a product target, not a measured current catalog**.
 
 No production deployment, security change or merge authority is created by this specification. Owner delivery, source implementation, automated checks, staging/device navigation and release require separate receipts.
-
-### Retained phone-lane checkpoints
-
-The following dated records are preserved from source `2a65e7983acb489084cecf1229fcfd582f68f19b`.
-Their source counts, earlier admission routes and earlier shared-dock deferrals
-are historical observations. Current shared acceptance above and the v26
-source/service boundaries govern where they differ; no Fractal runtime or
-new member/editor authority follows from this content reconciliation.
-
-## 2026-11-21 - v26 phone subset and deferred service phases
-
-The v26 working candidate starts from `9b85e9cbb874b3720e453d3e3d3a3974dca53504`.
-Preserve v25 as the frozen comparison. Historical v23-v25 results remain tied
-to their recorded source; combined v26 tests, publication and device acceptance
-are not closed by this documentation.
-
-Reuse the existing catalog, player, state and bottom dock. Leading `+` exposes
-Video Options and lazy Browse AI; trailing `+` retains contribution review.
-Compact Play chrome, Hasan's `https://hasan4speaker.com/` banner link and a
-separate Play Mall return are source changes awaiting combined qualification.
-Require one visible dock, unobscured native controls, fully hidden playback
-pause, scroll clearance, orientation/return and desktop regression checks.
-The [member roadmap](../../../public/member/ROADMAP.md) owns the phone details.
-
-Browse AI is a separate phase: explicit confirmation of one pinned 41-byte
-WASM addition test. Approved AI model/runtime choices remain empty. No model
-preload, reload or cloud fallback; API detection does not qualify WebGPU or a
-physical Safari/PWA environment.
-
-Graph revision `22374b` is not integrated. Existing public discovery and
-sign-in/invite checks are not a graph-depth ACL or writer. Depth-specific
-access and new writer actions stay unavailable/fail closed until the backend
-verifies membership, editor scope and resource. Add FoundUp/Add Video currently
-restore review and safe return only, with submission unavailable.
-
-Paid access/usage is proposed. An enabled service requires real entitlement,
-payment/settlement, delivery, expiry/refund and operational cost evidence; no
-price, charge flow or subscription grant is introduced here. Next: independent
-combined-source/CI checks, isolated HTTPS/worker parity, then real-provider and
-physical iPhone Safari/installed-PWA tests on Wi-Fi and cellular.
-
-## v23 source qualification checkpoint
-
-Root-shell preservation repair: obsolete root caches now retire within their
-numeric namespace (v2); the absent legacy sign-in opener is optional. Existing
-Member state and player sources are retained. The added cache/gateway controls
-pass 29 VM cases; 201 affected pytest cases pass, including that wrapper. Local
-source evidence does not clear the separate publication or physical-device gates.
-
-The combined implementation now passes 278 targeted pytest cases (one native
-junction case skipped), 15 pager and 26 cache/state Node scenarios, 92 public
-TV assertions across Chromium/WebKit, 18 delayed-queue/gesture cases, four HPC
-policy groups, four card/entity/OSP groups including 144-card far restoration,
-and two entry groups. Suites overlap; do not sum these as unique tests. Source
-hashes are in the run receipts. Push, draft PR, preview parity and hosted CI
-are separate release receipts; physical Safari/PWA remains a human gate.
-
-
-## 2026-11-16 - Current native/local reconciliation; combined qualification pending
-
-This current reconciliation supersedes conflicting counts, uncommitted-slice
-descriptions and hidden-audio expectations in the dated history below. Preserve
-local commits `fe9e9afe4fd94e23ce027e7ae125ced075b53ba6`,
-`bfcd7d0de721288260fafcadc9fd71bcc1bb0485`,
-`ae13094dece4d8f88bf8b4d903a0148d9f035979`,
-`fec27dfd7878c32ff76a7886b54f339c9230263d` and
-`773e9a23deb7ea9400fa0e2450f0dcd390e4092e`. Native source advanced separately
-to `155a89c281c06d84776a7f5f6ea718bd382f0395`; its owner reports a published
-Build v22 preview, with delivered-asset/service-worker parity still unverified.
-Merge checkpoint `a12414e0b478aa40de7e7c8ad64561fd2b3c78b8` retains parents
-`773e9a2...` and `155a89c...`. TV/pinch and pager changes continue in the working
-tree; Build v23 is intended, pending final combined-source tests and parity.
-
-The combined catalog has **17 metadata records: 14 canonical mappings, two
-source records and one House project candidate** (native 16 plus retained
-House candidate). This is not a finalized FoundUp count. Earlier 16-record
-fixtures and the intermediate 20-card source are historical. The 144 target
-remains capacity only. Preserve stable source/video IDs, approved canonical
-aliases and truthful readiness. Vote/Ballots (`voteballots`), Trade (`trade`),
-MAGADOOM (`magadoom_001`) and native `kids_episodes` reconciliation do not claim
-launched applications. Canonical entry retains the existing Member Portal,
-sign-in/invite-code doorway; sources and candidates have no fabricated entry.
-
-Retain the whole HPC banner/build/Voice behavior, native FoundUps logo/LN badge,
-accessible OSP/About/Back card faces and dismissal/focus restoration, phone
-portrait patch-loading, one shared visible player, hidden/tucked pause and late
-provider-event guards. Scoped-TV/pinch, bounded network metadata/video paging,
-generated-page parity and their combined state/cache integration are in progress,
-not qualified by earlier selected browser, pytest or Node passes. Keep the
-actual before/after obligations and new acceptance in the
-[regression matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md); extend existing
-test owners and bind final results to the exact combined head.
-
-FoundUps House remains a discoverable PROJECT CANDIDATE with null canonical
-identity and the pinned [public opportunity model](../docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md).
-No first-House public record or disclosure permission was verified. Do not add
-address, location or availability, alias it to Move2Japan, or claim working
-Join/add-House publishing. Recover the existing owner's approved public record;
-generic account admission does not create a house.
-
-The verified refresh -> channel-puller -> YouTube `search.list`/500-related
-limitation is an investigation lead, not a diagnosis of the current catalog.
-Inspect the actual selected source, endpoint, arguments and pagination evidence
-before changing it. The registry blob `c69d0c4eb8e2e2afdcadd251dd7b81927f92d5db`
-is unchanged between base `72a3182...` and native `155a89c...`; its 14 public
-entries among 21 typed records is a different classification from this metadata
-catalog and does not finalize ecosystem inventory.
-
-Separate read-only Opus audit `fc022313-7249-4b5d-a400-8a45b76624d6` has a launch
-receipt, actual `Orchestrator(Carbon)` selection, a three-worker maximum and a
-20-minute initial phase. Launch is not an inventory result or verified native
-worker dispatch. Mall continuation owner `6afa1ef7-5690-8191-8b7e-4e268558d037`
-retains implementation; JHR owner `6afafaaa-ffd4-8191-9609-617214655009` retains
-research/publication. The launch receipt's parent relay packets are prepared;
-delivery/acknowledgment and JHR's current canonical publication revision are not
-verified here. See the matrix for source revisions and hold boundaries.
-
-Final combined QA, preview parity, push/draft-PR/CI and production delivery are
-separate gates. No production deployment or main merge is established here.
-Structured physical iPhone Safari/installed-PWA QA remains incomplete; retain
-012's reported VPN-on challenge and VPN-off playback without inventing numeric
-media-time telemetry or attributing provider authentication to Clerk.
-
-## 2026-11-16 - Build v22 direct continuation and policy qualification
-
-012 explicitly authorized the existing v21 continuation through tests, push,
-draft PR and isolated preview. WSP 110 section 2.1 principal handoff records
-previous owner `pfmall-truth-author`, accepting direct Codex continuation,
-expected native head `1b5b77323325b855faf25d4a04ba3e671462084e`, and preserved
-header/entity commits `fe9e9afe4fd94e23ce027e7ae125ced075b53ba6` and
-`bfcd7d0de721288260fafcadc9fd71bcc1bb0485`. No exclusive lease or native-agent
-ACK is invented. Recheck head and all working state before ff-only native
-integration and use a guarded same-branch push. No production deploy or merge.
-
-The v21 hidden-player release defect described below is repaired in the v22
-source candidate: tuck/dismiss/document hide pause playback and cancel loading,
-start and recovery timers. Closed/tucked/hidden/offscreen stages cannot start;
-late READY/PLAYING/ENDED/error/recovery callbacks enforce that boundary. Untuck
-keeps the same iframe paused for explicit visible Play. Scripted playback
-retains the 200 x 200 stage and more-than-half-visible gate; continuous partial
-visibility is not redefined as a universal 50-percent pause rule. One stage
-observer reuses the central pause helper; chrome timers remain separate.
-Generic third-party iframe and opacity-only hiding are outside this YouTube fix.
-
-Build label, shell cache and versioned assets move together to v22. Existing
-browser fixtures now reject hidden audio rather than certifying it. Controlled
-Chromium/WebKit player-policy and header/entity runners pass, including pending
-WikiTube recovery cancellation, same-frame manual return, provider error
-taxonomy, rotation and exact far-scroll restoration. Targeted pytest: 209 pass;
-direct Node state/cache VM: 24 pass (overlaps its pytest wrapper). These are
-source/fixture results, not real YouTube or physical iPhone acceptance.
-
-See [before/after regression matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md)
-for preserved routes, actions, gestures and explicit acceptance changes.
-Native integration, remote push/PR/checks and fresh preview parity are separate
-receipts. Physical Safari/PWA on Wi-Fi/cellular remains unexecuted as a structured
-matrix. Principal-reported VPN-off playback is retained without invented numeric
-telemetry. WSP 22, 50, 71, 91, 97 and 110 apply.
-
-## 2026-11-16 - Bounded public portrait/entity loading sprint
-
-FITS_POC for public discovery; CHANGES_POC_ACCEPTANCE for portrait entity
-layout and the separately specified visible top-floating player. Start with
-the [HPC banner and Vote reconciliation](../hpc/ROADMAP.md), then the small
-public grid candidate. Do not rewrite the shell or create a parallel page.
-
-- `play.foundups.com` remains the intended public Mall; browsing is public,
-  then FoundUp entry uses the existing `foundups.com` Clerk + invite-code
-  admission and return path. No account authority comes from the grid.
-- Reuse HPC-style portrait tiles with the real FoundUp name centered. The
-  source catalog currently contains 16 records. 144 is the product capacity
-  target, not present inventory, 144 invented entities or 144 videos.
-- The candidate opts only the public top-level entity grid into the
-  existing six-item IntersectionObserver / manual Load More mechanism.
-  Append DOM and thumbnail requests near the viewport; preserve stable IDs,
-  search/reset, saved scroll and expanded-lane return. Ordinary category
-  rows, grouped products and expanded video fields retain their own modes.
-- This is incremental append, not full virtualization. The existing small
-  metadata catalog is still fetched once; generic `loadTileContent()` alone
-  is only a quality-state hook. Do not claim server catalog pagination or
-  measured live performance from its presence.
-- Evaluate later adaptive batches with viewport demand, actual render time,
-  DOM/request/byte counts and device/data-saving signals. Network ping alone
-  does not establish usable capacity. 144-entry automated capacity fixtures
-  must remain test-only, with bounded local thumbnails and no admission.
-- Keep roadmap, ModLog, source revision and test receipts together. Native
-  owner integration, cache-generation promotion, independent exact-head
-  review and authorized release remain separate from a local candidate.
-
-Historical release blocker on native v21: it fully hid the tucked YouTube player while
-audio continues and `canStartYouTube()` bypasses visibility when tucked.
-The existing player owner must pause fully hidden/dismissed playback and
-remove that bypass before release. See [HPC acceptance](../hpc/ROADMAP.md).
-Public player/search/queue changes and tests of other creators follow as
-separate focused slices. The shared-dock deferral in this historical record is
-superseded by PFDOCK-20261121 above. Physical iPhone Safari/PWA and network
-gates remain explicit.
-
-<!-- Native 155a89c historical record; reconciled acceptance and fresh checks supersede conflicting counts, ticker and hidden-playback claims. -->
-## Canonical Catalog, OSP Tile Flip & Phone Patch-Load (Build v22) — 2026-11-16
-
-- Added `"trading"` to `VALID_CATEGORIES`, consolidated `linkedin_*` pseudo-tiles into header/About/`linkedin_url` links, reconciled `voteballots`, `trade`, `magadoom_001`, and `kids_episodes` from `foundup_registry.json`, grounded `foundups.com` `#foundupTicker` in real catalog length, added WSP 109 `Outcome · Solution · Pain` tile turn-over on hover-hold / long-press, and enabled phone viewport DOM + poster patch-loading under `Build v22` (`pfmall-member-v22`).
 
 ## Manifest & Catalog Truth Reconciliation (Build v19) — 2026-11-16
 
@@ -760,7 +549,7 @@ existing invited Mall scope and shared search/queue implementation.
 | --- | --- | --- |
 | PoC dock | 14/P1 (C3, I4, D3, Impact4) | Use the existing catalog and queue matching with the current single floating bottom-dock order. Check search without reloading active media, local dictation fallback, menu dismissal, Red Dog and AutoPost handoff, and no overlap with provider controls. |
 | PoC tile playback | 15/P1 (C4, I4, D3, Impact4) | Play in the selected desktop tile using the shared player. Keep the separate full-view action, one iframe, provider dimensions, and original-card return. Use fixture and real-provider evidence. |
-| Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site as the open guest p.fMALL discovery landing for all FoundUps (mirroring `hpc.foundups.com` without auth gates for browsing/playback). Entering any FoundUp passes through the `foundups.com` Member Portal (`https://foundups.com/member/?enter={foundup_id}` -> Clerk + invite + `@username`). Qualify DNS, TLS, open guest browse, and member portal handoff independently. |
+| Play entry | 13/P1 (C3, I4, D3, Impact3) | Bind `play.foundups.com` to the existing Hosting site. Root opens the admitted Mall and the existing sign-in return remains available. Qualify DNS, TLS, signed-out and invited paths independently. |
 | PFWD-2/3 | Later stage | Device model selection needs an admitted runtime and measured device support. Plan mode and plugins need an authorized Red Dog contract. AutoPost keeps capture and private attachment ownership. |
 
 The options menu opens the deployed AutoPost app listed on its
@@ -810,89 +599,3 @@ The regression fixture checks the shared phone and desktop compositions.
 Physical Safari, Home Screen playback and keyboard behavior, and live
 invited admission remain separate release gates. Roll back the shared
 dock, tile presentation and matching service-worker generation together.
-
-
-## Discovery-first follow-up - current 012 direction; count remains unresolved
-
-Do not equate video/source lanes with independently constituted FoundUps.
-Canonical typed registry records, public project cards, creator/source channels,
-components and artifacts are distinct. Personal LinkedIn channels do not add
-FoundUps. Keep 144 as target capacity and use truthful stage labels; final
-classification may follow public discovery. No hidden record is exposed by
-this direction. Approved current additions are the existing public records
-Vote (`voteballots`), Trade (`trade`) and MAGADOOM (`magadoom_001`). Preserve
-the existing Member Portal/sign-in/code doorway and unfinished-stage disclosure.
-Investigate Vote/Ballots/Voice/Action/linked HPC relationships rather than minting
-five entities. EDUIT is the confirmed spelling.
-
-012 also explicitly requests a discoverable FoundUps House project. The existing
-opportunity model describes it but does not register or implement it; no first
-House public record or publisher endpoint has been verified. Do not alias it
-to Move2Japan or a Fukui listing. A candidate card can explain the intended
-find-houses/Join-to-add-House experience with canonical identity unresolved,
-no address/availability/private details and no functional Join claim. Recover
-012's first-House owner record and approved public projection before listing it.
-
-Publishing is 012's FoundUp concept for a shared automated publishing/social
-engine serving THA, Books of Un/Dao/Du, papers and future cartoons. Investigate
-and reuse existing publishing/AutoPost owners before claiming capability or
-registering outputs as separate entities. Foundups-Earth is a repository-backed
-foundation/extraction candidate; its alias to 'Geo World' is unproved. Do not
-confuse it with GEOZE or publish that alias as established.
-
-Next coherent interaction slice: selecting a video-backed project replaces the
-all-Mall field with that project's videos and scoped sequential queue. Reuse
-the current field/player/theater and gesture owners: phone player floats above
-the grid; desktop retains theater/rail; pinch out enters the selected view and
-pinch in/accessible Back returns to Mall with state. Preserve browser zoom and
-native YouTube controls. Popular sorting requires actual recorded metrics;
-otherwise label the order honestly. Bounded viewport NETWORK fetching as well
-as DOM rendering is required: current complete nested video-catalog download
-does not satisfy that new acceptance. Qualify queue continuation across pages.
-
-Deferred opus/investor artifact discovery uses this Mall, not a second archive,
-site, swarm or new public category system. First inventory and permission-classify
-existing ventures, components, papers, publications and demos separately from
-parent FoundUp and lifecycle. Each record needs canonical source/revision,
-provenance, verified public URL or private/unverified access, approval/publication
-status, owner and verification time; deduplicate aliases and editions. Use a
-public allowlist only: no raw Brain/Memex, private drafts or contacts.
-
-Second project only verified public metadata into existing portrait cards and
-loaded-catalog search. Later authenticated retrieval requires tenant isolation,
-revocation and negative tests. Authenticated resident RedDog ingress is not
-implemented; public HoloIndex is distinct from internal retrieval infrastructure.
-Do not claim deployed voice search or memory access. The existing JHR owner
-`6afafaaa-ffd4-8191-9609-617214655009` owns publication archive/orchestration;
-link its canonical records instead of duplicating them. Existing Carbon video
-lane `6afaa791-cdfc-8191-9da3-cb1f22384019` has a physical Escape stop and
-unconfirmed native state; resolve it before any new Carbon swarm. This section
-records deferred acceptance, not completed artifact ingestion or publication.
-
-
-## Ingestion completeness versus viewport delivery - verified research boundary
-
-At base `72a3182c70974f0523be91d5ce4bd32808d824bc`, unchanged
-`channel_puller.py` blob `b5098b7ee1fea2a47bcd828fa8c01a22ae1e5f8b`
-implements `fetch_channel_videos()` using `search.list(channelId,type=video,
-order=date,maxResults=50,pageToken)` without the ownership filters. The existing
-refresh utility imports and calls it for delta/full acquisition; scheduler/CLI
-paths also produce reviewed ingest deltas. Continuation tokens remain local
-to the call, and returned records omit video popularity statistics.
-
-Google documents a 500-video maximum for that query without the relevant owner
-filters: [official search.list](https://developers.google.com/youtube/data/reference/rest/v3/search/list).
-This is an applicable completeness limitation of that utility, NOT established
-proof that it populated/truncated the present catalog (Move2Japan already has
-594 approved records). Browser boot and offline viewport-page generation read
-the committed reviewed catalog and do not invoke that API path.
-
-For a future separately qualified ingestion slice, reuse the existing scoped
-audit's channels.contentDetails uploads-playlist lookup and playlistItems
-pagination before creating another pipeline. Persist resumable progress and
-refresh verified video statistics separately if popularity is offered; preserve
-existing review deltas, indexing/cache ownership and provider limits. No API
-calls, OAuth expansion, ingestion/index/cache mutation or complete-channel claim
-is made here. Current per-video metadata has no popularity values, so present
-Catalog order only. The current viewport slice addresses bounded delivery and
-queue continuation independently of full-channel acquisition completeness.
