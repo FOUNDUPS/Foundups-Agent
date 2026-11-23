@@ -109,6 +109,7 @@
   var swipeStartX = 0;
   var swipeStartY = 0;
   var swipeStartTime = 0;
+  var gestureClickBlockedUntil = 0;
   var suppressNextClick = false;
 
   // ─── Storage Keys ───
@@ -243,10 +244,28 @@
     return 'full-video';
   }
 
+  function playerFocusTarget() {
+    if (theater) return stage?.querySelector('iframe') || topBar?.querySelector('[data-action="back"]');
+    if (floating || wikitube || container?.classList.contains('video-player-full-video')) return gestureGrip;
+    return topBar?.querySelector('[data-action="back"]');
+  }
+
+  function updateFrameGripLabel() {
+    if (!gestureGrip) return;
+    var label = floating ? 'Video controls; drag to move, swipe right to hide' : 'Video controls; pinch to change view';
+    if (container?.classList.contains('video-player-full-video')) {
+      var action = videoOptions().fullVideoSwipeRight || 'next';
+      if (action !== 'none') label = 'Video controls; swipe right for ' + (action === 'previous' ? 'previous' : 'next') + ' video';
+    }
+    gestureGrip.setAttribute('aria-label', label);
+    gestureGrip.title = label;
+  }
+
   function videoOptions() {
     return window.mallStateRestore?.getVideoOptions?.() || {
       autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true,
-      tileTapDestination: 'floating', pinchOutDestination: 'wikitube'
+      tileTapDestination: 'floating', pinchOutDestination: 'wikitube',
+      fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-reveal'
     };
   }
 
@@ -580,23 +599,25 @@
     gestureGrip.title = 'Video controls · drag to move · swipe right to hide';
     var stageFrame = document.createElement('div');
     stageFrame.className = 'video-player-stage-frame';
-    var dragSides = ['left', 'right'].map(function (side) {
+    var dragSides = ['right'].map(function (side) {
       var rail = document.createElement('div');
       rail.className = 'video-player-gesture-side';
       rail.dataset.side = side;
       rail.setAttribute('aria-hidden', 'true');
       return rail;
     });
-    stageFrame.append(dragSides[0], stage, dragSides[1]);
-    mediaPanel.append(gestureGrip, topBar, stageFrame, statusEl, playBtn);
+    // The visible grip is on the left so a right-swipe has usable travel inside
+    // the viewport. The tucked restore rail remains at the right screen edge.
+    stageFrame.append(gestureGrip, stage, dragSides[0]);
+    mediaPanel.append(topBar, stageFrame, statusEl, playBtn);
     gestureGrip.addEventListener('click', function () {
-      if (!suppressNextClick) { gestureGrip.focus({ preventScroll: true }); openVideoControls(); }
+      if (!suppressNextClick && performance.now() >= gestureClickBlockedUntil) { gestureGrip.focus({ preventScroll: true }); openVideoControls(); }
     });
     gestureGrip.addEventListener('keydown', function (event) {
       if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault(); openVideoControls();
+        event.preventDefault(); event.stopPropagation(); openVideoControls();
       } else if (floating && /^Arrow(Left|Right|Up|Down)$/.test(event.key)) {
-        event.preventDefault();
+        event.preventDefault(); event.stopPropagation();
         var rect = container.getBoundingClientRect();
         floatingPosition = { x: rect.left + (event.key === 'ArrowRight' ? 12 : event.key === 'ArrowLeft' ? -12 : 0),
           y: rect.top + (event.key === 'ArrowDown' ? 12 : event.key === 'ArrowUp' ? -12 : 0) };
@@ -693,7 +714,7 @@
         e.preventDefault();
         e.stopPropagation();
         memberQueueDock.input.blur();
-        (floating ? gestureGrip : topBar.querySelector('[data-action="back"]'))?.focus({ preventScroll: true });
+        playerFocusTarget()?.focus({ preventScroll: true });
         return;
       }
       if (wikitube || (memberQueueDock && !memberQueueDock.element.hidden)) {
@@ -845,6 +866,7 @@
       prevBtn.hidden = !hasMultiQueue;
       nextBtn.hidden = !hasMultiQueue;
     }
+    updateFrameGripLabel();
   }
 
   function applyFloatingPresentation() {
@@ -909,7 +931,7 @@
     syncTopBarButtons();
     syncFloatingGeometry();
     resetChromeTimer();
-    topBar.querySelector('[data-action="back"]').focus({ preventScroll: true });
+    playerFocusTarget()?.focus({ preventScroll: true });
 
     if (attemptImmediatePlay && playbackStatus?.state !== 'playing' && playbackStatus?.state !== 'starting') {
       autoplayRequested = true;
@@ -1188,6 +1210,10 @@
       return false;
     }
     var focusInsideHandle = document.activeElement === tuckHandle;
+    if (opts?.immediate) {
+      container.classList.add('player-reveal-immediate');
+      requestAnimationFrame(function () { container?.classList.remove('player-reveal-immediate'); });
+    }
     tucked = false;
     container.classList.remove('is-tucked');
     container.inert = false;
@@ -1593,7 +1619,7 @@
     if (mallHidden) return;
     var seq = activeSequence();
     var pos = seq.indexOf(currentIndex);
-    var next = pos >= 0 ? seq[pos + 1] : currentIndex + 1;
+    var next = pos >= 0 ? seq[pos + 1] : seq[0];
     if (next !== undefined && next < currentQueue.length) {
       autoplayRequested = true;
       goToVideo(next, { explicitUserSelect: true });
@@ -1607,7 +1633,7 @@
     if (mallHidden) return;
     var seq = activeSequence();
     var pos = seq.indexOf(currentIndex);
-    var previous = pos >= 0 ? seq[pos - 1] : currentIndex - 1;
+    var previous = pos >= 0 ? seq[pos - 1] : seq[seq.length - 1];
     if (previous !== undefined && previous >= 0) {
       autoplayRequested = true;
       goToVideo(previous, { explicitUserSelect: true });
@@ -1733,7 +1759,7 @@
         return;
       }
       if (document.activeElement === playBtn) {
-        var focusTarget = theater ? iframe : floating ? gestureGrip : topBar.querySelector('[data-action="back"]');
+        var focusTarget = playerFocusTarget();
         focusTarget?.focus({ preventScroll: true });
       }
       reportYouTube('starting', 'Starting video…');
@@ -1839,7 +1865,7 @@
               waitForPlayback('provider-unknown', 'YouTube did not start. Try its Play control or open the source.');
               armPlayStartGuard(ytActiveGeneration);
               if (document.activeElement === playBtn) {
-                var focusTarget = theater ? iframe : floating ? gestureGrip : topBar.querySelector('[data-action="back"]');
+                var focusTarget = playerFocusTarget();
                 focusTarget?.focus({ preventScroll: true });
               }
               reportYouTube('starting', 'Starting video…');
@@ -2367,6 +2393,20 @@
       return;
     }
 
+    // Only the app Full Video presentation uses this horizontal queue gesture.
+    // WikiTube keeps its existing save/dismiss grammar; provider touches never
+    // reach this handler. A deliberate swipe is independent of natural autoplay.
+    if (container.classList.contains('video-player-full-video') &&
+        dir === 'right' && absDx >= Math.max(72, Math.min(140, container.clientWidth * .2)) &&
+        absDx > absDy * 1.4 && !isHorizontalScrollTarget(target)) {
+      var action = videoOptions().fullVideoSwipeRight || 'next';
+      if (action === 'none') return;
+      gestureClickBlockedUntil = performance.now() + 400;
+      if (action === 'previous') prevVideo();
+      else nextVideo();
+      return;
+    }
+
     if (wikitube && !isHorizontalScrollTarget(target)) {
       if ((dir === 'up' || dir === 'down') && absDy >= 50 && absDy > absDx * 1.3) {
         if (dir === 'up') nextVideo();
@@ -2421,8 +2461,15 @@
       var dy = e.changedTouches[0].clientY - handleStartY;
       if (dx <= -UNTUCK_SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
         untuck();
+      } else if (dx >= Math.max(16, Math.min(32, tuckHandle.clientWidth * .5)) && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        var action = videoOptions().tuckedSwipeRight || 'next-reveal';
+        if (action === 'none') return;
+        e.preventDefault();
+        gestureClickBlockedUntil = performance.now() + 400;
+        untuck({ immediate: true });
+        if (action === 'next-reveal') nextVideo();
       }
-    }, { passive: true });
+    }, { passive: false });
   }
 
   // ─── Event Handlers ───
@@ -2753,6 +2800,16 @@
         ? { title: titleEl.textContent, label: source.textContent, url: source.href } : null;
     },
     getPlaybackSnapshot: getPlaybackSnapshot,
+    save: function () { if (isOpen && !mallHidden) saveBtn?.click(); },
+    share: function () { if (isOpen && !mallHidden) topBar?.querySelector('[data-action="share"]')?.click(); },
+    canEnterFoundUp: function () {
+      var button = topBar?.querySelector('[data-action="enter"]');
+      return isOpen && !!button && !button.hidden;
+    },
+    enterFoundUp: function () {
+      var button = topBar?.querySelector('[data-action="enter"]');
+      if (isOpen && !mallHidden && button && !button.hidden) button.click();
+    },
     goToVideo: goToVideo,
     next: nextVideo,
     prev: prevVideo,

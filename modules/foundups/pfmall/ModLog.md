@@ -1,13 +1,13 @@
 ## 2026-11-22 — Floating control continuation
 
-Use the same player/state/dock for HPC-first qualification of drag, persistent
-frame gesture targets, full-height tuck/restore, independent preferences and
-accessible Video actions. Camera reuses external AutoPost; its companion footer
-owns safe return and capture lifecycle. No duplicate capture, search, model or
-conversation engine is added. The source review corrected Full Video timeout
-advancement and focus, and the wide-floating menu now reuses its existing dialog.
-See the member test log, HPC roadmap and canonical media incident for source,
-provider, delivery and physical-device distinctions under WSP 00/10/15/22/30/97.
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,
+configurable right-swipe queue/reveal actions, full-height external gesture grip
+and opt-in bounded current-tab DAEmon. See the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate) and
+[canonical media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md).
+Native provider controls and ordinary desktop theater remain; physical phone
+and production acceptance are open. No model, mic or backend service is added.
 
 ## 2026-11-21 — Shared dock and configurable player acceptance
 

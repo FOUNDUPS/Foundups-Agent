@@ -1,5 +1,14 @@
 # Member Area Module Change Log
 
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE.** The [interaction contract](INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate)
+specifies app-only chrome removal, mode-specific configurable right-swipes,
+full-height external grips and opt-in bounded local activity. Shared player,
+queue and preference owners are reused; preview diagnostics are nested.
+Exact-source tests, independent review and physical iPhone/PWA evidence remain
+required. Existing source62/livev25 previews are retained as rollback references.
+
 ## 2026-11-22 — Floating control and camera continuation
 
 Extend the shared player/state/dock from #2439 a3ea8260. Add viewport-clamped

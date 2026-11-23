@@ -99,17 +99,108 @@ def boot(page, hpc=False):
     expect(page.locator('.mall-member-search-dock:visible')).to_have_count(1)
 
 
+def open_video_menu(page, settings=False):
+    if page.evaluate('window.mallVideoPlayer?.isFloating?.()&&!window.mallVideoPlayer?.isTucked?.()'):
+        page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
+    elif page.locator('.mall-member-search-dock:visible .mall-search-plus').count():
+        page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
+    else:
+        page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
+    menu = page.locator('.mall-member-search-options[open]')
+    expect(menu).to_be_visible()
+    details = menu.locator('[data-video-settings]' if settings else '[data-video-commands]')
+    if details.get_attribute('open') is None:
+        details.locator(':scope > summary').click()
+    expect(details).to_have_attribute('open', '')
+    return menu
+
+
+def close_video_menu(page, menu):
+    dialog = menu.element_handle()
+    dialog.evaluate("d=>{delete d.dataset.fixtureClosed;d.addEventListener('close',()=>{d.dataset.fixtureClosed='yes'},{once:true})}")
+    menu.get_by_role('button', name='Close', exact=True).click()
+    page.wait_for_function("d=>d.dataset.fixtureClosed==='yes'", arg=dialog)
+    dialog.dispose()
+    expect(menu).not_to_be_visible()
+
+
+def set_video_choices(page, **values):
+    menu = open_video_menu(page, settings=True)
+    for key, value in values.items():
+        control = menu.locator('[data-video-option="' + key + '"]')
+        if isinstance(value, bool):
+            control.set_checked(value)
+        else:
+            control.select_option(value)
+    close_video_menu(page, menu)
+
+
 def video_action(page, action):
     # The existing desktop theater retains its own Back control; it has no
     # floating phone dock. Do not change input capabilities to manufacture a tap.
     if action == 'close' and page.evaluate('window.mallVideoPlayer.isTheater()'):
         page.locator('#videoPlayerFullscreen [data-action="back"]').click()
         return
-    if page.evaluate('window.mallVideoPlayer.isFloating()'):
-        page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
+    menu = open_video_menu(page)
+    dialog = menu.element_handle()
+    dialog.evaluate("d=>{delete d.dataset.fixtureActionClosed;d.addEventListener('close',()=>{d.dataset.fixtureActionClosed='yes'},{once:true})}")
+    menu.locator('[data-player-action="' + action + '"]').click()
+    page.wait_for_function("d=>d.dataset.fixtureActionClosed==='yes'", arg=dialog)
+    dialog.dispose()
+
+
+def app_touch(page, target, dx=0, dy=0, pinch=None, start_fraction=.5):
+    """Hit-tested app edge; Chromium native touch injection, WebKit DOM events.
+
+    No input is sent into the provider iframe. Neither engine proves physical
+    iPhone/Safari gesture behavior.
+    """
+    expect(target).to_be_visible()
+    box = target.bounding_box()
+    assert_true(box and box['width'] > 0 and box['height'] >= 44, box)
+    viewport = page.viewport_size
+    x, y = box['x'] + box['width'] * start_fraction, box['y'] + box['height'] / 2
+    assert_true(target.evaluate('(e,p)=>e===document.elementFromPoint(p.x,p.y)||e.contains(document.elementFromPoint(p.x,p.y))', {'x': x, 'y': y}),
+                {'app_surface_not_hit_testable': box})
+    if pinch is None:
+        start = [{'x': x, 'y': y}]
+        end = [{'x': x + dx, 'y': y + dy}]
     else:
-        page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
-    page.locator('.mall-member-search-options[open] [data-player-action="' + action + '"]').click()
+        half = min(box['height'] / 2 - 8, y - 8, viewport['height'] - y - 8)
+        assert_true(half >= 70, {'insufficient_pinch_surface': box})
+        a, b = (half / 2, half) if pinch == 'out' else (half, half / 2)
+        start = [{'x': x, 'y': y - a}, {'x': x, 'y': y + a}]
+        end = [{'x': x, 'y': y - b}, {'x': x, 'y': y + b}]
+    for point in start + end:
+        assert_true(0 <= point['x'] < viewport['width'] and 0 <= point['y'] < viewport['height'],
+                    {'gesture_point_outside_viewport': point, 'box': box})
+    engine = page.context.browser.browser_type.name
+    if engine == 'chromium':
+        session = page.context.new_cdp_session(page)
+        try:
+            session.send('Input.dispatchTouchEvent', {'type': 'touchStart', 'touchPoints': start})
+            for step in range(1, 7):
+                points = [{'x': a['x'] + (b['x'] - a['x']) * step / 6,
+                           'y': a['y'] + (b['y'] - a['y']) * step / 6} for a, b in zip(start, end)]
+                session.send('Input.dispatchTouchEvent', {'type': 'touchMove', 'touchPoints': points})
+            session.send('Input.dispatchTouchEvent', {'type': 'touchEnd', 'touchPoints': []})
+        finally:
+            session.detach()
+        mode = 'Chromium CDP touch on visible app edge'
+    else:
+        target.evaluate("""(e,p)=>{
+          const touches=points=>points.map(t=>({clientX:t.x,clientY:t.y}));
+          for(const [name,active,changed] of [['touchstart',p.start,p.start],['touchmove',p.end,p.end],['touchend',[],p.end]]){
+            const event=new Event(name,{bubbles:true,cancelable:true});
+            Object.defineProperties(event,{touches:{value:touches(active)},changedTouches:{value:touches(changed)}});
+            e.dispatchEvent(event);
+          }
+        }""", {'start': start, 'end': end})
+        mode = 'WebKit synthetic touch events on hit-tested visible app edge'
+    # Settle the pinch fence and the longer synthetic-click suppression. This
+    # also exposes an accidental second navigation from pointer/touch delivery.
+    page.wait_for_timeout(460)
+    return {'surface': box, 'start': start, 'end': end, 'delivery': mode}
 
 
 def checkpoint(page, name):
@@ -284,6 +375,11 @@ def tile_tap_choices(page, hpc):
     menu = page.locator('.mall-member-search-options[open]')
     group = menu.get_by_role('group', name='Video', exact=True)
     expect(group).to_be_visible()
+    assert_true(group.locator('[data-video-settings]').get_attribute('open') is None,
+                'Normal plus entry exposed the settings detail group by default')
+    assert_true(group.locator('[data-video-commands]').get_attribute('open') is None,
+                'Normal plus entry exposed playback commands by default')
+    group.locator('[data-video-settings] > summary').click()
     choice = group.locator('[data-video-option="tileTapDestination"]')
     expect(choice).to_have_value('floating')
     assert_true(choice.locator('option').evaluate_all('(es)=>es.map(e=>e.value)') ==
@@ -304,6 +400,8 @@ def tile_tap_choices(page, hpc):
     for destination, mode in modes.items():
         if not menu.is_visible():
             dock.locator('.mall-search-plus').tap()
+        if group.locator('[data-video-settings]').get_attribute('open') is None:
+            group.locator('[data-video-settings] > summary').click()
         choice.select_option(destination)
         expect(group.locator('[data-video-option="pinchOutDestination"]')).to_have_value('wikitube')
         assert_true(page.evaluate('window.mallStateRestore.getVideoOptions().tileTapDestination') == destination,
@@ -331,6 +429,8 @@ def tile_tap_choices(page, hpc):
             before = page.evaluate('({snapshot:window.mallVideoPlayer.getPlaybackSnapshot(),loads:window.fixturePlayback.loadedIds.length,created:window.fixturePlayback.created})')
             page.evaluate('window.independentFrame=document.querySelector("#videoPlayerFullscreen iframe")')
             dock.locator('.mall-search-plus').tap()
+            if group.locator('[data-video-settings]').get_attribute('open') is None:
+                group.locator('[data-video-settings] > summary').click()
             choice.select_option('full-video')
             close_choices()
             tile.focus()
@@ -348,6 +448,8 @@ def tile_tap_choices(page, hpc):
     page.reload(wait_until='domcontentloaded')
     expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
     page.locator('.mall-member-search-dock:visible .mall-search-plus').tap()
+    if page.locator('.mall-member-search-options[open] [data-video-settings]').get_attribute('open') is None:
+        page.locator('.mall-member-search-options[open] [data-video-settings] > summary').click()
     expect(page.locator('.mall-member-search-options[open] [data-video-option="tileTapDestination"]')).to_have_value('full-video')
     return {'choices': results, 'reload_retained': 'full-video', 'unconfirmed_defaults_seeded': False}
 
@@ -516,7 +618,7 @@ def reversible_mall_return(page, hpc, desktop=False, lane=False):
     dock.fill('Fixture' if hpc else 'retained queue probe')
     dock.press('Enter')
     before=retained_snapshot(page)
-    player.locator('[data-action="float"]').click()
+    video_action(page, 'collapse')
     page.wait_for_function('window.mallVideoPlayer.isMallHidden()')
     expect(player).not_to_be_visible()
     after=retained_snapshot(page)
@@ -606,7 +708,7 @@ def retained_pending_page(page, close_instead=False):
         expect(player).not_to_be_visible()
         expect(player.locator('iframe')).to_have_count(0)
     else:
-        player.locator('[data-action="float"]').click()
+        video_action(page, 'collapse')
         page.wait_for_function('window.mallVideoPlayer.isMallHidden()')
         expect(root).to_be_visible()
     route=held.pop()
@@ -629,7 +731,7 @@ def retained_pending_page(page, close_instead=False):
     resumed=retained_snapshot(page)
     assert_true(resumed['sameFrame'] and resumed['length']==length+len(batch) and resumed['id']==before['id'], resumed)
     video_action(page, 'expand')
-    player.locator('[data-action="next"]').click()
+    video_action(page, 'next')
     page.wait_for_function('id=>window.mallVideoPlayer.getCurrentVideoId()===id',arg=batch[0]['video_id'])
     page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
     assert_true(page.evaluate('document.querySelector("#videoPlayerFullscreen iframe")===window.returnFixtureFrame'),'Pending-page continuation recreated the provider')
@@ -730,7 +832,7 @@ def unready_mall_return_stays_closed(page):
     page.evaluate('window.mallVideoPlayer.setTheater(false);window.mallVideoPlayer.openFullVideo()')
     player=page.locator('#videoPlayerFullscreen')
     expect(player).to_have_attribute('aria-label','Full Video in app')
-    player.locator('[data-action="float"]').click()
+    video_action(page, 'collapse')
     expect(player.locator('iframe')).to_have_count(0)
     assert_true(page.evaluate('!window.mallVideoPlayer.isOpen()&&window.mallVideoPlayer.getQueueLength()===0'),'Unready return retained an unsafe provider')
     event=page.evaluate('window.fixturePlayback.events.at(-1)')
@@ -853,7 +955,7 @@ def dock_flow(page, hpc):
         expect(player).to_be_visible()
         queue.fill('')
         queue.press('Enter')
-        player.locator('[data-action="float"]').tap()
+        video_action(page, 'collapse')
         page.wait_for_function('window.mallVideoPlayer.isMallHidden()')
         expect(player).not_to_be_visible()
         reopen_retained_from_caller(page, hpc)
@@ -863,8 +965,7 @@ def dock_flow(page, hpc):
             expect(page.locator('#videoScopePhoneDock .mall-member-search-bar textarea')).to_have_value('Fixture')
     assert_true(all(p['sameFrame'] and p['created'] == 1 for p in points), points)
     # Exercise the existing options through UI, including Full Video -> WikiTube.
-    page.locator('.mall-member-search-dock:visible .mall-search-plus').tap()
-    menu = page.locator('.mall-member-search-options[open]')
+    menu = open_video_menu(page, settings=True)
     menu.locator('[data-video-option="pinchOutDestination"]').select_option('full-video')
     menu.locator('[data-video-option="collapseDestination"]').select_option('wikitube')
     # A native select can consume Escape; focus a dialog control first.
@@ -875,18 +976,17 @@ def dock_flow(page, hpc):
     expect(player).to_have_attribute('aria-label', 'Full Video in app')
     expect(player.locator('.video-player-queue-rail')).not_to_be_visible()
     points.append(checkpoint(page, 'full-video'))
-    player.locator('[data-action="float"]').tap()
+    video_action(page, 'collapse')
     expect(player).to_have_attribute('aria-label', 'WikiTube video player')
     points.append(checkpoint(page, 'full-video-to-wikitube'))
-    player.locator('[data-action="float"]').tap()
+    video_action(page, 'collapse')
     page.wait_for_function('window.mallVideoPlayer.isMallHidden()')
     expect(player).not_to_be_visible()
     reopen_retained_from_caller(page, hpc)
     expect(player).to_have_attribute('aria-label', 'Floating video player')
     points.append(checkpoint(page, 'full-video-restored'))
     assert_true(all(p['sameFrame'] and p['created'] == 1 for p in points), points)
-    page.locator('.mall-member-search-dock:visible .mall-search-plus').tap()
-    menu = page.locator('.mall-member-search-options[open]')
+    menu = open_video_menu(page, settings=True)
     menu.locator('[data-video-option="pinchOutDestination"]').select_option('wikitube')
     menu.get_by_role('button', name='Close', exact=True).focus()
     page.keyboard.press('Escape')
@@ -897,7 +997,7 @@ def dock_flow(page, hpc):
         page.go_back(wait_until='domcontentloaded')
     else:
         # Public browsing preserves its existing native history. Use its UI Back.
-        player.locator('[data-action="back"]').tap()
+        video_action(page, 'close')
     expect(player).not_to_be_visible()
     final = checkpoint(page, 'closed')
     if hpc:
@@ -1001,25 +1101,212 @@ def floating_frame_controls(page):
     page.evaluate("window.__pfmallWikiTubeSkipDelayMs=40;window.fixturePlayback.errorsByVideo={HPC00000001:100};window.fixturePlayback.finishCurrent()")
     page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&window.mallVideoPlayer.getCurrentVideoId()==='HPC00000002'")
     assert_true(page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot().failedIndices.includes(1)"), 'Full Video did not retain failed-clip diagnosis')
-    player.locator('.video-player-top-bar').evaluate("e=>{e.dispatchEvent(new Event('gestureend',{bubbles:true}));}")
-    # Start a fresh pinch only after the controller's documented consumption fence.
-    page.wait_for_timeout(100)
-    player.locator('.video-player-top-bar').evaluate("e=>{const g=new Event('gesturechange',{bubbles:true,cancelable:true});Object.defineProperty(g,'scale',{value:.6});e.dispatchEvent(g)}")
+    expect(grip).to_be_visible()
+    app_touch(page, grip, pinch='in')
     expect(player).to_have_attribute('aria-label', 'WikiTube video player')
-    player.locator('.video-player-top-bar').evaluate("""e=>{
-      for(const [name,touches,changedTouches] of [
-        ['touchstart',[{clientX:80,clientY:150}],[]],
-        ['touchend',[],[{clientX:80,clientY:60}]]]){
-        const event=new Event(name,{bubbles:true,cancelable:true});
-        Object.defineProperties(event,{touches:{value:touches},changedTouches:{value:changedTouches}});e.dispatchEvent(event);
-      }
-    }""")
+    app_touch(page, grip, dy=-90)
     page.wait_for_function('window.mallVideoPlayer.isMallHidden()')
     assert_true(page.evaluate("document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame"), 'Gesture return recreated iframe')
     assert_true(page.evaluate('window.fixturePlayback.created===1'), 'More than one player created')
     return {'responsive_provider_minimum': True, 'drag': {'before': before, 'after': after},
             'restore_rail': box, 'hidden_paused': True, 'independent_gesture_destinations': True,
             'same_iframe': True, 'cross_origin_touches': 'NOT_CAPTURED', 'physical_iPhone': 'UNEXECUTED'}
+
+
+def clean_video_gestures(page):
+    boot(page, True)
+    page.locator('.mall-tile[data-video-id="HPC00000000"]').tap(position={'x': 25, 'y': 75})
+    page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    player = page.locator('#videoPlayerFullscreen')
+    grip = player.locator('.video-player-gesture-grip')
+    # Materialize the existing paged fixture through its canonical control;
+    # filtered navigation must include records beyond the first loaded page.
+    for _ in range(12):
+        if page.evaluate('window.mallVideoPlayer.getQueueLength()>=24'):
+            break
+        more = page.get_by_role('button', name='Load more videos', exact=True)
+        if not more.count():
+            break
+        more.evaluate('e=>e.click()')
+        page.wait_for_timeout(40)
+    assert_true(page.evaluate('window.mallVideoPlayer.getQueueLength()>=24'), 'Fixture did not exercise more than one catalog page')
+    page.evaluate("""() => {
+      const frame=document.querySelector('#videoPlayerFullscreen iframe');
+      window.cleanFrame=frame;window.cleanWindow=frame.contentWindow;
+      const wrapper=document.querySelector('.mall-tile-field-wrapper');
+      window.cleanCaller={id:mallVideoPlayer.getCurrentVideoId(),scroll:wrapper.scrollTop,left:wrapper.scrollLeft};
+      window.cleanEvents={save:0,share:0,dismiss:0};window.cleanShares=[];
+      for(const [event,key] of [['videoPlayerSave','save'],['videoPlayerShare','share'],['videoPlayerDismiss','dismiss']])
+        addEventListener(event,()=>window.cleanEvents[key]++);
+      Object.defineProperty(navigator,'share',{configurable:true,value:async data=>{window.cleanShares.push(data)}});
+    }""")
+    set_video_choices(page, autoplayNext=False, pinchOutDestination='full-video',
+                      pinchInDestination='wikitube', fullVideoSwipeRight='next', tuckedSwipeRight='next-reveal')
+    transitions = [app_touch(page, grip, pinch='out')]
+    expect(player).to_have_attribute('aria-label', 'Full Video in app')
+    expect(player.locator('.video-player-top-bar')).not_to_be_visible()
+    expect(player.locator('.video-player-manual-play')).not_to_be_visible()
+    assert_true(page.evaluate('document.activeElement===document.querySelector(".video-player-gesture-grip")'), 'Expanded keyboard focus did not reach the visible app grip')
+    assert_true(not page.evaluate('!!document.fullscreenElement'), 'App Full Video entered native provider fullscreen')
+    frame = player.locator('iframe').bounding_box()
+    edge = grip.bounding_box()
+    assert_true(frame['width'] >= 200 and frame['height'] >= 200 and edge['x'] + edge['width'] <= frame['x'] + 1,
+                {'provider_or_edge_geometry': {'frame': frame, 'edge': edge}})
+    assert_true(abs(frame['height'] - edge['height']) <= 1, 'Grip is not the provider-height side edge')
+    before = page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length,plays:fixturePlayback.plays})')
+    transitions.append(app_touch(page, grip, dx=110))
+    page.wait_for_function("mallVideoPlayer.getCurrentVideoId()==='HPC00000001'&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    page.wait_for_function('mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3')
+    after = page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length,plays:fixturePlayback.plays,events:cleanEvents})')
+    assert_true(after['loads'] == before['loads'] + 1 and after['plays'] == before['plays'] + 1,
+                {'one_swipe_advanced_more_than_once': {'before': before, 'after': after}})
+    assert_true(after['events'] == {'save': 0, 'share': 0, 'dismiss': 0}, after)
+    assert_true(page.evaluate('mallStateRestore.getVideoOptions().autoplayNext===false'), 'Explicit swipe silently enabled natural autoplay')
+
+    # The canonical queue filter leaves the current clip playing while typing.
+    query = page.locator('.mall-member-search-dock:visible textarea')
+    # Existing fixture IDs2 and20 alone carry the unique topic marker. Common
+    # words in "Fixture clip2" would match the canonical token-search grammar.
+    query.fill('topic')
+    expect(page.locator('.video-player-queue-item')).to_have_count(2)
+    matches = page.locator('.video-player-queue-item').evaluate_all('es=>es.map(e=>Number(e.dataset.index))')
+    assert_true(matches == [2, 20], {'filtered_fixture': matches})
+    assert_true(page.evaluate('mallVideoPlayer.getCurrentVideoId()') == 'HPC00000001', 'Typing interrupted the active clip')
+    video_action(page, 'next')
+    page.wait_for_function('i=>mallVideoPlayer.getCurrentIndex()===i', arg=matches[0])
+    video_action(page, 'previous')
+    assert_true(page.evaluate('mallVideoPlayer.getCurrentIndex()') == matches[0], 'Previous escaped the beginning of the filtered queue')
+    # Setup an out-of-filter active clip through the existing shared API,
+    # preserving the entered query; previous must choose the last match.
+    page.evaluate('mallVideoPlayer.selectVideo(1)')
+    page.wait_for_function("mallVideoPlayer.getCurrentVideoId()==='HPC00000001'&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    video_action(page, 'previous')
+    page.wait_for_function('i=>mallVideoPlayer.getCurrentIndex()===i', arg=matches[-1])
+    boundary = page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length})')
+    video_action(page, 'next')
+    assert_true(page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length})') == boundary,
+                'End of filtered queue wrapped or loaded an unrelated clip')
+    query.fill('')
+    set_video_choices(page, fullVideoSwipeRight='previous')
+    index = page.evaluate('mallVideoPlayer.getCurrentIndex()')
+    transitions.append(app_touch(page, grip, dx=110))
+    assert_true(page.evaluate('mallVideoPlayer.getCurrentIndex()') == index - 1, 'Configured reverse swipe did not select exactly one previous clip')
+    set_video_choices(page, fullVideoSwipeRight='none')
+    index = page.evaluate('mallVideoPlayer.getCurrentIndex()')
+    transitions.append(app_touch(page, grip, dx=110))
+    assert_true(page.evaluate('mallVideoPlayer.getCurrentIndex()') == index, 'No-action swipe changed video')
+    set_video_choices(page, fullVideoSwipeRight='next')
+
+    # WikiTube retains save-left/dismiss-right, rather than Full Video next.
+    transitions.append(app_touch(page, grip, pinch='in'))
+    expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+    index = page.evaluate('mallVideoPlayer.getCurrentIndex()')
+    saved_before = page.evaluate('mallVideoPlayer.isCurrentSaved()')
+    right_edge = player.locator('.video-player-gesture-side[data-side="right"]')
+    transitions.append(app_touch(page, right_edge, dx=-90))
+    assert_true(page.evaluate('mallVideoPlayer.isCurrentSaved()') is not saved_before, 'WikiTube left swipe stopped saving')
+    transitions.append(app_touch(page, grip, dx=110))
+    assert_true(page.evaluate('mallVideoPlayer.getCurrentIndex()') == index, 'WikiTube right swipe acquired Full Video next semantics')
+    assert_true(page.evaluate('cleanEvents.dismiss') == 1, 'WikiTube dismiss hook changed')
+    video_action(page, 'save')
+    assert_true(page.evaluate('mallVideoPlayer.isCurrentSaved()') == saved_before, 'Accessible Save command did not revise selection')
+    video_action(page, 'share')
+    assert_true(page.evaluate('cleanEvents.share===1&&cleanShares.length===1'), 'Accessible Share did not use the existing shared owner')
+
+    # Escape first dismisses the focused search; its return target is visible.
+    query.focus(); page.keyboard.press('Escape')
+    expect(player).to_be_visible()
+    assert_true(page.evaluate('document.activeElement===document.querySelector(".video-player-gesture-grip")'), 'Search Escape focused hidden chrome')
+    video_action(page, 'return')
+    page.wait_for_function('mallVideoPlayer.isMallHidden()')
+    returned = page.evaluate("""() => {
+      const wrapper=document.querySelector('.mall-tile-field-wrapper'),active=document.activeElement;
+      return {caller:cleanCaller,retainedId:mallVideoPlayer.getCurrentVideoId(),focus:active?.dataset?.videoId,
+        scroll:wrapper.scrollTop,left:wrapper.scrollLeft};
+    }""")
+    assert_true(returned['focus'] == returned['caller']['id'] and
+                abs(returned['scroll'] - returned['caller']['scroll']) <= 2 and
+                abs(returned['left'] - returned['caller']['left']) <= 2,
+                {'return_before_any_test_focus_or_scroll': returned})
+    caller = page.locator('.mall-tile[data-video-id="' + returned['caller']['id'] + '"]')
+    # This is a deliberate new selection of the original visible caller. The
+    # retained clip can differ after queue navigation; do not call it lost state.
+    activate_visible_tile(page, caller, False)
+    page.wait_for_function('id=>mallVideoPlayer.getCurrentVideoId()===id&&mallVideoPlayer.getPlaybackSnapshot()?.state==="playing"',
+                           arg=returned['caller']['id'])
+    expect(player).to_have_attribute('aria-label', 'Floating video player')
+    transitions.append(app_touch(page, grip, dx=85))
+    page.wait_for_function('mallVideoPlayer.isTucked()')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='paused'")
+    rail = page.locator('.video-player-tuck-handle')
+    before = page.evaluate('({index:mallVideoPlayer.getCurrentIndex(),loads:fixturePlayback.loadedIds.length})')
+    #42px edge: this complete right swipe starts AND ends inside the viewport.
+    rail_box = rail.bounding_box()
+    dx = min(26, page.viewport_size['width'] - (rail_box['x'] + rail_box['width'] * .25) - 2)
+    assert_true(dx >= rail_box['width'] * .5, {'insufficient_real_tuck_swipe': {'rail': rail_box, 'dx': dx}})
+    transitions.append(app_touch(page, rail, dx=dx, start_fraction=.25))
+    page.wait_for_function('!mallVideoPlayer.isTucked()&&mallVideoPlayer.getCurrentIndex()==='+str(before['index'] + 1))
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3")
+    assert_true(page.evaluate('fixturePlayback.loadedIds.length') == before['loads'] + 1, 'Tucked right swipe advanced more than once')
+    set_video_choices(page, tuckedSwipeRight='restore')
+    transitions.append(app_touch(page, grip, dx=85))
+    page.wait_for_function('mallVideoPlayer.isTucked()')
+    held = page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length})')
+    transitions.append(app_touch(page, rail, dx=26, start_fraction=.25))
+    page.wait_for_function('!mallVideoPlayer.isTucked()')
+    assert_true(page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length})') == held,
+                'Restore-current tuck gesture selected another video')
+    assert_true(page.evaluate("mallVideoPlayer.getPlaybackSnapshot()?.state==='paused'"), 'Restore-current gesture resumed hidden playback without Play')
+    set_video_choices(page, tuckedSwipeRight='none')
+    transitions.append(app_touch(page, grip, dx=85))
+    page.wait_for_function('mallVideoPlayer.isTucked()')
+    transitions.append(app_touch(page, rail, dx=26, start_fraction=.25))
+    assert_true(page.evaluate('mallVideoPlayer.isTucked()'), 'No-action tucked gesture revealed the player')
+    assert_true(page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length})') == held,
+                'No-action tucked gesture selected another video')
+    # The persistent dock provides explicit recovery even while the player/grip
+    # is inert and a no-action tuck gesture is selected.
+    video_action(page, 'play')
+    page.wait_for_function("!mallVideoPlayer.isTucked()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3")
+    assert_true(page.evaluate('document.querySelector("#videoPlayerFullscreen iframe")===cleanFrame&&cleanFrame.contentWindow===cleanWindow&&fixturePlayback.created===1'), 'Navigation or gestures replaced the ready provider')
+    expect(player.locator('iframe')).to_have_count(1)
+    return {'transitions': transitions, 'explicit_swipe_autoplay_with_natural_autoplay_off': True,
+            'return_before_test_activation': returned,
+            'filtered_first_last_end_reverse': True, 'wiki_save_dismiss_retained': True,
+            'tucked_next_and_reveal': True, 'one_provider': True,
+            'menu_play_from_tucked': True,
+            'share': 'MOCK_NATIVE_SHARE_API; no OS share or clipboard operation',
+            'cross_origin_provider_gestures': 'NOT_CAPTURED', 'physical_iPhone': 'UNEXECUTED'}
+
+
+def theater_clean_control_regression(page):
+    boot(page, False)
+    page.locator('#mallTileField [data-foundup-id="move2japan"]').click()
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    player = page.locator('#videoPlayerFullscreen')
+    page.evaluate("""() => {
+      window.theaterFrame=document.querySelector('#videoPlayerFullscreen iframe');
+      window.theaterErrors=[];addEventListener('error',event=>theaterErrors.push(event.message));
+      mallVideoPlayer.setTheater(true);
+    }""")
+    assert_true(page.evaluate('mallVideoPlayer.isTheater()'), 'Theater mode did not remain distinct')
+    expect(player.locator('.video-player-top-bar')).to_be_visible()
+    expect(player.locator('.video-player-gesture-grip')).not_to_be_visible()
+    page.evaluate('fixturePlayback.block=true;mallVideoPlayer.requestPlay()')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='autoplay-blocked'")
+    recovery = player.get_by_role('button', name='Play video', exact=True)
+    expect(recovery).to_be_visible()
+    page.evaluate('fixturePlayback.block=false')
+    recovery.focus()
+    page.keyboard.press('Enter')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    expect(recovery).not_to_be_visible()
+    assert_true(page.evaluate('document.activeElement===theaterFrame'), 'Theater keyboard recovery did not focus its mounted provider')
+    assert_true(page.evaluate('theaterErrors.length===0'), 'Theater recovery threw a runtime error')
+    assert_true(page.evaluate('theaterFrame===document.querySelector("#videoPlayerFullscreen iframe")'), 'Theater recovery recreated the player')
+    expect(player.locator('iframe')).to_have_count(1)
+    return {'ordinary_mall_theater_chrome_retained': True, 'keyboard_recovery': True,
+            'one_provider': True, 'real_provider': 'UNEXECUTED'}
 
 
 def dog_and_camera_actions(page):
@@ -1129,6 +1416,8 @@ try:
                 run_case(browser, 'hpc-one-dock-player', lambda page: dock_flow(page, True))
                 run_case(browser, 'public-one-dock-player', lambda page: dock_flow(page, False))
                 run_case(browser, 'floating-frame-controls', floating_frame_controls)
+                run_case(browser, 'clean-video-gestures', clean_video_gestures)
+                run_case(browser, 'theater-clean-control-regression', theater_clean_control_regression, desktop=True)
                 run_case(browser, 'dog-and-camera-actions', dog_and_camera_actions)
                 run_case(browser, 'conditional-manual-recovery', blocked_recovery, True)
                 run_case(browser, 'silent-start-provider-unknown', silent_start_unknown, silent_start=True)
@@ -1138,7 +1427,7 @@ finally:
     REPORT['source_sha256_after'] = hashes()
     REPORT['source_stable'] = REPORT['source_sha256_before'] == REPORT['source_sha256_after']
     REPORT['elapsed_seconds'] = round(time.time() - REPORT['started_epoch'], 3)
-    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (58 if args.include_defensive else 56)) and
+    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (62 if args.include_defensive else 60)) and
         all(row['passed'] for row in REPORT['cases']) and REPORT['source_stable']) else 'FAIL'
     save()
 sys.exit(0 if REPORT['status'] == 'PASS' else 1)

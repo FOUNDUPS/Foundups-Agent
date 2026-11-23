@@ -1,5 +1,14 @@
 # p.fMALL Interface
 
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,
+configurable right-swipe queue/reveal actions, full-height external gesture grip
+and opt-in bounded current-tab DAEmon. See the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate) and
+[canonical media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md).
+Native provider controls and ordinary desktop theater remain; physical phone
+and production acceptance are open. No model, mic or backend service is added.
+
 ## 2026-11-22 — Floating controls, preferences and camera contract
 
 Candidate additions to the existing shared owners, pending final qualification:

@@ -226,6 +226,10 @@ def verify_gesture_boundaries(browser):
             page.wait_for_timeout(100)
         assert page.evaluate("probeWheel('body')") is False
         assert page.evaluate("probeWheel('.video-player-queue-rail')") is False
+        grip = page.locator('.video-player-gesture-grip')
+        expect(grip).to_be_visible()
+        assert grip.evaluate("e=>{const r=e.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===e}")
+        assert grip.evaluate("e=>{const a=e.getBoundingClientRect(),b=document.querySelector('.video-player-stage iframe').getBoundingClientRect();return a.right<=b.left+1||a.left>=b.right-1}")
         flags = page.evaluate("probePinch('.video-player-gesture-grip')")
         assert flags[1:3] == [True,True], flags
         assert page.evaluate("queueProbe.pinches") == 1
@@ -233,7 +237,7 @@ def verify_gesture_boundaries(browser):
         assert page.evaluate("fixturePlayback.plays") == plays
         page.wait_for_timeout(100)
         page.evaluate("queueProbe.pinches=0")
-        assert page.evaluate("probeWheel('.video-player-title')") is True
+        assert page.evaluate("probeWheel('.video-player-gesture-grip')") is True
         assert page.evaluate("queueProbe.pinches") == 1
         assert page.evaluate("mallVideoPlayer.isOpen() && mallVideoPlayer.isFloating()")
         return {"case":"gesture_provider_and_browser_boundaries","passed":True,

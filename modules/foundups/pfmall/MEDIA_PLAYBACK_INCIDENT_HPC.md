@@ -1,5 +1,80 @@
 # Shared Mall media incident · HPC-P01–P08
 
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** This continues existing
+PR #2439 from source `62f577ae10c73899d602332cbf69dd444a4aae85`; it does not
+replace the Mall or authorize a production release. Physical iPhone/Home Screen,
+audible output and installed-client migration remain separate open gates.
+
+App-owned title/back/expand/play chrome is removed from Floating, WikiTube and
+app Full Video. Attribution, Save/Share, Next/Previous, Collapse, Return and
+Close remain accessible in `+` → Video. Ordinary desktop theater/Enter retains
+its existing owner. Native YouTube title, branding, controls and input remain.
+
+The visible app gesture grip is the full-height left side of the framed video,
+outside the iframe. It supports floating drag and app gestures without covering
+provider controls. Full Video right-swipe selects the next clip and requests
+playback; Floating right-swipe tucks. The right-edge tucked rail spans the player
+height. 012 explicitly selected right-swipe → next clip and reveal; tapping or
+left-swiping restores the existing paused clip. Full Video and tucked right-swipe
+actions are independently configurable. Deliberate Next uses the permitted
+filtered queue and requests playback even when natural autoplay-next is off.
+
+`+` keeps AI first and collapses gesture defaults and playback commands. Its
+bottom Open DAEmon checkbox reveals observed activity from this tab only.
+The shared local projection is bounded to 100 entries, deduplicates playback
+ticks, allowlists event fields and stays in memory. It does not start a service,
+model, microphone, backend trace, code runner or persistent learning/audit store.
+Preview-only probe fields move behind DAEmon → Playback diagnostics; their
+script remains outside the committed public shell and requires explicit staging.
+
+Fully hidden YouTube remains paused; no unsupported background-audio toggle is
+offered. App Full Video is distinct from native provider/browser fullscreen.
+Touches beginning inside the cross-origin YouTube document belong to YouTube;
+the surrounding grip and accessible menu are the app alternatives. Spoken
+RedDog and browser-model admission remain undelivered. Existing AutoPost and
+manual civic-resource destinations retain their separate ownership.
+
+Candidate UI is visibly labeled **Build v26 · Gestures**. A separately owned
+`play-v26-gestures` preview family is public/read-only, with no member admission
+or Auth-domain grant. Source62, livev25 and comparison previews remain rollback
+references. Exact-source tests, independent review, served-asset/worker checks
+and phone evidence determine acceptance; a source edit is not delivery.
+
+Continuation receipt scope: incident PFMALL-MEDIA-20261111-HPC, shared member
+player/dock owners, FoundUp hpc. Baseline62 passed native bootstrap/strict tracker,
+17 preference groups, six selected phone cases and 18 queue callback cases.
+New candidate source requires its own tests and independent delivery evidence.
+The ordinary menu's probe selectors were traced to the staged test fixture,
+not a production backend. Rejected: a transparent iframe gesture shield, cropped
+provider UI, hidden YouTube playback and a fake daemon/code/model feed.
+References checked 2026-11-23: YouTube developer policies III.I.4–9,
+https://developers.google.com/youtube/terms/developer-policies/ . The existing
+Pointer Events iframe boundary reference remains applicable. No physical-device,
+Brain ingestion, production release or semantic freshness claim follows here.
+
+### Candidate verification receipt — 2026-11-23
+
+- status: IMPLEMENTED and TESTED in a frozen local overlay after source62;
+  not MERGED, production DEPLOYED or DEVICE_VERIFIED.
+- source review: independent seven-runtime-file SHA receipt, no remaining
+  source/security blocker; no physical/provider inference from source review.
+- regression: independent62 browser rows/18 queue callbacks; prefs19, local6,
+  probe7; root policy both engines, public-TV, guest,160 Python contracts and
+  existing account/worker/routing/property/entry suites passed.
+- confirmed defects corrected: side-rail width overflow; queued dialog-close
+  focus steal after Return; filtered explicit queue fallback; actual canonical
+  failure states omitted by local event projection. The early offscreen-focus
+  report was partly test-helper-induced; pre-helper assertions then isolated
+  the separate genuine queued-close defect. Preserve that distinction.
+- test reconciliation: intentional app chrome removal required visible Video
+  actions in the legacy policy fixture; all original error/geometry/queue/pause
+  assertions remain. Earlier failed/stale-source runs remain private evidence.
+- next action: bind committed source, hosted checks and isolated preview asset/
+  worker receipts, then obtain physical Safari/Home Screen tests. Runtime
+  emulation and a new preview URL cannot close the reported phone/provider gate.
+
 ## Floating control continuation — 2026-11-22
 
 - incident_id: `PFMALL-MEDIA-20261111-HPC` (same shared owner)

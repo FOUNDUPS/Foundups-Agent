@@ -38,6 +38,7 @@ const SHELL_ASSETS = [
   '/member/js/mall-tile-field.js?v=26',
   '/member/js/mall-video-player.js?v=26',
   '/member/js/mall-video-projection.js?v=26',
+  '/member/js/mall-local-activity.js?v=26',
   '/member/js/account-concierge.js',
   '/js/reddog-fractal-focus.js',
   '/js/reddog-public-client.js',

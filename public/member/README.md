@@ -1,16 +1,13 @@
 # FoundUPS Member Mall
 
-Phone control candidate: move the floating video using its permanent top grip
-or frame edges; swipe the frame right to tuck it, then tap anywhere on its
-video-height edge rail to restore. YouTube pauses while fully hidden. Use
-`+` → Video for independent gesture choices and accessible playback actions.
-The camera opens AutoPost with a bounded return destination. Red Dog stays in
-the current view and reports unavailable conversation truthfully until its
-canonical backend is qualified. Device/provider evidence remains separate from
-the controlled [test inventory](tests/README.md).
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
-**Status**: Shared p.fMALL shell; ordinary Mall admission plus registered public product discovery
-**Location**: `public/member/`
+**IMPLEMENTED_CANDIDATE.** The [interaction contract](INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate)
+specifies app-only chrome removal, mode-specific configurable right-swipes,
+full-height external grips and opt-in bounded local activity. Shared player,
+queue and preference owners are reused; preview diagnostics are nested.
+Exact-source tests, independent review and physical iPhone/PWA evidence remain
+required. Existing source62/livev25 previews are retained as rollback references.
 
 ## Overview
 

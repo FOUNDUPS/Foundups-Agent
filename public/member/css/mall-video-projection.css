@@ -741,3 +741,9 @@
   bottom: var(--mall-dock-inset);
 }
 .red-dog-listening[hidden] { display: none; }
+.mall-video-options summary,
+[data-daemon-panel] summary { cursor: pointer; padding: .5rem 0; min-height: 2.75rem; box-sizing: border-box; }
+.mall-daemon-toggle { display: flex; align-items: center; gap: .6rem; min-height: 2.75rem; }
+.mall-daemon-entries { max-height: 11rem; overflow-y: auto; overscroll-behavior: contain; padding-left: 1.25rem; font-size: .8rem; }
+.mall-daemon-entries li { margin: .35rem 0; overflow-wrap: anywhere; }
+[data-daemon-panel] p { font-size: .8rem; margin: .5rem 0; }

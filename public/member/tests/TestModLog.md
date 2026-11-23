@@ -1,3 +1,32 @@
+## 2026-11-23 — Clean app video gestures and opt-in local activity
+
+The shared #2439 continuation removes app title/back/expand/play chrome from
+Floating, WikiTube and app Full Video, preserving provider controls and ordinary
+desktop theater. A full-height external grip and accessible Video menu replace
+app chrome. Confirmed defaults: Full Video right selects Next; tucked rail right
+selects Next and reveals; floating right tucks. Explicit queue gestures request
+visible playback independently of natural autoplay. Hidden YouTube pauses.
+The menu groups defaults/actions, retains source/Save/Share/Enter owners, and
+adds opt-in memory-only local activity with preview diagnostics nested beneath.
+
+Independent frozen overlay:62/62 browser rows (Chromium/WebKit),18 queue
+callbacks,19 preference groups,6 local-activity cases and7 probe cases passed.
+Existing player-policy, public-TV and guest suites,160 targeted Python cases,
+worker29, routing19, member boot34, compatibility16, pager15, metadata10 and
+other shared account/property/dispatcher/entry VMs passed. Controlled provider
+fixtures do not establish real YouTube or physical iPhone/Home Screen success.
+
+Verification corrected an inflexible floating stage overflowing side grips,
+a delayed menu-close focus steal, filtered manual Next/Previous crossing their
+queue, and omitted canonical diagnostic states. Legacy policy selectors now
+use the relocated visible actions; CI adds the local-activity gate and retains
+all existing gates. Product/security source review found no remaining blocker.
+Source62 was the parent baseline; these passes bind the later file hashes.
+Source merge, new-preview publication/asset checks, physical phone acceptance
+and production remain separate gates. See the shared incident for the durable
+record. WSP00/10/15/22/30/50/71/91/97 apply; semantic freshness and Brain admission
+are not claimed.
+
 ## 2026-11-22 — Floating controls and camera follow-through
 
 Baseline a3ea8260 passed 16 preference cases, 29 worker/state groups and six

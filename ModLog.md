@@ -1,3 +1,14 @@
+## 2026-11-23 — Shared Mall clean gesture continuation
+
+The existing v26 #2439 lane supplies configurable mode-specific right swipes,
+clean app video surfaces, full-height external grips and a bounded opt-in local
+DAEmon projection. Shared queue, preference, provider, attribution, membership
+and return owners remain authoritative. Exact-source browser/static/VM evidence
+and independent product review are recorded in the existing member TestModLog
+and shared media incident. Physical phone/provider and production acceptance
+remain open; no Voice/model/backend service or hidden YouTube audio is claimed.
+WSP00/10/15/22/30/50/71/91/97 apply. No Moshpit or Google Drive content is changed.
+
 ## 2026-11-22 — Shared Mall floating control continuation
 
 Extend the existing v26 lane under WSP 00/10/15/22/30/97, with shared ownership,

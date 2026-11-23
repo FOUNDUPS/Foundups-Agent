@@ -1,5 +1,14 @@
 # HPC solution
 
+## 2026-11-23 — Small shared refinement
+
+Reuse the player/frame, canonical queue APIs and one Search Dock. Move app
+commands into collapsed Video controls, expose a full-height external grip,
+route right swipes by presentation and retain native provider input. Add only
+a bounded local-tab DAEmon projection over existing events. Preview diagnostics
+stay behind an explicit diagnostic disclosure. No new Mall, background service,
+model, microphone, memory database or token feature is introduced.
+
 2026-11-22 continuation: qualify the same shared floating player and dock with
 movable frame controls, independent Video preferences, canonical AutoPost camera
 return and in-page Red Dog availability. These are PoC acceptance refinements.

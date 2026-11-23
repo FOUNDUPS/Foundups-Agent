@@ -1,5 +1,25 @@
 # Member Mall tests
 
+## Clean video gesture qualification — 2026-11-23
+
+`mall_phone_ui_browser.py --include-defensive` adds `clean-video-gestures` and
+`theater-clean-control-regression` while preserving previous cases (62 rows
+across Chromium/WebKit). It checks app-only chrome removal, hit-tested external
+full-height grips, provider minimum dimensions, full-video explicit Next with
+autoplay off, filtered/multipage/end queues, menu Save/Share/Enter, caller focus
+and original scroll, in-viewport tucked Next/reveal, Restore/no-action and
+manual Play. Chromium injects real CDP touch input; WebKit touch events here
+are synthetic. Neither is a physical iPhone or native-provider fullscreen pass.
+
+Run `node public/member/tests/mall_local_activity_vm.mjs` for opt-in events,
+getter-safe field projection, canonical diagnostic enums, deduplication,100-entry
+bound, listener lifecycle and absence of network/persistence/mic/model work.
+The existing phone CI invokes it; preferences (19), nested probe diagnostics (7)
+and the original queue/policy/worker suites remain required. The new preview
+host family is `play-v26-gestures` and its UI says Build v26 · Gestures. Keep
+real YouTube, audible output, installed-client migration and physical-device
+receipts separate from mocked provider and emulated-layout evidence.
+
 ## Floating control continuation — 2026-11-22
 
 `mall_phone_ui_browser.py --case floating-frame-controls --case dog-and-camera-actions`

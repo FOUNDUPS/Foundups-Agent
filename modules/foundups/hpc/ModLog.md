@@ -1,16 +1,13 @@
 ## 2026-11-22 — Shared floating controls and camera follow-through
 
-012 reports v25 working on iPhone 16 and requests movable/tuckable video,
-minimal app chrome, configurable pinch/return, full-view autoplay, camera and
-conversational Red Dog. Extend the existing #2439 shared owners and contracts;
-retain the report as USER_REPORTED, with OS/PWA/source details unknown.
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
-Candidate adds persistent external frame targets, bounded drag, full-height
-restore/inert tuck, independent preferences, Video menu alternatives and
-canonical AutoPost caller return. Dock dog stays in-page and reports unavailable
-AI truthfully. Preserve native controls and hidden-YouTube pause policy. The
-incident/roadmap record backend, local-model, speech and physical-device gaps.
-Local/independent controlled results do not establish production or phone passes.
+**IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,
+configurable right-swipe queue/reveal actions, full-height external gesture grip
+and opt-in bounded current-tab DAEmon. See the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate) and
+[canonical media incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+Native provider controls and ordinary desktop theater remain; physical phone
+and production acceptance are open. No model, mic or backend service is added.
 
 ## 2026-11-22 - source reconciliation with current main
 

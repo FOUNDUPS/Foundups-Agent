@@ -1,5 +1,17 @@
 # HPC pain
 
+## 2026-11-23 — Reported gesture and menu pain
+
+012 reports app controls/title chrome taking video space, a top-only gesture
+target, no Full Video right-swipe next, and technical preview selectors in the
+ordinary settings menu. Existing source62 hides chrome only for Floating;
+Full Video has no right-swipe branch and its external gesture surface is hidden.
+This is implementation evidence, separate from the phone report. 012 confirmed
+the tucked rail's right swipe should select the next clip and reveal it.
+Fully hidden YouTube audio conflicts with its supported provider contract.
+Native cross-origin gestures, physical iPhone behavior and installed-client
+upgrade require separate evidence; no PC pass closes those gaps.
+
 ## Phone control feedback — 012, 2026-11-22
 
 USER_REPORTED: v25 works on iPhone 16, but the floating player's app controls

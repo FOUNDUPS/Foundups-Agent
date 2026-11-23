@@ -1,5 +1,47 @@
 # Member Area Interface
 
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** This continues existing
+PR #2439 from source `62f577ae10c73899d602332cbf69dd444a4aae85`; it does not
+replace the Mall or authorize a production release. Physical iPhone/Home Screen,
+audible output and installed-client migration remain separate open gates.
+
+App-owned title/back/expand/play chrome is removed from Floating, WikiTube and
+app Full Video. Attribution, Save/Share, Next/Previous, Collapse, Return and
+Close remain accessible in `+` → Video. Ordinary desktop theater/Enter retains
+its existing owner. Native YouTube title, branding, controls and input remain.
+
+The visible app gesture grip is the full-height left side of the framed video,
+outside the iframe. It supports floating drag and app gestures without covering
+provider controls. Full Video right-swipe selects the next clip and requests
+playback; Floating right-swipe tucks. The right-edge tucked rail spans the player
+height. 012 explicitly selected right-swipe → next clip and reveal; tapping or
+left-swiping restores the existing paused clip. Full Video and tucked right-swipe
+actions are independently configurable. Deliberate Next uses the permitted
+filtered queue and requests playback even when natural autoplay-next is off.
+
+`+` keeps AI first and collapses gesture defaults and playback commands. Its
+bottom Open DAEmon checkbox reveals observed activity from this tab only.
+The shared local projection is bounded to 100 entries, deduplicates playback
+ticks, allowlists event fields and stays in memory. It does not start a service,
+model, microphone, backend trace, code runner or persistent learning/audit store.
+Preview-only probe fields move behind DAEmon → Playback diagnostics; their
+script remains outside the committed public shell and requires explicit staging.
+
+Fully hidden YouTube remains paused; no unsupported background-audio toggle is
+offered. App Full Video is distinct from native provider/browser fullscreen.
+Touches beginning inside the cross-origin YouTube document belong to YouTube;
+the surrounding grip and accessible menu are the app alternatives. Spoken
+RedDog and browser-model admission remain undelivered. Existing AutoPost and
+manual civic-resource destinations retain their separate ownership.
+
+Candidate UI is visibly labeled **Build v26 · Gestures**. A separately owned
+`play-v26-gestures` preview family is public/read-only, with no member admission
+or Auth-domain grant. Source62, livev25 and comparison previews remain rollback
+references. Exact-source tests, independent review, served-asset/worker checks
+and phone evidence determine acceptance; a source edit is not delivery.
+
 ## 2026-11-22 — Floating controls and camera candidate
 
 The shared floating player has a persistent external grip and side edges.
@@ -858,3 +900,14 @@ mapping and authenticated speech/conversation are future slices, not implied by
 this presentation interface.
 
 Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.
+
+### Gesture refinement API additions
+
+`pfmall_video_options_v1` adds `fullVideoSwipeRight` (`next`, `previous`, `none`)
+and `tuckedSwipeRight` (`next-reveal`, `restore`, `none`). Read-only v1 migration
+supplies confirmed defaults without persisting or coupling earlier choices.
+`mallVideoPlayer.untuck({immediate:true})` reveals synchronously for deliberate
+queue selection. `save()`, `share()` and `enterFoundUp()` delegate to existing
+control owners. `canEnterFoundUp()` is a UI hint, not an authorization grant.
+The local-activity module exposes an in-memory Window-bound monitor and view;
+its feed is observed browser events, not a server/agent execution receipt.

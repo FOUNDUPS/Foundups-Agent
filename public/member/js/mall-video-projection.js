@@ -11,7 +11,7 @@
     ['hpc.foundups.com', 'hpc'],
     ['play.foundups.com', 'mall']
   ]);
-  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-controls)-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
+  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-(?:controls|gestures))-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
     dedicatedHosts.set(window.location.hostname, 'mall');
   }
   const publicScopes = new Set(['hpc']);
@@ -19,7 +19,7 @@
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
   const mallBuild = 'v26';
-  const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
+  const buildLabel = `<small class="mall-build-label">Build ${mallBuild} · Gestures</small>`;
 
   function hostScope(location) {
     return dedicatedHosts.get(location?.hostname) || null;
@@ -462,24 +462,41 @@
         </a>
         <fieldset class="mall-video-options">
           <legend>Video</legend>
+          <details data-video-settings><summary>Gesture and autoplay defaults</summary>
           <label>Tap a video tile <select data-video-option="tileTapDestination"><option value="floating">Floating</option><option value="wikitube">WikiTube</option><option value="full-video">Fullscreen in app</option></select></label>
           <label><input type="checkbox" data-video-option="autoplayNext"> Autoplay next clip while visible</label>
           <label>Pinch out <select data-video-option="pinchOutDestination"><option value="wikitube">WikiTube</option><option value="full-video">Fullscreen in app</option></select></label>
           <label>Pinch in return <select data-video-option="pinchInDestination"><option value="" disabled>Keep current return</option><option value="wikitube">WikiTube</option><option value="mall">Mall tiles</option></select></label>
           <label>Swipe up return <select data-video-option="swipeUpDestination"><option value="" disabled>Keep current gesture</option><option value="wikitube">WikiTube</option><option value="mall">Mall tiles</option></select></label>
+          <label>Full Video swipe right <select data-video-option="fullVideoSwipeRight"><option value="next">Next video</option><option value="previous">Previous video</option><option value="none">No action</option></select></label>
+          <label>Tucked tab swipe right <select data-video-option="tuckedSwipeRight"><option value="next-reveal">Next video and reveal</option><option value="restore">Restore current video</option><option value="none">No action</option></select></label>
           <small>Use the frame edges for app gestures. Gestures inside YouTube belong to YouTube.</small>
           <label>Collapse Full Video to <select data-video-option="collapseDestination"><option value="mall">Mall</option><option value="wikitube">WikiTube</option></select></label>
           <label><input type="checkbox" data-video-option="revealSelectedPlayer"> Show parked player when I select a clip</label>
           <small>A fully hidden player stays paused. Browser/provider playback rules still apply.</small>
+          </details>
           <a data-player-source target="_blank" rel="noopener noreferrer" hidden></a>
+          <details data-video-commands><summary>Playback actions</summary>
           <div class="mall-video-actions">
+            <button type="button" data-player-action="previous">Previous video</button>
+            <button type="button" data-player-action="next">Next video</button>
             <button type="button" data-player-action="play">Play / resume video</button>
             <button type="button" data-player-action="expand">Expand video</button>
+            <button type="button" data-player-action="collapse">Collapse video</button>
             <button type="button" data-player-action="hide">Hide video</button>
+            <button type="button" data-player-action="save">Save video</button>
+            <button type="button" data-player-action="share">Share video</button>
+            <button type="button" data-player-action="enter" hidden>Enter FoundUp</button>
             <button type="button" data-player-action="return">Return to tiles</button>
             <button type="button" data-player-action="close">Close video</button>
           </div>
+          </details>
         </fieldset>
+        <label class="mall-daemon-toggle"><input type="checkbox" data-daemon-toggle> Open DAEmon</label>
+        <section data-daemon-panel aria-label="DAEmon activity" hidden>
+          <div data-daemon-feed></div>
+          <details data-preview-diagnostics hidden><summary>Playback diagnostics</summary><div data-mall-daemon-diagnostics></div></details>
+        </section>
         ${buildLabel}
         <form method="dialog"><button type="submit">Close</button></form>
       </dialog>`;
@@ -487,6 +504,26 @@
     const input = form.querySelector('textarea');
     const submitButton = form.querySelector('.mall-search-submit');
     const dialog = element.querySelector('dialog');
+    const daemonToggle = dialog.querySelector('[data-daemon-toggle]');
+    const daemonPanel = dialog.querySelector('[data-daemon-panel]');
+    let activityMonitor = null, activityView = null;
+    daemonToggle.addEventListener('change', async () => {
+      daemonPanel.hidden = !daemonToggle.checked;
+      if (!daemonToggle.checked) { activityMonitor?.setEnabled(false); placeOptions(); return; }
+      try {
+        const local = await import('/member/js/mall-local-activity.js?v=26');
+        if (!daemonToggle.checked) return;
+        activityMonitor ||= local.createLocalActivityMonitor(window);
+        activityView ||= local.mountLocalActivityView(dialog.querySelector('[data-daemon-feed]'), activityMonitor);
+        activityMonitor.setEnabled(true);
+        activityView.refresh();
+        placeOptions();
+      } catch {
+        daemonToggle.checked = false;
+        dialog.querySelector('[data-daemon-feed]').textContent = 'Activity view is unavailable on this build.';
+        placeOptions();
+      }
+    });
     const options = form.querySelector('.mall-search-plus');
     dialog.prepend(dialog.querySelector('[data-action="browse-ai"]'),
       dialog.querySelector('[data-browse-ai-pilot]'), dialog.querySelector('.mall-video-options'));
@@ -578,6 +615,7 @@
       }
       for (const button of dialog.querySelectorAll('[data-player-action]')) {
         button.disabled = window.mallVideoPlayer?.isOpen?.() !== true || window.mallVideoPlayer?.isMallHidden?.() === true;
+        if (button.dataset.playerAction === 'enter') button.hidden = window.mallVideoPlayer?.canEnterFoundUp?.() !== true;
       }
       const source = dialog.querySelector('[data-player-source]');
       const attribution = window.mallVideoPlayer?.getAttribution?.();
@@ -594,17 +632,34 @@
         } catch { /* Untrusted catalog links never become menu navigation. */ }
       }
       if (!element.hidden) options.focus({ preventScroll: true });
+      if (activityMonitor) {
+        daemonToggle.checked = activityMonitor.getSnapshot().enabled;
+        daemonPanel.hidden = !daemonToggle.checked;
+      }
       dialog.showModal();
+      activityView?.refresh();
       placeOptions();
     }
     dialog.querySelector('.mall-video-actions').addEventListener('click', event => {
       const action = event.target.closest('[data-player-action]')?.dataset.playerAction;
       if (!action) return;
+      // These commands transfer focus through the player/field owner. The
+      // asynchronously delivered dialog close must not steal it back to +.
+      if (['expand', 'collapse', 'hide', 'enter', 'return', 'close'].includes(action)) optionsReturnFocus = null;
       dialog.close();
       const player = window.mallVideoPlayer;
-      if (action === 'play') { player?.untuck?.(); player?.requestPlay?.(); }
+      if (action === 'play') { player?.untuck?.({ immediate: true }); player?.requestPlay?.(); }
+      else if (action === 'next' || action === 'previous') {
+        player?.untuck?.({ immediate: true });
+        if (action === 'next') player?.next?.();
+        else player?.prev?.();
+      }
       else if (action === 'expand') player?.openPinchDestination?.();
+      else if (action === 'collapse') player?.collapseAppVideo?.();
       else if (action === 'hide') player?.tuck?.();
+      else if (action === 'save') player?.save?.();
+      else if (action === 'share') player?.share?.();
+      else if (action === 'enter') player?.enterFoundUp?.();
       else if (action === 'return') player?.returnToMall?.();
       else if (action === 'close') player?.close?.();
     });
@@ -675,7 +730,7 @@
     }
     return {
       element, input, dialog, dictation, fitInput,
-      showVideoOptions() { showOptions(true); dialog.querySelector('.mall-video-options')?.scrollIntoView({ block: 'nearest' }); },
+      showVideoOptions() { showOptions(true); dialog.querySelector('[data-video-commands]').open = true; dialog.querySelector('.mall-video-options')?.scrollIntoView({ block: 'nearest' }); },
       setScoped(scoped) {
         // AutoPost is a working existing action, not a model placeholder.
         autoPost.hidden = false;

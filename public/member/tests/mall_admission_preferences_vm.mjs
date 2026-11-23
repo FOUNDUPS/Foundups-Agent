@@ -12,7 +12,8 @@ const OPTIONS = 'pfmall_video_options_v1';
 const TTL = 15 * 60 * 1000;
 const copy = value => JSON.parse(JSON.stringify(value));
 const legacyDefaults = { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true };
-const defaults = { ...legacyDefaults, tileTapDestination: 'floating', pinchOutDestination: 'wikitube' };
+const defaults = { ...legacyDefaults, tileTapDestination: 'floating', pinchOutDestination: 'wikitube',
+  fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-reveal' };
 let checks = 0;
 function check(name, fn) { fn(); checks++; console.log('PASS ' + name); }
 
@@ -168,14 +169,14 @@ check('legacy v1 frame and collapse choices never become tile-tap defaults', () 
     collapseDestination: 'wikitube', revealSelectedPlayer: false };
   const raw = JSON.stringify({ version: 1, options: legacy });
   const h = runtime({ local: new Map([[OPTIONS, raw]]) });
-  assert.deepEqual(copy(h.api.getVideoOptions()), { ...legacy, tileTapDestination: 'floating', pinchOutDestination: 'wikitube' });
+  assert.deepEqual(copy(h.api.getVideoOptions()), { ...defaults, ...legacy });
   assert.deepEqual(h.writes, [], 'migration reads do not write browser storage');
   assert.equal(h.local.get(OPTIONS), raw);
   for (const destination of ['floating', 'wikitube', 'full-video']) {
     assert.equal(h.api.setVideoOptions({ tileTapDestination: destination }), true);
     const saved = JSON.parse(h.local.get(OPTIONS));
     assert.equal(saved.version, 1);
-    assert.deepEqual(saved.options, { ...legacy, tileTapDestination: destination, pinchOutDestination: 'wikitube' });
+    assert.deepEqual(saved.options, { ...defaults, ...legacy, tileTapDestination: destination });
     assert.deepEqual(copy(runtime({ local: h.local }).api.getVideoOptions()), saved.options);
   }
   assert.equal(h.api.setVideoOptions({ frameDestination: 'wikitube', collapseDestination: 'mall' }), true);
@@ -190,7 +191,7 @@ check('invalid stored tile choice falls back independently of valid legacy prefe
     const legacy = { ...legacyDefaults, autoplayNext: false, frameDestination: 'full-video' };
     const local = new Map([[OPTIONS, JSON.stringify({ version: 1, options: { ...legacy, tileTapDestination: invalid } })]]);
     const h = runtime({ local });
-    assert.deepEqual(copy(h.api.getVideoOptions()), { ...legacy, tileTapDestination: 'floating', pinchOutDestination: 'wikitube' });
+    assert.deepEqual(copy(h.api.getVideoOptions()), { ...defaults, ...legacy });
     assert.deepEqual(h.writes, []);
   }
 });
@@ -202,6 +203,10 @@ check('invalid preference patches reject atomically without authority flags or g
     { collapseDestination: 'account' }, { tileTapDestination: 'native' }, { tileTapDestination: 'mall' },
     { tileTapDestination: null }, { pinchOutDestination: 'floating' }, { pinchInDestination: 'full-video' },
     { swipeUpDestination: '' }, { swipeUpDestination: null },
+    { fullVideoSwipeRight: 'next-reveal' }, { fullVideoSwipeRight: null },
+    { tuckedSwipeRight: 'next' }, { tuckedSwipeRight: false },
+    { get fullVideoSwipeRight() { getters++; return 'next'; } },
+    { get tuckedSwipeRight() { getters++; return 'next-reveal'; } },
     { capabilities: null }, { editor: true }, Object.create({ autoplayNext: false }),
     { get autoplayNext() { getters++; return false; } }, JSON.parse('{"__proto__":{}}')]) {
     assert.equal(h.api.setVideoOptions(patch), false); assert.equal(h.local.get(OPTIONS), before);
@@ -244,14 +249,16 @@ check('bounded storage events accept only versioned preference data', () => {
   assert.equal(calls, 1); assert.equal(h.api.getVideoOptions().autoplayNext, false);
 });
 
-check('legacy storage event migrates one shared snapshot without writing or new gesture defaults', () => {
+check('legacy storage event supplies confirmed swipe defaults without writing or inventing return gestures', () => {
   const h = runtime(); const snapshots = [];
   h.api.subscribeVideoOptions(value => snapshots.push(copy(value)));
   const legacy = { ...legacyDefaults, frameDestination: 'full-video', collapseDestination: 'wikitube' };
   const raw = JSON.stringify({ version: 1, options: legacy });
   h.local.set(OPTIONS, raw);
   h.fire({ key: OPTIONS, newValue: raw });
-  assert.deepEqual(snapshots, [{ ...legacy, tileTapDestination: 'floating', pinchOutDestination: 'wikitube' }]);
+  assert.deepEqual(snapshots, [{ ...defaults, ...legacy }]);
+  assert.equal('pinchInDestination' in snapshots[0], false);
+  assert.equal('swipeUpDestination' in snapshots[0], false);
   assert.deepEqual(h.writes, []);
   assert.equal(h.local.get(OPTIONS), raw);
 });
@@ -268,6 +275,39 @@ check('pinch and swipe choices persist independently of frame, tile and collapse
   const before = h.local.get(OPTIONS);
   assert.equal(h.api.setVideoOptions({ swipeUpDestination: 'mall', pinchInDestination: 'account' }), false);
   assert.equal(h.local.get(OPTIONS), before);
+});
+
+check('Full Video and tucked right swipes persist every supported choice independently', () => {
+  for (const fullVideoSwipeRight of ['next', 'previous', 'none']) {
+    for (const tuckedSwipeRight of ['next-reveal', 'restore', 'none']) {
+      const h = runtime();
+      assert.equal(h.api.setVideoOptions({ fullVideoSwipeRight, tuckedSwipeRight, autoplayNext: false }), true);
+      const expected = { ...defaults, fullVideoSwipeRight, tuckedSwipeRight, autoplayNext: false };
+      assert.deepEqual(copy(h.api.getVideoOptions()), expected);
+      assert.deepEqual(copy(runtime({ local: h.local }).api.getVideoOptions()), expected);
+      assert.equal('pinchInDestination' in expected, false);
+      assert.equal('swipeUpDestination' in expected, false);
+    }
+  }
+});
+
+check('malformed stored swipe choices and storage events cannot replace validated preferences', () => {
+  for (const patch of [{ fullVideoSwipeRight: 'restore' }, { fullVideoSwipeRight: true },
+    { tuckedSwipeRight: 'previous' }, { tuckedSwipeRight: null }]) {
+    const raw = JSON.stringify({ version: 1, options: { ...defaults, ...patch } });
+    const cold = runtime({ local: new Map([[OPTIONS, raw]]) });
+    assert.deepEqual(copy(cold.api.getVideoOptions()), defaults);
+    assert.deepEqual(cold.writes, [], 'invalid stored values never trigger repair writes');
+    const warm = runtime();
+    warm.api.setVideoOptions({ fullVideoSwipeRight: 'previous', tuckedSwipeRight: 'restore' });
+    const before = copy(warm.api.getVideoOptions());
+    let calls = 0;
+    warm.api.subscribeVideoOptions(() => calls++);
+    warm.local.set(OPTIONS, raw);
+    warm.fire({ key: OPTIONS, newValue: raw });
+    assert.deepEqual(copy(warm.api.getVideoOptions()), before);
+    assert.equal(calls, 0);
+  }
 });
 
 console.log(JSON.stringify({ checks, real_auth: 'UNEXECUTED', graph_runtime_imported: false, writes_or_publication: false }));

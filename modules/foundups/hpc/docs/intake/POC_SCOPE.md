@@ -1,5 +1,17 @@
 # HPC PoC scope
 
+## 2026-11-23 — Clarified acceptance
+
+Full Video right swipe → next permitted clip and playback request. Floating
+right swipe → tuck. Tucked full-height right rail right swipe → next and reveal,
+as explicitly selected by012; tap/left swipe restore. Keep browser/provider
+boundaries and paused hidden YouTube. App-only chrome is replaced by gestures
+and accessible plus-menu commands. Test filtered queues, explicit next with
+autoplay disabled, view/focus recovery, side-target dimensions and no duplicate
+player. DAEmon shows bounded allowlisted current-tab activity without starting
+other capabilities. Native fullscreen, actual iPhone/PWA, audio, migration and
+canonical AutoPost composition remain independent gates.
+
 The 2026-11-22 shared-control continuation includes responsive floating drag,
 video-height tuck/restore, menu-based gesture/playback choices, a real AutoPost
 camera handoff and truthful in-page dog availability. Hidden YouTube audio is

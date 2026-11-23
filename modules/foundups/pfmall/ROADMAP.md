@@ -1,5 +1,13 @@
 # p.fMALL Roadmap
 
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE / acceptance open.** Continue #2439 at source62;
+qualify clean app surfaces, configurable Full Video next and tucked next/reveal,
+full-height external grip, and opt-in current-tab DAEmon through the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate).
+No hidden YouTube audio, Voice/model delivery or lifecycle-stage promotion.
+Independent exact-source and phone evidence remain required.
+
 ## 2026-11-22 — Shared floating control continuation
 
 **IMPLEMENTED_PENDING_VERIFICATION / 15-P1.** Reuse #2439 and the current shared

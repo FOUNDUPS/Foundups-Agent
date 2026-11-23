@@ -570,6 +570,15 @@ voice and Simulator boundaries.
 
 ## 14. Shared Search Dock and video preferences
 
+### 14.0 Clean video gesture candidate — 2026-11-23
+
+**IMPLEMENTED_CANDIDATE.** The [shared interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate)
+records app-only chrome removal, the external full-height grip, independently
+configurable Full Video next and tucked next/reveal, and bounded opt-in local
+DAEmon activity. The table below records confirmed defaults. Native provider
+controls and ordinary theater remain unchanged; exact-source preview and
+physical-device evidence are separate acceptance gates.
+
 2026-11-22 candidate update: the shared #2439 continuation implements clamped
 floating drag/frame targets, a video-height tuck/restore rail, independent
 validated options and menu-based accessible actions. Outward pinch now defaults
@@ -638,6 +647,8 @@ requested immersive destination, subject to the mechanism boundary in 14.4.
 | Pinch inward from Fullscreen | Return to **WikiTube / Mall tiles** according to its own preference. | Do not bind this to the swipe-up preference; initial return default is unresolved. |
 | Swipe up on the active video | Return to **WikiTube / Mall tiles** according to a separate preference. | This changes the older video swipe-up-to-next acceptance. It must not also advance the queue or trigger grid/type navigation. Initial return default is unresolved. |
 | Rotate an active Floating video portrait to landscape | Enter the supported fullscreen presentation; portrait rotation restores the prior Floating presentation. | Required behavior. Track whether rotation caused expansion; a later deliberate view selection takes precedence over automatic restoration. |
+| Swipe right in app Full Video | Next permitted clip and a deliberate playback request; configurable to Previous or no action. | Confirmed default Next on2026-11-23. Natural autoplay preference does not gate deliberate selection. |
+| Swipe right on the tucked right-edge rail | Next permitted clip and reveal, configurable to Restore/no action. | Explicit012 answer2026-11-23. Tap/left swipe still restore; hidden YouTube stays paused. |
 | Swipe right on the Floating player | Park/hide it with a visible restore action and supported leftward restore gesture; preserve the selected clip and browse context. | Fully hidden YouTube playback pauses. Do not restart a deliberate pause on restoration. |
 | Autoplay and parked-player selection | Retain autoplay/next-clip and reveal-versus-keep-parked preferences in Video. | Preserve their existing qualified behavior; this decision does not guarantee audible startup or change their defaults. |
 | Rotation lock | Possible opt-in lock / stay-landscape behavior. | **OPEN IDEA**, not an approved control, default, or implemented capability. |
@@ -716,7 +727,7 @@ and keyboard/viewport resizing must not be mistaken for physical rotation.
 
 ### 14.5 Qualification and existing implementation lane
 
-At inspection, [v26 PR #2439](https://github.com/FOUNDUPS/Foundups-Agent/pull/2439)
+Historical inspection of an earlier [v26 PR #2439](https://github.com/FOUNDUPS/Foundups-Agent/pull/2439)
 head `5be6f3b7bd9eb3c24c39210e74fada8e773a97c7` is an unmerged draft.
 Its menu places AI last; `frameDestination` allows WikiTube/app Full Video,
 tile selection does not read that setting, pinch-out opens WikiTube, and

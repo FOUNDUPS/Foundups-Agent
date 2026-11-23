@@ -66,6 +66,7 @@ jobs:
               'public/member/tests/public_discovery_concierge_vm.mjs',
               'public/member/tests/mall_admission_preferences_vm.mjs',
               'public/member/tests/mall_browser_ai_pilot_vm.mjs',
+              'public/member/tests/mall_local_activity_vm.mjs',
               'public/member/wasm/pilot-add.wasm',
               'public/member/tests/mall_product_state_vm.mjs',
               'public/member/tests/mall_property_listing_vm.mjs',
@@ -137,6 +138,7 @@ jobs:
           run_gate admission-routing node public/member/tests/mall_projection_routing_vm.mjs
           run_gate member-boot node public/member/tests/member_product_boot_vm.mjs
           run_gate browser-ai-compatibility node public/member/tests/mall_browser_ai_pilot_vm.mjs
+          run_gate local-activity node public/member/tests/mall_local_activity_vm.mjs
           run_gate public-concierge node public/member/tests/public_discovery_concierge_vm.mjs
           run_gate property-navigation node public/member/tests/mall_property_listing_vm.mjs
           run_gate entry-actions node public/member/tests/legacy_navigation_runtime_vm.mjs

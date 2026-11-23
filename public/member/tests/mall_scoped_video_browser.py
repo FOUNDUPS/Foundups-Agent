@@ -1248,11 +1248,15 @@ def player_menu_action(page, action):
         page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
     else:
         page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
-    page.locator('.mall-member-search-options[open] [data-player-action="' + action + '"]').click()
+    dialog = page.locator('.mall-member-search-options[open]')
+    commands = dialog.locator('[data-video-commands]')
+    if not commands.evaluate('el=>el.open'):
+        commands.locator('summary').click()
+    dialog.locator('[data-player-action="' + action + '"]').click()
 
 
 def app_gesture_target(page):
-    selector = '.video-player-gesture-grip' if page.evaluate('window.mallVideoPlayer.isFloating()') else '.video-player-top-bar'
+    selector = '.video-player-gesture-grip' if page.locator('#videoPlayerFullscreen .video-player-gesture-grip').is_visible() else '.video-player-top-bar'
     target = page.locator('#videoPlayerFullscreen ' + selector)
     expect(target).to_be_visible()
     return target
@@ -1504,7 +1508,7 @@ def verify_floating_and_wikitube_gestures(browser_type):
         # The existing app collapse action returns to the actual Mall, retaining
         # the same provider paused. A deliberate same-video tile tap resumes it.
         page.evaluate("window.gestureReturnFrame = document.querySelector('#videoPlayerFullscreen iframe')")
-        player.locator('[data-action="float"]').tap()
+        player_menu_action(page, "collapse")
         page.wait_for_function("window.mallVideoPlayer.isMallHidden() && window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'paused'")
         expect(player).to_be_hidden()
         assert page.evaluate("window.mallVideoPlayer.isOpen() && window.mallVideoPlayer.getCurrentIndex() === 1")
@@ -1561,15 +1565,23 @@ def verify_floating_and_wikitube_gestures(browser_type):
         assert halted_snap["state"] == "embedding-disabled" and halted_snap["queueIndex"] == 10, halted_snap
         expect(player.locator(".video-player-status")).to_contain_text("Queue stopped")
 
-        # Autoplay-blocked in WikiTube halts immediately and surfaces Play video (never auto-skips)
+        # Autoplay-blocked in WikiTube halts immediately and offers the shared
+        # menu's manual Play action (never auto-skips or restores app chrome).
         page.evaluate("window.fixturePlayback.error = null; window.fixturePlayback.block = true;")
         player.locator('.video-player-queue-item[data-index="12"]').tap()
         page.wait_for_function("window.mallVideoPlayer.getPlaybackSnapshot()?.state === 'autoplay-blocked'")
         blocked_snap = page.evaluate("window.mallVideoPlayer.getPlaybackSnapshot()")
         assert blocked_snap["queueIndex"] == 12 and blocked_snap["queueHalted"] is True, blocked_snap
-        expect(player.get_by_role("button", name="Play video", exact=True)).to_be_visible()
+        page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
+        menu = page.locator('.mall-member-search-options[open]')
+        commands = menu.locator('[data-video-commands]')
+        if not commands.evaluate('el=>el.open'):
+            commands.locator('summary').click()
+        resume = menu.locator('[data-player-action="play"]')
+        expect(resume).to_be_visible()
+        expect(resume).to_be_enabled()
         page.evaluate("window.fixturePlayback.block = false")
-        player.get_by_role("button", name="Play video", exact=True).tap()
+        resume.tap()
         expect_playing(page, 12)
 
         # Orientation rotation (portrait 375x812 -> landscape 844x390 -> portrait) keeps playback & stage >= 200px
@@ -1578,7 +1590,7 @@ def verify_floating_and_wikitube_gestures(browser_type):
                    player.locator(".video-player-stage").bounding_box()["height"]) >= 200
         expect_playing(page, 12)
         page.set_viewport_size({"width": 375, "height": 812})
-        player.get_by_role("button", name="Back", exact=True).tap()
+        player_menu_action(page, "close")
         expect(player).to_be_hidden()
     finally:
         browser.close()
@@ -1885,7 +1897,7 @@ def verify_hidden_playback_policy(browser_type):
         page.evaluate("delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))")
         stable_paused()
         manual_play(1)
-        player.locator('[data-action="float"]').tap()
+        player_menu_action(page, "collapse")
         page.wait_for_function("window.mallVideoPlayer.isMallHidden()")
         expect(player).to_be_hidden()
         stable_paused()

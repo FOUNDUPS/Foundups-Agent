@@ -472,9 +472,10 @@ await check('camera handoff carries only bounded canonical public caller URLs an
   }
 });
 
-await check('isolated v26 controls preview is read-only while unrelated preview hosts remain unselected', () => {
+await check('isolated v26 controls and gestures previews are read-only while unrelated hosts remain unselected', () => {
+ for (const family of ['controls', 'gestures']) {
   for (const domain of ['web.app', 'firebaseapp.com']) {
-    const location = new URL('https://foundupscom--play-v26-controls-abc123.' + domain + '/member/?foundup=hpc');
+    const location = new URL('https://foundupscom--play-v26-' + family + '-abc123.' + domain + '/member/?foundup=hpc');
     const h = runtime(location.href);
     assert.equal(h.api.hostScope(location), 'mall');
     assert.equal(h.api.publicEntryPath(location), null, 'foundup projection is not an enter handoff');
@@ -485,6 +486,7 @@ await check('isolated v26 controls preview is read-only while unrelated preview 
     assert.deepEqual(h.calls.sdk, []);
     assert.deepEqual(h.calls.fetches, []); assert.deepEqual(h.calls.intents, []);
   }
+ }
   assert.equal(runtime('https://foundupscom--random-controls-abc123.web.app/member/').api.hostScope(
     new URL('https://foundupscom--random-controls-abc123.web.app/member/')), null);
 });

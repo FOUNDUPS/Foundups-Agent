@@ -23,6 +23,7 @@ class FakeElement {
     this.style = {};
     this.dataset = {};
     this.hidden = false;
+    this.open = false;
     this.readOnly = false;
     this.textContent = '';
     this.value = '';
@@ -112,6 +113,9 @@ class FakeElement {
     if (selector === '[data-hpc-probe-tools]') {
       return this.attributes.has('data-hpc-probe-tools');
     }
+    if (selector === '[data-mall-daemon-diagnostics]' || selector === '[data-preview-diagnostics]') {
+      return this.attributes.has(selector.slice(1, -1));
+    }
     if (selector === '.mall-build-label') {
       return this.className.split(/\s+/).includes('mall-build-label');
     }
@@ -191,6 +195,17 @@ function createHarness(opts = {}) {
     const dialogForm = new FakeElement('form', doc);
     dialogForm.setAttribute('method', 'dialog');
     menu.append(dialogForm);
+    if (opts.nestedDiagnostics) {
+      const diagnostics = new FakeElement('details', doc);
+      diagnostics.setAttribute('data-preview-diagnostics', '');
+      diagnostics.hidden = true;
+      const summary = new FakeElement('summary', doc);
+      summary.textContent = 'Playback diagnostics';
+      const target = new FakeElement('div', doc);
+      target.setAttribute('data-mall-daemon-diagnostics', '');
+      diagnostics.append(summary, target);
+      menu.append(diagnostics);
+    }
     const stageRoot = new FakeElement('div', doc);
     stageRoot.setAttribute('id', 'stage-root');
     const mallIframe = new FakeElement('iframe', doc);
@@ -477,4 +492,26 @@ for (const unadmitted of ['R7xm4MZ9N4w', 'TppBUj_7lC0', 'qNFSBWXhZSY', 'B0P1Zci5
   assert.match(refIframe.src, /^https:\/\/www\.youtube-nocookie\.com\/embed\/DDAfdpJeUP0\?/);
 }
 
-console.log('HPC iPhone playback probe runtime: 6 passed.');
+//7. Current shell and legacy fallback both keep probe controls in collapsed
+// diagnostics. This fake DOM proves structure, not real browser visibility.
+for (const nestedDiagnostics of [false, true]) {
+  const h = createHarness({ mode: 'mall', nestedDiagnostics,
+    url: 'https://foundupscom--probe.web.app/member/?foundup=hpc' });
+  await h.flushAsync();
+  const menu = h.doc.getElementById('videoScopeOptions');
+  const tools = menu.querySelector('[data-hpc-probe-tools]');
+  assert.ok(tools, 'Probe controls did not mount');
+  assert.notEqual(tools.parentNode, menu, 'Technical controls crowded the top-level menu');
+  const groups = menu.findAll(el => el.tagName === 'DETAILS');
+  assert.equal(groups.length, 1, 'Probe duplicated the shell diagnostics group');
+  assert.equal(groups[0].open, false, 'Probe opened diagnostics without an explicit action');
+  if (nestedDiagnostics) {
+    assert.equal(tools.parentNode, menu.querySelector('[data-mall-daemon-diagnostics]'));
+    assert.equal(groups[0].hidden, false);
+  } else {
+    assert.equal(tools.parentNode, groups[0]);
+  }
+  assert.equal(tools.findAll(el => el.tagName === 'SELECT').length, 2);
+}
+
+console.log('HPC iPhone playback probe runtime: 7 passed.');
