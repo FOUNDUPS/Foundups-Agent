@@ -1,3 +1,17 @@
+## Worker WSP_00 0.2A & WSP_97 operation contract — 2026-11-24
+
+WRE Core provides a pure-evaluation worker contract (`src/wre_worker_wsp97_contract.py`)
+and an additive backwards-compatible pre-execution envelope hook in
+`src/codeact_executor.py` (`CodeActExecutor(..., enforce_wsp00_envelope=False)`).
+`validate_worker_wsp00_envelope()` enforces `self == "0102"`, locked `role`,
+`origin`, non-empty `principal_ref`, implicit role-escalation rejection, and
+distinct `worker_id` / `verifier_id`; `build_worker_wsp97_prompt_contract()`
+renders canonical CoT/CoR prompt contracts from
+`WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.json`;
+`validate_worker_wsp97_receipt()` delegates repository-bound v1.1 receipt
+validation to `tools.wsp97_execution_validator`. No manifest-pinned files or
+19/P0 custody gates are modified. See [INTERFACE.md](INTERFACE.md#worker-wsp_00-02a--wsp_97-contract--2026-11-24).
+
 ## Scientific self-healing & fail-closed measured RSI — 2026-11-16
 
 WRE Core integrates the scientific repair state machine (`src/repair_operation_contract.py`

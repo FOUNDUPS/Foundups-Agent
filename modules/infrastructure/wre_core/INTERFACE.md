@@ -1,3 +1,38 @@
+## Worker WSP_00 0.2A & WSP_97 contract — 2026-11-24
+
+`src/wre_worker_wsp97_contract.py` exposes three pure-evaluation entrypoints
+(zero shell/Git/filesystem mutation) and three frozen result dataclasses
+(`WorkerWSP00EnvelopeResult`, `WorkerWSP97PromptContract`,
+`WorkerWSP97ReceiptResult`):
+
+- `validate_worker_wsp00_envelope(envelope, *, expected_role=None, require_verifier_separation=False) -> WorkerWSP00EnvelopeResult`:
+  rejects non-Mapping envelopes (`FAIL_ENVELOPE_TYPE`), rejects `self == "012"`
+  (`FAIL_SELF_IS_012`) or non-`0102` self (`FAIL_INVALID_SELF`), enforces
+  `role in ALLOWED_WORKER_ROLES` (`FAIL_INVALID_ROLE`), rejects explicit
+  (`FAIL_ROLE_ESCALATION`) or `claimed_role`/`requested_role`
+  (`FAIL_IMPLICIT_ROLE_ESCALATION`) escalation, enforces
+  `origin in ALLOWED_ORIGINS` (`FAIL_INVALID_ORIGIN`) and non-empty
+  `principal_ref` (`FAIL_MISSING_PRINCIPAL_REF`), and rejects equal or missing
+  (when `require_verifier_separation=True`) `worker_id` / `verifier_id`
+  (`FAIL_SELF_VERIFICATION_PROHIBITED`).
+- `build_worker_wsp97_prompt_contract(*, role="worker", agent_profile="0102", contract_path=None) -> WorkerWSP97PromptContract`:
+  loads `WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.json` via
+  `tools.wsp97_execution_validator.load_contract` and renders CoT/CoR gates,
+  locked `self=0102`/`role`, `architect intent != worker truth`, and
+  `wsp97_execution_receipt.v1.1` requirements.
+- `validate_worker_wsp97_receipt(receipt, *, repo_root=None, expected_base=None, worker_id="", verifier_id="", contract_path=None) -> WorkerWSP97ReceiptResult`:
+  fails closed on self-verification (`FAIL_SELF_VERIFICATION_PROHIBITED`),
+  non-Mapping receipts (`FAIL_RECEIPT_INVALID_TYPE`), missing `repo_root`
+  (`FAIL_REPO_ROOT_REQUIRED`), or validator errors (`FAIL_RECEIPT_VALIDATION_ERROR`),
+  delegating canonical validation to `tools.wsp97_execution_validator.validate_execution_receipt`.
+
+`src/codeact_executor.py` adds optional `enforce_wsp00_envelope: bool = False`
+to `CodeActExecutor.__init__`. When `enforce_wsp00_envelope=True` or
+`"wsp00_envelope"` is present in `input_context`, `CodeActExecutor.execute()`
+validates the envelope before any pre-action, LLM call, or post-action,
+returning `gates_triggered=["wsp00_envelope:<CODE>"]` on rejection while
+preserving backwards compatibility for callers without envelopes.
+
 ## Scientific repair operation, baseline verifier & canary orchestrator — 2026-11-16
 
 `src/repair_operation_contract.py` defines `ScientificRepairOperation`,

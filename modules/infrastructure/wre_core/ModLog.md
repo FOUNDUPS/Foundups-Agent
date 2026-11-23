@@ -1,3 +1,9 @@
+## 2026-11-24 — Layer-1 WRE worker WSP_00 0.2A / WSP_97 contract & CodeAct envelope hook
+
+- **Worker WSP_97 Contract (`src/wre_worker_wsp97_contract.py`)**: Added pure-evaluation (zero shell/Git/filesystem mutation) `validate_worker_wsp00_envelope()`, `build_worker_wsp97_prompt_contract()`, and `validate_worker_wsp97_receipt()` delegating canonical receipt validation to `tools.wsp97_execution_validator` without duplicating validator logic (WSP 84) and keeping `<= 240` lines (WSP 62).
+- **CodeAct Envelope Hook (`src/codeact_executor.py`)**: Added additive backwards-compatible `enforce_wsp00_envelope: bool = False` option and pre-action `_check_wsp00_envelope()` gate failing closed before shell/LLM/read actions when enforced or `"wsp00_envelope"` is supplied in `input_context`. Kept `scripts/reddog_backend_manifest.json` (`1,494 / 1,494`) and 19/P0 custody gates untouched.
+- **Tests & Registry (`tests/test_wre_worker_wsp97_contract.py`, `tests/test_codeact_executor_hardening.py`, `WSP_knowledge/WSP_Test_Registry.json`)**: Added unit, repository-bound v1.1 receipt, AST-purity, and CodeAct gate tests and updated the canonical test registry (`1,852 -> 1,853`). WSP 00, 11, 22, 50, 62, 84, and 97.
+
 ## 2026-11-19 — Fractal census and researcher boundary documentation
 
 Link WRE responsibilities to the existing dispatch owner's single census and

@@ -875,6 +875,11 @@ promotion, or production RSI.
 
 ## Test inventory
 
+- `test_wre_worker_wsp97_contract.py`: pure-evaluation WSP_00 0.2A envelope lock,
+  WSP_97 CoT/CoR prompt contract, repository-bound v1.1 receipt delegation, and
+  AST-purity checks.
+- `test_codeact_executor_hardening.py`: CodeActExecutor safety policy, worker
+  git cwd guard, read confinement, and WSP_00 0.2A pre-execution envelope gate.
 - `test_wre_execution_truth.py`: false-success, result evidence, ReAct, and
   bounded executor contracts.
 - `test_wre_runtime_admission_truth.py`: runtime admission, scan fingerprints,
