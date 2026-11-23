@@ -1,3 +1,20 @@
+## Layer-2A current-window readiness evidence — 2026-11-24
+
+- `PatternMemory.get_telemetry_dashboard(self, *, since: Optional[str] = None, collection_id: Optional[str] = None, now: Optional[datetime] = None) -> Dict`:
+  - Preserves 0-arg `telemetry_scope="database_lifetime"` fields and `metric_evidence`.
+  - Adds `collection_scope` (`requested_scope`, `since`, `collection_id`, `evaluated_at`).
+  - Validates explicit `since` via `_parse_iso_utc()` (`ValueError` on invalid input).
+  - When `since` is supplied, computes read-only `current_metric_evidence`:
+    - `retrieval_coverage` (`window_bounded=True`, `time_basis="retrieval_timestamp"`, `COUNT(relevance_score)` denominator excluding `NULL`).
+    - `variation_win_rate` (`window_bounded=True`, `time_basis="variation_created_at"`, `test_status IN ('promoted', 'archived')`).
+    - `tot_confidence_rate`, `codeact_success_rate`, `codeact_gate_trigger_rate` (`window_bounded=False`, `time_basis="counter_last_updated"`, `counter_updated_in_window`).
+- `DashboardAlertMonitor.__init__(self, pattern_memory=None, *, current_since: Optional[str] = None, collection_id: Optional[str] = None)` (reading `WRE_DASHBOARD_CURRENT_SINCE` / `WRE_DASHBOARD_COLLECTION_ID` when args are `None`), `evaluate_metric_statuses(dashboard, *, require_minimum=True)`, and `check_dashboard_health(*, pattern_memory=None, current_since=None, collection_id=None)`:
+  - Calls zero-arg `DashboardAlertMonitor()` when all 3 kwargs are `None`.
+  - Returns `telemetry_scope`, `collection_identity`, `metric_statuses`, `metric_samples`, `historical_alerts`, `historical_critical_count`, `current_readiness`, `status`, `alerts`, `unknown_metrics`, `healthy`, `dashboard`, `insufficient_data`, `total_executions`, `min_samples`, `timestamp`.
+  - Unwindowed cumulative counters fail closed on threshold breach (`CRITICAL`/`WARNING`, `unwindowed_cumulative_counter_breach`) and never return `PASS` (`UNKNOWN`, `unwindowed_cumulative_counter`).
+- `dae_preflight.dashboard_readiness(health, *, in_watch, interactive_menu=False, unresolved_admission_gates=())`:
+  - Preserves existing keys (`allowed`, `readiness`, `status`, `critical`, `warnings`, `unknown`, `evidence_valid`) and adds `current_readiness`, `historical_critical`, `unresolved_admission_gates`, `unattended_work_allowed`, `worker_admission_granted=False`, `model_admission_granted=False`.
+
 ## Worker WSP_00 0.2A & WSP_97 contract — 2026-11-24
 
 `src/wre_worker_wsp97_contract.py` exposes three pure-evaluation entrypoints

@@ -24,7 +24,7 @@ import sqlite3
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import logging
 
@@ -34,6 +34,24 @@ from modules.infrastructure.wre_core.src.pattern_ab_evidence import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_iso_utc(value: Optional[str]) -> Optional[datetime]:
+    """Normalize an ISO-8601 date/datetime string to UTC, returning None if invalid."""
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    if text.endswith(("Z", "z")):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 @dataclass
@@ -861,13 +879,114 @@ class PatternMemory(PatternABEvidenceMixin):
         row = cursor.fetchone()
         return row['counter_value'] if row else 0
 
-    def get_telemetry_dashboard(self) -> Dict:
+    def _current_retrieval_evidence(self, cursor: sqlite3.Cursor, since_dt: datetime) -> Dict[str, Any]:
+        """Compute window-bounded retrieval_coverage evidence without DB writes."""
+        cursor.execute("SELECT timestamp, relevance_score, skill_name FROM retrieval_quality")
+        total_in_window = 0
+        scored: List[tuple] = []
+        for row in cursor.fetchall():
+            row_dt = _parse_iso_utc(row["timestamp"])
+            if row_dt is None or row_dt < since_dt:
+                continue
+            total_in_window += 1
+            score = row["relevance_score"]
+            if score is not None:
+                scored.append((row_dt, row["timestamp"], float(score), row["skill_name"]))
+        samples = len(scored)
+        high = sum(1 for _, _, score, _ in scored if score >= 0.5)
+        skills = {skill for _, _, _, skill in scored if skill is not None}
+        return {
+            "samples": samples,
+            "total_retrievals": total_in_window,
+            "value": round(high / samples, 3) if samples > 0 else None,
+            "recorded_from": min(scored, key=lambda item: item[0])[1] if scored else None,
+            "recorded_to": max(scored, key=lambda item: item[0])[1] if scored else None,
+            "time_basis": "retrieval_timestamp",
+            "skill_count": len(skills),
+            "window_bounded": True,
+        }
+
+    def _current_variation_evidence(self, cursor: sqlite3.Cursor, since_dt: datetime) -> Dict[str, Any]:
+        """Compute window-bounded variation_win_rate evidence without DB writes."""
+        cursor.execute(
+            "SELECT created_at, promoted FROM skill_variations "
+            "WHERE test_status IN ('promoted', 'archived')"
+        )
+        matched: List[tuple] = []
+        for row in cursor.fetchall():
+            row_dt = _parse_iso_utc(row["created_at"])
+            if row_dt is None or row_dt < since_dt:
+                continue
+            matched.append((row_dt, row["created_at"], int(row["promoted"] or 0) == 1))
+        samples = len(matched)
+        promoted = sum(1 for _, _, is_promoted in matched if is_promoted)
+        return {
+            "samples": samples,
+            "promoted": promoted,
+            "value": round(promoted / samples, 3) if samples > 0 else None,
+            "recorded_from": min(matched, key=lambda item: item[0])[1] if matched else None,
+            "recorded_to": max(matched, key=lambda item: item[0])[1] if matched else None,
+            "time_basis": "variation_created_at",
+            "window_bounded": True,
+        }
+
+    @staticmethod
+    def _current_counter_evidence(
+        since_dt: datetime,
+        counter_times: Dict[str, Optional[str]],
+        lifetime_samples: int,
+        lifetime_value: Optional[float],
+        *counter_names: str,
+    ) -> Dict[str, Any]:
+        """Evaluate cumulative counter freshness without pretending a sample window."""
+        raw_times = [counter_times[name] for name in counter_names if counter_times.get(name)]
+        parsed = [_parse_iso_utc(ts) for ts in raw_times]
+        updated = any(dt is not None and dt >= since_dt for dt in parsed)
+        return {
+            "samples": lifetime_samples if updated else 0,
+            "value": lifetime_value if updated else None,
+            "counter_updated_in_window": updated,
+            "window_bounded": False,
+            "recorded_from": min(raw_times) if raw_times else None,
+            "recorded_to": max(raw_times) if raw_times else None,
+            "time_basis": "counter_last_updated",
+        }
+
+    def get_telemetry_dashboard(
+        self,
+        *,
+        since: Optional[str] = None,
+        collection_id: Optional[str] = None,
+        now: Optional[datetime] = None,
+    ) -> Dict:
         """
         Get telemetry dashboard for Sprint 1 metrics.
+
+        Args:
+            since: Optional ISO-8601 lower bound for current-window evidence.
+            collection_id: Optional caller-supplied collection identity label.
+            now: Optional evaluation timestamp (defaults to UTC now).
 
         Returns:
             Dict with retry_count, variation_win_rate, avg_fidelity_delta
         """
+        since_dt: Optional[datetime] = None
+        if since is not None:
+            since_dt = _parse_iso_utc(since)
+            if since_dt is None:
+                raise ValueError(f"Invalid ISO-8601 since timestamp: {since!r}")
+
+        if now is None:
+            evaluated_at_dt = datetime.now(timezone.utc)
+        elif isinstance(now, datetime):
+            evaluated_at_dt = (
+                now.replace(tzinfo=timezone.utc)
+                if now.tzinfo is None
+                else now.astimezone(timezone.utc)
+            )
+        else:
+            raise TypeError("now must be a datetime or None")
+
         cursor = self.conn.cursor()
 
         cursor.execute("SELECT * FROM telemetry_counters")
@@ -949,9 +1068,16 @@ class PatternMemory(PatternABEvidenceMixin):
         codeact_total = codeact_success + codeact_fail
         codeact_success_rate = ratio(codeact_success, codeact_total)
         codeact_gate_triggers = counters.get("codeact_gate_triggers", 0)
+        codeact_gate_trigger_rate = ratio(codeact_gate_triggers, codeact_total)
 
-        return {
+        dashboard = {
             "telemetry_scope": "database_lifetime",
+            "collection_scope": {
+                "requested_scope": "current_window" if since_dt is not None else "database_lifetime",
+                "since": since_dt.isoformat() if since_dt is not None else None,
+                "collection_id": collection_id,
+                "evaluated_at": evaluated_at_dt.isoformat(),
+            },
             "metric_evidence": {
                 "tot_confidence_rate": evidence(tot_selections, "tot_selections"),
                 "codeact_success_rate": evidence(codeact_total, "codeact_exec_success", "codeact_exec_fail"),
@@ -982,6 +1108,23 @@ class PatternMemory(PatternABEvidenceMixin):
             "codeact_success_rate": rounded(codeact_success_rate),
             "codeact_gate_triggers": codeact_gate_triggers
         }
+        if since_dt is not None:
+            dashboard["current_metric_evidence"] = {
+                "tot_confidence_rate": self._current_counter_evidence(
+                    since_dt, counter_times, tot_selections, rounded(tot_confidence_rate), "tot_selections"
+                ),
+                "codeact_success_rate": self._current_counter_evidence(
+                    since_dt, counter_times, codeact_total, rounded(codeact_success_rate),
+                    "codeact_exec_success", "codeact_exec_fail",
+                ),
+                "codeact_gate_trigger_rate": self._current_counter_evidence(
+                    since_dt, counter_times, codeact_total, rounded(codeact_gate_trigger_rate),
+                    "codeact_exec_success", "codeact_exec_fail",
+                ),
+                "variation_win_rate": self._current_variation_evidence(cursor, since_dt),
+                "retrieval_coverage": self._current_retrieval_evidence(cursor, since_dt),
+            }
+        return dashboard
 
     # ------------------------------------------------------------------ #
     #  Retrieval Quality Tracking (Sprint 2 - Agentic RAG)               #

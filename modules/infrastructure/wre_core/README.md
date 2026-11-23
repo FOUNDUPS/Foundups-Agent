@@ -1,3 +1,25 @@
+## Layer-2A current-window readiness evidence — 2026-11-24
+
+WRE Core distinguishes `database_lifetime` history from bounded `current_window`
+readiness evidence without modifying SQLite storage or weakening 19/P0 custody
+gates:
+
+- `PatternMemory.get_telemetry_dashboard(*, since=None, collection_id=None, now=None)`
+  preserves 0-arg `database_lifetime` metrics and `metric_evidence`, adds
+  `collection_scope`, and computes read-only `current_metric_evidence` when
+  `since` is supplied (windowed `retrieval_coverage` / `variation_win_rate`
+  separately from `window_bounded=False` `telemetry_counters`).
+- `DashboardAlertMonitor.evaluate_metric_statuses()` and `check_dashboard_health()`
+  preserve `historical_alerts` and `historical_critical_count`, classify old
+  historical-only metrics as `STALE_UNKNOWN` / `stale_historical_only`, never
+  promote unwindowed cumulative counters to `PASS`, and surface `current_readiness`
+  plus `metric_samples`.
+- `dae_preflight.dashboard_readiness()` adds `unattended_work_allowed`
+  (requiring `READY` in both overall and `current_readiness`, zero alerts/unknowns,
+  and empty `unresolved_admission_gates`) while keeping `worker_admission_granted=False`
+  and `model_admission_granted=False`. See
+  [INTERFACE.md](INTERFACE.md#layer-2a-current-window-readiness-evidence--2026-11-24).
+
 ## Worker WSP_00 0.2A & WSP_97 operation contract — 2026-11-24
 
 WRE Core provides a pure-evaluation worker contract (`src/wre_worker_wsp97_contract.py`)

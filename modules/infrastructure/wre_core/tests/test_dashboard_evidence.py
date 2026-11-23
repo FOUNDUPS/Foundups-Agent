@@ -240,3 +240,204 @@ def test_startup_context_preserves_critical_policy(monkeypatch, interactive, exp
     monkeypatch.setitem(sys.modules, "modules.ai_intelligence.ai_overseer.src.preflight_resolution",
                         types.SimpleNamespace(on_preflight_fail=lambda **kwargs: None))
     assert _main_functions()["run_wre_dashboard_preflight"](None, interactive_menu=interactive) is expected
+
+
+def test_historical_only_rows_become_stale_unknown_in_current_window_read_only(memory):
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,'fixture','2026-06-26T00:00:00+00:00',0,0.0)",
+        [(f"hist_{i}", f"hist_{i}", "shorts_fixture") for i in range(45)],
+    )
+    memory.conn.commit()
+    path = memory.db_path
+    before = path.read_bytes()
+
+    reader = PatternMemory(path, read_only=True)
+    try:
+        health = dashboard_alerts.check_dashboard_health(
+            pattern_memory=reader,
+            current_since="2026-11-01T00:00:00Z",
+            collection_id="audit_run_1",
+        )
+    finally:
+        reader.conn.close()
+
+    assert path.read_bytes() == before
+    assert health["telemetry_scope"] == "current_window"
+    assert health["collection_identity"]["collection_id"] == "audit_run_1"
+    assert health["historical_critical_count"] == 1
+    assert [(a["metric"], a["severity"]) for a in health["historical_alerts"]] == [
+        ("retrieval_coverage", "critical")
+    ]
+    assert health["alerts"] == []
+    assert health["healthy"] is False
+    assert health["current_readiness"] == "STALE_UNKNOWN"
+    ret_status = health["metric_statuses"]["retrieval_coverage"]
+    assert ret_status["status"] == "STALE_UNKNOWN"
+    assert ret_status["collection_state"] == "stale_historical_only"
+    assert ret_status["samples"] == 0
+    assert ret_status["lifetime_samples"] == 45
+    assert ret_status["lifetime_status"] == "CRITICAL"
+
+    policy = dae_preflight.dashboard_readiness(health, in_watch=False)
+    assert policy["unattended_work_allowed"] is False
+    assert policy["historical_critical"] == 1
+    assert policy["worker_admission_granted"] is False
+    assert policy["model_admission_granted"] is False
+
+
+def test_fresh_healthy_windowed_metrics_stay_fail_closed_when_counters_unwindowed(memory):
+    since = "2026-11-24T00:00:00+00:00"
+    fresh_ts = "2026-11-24T01:00:00+00:00"
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,3,0.9)",
+        [(f"r_{i}", f"e_{i}", "skill_a", "q", fresh_ts) for i in range(25)],
+    )
+    memory.conn.executemany(
+        "INSERT INTO skill_variations "
+        "(variation_id,skill_name,parent_version,variation_content,created_at,created_by,test_status,promoted) "
+        "VALUES (?,?,?,?,?,?, 'promoted', 1)",
+        [(f"v_{i}", "skill_a", "v0", "body", fresh_ts, "worker") for i in range(25)],
+    )
+    memory.conn.commit()
+    memory.increment_counter("tot_selections", 30)
+    memory.increment_counter("tot_high_confidence", 28)
+
+    health = dashboard_alerts.check_dashboard_health(
+        pattern_memory=memory,
+        current_since=since,
+        collection_id="fresh_healthy",
+    )
+    statuses = health["metric_statuses"]
+    assert statuses["retrieval_coverage"]["status"] == "PASS"
+    assert statuses["retrieval_coverage"]["collection_state"] == "fresh_sampled"
+    assert statuses["retrieval_coverage"]["samples"] == 25
+    assert statuses["retrieval_coverage"]["window_bounded"] is True
+    assert statuses["variation_win_rate"]["status"] == "PASS"
+    assert statuses["variation_win_rate"]["collection_state"] == "fresh_sampled"
+    assert statuses["variation_win_rate"]["samples"] == 25
+    assert statuses["variation_win_rate"]["window_bounded"] is True
+    assert statuses["tot_confidence_rate"]["status"] == "UNKNOWN"
+    assert statuses["tot_confidence_rate"]["collection_state"] == "unwindowed_cumulative_counter"
+    assert statuses["tot_confidence_rate"]["window_bounded"] is False
+    assert health["healthy"] is False
+    assert health["current_readiness"] == "UNKNOWN"
+    policy = dae_preflight.dashboard_readiness(health, in_watch=False)
+    assert policy["unattended_work_allowed"] is False
+
+
+def test_fresh_failing_retrieval_blocks_current_window(memory):
+    since = "2026-11-24T00:00:00Z"
+    fresh_ts = "2026-11-24T01:00:00+00:00"
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,0,0.0)",
+        [(f"rf_{i}", f"ef_{i}", "skill_b", "q", fresh_ts) for i in range(25)],
+    )
+    memory.conn.commit()
+
+    health = dashboard_alerts.check_dashboard_health(
+        pattern_memory=memory,
+        current_since=since,
+    )
+    assert health["current_readiness"] == "BLOCKED"
+    assert [(a["metric"], a["severity"]) for a in health["alerts"]] == [
+        ("retrieval_coverage", "critical")
+    ]
+    policy = dae_preflight.dashboard_readiness(health, in_watch=False)
+    assert policy["allowed"] is False
+    assert policy["readiness"] == "BLOCKED"
+    assert policy["unattended_work_allowed"] is False
+
+
+def test_absent_and_insufficient_current_samples_exclude_null_scores(memory):
+    since = "2026-11-24T00:00:00Z"
+    fresh_ts = "2026-11-24T01:00:00+00:00"
+    empty_health = dashboard_alerts.check_dashboard_health(
+        pattern_memory=memory,
+        current_since=since,
+    )
+    assert empty_health["metric_statuses"]["retrieval_coverage"]["collection_state"] == "no_samples"
+    assert empty_health["metric_statuses"]["retrieval_coverage"]["samples"] == 0
+    assert empty_health["healthy"] is False
+    assert dae_preflight.dashboard_readiness(empty_health, in_watch=False)["unattended_work_allowed"] is False
+
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,1,?)",
+        [(f"s_{i}", f"es_{i}", "skill_c", "q", fresh_ts, 0.9 if i < 10 else None) for i in range(30)],
+    )
+    memory.conn.commit()
+    dash = memory.get_telemetry_dashboard(since=since)
+    cur_ret = dash["current_metric_evidence"]["retrieval_coverage"]
+    assert cur_ret["total_retrievals"] == 30
+    assert cur_ret["samples"] == 10
+
+    insuff_health = dashboard_alerts.check_dashboard_health(
+        pattern_memory=memory,
+        current_since=since,
+    )
+    assert insuff_health["metric_statuses"]["retrieval_coverage"]["status"] == "UNKNOWN"
+    assert insuff_health["metric_statuses"]["retrieval_coverage"]["collection_state"] == "insufficient_current_samples"
+    assert insuff_health["healthy"] is False
+    assert dae_preflight.dashboard_readiness(insuff_health, in_watch=False)["unattended_work_allowed"] is False
+
+
+def test_invalid_since_rejected_and_unresolved_gate_blocks_unattended_work(memory):
+    with pytest.raises(ValueError):
+        memory.get_telemetry_dashboard(since="not-a-valid-iso-timestamp")
+
+    ready_health = {
+        "healthy": True,
+        "status": "PASS",
+        "current_readiness": "READY",
+        "insufficient_data": False,
+        "unknown_metrics": [],
+        "alerts": [],
+        "historical_critical_count": 0,
+    }
+    open_policy = dae_preflight.dashboard_readiness(ready_health, in_watch=False)
+    assert open_policy["unattended_work_allowed"] is True
+    assert open_policy["worker_admission_granted"] is False
+    assert open_policy["model_admission_granted"] is False
+
+    gated_policy = dae_preflight.dashboard_readiness(
+        ready_health,
+        in_watch=False,
+        unresolved_admission_gates=("19/P0_worker_custody",),
+    )
+    assert gated_policy["unattended_work_allowed"] is False
+    assert gated_policy["unresolved_admission_gates"] == ("19/P0_worker_custody",)
+    assert gated_policy["worker_admission_granted"] is False
+    assert gated_policy["model_admission_granted"] is False
+
+
+def test_root_connect_wre_separates_total_executions_from_metric_samples(monkeypatch):
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
+    monkeypatch.setenv("WRE_DASHBOARD_AUTO_ENFORCE", "1")
+    monkeypatch.setattr(dashboard_alerts.DashboardAlertMonitor, "is_in_watch_period", lambda self: False)
+    health = {
+        "healthy": False,
+        "insufficient_data": True,
+        "total_executions": 45,
+        "metric_samples": {"retrieval_coverage": 0, "variation_win_rate": 0},
+        "telemetry_scope": "current_window",
+        "current_readiness": "STALE_UNKNOWN",
+        "historical_critical_count": 1,
+        "unknown_metrics": ["retrieval_coverage", "variation_win_rate"],
+        "alerts": [],
+    }
+    monkeypatch.setattr(dashboard_alerts, "check_dashboard_health", lambda: health)
+    result = _main_functions()["run_connect_wre"](None)
+    assert result["sample_coverage"] == 45
+    assert result["total_executions"] == 45
+    assert result["metric_samples"] == {"retrieval_coverage": 0, "variation_win_rate": 0}
+    assert result["telemetry_scope"] == "current_window"
+    assert result["current_readiness"] == "STALE_UNKNOWN"
+    assert result["historical_critical_count"] == 1
+    assert result["unattended_work_allowed"] is False
