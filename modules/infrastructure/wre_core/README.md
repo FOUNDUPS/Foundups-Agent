@@ -6,15 +6,22 @@ gates:
 
 - `PatternMemory.get_telemetry_dashboard(*, since=None, collection_id=None, now=None)`
   preserves 0-arg `database_lifetime` metrics and `metric_evidence`, adds
-  `collection_scope` (with `upper_bound` and `naive_timestamp_policy="assumed_utc"`),
-  rejects `since > evaluated_at`, excludes future timestamps (`row_dt > evaluated_at`),
+  `collection_scope` (with `upper_bound` and
+  `naive_timestamp_policy="excluded_ambiguous_timezone"`), rejects zone-less or
+  invalid `since`/`now` and `since > evaluated_at`, excludes zone-less rows
+  (`naive_timestamp_excluded`) and future timestamps (`row_dt > evaluated_at`),
   and computes read-only `current_metric_evidence` when `since` is supplied.
-- `DashboardAlertMonitor.evaluate_metric_statuses()` and `check_dashboard_health()`
-  preserve `historical_alerts` and `historical_critical_count`, classify old
-  historical-only metrics as `STALE_UNKNOWN` / `stale_historical_only`, mark
-  future-dated exclusions as `UNKNOWN` / `future_timestamp_excluded`, never
-  promote unwindowed cumulative counters to `PASS`, and surface `current_readiness`
-  plus `metric_samples`.
+  Dashboard writers (`record_retrieval`, `store_variation`, `increment_counter`)
+  emit explicit UTC ISO-8601 timestamps.
+- `DashboardAlertMonitor.evaluate_metric_statuses()`, `check_all()`,
+  `unknown_metrics()`, `run_check()`, and `check_dashboard_health()` honor
+  active `current_window` scope when `current_since` is configured while
+  retaining lifetime history via `check_lifetime_all()` / `historical_alerts` /
+  `historical_critical_count`; classify historical-only metrics as
+  `STALE_UNKNOWN` / `stale_historical_only`, future exclusions as `UNKNOWN` /
+  `future_timestamp_excluded`, and zone-less exclusions as `UNKNOWN` /
+  `naive_timestamp_excluded`; never promote unwindowed cumulative counters to
+  `PASS`; and surface `current_readiness` plus `metric_samples`.
 - `dae_preflight.dashboard_readiness()` retains `unattended_work_allowed=False`,
   `admission_authority_verified=False`, `worker_admission_granted=False`, and
   `model_admission_granted=False` across telemetry-only evaluations (defaulting

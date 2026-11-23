@@ -1,3 +1,9 @@
+## 2026-11-24 — Layer-2A QA-B hardening (`WRE-L2A-INDEPENDENT-QA-20261124-B`)
+
+- **PatternMemory (`src/pattern_memory.py`)**: Replaced `assumed_utc` with conservative `excluded_ambiguous_timezone` policy (`_parse_iso_utc_with_meta()` excludes zone-less strings rather than guessing UTC; rejects zone-less `since` and naive `now` with `ValueError`); updated telemetry writers (`record_retrieval()`, `store_variation()`, `increment_counter()`, `get_retrieval_stats()`) to emit explicit UTC ISO-8601 timestamps.
+- **Dashboard Alerts (`src/dashboard_alerts.py`)**: Aligned `DashboardAlertMonitor.unknown_metrics()`, `check_all()`, and `run_check()` with active `current_window` scope when `current_since` is configured while retaining `check_lifetime_all()` for `historical_alerts` / `historical_critical_count`; classified zone-less exclusions as `UNKNOWN` (`naive_timestamp_excluded`); validated `now`/`current_since` in missing-DB fallback.
+- **Manifest Pin (`scripts/reddog_backend_manifest.json`, `extensions/reddog/backend_compatibility_constants.js`, `scripts/tests/test_generate_reddog_backend_manifest.py`)**: Regenerated manifest (`required_runtime_files=1494`, SHA-256 `8eadf0820e0ea2fd30ee40d08990d08238b77b74876e755a389f17c50a961d30`). WSP 00, 22, 50, 71, 91, and 97.
+
 ## 2026-11-24 — Layer-2A QA hardening (`WRE-L2A-INDEPENDENT-QA-20261124-A`)
 
 - **PatternMemory (`src/pattern_memory.py`)**: Bounded `current_window` evaluation above by `evaluated_at` (`upper_bound`), rejected `since > evaluated_at` (`ValueError`), excluded future timestamps (`row_dt > evaluated_at`), and surfaced `future_rows`, `invalid_timestamp_rows`, `naive_timestamp_rows`, and `naive_timestamp_policy="assumed_utc"`.

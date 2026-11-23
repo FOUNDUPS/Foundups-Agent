@@ -1,11 +1,15 @@
 """Readiness distinguishes missing evidence, measured failure and admission."""
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import sqlite3
 
 import pytest
 
 from modules.infrastructure.wre_core.src import dashboard_alerts, dae_preflight
-from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+from modules.infrastructure.wre_core.src.pattern_memory import (
+    PatternMemory,
+    _parse_iso_utc,
+    _parse_iso_utc_with_meta,
+)
 
 
 @pytest.fixture
@@ -467,18 +471,24 @@ def test_future_timestamps_excluded_and_future_since_rejected(memory):
     )
     memory.conn.commit()
 
+    assert _parse_iso_utc("2026-11-24T05:30:00") is None
+    assert _parse_iso_utc("2026-11-24T05:30:00+09:00") == datetime(2026, 11, 23, 20, 30, tzinfo=timezone.utc)
+    with pytest.raises(ValueError, match="explicit timezone offset"):
+        memory.get_telemetry_dashboard(since="2026-11-24T05:30:00", now=now_dt)
+    with pytest.raises(ValueError, match="timezone-aware"):
+        memory.get_telemetry_dashboard(since=since, now=datetime(2026, 11, 24, 0, 0))
     with pytest.raises(ValueError, match="cannot exceed evaluated_at"):
         memory.get_telemetry_dashboard(since="2027-01-01T00:00:00+00:00", now=now_dt)
 
     dash = memory.get_telemetry_dashboard(since=since, now=now_dt)
     assert dash["collection_scope"]["upper_bound"] == now_dt.isoformat()
-    assert dash["collection_scope"]["naive_timestamp_policy"] == "assumed_utc"
+    assert dash["collection_scope"]["naive_timestamp_policy"] == "excluded_ambiguous_timezone"
     cur_ret = dash["current_metric_evidence"]["retrieval_coverage"]
-    assert cur_ret["samples"] == 1
+    assert cur_ret["samples"] == 0
     assert cur_ret["future_rows"] == 25
     assert cur_ret["naive_timestamp_rows"] == 1
     assert cur_ret["invalid_timestamp_rows"] == 1
-    assert cur_ret["timestamp_assumption"] == "naive_assumed_utc"
+    assert cur_ret["timestamp_assumption"] == "naive_excluded_unknown_timezone"
 
     memory.conn.execute("DELETE FROM retrieval_quality WHERE retrieval_id IN ('naive_r', 'bad_r')")
     memory.conn.commit()
@@ -541,6 +551,173 @@ def test_all_pass_lifetime_sqlite_fixture_never_unlocks_unattended_work(memory):
     assert policy["worker_admission_granted"] is False
     assert policy["model_admission_granted"] is False
     assert policy["unresolved_admission_gates"] == ("protected_admission_unverified",)
+
+
+def test_monitor_run_check_and_check_all_honor_current_scope_and_preserve_lifetime_history(memory):
+    now_dt = datetime(2026, 11, 24, 2, 0, tzinfo=timezone.utc)
+    hist_ts = "2026-11-10T12:00:00+00:00"
+    cur_ts = "2026-11-23T12:00:00+00:00"
+    since = "2026-11-23T00:00:00+00:00"
+
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,3,0.95)",
+        [(f"hg_{i}", f"ehg_{i}", "skill_h", "q", hist_ts) for i in range(250)],
+    )
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,0,0.0)",
+        [(f"cb_{i}", f"ecb_{i}", "skill_c", "q", cur_ts) for i in range(25)],
+    )
+    memory.conn.executemany(
+        "INSERT INTO skill_variations "
+        "(variation_id,skill_name,parent_version,variation_content,created_at,created_by,test_status,promoted) "
+        "VALUES (?,?,?,?,?,?, 'promoted', 1)",
+        [(f"cv_{i}", "skill_c", "v0", "body", cur_ts, "worker") for i in range(25)],
+    )
+    memory.conn.execute(
+        "INSERT OR REPLACE INTO telemetry_counters (counter_name, counter_value, last_updated) VALUES "
+        "('tot_selections', 25, ?), ('tot_high_confidence', 25, ?), "
+        "('codeact_exec_success', 25, ?), ('codeact_exec_fail', 0, ?), ('codeact_gate_triggers', 0, ?)",
+        (cur_ts, cur_ts, cur_ts, cur_ts, cur_ts),
+    )
+    memory.conn.commit()
+    path = memory.db_path
+    before = path.read_bytes()
+
+    reader = PatternMemory(path, read_only=True)
+    try:
+        monitor = dashboard_alerts.DashboardAlertMonitor(reader, current_since=since, collection_id="qa_b_mixed")
+        assert monitor.run_check(verbose=False, now=now_dt) is False
+        dash = monitor.get_dashboard(now=now_dt)
+        cur_alerts = monitor.check_all(dashboard=dash)
+        assert [(a.metric, a.severity) for a in cur_alerts] == [("retrieval_coverage", "critical")]
+        assert monitor.check_lifetime_all(dashboard=dash) == []
+        health = dashboard_alerts.check_dashboard_health(
+            pattern_memory=reader,
+            current_since=since,
+            collection_id="qa_b_mixed",
+            now=now_dt,
+        )
+    finally:
+        reader.conn.close()
+
+    assert path.read_bytes() == before
+    assert health["current_readiness"] == "BLOCKED"
+    assert health["historical_alerts"] == []
+    assert health["historical_critical_count"] == 0
+    ret = health["metric_statuses"]["retrieval_coverage"]
+    assert ret["status"] == "CRITICAL"
+    assert ret["samples"] == 25
+    assert ret["lifetime_status"] == "PASS"
+    assert ret["lifetime_samples"] == 275
+
+
+def test_naive_rows_fail_closed_and_writers_emit_explicit_offsets_with_boundaries(memory):
+    now_dt = datetime(2026, 11, 24, 2, 0, tzinfo=timezone.utc)
+    since = "2026-11-23T15:00:00+00:00"
+    naive_ts = "2026-11-24T05:30:00"
+
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,3,0.95)",
+        [(f"nv_{i}", f"env_{i}", "skill_nv", "q", naive_ts) for i in range(25)],
+    )
+    memory.conn.commit()
+
+    health = dashboard_alerts.check_dashboard_health(
+        pattern_memory=memory,
+        current_since=since,
+        collection_id="naive_rows_test",
+        now=now_dt,
+    )
+    ret = health["metric_statuses"]["retrieval_coverage"]
+    assert ret["status"] == "UNKNOWN"
+    assert ret["collection_state"] == "naive_timestamp_excluded"
+    assert ret["samples"] == 0
+    assert ret["naive_timestamp_rows"] == 25
+    assert ret["lifetime_status"] == "PASS"
+    assert ret["lifetime_samples"] == 25
+    assert dae_preflight.dashboard_readiness(health, in_watch=False)["unattended_work_allowed"] is False
+
+    # Boundary and explicit-offset normalization checks (+09:00, -05:00, Z)
+    memory.conn.execute("DELETE FROM retrieval_quality")
+    boundary_rows = [
+        ("b_before", "eb_1", "skill_b", "q", "2026-11-23T23:59:59+09:00", 1, 0.9),  # 14:59:59Z -> historical
+        ("b_start", "eb_2", "skill_b", "q", "2026-11-24T00:00:00+09:00", 1, 0.9),   # 15:00:00Z -> included
+        ("b_neg5", "eb_3", "skill_b", "q", "2026-11-23T19:00:00-05:00", 1, 0.9),    # 00:00:00Z -> included
+        ("b_end", "eb_4", "skill_b", "q", "2026-11-24T02:00:00Z", 1, 0.9),          # 02:00:00Z -> included
+        ("b_future", "eb_5", "skill_b", "q", "2026-11-24T02:00:01+00:00", 1, 0.9),  # 02:00:01Z -> future
+    ]
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,?,?)",
+        boundary_rows,
+    )
+    memory.conn.commit()
+    dash_utc = memory.get_telemetry_dashboard(since="2026-11-23T15:00:00+00:00", now=now_dt)
+    dash_jst = memory.get_telemetry_dashboard(since="2026-11-24T00:00:00+09:00", now=now_dt)
+    for dash in (dash_utc, dash_jst):
+        ev = dash["current_metric_evidence"]["retrieval_coverage"]
+        assert ev["samples"] == 3
+        assert ev["future_rows"] == 1
+        assert ev["naive_timestamp_rows"] == 0
+
+    # Writer compatibility: writers must emit explicit timezone offsets and enter active UTC windows
+    before_write = datetime.now(timezone.utc) - timedelta(seconds=1)
+    memory.record_retrieval("w_r1", "w_e1", "skill_w", "q", 2, 0.95, 10)
+    memory.store_variation("w_v1", "skill_w", "body", created_by="worker")
+    memory.conn.execute("UPDATE skill_variations SET test_status='promoted', promoted=1 WHERE variation_id='w_v1'")
+    memory.increment_counter("tot_selections", 1)
+    memory.conn.commit()
+    after_write = datetime.now(timezone.utc) + timedelta(seconds=1)
+
+    r_ts = memory.conn.execute("SELECT timestamp FROM retrieval_quality WHERE retrieval_id='w_r1'").fetchone()[0]
+    v_ts = memory.conn.execute("SELECT created_at FROM skill_variations WHERE variation_id='w_v1'").fetchone()[0]
+    c_ts = memory.conn.execute("SELECT last_updated FROM telemetry_counters WHERE counter_name='tot_selections'").fetchone()[0]
+    for ts in (r_ts, v_ts, c_ts):
+        dt, was_naive = _parse_iso_utc_with_meta(ts)
+        assert dt is not None and was_naive is False
+
+    w_dash = memory.get_telemetry_dashboard(since=before_write.isoformat(), now=after_write)
+    assert w_dash["current_metric_evidence"]["retrieval_coverage"]["samples"] >= 1
+    assert w_dash["current_metric_evidence"]["variation_win_rate"]["samples"] == 1
+    assert w_dash["current_metric_evidence"]["tot_confidence_rate"]["counter_updated_in_window"] is True
+
+
+def test_standalone_env_current_since_drives_run_check(monkeypatch, memory, capsys):
+    now_dt = datetime(2026, 11, 24, 2, 0, tzinfo=timezone.utc)
+    hist_ts = "2026-11-10T12:00:00+00:00"
+    cur_ts = "2026-11-23T12:00:00+00:00"
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,3,0.95)",
+        [(f"shg_{i}", f"eshg_{i}", "skill_s", "q", hist_ts) for i in range(250)],
+    )
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,0,0.0)",
+        [(f"scb_{i}", f"escb_{i}", "skill_s", "q", cur_ts) for i in range(25)],
+    )
+    memory.conn.commit()
+    reader = PatternMemory(memory.db_path, read_only=True)
+    try:
+        monkeypatch.setenv("WRE_DASHBOARD_CURRENT_SINCE", "2026-11-23T00:00:00+00:00")
+        monkeypatch.setenv("WRE_DASHBOARD_COLLECTION_ID", "standalone_env")
+        monitor = dashboard_alerts.DashboardAlertMonitor(reader)
+        assert monitor.current_since == "2026-11-23T00:00:00+00:00"
+        assert monitor.run_check(verbose=True, now=now_dt) is False
+    finally:
+        reader.conn.close()
+    out = capsys.readouterr().out
+    assert "Scope: current_window since=2026-11-23T00:00:00+00:00 collection_id=standalone_env" in out
+    assert "Historical critical count: 0" in out
 
 
 def test_root_connect_wre_separates_total_executions_from_metric_samples(monkeypatch):

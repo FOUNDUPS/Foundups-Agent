@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 def _parse_iso_utc_with_meta(value: Optional[str]) -> tuple[Optional[datetime], bool]:
-    """Normalize ISO-8601 text to UTC and report whether tzinfo was absent (assumed UTC)."""
+    """Normalize explicit-timezone ISO-8601 text to UTC; exclude zone-less strings."""
     if not isinstance(value, str):
         return None, False
     text = value.strip()
@@ -49,8 +49,8 @@ def _parse_iso_utc_with_meta(value: Optional[str]) -> tuple[Optional[datetime], 
         parsed = datetime.fromisoformat(text)
     except ValueError:
         return None, False
-    if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=timezone.utc), True
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        return None, True
     return parsed.astimezone(timezone.utc), False
 
 
@@ -695,7 +695,7 @@ class PatternMemory(PatternABEvidenceMixin):
             skill_name,
             parent_version,
             variation_content,
-            datetime.now().isoformat(),
+            datetime.now(timezone.utc).isoformat(),
             created_by
         ))
 
@@ -856,6 +856,7 @@ class PatternMemory(PatternABEvidenceMixin):
         Per WRE_COT_DEEP_ANALYSIS.md: Track retry_count, variation_win_rate
         """
         cursor = self.conn.cursor()
+        now_utc = datetime.now(timezone.utc).isoformat()
         cursor.execute("""
             INSERT INTO telemetry_counters (counter_name, counter_value, last_updated)
             VALUES (?, ?, ?)
@@ -863,8 +864,8 @@ class PatternMemory(PatternABEvidenceMixin):
                 counter_value = counter_value + ?,
                 last_updated = ?
         """, (
-            counter_name, delta, datetime.now().isoformat(),
-            delta, datetime.now().isoformat()
+            counter_name, delta, now_utc,
+            delta, now_utc
         ))
         self.conn.commit()
 
@@ -897,11 +898,12 @@ class PatternMemory(PatternABEvidenceMixin):
         scored: List[tuple] = []
         for row in cursor.fetchall():
             row_dt, was_naive = _parse_iso_utc_with_meta(row["timestamp"])
+            if was_naive:
+                naive_timestamp_rows += 1
+                continue
             if row_dt is None:
                 invalid_timestamp_rows += 1
                 continue
-            if was_naive:
-                naive_timestamp_rows += 1
             if row_dt > evaluated_at_dt:
                 future_rows += 1
                 continue
@@ -926,7 +928,7 @@ class PatternMemory(PatternABEvidenceMixin):
             "future_rows": future_rows,
             "invalid_timestamp_rows": invalid_timestamp_rows,
             "naive_timestamp_rows": naive_timestamp_rows,
-            "timestamp_assumption": "naive_assumed_utc",
+            "timestamp_assumption": "naive_excluded_unknown_timezone",
         }
 
     def _current_variation_evidence(
@@ -943,11 +945,12 @@ class PatternMemory(PatternABEvidenceMixin):
         matched: List[tuple] = []
         for row in cursor.fetchall():
             row_dt, was_naive = _parse_iso_utc_with_meta(row["created_at"])
+            if was_naive:
+                naive_timestamp_rows += 1
+                continue
             if row_dt is None:
                 invalid_timestamp_rows += 1
                 continue
-            if was_naive:
-                naive_timestamp_rows += 1
             if row_dt > evaluated_at_dt:
                 future_rows += 1
                 continue
@@ -967,7 +970,7 @@ class PatternMemory(PatternABEvidenceMixin):
             "future_rows": future_rows,
             "invalid_timestamp_rows": invalid_timestamp_rows,
             "naive_timestamp_rows": naive_timestamp_rows,
-            "timestamp_assumption": "naive_assumed_utc",
+            "timestamp_assumption": "naive_excluded_unknown_timezone",
         }
 
     @staticmethod
@@ -982,9 +985,9 @@ class PatternMemory(PatternABEvidenceMixin):
         """Evaluate cumulative counter freshness without pretending a sample window."""
         raw_times = [counter_times[name] for name in counter_names if counter_times.get(name)]
         parsed = [_parse_iso_utc_with_meta(ts) for ts in raw_times]
+        naive_timestamp_rows = sum(1 for _, was_naive in parsed if was_naive)
+        invalid_timestamp_rows = sum(1 for dt, was_naive in parsed if dt is None and not was_naive)
         future_rows = sum(1 for dt, _ in parsed if dt is not None and dt > evaluated_at_dt)
-        invalid_timestamp_rows = sum(1 for dt, _ in parsed if dt is None)
-        naive_timestamp_rows = sum(1 for dt, was_naive in parsed if dt is not None and was_naive)
         updated = any(dt is not None and since_dt <= dt <= evaluated_at_dt for dt, _ in parsed)
         return {
             "samples": lifetime_samples if updated else 0,
@@ -997,7 +1000,7 @@ class PatternMemory(PatternABEvidenceMixin):
             "future_rows": future_rows,
             "invalid_timestamp_rows": invalid_timestamp_rows,
             "naive_timestamp_rows": naive_timestamp_rows,
-            "timestamp_assumption": "naive_assumed_utc",
+            "timestamp_assumption": "naive_excluded_unknown_timezone",
         }
 
     def get_telemetry_dashboard(
@@ -1020,18 +1023,18 @@ class PatternMemory(PatternABEvidenceMixin):
         """
         since_dt: Optional[datetime] = None
         if since is not None:
-            since_dt = _parse_iso_utc(since)
+            since_dt, since_was_naive = _parse_iso_utc_with_meta(since)
+            if since_was_naive:
+                raise ValueError(f"since timestamp must include an explicit timezone offset: {since!r}")
             if since_dt is None:
                 raise ValueError(f"Invalid ISO-8601 since timestamp: {since!r}")
 
         if now is None:
             evaluated_at_dt = datetime.now(timezone.utc)
         elif isinstance(now, datetime):
-            evaluated_at_dt = (
-                now.replace(tzinfo=timezone.utc)
-                if now.tzinfo is None
-                else now.astimezone(timezone.utc)
-            )
+            if now.tzinfo is None or now.utcoffset() is None:
+                raise ValueError("now timestamp must be timezone-aware")
+            evaluated_at_dt = now.astimezone(timezone.utc)
         else:
             raise TypeError("now must be a datetime or None")
         if since_dt is not None and since_dt > evaluated_at_dt:
@@ -1130,7 +1133,7 @@ class PatternMemory(PatternABEvidenceMixin):
                 "upper_bound": evaluated_at_dt.isoformat(),
                 "collection_id": collection_id,
                 "evaluated_at": evaluated_at_dt.isoformat(),
-                "naive_timestamp_policy": "assumed_utc",
+                "naive_timestamp_policy": "excluded_ambiguous_timezone",
             },
             "metric_evidence": {
                 "tot_confidence_rate": evidence(tot_selections, "tot_selections"),
@@ -1203,7 +1206,7 @@ class PatternMemory(PatternABEvidenceMixin):
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             retrieval_id, execution_id, skill_name, query,
-            datetime.now().isoformat(), results_count, relevance_score, retrieval_time_ms
+            datetime.now(timezone.utc).isoformat(), results_count, relevance_score, retrieval_time_ms
         ))
         self.conn.commit()
         logger.debug(f"[PATTERN-MEMORY] Recorded retrieval {retrieval_id}")
@@ -1211,7 +1214,7 @@ class PatternMemory(PatternABEvidenceMixin):
     def get_retrieval_stats(self, skill_name: str, days: int = 7) -> Dict:
         """Get retrieval quality stats for a skill."""
         cursor = self.conn.cursor()
-        cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
         cursor.execute("""
             SELECT
                 COUNT(*) as total_retrievals,

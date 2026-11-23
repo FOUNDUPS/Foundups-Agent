@@ -1,3 +1,7 @@
+## 2026-11-24 — Layer-2A QA-B hardening (`WRE-L2A-INDEPENDENT-QA-20261124-B`)
+
+- Extended `tests/test_dashboard_evidence.py` with explicit zone-less rejection checks (`_parse_iso_utc` returning `None`, zone-less `since` and naive `now` raising `ValueError`), `test_monitor_run_check_and_check_all_honor_current_scope_and_preserve_lifetime_history`, `test_naive_rows_fail_closed_and_writers_emit_explicit_offsets_with_boundaries` (+09:00/-05:00/Z boundary inclusion/exclusion plus `record_retrieval`/`store_variation`/`increment_counter` UTC emission), and `test_standalone_env_current_since_drives_run_check` (`WRE_DASHBOARD_CURRENT_SINCE`).
+
 ## 2026-11-24 — Layer-2A QA hardening (`future_not_fresh` + `absent_admission_not_resolved`)
 
 - Extended `tests/test_dashboard_evidence.py` with `test_future_timestamps_excluded_and_future_since_rejected` (25 `2027-01-01` rows excluded into `future_timestamp_excluded` / `UNKNOWN`, `since > now` rejection, `naive_timestamp_rows` / `invalid_timestamp_rows` counts) and `test_all_pass_lifetime_sqlite_fixture_never_unlocks_unattended_work` (`read_only=True` byte-unchanged all-pass SQLite fixture yields `READY` with `unattended_work_allowed=False`, `admission_authority_verified=False`, `unresolved_admission_gates=("protected_admission_unverified",)`).

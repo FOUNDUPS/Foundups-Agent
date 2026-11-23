@@ -206,11 +206,33 @@ class DashboardAlertMonitor:
         try:
             memory = self._get_memory()
         except FileNotFoundError:
-            evaluated_iso = (
-                (now.replace(tzinfo=timezone.utc) if now.tzinfo is None else now.astimezone(timezone.utc)).isoformat()
-                if now is not None
-                else datetime.now(timezone.utc).isoformat()
-            )
+            from modules.infrastructure.wre_core.src.pattern_memory import _parse_iso_utc_with_meta
+
+            if now is None:
+                evaluated_at_dt = datetime.now(timezone.utc)
+            elif isinstance(now, datetime):
+                if now.tzinfo is None or now.utcoffset() is None:
+                    raise ValueError("now timestamp must be timezone-aware")
+                evaluated_at_dt = now.astimezone(timezone.utc)
+            else:
+                raise TypeError("now must be a datetime or None")
+
+            since_iso = None
+            if self.current_since is not None:
+                since_dt, since_was_naive = _parse_iso_utc_with_meta(self.current_since)
+                if since_was_naive:
+                    raise ValueError(
+                        f"since timestamp must include an explicit timezone offset: {self.current_since!r}"
+                    )
+                if since_dt is None:
+                    raise ValueError(f"Invalid ISO-8601 since timestamp: {self.current_since!r}")
+                if since_dt > evaluated_at_dt:
+                    raise ValueError(
+                        f"since timestamp ({since_dt.isoformat()}) cannot exceed evaluated_at ({evaluated_at_dt.isoformat()})"
+                    )
+                since_iso = since_dt.isoformat()
+
+            evaluated_iso = evaluated_at_dt.isoformat()
             return {
                 "total_executions": 0,
                 "telemetry_scope": scope_name,
@@ -218,11 +240,11 @@ class DashboardAlertMonitor:
                 "metric_evidence": {},
                 "collection_scope": {
                     "requested_scope": scope_name,
-                    "since": self.current_since,
+                    "since": since_iso,
                     "upper_bound": evaluated_iso,
                     "collection_id": self.collection_id,
                     "evaluated_at": evaluated_iso,
-                    "naive_timestamp_policy": "assumed_utc",
+                    "naive_timestamp_policy": "excluded_ambiguous_timezone",
                 },
             }
         try:
@@ -302,7 +324,7 @@ class DashboardAlertMonitor:
         future_rows = int(cur_ev.get("future_rows", 0) or 0)
         invalid_ts = int(cur_ev.get("invalid_timestamp_rows", 0) or 0)
         naive_ts = int(cur_ev.get("naive_timestamp_rows", 0) or 0)
-        ts_assumption = cur_ev.get("timestamp_assumption", "naive_assumed_utc")
+        ts_assumption = cur_ev.get("timestamp_assumption", "naive_excluded_unknown_timezone")
         if window_bounded:
             raw_samples = cur_ev.get("samples", 0)
             samples = raw_samples if type(raw_samples) is int and raw_samples >= 0 else 0
@@ -311,6 +333,10 @@ class DashboardAlertMonitor:
             if samples == 0:
                 if future_rows > 0:
                     status, state = "UNKNOWN", "future_timestamp_excluded"
+                elif naive_ts > 0:
+                    status, state = "UNKNOWN", "naive_timestamp_excluded"
+                elif invalid_ts > 0:
+                    status, state = "UNKNOWN", "invalid_timestamp_excluded"
                 elif lifetime_samples > 0:
                     status, state = "STALE_UNKNOWN", "stale_historical_only"
                 else:
@@ -332,10 +358,23 @@ class DashboardAlertMonitor:
         recorded_from = cur_ev.get("recorded_from", lifetime_ev.get("recorded_from"))
         recorded_to = cur_ev.get("recorded_to", lifetime_ev.get("recorded_to"))
         if lifetime_samples == 0:
-            status, state, samples, value = "UNKNOWN", "no_samples", 0, None
+            if future_rows > 0:
+                status, state, samples, value = "UNKNOWN", "future_timestamp_excluded", 0, None
+            elif naive_ts > 0:
+                status, state, samples, value = "UNKNOWN", "naive_timestamp_excluded", 0, None
+            elif invalid_ts > 0:
+                status, state, samples, value = "UNKNOWN", "invalid_timestamp_excluded", 0, None
+            else:
+                status, state, samples, value = "UNKNOWN", "no_samples", 0, None
         elif not updated:
-            state = "future_timestamp_excluded" if future_rows > 0 else "stale_historical_only"
-            status = "UNKNOWN" if future_rows > 0 else "STALE_UNKNOWN"
+            if future_rows > 0:
+                status, state = "UNKNOWN", "future_timestamp_excluded"
+            elif naive_ts > 0:
+                status, state = "UNKNOWN", "naive_timestamp_excluded"
+            elif invalid_ts > 0:
+                status, state = "UNKNOWN", "invalid_timestamp_excluded"
+            else:
+                status, state = "STALE_UNKNOWN", "stale_historical_only"
             samples, value = 0, None
         else:
             raw_samples = cur_ev.get("samples", lifetime_samples)
@@ -362,15 +401,18 @@ class DashboardAlertMonitor:
             "naive_timestamp_rows": naive_ts, "timestamp_assumption": ts_assumption,
         }
 
-    def evaluate_metric_statuses(self, dashboard: Dict, *, require_minimum: bool = True) -> Dict[str, Dict]:
-        """Evaluate lifetime and active-scope status for all 5 threshold metrics."""
-        minimum = max(1, self.min_samples if require_minimum and self.unknown_mode else 1)
+    def _is_current_scope(self, dashboard: Dict) -> bool:
         scope_since = (dashboard.get("collection_scope") or {}).get("since")
-        current_mode = (
+        return (
             self.current_since is not None
             or "current_metric_evidence" in dashboard
             or scope_since is not None
         )
+
+    def evaluate_metric_statuses(self, dashboard: Dict, *, require_minimum: bool = True) -> Dict[str, Dict]:
+        """Evaluate lifetime and active-scope status for all 5 threshold metrics."""
+        minimum = max(1, self.min_samples if require_minimum and self.unknown_mode else 1)
+        current_mode = self._is_current_scope(dashboard)
         current_evidence = dashboard.get("current_metric_evidence", {})
         statuses: Dict[str, Dict] = {}
         for metric in dict.fromkeys(t.metric for t in self.thresholds):
@@ -410,7 +452,7 @@ class DashboardAlertMonitor:
                     alerts[metric] = alert
         return list(alerts.values())
 
-    def unknown_metrics(self, dashboard: Dict, *, require_minimum: bool = True) -> List[str]:
+    def _lifetime_unknown_metrics(self, dashboard: Dict, *, require_minimum: bool = True) -> List[str]:
         evidence = dashboard.get("metric_evidence", {})
         missing = []
         for metric in dict.fromkeys(t.metric for t in self.thresholds):
@@ -421,6 +463,12 @@ class DashboardAlertMonitor:
                     or type(value) not in (int, float) or not math.isfinite(value)):
                 missing.append(metric)
         return missing
+
+    def unknown_metrics(self, dashboard: Dict, *, require_minimum: bool = True) -> List[str]:
+        if self._is_current_scope(dashboard):
+            statuses = self.evaluate_metric_statuses(dashboard, require_minimum=require_minimum)
+            return [m for m, st in statuses.items() if st["status"] in ("UNKNOWN", "STALE_UNKNOWN")]
+        return self._lifetime_unknown_metrics(dashboard, require_minimum=require_minimum)
 
     def check_threshold(self, metric: str, value: float, threshold: AlertThreshold) -> Optional[Alert]:
         """Check if metric breaches threshold."""
@@ -442,21 +490,12 @@ class DashboardAlertMonitor:
             )
         return None
 
-    def check_all(self, skip_if_insufficient: bool = True, *, dashboard: Optional[Dict] = None) -> List[Alert]:
-        """
-        Check all metrics against thresholds.
-
-        Args:
-            skip_if_insufficient: If True and unknown_mode enabled, skip threshold
-                                  evaluation when below min_samples (default True)
-
-        Returns:
-            List of triggered alerts (empty if healthy or insufficient data)
-        """
+    def check_lifetime_all(self, skip_if_insufficient: bool = True, *, dashboard: Optional[Dict] = None) -> List[Alert]:
+        """Evaluate lifetime dashboard metrics against thresholds (preserving historical context)."""
         alerts = []
         if dashboard is None:
             dashboard = self.get_dashboard()
-        unknown = self.unknown_metrics(dashboard, require_minimum=skip_if_insufficient)
+        unknown = self._lifetime_unknown_metrics(dashboard, require_minimum=skip_if_insufficient)
 
         # Check each threshold
         for threshold in self.thresholds:
@@ -476,6 +515,24 @@ class DashboardAlertMonitor:
                 deduped[key] = alert
 
         return list(deduped.values())
+
+    def check_all(self, skip_if_insufficient: bool = True, *, dashboard: Optional[Dict] = None) -> List[Alert]:
+        """
+        Check active-scope metrics against thresholds.
+
+        Args:
+            skip_if_insufficient: If True and unknown_mode enabled, skip threshold
+                                  evaluation when below min_samples (default True)
+
+        Returns:
+            List of triggered alerts (empty if healthy or insufficient data)
+        """
+        if dashboard is None:
+            dashboard = self.get_dashboard()
+        if self._is_current_scope(dashboard):
+            statuses = self.evaluate_metric_statuses(dashboard, require_minimum=skip_if_insufficient)
+            return self._current_window_alerts(statuses)
+        return self.check_lifetime_all(skip_if_insufficient=skip_if_insufficient, dashboard=dashboard)
 
     def is_in_watch_period(self) -> bool:
         """Check if currently in 7-day watch period."""
@@ -505,24 +562,38 @@ class DashboardAlertMonitor:
 
         return "\n".join(lines)
 
-    def run_check(self, verbose: bool = True) -> bool:
+    def run_check(self, verbose: bool = True, *, now: Optional[datetime] = None) -> bool:
         """
-        Run full alert check.
+        Run full alert check against active scope (current window if configured, else lifetime).
 
         Args:
             verbose: Print results to stdout
+            now: Optional timezone-aware evaluation timestamp
 
         Returns:
-            True if all healthy, False if any alerts
+            True if active scope has zero alerts and zero unknown metrics, else False
         """
-        dashboard = self.get_dashboard()
+        dashboard = self.get_dashboard() if now is None else self.get_dashboard(now=now)
+        in_current = self._is_current_scope(dashboard)
         unknown = self.unknown_metrics(dashboard)
         alerts = self.check_all(dashboard=dashboard)
+        historical_alerts = self.check_lifetime_all(dashboard=dashboard)
+        historical_critical = sum(1 for a in historical_alerts if a.severity == "critical")
 
         if verbose:
+            scope_info = dashboard.get("collection_scope") or {}
+            scope_label = "current_window" if in_current else dashboard.get("telemetry_scope", "database_lifetime")
             print("=" * 60)
             print("WRE Dashboard Alert Check")
             print(f"Timestamp: {datetime.now().isoformat()}")
+            if in_current:
+                print(
+                    f"Scope: {scope_label} since={scope_info.get('since') or self.current_since} "
+                    f"collection_id={scope_info.get('collection_id') or self.collection_id or 'none'}"
+                )
+                print(f"Historical critical count: {historical_critical}")
+            else:
+                print(f"Scope: {scope_label}")
             print(f"Watch period: {self.watch_period_start.date()} to {self.watch_period_end.date()}")
             print(f"In watch period: {self.is_in_watch_period()}")
             print("=" * 60)
@@ -578,7 +649,7 @@ def check_dashboard_health(
     total_executions = monitor.get_total_executions(dashboard)
     metric_statuses = monitor.evaluate_metric_statuses(dashboard)
     metric_samples = {metric: st["samples"] for metric, st in metric_statuses.items()}
-    historical_alerts = [_alert_to_dict(a) for a in monitor.check_all(dashboard=dashboard)]
+    historical_alerts = [_alert_to_dict(a) for a in monitor.check_lifetime_all(dashboard=dashboard)]
     historical_critical_count = sum(1 for a in historical_alerts if a["severity"] == "critical")
 
     scope_info = dashboard.get("collection_scope") or {}
@@ -596,11 +667,14 @@ def check_dashboard_health(
         alerts = historical_alerts
         unknown = [m for m, st in metric_statuses.items() if st["status"] == "UNKNOWN"]
 
+    evaluated_iso = scope_info.get("evaluated_at", datetime.now(timezone.utc).isoformat())
     collection_identity = {
         "requested_scope": scope_info.get("requested_scope", telemetry_scope),
         "since": scope_info.get("since", monitor.current_since),
+        "upper_bound": scope_info.get("upper_bound", evaluated_iso),
         "collection_id": scope_info.get("collection_id", monitor.collection_id),
-        "evaluated_at": scope_info.get("evaluated_at", datetime.now(timezone.utc).isoformat()),
+        "evaluated_at": evaluated_iso,
+        "naive_timestamp_policy": scope_info.get("naive_timestamp_policy", "excluded_ambiguous_timezone"),
     }
     return {
         "telemetry_scope": telemetry_scope,
