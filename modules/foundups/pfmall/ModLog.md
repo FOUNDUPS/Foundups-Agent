@@ -1,3 +1,20 @@
+## 2026-11-23 — Fractal Mall paper and experiment roadmap reference
+
+- Linked the Fractal work-navigation roadmap to the standalone notebook's
+  manuscript, PDF and public source-recovery experiment on main. Notebook PR
+  [#1](https://github.com/FOUNDUPS/fractal-mall/pull/1) merged at
+  `abaddcb3bb7c74f83f3813c84a1e459a93328740`; its tree matches reviewed head
+  `6468de2f818b03dcb4395d19f345744e16c3e26e`.
+- The notebook passed all five tests on Linux at both revisions; four
+  source-recovery tests passed on Windows, and both hosts reproduced the stored
+  receipt. Independently reviewed the manuscript and all nine rendered PDF
+  pages. GitGuardian passed on the PR head; no hosted checks ran on notebook
+  main. Private product observations and production behavior remain unverified.
+- Documentation scope: cite that bounded research baseline without closing
+  Sprint 2 navigation or Sprint 4 evidence milestones. Validated the citation
+  targets and preservation of existing roadmap content. WSP 10, 15, 22, 34,
+  50, 71 and 97 apply; no product runtime or deployment change.
+
 ## 2026-11-21 — Shared dock and configurable player acceptance
 
 PFDOCK-20261121 extends the same dock/settings requirement across all FoundUps,
