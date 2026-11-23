@@ -2,18 +2,18 @@
 
 - `PatternMemory.get_telemetry_dashboard(self, *, since: Optional[str] = None, collection_id: Optional[str] = None, now: Optional[datetime] = None) -> Dict`:
   - Preserves 0-arg `telemetry_scope="database_lifetime"` fields and `metric_evidence`.
-  - Adds `collection_scope` (`requested_scope`, `since`, `collection_id`, `evaluated_at`).
-  - Validates explicit `since` via `_parse_iso_utc()` (`ValueError` on invalid input).
+  - Adds `collection_scope` (`requested_scope`, `since`, `upper_bound`, `collection_id`, `evaluated_at`, `naive_timestamp_policy="assumed_utc"`).
+  - Validates explicit `since` via `_parse_iso_utc()` and rejects `since > evaluated_at` (`ValueError`); excludes future rows (`row_dt > evaluated_at`), reporting `future_rows`, `invalid_timestamp_rows`, `naive_timestamp_rows`, and `timestamp_assumption`.
   - When `since` is supplied, computes read-only `current_metric_evidence`:
     - `retrieval_coverage` (`window_bounded=True`, `time_basis="retrieval_timestamp"`, `COUNT(relevance_score)` denominator excluding `NULL`).
     - `variation_win_rate` (`window_bounded=True`, `time_basis="variation_created_at"`, `test_status IN ('promoted', 'archived')`).
     - `tot_confidence_rate`, `codeact_success_rate`, `codeact_gate_trigger_rate` (`window_bounded=False`, `time_basis="counter_last_updated"`, `counter_updated_in_window`).
-- `DashboardAlertMonitor.__init__(self, pattern_memory=None, *, current_since: Optional[str] = None, collection_id: Optional[str] = None)` (reading `WRE_DASHBOARD_CURRENT_SINCE` / `WRE_DASHBOARD_COLLECTION_ID` when args are `None`), `evaluate_metric_statuses(dashboard, *, require_minimum=True)`, and `check_dashboard_health(*, pattern_memory=None, current_since=None, collection_id=None)`:
-  - Calls zero-arg `DashboardAlertMonitor()` when all 3 kwargs are `None`.
+- `DashboardAlertMonitor.__init__(self, pattern_memory=None, *, current_since: Optional[str] = None, collection_id: Optional[str] = None)` (reading `WRE_DASHBOARD_CURRENT_SINCE` / `WRE_DASHBOARD_COLLECTION_ID` when args are `None`), `evaluate_metric_statuses(dashboard, *, require_minimum=True)`, and `check_dashboard_health(*, pattern_memory=None, current_since=None, collection_id=None, now=None)`:
+  - Calls zero-arg `DashboardAlertMonitor()` when `pattern_memory`, `current_since`, and `collection_id` are `None`.
   - Returns `telemetry_scope`, `collection_identity`, `metric_statuses`, `metric_samples`, `historical_alerts`, `historical_critical_count`, `current_readiness`, `status`, `alerts`, `unknown_metrics`, `healthy`, `dashboard`, `insufficient_data`, `total_executions`, `min_samples`, `timestamp`.
-  - Unwindowed cumulative counters fail closed on threshold breach (`CRITICAL`/`WARNING`, `unwindowed_cumulative_counter_breach`) and never return `PASS` (`UNKNOWN`, `unwindowed_cumulative_counter`).
+  - Excludes future-dated rows into `UNKNOWN` (`future_timestamp_excluded`), marks historical-only metrics as `STALE_UNKNOWN` (`stale_historical_only`), fails closed on unwindowed cumulative counter breaches (`CRITICAL`/`WARNING`), and never promotes unwindowed cumulative counters to `PASS`.
 - `dae_preflight.dashboard_readiness(health, *, in_watch, interactive_menu=False, unresolved_admission_gates=())`:
-  - Preserves existing keys (`allowed`, `readiness`, `status`, `critical`, `warnings`, `unknown`, `evidence_valid`) and adds `current_readiness`, `historical_critical`, `unresolved_admission_gates`, `unattended_work_allowed`, `worker_admission_granted=False`, `model_admission_granted=False`.
+  - Preserves existing keys (`allowed`, `readiness`, `status`, `critical`, `warnings`, `unknown`, `evidence_valid`) and adds `current_readiness`, `historical_critical`, `unresolved_admission_gates` (defaulting to `("protected_admission_unverified",)` when omitted), `admission_authority_verified=False`, `unattended_work_allowed=False`, `worker_admission_granted=False`, and `model_admission_granted=False`.
 
 ## Worker WSP_00 0.2A & WSP_97 contract — 2026-11-24
 

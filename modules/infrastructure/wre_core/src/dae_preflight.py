@@ -138,11 +138,11 @@ def dashboard_readiness(
         )
     else:
         historical_critical = critical
-    unresolved_gates = tuple(str(g) for g in unresolved_admission_gates if str(g).strip())
-    unattended_work_allowed = (
-        valid and enabled and readiness == "READY" and current_readiness == "READY"
-        and critical == 0 and warnings == 0 and not unknown and not unresolved_gates
-    )
+    explicit_gates = tuple(str(g) for g in unresolved_admission_gates if str(g).strip())
+    unresolved_gates = explicit_gates if explicit_gates else ("protected_admission_unverified",)
+    # Telemetry readiness alone never grants unattended execution authority; only
+    # existing protected admission owners may certify execution/worker/model grants.
+    unattended_work_allowed = False
     return dict(
         enabled=enabled, manual_enforced=manual, auto_enforce=auto,
         auto_enforced=auto_now, enforced=manual or auto_now,
@@ -150,6 +150,7 @@ def dashboard_readiness(
         status=status, readiness=readiness, allowed=not blocked, evidence_valid=valid,
         current_readiness=current_readiness, historical_critical=historical_critical,
         unresolved_admission_gates=unresolved_gates,
+        admission_authority_verified=False,
         unattended_work_allowed=unattended_work_allowed,
         worker_admission_granted=False, model_admission_granted=False,
     )

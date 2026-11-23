@@ -1,3 +1,7 @@
+## 2026-11-24 — Layer-2A QA hardening (`future_not_fresh` + `absent_admission_not_resolved`)
+
+- Extended `tests/test_dashboard_evidence.py` with `test_future_timestamps_excluded_and_future_since_rejected` (25 `2027-01-01` rows excluded into `future_timestamp_excluded` / `UNKNOWN`, `since > now` rejection, `naive_timestamp_rows` / `invalid_timestamp_rows` counts) and `test_all_pass_lifetime_sqlite_fixture_never_unlocks_unattended_work` (`read_only=True` byte-unchanged all-pass SQLite fixture yields `READY` with `unattended_work_allowed=False`, `admission_authority_verified=False`, `unresolved_admission_gates=("protected_admission_unverified",)`).
+
 ## 2026-11-24 — Layer-2A current-window readiness evidence & Connect-WRE separation
 
 - Extended `tests/test_dashboard_evidence.py` (6 new cases covering historical-only `STALE_UNKNOWN` with read-only DB byte preservation and `historical_critical_count == 1`, fresh healthy windowed metrics vs unwindowed counters, fresh failing `BLOCKED` retrieval, absent and `< 25` insufficient samples excluding `NULL` `relevance_score`, invalid `since` + unresolved admission gate blocking `unattended_work_allowed`, and `main.py` `run_connect_wre` `total_executions` vs `metric_samples` separation) and `modules/infrastructure/cli/tests/test_connect_wre_menu.py` (`_run_connect_wre` `total_executions` vs `metric_samples` separation).

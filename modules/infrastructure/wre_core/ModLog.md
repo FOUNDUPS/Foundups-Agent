@@ -1,3 +1,10 @@
+## 2026-11-24 — Layer-2A QA hardening (`WRE-L2A-INDEPENDENT-QA-20261124-A`)
+
+- **PatternMemory (`src/pattern_memory.py`)**: Bounded `current_window` evaluation above by `evaluated_at` (`upper_bound`), rejected `since > evaluated_at` (`ValueError`), excluded future timestamps (`row_dt > evaluated_at`), and surfaced `future_rows`, `invalid_timestamp_rows`, `naive_timestamp_rows`, and `naive_timestamp_policy="assumed_utc"`.
+- **Dashboard Alerts (`src/dashboard_alerts.py`)**: Classified future-dated exclusions as `UNKNOWN` (`future_timestamp_excluded`) and added optional `now` threading in `get_dashboard()` / `check_dashboard_health()` while preserving zero-arg compatibility.
+- **Preflight (`src/dae_preflight.py`)**: Kept `unattended_work_allowed=False` and `admission_authority_verified=False` across telemetry-only evaluations (defaulting omitted admission gates to `("protected_admission_unverified",)`).
+- **Manifest Pin (`scripts/reddog_backend_manifest.json`, `extensions/reddog/backend_compatibility_constants.js`, `scripts/tests/test_generate_reddog_backend_manifest.py`)**: Regenerated manifest (`required_runtime_files=1494`, SHA-256 `49e697ef9779b5c3d25c869e21ef4f83817c415639497cab156d09fb69e715db`). WSP 00, 22, 50, 71, 91, and 97.
+
 ## 2026-11-24 — Layer-2A offline readiness evidence & Connect-WRE metric separation
 
 - **PatternMemory (`src/pattern_memory.py`)**: Added `_parse_iso_utc()` and keyword-only `since` / `collection_id` / `now` options to `get_telemetry_dashboard()`, preserving 0-arg `database_lifetime` compatibility while adding `collection_scope` and read-only `current_metric_evidence` (windowed `retrieval_coverage` / `variation_win_rate` and `window_bounded=False` `telemetry_counters`).

@@ -1,4 +1,5 @@
 """Readiness distinguishes missing evidence, measured failure and admission."""
+from datetime import datetime, timezone
 import sqlite3
 
 import pytest
@@ -288,6 +289,7 @@ def test_historical_only_rows_become_stale_unknown_in_current_window_read_only(m
 
 
 def test_fresh_healthy_windowed_metrics_stay_fail_closed_when_counters_unwindowed(memory):
+    now_dt = datetime(2026, 11, 24, 2, 0, tzinfo=timezone.utc)
     since = "2026-11-24T00:00:00+00:00"
     fresh_ts = "2026-11-24T01:00:00+00:00"
     memory.conn.executemany(
@@ -305,11 +307,14 @@ def test_fresh_healthy_windowed_metrics_stay_fail_closed_when_counters_unwindowe
     memory.conn.commit()
     memory.increment_counter("tot_selections", 30)
     memory.increment_counter("tot_high_confidence", 28)
+    memory.conn.execute("UPDATE telemetry_counters SET last_updated = ?", (fresh_ts,))
+    memory.conn.commit()
 
     health = dashboard_alerts.check_dashboard_health(
         pattern_memory=memory,
         current_since=since,
         collection_id="fresh_healthy",
+        now=now_dt,
     )
     statuses = health["metric_statuses"]
     assert statuses["retrieval_coverage"]["status"] == "PASS"
@@ -330,6 +335,7 @@ def test_fresh_healthy_windowed_metrics_stay_fail_closed_when_counters_unwindowe
 
 
 def test_fresh_failing_retrieval_blocks_current_window(memory):
+    now_dt = datetime(2026, 11, 24, 2, 0, tzinfo=timezone.utc)
     since = "2026-11-24T00:00:00Z"
     fresh_ts = "2026-11-24T01:00:00+00:00"
     memory.conn.executemany(
@@ -343,6 +349,7 @@ def test_fresh_failing_retrieval_blocks_current_window(memory):
     health = dashboard_alerts.check_dashboard_health(
         pattern_memory=memory,
         current_since=since,
+        now=now_dt,
     )
     assert health["current_readiness"] == "BLOCKED"
     assert [(a["metric"], a["severity"]) for a in health["alerts"]] == [
@@ -355,11 +362,13 @@ def test_fresh_failing_retrieval_blocks_current_window(memory):
 
 
 def test_absent_and_insufficient_current_samples_exclude_null_scores(memory):
+    now_dt = datetime(2026, 11, 24, 2, 0, tzinfo=timezone.utc)
     since = "2026-11-24T00:00:00Z"
     fresh_ts = "2026-11-24T01:00:00+00:00"
     empty_health = dashboard_alerts.check_dashboard_health(
         pattern_memory=memory,
         current_since=since,
+        now=now_dt,
     )
     assert empty_health["metric_statuses"]["retrieval_coverage"]["collection_state"] == "no_samples"
     assert empty_health["metric_statuses"]["retrieval_coverage"]["samples"] == 0
@@ -373,7 +382,7 @@ def test_absent_and_insufficient_current_samples_exclude_null_scores(memory):
         [(f"s_{i}", f"es_{i}", "skill_c", "q", fresh_ts, 0.9 if i < 10 else None) for i in range(30)],
     )
     memory.conn.commit()
-    dash = memory.get_telemetry_dashboard(since=since)
+    dash = memory.get_telemetry_dashboard(since=since, now=now_dt)
     cur_ret = dash["current_metric_evidence"]["retrieval_coverage"]
     assert cur_ret["total_retrievals"] == 30
     assert cur_ret["samples"] == 10
@@ -381,6 +390,7 @@ def test_absent_and_insufficient_current_samples_exclude_null_scores(memory):
     insuff_health = dashboard_alerts.check_dashboard_health(
         pattern_memory=memory,
         current_since=since,
+        now=now_dt,
     )
     assert insuff_health["metric_statuses"]["retrieval_coverage"]["status"] == "UNKNOWN"
     assert insuff_health["metric_statuses"]["retrieval_coverage"]["collection_state"] == "insufficient_current_samples"
@@ -402,7 +412,10 @@ def test_invalid_since_rejected_and_unresolved_gate_blocks_unattended_work(memor
         "historical_critical_count": 0,
     }
     open_policy = dae_preflight.dashboard_readiness(ready_health, in_watch=False)
-    assert open_policy["unattended_work_allowed"] is True
+    assert open_policy["readiness"] == "READY"
+    assert open_policy["unattended_work_allowed"] is False
+    assert open_policy["admission_authority_verified"] is False
+    assert open_policy["unresolved_admission_gates"] == ("protected_admission_unverified",)
     assert open_policy["worker_admission_granted"] is False
     assert open_policy["model_admission_granted"] is False
 
@@ -412,9 +425,122 @@ def test_invalid_since_rejected_and_unresolved_gate_blocks_unattended_work(memor
         unresolved_admission_gates=("19/P0_worker_custody",),
     )
     assert gated_policy["unattended_work_allowed"] is False
+    assert gated_policy["admission_authority_verified"] is False
     assert gated_policy["unresolved_admission_gates"] == ("19/P0_worker_custody",)
     assert gated_policy["worker_admission_granted"] is False
     assert gated_policy["model_admission_granted"] is False
+
+
+def test_future_timestamps_excluded_and_future_since_rejected(memory):
+    now_dt = datetime(2026, 11, 24, 0, 0, tzinfo=timezone.utc)
+    since = "2026-11-01T00:00:00+00:00"
+    future_ts = "2027-01-01T00:00:00+00:00"
+    naive_ts = "2026-11-10T12:00:00"
+
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,3,0.95)",
+        [(f"fut_r_{i}", f"fut_e_{i}", "skill_fut", "q", future_ts) for i in range(25)],
+    )
+    memory.conn.execute(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES ('naive_r','naive_e','skill_fut','q',?,1,0.95)",
+        (naive_ts,),
+    )
+    memory.conn.execute(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES ('bad_r','bad_e','skill_fut','q','not-a-timestamp',1,0.95)"
+    )
+    memory.conn.executemany(
+        "INSERT INTO skill_variations "
+        "(variation_id,skill_name,parent_version,variation_content,created_at,created_by,test_status,promoted) "
+        "VALUES (?,?,?,?,?,?, 'promoted', 1)",
+        [(f"fut_v_{i}", "skill_fut", "v0", "body", future_ts, "worker") for i in range(25)],
+    )
+    memory.conn.execute(
+        "INSERT OR REPLACE INTO telemetry_counters (counter_name, counter_value, last_updated) "
+        "VALUES ('tot_selections', 25, ?), ('tot_high_confidence', 25, ?)",
+        (future_ts, future_ts),
+    )
+    memory.conn.commit()
+
+    with pytest.raises(ValueError, match="cannot exceed evaluated_at"):
+        memory.get_telemetry_dashboard(since="2027-01-01T00:00:00+00:00", now=now_dt)
+
+    dash = memory.get_telemetry_dashboard(since=since, now=now_dt)
+    assert dash["collection_scope"]["upper_bound"] == now_dt.isoformat()
+    assert dash["collection_scope"]["naive_timestamp_policy"] == "assumed_utc"
+    cur_ret = dash["current_metric_evidence"]["retrieval_coverage"]
+    assert cur_ret["samples"] == 1
+    assert cur_ret["future_rows"] == 25
+    assert cur_ret["naive_timestamp_rows"] == 1
+    assert cur_ret["invalid_timestamp_rows"] == 1
+    assert cur_ret["timestamp_assumption"] == "naive_assumed_utc"
+
+    memory.conn.execute("DELETE FROM retrieval_quality WHERE retrieval_id IN ('naive_r', 'bad_r')")
+    memory.conn.commit()
+    health = dashboard_alerts.check_dashboard_health(
+        pattern_memory=memory,
+        current_since=since,
+        collection_id="future_only_test",
+        now=now_dt,
+    )
+    statuses = health["metric_statuses"]
+    assert statuses["retrieval_coverage"]["status"] == "UNKNOWN"
+    assert statuses["retrieval_coverage"]["collection_state"] == "future_timestamp_excluded"
+    assert statuses["retrieval_coverage"]["samples"] == 0
+    assert statuses["retrieval_coverage"]["future_rows"] == 25
+    assert statuses["variation_win_rate"]["status"] == "UNKNOWN"
+    assert statuses["variation_win_rate"]["collection_state"] == "future_timestamp_excluded"
+    assert statuses["tot_confidence_rate"]["status"] == "UNKNOWN"
+    assert statuses["tot_confidence_rate"]["collection_state"] == "future_timestamp_excluded"
+    assert health["healthy"] is False
+    assert dae_preflight.dashboard_readiness(health, in_watch=False)["unattended_work_allowed"] is False
+
+
+def test_all_pass_lifetime_sqlite_fixture_never_unlocks_unattended_work(memory):
+    fresh_ts = "2026-11-23T12:00:00+00:00"
+    memory.conn.executemany(
+        "INSERT INTO retrieval_quality "
+        "(retrieval_id,execution_id,skill_name,query,timestamp,results_count,relevance_score) "
+        "VALUES (?,?,?,?,?,3,0.95)",
+        [(f"pass_r_{i}", f"pass_e_{i}", "skill_ok", "q", fresh_ts) for i in range(25)],
+    )
+    memory.conn.executemany(
+        "INSERT INTO skill_variations "
+        "(variation_id,skill_name,parent_version,variation_content,created_at,created_by,test_status,promoted) "
+        "VALUES (?,?,?,?,?,?, 'promoted', 1)",
+        [(f"pass_v_{i}", "skill_ok", "v0", "body", fresh_ts, "worker") for i in range(25)],
+    )
+    memory.conn.execute(
+        "INSERT OR REPLACE INTO telemetry_counters (counter_name, counter_value, last_updated) VALUES "
+        "('total_executions', 1000, ?), ('tot_selections', 25, ?), ('tot_high_confidence', 25, ?), "
+        "('codeact_exec_success', 25, ?), ('codeact_exec_fail', 0, ?), ('codeact_gate_triggers', 0, ?)",
+        (fresh_ts, fresh_ts, fresh_ts, fresh_ts, fresh_ts, fresh_ts),
+    )
+    memory.conn.commit()
+    path = memory.db_path
+    before = path.read_bytes()
+
+    reader = PatternMemory(path, read_only=True)
+    try:
+        health = dashboard_alerts.check_dashboard_health(pattern_memory=reader)
+    finally:
+        reader.conn.close()
+
+    assert path.read_bytes() == before
+    assert health["healthy"] is True
+    assert health["status"] == "PASS"
+    policy = dae_preflight.dashboard_readiness(health, in_watch=False)
+    assert policy["readiness"] == "READY"
+    assert policy["unattended_work_allowed"] is False
+    assert policy["admission_authority_verified"] is False
+    assert policy["worker_admission_granted"] is False
+    assert policy["model_admission_granted"] is False
+    assert policy["unresolved_admission_gates"] == ("protected_admission_unverified",)
 
 
 def test_root_connect_wre_separates_total_executions_from_metric_samples(monkeypatch):

@@ -199,13 +199,18 @@ class DashboardAlertMonitor:
             self.pattern_memory = PatternMemory(read_only=True)
         return self.pattern_memory
 
-    def get_dashboard(self) -> Dict:
+    def get_dashboard(self, *, now: Optional[datetime] = None) -> Dict:
         """Get current dashboard metrics."""
         owned = self.pattern_memory is None
         scope_name = "current_window" if self.current_since is not None else "database_lifetime"
         try:
             memory = self._get_memory()
         except FileNotFoundError:
+            evaluated_iso = (
+                (now.replace(tzinfo=timezone.utc) if now.tzinfo is None else now.astimezone(timezone.utc)).isoformat()
+                if now is not None
+                else datetime.now(timezone.utc).isoformat()
+            )
             return {
                 "total_executions": 0,
                 "telemetry_scope": scope_name,
@@ -214,8 +219,10 @@ class DashboardAlertMonitor:
                 "collection_scope": {
                     "requested_scope": scope_name,
                     "since": self.current_since,
+                    "upper_bound": evaluated_iso,
                     "collection_id": self.collection_id,
-                    "evaluated_at": datetime.now(timezone.utc).isoformat(),
+                    "evaluated_at": evaluated_iso,
+                    "naive_timestamp_policy": "assumed_utc",
                 },
             }
         try:
@@ -223,9 +230,10 @@ class DashboardAlertMonitor:
                 dashboard = memory.get_telemetry_dashboard(
                     since=self.current_since,
                     collection_id=self.collection_id,
+                    now=now,
                 )
             else:
-                dashboard = memory.get_telemetry_dashboard()
+                dashboard = memory.get_telemetry_dashboard(now=now)
             count = dashboard.get("codeact_executions", 0)
             dashboard["codeact_gate_trigger_rate"] = (
                 dashboard.get("codeact_gate_triggers", 0) / count if count > 0 else None
@@ -291,13 +299,22 @@ class DashboardAlertMonitor:
             "variation_created_at" if metric == "variation_win_rate" else "counter_last_updated"
         )
         time_basis = cur_ev.get("time_basis", default_basis)
+        future_rows = int(cur_ev.get("future_rows", 0) or 0)
+        invalid_ts = int(cur_ev.get("invalid_timestamp_rows", 0) or 0)
+        naive_ts = int(cur_ev.get("naive_timestamp_rows", 0) or 0)
+        ts_assumption = cur_ev.get("timestamp_assumption", "naive_assumed_utc")
         if window_bounded:
             raw_samples = cur_ev.get("samples", 0)
             samples = raw_samples if type(raw_samples) is int and raw_samples >= 0 else 0
             value = cur_ev.get("value")
             valid_val = self._is_finite_number(value)
             if samples == 0:
-                status, state = ("STALE_UNKNOWN", "stale_historical_only") if lifetime_samples > 0 else ("UNKNOWN", "no_samples")
+                if future_rows > 0:
+                    status, state = "UNKNOWN", "future_timestamp_excluded"
+                elif lifetime_samples > 0:
+                    status, state = "STALE_UNKNOWN", "stale_historical_only"
+                else:
+                    status, state = "UNKNOWN", "no_samples"
             elif samples < minimum or not valid_val:
                 status, state = "UNKNOWN", ("insufficient_current_samples" if samples < minimum else "unmeasured_value")
             else:
@@ -308,6 +325,8 @@ class DashboardAlertMonitor:
                 "recorded_from": cur_ev.get("recorded_from"), "recorded_to": cur_ev.get("recorded_to"),
                 "time_basis": time_basis, "lifetime_status": lifetime_status,
                 "lifetime_samples": lifetime_samples, "lifetime_value": lifetime_value,
+                "future_rows": future_rows, "invalid_timestamp_rows": invalid_ts,
+                "naive_timestamp_rows": naive_ts, "timestamp_assumption": ts_assumption,
             }
         updated = bool(cur_ev.get("counter_updated_in_window", False))
         recorded_from = cur_ev.get("recorded_from", lifetime_ev.get("recorded_from"))
@@ -315,7 +334,9 @@ class DashboardAlertMonitor:
         if lifetime_samples == 0:
             status, state, samples, value = "UNKNOWN", "no_samples", 0, None
         elif not updated:
-            status, state, samples, value = "STALE_UNKNOWN", "stale_historical_only", 0, None
+            state = "future_timestamp_excluded" if future_rows > 0 else "stale_historical_only"
+            status = "UNKNOWN" if future_rows > 0 else "STALE_UNKNOWN"
+            samples, value = 0, None
         else:
             raw_samples = cur_ev.get("samples", lifetime_samples)
             samples = raw_samples if type(raw_samples) is int and raw_samples >= 0 else 0
@@ -337,6 +358,8 @@ class DashboardAlertMonitor:
             "recorded_from": recorded_from, "recorded_to": recorded_to,
             "time_basis": time_basis, "lifetime_status": lifetime_status,
             "lifetime_samples": lifetime_samples, "lifetime_value": lifetime_value,
+            "future_rows": future_rows, "invalid_timestamp_rows": invalid_ts,
+            "naive_timestamp_rows": naive_ts, "timestamp_assumption": ts_assumption,
         }
 
     def evaluate_metric_statuses(self, dashboard: Dict, *, require_minimum: bool = True) -> Dict[str, Dict]:
@@ -540,6 +563,7 @@ def check_dashboard_health(
     pattern_memory=None,
     current_since: Optional[str] = None,
     collection_id: Optional[str] = None,
+    now: Optional[datetime] = None,
 ) -> Dict:
     """Quick health check function supporting lifetime and current-window readiness."""
     if pattern_memory is None and current_since is None and collection_id is None:
@@ -550,7 +574,7 @@ def check_dashboard_health(
             current_since=current_since,
             collection_id=collection_id,
         )
-    dashboard = monitor.get_dashboard()
+    dashboard = monitor.get_dashboard() if now is None else monitor.get_dashboard(now=now)
     total_executions = monitor.get_total_executions(dashboard)
     metric_statuses = monitor.evaluate_metric_statuses(dashboard)
     metric_samples = {metric: st["samples"] for metric, st in metric_statuses.items()}

@@ -36,22 +36,28 @@ from modules.infrastructure.wre_core.src.pattern_ab_evidence import (
 logger = logging.getLogger(__name__)
 
 
-def _parse_iso_utc(value: Optional[str]) -> Optional[datetime]:
-    """Normalize an ISO-8601 date/datetime string to UTC, returning None if invalid."""
+def _parse_iso_utc_with_meta(value: Optional[str]) -> tuple[Optional[datetime], bool]:
+    """Normalize ISO-8601 text to UTC and report whether tzinfo was absent (assumed UTC)."""
     if not isinstance(value, str):
-        return None
+        return None, False
     text = value.strip()
     if not text:
-        return None
+        return None, False
     if text.endswith(("Z", "z")):
         text = text[:-1] + "+00:00"
     try:
         parsed = datetime.fromisoformat(text)
     except ValueError:
-        return None
+        return None, False
     if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
+        return parsed.replace(tzinfo=timezone.utc), True
+    return parsed.astimezone(timezone.utc), False
+
+
+def _parse_iso_utc(value: Optional[str]) -> Optional[datetime]:
+    """Normalize an ISO-8601 date/datetime string to UTC, returning None if invalid."""
+    parsed, _was_naive = _parse_iso_utc_with_meta(value)
+    return parsed
 
 
 @dataclass
@@ -879,14 +885,27 @@ class PatternMemory(PatternABEvidenceMixin):
         row = cursor.fetchone()
         return row['counter_value'] if row else 0
 
-    def _current_retrieval_evidence(self, cursor: sqlite3.Cursor, since_dt: datetime) -> Dict[str, Any]:
+    def _current_retrieval_evidence(
+        self, cursor: sqlite3.Cursor, since_dt: datetime, evaluated_at_dt: datetime
+    ) -> Dict[str, Any]:
         """Compute window-bounded retrieval_coverage evidence without DB writes."""
         cursor.execute("SELECT timestamp, relevance_score, skill_name FROM retrieval_quality")
         total_in_window = 0
+        future_rows = 0
+        invalid_timestamp_rows = 0
+        naive_timestamp_rows = 0
         scored: List[tuple] = []
         for row in cursor.fetchall():
-            row_dt = _parse_iso_utc(row["timestamp"])
-            if row_dt is None or row_dt < since_dt:
+            row_dt, was_naive = _parse_iso_utc_with_meta(row["timestamp"])
+            if row_dt is None:
+                invalid_timestamp_rows += 1
+                continue
+            if was_naive:
+                naive_timestamp_rows += 1
+            if row_dt > evaluated_at_dt:
+                future_rows += 1
+                continue
+            if row_dt < since_dt:
                 continue
             total_in_window += 1
             score = row["relevance_score"]
@@ -904,18 +923,35 @@ class PatternMemory(PatternABEvidenceMixin):
             "time_basis": "retrieval_timestamp",
             "skill_count": len(skills),
             "window_bounded": True,
+            "future_rows": future_rows,
+            "invalid_timestamp_rows": invalid_timestamp_rows,
+            "naive_timestamp_rows": naive_timestamp_rows,
+            "timestamp_assumption": "naive_assumed_utc",
         }
 
-    def _current_variation_evidence(self, cursor: sqlite3.Cursor, since_dt: datetime) -> Dict[str, Any]:
+    def _current_variation_evidence(
+        self, cursor: sqlite3.Cursor, since_dt: datetime, evaluated_at_dt: datetime
+    ) -> Dict[str, Any]:
         """Compute window-bounded variation_win_rate evidence without DB writes."""
         cursor.execute(
             "SELECT created_at, promoted FROM skill_variations "
             "WHERE test_status IN ('promoted', 'archived')"
         )
+        future_rows = 0
+        invalid_timestamp_rows = 0
+        naive_timestamp_rows = 0
         matched: List[tuple] = []
         for row in cursor.fetchall():
-            row_dt = _parse_iso_utc(row["created_at"])
-            if row_dt is None or row_dt < since_dt:
+            row_dt, was_naive = _parse_iso_utc_with_meta(row["created_at"])
+            if row_dt is None:
+                invalid_timestamp_rows += 1
+                continue
+            if was_naive:
+                naive_timestamp_rows += 1
+            if row_dt > evaluated_at_dt:
+                future_rows += 1
+                continue
+            if row_dt < since_dt:
                 continue
             matched.append((row_dt, row["created_at"], int(row["promoted"] or 0) == 1))
         samples = len(matched)
@@ -928,11 +964,16 @@ class PatternMemory(PatternABEvidenceMixin):
             "recorded_to": max(matched, key=lambda item: item[0])[1] if matched else None,
             "time_basis": "variation_created_at",
             "window_bounded": True,
+            "future_rows": future_rows,
+            "invalid_timestamp_rows": invalid_timestamp_rows,
+            "naive_timestamp_rows": naive_timestamp_rows,
+            "timestamp_assumption": "naive_assumed_utc",
         }
 
     @staticmethod
     def _current_counter_evidence(
         since_dt: datetime,
+        evaluated_at_dt: datetime,
         counter_times: Dict[str, Optional[str]],
         lifetime_samples: int,
         lifetime_value: Optional[float],
@@ -940,8 +981,11 @@ class PatternMemory(PatternABEvidenceMixin):
     ) -> Dict[str, Any]:
         """Evaluate cumulative counter freshness without pretending a sample window."""
         raw_times = [counter_times[name] for name in counter_names if counter_times.get(name)]
-        parsed = [_parse_iso_utc(ts) for ts in raw_times]
-        updated = any(dt is not None and dt >= since_dt for dt in parsed)
+        parsed = [_parse_iso_utc_with_meta(ts) for ts in raw_times]
+        future_rows = sum(1 for dt, _ in parsed if dt is not None and dt > evaluated_at_dt)
+        invalid_timestamp_rows = sum(1 for dt, _ in parsed if dt is None)
+        naive_timestamp_rows = sum(1 for dt, was_naive in parsed if dt is not None and was_naive)
+        updated = any(dt is not None and since_dt <= dt <= evaluated_at_dt for dt, _ in parsed)
         return {
             "samples": lifetime_samples if updated else 0,
             "value": lifetime_value if updated else None,
@@ -950,6 +994,10 @@ class PatternMemory(PatternABEvidenceMixin):
             "recorded_from": min(raw_times) if raw_times else None,
             "recorded_to": max(raw_times) if raw_times else None,
             "time_basis": "counter_last_updated",
+            "future_rows": future_rows,
+            "invalid_timestamp_rows": invalid_timestamp_rows,
+            "naive_timestamp_rows": naive_timestamp_rows,
+            "timestamp_assumption": "naive_assumed_utc",
         }
 
     def get_telemetry_dashboard(
@@ -986,6 +1034,10 @@ class PatternMemory(PatternABEvidenceMixin):
             )
         else:
             raise TypeError("now must be a datetime or None")
+        if since_dt is not None and since_dt > evaluated_at_dt:
+            raise ValueError(
+                f"since timestamp ({since_dt.isoformat()}) cannot exceed evaluated_at ({evaluated_at_dt.isoformat()})"
+            )
 
         cursor = self.conn.cursor()
 
@@ -1075,8 +1127,10 @@ class PatternMemory(PatternABEvidenceMixin):
             "collection_scope": {
                 "requested_scope": "current_window" if since_dt is not None else "database_lifetime",
                 "since": since_dt.isoformat() if since_dt is not None else None,
+                "upper_bound": evaluated_at_dt.isoformat(),
                 "collection_id": collection_id,
                 "evaluated_at": evaluated_at_dt.isoformat(),
+                "naive_timestamp_policy": "assumed_utc",
             },
             "metric_evidence": {
                 "tot_confidence_rate": evidence(tot_selections, "tot_selections"),
@@ -1111,18 +1165,18 @@ class PatternMemory(PatternABEvidenceMixin):
         if since_dt is not None:
             dashboard["current_metric_evidence"] = {
                 "tot_confidence_rate": self._current_counter_evidence(
-                    since_dt, counter_times, tot_selections, rounded(tot_confidence_rate), "tot_selections"
+                    since_dt, evaluated_at_dt, counter_times, tot_selections, rounded(tot_confidence_rate), "tot_selections"
                 ),
                 "codeact_success_rate": self._current_counter_evidence(
-                    since_dt, counter_times, codeact_total, rounded(codeact_success_rate),
+                    since_dt, evaluated_at_dt, counter_times, codeact_total, rounded(codeact_success_rate),
                     "codeact_exec_success", "codeact_exec_fail",
                 ),
                 "codeact_gate_trigger_rate": self._current_counter_evidence(
-                    since_dt, counter_times, codeact_total, rounded(codeact_gate_trigger_rate),
+                    since_dt, evaluated_at_dt, counter_times, codeact_total, rounded(codeact_gate_trigger_rate),
                     "codeact_exec_success", "codeact_exec_fail",
                 ),
-                "variation_win_rate": self._current_variation_evidence(cursor, since_dt),
-                "retrieval_coverage": self._current_retrieval_evidence(cursor, since_dt),
+                "variation_win_rate": self._current_variation_evidence(cursor, since_dt, evaluated_at_dt),
+                "retrieval_coverage": self._current_retrieval_evidence(cursor, since_dt, evaluated_at_dt),
             }
         return dashboard
 
