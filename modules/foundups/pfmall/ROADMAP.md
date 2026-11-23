@@ -101,6 +101,15 @@ owns identity and scope; the [navigation contract](../docs/PFMALL_MALL_NAVIGATIO
 owns drill-down and return. This sequence supersedes the earlier immediate
 build plan and its verified-wiring admission gate.
 
+**Research baseline, 2026-11-23.** [From a Mall tile to its source](https://github.com/FOUNDUPS/fractal-mall/blob/main/paper/fractal-mall.md)
+([PDF](https://github.com/FOUNDUPS/fractal-mall/blob/main/paper/fractal-mall.pdf))
+and its [public source-recovery experiment](https://github.com/FOUNDUPS/fractal-mall/tree/main/cases/source-recovery)
+test historical evidence recovery, shared component identity and caller return
+in a small offline fixture. Use this evidence when planning Sprint 2 navigation
+and Sprint 4 evidence closure. The paper's dated product observations leave
+ordinary exact-source navigation and production qualification open; the fixture
+does not complete those product milestones.
+
 1. **Sprint 1 — Census and parallel auditor samples.** Inventory accessible
    FoundUps, modules, cubes, tools, artifacts, sockets and publications once,
    including immature, unwired, archived and proposed candidates. Preserve
