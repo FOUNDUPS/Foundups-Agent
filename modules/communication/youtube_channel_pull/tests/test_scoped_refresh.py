@@ -176,6 +176,57 @@ def test_missing_ids_are_unavailable_and_source_credit_is_authentic():
     assert receipt["excluded"] == [{"video_id": OLD, "reason": "unavailable"}]
 
 
+def test_documented_editorial_hold_blocks_matching_upload_until_reviewed_removal():
+    held_id = "B0P1Zci5Pxo"
+    reviewed = config()
+    reviewed["editorial_exclusions"] = {held_id: "Stephen Miller-led co-topic; prior reviewed exclusion"}
+    service = YouTube(pages=[[held_id, TARGET, OLD]], videos={
+        held_id: metadata(held_id, snippet={"title": "A real #SchumerOUT match"}),
+        TARGET: metadata(), OLD: metadata(OLD),
+    })
+    refreshed, receipt = refresh_scoped_projection(service, reviewed, SOURCE, now=NOW)
+    assert held_id not in [video["video_id"] for video in refreshed["videos"]]
+    assert held_id not in receipt["eligible_ids"]
+    assert receipt["added_ids"] == [TARGET]
+    assert {"video_id": held_id, "reason": "editorial_hold",
+            "editorial_reason": reviewed["editorial_exclusions"][held_id]} in receipt["excluded"]
+    refreshed["editorial_exclusions"].pop(held_id)  # explicit curation review is the admission boundary
+    admitted, reviewed_receipt = refresh_scoped_projection(service, refreshed, SOURCE, now=NOW)
+    assert held_id in [video["video_id"] for video in admitted["videos"]]
+    assert reviewed_receipt["added_ids"] == [held_id]
+
+
+@pytest.mark.parametrize("missing_held_metadata", [False, True])
+def test_retained_editorial_hold_survives_reruns_even_when_metadata_is_unavailable(missing_held_metadata):
+    held_id = "B0P1Zci5Pxo"
+    reviewed = config()
+    reviewed["editorial_exclusions"] = {held_id: "Prior editorial review hold"}
+    reviewed["videos"].append({"video_id": held_id, "title": "Retain old review evidence", "note": "old editorial note",
+                               "editorial_label": "Opinion", "stable_id": "held-retained-1"})
+    videos = {OLD: metadata(OLD), TARGET: metadata()}
+    if not missing_held_metadata:
+        videos[held_id] = metadata(held_id)
+    service = YouTube(videos=videos)
+    refreshed, receipt = refresh_scoped_projection(service, reviewed, SOURCE, now=NOW)
+    retained = next(video for video in refreshed["videos"] if video["video_id"] == held_id)
+    assert retained["publication_eligible"] is False
+    assert retained["editorial_label"] == "Opinion"
+    assert retained["stable_id"] == "held-retained-1"
+    assert retained["note"] == "old editorial note"
+    assert receipt["excluded"] == [{"video_id": held_id, "reason": "editorial_hold", "editorial_reason": "Prior editorial review hold"}]
+    rerun, next_receipt = refresh_scoped_projection(service, refreshed, SOURCE, previous_receipt=receipt, now=NOW)
+    assert held_id not in next_receipt["eligible_ids"]
+    assert [video["video_id"] for video in rerun["videos"]] == [OLD, held_id, TARGET]
+
+
+@pytest.mark.parametrize("holds", [["B0P1Zci5Pxo"], {"not-an-id": "Hold"}, {"B0P1Zci5Pxo": ""}, {"B0P1Zci5Pxo": False}])
+def test_malformed_editorial_exclusions_fail_before_source_requests(holds):
+    service = YouTube()
+    with pytest.raises(ScopedRefreshError):
+        refresh_scoped_projection(service, {**config(), "editorial_exclusions": holds}, SOURCE, now=NOW)
+    assert service.calls == []
+
+
 def test_bounded_full_pagination_batches_metadata_and_stable_addition_order():
     ids = [f"v{i:010d}" for i in range(110)]
     service = YouTube(pages=[ids[:50], ids[49:99], ids[99:]], videos={v: metadata(v) for v in ids})

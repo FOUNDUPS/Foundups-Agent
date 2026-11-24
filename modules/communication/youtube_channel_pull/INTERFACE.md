@@ -8,6 +8,8 @@
 
 `ensure_refresh_fresh(receipt, *, now=None)` rejects incomplete, wrong-source, stale and future-dated receipts; TTL is at most 24 hours. `matched_topics(snippet)` returns actual title/description/tag match evidence for the three HPC campaign spellings. Errors are sanitized to avoid provider URLs leaking credentials. This scoped exception does not grant general channel-pull auto-admission.
 
+`config.editorial_exclusions` optionally maps video IDs to recorded review reasons. Those IDs remain held even when source metadata matches or is missing; explicit reviewed removal of the mapping precedes admission. Holds are source-independent editorial evidence, not fabricated availability results.
+
 ### channel_puller.py
 
 #### `fetch_channel_videos(youtube_service, channel_id, max_results=50)`

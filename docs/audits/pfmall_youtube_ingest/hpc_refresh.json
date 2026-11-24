@@ -4,8 +4,8 @@
   "complete": true,
   "source_channel_id": "UC-LSSlOZwpGIRIYihaz8zCw",
   "uploads_playlist": "UU-LSSlOZwpGIRIYihaz8zCw",
-  "checked_at": "2026-11-24T22:23:42Z",
-  "expires_at": "2026-11-25T22:23:42Z",
+  "checked_at": "2026-11-24T22:42:38Z",
+  "expires_at": "2026-11-25T22:42:38Z",
   "scan_mode": "full",
   "reached_frontier": false,
   "last_seen_upload_id": "TsIOvI85FL4",
@@ -90,17 +90,11 @@
     "Rq92qjmFTZM",
     "NnZyt8lwyC8",
     "zxOwUIvaABg",
-    "bJIbM5TWLAY",
     "TSULgvrOjVw",
     "sOXP9HklKA4",
-    "hn7Pr4spUWQ",
     "y4KHfSpEzZs",
     "LDHYjA4VQY4",
-    "I1QIRCBYb2k",
-    "B0P1Zci5Pxo",
-    "d4_GIla3VZg",
-    "ayR6bG_qANw",
-    "xptQ0bkIZeg"
+    "I1QIRCBYb2k"
   ],
   "excluded": [
     {
@@ -110,6 +104,41 @@
     {
       "video_id": "DSmwKktffwU",
       "reason": "region_restricted"
+    },
+    {
+      "video_id": "bJIbM5TWLAY",
+      "reason": "editorial_hold",
+      "editorial_reason": "Reviewed AntifaFM music/mixed-topic exclusion; MEDIA_PLAYBACK_INCIDENT_HPC.md source reconciliation"
+    },
+    {
+      "video_id": "R7xm4MZ9N4w",
+      "reason": "editorial_hold",
+      "editorial_reason": "Existing isolated playback diagnostic only; not publicly admitted"
+    },
+    {
+      "video_id": "hn7Pr4spUWQ",
+      "reason": "editorial_hold",
+      "editorial_reason": "Reviewed music/midterm mixed-topic exclusion; MEDIA_PLAYBACK_INCIDENT_HPC.md source reconciliation"
+    },
+    {
+      "video_id": "B0P1Zci5Pxo",
+      "reason": "editorial_hold",
+      "editorial_reason": "Reviewed Stephen Miller-led exclusion and diagnostic-only Short"
+    },
+    {
+      "video_id": "d4_GIla3VZg",
+      "reason": "editorial_hold",
+      "editorial_reason": "Reviewed Georgia co-topic exclusion; MEDIA_PLAYBACK_INCIDENT_HPC.md source reconciliation"
+    },
+    {
+      "video_id": "ayR6bG_qANw",
+      "reason": "editorial_hold",
+      "editorial_reason": "Reviewed joint Jeffries/Schumer campaign exclusion; MEDIA_PLAYBACK_INCIDENT_HPC.md source reconciliation"
+    },
+    {
+      "video_id": "xptQ0bkIZeg",
+      "reason": "editorial_hold",
+      "editorial_reason": "Reviewed Jeffries-led exclusion; MEDIA_PLAYBACK_INCIDENT_HPC.md source reconciliation"
     },
     {
       "video_id": "FH_B3Y0KNDM",
@@ -696,14 +725,15 @@
       "reason": "region_restricted"
     }
   ],
-  "projection_sha256": "a9ddc02b3e1b44ddb7469cbfc0c7779bde9705ae9da18635022220ed0d744e2c",
-  "catalog_sha256": "a8a6357b0693a35153360c929a63522688d656f02099518699c4b56f91f69cbb",
-  "scope": "hpc",
   "exclusion_counts": {
     "not_processed": 2,
-    "no_topic_match": 4116,
+    "no_topic_match": 4115,
     "region_restricted": 105,
+    "editorial_hold": 7,
     "age_restricted": 39,
     "not_embeddable": 2
-  }
+  },
+  "projection_sha256": "aa6f2d6fbcd34e4e33afe1499561c7178d06112f19978e7595c2b2409ad9b706",
+  "catalog_sha256": "97daf4104add55a55523cc8ca7dc23dad534d432f6ccfc0f9be4fe13f6c1f400",
+  "scope": "hpc"
 }

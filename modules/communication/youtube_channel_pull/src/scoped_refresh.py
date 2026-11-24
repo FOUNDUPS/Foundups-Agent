@@ -153,6 +153,9 @@ def refresh_scoped_projection(
     descending source publication time (ID breaks ties). Ineligible old records
     stay in curation with ``publication_eligible=False`` for reversible recovery;
     the projection caller MUST exclude those records from its public output.
+    ``config["editorial_exclusions"]`` maps reviewed video IDs to reasons; an
+    authentic source match never clears these holds. Review must change that
+    mapping before a subsequent complete source pass can admit a held new ID.
 
     The first run scans the complete uploads playlist within ``max_pages``.
     Incremental runs stop after the page containing the prior leading upload.
@@ -167,6 +170,12 @@ def refresh_scoped_projection(
         raise ScopedRefreshError("HPC refresh is limited to its established approved source")
     if isinstance(max_pages, bool) or not isinstance(max_pages, int) or not 1 <= max_pages <= 100:
         raise ScopedRefreshError("max_pages must be between 1 and 100")
+    editorial_exclusions = config.get("editorial_exclusions", {})
+    if (not isinstance(editorial_exclusions, dict) or len(editorial_exclusions) > 10000
+            or any(not isinstance(video_id, str) or not VIDEO_ID.fullmatch(video_id)
+                   or not isinstance(reason, str) or not reason.strip()
+                   for video_id, reason in editorial_exclusions.items())):
+        raise ScopedRefreshError("Invalid reviewed editorial exclusions")
     existing = config.get("videos")
     if not isinstance(existing, list) or len(existing) > 10000:
         raise ScopedRefreshError("Invalid scoped curation records")
@@ -243,6 +252,12 @@ def refresh_scoped_projection(
 
     records, excluded = {}, []
     for video_id in requested_ids:
+        if video_id in editorial_exclusions:
+            # An authentic topic match is not authority to reverse a recorded
+            # editorial hold. Review changes the curated mapping explicitly.
+            excluded.append({"video_id": video_id, "reason": "editorial_hold",
+                             "editorial_reason": editorial_exclusions[video_id]})
+            continue
         if video_id not in metadata:
             excluded.append({"video_id": video_id, "reason": "unavailable"})
             continue
