@@ -2,7 +2,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const zlib = require('node:zlib');
-const { publish, sha256, jsonBytes, normalizeVersion } = require('../publish_hpc_catalog.cjs');
+const fs = require('node:fs');
+const path = require('node:path');
+const { Readable } = require('node:stream');
+const { publish, sha256, jsonBytes, normalizeVersion, uploadWithClient } = require('../publish_hpc_catalog.cjs');
 const NOW = Date.parse('2026-11-25T03:00:00Z');
 const oldVersion = normalizeVersion('sites/foundupscom/versions/12345678');
 const newVersion = normalizeVersion('sites/foundupscom/versions/87654321');
@@ -143,4 +146,71 @@ test('public readback mismatch fails after saved release without blind rollback'
   await assert.rejects(publish(f.options, f.host), error => {
     assert.equal(error.message, 'PUBLIC_CATALOG_READBACK_MISMATCH'); assert.equal(error.publicationReceipt.rollback_version, oldVersion); return true;
   }); assert.equal(f.writes.filter(w => w === 'release').length, 1);
+});
+test('native upload adapter satisfies vendor response guard and sends compressed binary bytes', async () => {
+  const bytes = zlib.gzipSync(Buffer.from('HPC catalog payload')), hash = sha256(bytes);
+  let requests = 0;
+  class GuardedClient {
+    constructor(options) { assert.equal(options.auth, true); }
+    async request(options) {
+      // Firebase CLI 14.26/14.27 Client.request rejects this combination before
+      // any network operation; keep that vendor boundary represented in CI.
+      if (options.responseType === 'stream' && !options.resolveOnHTTPError) throw new Error('VENDOR_STREAM_HTTP_ERROR_GUARD');
+      requests++;
+      assert.equal(options.method, 'POST'); assert.equal(options.path, '/' + hash);
+      assert.equal(options.responseType, 'json'); assert.equal(options.resolveOnHTTPError, undefined);
+      assert.equal(options.headers['Content-Type'], 'application/octet-stream');
+      assert.equal(options.retries, 0); assert.equal(options.timeout, 15000);
+      assert.ok(options.body instanceof Readable);
+      const chunks = []; for await (const chunk of options.body) chunks.push(chunk);
+      assert.deepEqual(Buffer.concat(chunks), bytes);
+      return { status: 200, body: undefined };
+    }
+  }
+  await uploadWithClient(GuardedClient, newVersion,
+    'https://upload-firebasehosting.googleapis.com/upload/sites/foundupscom/versions/87654321/files', hash, bytes);
+  assert.equal(requests, 1);
+});
+test('native upload adapter propagates HTTP rejection without suppression or retry', async () => {
+  let requests = 0;
+  class RejectedClient {
+    async request(options) {
+      requests++; assert.equal(options.resolveOnHTTPError, undefined); assert.equal(options.retries, 0);
+      throw Object.assign(new Error('offline denied upload'), { status: 403 });
+    }
+  }
+  await assert.rejects(uploadWithClient(RejectedClient, newVersion,
+    'https://upload-firebasehosting.googleapis.com/upload/sites/foundupscom/versions/87654321/files', 'a'.repeat(64), Buffer.from('gzip fixture')),
+  { status: 403 });
+  assert.equal(requests, 1);
+});
+test('installed native Client accepts empty success and rejects HTTP error using offline fetch', async t => {
+  const cliRoot = process.env.FIREBASE_CLI_ROOT || path.join(process.env.APPDATA || '', 'npm/node_modules/firebase-tools');
+  if (!fs.existsSync(path.join(cliRoot, 'lib/apiv2.js'))) { t.skip('Optional installed Firebase CLI unavailable; vendor contract tests above remain mandatory'); return; }
+  const cliVersion = JSON.parse(fs.readFileSync(path.join(cliRoot, 'package.json'), 'utf8')).version;
+  assert.ok(['14.26.0', '14.27.0'].includes(cliVersion));
+  const { logger } = require(path.join(cliRoot, 'lib/logger.js'));
+  const previousSilent = logger.silent; logger.silent = true;
+  const { Client } = require(path.join(cliRoot, 'lib/apiv2.js'));
+  const nodeFetch = require(require.resolve('node-fetch', { paths: [cliRoot] }));
+  const originalFetch = nodeFetch.default;
+  const bytes = zlib.gzipSync(Buffer.from('native offline upload')), hash = sha256(bytes);
+  let status = 200, requests = 0;
+  // Disable authentication before entering the real vendor request/response
+  // code; replace its fetch before any request, so this test has no network.
+  class OfflineClient extends Client { constructor(options) { super({ ...options, auth: false }); } }
+  nodeFetch.default = async (url, options) => {
+    requests++; assert.equal(url, 'https://upload-firebasehosting.googleapis.com/upload/sites/foundupscom/versions/87654321/files/' + hash);
+    assert.equal(options.headers.get('Content-Type'), 'application/octet-stream');
+    const chunks = []; for await (const chunk of options.body) chunks.push(chunk);
+    assert.deepEqual(Buffer.concat(chunks), bytes);
+    return new nodeFetch.Response(status === 200 ? '' : JSON.stringify({ error: { code: 403, message: 'offline denied upload', status: 'PERMISSION_DENIED' } }), { status });
+  };
+  try {
+    const url = 'https://upload-firebasehosting.googleapis.com/upload/sites/foundupscom/versions/87654321/files';
+    await uploadWithClient(OfflineClient, newVersion, url, hash, bytes);
+    status = 403;
+    await assert.rejects(uploadWithClient(OfflineClient, newVersion, url, hash, bytes), { status: 403 });
+    assert.equal(requests, 2);
+  } finally { nodeFetch.default = originalFetch; logger.silent = previousSilent; }
 });
