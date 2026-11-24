@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "firebase": "^12.9.0",
-    "vercel": "63.1.2"
+    "vercel": "66.6.0"
   },
   "engines": {
     "node": ">=18.0.0"
