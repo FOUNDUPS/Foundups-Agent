@@ -88,6 +88,10 @@ jobs:
           export_environment_variables: true
       - name: Install existing pinned Hosting client without install scripts
         run: npm install --prefix "$RUNNER_TEMP/hpc-hosting" --ignore-scripts --no-audit --no-fund firebase-tools@14.27.0
+      - name: Verify the installed Hosting upload adapter without network access
+        env:
+          FIREBASE_CLI_ROOT: ${{ runner.temp }}/hpc-hosting/node_modules/firebase-tools
+        run: node --test scripts/tests/test_publish_hpc_catalog.cjs
       - name: Publish or inspect collection-only release
         env:
           FIREBASE_CLI_ROOT: ${{ runner.temp }}/hpc-hosting/node_modules/firebase-tools

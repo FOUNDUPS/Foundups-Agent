@@ -184,6 +184,15 @@ async function readPublic(target, expectedHash) {
   }
   return Buffer.concat(chunks);
 }
+async function uploadWithClient(Client, name, url, hash, bytes) {
+  requireThat(url === `https://upload-firebasehosting.googleapis.com/upload/sites/${SITE}/versions/${versionId(name)}/files`, 'UPLOAD_DESTINATION_INVALID');
+  const uploader = new Client({ urlPrefix: url, auth: true });
+  // The CLI's JSON response mode accepts empty success bodies and rejects HTTP
+  // errors. Stream response mode instead requires caller-managed error checks.
+  await uploader.request({ method: 'POST', path: '/' + hash, body: Readable.from([bytes]),
+    headers: { 'Content-Type': 'application/octet-stream' },
+    timeout: 15000, retries: 0, responseType: 'json' });
+}
 async function createHost(cliRoot, cwd) {
   const cliPath = name => path.join(cliRoot, 'lib', name);
   const version = JSON.parse(fs.readFileSync(path.join(cliRoot, 'package.json'), 'utf8')).version;
@@ -226,12 +235,7 @@ async function createHost(cliRoot, cwd) {
       requireThat(!operation.error, 'CLONE_OPERATION_FAILED'); return normalizeVersion(operation.response?.name);
     },
     async populate(name, files) { return (await client.post('/' + normalizeVersion(name) + ':populateFiles', { files }, { timeout: 15000, retries: 0 })).body; },
-    async upload(name, url, hash, bytes) {
-      requireThat(url === `https://upload-firebasehosting.googleapis.com/upload/sites/${SITE}/versions/${versionId(name)}/files`, 'UPLOAD_DESTINATION_INVALID');
-      const uploader = new Client({ urlPrefix: url, auth: true });
-      await uploader.request({ method: 'POST', path: '/' + hash, body: Readable.from([bytes]),
-        timeout: 15000, retries: 0, responseType: 'stream' });
-    },
+    upload: (name, url, hash, bytes) => uploadWithClient(Client, name, url, hash, bytes),
     finalize: (name, config) => client.patch('/' + normalizeVersion(name), { status: 'FINALIZED', config }, {
       timeout: 15000, retries: 0, queryParams: { updateMask: 'status,config' } }),
     release: (name, sourceSha) => client.post(`/projects/${PROJECT}/sites/${SITE}/channels/live/releases`, {
@@ -275,5 +279,5 @@ async function main() {
     process.stdout.write(JSON.stringify({ status: result.status, applied: result.applied, paths: result.paths?.map(p => p.path), receipt: output }) + '\n');
   } finally { clearInterval(heartbeat); clearTimeout(deadline); }
 }
-module.exports = { publish, fresh, videosOf, collectionDocument, fileMap, normalizeVersion, createHost, sha256, jsonBytes, parse };
+module.exports = { publish, fresh, videosOf, collectionDocument, fileMap, normalizeVersion, createHost, uploadWithClient, sha256, jsonBytes, parse };
 if (require.main === module) main().catch(error => { process.stdout.write(JSON.stringify({ status: 'FAILED', error_code: error.safeCode || 'PUBLICATION_FAILED' }) + '\n'); process.exitCode = 1; });
