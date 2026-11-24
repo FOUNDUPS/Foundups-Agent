@@ -149,6 +149,30 @@ def route_local(route):
         if u.path == "/member/mall-public-video-catalog.json":
             route.fulfill(status=200, json=catalog)
             return
+        vote_assets = {"congressional-cards.json"} | {
+            "comics/" + person + "-card-" + suffix
+            for person in ["schumer", "jeffries"] for suffix in ["loop.mp4", "loop.webp", "still.webp"]}
+        if u.path.startswith('/member/vote/') and u.path[len('/member/vote/'):] in vote_assets:
+            filename = public.parent / 'modules/foundups/voteballots/web' / u.path[len('/member/vote/'):]
+            data = filename.read_bytes()
+            headers = {'Accept-Ranges': 'bytes'}
+            status = 200
+            requested = route.request.headers.get('range')
+            if requested and filename.suffix == '.mp4':
+                match = re.fullmatch(r'bytes=(\d+)-(\d*)', requested)
+                if not match or int(match[1]) >= len(data):
+                    route.fulfill(status=416, headers={'Content-Range': 'bytes */'+str(len(data))})
+                    return
+                start, end = int(match[1]), min(int(match[2]) if match[2] else len(data)-1, len(data)-1)
+                if end < start:
+                    route.fulfill(status=416, headers={'Content-Range': 'bytes */'+str(len(data))})
+                    return
+                headers['Content-Range'] = f'bytes {start}-{end}/{len(data)}'
+                data = data[start:end+1]
+                status = 206
+            route.fulfill(status=status, content_type=mimetypes.guess_type(filename.name)[0] or 'application/octet-stream',
+                          headers=headers, body=data)
+            return
         relative = u.path.lstrip("/")
         if relative.startswith("f/") and "." not in relative:
             relative = "f/index.html"

@@ -2038,6 +2038,9 @@
       // Track tile type for CSS background-size: avatar uses contain, video uses cover
       var isAvatarTile = !!item.channel_avatar_url && !item.video_data;
       var posterUrl = item.channel_avatar_url || item.poster_url || '';
+      var memberMedia = item.video_data || item;
+      var memberCard = window.mallVideoPlayer?.isMemberCardVideo?.(memberMedia) ? memberMedia.member_card : null;
+      if (memberCard) posterUrl = '';
       var deferPoster = phoneLazyPosters && !append && index >= loadPolicy.loadBatchSize && !!posterUrl;
       var posterStyle = (posterUrl && !deferPoster) ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
       var posterDataAttr = posterUrl ? ' data-poster-url="' + escapeAttr(posterUrl) + '"' : '';
@@ -2092,7 +2095,7 @@
       var sourceActionBadge = sourceAction ? '<span class="mall-tile-action-badge">' + sourceAction + '</span>' : '';
 
       // Non-video tile class modifier
-      var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video');
+      var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video') + (memberCard ? ' mall-member-card' : '');
 
       var videoId = (fixedVideoField || isSelectedEntityScope()) ? ' data-video-id="' + escapeAttr(item.video_data?.video_id || '') + '"' : '';
       var classification = entityGrid ? ' data-catalog-kind="' + (canonical ? 'foundup' : candidate ? 'candidate' : 'source') +
@@ -2108,12 +2111,12 @@
         playIndicator +
         audioBtn +
         enterFoundupBtn +
-        expandBtn +
-        '<div class="mall-tile-inner">' +
+        (memberCard ? '' : expandBtn) +
+        (memberCard ? renderMemberCard(memberCard, expandBtn) : '<div class="mall-tile-inner">' +
           '<span class="mall-tile-token">' + escapeHtml(item.token_symbol || '') + '</span>' +
           '<span class="mall-tile-hero">' + escapeHtml(item.hero_label || '') + '</span>' +
           '<p class="mall-tile-name">' + escapeHtml(item.name || item.title || '') + '</p>' +
-        '</div>' +
+        '</div>') +
         (cardBack ? '<button type="button" class="mall-card-flip" aria-expanded="false" aria-controls="mall-card-about-' +
           index + '" aria-label="' + escapeAttr('About ' + (item.name || item.title || 'this source')) + '">About</button></div>' +
           renderCardBack(item, index, canonical, !!hasVideos) : '') +
@@ -2195,6 +2198,21 @@
       renderFixedTail(itemsToRender.length, entityGrid, batchSize);
     }
     syncDesktopBlockNav();
+  }
+
+  // Typed media uses the same selection and accessible expand controls.
+  function renderMemberCard(card, expandBtn) {
+    var hashtag = String(card.hashtag || '');
+    var action = /OUT$/.test(hashtag)
+      ? escapeHtml(hashtag.slice(0, -3)) + '<strong>OUT</strong>' : escapeHtml(hashtag);
+    return '<div class="mall-member-card-content">' +
+      '<header class="mall-member-card-heading"><h3>' + escapeHtml(card.name || '') + '</h3>' +
+      '<p>' + escapeHtml([card.chamber, card.constituency].filter(Boolean).join(' · ')) + '</p></header>' +
+      '<div class="mall-member-card-art"><picture><source media="(prefers-reduced-motion: no-preference)" type="image/webp" srcset="' +
+      escapeAttr(card.animation_url || card.still_url || '') + '"><img src="' + escapeAttr(card.still_url || '') +
+      '" alt="' + escapeAttr('AI caricature of ' + (card.name || 'a member of Congress')) + '" loading="lazy"></picture>' + (expandBtn || '') + '</div>' +
+      '<footer class="mall-member-card-footer"><p class="mall-member-card-hashtag">' + action + '</p>' +
+      '<p class="mall-member-card-scores"><span>UDP <b>Pending</b></span><span>CU <b>Pending</b></span></p></footer></div>';
   }
 
   function renderFixedTail(total, entityGrid, batchSize) {
@@ -3192,6 +3210,7 @@
   }
 
   function canAutoplayFromTile(tile) {
+    if (tile?.classList.contains('mall-member-card')) return true;
     // YouTube requires at least 120 × 70 CSS pixels for an autoplay trigger.
     var rect = tile?.getBoundingClientRect();
     return !!rect && rect.width >= 120 && rect.height >= 70;

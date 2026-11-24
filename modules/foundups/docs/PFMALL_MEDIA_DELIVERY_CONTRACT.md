@@ -1,5 +1,24 @@
 # p.fMALL Media Delivery Contract
 
+## 2026-11-25 — Reviewed local VOTE media
+
+The optional member-card type uses approved silent four-second MP4s through
+the existing native branch, without changing outer player geometry. Its six
+MP4/animated-WebP/still derivatives total 8,874,256 bytes and remain in the
+VOTE owner. Staging maps exact source blobs; no streams are downloaded or
+rehosted from YouTube. MP4 byte-range delivery and actual decoded time are
+separate checks from metadata, poster display and HTTP success.
+
+Observed Windows WebKit rejected these H.264 Main/yuv420p assets with native
+error4 in both a minimal URL and browser-blob control; Chromium decoded and
+advanced time. For this validated local type only, that error may use the
+already approved animated WebP. It exposes `image-animation`, native error4
+and null media time, never a fabricated video/ENDED event. Pause switches to
+the approved still, reduced motion starts paused, and teardown/hidden state
+stops animation. Both native and image forms loop; explicit queue navigation
+remains shared. Physical Safari/Home Screen support is NOT_VERIFIED by a
+Windows engine or image fallback. This exception never applies to YouTube.
+
 **Version**: 1.0.1 (privacy clarification; delivery behavior unchanged)
 **Date**: 2026-10-23
 **Status**: Locked

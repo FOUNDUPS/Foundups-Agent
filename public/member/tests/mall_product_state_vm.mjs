@@ -100,6 +100,24 @@ await check('public and member video routes have separate exact selectors', () =
   assert.equal(route.memberPath('move2japan'), null);
 });
 
+await check('VOTE collection selection does not grant member application admission', () => {
+  const window = { location: new URL('https://play.foundups.com/member/') };
+  runInNewContext(videoProjectionSource, { window, URLSearchParams });
+  const route = window.mallVideoProjection;
+  assert.equal(route.resolve(new URL('https://play.foundups.com/member/?foundup=voteballots')), 'voteballots');
+  assert.equal(route.resolve(new URL('https://foundups.com/member/?foundup=voteballots')), null);
+  assert.equal(route.resolveMember(new URL('https://foundups.com/member/?foundup=voteballots')), 'voteballots');
+  assert.equal(route.resolve(new URL('https://hpc.foundups.com/member/?foundup=voteballots')), 'hpc');
+  for (const query of ['foundup=voteballots&foundup=hpc', 'foundup=unknown']) {
+    assert.equal(route.resolve(new URL('https://play.foundups.com/member/?' + query)), 'mall');
+  }
+  for (const query of ['foundup=voteballots&auth=failed', 'foundup=voteballots&enter=voteballots']) {
+    assert.equal(route.resolve(new URL('https://play.foundups.com/member/?' + query)), null);
+  }
+  assert.equal(route.resolve(new URL('https://play.foundups.com/f/voteballots/app')), null);
+  assert.equal(route.hostScope(new URL('https://vote.foundups.com/')), null);
+});
+
 await check('HPC sign-in return is bounded to a registered member path and one use', () => {
   const h = stateRuntime(ORIGIN + '/member/?foundup=hpc&next=https%3A%2F%2Fexample.invalid#account');
   assert.equal(h.api.rememberMemberVideoReturn(), true);

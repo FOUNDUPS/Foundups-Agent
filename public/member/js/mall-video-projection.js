@@ -14,7 +14,7 @@
   if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-(?:controls|gestures|home))-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
     dedicatedHosts.set(window.location.hostname, 'mall');
   }
-  const publicScopes = new Set(['hpc']);
+  const publicScopes = new Set(['hpc', 'voteballots']);
   let scopedPhoneDock = null;
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
@@ -735,8 +735,9 @@
         // AutoPost is a working existing action, not a model placeholder.
         autoPost.hidden = false;
         const hpc = document.documentElement.dataset.mallVideoScope === 'hpc';
-        add.hidden = hpc;
-        if (hpc) {
+        const scopedActions = scoped && (hpc || document.documentElement.dataset.mallVideoScope === 'voteballots');
+        add.hidden = scopedActions;
+        if (scopedActions) {
           options.setAttribute('aria-label', 'Available actions');
           options.title = 'Available actions';
           dialog.setAttribute('aria-label', 'Available actions');
@@ -810,9 +811,9 @@
     dock.input.addEventListener('blur', () => anchor.style.removeProperty('--member-dock-keyboard'));
   }
 
-  function createPhoneDock(actions, scope, disclosure, onHome) {
+  function createPhoneDock(actions, scope, disclosure, onHome, searchLabel = 'Search HPC Mall') {
     const field = window.mallTileField;
-    const dock = createMemberDock('Search HPC Mall', search, () => {
+    const dock = createMemberDock(searchLabel, search, () => {
       window.mallStateRestore?.save();
       window.redDog.openConversation();
     });
@@ -960,6 +961,7 @@
   }
 
   async function mount(scope) {
+    const memberCards = scope === 'voteballots';
     if (scope === 'mall') {
       await mountOpenMall();
       return;
@@ -970,18 +972,27 @@
     element('gestureHints').remove();
     element('loadingState').style.display = 'none';
     element('memberArea').style.display = 'block';
-    field.setAttribute('aria-label', 'Shorts');
+    field.setAttribute('aria-label', memberCards ? 'Congressional member cards' : 'Shorts');
     const home = document.querySelector('.mall-header .mall-brand-minimal');
     home.href = isOpenMallHost(window.location) ? '/member/' : OPEN_MALL_ORIGIN + '/';
     home.setAttribute('aria-label', 'Return to Play FoundUps Mall');
     home.addEventListener('click', function () { window.mallStateRestore.save(); });
+    if (memberCards) {
+      const image = home.querySelector('img');
+      image.src = '/logo-dog.png';
+      image.width = image.height = 32;
+      image.alt = '';
+    }
 
     try {
-      const response = await fetch('/member/mall-public-video-catalog.json', { cache: 'no-store', credentials: 'omit' });
+      const response = await fetch(memberCards ? '/member/vote/congressional-cards.json' : '/member/mall-public-video-catalog.json', { cache: 'no-store', credentials: 'omit' });
       if (!response.ok) throw new Error('Public video catalog unavailable');
       const projection = (await response.json())[scope];
       if (projection?.lane?.foundup_id !== scope || !projection.lane.videos?.length) {
         throw new Error('Public video projection missing');
+      }
+      if (memberCards && !projection.lane.videos.every(video => window.mallVideoPlayer.isMemberCardVideo(video))) {
+        throw new Error('Public member-card media is invalid');
       }
       const voiceResource = new URL(projection.voice_resource_url);
       if (voiceResource.protocol !== 'https:' || voiceResource.username || voiceResource.password) {
@@ -995,6 +1006,7 @@
       const topic = element('videoScopeTopic');
       identity.textContent = projection.identity;
       topic.textContent = projection.topic;
+      identity.hidden = topic.hidden = memberCards;
       const topicLine = document.createElement('div');
       topicLine.className = 'mall-video-scope-topic-line';
       if (scope !== 'hpc') topicLine.innerHTML = buildLabel;
@@ -1040,6 +1052,14 @@
       field.setAttribute('aria-describedby', 'videoScopeCredit');
       element('videoScopeDisclosureText').textContent = projection.disclosure;
       const disclosure = element('videoScopeDisclosure');
+      if (memberCards) {
+        const credit = document.createElement('p');
+        credit.textContent = projection.credit;
+        const guide = document.createElement('a');
+        guide.href = 'https://vote.foundups.com/guide';
+        guide.textContent = 'Vote guide';
+        disclosure.append(credit, guide);
+      }
       if (scope === 'hpc') {
         const campaign = document.createElement('a');
         campaign.href = 'https://hasan4speaker.com/';
@@ -1053,6 +1073,7 @@
 
       const voice = element('videoScopeVoice');
       voice.href = voiceResource.href;
+      if (memberCards) voice.textContent = 'Voice your opinion';
       voice.addEventListener('click', () => window.mallStateRestore.save());
       const actions = document.createElement('nav');
       actions.id = 'videoScopeActions';
@@ -1062,15 +1083,37 @@
 
       const header = element('videoScopeHeader');
       header.hidden = false;
+      if (memberCards) {
+        const resources = document.createElement('nav');
+        resources.className = 'mall-member-card-resources';
+        resources.setAttribute('aria-label', 'Vote resources');
+        const dispatch = document.createElement('a');
+        dispatch.href = 'https://vote.foundups.com/dispatch';
+        dispatch.textContent = 'Dispatch';
+        dispatch.addEventListener('click', () => window.mallStateRestore.save());
+        resources.append(dispatch);
+        const hpcLink = document.createElement('a');
+        hpcLink.className = 'mall-vote-hpc-link';
+        hpcLink.href = 'https://hpc.foundups.com/';
+        hpcLink.setAttribute('aria-label', 'HPC — open Hasan Piker Coalition');
+        hpcLink.addEventListener('click', () => window.mallStateRestore.save());
+        const hpcBanner = document.createElement('img');
+        hpcBanner.src = '/member/hpc-banner.webp';
+        hpcBanner.width = 1280;
+        hpcBanner.height = 353;
+        hpcBanner.alt = 'HPC';
+        hpcLink.append(hpcBanner);
+        header.append(resources, hpcLink);
+      }
       window.mallStateRestore.selectVideoScope(scope);
       window.mallTileField.initialize([projection.lane], { fixedVideoField: true });
       window.mallStateRestore.restore();
       window.mallStateRestore.bindAutoSave();
 
-      const dock = createPhoneDock(actions, scope, disclosure, showScopedGrid);
+      const dock = createPhoneDock(actions, scope, disclosure, showScopedGrid, memberCards ? 'Search VOTE cards' : 'Search HPC Mall');
       const desktop = window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
       function applyPresentation() {
-        const theater = desktop.matches && window.mallStateRestore.getScopedPresentation() !== 'grid';
+        const theater = desktop.matches && !memberCards && window.mallStateRestore.getScopedPresentation() !== 'grid';
         document.documentElement.dataset.mallVideoLayout = theater ? 'theater' : desktop.matches ? 'grid' : 'phone';
         info.hidden = !theater;
         (theater ? actions : header).append(voice);

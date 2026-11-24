@@ -1,5 +1,40 @@
 # Shared Mall media incident · HPC-P01–P08
 
+## 2026-11-25 — Optional local-media source rejection
+
+- **incident_id:** PFMALL-MEDIA-20261111-HPC; provider-specific native VOTE finding.
+- **affected_owner / foundup_id:** shared native player/field; `voteballots`.
+  HPC remains the shared-player regression surface, not a new media engine.
+- **symptom/reproduction:** Windows Playwright WebKit rejects approved local
+  silent MP4 with native error4/NotSupportedError, time0, width0. Same bytes in
+  minimal URL and browser-blob controls also fail. Chromium decodes 480×562
+  H.264 Main/yuv420p level3.0 and advances1.8s. Availability and metadata alone
+  do not prove device playback. Physical iPhone Safari/PWA is NOT_VERIFIED.
+- **environment/revision:** Windows controlled B26 core2b4bf854 plus the
+  source-bound donor220206d9 optional-media port, observed 2026-11-25 JST.
+  This is not a deployed revision or a fresh production observation.
+- **hypotheses tested:** full and ranged delivery, minimal player and blob
+  delivery, native metadata/codec hints. `canPlayType` said probably despite
+  rejection; hints are not playback proof. Mall layout is not the demonstrated
+  cause. Specific decoder/environment cause remains unproven.
+- **fix/bounded mitigation:** validated local member cards alone may use the
+  approved animated WebP/still fallback. Reports image-animation/nativeError4
+  and null time. Pause, reduced motion, hidden state and teardown stop it;
+  Next/Previous reuse the queue. Native errors retain HTML5 classification.
+- **rejected:** treating image motion as decoded video, fake ENDED/time,
+  replacing YouTube, changing approved media bytes, interpreting Windows
+  WebKit as physical Safari, and relaxing public/member authorization.
+- **regression/evidence:** existing phone browser's VOTE native phone/desktop
+  and reduced-motion cases, six engine rows passed; checks decoded time or
+  actual changing image frames/stable pause separately. Existing catalog,
+  boot/state and VOTE worker tests cover record and access boundaries.
+- **references:** shared INTERFACE optional member cards; VOTE canonical JSON;
+  existing media-delivery contract. Private controls/receipts are retained by
+  the execution owner, not claimed as Brain/HoloIndex ingestion.
+- **status/supersession/next:** IMPLEMENTED_CANDIDATE, 2026-11-25 JST; no earlier
+  observation rewritten. Complete final exact-source regression, independent
+  review and isolated preview before separate live/device acceptance.
+
 ## 2026-11-25 — Home/dock drift and next-hidden correction
 
 - **incident_id:** PFMALL-MEDIA-20261111-HPC (existing canonical incident).

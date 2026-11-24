@@ -1,5 +1,14 @@
 # TestModLog — Vote/Ballots FoundUp
 
+## [2026-11-25] — Shared current-owner collection
+
+Extend canonical catalog and existing public-worker tests for the two approved
+records/assets and fixed entry/bookmark preservation. Existing shared browser
+fixtures exercise 320/390px/desktop, actual MP4 time or explicit image-animation
+fallback, motion/pause/hidden cleanup, search and return. Native/image outcomes
+remain separate; physical iPhone and Sites release are not established by these
+tests. Integrated exact-head results are recorded with the shared release.
+
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
 ## [2026-11-22] — Source-selected HPC handoff

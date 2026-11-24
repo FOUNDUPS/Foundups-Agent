@@ -113,6 +113,28 @@ test('the cover hands every original guide fragment back to the guide', () => {
   assert.deepEqual(redirects, []);
 });
 
+test('the deck entry uses a fixed shared-PWA destination and preserves every original guide bookmark', () => {
+  const entryCode = readFileSync(new URL('../web/deck-entry.js', import.meta.url), 'utf8');
+  function enter(fragment, search = '?next=https%3A%2F%2Foutside.test') {
+    const location = new URL(origin + '/' + search + '#' + fragment);
+    const redirects = [];
+    location.replace = (destination) => redirects.push(String(destination));
+    vm.runInNewContext(entryCode, { URL, location });
+    assert.equal(redirects.length, 1);
+    return redirects[0];
+  }
+  for (const [, id] of guideMarkup.matchAll(/\bid="([^"]+)"/g)) {
+    assert.equal(enter(id, '?from=bookmark'), origin + '/guide?from=bookmark#' + id);
+  }
+  for (const fragment of ['', 'comic-cover', '%E0%A4', '//outside.test/path']) {
+    assert.equal(enter(fragment), 'https://play.foundups.com/member/?foundup=voteballots');
+  }
+  const markup = readFileSync(new URL('../web/deck-entry.html', import.meta.url), 'utf8');
+  for (const destination of ['dispatch', 'guide', 'contact']) {
+    assert.ok(markup.includes(`href="${destination}"`));
+  }
+});
+
 test('Oversight serves the scoped maps, roadmap and manual contact offline', async () => {
   const file = new URL('../oversight/public/sw.js', import.meta.url);
   const scope = origin + '/web/';

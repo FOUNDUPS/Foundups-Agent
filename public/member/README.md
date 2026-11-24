@@ -1,5 +1,15 @@
 # FoundUPS Member Mall
 
+## Optional VOTE collection — 2026-11-25 candidate
+
+`https://play.foundups.com/member/?foundup=voteballots` selects the VOTE-owned
+two-card collection through this shared shell. It starts in tiles, reuses the
+same player/dock and does not grant member application access. The
+[typed-media contract](INTERFACE.md#2026-11-25--optional-vote-member-cards)
+separates native MP4 playback from the approved image-animation fallback,
+reduced-motion stills, Pending scores and separate Sites release. Controlled
+browser acceptance is not deployment or physical-iPhone evidence.
+
 ## 2026-11-25 — Home and shared bottom controls candidate
 
 Fresh desktop HPC opens TV. Select its artwork/Home for HPC tiles; this tab

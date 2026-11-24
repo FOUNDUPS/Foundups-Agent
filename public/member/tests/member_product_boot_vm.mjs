@@ -379,6 +379,25 @@ await check('play.foundups.com mounts the open Mall landing without Clerk or Fir
   assert.equal(h.state.consumes, 0);
 });
 
+await check('Play VOTE collection is public while member entry and auth remain gated', async () => {
+  const open = harness({ url: 'https://play.foundups.com/member/?foundup=voteballots', bootVideo: true, noClerk: true });
+  await flush();
+  assert.deepEqual(open.state.videoMounts, ['voteballots']);
+  assert.deepEqual(open.state.imports, []);
+  assert.deepEqual(open.state.reads, []);
+  assert.deepEqual(open.state.writes, []);
+  assert.equal(open.state.consumes, 0);
+  for (const url of ['https://foundups.com/member/?foundup=voteballots',
+    'https://play.foundups.com/member/?foundup=voteballots&auth=failed',
+    'https://foundups.com/member/?enter=voteballots']) {
+    const gated = harness({ url, bootVideo: true });
+    await flush();
+    assert.deepEqual(gated.state.videoMounts, []);
+    assert.deepEqual(gated.state.writes, []);
+    assert.match(gated.win.location.href, /^https:\/\/(?:play\.)?foundups\.com\/\?signin=required$/);
+  }
+});
+
 await check('FoundUp entry handoff through foundups.com requires Clerk, invite, and username before opening FoundUp', async () => {
   const entryUrl = 'https://foundups.com/member/?enter=gotjunk_001';
   const signedOut = harness({ url: entryUrl });

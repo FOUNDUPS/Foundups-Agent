@@ -1,3 +1,15 @@
+## 2026-11-25 — VOTE typed native/image media regression
+
+Extend existing phone-browser fixtures with six engine/case rows for two-card
+tiles, 320/390px and desktop geometry, common-stage containment, native decoding
+and time, one-source replacement, keyboard expansion/Escape return, submitted
+search and initial/live reduced motion. Native error4 fallback must expose its
+image provider, null time, changing frames and stable paused still. Minimal
+native URL/blob controls distinguish Windows WebKit's source rejection from
+Mall behavior. Add state/boot public-selector and protected-boundary checks;
+reuse VOTE worker and canonical catalog owner tests. Focused six rows passed;
+final combined exact-head results remain in the release receipt. WSP5/22/97.
+
 ## 2026-11-25 — Home/dock and selection-only tucked Next
 
 Extend the current phone/browser, queue and preference owners rather than add

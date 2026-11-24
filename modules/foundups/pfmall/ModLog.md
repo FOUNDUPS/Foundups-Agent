@@ -636,6 +636,16 @@ This is a **stacked review**, not a production cutover.
 
 # p.fMALL ModLog
 
+## 2026-11-25 — Reviewed VOTE media in shared current owners
+
+Extend current B26 with the optional VOTE member-card catalog/presentation from
+donor220206d9. Shared native lifecycle, dock/queue, geometry and return are
+preserved. Add strict local typed media and native error4 approved-image
+fallback, with truthful provider/time, pause/still, motion and teardown behavior.
+Six focused engine rows passed; combined exact-head/release/device gates remain.
+HPC catalog is not edited by this port. No Sites/DNS/Auth/model/calling release.
+WSP5/10/15/22/50/71/91/97.
+
 ## 2026-08-23 — Tier-0 contract and RedDog authority alignment
 
 **WSP Protocol**: WSP 15, WSP 22, WSP 49, WSP 50, WSP 84, WSP 97

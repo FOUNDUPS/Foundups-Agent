@@ -1,5 +1,18 @@
 # p.fMALL Roadmap
 
+## 2026-11-25 — VOTE typed-media integration
+
+**IMPLEMENTED_CANDIDATE / combined release open.** Port the reviewed two-card
+payload into current B26 owners. Keep shared player geometry and source/queue
+lifecycle; optional native/image presentation must not fork the Mall or relax
+YouTube requirements. Acceptance includes two records, readable text/44px
+targets at 320/390px and desktop, decoded MP4 time where supported, explicit
+image fallback motion/pause where native error4 occurs, initial/live reduced
+motion, search, expansion and return. Focused six engine rows passed. Final
+exact-head regression, independent review, delivery and physical iPhone remain
+separate. The owning VOTE Sites entry is released only after shared collection
+verification; no Sites publication is performed by this runtime integration.
+
 ## 2026-11-25 — Shared dock/Home and selection-only hidden queue
 
 **IMPLEMENTED_CANDIDATE / acceptance open.** Extend the existing dock loan for

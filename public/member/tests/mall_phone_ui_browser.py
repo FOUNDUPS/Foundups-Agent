@@ -28,7 +28,7 @@ import mall_scoped_video_browser as fixture
 from playwright.sync_api import expect, sync_playwright
 
 REPORT = {
-    'provider': 'Existing controlled YT API fixture; all requests intercepted',
+    'provider': 'Controlled YT API fixture; VOTE uses real source-bound local MP4 bytes. All requests intercepted.',
     'physical_iPhone': 'UNEXECUTED',
     'candidate_scope': 'Selective pre-Fractal reversible return and navigation/tap core',
     'excluded_source_cases': [
@@ -48,9 +48,11 @@ REPORT = {
 
 
 def hashes():
-    return {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in sorted((ROOT / 'public').rglob('*')) if p.is_file()
-            and '/tests/' not in p.as_posix() and '__pycache__' not in p.parts}
+    files = [p for p in sorted((ROOT / 'public').rglob('*')) if p.is_file()
+             and '/tests/' not in p.as_posix() and '__pycache__' not in p.parts]
+    vote = ROOT / 'modules/foundups/voteballots/web'
+    files += [vote / 'congressional-cards.json'] + sorted((vote / 'comics').glob('*-card-*'))
+    return {p.relative_to(ROOT).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
 
 
 def save():
@@ -1457,6 +1459,155 @@ def dog_and_camera_actions(page):
             'camera_destination': page.url, 'actual_camera': 'UNEXECUTED'}
 
 
+def observe_member_media(page):
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    snapshot = page.evaluate('mallVideoPlayer.getPlaybackSnapshot()')
+    if snapshot['provider'] == 'html5':
+        page.wait_for_function("document.querySelector('#videoPlayerFullscreen video')?.currentTime>.15")
+        native = page.locator('#videoPlayerFullscreen video').evaluate('e=>({duration:e.duration,width:e.videoWidth,height:e.videoHeight,time:e.currentTime,loop:e.loop,muted:e.muted,paused:e.paused})')
+        assert_true(native['width'] == 480 and native['height'] == 562 and abs(native['duration']-4) < .1 and
+                    native['loop'] and native['muted'] and not native['paused'], native)
+        return {'kind':'native-video','decoded_playback':native}
+    assert_true(snapshot['provider'] == 'image-animation' and snapshot['nativeErrorCode'] == 4 and
+                snapshot['fallback'] == 'approved-animated-webp' and snapshot['positionSeconds'] is None, snapshot)
+    image = page.locator('#videoPlayerFullscreen .video-player-member-animation img')
+    page.wait_for_function("document.querySelector('.video-player-member-animation img')?.naturalWidth>0")
+    assert_true(image.get_attribute('src').endswith('-loop.webp'), 'Fallback did not use the approved motion asset')
+    first = image.screenshot()
+    changed = False
+    for _ in range(12):
+        page.wait_for_timeout(100)
+        if image.screenshot() != first:
+            changed = True
+            break
+    assert_true(changed, 'Image fallback did not demonstrate changing frames')
+    page.get_by_role('button', name='Pause card animation', exact=True).click()
+    expect(image).to_have_attribute('src', __import__('re').compile(r'-still\.webp$'))
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='paused'")
+    paused = image.screenshot(); page.wait_for_timeout(250)
+    assert_true(image.screenshot() == paused, 'Paused fallback still changed frames')
+    video_action(page, 'play')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    return {'kind':'image-animation','native_error':4,'frames_changed':True,'pause_still_verified':True,
+            'native_video_playback':'NOT_SUPPORTED_IN_THIS_ENVIRONMENT','media_time':None}
+
+
+def vote_native_cards(page, desktop=False):
+    page.emulate_media(reduced_motion='no-preference')
+    if not desktop:
+        page.set_viewport_size({'width': 390, 'height': 844})
+    page.goto('https://play.foundups.com/member/?foundup=voteballots', wait_until='domcontentloaded')
+    tiles = page.locator('#mallTileField .mall-member-card')
+    expect(tiles).to_have_count(2)
+    expect(page.locator('#videoScopeTitle')).to_have_text('VOTE')
+    expect(page.get_by_role('textbox', name='Search VOTE cards', exact=True)).to_be_visible()
+    expect(page.locator('#videoScopePhoneDock .mall-search-add')).not_to_be_visible()
+    expect(page.locator('#videoScopePhoneDock .mall-search-plus')).to_have_attribute('aria-label', 'Available actions')
+    assert_true(page.evaluate('!mallVideoPlayer.isOpen()'), 'VOTE forced desktop theater')
+    widths = [1440, 1000] if desktop else [390, 320]
+    measured = []
+    for width in widths:
+        page.set_viewport_size({'width': width, 'height': 900 if desktop else 844})
+        for tile, expected in [(tiles.nth(0), 'Chuck Schumer'), (tiles.nth(1), 'Hakeem Jeffries')]:
+            expect(tile.locator('h3')).to_have_text(expected)
+            expect(tile.locator('.mall-member-card-scores')).to_contain_text('UDP Pending')
+            expect(tile.locator('.mall-member-card-scores')).to_contain_text('CU Pending')
+            geometry = tile.evaluate('''e=>{
+              const b=e.getBoundingClientRect(),h=e.querySelector('header').getBoundingClientRect(),
+                a=e.querySelector('.mall-tile-expand').getBoundingClientRect(),f=e.querySelector('footer').getBoundingClientRect();
+              return {width:b.width,height:b.height,targetWidth:a.width,targetHeight:a.height,
+                clearHeading:a.top>=h.bottom,clearFooter:a.bottom<=f.top,overflow:e.scrollWidth>e.clientWidth+1};
+            }''')
+            assert_true(geometry['targetWidth'] >= 44 and geometry['targetHeight'] >= 44 and
+                        geometry['clearHeading'] and geometry['clearFooter'] and not geometry['overflow'], geometry)
+            measured.append({'viewport': width, 'member': expected, **geometry})
+    page.set_viewport_size({'width': 1440 if desktop else 390, 'height': 900 if desktop else 844})
+    page.screenshot(path=str(OUT.with_name(OUT.stem+'-'+REPORT['engine']+'-vote-'+('desktop' if desktop else 'phone')+'.png')))
+    tiles.first.focus(); page.keyboard.press('Enter')
+    page.wait_for_function("mallVideoPlayer.isFloating()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    player = page.locator('#videoPlayerFullscreen')
+    native = observe_member_media(page)
+    page.evaluate("window.retiredVoteMedia=document.querySelector('#videoPlayerFullscreen video, #videoPlayerFullscreen .video-player-member-animation')")
+    stage = player.locator('.video-player-stage').bounding_box()
+    card = player.locator('.video-player-member-card').bounding_box()
+    assert_true(card['width'] <= stage['width']+1 and card['height'] <= stage['height']+1, {'stage':stage,'card':card})
+    expect(player.locator('h2')).to_have_text('Chuck Schumer')
+    expect(player.locator('iframe')).to_have_count(0)
+    video_action(page, 'next')
+    page.wait_for_function("mallVideoPlayer.getCurrentIndex()===1&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    assert_true(page.evaluate("!retiredVoteMedia.isConnected&&(retiredVoteMedia.tagName==='VIDEO'?retiredVoteMedia.paused&&!retiredVoteMedia.hasAttribute('src'):!retiredVoteMedia.querySelector('img'))"), 'Retired media remains active')
+    expect(player.locator('video, .video-player-member-animation')).to_have_count(1)
+    expect(player.locator('h2')).to_have_text('Hakeem Jeffries')
+    video_action(page, 'expand')
+    expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+    expect(page.locator('#videoScopePhoneDock')).to_be_visible()
+    page.keyboard.press('Escape')
+    page.wait_for_function('mallVideoPlayer.isMallHidden()||!mallVideoPlayer.isOpen()')
+    expect(tiles.nth(1)).to_be_visible()
+    query = page.get_by_role('textbox', name='Search VOTE cards', exact=True)
+    query.fill('Jeffries')
+    query.press('Enter')
+    expect(tiles).to_have_count(1)
+    expect(tiles.first.locator('h3')).to_have_text('Hakeem Jeffries')
+    query.fill(''); expect(tiles).to_have_count(2)
+    # Compare with the same shared floating stage, not a separately sized player.
+    page.goto('https://hpc.foundups.com/member/', wait_until='domcontentloaded')
+    expect(page.locator('#mallTileField .mall-tile').first).to_be_attached()
+    if desktop:
+        page.get_by_role('link', name='Home: HPC video tiles', exact=True).click()
+        page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'")
+    page.locator('#mallTileField .mall-tile[data-video-id]').first.focus(); page.keyboard.press('Enter')
+    page.wait_for_function("mallVideoPlayer.isFloating()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    reference = page.locator('#videoPlayerFullscreen .video-player-stage').bounding_box()
+    assert_true(abs(reference['width']-stage['width']) < 1 and abs(reference['height']-stage['height']) < 1,
+                {'vote_stage':stage,'hpc_stage':reference})
+    return {'observed_media':native,'two_cards':True,'targets':measured,'same_shared_stage':True,
+            'single_native_source_and_cleanup':True,'search_and_escape_return':True,'physical_iPhone':'UNEXECUTED'}
+
+
+def vote_reduced_motion(page):
+    page.goto('https://play.foundups.com/member/?foundup=voteballots', wait_until='domcontentloaded')
+    tile = page.locator('#mallTileField .mall-member-card').first
+    expect(tile).to_be_visible()
+    page.wait_for_function("document.querySelector('.mall-member-card img')?.currentSrc.endsWith('-still.webp')")
+    tile.focus(); page.keyboard.press('Enter')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='manual-play'")
+    media = page.locator('#videoPlayerFullscreen video')
+    initial = media.evaluate('e=>({paused:e.paused,time:e.currentTime,autoplay:e.autoplay,poster:e.poster})')
+    assert_true(initial['paused'] and initial['time'] == 0 and not initial['autoplay'] and initial['poster'].endswith('-still.webp'), initial)
+    video_action(page, 'play')
+    manual = observe_member_media(page)
+    page.emulate_media(reduced_motion='no-preference')
+    video_action(page, 'next')
+    page.wait_for_function("mallVideoPlayer.getCurrentIndex()===1&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    page.emulate_media(reduced_motion='reduce')
+    page.wait_for_function("""()=>{
+      const v=document.querySelector('#videoPlayerFullscreen video'),i=document.querySelector('.video-player-member-animation img');
+      return v?v.paused&&v.currentTime===0&&!v.autoplay:i?.getAttribute('src').endsWith('-still.webp')&&mallVideoPlayer.getPlaybackSnapshot()?.state==='paused';
+    }""")
+    validity = page.evaluate('''()=>{
+      const good={source_url:'/member/vote/comics/schumer-card-loop.mp4',member_card:{name:'Chuck Schumer',chamber:'U.S. Senate',
+        constituency:'New York',hashtag:'#SchumerOUT',still_url:'/member/vote/comics/schumer-card-still.webp',
+        animation_url:'/member/vote/comics/schumer-card-loop.webp',udp_score:null,cu_score:null}};
+      return [mallVideoPlayer.isMemberCardVideo(good), ...[
+        {source_url:'https://external.example/card.mp4'}, {embed_url:'https://www.youtube.com/embed/iJuguXpbRR4'},
+        {source_url:'/member/vote/comics/../schumer-card-loop.mp4'},
+        {member_card:{...good.member_card,udp_score:90}}, {member_card:{...good.member_card,still_url:'/other.webp'}}
+      ].map(change=>mallVideoPlayer.isMemberCardVideo({...good,...change}))];
+    }''')
+    assert_true(validity == [True,False,False,False,False,False], validity)
+    page.emulate_media(reduced_motion='no-preference')
+    video_action(page, 'previous')
+    page.wait_for_function("mallVideoPlayer.getCurrentIndex()===0&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    app_touch(page, page.locator('.video-player-gesture-grip'), dx=85)
+    page.wait_for_function('mallVideoPlayer.isTucked()')
+    app_touch(page, page.locator('.video-player-tuck-handle'), dx=26, start_fraction=.25)
+    page.wait_for_function("mallVideoPlayer.isTucked()&&mallVideoPlayer.getCurrentIndex()===1&&mallVideoPlayer.getPlaybackSnapshot()?.state==='selected-hidden'")
+    expect(page.locator('#videoPlayerFullscreen video, #videoPlayerFullscreen .video-player-member-animation')).to_have_count(0)
+    return {'initial_still_and_paused':initial,'manual_play':manual,'live_motion_change_stops':True,
+            'typed_media_boundary':validity,'hidden_next_has_no_active_media':True,'physical_iPhone':'UNEXECUTED'}
+
+
 def run_case(browser, name, fn, block=False, block_storage=False, silent_start=False, desktop=False, hold_ready=False):
     if args.case and name not in args.case:return
     REPORT['active_case'] = name
@@ -1482,7 +1633,10 @@ def run_case(browser, name, fn, block=False, block_storage=False, silent_start=F
               state:window.mallVideoPlayer?.getPlaybackSnapshot?.(),
               dialogs:[...document.querySelectorAll('dialog[open]')].map(x=>x.getAttribute('aria-label')),
               accountPlane:document.querySelector('#accountPlane')?.className,
-              focused:document.activeElement?.outerHTML?.slice(0,400)})""")
+              focused:document.activeElement?.outerHTML?.slice(0,400),
+              native:[...document.querySelectorAll('#videoPlayerFullscreen video')].map(e=>({
+                src:e.getAttribute('src'),error:e.error?{code:e.error.code,message:e.error.message}:null,
+                ready:e.readyState,network:e.networkState,paused:e.paused,time:e.currentTime}))})""")
         except Exception:
             pass
         try:
@@ -1539,6 +1693,9 @@ try:
                 run_case(browser, 'hpc-home-shared-desktop-dock', hpc_home_shared_desktop_dock, desktop=True)
                 run_case(browser, 'theater-clean-control-regression', theater_clean_control_regression, desktop=True)
                 run_case(browser, 'dog-and-camera-actions', dog_and_camera_actions)
+                run_case(browser, 'vote-native-cards', vote_native_cards)
+                run_case(browser, 'vote-native-desktop', lambda page: vote_native_cards(page, True), desktop=True)
+                run_case(browser, 'vote-reduced-motion', vote_reduced_motion)
                 run_case(browser, 'conditional-manual-recovery', blocked_recovery, True)
                 run_case(browser, 'silent-start-provider-unknown', silent_start_unknown, silent_start=True)
             finally:
@@ -1547,7 +1704,7 @@ finally:
     REPORT['source_sha256_after'] = hashes()
     REPORT['source_stable'] = REPORT['source_sha256_before'] == REPORT['source_sha256_after']
     REPORT['elapsed_seconds'] = round(time.time() - REPORT['started_epoch'], 3)
-    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (66 if args.include_defensive else 64)) and
+    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (72 if args.include_defensive else 70)) and
         all(row['passed'] for row in REPORT['cases']) and REPORT['source_stable']) else 'FAIL'
     save()
 sys.exit(0 if REPORT['status'] == 'PASS' else 1)

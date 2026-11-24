@@ -1,5 +1,21 @@
 # Member Mall tests
 
+## VOTE typed media qualification — 2026-11-25
+
+The existing `mall_phone_ui_browser.py` adds `vote-native-cards`,
+`vote-native-desktop` and `vote-reduced-motion`. The shared local route serves
+the seven canonical module payloads, including MP4 byte ranges. Media is not
+mocked: Chromium must decode 480×562 video and advance time; unsupported native
+sources must report the image-animation fallback, demonstrate changing frames,
+pause to a stable still and retain null media time. Both paths exercise cleanup,
+the common stage, two records, search, expansion/return and motion changes.
+Windows WebKit is not physical Safari or installed-PWA qualification.
+
+Run these with the repository-approved bounded environment, then the full
+existing suite and state/boot/catalog/worker regressions. Browser hashes include
+the canonical VOTE catalog and six assets. Existing controlled YouTube fixtures
+remain distinct from real-provider acceptance.
+
 ## Home/dock and hidden Next qualification — 2026-11-25
 
 `mall_phone_ui_browser.py` adds `hpc-home-shared-desktop-dock` and

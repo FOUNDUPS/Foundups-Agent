@@ -1,5 +1,37 @@
 # Member Area Interface
 
+## 2026-11-25 — Optional VOTE member cards
+
+The public Play selector `?foundup=voteballots` mounts exactly two reviewed
+records from the VOTE-owned `web/congressional-cards.json`. It uses the existing
+field, shared player, search dock, queue and return state. VOTE starts in tiles
+on desktop as well as phone. HPC retains its default desktop theater and
+explicit Home/grid choice. Apex member entry and protected VOTE application
+admission are unchanged; collection visibility grants no account capability.
+
+`mallVideoPlayer.isMemberCardVideo(video)` admits the optional `member_card`
+presentation only with bounded identity fields, null UDP/CU and matching local
+MP4/still/animated-WebP paths. Only that type bypasses the small-poster autoplay
+trigger; YouTube sizing, controls and visibility guards remain intact. The
+9:16 inner card fits the existing common stage. Text and Pending values remain
+outside the artwork; the tile's 44px expand target stays clear of that text.
+
+Approved silent four-second MP4s use the existing HTML5 branch. A native
+MEDIA_ERR_SRC_NOT_SUPPORTED (4) may select the approved animated WebP in the
+same card. That fallback reports `provider: image-animation`,
+`fallback: approved-animated-webp`, `nativeErrorCode: 4` and null media time;
+it is not evidence of decoded video playback. Its image button pauses to the
+approved still and supports keyboard activation. Hidden/returned/replaced
+cards stop animation, and reduced motion starts with stills and no autoplay.
+Deliberate Play remains possible. Observer, motion and stale media callbacks
+are cleaned up by the existing render generation and teardown owner.
+
+Both media forms loop; they do not synthesize ENDED events or queue timing.
+Explicit Next/Previous, search, expansion and return remain shared. Attribution,
+official profiles, independent disclosure, Dispatch/guide/contact links remain
+accessible. No scores are calculated. The fixed VOTE Sites handoff template
+is source only until its owning release is separately qualified.
+
 ## 2026-11-25 — Scoped Home, shared theater dock and hidden selection
 
 **IMPLEMENTED_CANDIDATE; release/device acceptance remains open.** Fresh desktop

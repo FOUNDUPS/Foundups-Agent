@@ -1,5 +1,15 @@
 # p.fMALL Interface
 
+## 2026-11-25 — Optional member-card projection
+
+VOTE's two reviewed records reuse the existing fixed field, HTML5 player branch,
+search dock, queue and return state. The shared
+[typed-media contract](../../../public/member/INTERFACE.md#2026-11-25--optional-vote-member-cards)
+owns strict local asset admission, common-stage containment, image-animation
+fallback diagnostics, reduced-motion and cleanup. VOTE starts in tiles; HPC's
+theater/Home selection, YouTube guards and protected application entry remain
+unchanged. Collection discovery does not authorize scores, voting or membership.
+
 ## 2026-11-25 — Scoped navigation and hidden selection candidate
 
 Use the [current shared contract](../../../public/member/INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)

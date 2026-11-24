@@ -1,5 +1,20 @@
 # Member Area Module Change Log
 
+## 2026-11-25 — Optional VOTE cards through current B26 owners
+
+Port donor220206d9's two-card catalog/artwork into the current shared field,
+HTML5 branch and dock instead of replacing newer runtime files. Preserve HPC
+Home/theater and next-hidden. VOTE uses default tiles, strict local typed media,
+44px artwork-corner expand targets and null/Pending UDP/CU. Native media,
+motion/observer teardown and generation guards remain shared.
+Minimal URL and browser-blob controls reproduced Windows WebKit native error4;
+Chromium decoded and advanced the approved MP4. Add the already approved
+animated-WebP/still fallback with truthful image-animation diagnostics, pause,
+reduced-motion and hidden cleanup. Six focused browser rows pass across both
+engines, separately proving native video versus changing image frames.
+Exact-head integrated regression, independent review, release and physical
+iPhone remain separate gates. No Sites/DNS/Auth/backend release. WSP5/10/22/50/71/91/97.
+
 ## 2026-11-25 — Scoped Home, shared TV dock and hidden Next
 
 Extend the existing projection/state/player/field owners at base187c79a5.
