@@ -7,7 +7,7 @@
   Dispatch portrait-section change; do not duplicate the shared shell.
 - Exact labels: Chuck Schumer / U.S. Senate / New York and Hakeem Jeffries /
   U.S. House / New York District 8. Official congressional pages were checked.
-  Use #ChuckSchumerOUT and #ChuckJeffriesOUT; show UDP/CU Pending without scores.
+  Use #SchumerOUT and #JeffriesOUT; show UDP/CU Pending without scores.
 - MPS: C3 + I4 + D4 + Impact4 = 15/P1. One bounded card-media layer, existing
   owners and no provider/model generation. Approved Muse/Wan files supply native
   reduced-motion stills, animated WebP tiles and silent four-second MP4 playback.

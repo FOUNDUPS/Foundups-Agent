@@ -1,3 +1,23 @@
+## VOTE selected public scope review — 2026-11-25
+
+PR #2453 head `cabe648d1783503e0c64a4ddff4f502f0bc01185`, security job
+`138818239266`, reported one unreviewed current-tree match and zero unreviewed
+introduced-history matches. Author and independent verifier compared canonical
+Git LF bytes against base `60eb7f321647a6736826f33fbceb0f90fe2b773b`.
+The public frontend SDK identifier at `public/member/index.html:28`, including
+five lines of surrounding context, is unchanged and already approved in the base.
+Only the VOTE/Play query-normalization guard later in that file changed.
+
+The base file SHA256 is
+`b8a3238ed8b062fc86574106360c201e0e8fc7a25e25c0dff780e0ca025e3b23`;
+the reviewed head file SHA256 is
+`7ff050e28fb771ae7dad41922506ece50ae9510f71205a63f3cc73e157f7c866`.
+Append only the exact current-file / `generic-api-key` / line-28 binding,
+preserving all 4,822 earlier entries and their order (4,823 total). No candidate
+value is reproduced. Scanner rules, scope, history checks, fingerprint formula
+and failure handling remain unchanged. Fresh exact-head hosted checks are required.
+WSP 71 section 5.5 and WSP 97 apply; this review is not deployment acceptance.
+
 ## HPC public guest review — 2026-11-20
 
 PR #2435 job 136139611051 on head `0d2c0fc20` reported 41 unreviewed

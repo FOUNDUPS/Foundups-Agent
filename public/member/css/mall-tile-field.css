@@ -19,7 +19,9 @@
 }
 
 /* Typed member media uses the same tile geometry as every other Mall item. */
+.mall-member-card { container-type: inline-size; }
 .mall-member-card::after { display: none; }
+[data-mall-video-scope="voteballots"] .mall-tile-field .mall-member-card { aspect-ratio: 9 / 16; }
 .mall-member-card .mall-member-card-content {
   position: absolute;
   inset: 0;
@@ -30,14 +32,36 @@
   pointer-events: none;
 }
 .mall-member-card-heading, .mall-member-card-footer { padding: .35rem .4rem; }
-.mall-member-card-heading h3 { margin: 0; font-size: .875rem; line-height: 1.15; overflow-wrap: anywhere; }
-.mall-member-card-heading p { margin: .2rem 0 0; font-size: .75rem; line-height: 1.15; }
-.mall-member-card-art { display: block; min-height: 0; overflow: hidden; background: #f6eddf; }
+.mall-member-card .mall-member-card-heading h3 { margin: 0; font-size: min(.875rem, 12cqi); line-height: 1.15; overflow-wrap: anywhere; }
+.mall-member-card .mall-member-card-heading p { margin: .2rem 0 0; font-size: min(.75rem, 10cqi); line-height: 1.15; }
+.mall-member-card .mall-member-card-heading :is(h3, p) {
+  display: block;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+}
+.mall-member-card-art { position: relative; display: block; min-height: 0; overflow: hidden; background: #f6eddf; }
+.mall-member-card-art > picture { display: block; width: 100%; height: 100%; }
+.mall-member-card .mall-member-card-art > .mall-tile-expand {
+  top: .25rem;
+  right: .25rem;
+  bottom: auto;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  pointer-events: auto;
+}
 .mall-member-card-art img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .mall-member-card-footer p { margin: 0; }
-.mall-member-card-hashtag { font-size: .875rem; line-height: 1.15; overflow-wrap: anywhere; font-weight: 700; }
+.mall-member-card .mall-member-card-hashtag { font-size: min(.875rem, 10cqi); line-height: 1.15; overflow-wrap: anywhere; font-weight: 700; }
 .mall-member-card-hashtag strong { color: #ffdf61; font-weight: 900; }
-.mall-member-card-scores { display: flex; flex-wrap: wrap; gap: .15rem .5rem; font-size: .75rem; line-height: 1.2; }
+.mall-member-card .mall-member-card-scores { display: flex; flex-wrap: wrap; gap: .15rem .5rem; font-size: min(.75rem, 10cqi); line-height: 1.2; }
 .mall-member-card-scores b { font-weight: 400; }
 
 /* ========== Projection Controls ========== */

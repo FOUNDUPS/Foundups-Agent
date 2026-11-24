@@ -1357,8 +1357,8 @@
         playIndicator +
         audioBtn +
         enterFoundupBtn +
-        expandBtn +
-        (memberCard ? renderMemberCard(memberCard) : '<div class="mall-tile-inner">' +
+        (memberCard ? '' : expandBtn) +
+        (memberCard ? renderMemberCard(memberCard, expandBtn) : '<div class="mall-tile-inner">' +
           '<span class="mall-tile-token">' + escapeHtml(item.token_symbol || '') + '</span>' +
           '<span class="mall-tile-hero">' + escapeHtml(item.hero_label || '') + '</span>' +
           '<p class="mall-tile-name">' + escapeHtml(item.name || item.title || '') + '</p>' +
@@ -1456,16 +1456,16 @@
   }
 
   // Optional media metadata; the existing tile, selection and player remain the owners.
-  function renderMemberCard(card) {
+  function renderMemberCard(card, expandBtn) {
     var hashtag = String(card.hashtag || '');
     var action = /OUT$/.test(hashtag)
       ? escapeHtml(hashtag.slice(0, -3)) + '<strong>OUT</strong>' : escapeHtml(hashtag);
     return '<div class="mall-member-card-content">' +
       '<header class="mall-member-card-heading"><h3>' + escapeHtml(card.name || '') + '</h3>' +
       '<p>' + escapeHtml([card.chamber, card.constituency].filter(Boolean).join(' · ')) + '</p></header>' +
-      '<picture class="mall-member-card-art"><source media="(prefers-reduced-motion: no-preference)" type="image/webp" srcset="' +
+      '<div class="mall-member-card-art"><picture><source media="(prefers-reduced-motion: no-preference)" type="image/webp" srcset="' +
       escapeAttr(card.animation_url || card.still_url || '') + '"><img src="' + escapeAttr(card.still_url || '') +
-      '" alt="' + escapeAttr('AI caricature of ' + (card.name || 'a member of Congress')) + '" loading="lazy"></picture>' +
+      '" alt="' + escapeAttr('AI caricature of ' + (card.name || 'a member of Congress')) + '" loading="lazy"></picture>' + (expandBtn || '') + '</div>' +
       '<footer class="mall-member-card-footer"><p class="mall-member-card-hashtag">' + action + '</p>' +
       '<p class="mall-member-card-scores"><span>UDP <b>Pending</b></span><span>CU <b>Pending</b></span></p></footer></div>';
   }
@@ -2180,6 +2180,7 @@
   }
 
   function canAutoplayFromTile(tile) {
+    if (tile?.classList.contains('mall-member-card')) return true;
     // YouTube requires at least 120 × 70 CSS pixels for an autoplay trigger.
     var rect = tile?.getBoundingClientRect();
     return !!rect && rect.width >= 120 && rect.height >= 70;

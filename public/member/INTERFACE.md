@@ -61,8 +61,8 @@ The UI always labels both scores **Pending**; no funding score is computed.
 
 | Member | Office metadata and primary reference | Action text |
 |---|---|---|
-| Chuck Schumer | [U.S. Senate · New York](https://www.schumer.senate.gov/) | `#ChuckSchumerOUT` |
-| Hakeem Jeffries | [U.S. House · New York, District 8](https://jeffries.house.gov/about/) | `#ChuckJeffriesOUT` |
+| Chuck Schumer | [U.S. Senate · New York](https://www.schumer.senate.gov/) | `#SchumerOUT` |
+| Hakeem Jeffries | [U.S. House · New York, District 8](https://jeffries.house.gov/about/) | `#JeffriesOUT` |
 
 The approved Meta Muse / Alibaba Wan art remains separate from this text.
 Tiles use animated WebPs with native reduced-motion still selection. Opened

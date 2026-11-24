@@ -917,7 +917,11 @@
       media.load(); // Return to the supplied still poster; playback remains a deliberate action.
     }
     motion?.addEventListener('change', reduceMotion);
-    memberMotionCleanup = function() { motion?.removeEventListener('change', reduceMotion); };
+    var cardObserver;
+    memberMotionCleanup = function() {
+      motion?.removeEventListener('change', reduceMotion);
+      cardObserver?.disconnect();
+    };
 
     var footer = document.createElement('footer');
     var hashtag = document.createElement('p');
@@ -947,6 +951,14 @@
     } catch (error) { /* An absent official profile does not fabricate a destination. */ }
     panel.append(heading, media, footer);
     stage.append(panel);
+    function fitCard() {
+      var width = Math.min(stage.clientWidth, stage.clientHeight * 9 / 16);
+      panel.style.width = width + 'px';
+      panel.style.height = width * 16 / 9 + 'px';
+    }
+    fitCard();
+    cardObserver = new ResizeObserver(fitCard);
+    cardObserver.observe(stage);
   }
 
   // ─── Render Rail ───

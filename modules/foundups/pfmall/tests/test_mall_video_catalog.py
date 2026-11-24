@@ -62,8 +62,8 @@ def test_vote_member_cards_keep_local_art_unknown_scores_and_separate_hpc_scope(
     records = lane["videos"]
     assert lane["video_count"] == len(records) == 2
     expected = {
-        "chuck-schumer": ("Chuck Schumer", "U.S. Senate", "New York", "#ChuckSchumerOUT", "www.schumer.senate.gov"),
-        "hakeem-jeffries": ("Hakeem Jeffries", "U.S. House", "New York · District 8", "#ChuckJeffriesOUT", "jeffries.house.gov"),
+        "chuck-schumer": ("Chuck Schumer", "U.S. Senate", "New York", "#SchumerOUT", "www.schumer.senate.gov"),
+        "hakeem-jeffries": ("Hakeem Jeffries", "U.S. House", "New York · District 8", "#JeffriesOUT", "jeffries.house.gov"),
     }
     assert {record["video_id"] for record in records} == set(expected)
     for record in records:

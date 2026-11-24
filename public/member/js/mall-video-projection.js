@@ -469,6 +469,12 @@
     const home = document.querySelector('.mall-header .mall-brand-minimal');
     home.href = 'https://foundups.com/member/';
     if (scope === 'hpc') home.querySelector('img').src = hpcPortrait;
+    if (memberCards) {
+      const image = home.querySelector('img');
+      image.src = '/logo-dog.png';
+      image.width = image.height = 32;
+      image.alt = '';
+    }
     home.setAttribute('aria-label', 'Return to Play FoundUps Mall');
     home.addEventListener('click', function () { window.mallStateRestore.save(); });
 
@@ -485,17 +491,21 @@
       }
 
       document.title = projection.lane.title;
-      element('videoScopeTitle').textContent = projection.lane.title;
+      element('videoScopeTitle').textContent = memberCards ? 'VOTE' : projection.lane.title;
       const identity = element('videoScopeIdentity');
       const topic = element('videoScopeTopic');
-      identity.textContent = projection.identity;
-      topic.textContent = projection.topic;
+      identity.textContent = memberCards ? '' : projection.identity;
+      topic.textContent = memberCards ? '' : projection.topic;
+      identity.hidden = topic.hidden = memberCards;
       const topicLine = document.createElement('div');
       topicLine.className = 'mall-video-scope-topic-line';
-      topicLine.innerHTML = buildLabel;
-      topicLine.prepend(topic);
-      identity.after(topicLine);
-      element('videoScopeCredit').textContent = projection.credit + (memberCards ? ' · Independent AI caricatures' : ' Shorts · Commentary and satire');
+      if (!memberCards) {
+        topicLine.innerHTML = buildLabel;
+        topicLine.prepend(topic);
+        identity.after(topicLine);
+      }
+      element('videoScopeCredit').textContent = projection.credit + (memberCards ? '' : ' Shorts · Commentary and satire');
+      element('videoScopeCredit').hidden = memberCards;
       field.setAttribute('aria-describedby', 'videoScopeCredit');
       element('videoScopeDisclosureText').textContent = projection.disclosure;
       const disclosure = element('videoScopeDisclosure');
@@ -504,6 +514,7 @@
 
       const voice = element('videoScopeVoice');
       voice.href = voiceResource.href;
+      if (memberCards) voice.textContent = 'Voice your opinion';
       voice.addEventListener('click', () => window.mallStateRestore.save());
       const actions = document.createElement('nav');
       actions.id = 'videoScopeActions';
@@ -517,13 +528,24 @@
         const resources = document.createElement('nav');
         resources.className = 'mall-member-card-resources';
         resources.setAttribute('aria-label', 'Vote resources');
-        for (const [label, path] of [['The Vote Dispatch', 'https://vote.foundups.com/dispatch'], ['Vote guide', 'https://vote.foundups.com/guide']]) {
+        for (const [label, path] of [['Dispatch', 'https://vote.foundups.com/dispatch']]) {
           const link = document.createElement('a');
           link.href = path;
           link.textContent = label;
           resources.append(link);
         }
         header.append(resources);
+        const hpcLink = document.createElement('a');
+        hpcLink.className = 'mall-vote-hpc-link';
+        hpcLink.href = 'https://hpc.foundups.com/';
+        hpcLink.setAttribute('aria-label', 'HPC — open Hasan Piker Coalition');
+        const hpcBanner = document.createElement('img');
+        hpcBanner.src = 'https://hpc.foundups.com/member/hpc-v25/hpc-banner.webp';
+        hpcBanner.width = 1280;
+        hpcBanner.height = 353;
+        hpcBanner.alt = 'HPC';
+        hpcLink.append(hpcBanner);
+        header.append(hpcLink);
       }
       window.mallStateRestore.selectVideoScope(scope);
       window.mallTileField.initialize([projection.lane], { fixedVideoField: true });

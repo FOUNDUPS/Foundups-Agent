@@ -13,8 +13,8 @@ shared collection and real tile → viewer → return flow are qualified.
 tile/player owners. Its release path is `/member/vote/congressional-cards.json`;
 the six supplied-art derivatives map to `/member/vote/comics/`. Schumer is labeled
 U.S. Senate / New York and Jeffries U.S. House / New York District 8, with official
-congressional profile links. The action labels are `#ChuckSchumerOUT` and
-`#ChuckJeffriesOUT`, with OUT distinguished in separate HTML. UDP and CU remain
+congressional profile links. The action labels are `#SchumerOUT` and
+`#JeffriesOUT`, with OUT distinguished in separate HTML. UDP and CU remain
 Pending, never numeric scores. Names, office and captions remain outside the art.
 
 The existing four-second Muse/Wan loops are reused without generation. Animated

@@ -1,5 +1,25 @@
 # Member Area Module Change Log
 
+## 2026-11-25 — Compact VOTE identity and proportional portrait correction
+
+- Keep the existing shared shell; VOTE alone shows a 32px dog and one VOTE
+  title with compact Dispatch/Voice actions. Hide redundant header metadata.
+  The small HPC banner uses its trusted absolute production asset URL in
+  canonical source; the isolated fixture retains its local baseline path.
+- Latest action text is `#SchumerOUT` / `#JeffriesOUT`. Typed tiles and opened
+  panels retain 9:16 proportions; panel text scales with its container inside
+  the existing shared player stage, rather than enlarging the viewer.
+- An explicitly authorized headless harness recovered local browser evidence
+  after the earlier CUA timeouts. The recovered-v25 fixture passed the recorded
+  320px/390px/desktop playback, keyboard fullscreen and return checks after the
+  final control/text correction. Reduced motion selects a still without
+  autoplay. Only typed media bypasses the YouTube minimum-trigger width.
+  See TestModLog for measurements and limits.
+- Current source suites: 2,705 Python tests, 137 Vote Node tests and 23/26
+  state/boot VM checks passed. This is not a v19-to-v25/v26 port or release;
+  shared-owner integration, public deployment and physical-phone acceptance
+  remain NOT_VERIFIED. WSP 22, 50 and 97.
+
 ## 2026-11-25 — Typed VOTE cards in the existing shared player
 
 - Add optional `member_card` rendering to existing tiles and player, with

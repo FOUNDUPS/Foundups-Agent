@@ -1,3 +1,33 @@
+## 2026-11-25 — VOTE local visual correction and latest source checks
+
+- Explicit authorization for the bounded headless harness supplied browser
+  evidence after the earlier CUA timeouts. This is an isolated recovered-v25
+  fixture, not deployment or proof that canonical v19 changes were ported to
+  the active v25/v26 owner. Retained screenshots/receipts use the
+  `vote-shared-mall` prefix in the task's outputs.
+- At **390×844** and **1440×1000**, both cards opened, looped muted, expanded
+  and returned with Escape. Existing stage bounds were **372×210.59375** on
+  phone and **382×228** on desktop; the expanded phone card measured
+  **333.5625×593**. The member panel stays 9:16 inside those bounds and uses
+  proportional container text. Header identity is dog + VOTE, with compact
+  resource actions and an HPC banner; tags are `#SchumerOUT` / `#JeffriesOUT`.
+- The latest broad source rerun passed **2,705 Python tests** across
+  `public/member/tests`, `modules/foundups/pfmall/tests` and
+  `modules/foundups/voteballots/tests` in 29.72 seconds, with two existing
+  asyncio-configuration warnings. Focused Python checks passed 217 tests;
+  current Vote Node and state/boot VM results are **137**, **23** and **26**.
+- Final browser replay also passed **320×844**, with both local animations
+  advancing after the typed-media exception to YouTube's 120px trigger rule.
+  The same 44px expand buttons remain within artwork, clear of heading text;
+  keyboard Enter opens the selected member in fullscreen and Escape returns.
+  All three sizes passed both-member open/loop/expand/return, 9:16 containment,
+  no horizontal overflow and no page errors. Reduced motion uses the still,
+  remains paused at time zero and has autoplay disabled. The post-adjustment
+  focused field/catalog replay passed **216** tests.
+- This completes the recorded local fixture checks. Shared-owner release,
+  public readback and physical-phone results remain **NOT_VERIFIED**. Earlier
+  entries below retain their original source revisions and verification limits.
+
 ## 2026-11-25 — VOTE typed-card source and boot boundaries
 
 - Integration run recorded **2,292 source Python tests passed** before the

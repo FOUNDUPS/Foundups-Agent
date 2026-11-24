@@ -196,19 +196,25 @@
 /* Header, artwork and pending evidence fit inside the existing shared stage. */
 .video-player-member-card {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  aspect-ratio: 9 / 16;
+  max-width: 100%;
+  max-height: 100%;
+  container-type: inline-size;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   background: #162735;
   color: #fff4dc;
 }
-.video-player-member-card header, .video-player-member-card footer { padding: .4rem .65rem; text-align: center; }
-.video-player-member-card h2 { margin: 0; font-size: 1rem; line-height: 1.2; }
-.video-player-member-card p { margin: .2rem 0 0; font-size: .875rem; line-height: 1.2; }
+.video-player-member-card header, .video-player-member-card footer { padding: min(.4rem, 2.7cqi) min(.65rem, 4.3cqi); text-align: center; }
+.video-player-member-card h2 { margin: 0; font-size: min(1rem, 6.7cqi); line-height: 1.2; }
+.video-player-member-card p { margin: min(.2rem, 1.3cqi) 0 0; font-size: min(.875rem, 5.8cqi); line-height: 1.2; }
 .video-player-stage .video-player-member-card video { min-height: 0; object-fit: contain; background: #f6eddf; }
-.video-player-member-card .video-player-member-hashtag { font-size: 1rem; font-weight: 700; overflow-wrap: anywhere; }
+.video-player-member-card .video-player-member-hashtag { font-size: min(1rem, 6.7cqi); font-weight: 700; overflow-wrap: anywhere; }
 .video-player-member-hashtag strong { color: #ffdf61; font-weight: 900; }
-.video-player-member-card a { display: inline-block; margin-top: .2rem; color: #fff4dc; font-size: .875rem; }
+.video-player-member-card a { display: inline-block; margin-top: min(.2rem, 1.3cqi); color: #fff4dc; font-size: min(.875rem, 5.8cqi); }
 .member-card-player .video-player-title { white-space: normal; max-width: none; }
 
 .video-player-status {

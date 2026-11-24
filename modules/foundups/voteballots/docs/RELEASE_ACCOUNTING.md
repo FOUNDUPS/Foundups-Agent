@@ -31,10 +31,32 @@ Dispatch path. CUA repeatedly timed out before this new flow could be observed.
 The former 390px Dispatch-section preview is superseded and is not phone-deck
 acceptance. No physical-phone, new live-card flow or completed release is claimed.
 
-The action labels are #ChuckSchumerOUT / #ChuckJeffriesOUT. Both UDP and CU fields
+The action labels are #SchumerOUT / #JeffriesOUT. Both UDP and CU fields
 are Pending. Committee/leadership labels are omitted. Official office/constituency
 sources: [Schumer](https://www.schumer.senate.gov/) and
 [Jeffries](https://jeffries.house.gov/about/).
+
+Local correction receipt, 2026-11-25: with explicit headless-browser
+authorization, a read-only recovered-v25 fixture now verifies both cards at
+390 × 844, 320 × 844 and 1440 × 1000. Both silent MP4s advance, expand and
+return to the grid. Reduced motion selects the still and disables autoplay.
+The compact dog/VOTE header and small trusted HPC banner replace the redundant
+VOTE-only headings. The existing expand control occupies the artwork corner,
+clear of fully wrapped names and office text; native grid density is retained.
+Portrait panels remain centered at 9:16 inside the common player stage.
+The narrow typed-media selection bypasses only the YouTube-specific minimum
+trigger width; ordinary YouTube selection retains that guard.
+
+The screenshots and `vote-shared-mall-measurements.json` describe a local
+fixture, not current shared-owner integration, a deployed build or physical
+phone qualification. The 390px HPC comparison uses the same 372 × 210.59375px
+floating stage. HPC's native desktop startup remains theater while VOTE opens
+on its two tiles. All 2,705 broader Python tests passed before the final narrow
+tile adjustment; its subsequent focused field/catalog replay passed 216 tests.
+The Vote Node suites passed 137 checks and state/boot VMs passed 23/26.
+Publication remains held until the active HPC owner integrates the tested
+extension, exact-head required checks pass and the resulting live scope is
+verified. No Sites version or domain forwarding was changed.
 
 `hasan4speaker.com` was observed returning 301 to Vote's root with a browser
 User-Agent; its forwarder cannot preserve the original host after redirect.
