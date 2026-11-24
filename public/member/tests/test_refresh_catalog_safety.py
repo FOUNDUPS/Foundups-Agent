@@ -324,13 +324,16 @@ module.main()
 assert module.CATALOG_PATH.read_text(encoding='utf-8') == '[]'
 output = module.REPO_ROOT / 'public/member/discovery/catalog.json'
 assert json.loads(output.read_text(encoding='utf-8'))['items'] == []
-sys.argv = ['refresh_mall_catalog.py', '--public-pages-only', '--scoped-only', '--apply']
-try:
-    module.main()
-except SystemExit as error:
-    assert error.code == 2
-else:
-    raise AssertionError('Conflicting refresh mode was accepted')
+for conflict in [['--scoped-only'], ['--refresh-scoped-source', 'hpc'],
+                 ['--refresh-scoped-source', 'hpc', '--seed-live'], ['--discover']]:
+    sys.argv = ['refresh_mall_catalog.py', '--public-pages-only', '--apply', *conflict]
+    try:
+        module.main()
+    except SystemExit as error:
+        assert error.code == 2
+    else:
+        raise AssertionError('Conflicting refresh mode was accepted')
+assert module.CATALOG_PATH.read_text(encoding='utf-8') == '[]'
 '''
         result = subprocess.run([sys.executable, "-B", "-c", harness, str(SCRIPT_PATH), str(tmp_path)],
                                 capture_output=True, text=True, timeout=15)
