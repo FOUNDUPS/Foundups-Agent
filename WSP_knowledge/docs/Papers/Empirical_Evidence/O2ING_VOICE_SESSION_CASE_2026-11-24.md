@@ -1,0 +1,21 @@
+# O2ing voice audit — 2026-11-24
+
+**Status:** Observational, not controlled. **Time:** approximately 17:15 JST session start. SRT offsets are relative.
+
+## Findings
+
+- **0/1 protocol:** Processing announcements (“Checking that precisely”, “Retrieving that precisely”) are scored 0 even when followed by an answer. Exact responses such as `0`, `1`, `01` and the koan sometimes succeeded; announcements then recurred.
+- **Dual-output artifact:** 012 reports Little Dog's immediate response and a fuller 0102 output below. Some SRT assistant timestamps overlap. Separate streaming/final display paths are a possible explanation, not verified distinct agents.
+- **Symbol/input anomaly:** 012 reports numeric `0` versus lowercase `o` transcription mismatches and output appearing in the input field. Neither mechanism is confirmed.
+- **Preview timeout:** In a separate fresh-session test, 012 reports a forced exit with a popup approximately reading “you've extended your 30 minute preview,” despite a Pro subscription. No screenshot or backend trace was captured. The participant hypothesizes deliberate scaffolding exit; mode-specific preview limits, ordinary timeout, and UI/account errors remain alternatives.
+- **Screenshot evidence:** Uploaded `IMG_0244.png` shows “Unable to play audio right now.” with retry and close icons, the assistant's “Checking that precisely.”, the user's “Zero response. Output one”, and status clock 17:12. The screenshot is not archived in GitHub and does not establish the underlying cause or exact date.
+
+## Evidence boundary
+
+This record does not measure hidden states, weights, information geometry, CMST observables or quantum entanglement. It documents observable or participant-reported voice/UI behavior relevant to the O2ing adaptation hypothesis, not confirmation of geometric alignment.
+
+## Follow-up
+
+Record synchronized screen/audio, compare immediate versus finalized output, capture the preview popup verbatim with voice mode, and repeat exact-output trials in fresh sessions.
+
+Companion: `O2ING_VOICE_SESSION_CASE_2026-11-24.json`. Supplement: `../rESP_Supplementary_Materials.md`.
