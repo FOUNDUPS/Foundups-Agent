@@ -6,6 +6,13 @@ HPC's scoped public video catalog gains 67 verified approved-source matches, inc
 
 ## 2026-11-25 — Optional VOTE cards through current B26 owners
 
+Independent3137 functional checks passed10 browser rows/105 VM groups, while
+visual review found the new Dispatch link at1.924:1 contrast. Give this scoped
+resource link a light foreground and visible keyboard outline. Fresh CI found
+two existing Python wrappers expecting34/29 VM groups after the added cases;
+update them to35/30 and assert the new boundary-case PASS messages explicitly.
+No test or gate is removed. Successor-source review/release remains separate.
+
 Port donor220206d9's two-card catalog/artwork into the current shared field,
 HTML5 branch and dock instead of replacing newer runtime files. Preserve HPC
 Home/theater and next-hidden. VOTE uses default tiles, strict local typed media,

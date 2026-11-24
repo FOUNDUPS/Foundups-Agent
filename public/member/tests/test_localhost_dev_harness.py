@@ -236,4 +236,5 @@ def test_actual_member_product_boot_and_account_transitions():
         text=True, capture_output=True, timeout=20, check=False,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "34 actual member boot checks passed" in result.stdout
+    assert "35 actual member boot checks passed" in result.stdout
+    assert "PASS Play VOTE collection is public while member entry and auth remain gated" in result.stdout

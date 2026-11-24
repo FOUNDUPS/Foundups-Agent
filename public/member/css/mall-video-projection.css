@@ -779,7 +779,8 @@
   gap: .25rem 1rem;
   font-size: .875rem;
 }
-.mall-member-card-resources a { display: inline-flex; align-items: center; min-height: 44px; }
+.mall-member-card-resources a { display: inline-flex; align-items: center; min-height: 44px; color: #ffe09b; }
+.mall-member-card-resources a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 
 
 /* VOTE-only compact identity; other shared scopes retain their header. */

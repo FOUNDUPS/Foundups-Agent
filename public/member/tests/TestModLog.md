@@ -1,5 +1,11 @@
 ## 2026-11-25 — VOTE typed native/image media regression
 
+CI3137:2 failed/1892 passed because Python VM wrappers retained the prior34/29
+totals, while actual boot/state VMs passed35/30. Correct exact totals and assert
+the added public-collection/protected-boundary case names. Independent3137
+browser/VM acceptance passed10 rows/105 groups; its Dispatch contrast finding
+is corrected in the scoped resource style, with visual recheck still required.
+
 Extend existing phone-browser fixtures with six engine/case rows for two-card
 tiles, 320/390px and desktop geometry, common-stage containment, native decoding
 and time, one-source replacement, keyboard expansion/Escape return, submitted
