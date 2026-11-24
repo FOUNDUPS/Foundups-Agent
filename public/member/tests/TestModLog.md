@@ -1,3 +1,14 @@
+## 2026-11-25 — Home/dock and selection-only tucked Next
+
+Extend the current phone/browser, queue and preference owners rather than add
+a test framework. New acceptance covers one shared desktop dock below the app
+queue, explicit HPC Home with reload/resize persistence, actions-plus versus
+gated grid contribution, repeated hidden Next, no hidden provider work and
+paused restoration. Delayed-page checks exposed redundant geometry Pause
+callbacks invalidating catalog intent; regression retains native pause and
+force-playing enforcement. Fixture/device/real-media/source/release outcomes
+remain distinct; commands/results belong to the exact-head receipt. WSP5/22/97.
+
 ## 2026-11-23 — Clean app video gestures and opt-in local activity
 
 The shared #2439 continuation removes app title/back/expand/play chrome from

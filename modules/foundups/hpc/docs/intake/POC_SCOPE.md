@@ -1,5 +1,16 @@
 # HPC PoC scope
 
+## 2026-11-25 — Latest bounded acceptance
+
+Fresh Windows TV; explicit HPC Home to its tiles, stable through reload/resize.
+Shared search/actions dock below the app queue; one visible actions plus,
+separate gated grid Add Video, unchanged provider recommendations and controls.
+Tucked right swipe defaults to Next and stay hidden; tap restores paused and
+visible Play starts the selected clip. Retain saved next/reveal/restore/none,
+filtered/end/paged cancellation and single active provider. This supersedes the
+November23 default below. Real provider and physical iPhone/PWA qualification,
+release and unrelated Voice/model work remain separate gates.
+
 ## 2026-11-23 — Clarified acceptance
 
 Full Video right swipe → next permitted clip and playback request. Floating

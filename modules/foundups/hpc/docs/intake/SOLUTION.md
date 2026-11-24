@@ -1,5 +1,14 @@
 # HPC solution
 
+## 2026-11-25 — Extend existing owners
+
+Reuse scoped position state for explicit Home/grid intent, the existing dock
+loan for desktop TV, and gated contribution review for the separate grid plus.
+Use one shared dock below the app queue. Extend the validated tucked preference
+with next-hidden and defer provider materialization until visible restoration;
+retain bounded queue continuation/cancellation. No new URL/auth contract, Mall,
+player, voice service or model loader. H1H and the shared incident own acceptance.
+
 ## 2026-11-23 — Small shared refinement
 
 Reuse the player/frame, canonical queue APIs and one Search Dock. Move app

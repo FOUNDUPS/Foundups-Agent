@@ -1,5 +1,14 @@
 # p.fMALL Interface
 
+## 2026-11-25 — Scoped navigation and hidden selection candidate
+
+Use the [current shared contract](../../../public/member/INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)
+for explicit scoped Home, one borrowed dock below the app queue, distinct
+actions/contribution plus controls and selection-only next-hidden. State and
+queue owners remain shared. Historical next/reveal and detached search records
+below do not override this revision. Source implementation, controlled tests,
+real media, independent review, device acceptance and release remain separate.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,

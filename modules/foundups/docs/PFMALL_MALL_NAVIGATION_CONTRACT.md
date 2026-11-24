@@ -570,6 +570,24 @@ voice and Simulator boundaries.
 
 ## 14. Shared Search Dock and video preferences
 
+### 14.0a Scoped desktop dock and hidden Next — 2026-11-25
+
+**IMPLEMENTED_CANDIDATE / acceptance open.** The current
+[shared contract](../../../public/member/INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)
+supersedes conflicting earlier candidate descriptions. HPC fresh desktop keeps
+theater; explicit scoped Home remembers grid in the existing per-scope tab state.
+The order is main video, app queue, then the same shared dock used on the grid.
+Leave provider recommendations and controls intact. On HPC the dock's single
+plus opens Available actions; Add Video is a separate gated grid action. Other
+FoundUps retain their own contribution intent and admission rules.
+
+Tucked right swipe defaults to `next-hidden`; `next-reveal`, `restore` and `none`
+remain explicit settings. Hidden Next changes only the selected catalog record,
+never starts/cues/loads a provider, and restores paused on tap. A delayed page is
+accepted only by its unchanged scope, queue, selection and intent. Existing saved
+choices are preserved. This does not authorize hidden YouTube audio or imply
+physical iPhone/PWA acceptance. The November 23 record remains dated history.
+
 ### 14.0 Clean video gesture candidate — 2026-11-23
 
 **IMPLEMENTED_CANDIDATE.** The [shared interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate)

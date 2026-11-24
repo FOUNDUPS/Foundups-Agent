@@ -472,8 +472,8 @@ await check('camera handoff carries only bounded canonical public caller URLs an
   }
 });
 
-await check('isolated v26 controls and gestures previews are read-only while unrelated hosts remain unselected', () => {
- for (const family of ['controls', 'gestures']) {
+await check('isolated v26 controls, gestures and home previews are read-only while unrelated hosts remain unselected', () => {
+ for (const family of ['controls', 'gestures', 'home']) {
   for (const domain of ['web.app', 'firebaseapp.com']) {
     const location = new URL('https://foundupscom--play-v26-' + family + '-abc123.' + domain + '/member/?foundup=hpc');
     const h = runtime(location.href);

@@ -1,5 +1,49 @@
 # Shared Mall media incident · HPC-P01–P08
 
+## 2026-11-25 — Home/dock drift and next-hidden correction
+
+- **incident_id:** PFMALL-MEDIA-20261111-HPC (existing canonical incident).
+- **affected_owner / foundup_id:** shared member projection/player/state/field;
+  HPC first acceptance surface. No duplicate media or navigation owner.
+- **symptom/reproduction:** Windows Chrome live `/member/hpc-v25/` displays
+  Buildv25 and a plain search above the app queue. Clicking header identity
+  navigated to `https://play.foundups.com/member/` and credentials loading.
+  Provider recommendations are a separate row inside YouTube, not the app queue.
+- **environment/revisions:** observation2026-11-25JST; Chrome visible desktop,
+  browser mode. Candidate base187c79a5128c12be05d7f9cc2974b4c414946208,
+  remote main60eb7f321647a6736826f33fbceb0f90fe2b773b. Generic `/member/`
+  redirects HPC to the versioned v25 namespace; generic SW/hash alone is not
+  evidence of the active namespace or an installed phone's worker.
+- **confirmed causes:** source187 excludes HPC from desktop dock loan admission;
+  scoped theater selects the legacy search; header Home uses another destination.
+  These are independent of provider/session playback challenges.
+- **latest acceptance/fix:** keep fresh Windows theater. HPC artwork/Home parks
+  media and stores explicit grid in existing scoped tab state. The exact shared
+  dock goes below the app queue; actions plus differs from gated grid Add Video.
+  A disabled contribution handoff stays disabled and sends no submission.
+- **hidden navigation:** next-hidden supersedes the November23 default for
+  fresh preferences; explicit saved next-reveal remains. Hidden selection
+  disposes old playback/callbacks, records a pending identity with no media time,
+  and defers all provider load/cue/play. Restore materializes paused. Existing
+  queue owner admits one catalog page with unchanged scope/queue/index/intent.
+  Regression reproduced redundant visibility Pause observations canceling that
+  catalog intent; an already stopped provider no longer issues repeated Pause
+  intent. Actual playing/unknown providers still take the pause path.
+- **rejected approaches:** no new dock/player, no whole-PR revert, no cropping
+  provider controls or hidden audio. Avoid a new view query that would widen
+  strict AutoPost/auth return allowlists; existing scoped state owns the choice.
+- **regression/evidence:** existing phone `hpc-home-shared-desktop-dock`,
+  `tucked-next-stays-hidden`, branding/camera/clean-gesture checks; queue
+  hidden-page and cancellation cases; preference/scoped-state VM. Controlled
+  test screenshots are labeled fixtures. Exact-head/real-media and independently
+  reviewed preview receipts remain required; physical iPhone is NOT_VERIFIED.
+- **source references:** [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality)
+  and [player parameters](https://developers.google.com/youtube/player_parameters),
+  accessed2026-11-25JST. Keep provider minimum dimensions, visibility and controls.
+- **status/next:** IMPLEMENTED_CANDIDATE; independent review, final regression,
+  source-bound preview, device and release qualification remain. No production
+  or Brain/HoloIndex ingestion claim follows from this repository edit.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** This continues existing

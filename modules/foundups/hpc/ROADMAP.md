@@ -1,5 +1,22 @@
 # HPC roadmap
 
+## 2026-11-25 — H1H Home/dock and hidden Next acceptance
+
+**CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** Keep fresh Windows theater,
+but make the HPC artwork/Home return to scoped tiles and persist the explicit
+grid choice in existing tab state. Reuse the exact grid dock below the app
+thumbnail queue in TV. Its plus opens actions; the distinct grid Add Video
+retains the existing contribution gate. No new auth selector or admission.
+
+Latest tucked-tab default: next clip **stays hidden**. Selection-only catalog
+continuation starts no hidden provider; restore shows the pending clip paused.
+Preserve saved next/reveal and other gesture choices. Dependencies: shared state,
+queue/player and dock owners. Acceptance: existing browser/queue/preference
+fixtures plus independent review, exact-source preview, real media and physical
+Safari/Home Screen checks. Evidence and current blockers belong to the
+[shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md); this does not promote
+the FoundUp lifecycle or claim production delivery.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **IMPLEMENTED_CANDIDATE / acceptance open.** Continue #2439 at source62;

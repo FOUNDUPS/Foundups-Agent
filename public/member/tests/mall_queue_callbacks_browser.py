@@ -13,6 +13,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+import traceback
 from playwright.sync_api import expect, sync_playwright
 
 
@@ -78,7 +79,8 @@ def setup(page):
         onPinchReturn:() => { queueProbe.pinches++; return true; },
         onQueueEnd:() => {
           queueProbe.calls++;
-          return new Promise(resolve => {
+          return new Promise((resolve, reject) => {
+            window.rejectQueuePage = () => { queueProbe.resolved=true; reject(new Error('Controlled page failure')); };
             window.resolveQueuePage = () => {
               callbackQueue.push(...appendedQueue);
               queueProbe.resolved=true;
@@ -118,13 +120,13 @@ def verify_case(browser, case):
             # Use the ordinary visible theater search control. Its existing
             # event path calls the same shared filter controller.
             page.evaluate("mallVideoPlayer.setTheater(true)")
-            expect(page.get_by_role("searchbox", name="Search videos", exact=True)).to_be_visible()
+            expect(page.get_by_role("textbox", name="Search this queue", exact=True)).to_be_visible()
         begin_pending(page, ended=case == "ended_continues")
         if case == "native_pause":
             page.evaluate("queueFixtureNativePlayer.pauseVideo()")
             page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state === 'paused'")
         elif case == "query":
-            page.get_by_role("searchbox", name="Search videos", exact=True).fill("Fixture clip 1")
+            page.get_by_role("textbox", name="Search this queue", exact=True).fill("Fixture clip 1")
             expect(page.locator("#videoPlayerFullscreen .video-player-queue-item")).to_have_count(1)
         elif case == "hide_restore":
             # Explicitly synthetic background state, never a real OS/device gate.
@@ -246,6 +248,63 @@ def verify_gesture_boundaries(browser):
         context.close()
 
 
+def verify_hidden_selection(browser, case):
+    context = browser.new_context(viewport={"width":390,"height":844},
+        is_mobile=True, has_touch=True, service_workers="block", reduced_motion="reduce")
+    try:
+        context.add_init_script(PROVIDER)
+        context.route("**/*", fixture.route_local)
+        page = context.new_page()
+        page.set_default_timeout(5000)
+        clips = setup(page)
+        if case.startswith('filtered-'):
+            page.evaluate('mallVideoPlayer.setTheater(true)')
+            query = page.get_by_role('textbox', name='Search this queue', exact=True)
+            query.fill('Fixture clip 0' if case == 'filtered-first' else 'Fixture clip 1')
+            page.evaluate('mallVideoPlayer.setTheater(false)')
+        page.evaluate('mallVideoPlayer.tuck()')
+        page.wait_for_function('mallVideoPlayer.isTucked()')
+        if case == 'page-empty': page.evaluate('appendedQueue=[]')
+        page.evaluate('mallVideoPlayer.next({keepHidden:true})')
+        if case.startswith('filtered-'):
+            settle(page)
+            assert page.evaluate('queueProbe.calls') == 0, 'Filtered Next fetched unrelated records'
+            assert page.evaluate('mallVideoPlayer.isTucked()')
+            assert page.evaluate('mallVideoPlayer.getCurrentIndex()') == (0 if case == 'filtered-first' else 1)
+            return {'case':'hidden-'+case,'passed':True,'filtered_boundary':True}
+        page.wait_for_function('queueProbe.calls===1&&!!window.resolveQueuePage')
+        page.evaluate('mallVideoPlayer.next({keepHidden:true})')
+        assert page.evaluate('queueProbe.calls') == 1
+        if case == 'page-restore': page.evaluate('mallVideoPlayer.untuck()')
+        elif case == 'page-close': page.evaluate('mallVideoPlayer.close()')
+        elif case == 'page-selection': page.evaluate('mallVideoPlayer.selectVideo(0)')
+        elif case == 'page-scope':
+            page.evaluate("mallVideoPlayer.open('move2japan',callbackQueue,0,{floating:true,autoplay:false})")
+        settle(page)  # Finish the deliberate selection before measuring the late-page effect.
+        before = page.evaluate('({plays:fixturePlayback.plays,loads:fixturePlayback.loadedIds.length,cues:fixturePlayback.cuedIds.length,created:fixturePlayback.created})')
+        page.evaluate('rejectQueuePage()' if case == 'page-reject' else 'resolveQueuePage()')
+        page.wait_for_function('queueProbe.resolved')
+        settle(page)
+        after = page.evaluate('({plays:fixturePlayback.plays,loads:fixturePlayback.loadedIds.length,cues:fixturePlayback.cuedIds.length,created:fixturePlayback.created})')
+        assert after == before, (case, before, after)
+        expected = 2 if case == 'page-select' else -1 if case == 'page-close' else 0 if case in {'page-selection','page-scope'} else 1
+        assert page.evaluate('mallVideoPlayer.getCurrentIndex()') == expected, {
+            'case':case,'expected':expected,'actual':page.evaluate('mallVideoPlayer.getPlaybackSnapshot()'),
+            'probe':page.evaluate('queueProbe'),'events':page.evaluate('fixturePlayback.events.slice(-5)')}
+        if case == 'page-select':
+            assert page.evaluate('mallVideoPlayer.isTucked()')
+            expect(page.locator('#videoPlayerFullscreen iframe')).to_have_count(0)
+            snapshot = page.evaluate('mallVideoPlayer.getPlaybackSnapshot()')
+            assert snapshot['state'] == 'selected-hidden' and snapshot['positionSeconds'] is None, snapshot
+            page.evaluate('mallVideoPlayer.untuck()')
+            page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='manual-play'")
+            assert page.evaluate('mallVideoPlayer.getCurrentVideoId()') == clips[2]['video_id']
+            assert page.evaluate('fixturePlayback.plays') == before['plays']
+        return {'case':'hidden-'+case,'passed':True,'one_catalog_request':True,'hidden_provider_work':False}
+    finally:
+        context.close()
+
+
 def main():
     if Path.cwd().resolve() != REPO:
         raise SystemExit("Run this runner from the repository root.")
@@ -262,6 +321,9 @@ def main():
                 for case in cases:
                     print(json.dumps({"engine":name, **verify_case(browser,case)}), flush=True)
                 print(json.dumps({"engine":name, **verify_gesture_boundaries(browser)}), flush=True)
+                for case in ('page-select','page-restore','page-close','page-selection','page-scope',
+                             'page-empty','page-reject','filtered-first','filtered-end'):
+                    print(json.dumps({'engine':name, **verify_hidden_selection(browser,case)}), flush=True)
             finally:
                 browser.close()
     assert source_hashes() == before, "Bound runtime source changed during this run."
@@ -270,4 +332,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        print(traceback.format_exc(), flush=True)
+        raise SystemExit(1)

@@ -608,6 +608,10 @@
 }
 
 .video-player-shared-dock-host .mall-member-search-bar { max-width: 100%; }
+.video-player-shared-dock-host .mall-member-search-dock {
+  width: min(36.5rem, 100%);
+  margin-inline: auto;
+}
 
 /* On short viewports, scroll the queue rather than clipping native player controls. */
 .video-player-queue-docked:has(> .video-player-shared-dock-host) .video-player-media-panel {

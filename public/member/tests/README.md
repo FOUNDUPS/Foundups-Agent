@@ -1,5 +1,23 @@
 # Member Mall tests
 
+## Home/dock and hidden Next qualification — 2026-11-25
+
+`mall_phone_ui_browser.py` adds `hpc-home-shared-desktop-dock` and
+`tucked-next-stays-hidden` to the existing matrix (66 rows with defensive
+history). It checks fresh Windows TV, exact shared-dock identity below the app
+queue, live filtering/Enter selection, scoped Home/reload/resize, gated grid
+Add Video and a single actions plus. Hidden right-swipe input advances exactly
+once without provider creation/cue/load/play; tap materializes paused and
+explicit visible Play advances fixture time. Chromium uses CDP touch and
+WebKit uses synthetic touch; neither is physical iPhone evidence.
+
+`mall_queue_callbacks_browser.py` preserves existing cases and adds hidden
+paging, empty/error pages, no duplicate request, filtered first/end boundaries,
+and stale-page cancellation after restore/close/new selection/scope. Existing
+preference VM covers all four tucked choices, legacy migration, explicit saved
+next/reveal and scoped presentation isolation. Real YouTube and delivery are
+separate gates; provider fixtures cannot close those checks.
+
 ## Clean video gesture qualification — 2026-11-23
 
 `mall_phone_ui_browser.py --include-defensive` adds `clean-video-gestures` and

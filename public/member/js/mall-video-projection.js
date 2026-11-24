@@ -11,7 +11,7 @@
     ['hpc.foundups.com', 'hpc'],
     ['play.foundups.com', 'mall']
   ]);
-  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-(?:controls|gestures))-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
+  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-(?:controls|gestures|home))-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
     dedicatedHosts.set(window.location.hostname, 'mall');
   }
   const publicScopes = new Set(['hpc']);
@@ -19,7 +19,7 @@
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
   const mallBuild = 'v26';
-  const buildLabel = `<small class="mall-build-label">Build ${mallBuild} · Gestures</small>`;
+  const buildLabel = `<small class="mall-build-label">Build ${mallBuild} · Home &amp; Dock</small>`;
 
   function hostScope(location) {
     return dedicatedHosts.get(location?.hostname) || null;
@@ -136,7 +136,7 @@
   }
 
   function isPhoneDockLayout() {
-    return document.documentElement.dataset.mallVideoLayout === 'phone' ||
+    return ['phone', 'grid'].includes(document.documentElement.dataset.mallVideoLayout) ||
       !window.matchMedia?.('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches;
   }
 
@@ -469,7 +469,7 @@
           <label>Pinch in return <select data-video-option="pinchInDestination"><option value="" disabled>Keep current return</option><option value="wikitube">WikiTube</option><option value="mall">Mall tiles</option></select></label>
           <label>Swipe up return <select data-video-option="swipeUpDestination"><option value="" disabled>Keep current gesture</option><option value="wikitube">WikiTube</option><option value="mall">Mall tiles</option></select></label>
           <label>Full Video swipe right <select data-video-option="fullVideoSwipeRight"><option value="next">Next video</option><option value="previous">Previous video</option><option value="none">No action</option></select></label>
-          <label>Tucked tab swipe right <select data-video-option="tuckedSwipeRight"><option value="next-reveal">Next video and reveal</option><option value="restore">Restore current video</option><option value="none">No action</option></select></label>
+          <label>Tucked tab swipe right <select data-video-option="tuckedSwipeRight"><option value="next-hidden">Next video, stay hidden</option><option value="next-reveal">Next video and reveal</option><option value="restore">Restore current video</option><option value="none">No action</option></select></label>
           <small>Use the frame edges for app gestures. Gestures inside YouTube belong to YouTube.</small>
           <label>Collapse Full Video to <select data-video-option="collapseDestination"><option value="mall">Mall</option><option value="wikitube">WikiTube</option></select></label>
           <label><input type="checkbox" data-video-option="revealSelectedPlayer"> Show parked player when I select a clip</label>
@@ -735,6 +735,12 @@
         // AutoPost is a working existing action, not a model placeholder.
         autoPost.hidden = false;
         const hpc = document.documentElement.dataset.mallVideoScope === 'hpc';
+        add.hidden = hpc;
+        if (hpc) {
+          options.setAttribute('aria-label', 'Available actions');
+          options.title = 'Available actions';
+          dialog.setAttribute('aria-label', 'Available actions');
+        }
         add.setAttribute('aria-label', hpc ? 'Add Video' : 'Add FoundUp');
         add.title = hpc ? 'Add Video' : 'Add FoundUp';
       },
@@ -804,7 +810,7 @@
     dock.input.addEventListener('blur', () => anchor.style.removeProperty('--member-dock-keyboard'));
   }
 
-  function createPhoneDock(actions, scope, disclosure) {
+  function createPhoneDock(actions, scope, disclosure, onHome) {
     const field = window.mallTileField;
     const dock = createMemberDock('Search HPC Mall', search, () => {
       window.mallStateRestore?.save();
@@ -841,7 +847,7 @@
     const about = dialog.querySelector('[data-action="about"]');
     home.hidden = about.hidden = false;
     about.lastChild.textContent = 'Site information';
-    home.addEventListener('click', () => { dialog.close(); search(''); });
+    home.addEventListener('click', () => { dialog.close(); search(''); onHome?.(); });
     about.addEventListener('click', () => { dialog.close(); disclosure.showModal(); });
     return {
       show(visible) {
@@ -1009,8 +1015,14 @@
         image.height = 353;
         image.classList.replace('mall-brand-logo-sm', 'mall-hpc-banner-image');
         home.classList.add('mall-hpc-banner-link');
-        home.href = 'https://hasan4speaker.com/';
-        home.setAttribute('aria-label', 'Visit Hasan for Speaker');
+        home.href = window.location.pathname + window.location.search;
+        home.setAttribute('aria-label', 'Home: HPC video tiles');
+        home.title = 'HPC video tiles';
+        home.addEventListener('click', event => {
+          if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          event.preventDefault();
+          showScopedGrid();
+        });
         const mallReturn = document.createElement('a');
         mallReturn.className = 'mall-hpc-mall-return';
         mallReturn.href = isOpenMallHost(window.location) ? '/member/' : OPEN_MALL_ORIGIN + '/';
@@ -1028,6 +1040,14 @@
       field.setAttribute('aria-describedby', 'videoScopeCredit');
       element('videoScopeDisclosureText').textContent = projection.disclosure;
       const disclosure = element('videoScopeDisclosure');
+      if (scope === 'hpc') {
+        const campaign = document.createElement('a');
+        campaign.href = 'https://hasan4speaker.com/';
+        campaign.target = '_blank';
+        campaign.rel = 'noopener noreferrer';
+        campaign.textContent = 'Hasan for Speaker campaign';
+        disclosure.append(campaign);
+      }
       const info = element('videoScopeInfo');
       info.addEventListener('click', () => disclosure.showModal());
 
@@ -1047,16 +1067,23 @@
       window.mallStateRestore.restore();
       window.mallStateRestore.bindAutoSave();
 
-      const dock = createPhoneDock(actions, scope, disclosure);
+      const dock = createPhoneDock(actions, scope, disclosure, showScopedGrid);
       const desktop = window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
-      const applyPresentation = () => {
-        const theater = desktop.matches;
-        document.documentElement.dataset.mallVideoLayout = theater ? 'theater' : 'phone';
+      function applyPresentation() {
+        const theater = desktop.matches && window.mallStateRestore.getScopedPresentation() !== 'grid';
+        document.documentElement.dataset.mallVideoLayout = theater ? 'theater' : desktop.matches ? 'grid' : 'phone';
         info.hidden = !theater;
         (theater ? actions : header).append(voice);
         window.mallTileField.setScopedTheater(theater);
         dock.show(!theater);
-      };
+      }
+      function showScopedGrid() {
+        window.mallStateRestore.save();
+        window.mallVideoPlayer.returnToMall?.();
+        window.mallStateRestore.setScopedPresentation('grid');
+        applyPresentation();
+        window.mallStateRestore.save();
+      }
       desktop.addEventListener('change', applyPresentation);
       // The shared state owner restores the tab's browse position before startup.
       requestAnimationFrame(applyPresentation);
@@ -1090,8 +1117,8 @@
     createMemberDock,
     cameraDestination,
     getScopedPhoneDock(scope, options) {
-      const sharedMallDock = options?.includeDesktop === true && scopedPhoneDock?.scope === null;
-      return (isPhoneDockLayout() || sharedMallDock) && scopedPhoneDock && (scopedPhoneDock.scope === null || scopedPhoneDock.scope === scope)
+      const sharedDesktopDock = options?.includeDesktop === true;
+      return (isPhoneDockLayout() || sharedDesktopDock) && scopedPhoneDock && (scopedPhoneDock.scope === null || scopedPhoneDock.scope === scope)
         ? scopedPhoneDock.dock : null;
     },
     isPhoneDockLayout,

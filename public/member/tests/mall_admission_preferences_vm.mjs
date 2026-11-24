@@ -13,7 +13,7 @@ const TTL = 15 * 60 * 1000;
 const copy = value => JSON.parse(JSON.stringify(value));
 const legacyDefaults = { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true };
 const defaults = { ...legacyDefaults, tileTapDestination: 'floating', pinchOutDestination: 'wikitube',
-  fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-reveal' };
+  fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-hidden' };
 let checks = 0;
 function check(name, fn) { fn(); checks++; console.log('PASS ' + name); }
 
@@ -279,7 +279,7 @@ check('pinch and swipe choices persist independently of frame, tile and collapse
 
 check('Full Video and tucked right swipes persist every supported choice independently', () => {
   for (const fullVideoSwipeRight of ['next', 'previous', 'none']) {
-    for (const tuckedSwipeRight of ['next-reveal', 'restore', 'none']) {
+    for (const tuckedSwipeRight of ['next-hidden', 'next-reveal', 'restore', 'none']) {
       const h = runtime();
       assert.equal(h.api.setVideoOptions({ fullVideoSwipeRight, tuckedSwipeRight, autoplayNext: false }), true);
       const expected = { ...defaults, fullVideoSwipeRight, tuckedSwipeRight, autoplayNext: false };
@@ -308,6 +308,35 @@ check('malformed stored swipe choices and storage events cannot replace validate
     assert.deepEqual(copy(warm.api.getVideoOptions()), before);
     assert.equal(calls, 0);
   }
+});
+
+check('scoped grid intent reuses positional storage without changing admission or ordinary Mall', () => {
+  const h = runtime();
+  assert.equal(h.api.setScopedPresentation('grid'), false);
+  assert.equal(h.api.selectVideoScope('hpc'), true);
+  assert.equal(h.api.getScopedPresentation(), null);
+  assert.equal(h.api.setScopedPresentation('grid'), true);
+  const restored = runtime({ session: h.session });
+  restored.api.selectVideoScope('hpc');
+  assert.equal(restored.api.getScopedPresentation(), 'grid');
+  assert.deepEqual([...h.session.keys()], ['pfmall_video_scope_hpc_v1']);
+  assert.equal(h.local.size, 0);
+  for (const presentation of ['phone', 'all', 'member', false, {}, null]) {
+    assert.equal(h.api.setScopedPresentation(presentation), false);
+    assert.equal(h.api.isValid({ scrollTop: 0, scrollLeft: 0, presentation }), false);
+  }
+  assert.equal(h.api.isValid({ scrollTop: 0, scrollLeft: 0 }), true, 'legacy state remains readable');
+  assert.equal(h.api.isValid({ scrollTop: 0, scrollLeft: 0, presentation: 'theater' }), true);
+  h.api.clear();
+  assert.equal(h.api.getScopedPresentation(), null);
+});
+
+check('saved next-reveal remains explicit while absent swipe choice uses next-hidden without writes', () => {
+  const h = runtime({ local: new Map([[OPTIONS, JSON.stringify({ version: 1,
+    options: { ...defaults, tuckedSwipeRight: 'next-reveal', revealSelectedPlayer: false } })]]) });
+  assert.equal(h.api.getVideoOptions().tuckedSwipeRight, 'next-reveal');
+  assert.equal(h.api.getVideoOptions().revealSelectedPlayer, false);
+  assert.deepEqual(h.writes, []);
 });
 
 console.log(JSON.stringify({ checks, real_auth: 'UNEXECUTED', graph_runtime_imported: false, writes_or_publication: false }));

@@ -1,3 +1,12 @@
+## 2026-11-25 — Home/dock and tucked Next correction
+
+Shared owners implement the latest scoped Home, same-dock TV placement and
+selection-only next-hidden requirement. Keep fresh desktop TV, phone grid,
+separate Play/campaign links, attribution, manual civic resource and protected
+admission. Preserve the earlier next/reveal choice as configurable dated history.
+The shared media incident and H1H acceptance track verification/release. No
+HPC engine copy, unrelated FoundUp changes or lifecycle promotion. WSP22/50/97.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,

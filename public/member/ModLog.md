@@ -1,5 +1,18 @@
 # Member Area Module Change Log
 
+## 2026-11-25 — Scoped Home, shared TV dock and hidden Next
+
+Extend the existing projection/state/player/field owners at base187c79a5.
+HPC Home parks the player and persists scoped grid intent without adding auth
+URL parameters. Matching scoped theater borrows the grid dock below its queue,
+including functional actions/search/camera/dog controls. Keep gated Add Video
+as a distinct grid action. Add validated next-hidden, pending selection without
+provider loading, and bounded delayed-page cancellation. Repeated visibility
+observations do not cancel catalog-only selection once media is already stopped.
+Tests extend existing browser/queue/preference fixtures; independent review and
+release/device gates remain open. WSP00/10/15/22/50/71/91/97 applied; no new shell,
+model, mic, calling, registry privilege or production claim.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **IMPLEMENTED_CANDIDATE.** The [interaction contract](INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate)

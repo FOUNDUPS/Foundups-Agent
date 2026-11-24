@@ -1,3 +1,12 @@
+## 2026-11-25 — Reuse scoped state, queue and shared dock
+
+Extend matching-scope desktop dock borrowing instead of retaining a second
+plain search. Existing scoped position storage owns explicit Home/grid intent;
+strict camera/auth URL allowlists stay unchanged. Validated next-hidden defers
+provider work and preserves bounded catalog cancellation. Existing native
+controls and visibility protection remain. Regression/independent/device/release
+evidence is tracked separately in the canonical incident. WSP00/22/50/71/91/97.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,

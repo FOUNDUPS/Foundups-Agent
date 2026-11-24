@@ -2198,6 +2198,7 @@
   }
 
   function renderFixedTail(total, entityGrid, batchSize) {
+    tileField.querySelector('.mall-grid-add-video')?.remove();
     var step = batchSize || FIXED_VIDEO_BATCH;
     var fieldError = entityGrid ? (catalogError || discoveryError) : discoveryError;
     fixedTailObserver?.disconnect();
@@ -2237,6 +2238,17 @@
       error.setAttribute('role', 'status');
       error.textContent = fieldError;
       tail.appendChild(error);
+    }
+    if (fixedVideoField && mallCatalog[0]?.foundup_id === 'hpc') {
+      var addVideo = document.createElement('button');
+      addVideo.type = 'button';
+      addVideo.className = 'mall-grid-add-video';
+      addVideo.setAttribute('aria-label', 'Add Video to HPC');
+      addVideo.innerHTML = '<span aria-hidden="true">+</span><span>Add Video</span>';
+      addVideo.addEventListener('click', function () {
+        window.mallVideoProjection?.showContributionReview?.({ action: 'add-video', foundupId: 'hpc' }, false, addVideo);
+      });
+      tileField.appendChild(addVideo);
     }
     tileField.appendChild(tail);
   }

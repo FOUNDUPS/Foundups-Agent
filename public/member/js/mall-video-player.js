@@ -65,6 +65,7 @@
   var theater = false;
   var wikitube = false;
   var tucked = false;
+  var hiddenSelectionPending = false;
   // A live session can be paused behind the Mall without becoming a floating
   // player or being destroyed. This state is page-local, never persisted.
   var mallHidden = false;
@@ -265,7 +266,7 @@
     return window.mallStateRestore?.getVideoOptions?.() || {
       autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true,
       tileTapDestination: 'floating', pinchOutDestination: 'wikitube',
-      fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-reveal'
+      fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-hidden'
     };
   }
 
@@ -372,7 +373,17 @@
   }
 
   function pauseHiddenPlayback() {
-    if (isOpen && !isPlaybackDisplayed()) pausePlayback();
+    if (!isOpen || isPlaybackDisplayed()) return;
+    // Repeated geometry observations are not fresh Pause intent. Keep a
+    // catalog-only hidden Next request valid once its provider is stopped.
+    if (!autoplayRequested) {
+      try {
+        if (ytPlayer && [2, 5, -1].includes(ytPlayer.getPlayerState?.())) return;
+      } catch (error) { /* Unknown provider state still takes the pause path. */ }
+      var media = stage?.querySelector('video');
+      if (!stage?.querySelector('iframe') && (!media || media.paused)) return;
+    }
+    pausePlayback();
   }
 
   function normalizeResumeSeconds(sec, durationSec) {
@@ -751,7 +762,7 @@
     container.style.setProperty('--video-player-keyboard', keyboard + 'px');
   }
 
-  // Loan the existing shared dock on phone and ordinary Mall desktop. The
+  // Loan the existing shared dock on phone and desktop, including scoped TV. The
   // mounted provider and player stage never move.
   function borrowScopedPhoneDock() {
     if (scopedDockLoan || !matchesQuery) return;
@@ -765,7 +776,10 @@
     dock.hide();
     memberQueueDock?.hide();
     scopedDockLoan = { dock: dock, marker: marker, host: host, hidden: hidden, previous: memberQueueDock,
-      restoreContext: dock.useSearchContext(playMemberSearchResult, 'Search this queue', scopedQueueQuery) };
+      restoreContext: dock.useSearchContext(function () {
+        if (theater) playSearchResult();
+        else playMemberSearchResult();
+      }, 'Search this queue', theater ? queueSearch.value : scopedQueueQuery) };
     memberQueueDock = dock;
     dock.input.addEventListener('input', filterRail);
     dock.input.addEventListener('change', filterRail);
@@ -974,11 +988,16 @@
       container.setAttribute('role', 'region');
       container.setAttribute('aria-label', 'Video theater');
       memberQueueDock?.hide();
+      borrowScopedPhoneDock();
+      container.classList.toggle('video-player-queue-docked', !!scopedDockLoan);
       var active = document.activeElement;
       var back = topBar.querySelector('[data-action="back"]');
       syncTopBarButtons();
-      queueSearchForm.hidden = !matchesQuery;
-      if (active === back && !queueSearchForm.hidden) queueSearch.focus({ preventScroll: true });
+      queueSearchForm.hidden = !!scopedDockLoan || !matchesQuery;
+      if (active === back) {
+        var searchFocus = scopedDockLoan ? memberQueueDock.input : queueSearchForm.hidden ? null : queueSearch;
+        searchFocus?.focus({ preventScroll: true });
+      }
       filterRail();
       renderRail();
       syncFloatingGeometry();
@@ -1148,6 +1167,7 @@
     else if (destination === 'full-video') applyWikiTubePresentation(false, true);
     else if (destination === 'wikitube') applyWikiTubePresentation(false);
     else applyFloatingPresentation();
+    materializeHiddenSelection();
     refreshQueue();
     // Browser Forward is a paused restoration. An intentional selection may
     // play through the existing provider guard, without reloading the iframe.
@@ -1220,6 +1240,7 @@
     container.removeAttribute('aria-hidden');
     tuckHandle.hidden = true;
     syncFloatingGeometry();
+    materializeHiddenSelection();
     if (!opts?.silent && focusInsideHandle) {
       gestureGrip?.focus({ preventScroll: true });
     }
@@ -1233,6 +1254,14 @@
       }));
     }
     return true;
+  }
+
+  function materializeHiddenSelection() {
+    if (!hiddenSelectionPending || !isOpen || mallHidden || tucked) return;
+    hiddenSelectionPending = false;
+    autoplayRequested = false;
+    renderVideo(currentQueue[currentIndex], false);
+    recordWatch(currentFoundUpId, currentQueue[currentIndex], currentIndex);
   }
 
   // ─── Open or Switch Selected Media ───
@@ -1454,6 +1483,7 @@
     pendingResumeSeconds = null;
 
     isOpen = false;
+    hiddenSelectionPending = false;
     mallHidden = false;
     mallReturnMode = null;
     container.hidden = false;
@@ -1553,13 +1583,29 @@
     }
     flushCurrentPlaybackPosition();
     pendingResumeSeconds = null;
+    if (navOpts?.selectionOnly && tucked) {
+      pausePlayback();
+      resetPlayback(false);
+    }
     currentIndex = index;
-    renderVideo(currentQueue[index], true);
+    if (navOpts?.selectionOnly && tucked) {
+      // Select from the catalog while parked; defer provider work until visible.
+      hiddenSelectionPending = true;
+      updateVideoCaption(currentQueue[index]);
+      playbackStatus = { provider: parseYouTubeEmbed(currentQueue[index].embed_url || currentQueue[index].embedUrl) ? 'youtube' : 'html5',
+        state: 'selected-hidden', videoId: currentQueue[index].video_id || currentQueue[index].id || null,
+        mode: currentModeName(), tucked: true, pendingSelection: true };
+      updateTuckHandleLabel();
+      window.dispatchEvent(new CustomEvent('mallVideoPlayback', { detail: { ...playbackStatus } }));
+    } else {
+      hiddenSelectionPending = false;
+      renderVideo(currentQueue[index], true);
+    }
     updateRailSelection();
     resetChromeTimer();
 
     updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[index]));
-    recordWatch(currentFoundUpId, currentQueue[index], index);
+    if (!hiddenSelectionPending) recordWatch(currentFoundUpId, currentQueue[index], index);
     onSelectChange?.(currentIndex, currentQueue[index]);
 
     window.dispatchEvent(new CustomEvent('videoPlayerNavigate', {
@@ -1569,27 +1615,31 @@
 
   // A scoped data owner may append one bounded page at a loaded queue boundary.
   // Closing, pausing, hiding or changing selection invalidates deferred playback.
-  function continueQueue(explicit) {
-    if (!onQueueEnd || filteredIndices || queueContinuation || !canStartYouTube()) return false;
+  function continueQueue(explicit, selectionOnly) {
+    var hiddenSelection = selectionOnly === true;
+    if (queueContinuation) return hiddenSelection;
+    if (!onQueueEnd || filteredIndices || !(hiddenSelection ? isOpen && tucked && !mallHidden : canStartYouTube())) return false;
     var owner = currentFoundUpId;
     var queue = currentQueue;
     var index = currentIndex;
     var generation = renderGeneration;
     var intent = playbackIntentEpoch;
+    var query = railQuery;
     var load = onQueueEnd;
     var task = Promise.resolve().then(function () { return load(); });
     queueContinuation = task;
     task.then(function (added) {
       if (!added || !isOpen || currentFoundUpId !== owner || currentQueue !== queue ||
           currentIndex !== index || renderGeneration !== generation ||
-          playbackIntentEpoch !== intent || filteredIndices || !canStartYouTube() ||
+          playbackIntentEpoch !== intent || railQuery !== query || filteredIndices ||
+          !(hiddenSelection ? tucked && !mallHidden : canStartYouTube()) ||
           (!explicit && !videoOptions().autoplayNext)) return;
       var next = index + 1;
       if (next >= currentQueue.length) return;
       refreshQueue();
-      autoplayRequested = true;
-      goToVideo(next, { explicitUserSelect: explicit, fromAutoAdvance: !explicit, preserveFailures: !explicit });
-      showHint('Next');
+      autoplayRequested = !hiddenSelection;
+      goToVideo(next, { explicitUserSelect: explicit, fromAutoAdvance: !explicit, preserveFailures: !explicit, selectionOnly: hiddenSelection });
+      showHint(hiddenSelection ? 'Next selected · hidden' : 'Next');
     }).catch(function () {
       if (isOpen && currentFoundUpId === owner) showHint('Could not load more videos. Try Next again.');
     }).finally(function () {
@@ -1615,16 +1665,17 @@
     close();
   }
 
-  function nextVideo() {
+  function nextVideo(options) {
     if (mallHidden) return;
+    var selectionOnly = options?.keepHidden === true && tucked;
     var seq = activeSequence();
     var pos = seq.indexOf(currentIndex);
     var next = pos >= 0 ? seq[pos + 1] : seq[0];
     if (next !== undefined && next < currentQueue.length) {
-      autoplayRequested = true;
-      goToVideo(next, { explicitUserSelect: true });
-      showHint('Next');
-    } else if (!continueQueue(true)) {
+      autoplayRequested = !selectionOnly;
+      goToVideo(next, { explicitUserSelect: true, selectionOnly: selectionOnly });
+      showHint(selectionOnly ? 'Next selected · hidden' : 'Next');
+    } else if (!continueQueue(true, selectionOnly)) {
       showHint('End of queue');
     }
   }
@@ -1962,8 +2013,7 @@
   }
 
   // ─── Render Video ───
-  function renderVideo(video, allowReuse) {
-    if (!video) return;
+  function updateVideoCaption(video) {
     var sourceLink = topBar.querySelector('.video-player-source');
     var originalUrl = scopedPlayer ? scopedSourceUrl(video) : '';
     sourceLink.hidden = !originalUrl;
@@ -1975,6 +2025,13 @@
     }
 
     titleEl.textContent = video.title || '';
+    return originalUrl;
+  }
+
+  function renderVideo(video, allowReuse) {
+    if (!video) return;
+    var originalUrl = updateVideoCaption(video);
+    var sourceLink = topBar.querySelector('.video-player-source');
 
     var embedUrl = video.embed_url || video.embedUrl;
     var sourceUrl = video.source_url || video.sourceUrl;
@@ -2073,6 +2130,7 @@
     var input = theater ? queueSearch : null;
     if (memberQueueDock && !memberQueueDock.element.hidden) input = memberQueueDock.input;
     var query = input ? input.value.trim().slice(0, 300) : scopedQueueQuery;
+    if (theater && input !== queueSearch) queueSearch.value = query;
     // This queue context is independent of the Mall's restored search input.
     // Keep it even when the queue dock is released or hidden in Floating/Mall.
     scopedQueueQuery = query;
@@ -2088,7 +2146,7 @@
   }
 
   function playSearchResult(event) {
-    event.preventDefault();
+    event?.preventDefault();
     if (!theater) return;
     filterRail();
     if (!filteredIndices?.length) return;
@@ -2432,19 +2490,20 @@
     var handleStartY = 0;
     var handleTracking = false;
 
-    tuckHandle.addEventListener('click', function () {
+    tuckHandle.addEventListener('click', function (event) {
+      if (performance.now() < gestureClickBlockedUntil) { event.preventDefault(); return; }
       untuck();
     });
 
     tuckHandle.addEventListener('touchstart', function (e) {
-      if (e.touches.length !== 1) return;
+      if (e.touches.length !== 1) { handleTracking = false; return; }
       handleStartX = e.touches[0].clientX;
       handleStartY = e.touches[0].clientY;
       handleTracking = true;
     }, { passive: true });
 
     tuckHandle.addEventListener('touchmove', function (e) {
-      if (!handleTracking || e.touches.length !== 1) return;
+      if (!handleTracking || e.touches.length !== 1) { handleTracking = false; return; }
       var dx = e.touches[0].clientX - handleStartX;
       var dy = e.touches[0].clientY - handleStartY;
       if (dx <= -UNTUCK_SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
@@ -2462,14 +2521,16 @@
       if (dx <= -UNTUCK_SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
         untuck();
       } else if (dx >= Math.max(16, Math.min(32, tuckHandle.clientWidth * .5)) && Math.abs(dx) > Math.abs(dy) * 1.4) {
-        var action = videoOptions().tuckedSwipeRight || 'next-reveal';
+        var action = videoOptions().tuckedSwipeRight || 'next-hidden';
         if (action === 'none') return;
         e.preventDefault();
         gestureClickBlockedUntil = performance.now() + 400;
+        if (action === 'next-hidden') { nextVideo({ keepHidden: true }); return; }
         untuck({ immediate: true });
         if (action === 'next-reveal') nextVideo();
       }
     }, { passive: false });
+    tuckHandle.addEventListener('touchcancel', function () { handleTracking = false; });
   }
 
   // ─── Event Handlers ───

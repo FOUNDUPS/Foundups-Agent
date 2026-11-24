@@ -1,5 +1,16 @@
 # FoundUPS Member Mall
 
+## 2026-11-25 — Home and shared bottom controls candidate
+
+Fresh desktop HPC opens TV. Select its artwork/Home for HPC tiles; this tab
+remembers the choice on reload/resize. TV uses the same grid search/actions dock,
+below its app thumbnail queue. The single HPC dock plus opens Available actions;
+the grid Add Video tile keeps the existing contribution gate. Right-swipe on a
+tucked player now defaults to Next while staying tucked; tap restores the
+selected clip paused, then use visible Play. Saved next/reveal remains available.
+See the [interface](INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)
+and [tests](tests/README.md). This candidate is not a production/device receipt.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **IMPLEMENTED_CANDIDATE.** The [interaction contract](INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate)

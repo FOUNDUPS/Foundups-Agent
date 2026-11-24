@@ -1,5 +1,19 @@
 # p.fMALL Roadmap
 
+## 2026-11-25 — Shared dock/Home and selection-only hidden queue
+
+**IMPLEMENTED_CANDIDATE / acceptance open.** Extend the existing dock loan for
+matching scoped desktop theater; no second search surface. HPC explicit Home
+returns to its own grid, preserving the global Mall destination separately.
+Store explicit presentation in existing scoped tab state rather than widening
+camera/auth URL allowlists. Extend the validated tucked action with next-hidden
+and bounded catalog-only continuation. Avoid treating repeated visibility Pause
+observations as new intent after the provider is already stopped. Native
+provider visibility/playback enforcement remains mandatory. Follow the
+[current interaction contract](../../../public/member/INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)
+and qualify controls, filtering, delayed callbacks, upgrade and device behavior
+independently before release. Other FoundUps and protected entry retain owners.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **IMPLEMENTED_CANDIDATE / acceptance open.** Continue #2439 at source62;

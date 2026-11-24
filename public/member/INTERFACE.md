@@ -1,5 +1,38 @@
 # Member Area Interface
 
+## 2026-11-25 — Scoped Home, shared theater dock and hidden selection
+
+**IMPLEMENTED_CANDIDATE; release/device acceptance remains open.** Fresh desktop
+HPC still opens the shared theater. Its header artwork and menu Home return to
+the HPC tile field, pause the retained player, and store explicit `grid` intent
+in the existing tab-local scoped position record. Reload and breakpoint changes
+respect this intent. No new URL selector or authentication permission is added.
+The separate Play Mall destination remains explicit; the campaign link is in
+the accessible independent-site disclosure.
+
+Scoped theater borrows the exact grid dock node through the existing loan and
+search-context contract: **main video → app thumbnail queue → shared dock**.
+Only one search is visible. Typing filters the queue without restarting media;
+Enter deliberately selects a matching clip. Returning restores the grid query.
+The HPC dock's single `+` is **Available actions**; its distinct grid **Add Video**
+tile opens the existing gated contribution review. A disabled/unconnected
+contribution handoff remains disabled and submits nothing.
+
+The fresh `tuckedSwipeRight` default is now `next-hidden`: select the next
+permitted clip and remain tucked. No provider is created, cued, loaded or played
+for that pending hidden selection; its snapshot is `selected-hidden` with no
+media time. Tap/left swipe reveals the selected clip paused. Explicit visible
+Play starts it. Keep the independently configurable `next-reveal`, `restore`
+and `none` choices and any explicitly saved selection. The same bounded queue
+owner may fetch one catalog page while tucked; restore/close/filter/scope/new
+selection invalidate stale results. Native YouTube controls remain untouched.
+
+State API additions: `getScopedPresentation()` and
+`setScopedPresentation('grid'|'theater')` operate only after selecting a video
+scope. Optional `presentation` is validated in its existing session record;
+legacy positions remain readable. This is presentation state, never authority.
+The dated November 23 next/reveal default below is superseded by this section.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** This continues existing
@@ -166,7 +199,8 @@ current contracts.
 discovery landing across all catalog FoundUps without Clerk or Firestore
 account reads, while the dedicated `hpc.foundups.com` hostname mounts a fixed
 single-FoundUp guest video field from `mall-public-video-catalog.json` (its
-header brand link returns to `https://play.foundups.com/`). Entering any
+header artwork returns to its scoped tiles; a separate Play Mall link opens
+`https://play.foundups.com/`). Entering any
 FoundUp from `play.foundups.com` (`Enter FoundUp` on tiles, floating/WikiTube
 player, quick-view cards, or direct `/member/foundup.html` / `/f/{id}/app`
 routes) requires membership and passes through the `foundups.com` Member Portal
@@ -181,8 +215,9 @@ top-anchored floating player (`#videoPlayerFullscreen.video-player-floating`)
 above the grid while keeping the selected tile visible (`aria-current="true"`)
 and allowing the grid to scroll underneath (`--floating-player-clearance`).
 Swiping the floating player right (or activating `Tuck player`) tucks it to
-the right viewport edge while audio and queue state continue; tapping or
-swiping left on `.video-player-tuck-handle` (`Restore player`) restores it.
+the right viewport edge and pauses hidden playback; tapping or swiping left on
+`.video-player-tuck-handle` (`Restore player`) restores it. Right swipe defaults
+to selecting the next clip while remaining hidden, as specified above.
 The corner control, `Open WikiTube`, or pinch-out on a thumbnail or the
 floating player chrome opens sequential WikiTube playback (`WikiTube video player`)
 and immediately attempts playback while retaining the live provider iframe.
@@ -904,7 +939,7 @@ Catalog queries discover matching channels. Opening a matching channel retains i
 ### Gesture refinement API additions
 
 `pfmall_video_options_v1` adds `fullVideoSwipeRight` (`next`, `previous`, `none`)
-and `tuckedSwipeRight` (`next-reveal`, `restore`, `none`). Read-only v1 migration
+and `tuckedSwipeRight` (`next-hidden`, `next-reveal`, `restore`, `none`). Read-only v1 migration
 supplies confirmed defaults without persisting or coupling earlier choices.
 `mallVideoPlayer.untuck({immediate:true})` reveals synchronously for deliberate
 queue selection. `save()`, `share()` and `enterFoundUp()` delegate to existing

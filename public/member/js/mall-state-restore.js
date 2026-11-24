@@ -28,6 +28,7 @@
   var PRODUCT_KEYS = { move2japan: 'pfmall_product_move2japan_state_v1' };
   var selectedProduct = null;
   var selectedVideoScope = null;
+  var scopedPresentation = null;
   var RETURN_KEY = 'pfmall_product_return_v1';
   var RETURN_TTL_MS = 15 * 60 * 1000;
   var FILTER_KEYS = ['q', 'country', 'prefecture', 'city', 'locality', 'max', 'land', 'sort', 'group', 'large', 'tour'];
@@ -63,6 +64,21 @@
     clearTimeout(scrollTimer);
     scrollTimer = null;
     selectedVideoScope = scope;
+    scopedPresentation = null;
+    return true;
+  }
+
+  function getScopedPresentation() {
+    if (!selectedVideoScope) return null;
+    var state = loadState();
+    if (state && isValidState(state) && state.presentation) scopedPresentation = state.presentation;
+    return scopedPresentation;
+  }
+
+  function setScopedPresentation(value) {
+    if (!selectedVideoScope || ['grid', 'theater'].indexOf(value) === -1) return false;
+    scopedPresentation = value;
+    save();
     return true;
   }
 
@@ -272,7 +288,7 @@
   function defaultVideoOptions() {
     return { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true,
       tileTapDestination: 'floating', pinchOutDestination: 'wikitube',
-      fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-reveal' };
+      fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-hidden' };
   }
 
   function validVideoOptions(options, partial) {
@@ -285,7 +301,7 @@
       if (key === 'pinchOutDestination') return ['wikitube', 'full-video'].indexOf(options[key]) !== -1;
       if (key === 'pinchInDestination' || key === 'swipeUpDestination') return ['wikitube', 'mall'].indexOf(options[key]) !== -1;
       if (key === 'fullVideoSwipeRight') return ['next', 'previous', 'none'].indexOf(options[key]) !== -1;
-      if (key === 'tuckedSwipeRight') return ['next-reveal', 'restore', 'none'].indexOf(options[key]) !== -1;
+      if (key === 'tuckedSwipeRight') return ['next-hidden', 'next-reveal', 'restore', 'none'].indexOf(options[key]) !== -1;
       return (key === 'frameDestination' ? ['wikitube', 'full-video'] : ['wikitube', 'mall']).indexOf(options[key]) !== -1;
     });
   }
@@ -304,7 +320,7 @@
       // retain their existing behavior until deliberately configured.
       if (!Object.prototype.hasOwnProperty.call(options, 'pinchOutDestination')) options.pinchOutDestination = 'wikitube';
       if (!Object.prototype.hasOwnProperty.call(options, 'fullVideoSwipeRight')) options.fullVideoSwipeRight = 'next';
-      if (!Object.prototype.hasOwnProperty.call(options, 'tuckedSwipeRight')) options.tuckedSwipeRight = 'next-reveal';
+      if (!Object.prototype.hasOwnProperty.call(options, 'tuckedSwipeRight')) options.tuckedSwipeRight = 'next-hidden';
       return validVideoOptions(options, false) ? options : null;
     } catch (error) { return null; }
   }
@@ -388,8 +404,11 @@
 
     var wrapper = browseWrapper();
     if (selectedVideoScope) {
-      return tf.getVideoGridState?.() ||
+      var gridState = tf.getVideoGridState?.() ||
         (wrapper ? { scrollTop: wrapper.scrollTop, scrollLeft: wrapper.scrollLeft } : null);
+      if (!gridState) return null;
+      if (scopedPresentation) return Object.assign({}, gridState, { presentation: scopedPresentation });
+      return gridState;
     }
 
     if (selectedProduct) {
@@ -444,7 +463,8 @@
   function isValidState(state) {
     if (!state || typeof state !== 'object') return false;
     if (selectedVideoScope) {
-      var keys = Object.keys(state).filter(function(key) { return key !== 'theater' && key !== 'phoneQuery'; });
+      var keys = Object.keys(state).filter(function(key) { return key !== 'theater' && key !== 'phoneQuery' && key !== 'presentation'; });
+      if ('presentation' in state && ['grid', 'theater'].indexOf(state.presentation) === -1) return false;
       if ('phoneQuery' in state && (typeof state.phoneQuery !== 'string' || state.phoneQuery.length > 300)) return false;
       if ('theater' in state) {
         var theater = state.theater;
@@ -502,6 +522,7 @@
     }
 
     if (selectedVideoScope) {
+      scopedPresentation = state.presentation || null;
       var scope = selectedVideoScope;
       requestAnimationFrame(function() {
         if (selectedVideoScope !== scope || tf.restoreVideoGridState?.(state)) return;
@@ -566,6 +587,7 @@
   // ─── Clear (Public) ───
 
   function clear() {
+    if (selectedVideoScope) scopedPresentation = null;
     try {
       stateStorage().removeItem(storageKey());
     } catch (e) {
@@ -706,6 +728,8 @@
   window.mallStateRestore = {
     /** Keep a fixed video field's scroll in its own browser tab. */
     selectVideoScope: selectVideoScope,
+    getScopedPresentation: getScopedPresentation,
+    setScopedPresentation: setScopedPresentation,
 
     /** Select a registered product namespace before loading its catalog. */
     selectProduct: selectProduct,

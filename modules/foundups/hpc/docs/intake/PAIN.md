@@ -1,5 +1,18 @@
 # HPC pain
 
+## 2026-11-25 — Home/dock drift and revised hidden Next
+
+REPRODUCED in Windows Chrome at live `/member/hpc-v25/`: header identity opens
+the generic Play member route and credentials check; the theater uses the old
+plain search above the app queue. Source187 separately excludes scoped desktop
+from shared-dock borrowing. Latest acceptance keeps desktop TV but puts the
+shared actions/search dock below the app queue and makes HPC Home enter scoped
+tiles. The tucked-tab request now selects Next while remaining hidden, replacing
+the dated next/reveal default. Hidden audio remains unsupported. Candidate
+delayed-page tests also exposed repeated visibility Pause observations canceling
+catalog selection; the shared owner handles that without permitting playback.
+These facts do not establish an installed iPhone pass or production remediation.
+
 ## 2026-11-23 — Reported gesture and menu pain
 
 012 reports app controls/title chrome taking video space, a top-only gesture
