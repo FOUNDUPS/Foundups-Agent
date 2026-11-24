@@ -1,5 +1,9 @@
 # HPC roadmap
 
+## H3 · Automatic collection refresh — 2026-11-25
+
+**CHANGES_POC_ACCEPTANCE:** regular videos join reviewed Shorts in the existing WikiTube queue. Implemented and locally validated: approved Move2Japan uploads, actual-field hashtag matching, public/embedding filters, stable queue IDs/editorial labels, duplicate-free reruns, preserved review holds, new-source review proposals, six-hour product workflow and reversible collection-only publisher. Initial official scan: 4,345 uploads, 73 metadata matches beyond the original eight; restoring nine unique prior content/diagnostic holds yields 67 publishable additions and 75 eligible videos. Repeat run: zero additions. Native read-only release planning preserves all 178 live files except the two admitted catalog replacements. Source merge, hosted recurrence and live readback are separate gates recorded in ModLog. Preserve #2439's player/navigation ownership and #2453's Vote cards; this slice changes neither UI.
+
 ## 2026-11-25 — H1H Home/dock and hidden Next acceptance
 
 **CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** Keep fresh Windows theater,

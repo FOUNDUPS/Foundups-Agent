@@ -1,5 +1,9 @@
 # Member Area Module Change Log
 
+## 2026-11-25 — HPC collection data refresh
+
+HPC's scoped public video catalog gains 67 verified approved-source matches, including `8qO3908bKAM`, while retaining eight reviewed video IDs, relative order and editorial labels. Recorded content/diagnostic holds exclude six otherwise matching videos from the initial 81-item metadata pass, leaving 75 publicly eligible. Generator supports regular watch URLs and per-video creator credits and omits ineligible retained curation. The general Mall catalog, member/player code, service worker and Vote are unchanged. HPC ModLog owns the six-hour workflow and separate source/deployment/runtime receipts.
+
 ## 2026-11-25 — Optional VOTE cards through current B26 owners
 
 Port donor220206d9's two-card catalog/artwork into the current shared field,

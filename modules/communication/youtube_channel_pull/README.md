@@ -14,6 +14,10 @@ This module provides the first truthful YouTube-to-catalog ingest path for pfMAL
 
 ## Usage
 
+### HPC approved-source refresh
+
+`python scripts/refresh_mall_catalog.py --refresh-scoped-source hpc --seed-live --discover --apply` reuses this module's `scoped_refresh` owner for HPC only. The established Move2Japan source may admit public, processed, embeddable hashtag matches automatically. The general review-first channel pull below is unchanged. New channels remain discovery proposals. See [HPC media contract](../../foundups/hpc/INTERFACE.md#media-contract) for six-hour scheduling, source/freshness filters, persistence, restricted-item removal and collection-only publication.
+
 ### Basic Pull (Dry-Run)
 
 ```bash

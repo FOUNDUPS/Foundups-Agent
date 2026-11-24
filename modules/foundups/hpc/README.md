@@ -1,5 +1,7 @@
 # Hasan Piker Coalition
 
+HPC is an independent satirical FoundUp for discovering attributed political-media videos. The collection includes public Move2Japan videos matching #SchumerOUT, #HasanForSpeaker or #Hasan4Speaker. Regular videos and the previously reviewed Shorts share one collection. [Vote/Ballots](../voteballots/) is its civic parent in the FoundUp registry.
+
 ## 2026-11-23 — Clean video gestures and local DAEmon candidate
 
 **IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,
@@ -9,14 +11,11 @@ and opt-in bounded current-tab DAEmon. See the [shared member interaction contra
 Native provider controls and ordinary desktop theater remain; physical phone
 and production acceptance are open. No model, mic or backend service is added.
 
-HPC is an independent satirical FoundUp for discovering attributed political-media clips. The first collection is SchumerOUT, sourced from public Move2Japan Shorts. [Vote/Ballots](../voteballots/) is its civic parent in the FoundUp registry.
-
 The PoC is a public projection of the existing Play FoundUps Mall. It uses the
 shared grid, player, gestures and browsing state. On a phone, **Voice Your
 Opinion** opens Vote's [HPC contact skin](https://vote.mtrout.com/contact#hpc)
 automatically. The public projection carries the registered skin fragment;
-it does not depend on browser referrer data or tracking. The bottom microphone is for search dictation. Red Dog opens the
-public HPC briefing. A fresh Home Screen install uses the HPC name and portrait.
+it does not depend on browser referrer data or tracking. In the v26 candidate the bottom camera opens the existing AutoPost destination. Red Dog stays in the current browsing context and reports unavailable conversation service truthfully; no live microphone/model is claimed. Production v25 remains a separate release observation. A fresh Home Screen install uses the HPC name and portrait.
 
 - [Interface and source curation](INTERFACE.md)
 - [Roadmap and release gates](ROADMAP.md)
@@ -39,7 +38,7 @@ The manifest's capability and agent-route lists are empty.
 
 ## DAEmon Outputs
 
-The PoC is a browser view with no HPC DAEmon.
+The PoC is a browser view. The product's [six-hour collection job](../../../.github/workflows/hpc-wikitube-refresh.yml) uses the existing channel-pull, discovery and scoped catalog owners. Approved Move2Japan matches can be admitted automatically after public metadata checks. New channels remain review proposals. See the [interface](INTERFACE.md#media-contract) for source and release gates; a workflow file alone does not establish an active schedule.
 
 ## Data / Telemetry Namespace
 

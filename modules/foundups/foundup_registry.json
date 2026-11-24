@@ -824,6 +824,7 @@
       "foundup_id": "kids_episodes",
       "display_name": "Kids Episodes",
       "entity_type": "skeleton_candidate",
+      "parent_foundup_id": "eduit",
       "module_path": "modules/foundups/kids_episodes",
       "stage": "incubating",
       "tier": "F0_DAE",
