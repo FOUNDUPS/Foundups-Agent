@@ -1,5 +1,15 @@
 # p.fMALL Test ModLog
 
+## 2026-11-25 — Current admission contract assertion
+
+Broader player/media contracts found one inherited BuildV20 static test still
+expecting the retired apex portal constant; it is also absent at prior B26
+source187c79a5. Reconcile that assertion to the current registered Play origin,
+same-host portal selection and admission-request helper. Keep the existing
+entry helper checks and independently executed routing/boot boundary VMs.
+The broader selection had307 passes/one stale expectation; successor replay
+is required. This changes no admission behavior, scanner or CI enforcement.
+
 ## 2026-11-25 — Growing HPC collection with retained review holds
 
 Hosted broad test at `82466032895dedaa0b7f017b2be9204ff14a1489` found a fixed eight-video assertion in the isolated playback-probe fixture (1 failed, 1,856 passed; dependent evidence upload then lacked its skipped output). The same fixture also protects four diagnostic-only exclusions; one authentic hashtag match had crossed its prior editorial disposition. Preserve all nine unique recorded content/diagnostic holds in the curation input, and replace only the obsolete fixed size with exact original-eight prefix/order, unique IDs and the requested regular-video identity. Retain all four diagnostic exclusion assertions. No production player, probe allowlist or authorization gate is weakened.

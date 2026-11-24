@@ -528,10 +528,13 @@ class TestFloatingAndWikiTubeBuildV20:
         assert "memberPortalUrl" in js_content
 
     def test_projection_defines_play_open_mall_and_member_portal_handoff(self):
-        """mall-video-projection.js defines play.foundups.com open Mall and foundups.com Member Portal helpers."""
+        """Play discovery retains registered, same-host admission helpers."""
         proj = (MEMBER_DIR / "js" / "mall-video-projection.js").read_text(encoding="utf-8")
         assert "['play.foundups.com', 'mall']" in proj
-        assert "const MEMBER_PORTAL_ORIGIN = 'https://foundups.com';" in proj
+        assert "const OPEN_MALL_ORIGIN = 'https://play.foundups.com';" in proj
+        assert "function portalOrigin" in proj
+        assert "return isOpenMallHost(location) && location.origin ? location.origin : OPEN_MALL_ORIGIN;" in proj
+        assert "function isAdmissionRequest" in proj
         assert "function isOpenMallHost" in proj
         assert "function resolveMemberEntry" in proj
         assert "function memberPortalUrl" in proj
