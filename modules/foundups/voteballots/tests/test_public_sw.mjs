@@ -17,7 +17,7 @@ function worker() {
   const handlers = {};
   const contents = new Map();
   const requests = [];
-  const names = ['unrelated', 'vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9', 'vote-public-guide-v10'];
+  const names = ['unrelated', ...Array.from({length: 11}, (_, i) => `vote-public-guide-v${i + 2}`)];
   const deleted = [];
   const cache = {
     match: async (url) => contents.get(url),
@@ -60,10 +60,10 @@ function worker() {
 test('canonical and prior HTML navigation use the same cached document offline', async () => {
   const sw = worker();
   await sw.event('install', '/');
-  assert.equal(sw.contents.size, 32);
+  assert.equal(sw.contents.size, 36);
   assert.ok(sw.requests.every(({options}) => options.redirect === 'error'));
   await sw.event('activate', '/');
-  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9', 'vote-public-guide-v10']);
+  assert.deepEqual(sw.deleted, Array.from({length: 11}, (_, i) => `vote-public-guide-v${i + 2}`));
   for (const asset of ['contact-script.js', 'contact-script.mjs']) assert.ok(sw.contents.has(origin + '/' + asset));
   sw.changeResponse(() => { throw new TypeError('offline'); });
   for (const path of ['/guide', '/contact', '/evidence', '/coalition']) {
@@ -71,7 +71,7 @@ test('canonical and prior HTML navigation use the same cached document offline',
     assert.equal(await sw.event('fetch', path + '.html'), sw.contents.get(origin + path));
   }
   assert.equal(await sw.event('fetch', '/index.html'), sw.contents.get(origin + '/'));
-  for (const path of ['/cover.css', '/cover.js', ...[1, 2, 3, 4, 5].map((n) => `/comics/photo-${n}.webp`)]) {
+  for (const path of ['/cover.css', '/cover.js', ...[1, 2, 3, 4, 5].map((n) => `/comics/photo-${n}.webp`), ...['schumer', 'jeffries'].flatMap((name) => [`/comics/${name}-card-loop.webp`, `/comics/${name}-card-still.webp`])]) {
     assert.ok(sw.contents.has(origin + path));
     assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
   }
@@ -111,6 +111,71 @@ test('the cover hands every original guide fragment back to the guide', () => {
     hashChanged();
   }
   assert.deepEqual(redirects, []);
+});
+
+test('cover portraits use stills while hidden or paused and require explicit play after a pause', () => {
+  const markup = readFileSync(new URL('../web/index.html', import.meta.url), 'utf8');
+  const nativeSources = [...markup.matchAll(/<source\s+media="([^"]+)"\s+srcset="comics\/(schumer|jeffries)-card-loop\.webp"/g)];
+  assert.equal(nativeSources.length, 2);
+  for (const [, media, name] of nativeSources) {
+    assert.equal(media, '(prefers-reduced-motion: no-preference)');
+    assert.ok(markup.includes(`src="comics/${name}-card-still.webp"`));
+  }
+
+  const sources = nativeSources.map(([, media]) => ({media}));
+  const clicks = {};
+  const toggle = {
+    hidden: true,
+    textContent: 'Pause portraits',
+    addEventListener: (name, callback) => { clicks[name] = callback; },
+  };
+  const portraits = {
+    querySelectorAll: (selector) => {
+      assert.equal(selector, 'picture source');
+      return sources;
+    },
+    querySelector: (selector) => {
+      assert.equal(selector, '.cover-portraits-toggle');
+      return toggle;
+    },
+  };
+  const listeners = {};
+  const document = {
+    hidden: true,
+    querySelector: (selector) => selector === '.cover-portraits' ? portraits : null,
+    addEventListener: (name, callback) => { listeners[name] = callback; },
+  };
+  vm.runInNewContext(coverCode, {
+    URL, location: new URL(origin + '/'), navigator: {}, document,
+    window: {addEventListener: () => {}},
+  });
+  const expectMedia = (media) => assert.deepEqual(sources.map((source) => source.media), [media, media]);
+
+  assert.equal(toggle.hidden, false);
+  expectMedia('not all');
+  document.hidden = false;
+  listeners.visibilitychange();
+  expectMedia('(prefers-reduced-motion: no-preference)');
+
+  clicks.click();
+  assert.equal(toggle.textContent, 'Play portraits');
+  expectMedia('not all');
+  for (const hidden of [true, false]) {
+    document.hidden = hidden;
+    listeners.visibilitychange();
+    expectMedia('not all');
+    assert.equal(toggle.textContent, 'Play portraits');
+  }
+
+  clicks.click();
+  assert.equal(toggle.textContent, 'Pause portraits');
+  expectMedia('(prefers-reduced-motion: no-preference)');
+  document.hidden = true;
+  listeners.visibilitychange();
+  expectMedia('not all');
+  document.hidden = false;
+  listeners.visibilitychange();
+  expectMedia('(prefers-reduced-motion: no-preference)');
 });
 
 test('Oversight serves the scoped maps, roadmap and manual contact offline', async () => {

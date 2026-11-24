@@ -2,6 +2,37 @@
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-25] — Portrait browser and preservation verification
+
+- Existing module Python suite: **412 passed**. Existing contact, coalition and
+  public-worker Node suites with the added portrait case: **137 passed**.
+- Real Chrome preview of the reconciled current Sites mirror at 1440, 390 and
+  320 CSS pixels: no horizontal overflow, matching portrait dimensions and
+  480/561 proportions, correct office labels and all three separate hashtag
+  captions below their corresponding artwork. Both image sources decoded.
+- Actual Pause and Play selected still and animated WebPs respectively. Native
+  reduced-motion plus JavaScript-disabled reload selected both stills; the
+  reduced-motion rule hid the motion control. The browser held a paused document
+  response during a later CDP offline attempt, so no new real-browser offline
+  result is claimed. Cache contents and active v13 worker were read back locally;
+  the existing worker fixture supplies offline navigation/asset acceptance.
+- Independent source review found no blocker and checked the mirror's scoped
+  additions and matching asset hashes. Current v12 song/player, CSP and all
+  existing content remain in that mirror. Preview and live release are separate.
+- No physical-phone, Safari, fundraising calculation or shared-card acceptance.
+
+## [2026-11-25] — Cover portrait motion and offline artwork
+
+- Extended `test_public_sw.mjs` in its existing VM harness: both portrait sources
+  select stills while the document is hidden or the visitor pauses; a manual
+  pause survives hide/show until explicit Play. Resuming keeps the native
+  `prefers-reduced-motion: no-preference` condition, with supplied still fallbacks.
+- The existing worker fixture now checks 36 exact shell assets, including both
+  animated/still portrait pairs, and retirement through the prior v12 cache.
+- Node v24.11.1: `node --test --test-timeout=15000
+  modules/foundups/voteballots/tests/test_public_sw.mjs` passed **8/8**, zero failed.
+  This is source/fixture evidence; browser and production checks are separate.
+
 ## [2026-11-22] — Source-selected HPC handoff
 
 - 136 passed across existing contact, coalition and public-worker suites.

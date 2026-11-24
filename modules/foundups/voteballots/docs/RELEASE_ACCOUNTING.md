@@ -1,5 +1,30 @@
 # Vote release accounting and launch checklist
 
+## 2026-11-25 Dispatch portrait release
+
+This slice adds the two approved animated caricatures to The Vote Dispatch at
+`vote.foundups.com`, with separate hashtag captions and reduced-motion stills.
+The existing homepage remains the entrypoint; the shared HPC/Mall card system and
+computed fundraising scores are outside this release.
+
+The refreshed public Sites project is
+`appgprj_6aee6646e6ac81918ac2624d5d1db413`, observed at version 12 with source mirror
+`8c40f15770ba78b622a23ebfe3d2d04533a22f99`. That mirror retains the campaign-song
+player and its exact frame policy. It differs from GitHub's homepage/navigation,
+so publication applies only the new portrait section, CSS/controller additions,
+v13 worker and four approved WebPs. Do not replace the whole deployed homepage
+or copy repository-only navigation changes. Other deployed assets, including the
+guide, Contact and Press, must remain byte-identical to the refreshed mirror.
+
+Both animations retain 50 frames, 80 ms per frame and 480 × 561 dimensions;
+the captions are `#SchumerOut`, `#ChuckSchumerOut` and `#JeffriesOut`.
+The existing public-worker fixture covers all 36 cached resources and retirement
+through v12; the new controller case covers pause and visibility state.
+Detailed browser observations belong in `tests/TestModLog.md`. The focused portrait
+PR is the shared release receipt for exact source/main checks, resulting mirror
+commit, Sites version/deployment and live readback. This source record alone does
+not assert that publication occurred.
+
 ## 2026-11-22 Source-selected skin handoff
 
 HPC's Voice link now carries `https://vote.mtrout.com/contact#hpc`, selecting

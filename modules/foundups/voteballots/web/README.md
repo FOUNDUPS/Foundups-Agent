@@ -1,5 +1,28 @@
 # Vote public landing
 
+## House and Senate portraits — 2026-11-25
+
+The existing Dispatch homepage adds matched portrait windows for New York Senator
+Chuck Schumer and Representative Hakeem Jeffries (NY-8). The captions are separate
+HTML text: `#SchumerOut`, `#ChuckSchumerOut` and `#JeffriesOut`. The supplied Meta
+Muse artwork and Alibaba Wan animations are reused without further generation.
+
+The four local `comics/*-card-{loop,still}.webp` assets are 480 × 561 pixels.
+Both loops retain all 50 frames at 80 ms each (four seconds), using Pillow 12.2.0
+and libwebp 1.6.0, quality 85/method 6. The stills resize the approved Muse originals
+with Lanczos, quality 90/method 6. The animations are 31.3% smaller than the GIFs.
+Native `picture` media queries choose stills for reduced motion, including without
+JavaScript. Pause/Play switches both portraits to stills or motion; hidden documents
+also use stills and retain the visitor's pause choice. There are no new timers,
+dependencies, providers, trackers or computed funding scores.
+
+The v13 worker adds exactly the four portrait assets to its 36-resource shell and
+retires older Vote caches. The deployed mirror already had v12 plus its campaign
+song, so publication must preserve its existing homepage and apply only the portrait
+HTML/CSS/JS additions, worker and four assets. Other pages remain byte-identical.
+Repository-only navigation/Press differences are outside this deployment. See the
+[release record](../docs/RELEASE_ACCOUNTING.md#2026-11-25-dispatch-portrait-release).
+
 ## HPC contact skin and local script composer
 
 Open `/contact#hpc` for the independent HPC skin; `/contact` starts with Vote

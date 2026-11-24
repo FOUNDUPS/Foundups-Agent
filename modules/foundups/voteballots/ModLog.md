@@ -1,3 +1,28 @@
+## 2026-11-25 — Approved animated Dispatch portraits
+
+- Add the supplied Schumer and Jeffries caricatures to the existing homepage in
+  matching responsive windows, with the exact campaign hashtags in HTML below
+  each image. Keep the six panels and existing guide/contact links intact.
+- Reuse the approved Muse/Wan files as four efficient WebP derivatives. Native
+  reduced-motion stills, manual Pause/Play and hidden-page stopping use the current
+  cover owner; the exact public cache advances to v13 with 36 resources.
+- WSP 15 allocation: complexity 2 + importance 3 + deferability 4 + impact 3 =
+  12/P2. One static-surface layer; local implementation and bounded independent
+  asset/source verification. Fixed assets need no Qwen/Gemma or provider generation.
+  No distributed DAE/WRE execution or new HPC/Mall card system is introduced.
+- WSP 00 native awakening and strict tracker passed at isolated upstream
+  `60eb7f321647a6736826f33fbceb0f90fe2b773b`. Holo returned an authority mismatch;
+  lexical workspace context had UNKNOWN freshness and an index gap. Retrieval
+  ordered cover.js first but included Oversight noise and omitted test hits;
+  direct owner docs and the existing test inventory resolved those gaps without
+  reindexing or duplicate code owners. Optional memory/requirements files are absent.
+- Current Sites source `8c40f15770ba78b622a23ebfe3d2d04533a22f99` is newer than
+  recorded v11. Preserve its song/player, CSP and navigation. Apply only the eight
+  scoped public-file additions/changes; leave the remaining deployed files intact.
+- WSP 10/22/50/71/91/97: isolated source, reviewed buildless assets and controller,
+  existing web fixtures, independent source review and finite read-only preview.
+  Source tests, browser evidence and actual release status are separate records.
+
 ## 2026-11-22 — HPC skin and local editable call scripts
 
 - Reuse the manual contact page, directory and service worker; add an opt-in
