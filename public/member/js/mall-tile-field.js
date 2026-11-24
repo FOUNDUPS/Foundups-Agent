@@ -1303,7 +1303,8 @@
       // Track tile type for CSS background-size: avatar uses contain, video uses cover
       var isAvatarTile = !!item.channel_avatar_url && !item.video_data;
       var posterUrl = item.channel_avatar_url || item.poster_url || '';
-      var posterStyle = posterUrl ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
+      var memberCard = item.video_data?.member_card || item.member_card;
+      var posterStyle = posterUrl && !memberCard ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
       var tileType = isAvatarTile ? 'avatar' : 'video';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
@@ -1345,7 +1346,7 @@
       var sourceActionBadge = sourceAction ? '<span class="mall-tile-action-badge">' + sourceAction + '</span>' : '';
 
       // Non-video tile class modifier
-      var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video');
+      var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video') + (memberCard ? ' mall-member-card' : '');
 
       var videoId = fixedVideoField ? ' data-video-id="' + escapeAttr(item.video_data?.video_id || '') + '"' : '';
       return '<article class="' + tileClass + '" data-index="' + index + '"' + videoId + ' data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
@@ -1357,11 +1358,11 @@
         audioBtn +
         enterFoundupBtn +
         expandBtn +
-        '<div class="mall-tile-inner">' +
+        (memberCard ? renderMemberCard(memberCard) : '<div class="mall-tile-inner">' +
           '<span class="mall-tile-token">' + escapeHtml(item.token_symbol || '') + '</span>' +
           '<span class="mall-tile-hero">' + escapeHtml(item.hero_label || '') + '</span>' +
           '<p class="mall-tile-name">' + escapeHtml(item.name || item.title || '') + '</p>' +
-        '</div>' +
+        '</div>') +
       '</article>';
     });
 
@@ -1452,6 +1453,21 @@
         tile.classList.add('thumb-loaded'); // No image = no shimmer needed
       }
     });
+  }
+
+  // Optional media metadata; the existing tile, selection and player remain the owners.
+  function renderMemberCard(card) {
+    var hashtag = String(card.hashtag || '');
+    var action = /OUT$/.test(hashtag)
+      ? escapeHtml(hashtag.slice(0, -3)) + '<strong>OUT</strong>' : escapeHtml(hashtag);
+    return '<div class="mall-member-card-content">' +
+      '<header class="mall-member-card-heading"><h3>' + escapeHtml(card.name || '') + '</h3>' +
+      '<p>' + escapeHtml([card.chamber, card.constituency].filter(Boolean).join(' · ')) + '</p></header>' +
+      '<picture class="mall-member-card-art"><source media="(prefers-reduced-motion: no-preference)" type="image/webp" srcset="' +
+      escapeAttr(card.animation_url || card.still_url || '') + '"><img src="' + escapeAttr(card.still_url || '') +
+      '" alt="' + escapeAttr('AI caricature of ' + (card.name || 'a member of Congress')) + '" loading="lazy"></picture>' +
+      '<footer class="mall-member-card-footer"><p class="mall-member-card-hashtag">' + action + '</p>' +
+      '<p class="mall-member-card-scores"><span>UDP <b>Pending</b></span><span>CU <b>Pending</b></span></p></footer></div>';
   }
 
   function renderFixedTail(total) {

@@ -1,5 +1,21 @@
 # Member Area Module Change Log
 
+## 2026-11-25 — Typed VOTE cards in the existing shared player
+
+- Add optional `member_card` rendering to existing tiles and player, with
+  separate identity/action text, reduced-motion stills, silent four-second
+  media and Pending-only UDP/CU labels. Retain the shared player stage bounds.
+- Add the strict selected VOTE collection and catalog path; preserve ordinary
+  member admission and HPC video startup. The Vote front door hands off to the
+  actual Play PWA; no static shell copy or new PWA is accepted.
+- Source is based on the v19 owner. Observed HPC uses `/member/hpc-v25/`;
+  preview metadata reports v26 source `187c79a5128c12be05d7f9cc2974b4c414946208`.
+  Neither observation proves this extension is integrated or deployed there.
+  Preserve the active HPC home/dock lane `fix/hpc-home-dock-20261125`.
+- PR #2453 remains Draft pending shared-owner integration, UI acceptance and
+  release. TestModLog records source evidence and repeated browser timeouts.
+  WSP 10, 22, 50, 71, 91 and 97; no runtime or public completion claim.
+
 ## 2026-11-21 — Shared dock and player preference contract
 
 Link roadmap and interface to PFDOCK-20261121 across HPC, Play and all

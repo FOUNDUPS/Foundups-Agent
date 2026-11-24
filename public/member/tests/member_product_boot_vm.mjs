@@ -281,13 +281,19 @@ await check('the original ordinary Mall still sends guests through its sign-in g
   assert.equal(h.state.field.length, 0);
 });
 
-await check('the dedicated HPC host mounts its video projection without member account reads', async () => {
-  const h = harness({ url: 'https://hpc.foundups.com/member/', bootVideo: true, noClerk: true });
-  await flush();
-  assert.deepEqual(h.state.videoMounts, ['hpc']);
-  assert.deepEqual(h.state.imports, []);
-  assert.deepEqual(h.state.reads, []);
-  assert.equal(h.state.consumes, 0);
+await check('registered public collections mount without member account reads', async () => {
+  for (const [url, scope] of [
+    ['https://hpc.foundups.com/member/', 'hpc'],
+    ['https://vote.foundups.com/', 'voteballots'],
+    ['https://play.foundups.com/member/?foundup=voteballots', 'voteballots'],
+  ]) {
+    const h = harness({ url, bootVideo: true, noClerk: true });
+    await flush();
+    assert.deepEqual(h.state.videoMounts, [scope]);
+    assert.deepEqual(h.state.imports, []);
+    assert.deepEqual(h.state.reads, []);
+    assert.equal(h.state.consumes, 0);
+  }
 });
 
 await check('the apex HPC route sends a signed-out visitor to the member sign-in', async () => {

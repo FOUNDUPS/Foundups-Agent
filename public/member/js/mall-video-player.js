@@ -86,6 +86,7 @@
   var pendingResumeSeconds = null;
   var ytPlayer = null;           // YouTube IFrame API player instance
   var ytLoad = null;
+  var memberMotionCleanup = null;
 
   // ─── YouTube IFrame API ───
   function ensureYouTubeAPI() {
@@ -145,6 +146,8 @@
   }
 
   function resetPlayback() {
+    memberMotionCleanup?.();
+    memberMotionCleanup = null;
     renderGeneration += 1;
     clearTimeout(playbackTimer);
     playbackStatus = null;
@@ -815,6 +818,12 @@
 
     resetPlayback();
     titleEl.textContent = video.title || '';
+    container.classList.toggle('member-card-player', !!video.member_card);
+    if (video.member_card) {
+      container.classList.remove('provider-youtube');
+      renderMemberCard(video);
+      return;
+    }
 
     // Determine embed type
     var embedUrl = video.embed_url || video.embedUrl;
@@ -876,6 +885,68 @@
       // Placeholder
       stage.innerHTML = '<div class="video-player-loading">Loading video...</div>';
     }
+  }
+
+  function renderMemberCard(video) {
+    var card = video.member_card;
+    titleEl.textContent = card.name || video.title || '';
+    var panel = document.createElement('article');
+    panel.className = 'video-player-member-card';
+    var heading = document.createElement('header');
+    var name = document.createElement('h2');
+    name.textContent = card.name || '';
+    var office = document.createElement('p');
+    office.textContent = [card.chamber, card.constituency].filter(Boolean).join(' · ');
+    heading.append(name, office);
+
+    var media = document.createElement('video');
+    media.controls = true;
+    media.loop = true;
+    media.muted = true;
+    media.playsInline = true;
+    media.preload = 'none';
+    media.poster = card.still_url || video.thumbnail_url || '';
+    media.src = video.source_url || '';
+    media.setAttribute('aria-label', 'Animated AI caricature of ' + (card.name || 'a member of Congress'));
+    var motion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    media.autoplay = autoplayRequested && !motion?.matches;
+    function reduceMotion() {
+      if (!motion.matches) return;
+      media.autoplay = false;
+      media.pause();
+      media.load(); // Return to the supplied still poster; playback remains a deliberate action.
+    }
+    motion?.addEventListener('change', reduceMotion);
+    memberMotionCleanup = function() { motion?.removeEventListener('change', reduceMotion); };
+
+    var footer = document.createElement('footer');
+    var hashtag = document.createElement('p');
+    hashtag.className = 'video-player-member-hashtag';
+    var action = String(card.hashtag || '');
+    hashtag.append(document.createTextNode(/OUT$/.test(action) ? action.slice(0, -3) : action));
+    if (/OUT$/.test(action)) {
+      var out = document.createElement('strong');
+      out.textContent = 'OUT';
+      hashtag.append(out);
+    }
+    var scores = document.createElement('p');
+    scores.className = 'video-player-member-scores';
+    scores.textContent = 'UDP: Pending · CU: Pending';
+    footer.append(hashtag, scores);
+    try {
+      var official = new URL(card.official_url);
+      if (official.protocol === 'https:' && !official.username && !official.password &&
+          /\.(?:house|senate)\.gov$/.test(official.hostname)) {
+        var link = document.createElement('a');
+        link.href = official.href;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'Official congressional profile';
+        footer.append(link);
+      }
+    } catch (error) { /* An absent official profile does not fabricate a destination. */ }
+    panel.append(heading, media, footer);
+    stage.append(panel);
   }
 
   // ─── Render Rail ───

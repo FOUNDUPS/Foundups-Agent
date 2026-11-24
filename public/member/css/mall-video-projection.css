@@ -1,3 +1,11 @@
+.mall-member-card-resources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem 1rem;
+  font-size: .875rem;
+}
+.mall-member-card-resources a { display: inline-flex; align-items: center; min-height: 44px; }
+
 .mall-video-scope-header:not([hidden]) {
   display: flex;
   flex: 1;

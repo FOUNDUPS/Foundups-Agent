@@ -2,7 +2,13 @@
   'use strict';
 
   // Only a dedicated host can start a guest projection.
-  const dedicatedHosts = new Map([['hpc.foundups.com', 'hpc']]);
+  const dedicatedHosts = new Map([
+    ['hpc.foundups.com', 'hpc'],
+    ['vote.foundups.com', 'voteballots'],
+    ['vote.mtrout.com', 'voteballots'],
+    ['vote.undaodu.chatgpt.site', 'voteballots'],
+    ['vote.localhost', 'voteballots']
+  ]);
   const publicScopes = new Set(dedicatedHosts.values());
   const memberPaths = new Set(['/member', '/member/', '/member/index.html']);
   // Keep this display label aligned with the shell cache generation.
@@ -10,10 +16,17 @@
   const buildLabel = `<small class="mall-build-label">Build ${mallBuild}</small>`;
 
   function hostScope(location) {
+    // A selected public collection reuses the actual Play Mall; other routes
+    // retain their existing admission and discovery behavior.
+    if (location.hostname === 'play.foundups.com') {
+      const selected = new URLSearchParams(location.search).getAll('foundup');
+      if (selected.length === 1 && selected[0] === 'voteballots') return 'voteballots';
+    }
     return dedicatedHosts.get(location.hostname) || null;
   }
 
   function resolve(location) {
+    if (hostScope(location) === 'voteballots' && ['/', '/index.html'].includes(location.pathname)) return 'voteballots';
     return memberPaths.has(location.pathname) ? hostScope(location) : null;
   }
 
@@ -445,13 +458,14 @@
   }
 
   async function mount(scope) {
+    const memberCards = scope === 'voteballots';
     const element = (id) => document.getElementById(id);
     const field = element('mallTileField');
     document.documentElement.dataset.mallVideoScope = scope;
     element('gestureHints').remove();
     element('loadingState').style.display = 'none';
     element('memberArea').style.display = 'block';
-    field.setAttribute('aria-label', 'Shorts');
+    field.setAttribute('aria-label', memberCards ? 'Congressional member cards' : 'Shorts');
     const home = document.querySelector('.mall-header .mall-brand-minimal');
     home.href = 'https://foundups.com/member/';
     if (scope === 'hpc') home.querySelector('img').src = hpcPortrait;
@@ -459,7 +473,7 @@
     home.addEventListener('click', function () { window.mallStateRestore.save(); });
 
     try {
-      const response = await fetch('/member/mall-public-video-catalog.json', { cache: 'no-store', credentials: 'omit' });
+      const response = await fetch(memberCards ? '/member/vote/congressional-cards.json' : '/member/mall-public-video-catalog.json', { cache: 'no-store', credentials: 'omit' });
       if (!response.ok) throw new Error('Public video catalog unavailable');
       const projection = (await response.json())[scope];
       if (projection?.lane?.foundup_id !== scope || !projection.lane.videos?.length) {
@@ -481,7 +495,7 @@
       topicLine.innerHTML = buildLabel;
       topicLine.prepend(topic);
       identity.after(topicLine);
-      element('videoScopeCredit').textContent = projection.credit + ' Shorts · Commentary and satire';
+      element('videoScopeCredit').textContent = projection.credit + (memberCards ? ' · Independent AI caricatures' : ' Shorts · Commentary and satire');
       field.setAttribute('aria-describedby', 'videoScopeCredit');
       element('videoScopeDisclosureText').textContent = projection.disclosure;
       const disclosure = element('videoScopeDisclosure');
@@ -499,6 +513,18 @@
 
       const header = element('videoScopeHeader');
       header.hidden = false;
+      if (memberCards) {
+        const resources = document.createElement('nav');
+        resources.className = 'mall-member-card-resources';
+        resources.setAttribute('aria-label', 'Vote resources');
+        for (const [label, path] of [['The Vote Dispatch', 'https://vote.foundups.com/dispatch'], ['Vote guide', 'https://vote.foundups.com/guide']]) {
+          const link = document.createElement('a');
+          link.href = path;
+          link.textContent = label;
+          resources.append(link);
+        }
+        header.append(resources);
+      }
       window.mallStateRestore.selectVideoScope(scope);
       window.mallTileField.initialize([projection.lane], { fixedVideoField: true });
       window.mallStateRestore.restore();
@@ -507,7 +533,7 @@
       const dock = createPhoneDock(actions, scope, disclosure);
       const desktop = window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
       const applyPresentation = () => {
-        const theater = desktop.matches;
+        const theater = desktop.matches && !memberCards;
         document.documentElement.dataset.mallVideoLayout = theater ? 'theater' : 'phone';
         info.hidden = !theater;
         (theater ? actions : header).append(voice);

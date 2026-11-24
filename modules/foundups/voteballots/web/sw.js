@@ -1,7 +1,7 @@
 'use strict';
 
 // Only this public guide's exact same-origin shell paths are eligible for caching.
-const CACHE = 'vote-public-guide-v13';
+const CACHE = 'vote-public-guide-v11';
 const PAGES = ['guide', 'coalition', 'evidence', 'contact'];
 const SHELL = [
   './', ...PAGES.map((page) => './' + page),
@@ -9,7 +9,6 @@ const SHELL = [
   './hpc-navigation.css', './hpc-navigation.js',
   './icons/hpc-portrait.png', './icons/red-dog.png',
   ...[1, 2, 3, 4, 5].map((photo) => `./comics/photo-${photo}.webp`),
-  ...['schumer', 'jeffries'].flatMap((name) => [`./comics/${name}-card-loop.webp`, `./comics/${name}-card-still.webp`]),
   './style.css', './app.js', './manifest.webmanifest',
   './coalition.js', './coalition-draft.mjs', './evidence.css',
   './contact.js', './contact.css', './contact-queue.mjs', './contact-roster.json',

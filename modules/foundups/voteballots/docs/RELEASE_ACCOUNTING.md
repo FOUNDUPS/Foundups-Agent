@@ -1,30 +1,45 @@
 # Vote release accounting and launch checklist
 
-## 2026-11-25 Dispatch portrait release
+## 2026-11-25 Shared congressional deck
 
-This slice adds the two approved animated caricatures to The Vote Dispatch at
-`vote.foundups.com`, with separate hashtag captions and reduced-motion stills.
-The existing homepage remains the entrypoint; the shared HPC/Mall card system and
-computed fundraising scores are outside this release.
+[PR #2453](https://github.com/FOUNDUPS/Foundups-Agent/pull/2453) is a **draft** for
+two individual typed member cards in the actual shared Play FoundUps Mall. The
+earlier Dispatch portrait section was superseded before publication. The source
+adds a fixed VOTE → shared-collection handoff, no separate Mall shell or viewer.
 
-The refreshed public Sites project is
-`appgprj_6aee6646e6ac81918ac2624d5d1db413`, observed at version 12 with source mirror
-`8c40f15770ba78b622a23ebfe3d2d04533a22f99`. That mirror retains the campaign-song
-player and its exact frame policy. It differs from GitHub's homepage/navigation,
-so publication applies only the new portrait section, CSS/controller additions,
-v13 worker and four approved WebPs. Do not replace the whole deployed homepage
-or copy repository-only navigation/Press changes. Other deployed assets, including
-the guide and Contact, must remain byte-identical to the refreshed mirror. Of the
-33 existing public files, only four change and 29 are preserved; four are added.
+Observed Sites state remains public version 12, project
+`appgprj_6aee6646e6ac81918ac2624d5d1db413`, mirror
+`8c40f15770ba78b622a23ebfe3d2d04533a22f99`. At the eventual release, preserve its
+existing Dispatch as `/dispatch`, including the campaign art, crying Schumer,
+song/radio and original tool links. The 33-file baseline is retained locally;
+no superseded section was deployed. `/guide` and `/contact` remain their current
+working pages, including the local call-script composer and skin selector.
 
-Both animations retain 50 frames, 80 ms per frame and 480 × 561 dimensions;
-the captions are `#SchumerOut`, `#ChuckSchumerOut` and `#JeffriesOut`.
-The existing public-worker fixture covers all 36 cached resources and retirement
-through v12; the new controller case covers pause and visibility state.
-Detailed browser observations belong in `tests/TestModLog.md`. The focused portrait
-PR is the shared release receipt for exact source/main checks, resulting mirror
-commit, Sites version/deployment and live readback. This source record alone does
-not assert that publication occurred.
+The shared release is separate. Chrome observed production HPC at
+`https://hpc.foundups.com/member/hpc-v25/`, visibly Build v25. Recovered core files
+match shared source `bd0510c5c2e333d07b1bb02340ca91b291420164` after newline
+normalization. The separately verified B26 Gestures preview names source
+`187c79a5128c12be05d7f9cc2974b4c414946208`, version `ee887c714947b74a`; it is not
+the production B25 comparison. Active HPC home/search/dock changes must retain
+their owner and exact current source. Do not publish older main files over them.
+
+Acceptance remaining: admit the optional card extension into the current shared
+release; verify two initial tiles, the real common viewer, reduced motion and
+close/Back restoration beside HPC at identical 390 × 844 and desktop viewports;
+save actual screenshots and measurements; then publish the VOTE handoff and
+Dispatch path. CUA repeatedly timed out before this new flow could be observed.
+The former 390px Dispatch-section preview is superseded and is not phone-deck
+acceptance. No physical-phone, new live-card flow or completed release is claimed.
+
+The action labels are #ChuckSchumerOUT / #ChuckJeffriesOUT. Both UDP and CU fields
+are Pending. Committee/leadership labels are omitted. Official office/constituency
+sources: [Schumer](https://www.schumer.senate.gov/) and
+[Jeffries](https://jeffries.house.gov/about/).
+
+`hasan4speaker.com` was observed returning 301 to Vote's root with a browser
+User-Agent; its forwarder cannot preserve the original host after redirect.
+The new release keeps an explicit Dispatch path. No registrar or domain-setting
+change was made or claimed. Keep this separate from shared-PWA admission.
 
 ## 2026-11-22 Source-selected skin handoff
 

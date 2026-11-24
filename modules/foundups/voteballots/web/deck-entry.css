@@ -1,0 +1,6 @@
+:root { color-scheme: dark; font: 1rem/1.5 system-ui, sans-serif; background: #08080f; color: #faf7ff; }
+body { margin: 0; }
+main { width: min(42rem, 100% - 2rem); margin: 4rem auto; }
+nav { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; }
+a { display: inline-flex; align-items: center; min-height: 44px; color: #d6c7ff; }
+a:focus-visible { outline: 3px solid #e3d55c; outline-offset: 4px; }

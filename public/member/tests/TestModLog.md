@@ -1,3 +1,19 @@
+## 2026-11-25 — VOTE typed-card source and boot boundaries
+
+- Integration run recorded **2,292 source Python tests passed** before the
+  latest head-selector guard adjustment. The focused existing player/field
+  suites earlier passed 251 tests; neither result establishes rendered cards.
+- After the guard adjustment, existing state/SW and boot VM fixtures passed
+  **23** and **26** checks respectively. Cases preserve HPC selection, reject
+  duplicate/unknown Play selectors, and retain ordinary FoundUps admission.
+  A subsequent removal of redundant head metadata is not covered by another
+  full Python rerun in this record.
+- Actual browser control timed out repeatedly. New-card animation, measured
+  stage bounds, readable 390×844 text, reduced-motion output and close/Back
+  restoration remain **NOT_VERIFIED**. Compare VOTE and HPC in the same actual
+  shared PWA before accepting the integration. No v25/v26 port or deployment
+  is established; PR #2453 is a Draft and publication is held.
+
 ## 2026-11-22 — HPC Voice link selects the Vote skin
 
 - Updated the scoped browser fixture's expected Voice link to `/contact#hpc`.

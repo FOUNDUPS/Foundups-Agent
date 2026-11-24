@@ -1,5 +1,16 @@
 # p.fMALL Test ModLog
 
+## 2026-11-25 — Separate VOTE congressional-card data contract
+
+- Added one case to `test_mall_video_catalog.py` for the two VOTE member records:
+  stable identities, office/constituency labels, supplied hashtags, official
+  profile hosts, bounded public fields and null UDP/CU scores. Artwork URLs must
+  stay under `/member/vote/comics/` and map to nonempty canonical WebP/MP4 files.
+- The case rejects embedded-video fields and keeps the VOTE identities outside
+  the existing HPC-only projection and catalog videos. No generator was changed.
+- Focused file: **34 passed**, with two existing pytest configuration warnings
+  when plugin autoload is disabled. This is data/source evidence only.
+
 ## 2026-11-22 — HPC source-selected Vote skin
 
 - Reconciled the catalog rebuild assertion to `/contact#hpc`; it retains the exact destination and full projection/idempotency checks.

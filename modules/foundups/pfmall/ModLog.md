@@ -1,3 +1,16 @@
+## 2026-11-25 — Shared typed-media seam for VOTE member cards
+
+- Extend the existing `public/member/` tile/player owner with optional
+  congressional member metadata and a strict selected VOTE collection.
+  HPC remains the video fixture; the generated HPC catalog is unchanged.
+- VOTE supplies two approved caricatures, separate identity/action text and
+  Pending-only UDP/CU labels. The front door hands off to the actual Play PWA;
+  there is no parallel viewer, copied shell, new PWA or admitted candidate app.
+- Source/VM evidence and open browser acceptance are recorded in
+  [the member TestModLog](../../../public/member/tests/TestModLog.md).
+  Preserve active HPC v25/v26 and home/dock work. PR #2453 remains Draft;
+  shared-owner integration and publication are held. WSP 10, 22, 50 and 97.
+
 ## 2026-11-23 — Fractal Mall paper and experiment roadmap reference
 
 - Linked the Fractal work-navigation roadmap to the standalone notebook's

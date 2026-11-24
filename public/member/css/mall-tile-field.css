@@ -18,6 +18,28 @@
   --field-rows: 5;
 }
 
+/* Typed member media uses the same tile geometry as every other Mall item. */
+.mall-member-card::after { display: none; }
+.mall-member-card .mall-member-card-content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  color: #fff4dc;
+  background: #162735;
+  pointer-events: none;
+}
+.mall-member-card-heading, .mall-member-card-footer { padding: .35rem .4rem; }
+.mall-member-card-heading h3 { margin: 0; font-size: .875rem; line-height: 1.15; overflow-wrap: anywhere; }
+.mall-member-card-heading p { margin: .2rem 0 0; font-size: .75rem; line-height: 1.15; }
+.mall-member-card-art { display: block; min-height: 0; overflow: hidden; background: #f6eddf; }
+.mall-member-card-art img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.mall-member-card-footer p { margin: 0; }
+.mall-member-card-hashtag { font-size: .875rem; line-height: 1.15; overflow-wrap: anywhere; font-weight: 700; }
+.mall-member-card-hashtag strong { color: #ffdf61; font-weight: 900; }
+.mall-member-card-scores { display: flex; flex-wrap: wrap; gap: .15rem .5rem; font-size: .75rem; line-height: 1.2; }
+.mall-member-card-scores b { font-weight: 400; }
+
 /* ========== Projection Controls ========== */
 
 .mall-projection {

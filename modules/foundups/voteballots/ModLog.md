@@ -1,27 +1,31 @@
-## 2026-11-25 — Approved animated Dispatch portraits
+## 2026-11-25 — Shared congressional card collection (release held)
 
-- Add the supplied Schumer and Jeffries caricatures to the existing homepage in
-  matching responsive windows, with the exact campaign hashtags in HTML below
-  each image. Keep the six panels and existing guide/contact links intact.
-- Reuse the approved Muse/Wan files as four efficient WebP derivatives. Native
-  reduced-motion stills, manual Pause/Play and hidden-page stopping use the current
-  cover owner; the exact public cache advances to v13 with 36 resources.
-- WSP 15 allocation: complexity 2 + importance 3 + deferability 4 + impact 3 =
-  12/P2. One static-surface layer; local implementation and bounded independent
-  asset/source verification. Fixed assets need no Qwen/Gemma or provider generation.
-  No distributed DAE/WRE execution or new HPC/Mall card system is introduced.
-- WSP 00 native awakening and strict tracker passed at isolated upstream
-  `60eb7f321647a6736826f33fbceb0f90fe2b773b`. Holo returned an authority mismatch;
-  lexical workspace context had UNKNOWN freshness and an index gap. Retrieval
-  ordered cover.js first but included Oversight noise and omitted test hits;
-  direct owner docs and the existing test inventory resolved those gaps without
-  reindexing or duplicate code owners. Optional memory/requirements files are absent.
-- Current Sites source `8c40f15770ba78b622a23ebfe3d2d04533a22f99` is newer than
-  recorded v11. Preserve its song/player, CSP and navigation. Apply only the eight
-  scoped public-file additions/changes; leave the remaining deployed files intact.
-- WSP 10/22/50/71/91/97: isolated source, reviewed buildless assets and controller,
-  existing web fixtures, independent source review and finite read-only preview.
-  Source tests, browser evidence and actual release status are separate records.
+- Add two typed member-media records and approved artwork derivatives for the
+  existing Play FoundUps tile/player. The intended VOTE entry is a fixed handoff
+  to that collection. Preserve the Dispatch at a separate working path, plus the
+  original guide and contact/script/skin flow. Remove the earlier unpublished
+  Dispatch portrait-section change; do not duplicate the shared shell.
+- Exact labels: Chuck Schumer / U.S. Senate / New York and Hakeem Jeffries /
+  U.S. House / New York District 8. Official congressional pages were checked.
+  Use #ChuckSchumerOUT and #ChuckJeffriesOUT; show UDP/CU Pending without scores.
+- MPS: C3 + I4 + D4 + Impact4 = 15/P1. One bounded card-media layer, existing
+  owners and no provider/model generation. Approved Muse/Wan files supply native
+  reduced-motion stills, animated WebP tiles and silent four-second MP4 playback.
+- WSP 00 native awakening/strict gate passed in the isolated source. Source-bound
+  Holo semantic retrieval returned an authority mismatch; lexical context retained
+  UNKNOWN freshness/index gap. Direct owner docs/test inventory resolved noise,
+  omitted tests and absent optional memory files. No reindex or new runtime agent.
+- Live Chrome identified HPC `/member/hpc-v25/`, Build v25. Its shared core maps
+  to `bd0510c5c2e333d07b1bb02340ca91b291420164`; B26 preview metadata names
+  `187c79a5128c12be05d7f9cc2974b4c414946208`. Current main is older. Active HPC
+  home/dock work must be preserved; source tests do not authorize overwriting it.
+- Local shared/member suites passed 2292 tests; updated route/state and actual
+  boot VMs passed 23/26 checks. Repeated CUA timeouts left the new 390px shared
+  tile/viewer/return comparison UNVERIFIED. No new shared or Sites release occurred.
+- WSP 10/22/50/71/91/97: PR #2453 remains the recoverable draft and scoped receipt.
+  Source implementation is IMPLEMENTED_NOT_VALIDATED for public operation. Admit
+  into the existing shared release, verify exact bounds and return, then release
+  the fixed VOTE entry and preserve Dispatch; no registrar changes are required.
 
 ## 2026-11-22 — HPC skin and local editable call scripts
 

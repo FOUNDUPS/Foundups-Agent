@@ -5,6 +5,21 @@
 
 ## Overview
 
+### VOTE member cards — source candidate, 2026-11-25
+
+VOTE adds two typed media records to this same Mall tile field and player.
+The intended entry is `https://play.foundups.com/member/?foundup=voteballots`;
+the Vote front door performs a fixed handoff, with Dispatch, guide and contact
+remaining separate resources. There is no copied shell or new PWA. VOTE starts
+with selectable cards; HPC retains its video collection and startup behavior.
+Names, offices, action hashtags and Pending scores are text outside the art.
+See [the typed-card contract](INTERFACE.md#vote-member-card-media--2026-11-25).
+
+This is **IMPLEMENTED_NOT_VALIDATED** source on the v19 owner. Publication is
+held for integration with the active shared-PWA owner, exact deployed-source
+parity, and real UI acceptance. Current HPC v25 and the v26 preview are separate
+observations; this change does not claim either has received the extension.
+
 ### Fractal work navigation target — 2026-11-19
 
 The intended member experience uses this shared shell as one view of the

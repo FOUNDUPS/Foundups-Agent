@@ -1,27 +1,35 @@
 # Vote public landing
 
-## House and Senate portraits — 2026-11-25
+## Congressional deck handoff — 2026-11-25
 
-The existing Dispatch homepage adds matched portrait windows for New York Senator
-Chuck Schumer and Representative Hakeem Jeffries (NY-8). The captions are separate
-HTML text: `#SchumerOut`, `#ChuckSchumerOut` and `#JeffriesOut`. The supplied Meta
-Muse artwork and Alibaba Wan animations are reused without further generation.
+The requested new entry is the actual shared Play FoundUps Mall collection,
+`https://play.foundups.com/member/?foundup=voteballots`. `deck-entry.html` and its
+small stylesheet/script provide a fixed handoff, plus accessible Dispatch, guide
+and contact fallbacks. They are not another grid, viewer or PWA. Earlier root
+guide fragments retain their existing destination. Release is held until the
+shared collection and real tile → viewer → return flow are qualified.
 
-The four local `comics/*-card-{loop,still}.webp` assets are 480 × 561 pixels.
-Both loops retain all 50 frames at 80 ms each (four seconds), using Pillow 12.2.0
-and libwebp 1.6.0, quality 85/method 6. The stills resize the approved Muse originals
-with Lanczos, quality 90/method 6. The animations are 31.3% smaller than the GIFs.
-Native `picture` media queries choose stills for reduced motion, including without
-JavaScript. Pause/Play switches both portraits to stills or motion; hidden documents
-also use stills and retain the visitor's pause choice. There are no new timers,
-dependencies, providers, trackers or computed funding scores.
+`congressional-cards.json` supplies exactly two typed media records to the shared
+tile/player owners. Its release path is `/member/vote/congressional-cards.json`;
+the six supplied-art derivatives map to `/member/vote/comics/`. Schumer is labeled
+U.S. Senate / New York and Jeffries U.S. House / New York District 8, with official
+congressional profile links. The action labels are `#ChuckSchumerOUT` and
+`#ChuckJeffriesOUT`, with OUT distinguished in separate HTML. UDP and CU remain
+Pending, never numeric scores. Names, office and captions remain outside the art.
 
-The v13 worker adds exactly the four portrait assets to its 36-resource shell and
-retires older Vote caches. The deployed mirror already had v12 plus its campaign
-song, so publication must preserve its existing homepage and apply only the portrait
-HTML/CSS/JS additions, worker and four assets. Other pages remain byte-identical.
-Repository-only navigation/Press differences are outside this deployment. See the
-[release record](../docs/RELEASE_ACCOUNTING.md#2026-11-25-dispatch-portrait-release).
+The existing four-second Muse/Wan loops are reused without generation. Animated
+WebPs retain 50 frames at 80ms; the shared viewer uses silent H.264 MP4 equivalents,
+50 frames/four seconds, 480 × 562 including one bottom padding row. Together the
+MP4s are 87.4% smaller than the supplied GIFs. Native picture media selects stills
+for reduced motion; the viewer starts on its still poster without autoplay.
+
+Keep the current deployed Dispatch, its crying Schumer, Hasan campaign art,
+song/radio, guide and contact/script/skin flow. At release, preserve the live
+Dispatch as `/dispatch` and use the fixed shared-PWA handoff at `/`. Do not ship
+the superseded portrait section or statically copy the HPC shell into this Site.
+The active HPC release owner must admit the shared changes against its current
+source; older main assets must not overwrite newer B25/B26 work. See
+[release accounting](../docs/RELEASE_ACCOUNTING.md#2026-11-25-shared-congressional-deck).
 
 ## HPC contact skin and local script composer
 

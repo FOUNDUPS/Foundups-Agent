@@ -193,6 +193,24 @@
   border: none;
 }
 
+/* Header, artwork and pending evidence fit inside the existing shared stage. */
+.video-player-member-card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: #162735;
+  color: #fff4dc;
+}
+.video-player-member-card header, .video-player-member-card footer { padding: .4rem .65rem; text-align: center; }
+.video-player-member-card h2 { margin: 0; font-size: 1rem; line-height: 1.2; }
+.video-player-member-card p { margin: .2rem 0 0; font-size: .875rem; line-height: 1.2; }
+.video-player-stage .video-player-member-card video { min-height: 0; object-fit: contain; background: #f6eddf; }
+.video-player-member-card .video-player-member-hashtag { font-size: 1rem; font-weight: 700; overflow-wrap: anywhere; }
+.video-player-member-hashtag strong { color: #ffdf61; font-weight: 900; }
+.video-player-member-card a { display: inline-block; margin-top: .2rem; color: #fff4dc; font-size: .875rem; }
+.member-card-player .video-player-title { white-space: normal; max-width: none; }
+
 .video-player-status {
   margin: 0;
   padding: 0.5rem 0.75rem;

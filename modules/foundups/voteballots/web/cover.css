@@ -197,69 +197,6 @@ a:focus-visible, summary:focus-visible {
   font-size: .86rem;
 }
 
-.cover-portraits { margin-block-end: 1.5rem; }
-
-.cover-portraits-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: .65rem;
-  margin-block-end: .8rem;
-}
-
-.cover-portraits-heading h2 {
-  margin: 0;
-  font: 900 1.5rem/1.2 var(--display);
-  text-transform: uppercase;
-}
-
-.cover-portrait-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: 1rem;
-  max-width: 58rem;
-  margin-inline: auto;
-}
-
-.cover-portrait .cover-kicker { font-size: .875rem; }
-
-.cover-portrait h3 {
-  margin: .3rem 0 0;
-  font: 850 clamp(1.2rem, 2vw, 1.6rem)/1.2 var(--reading);
-  overflow-wrap: anywhere;
-}
-
-.cover-portrait figure { margin: 0; }
-
-.cover-portrait picture, .cover-portrait img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 480 / 561;
-  object-fit: contain;
-}
-
-.cover-portrait figcaption {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .3rem .8rem;
-  border-top: 2px solid var(--ink);
-  padding: .8rem 1rem;
-  color: var(--red);
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  font-weight: 900;
-  overflow-wrap: anywhere;
-}
-
-.cover-portrait-credit { margin: .85rem 0 0; font-size: .875rem; }
-
-@media (min-width: 44rem) {
-  .cover-portrait-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cover-portrait .cover-head { min-height: 7rem; }
-}
-
 .cover-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -760,7 +697,6 @@ a:focus-visible, summary:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .cover-ticker-toggle { display: none; }
-  .cover-portraits-toggle { display: none; }
 }
 
 @media (max-width: 39rem) {

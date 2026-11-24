@@ -1,0 +1,56 @@
+{
+  "voteballots": {
+    "lane": {
+      "foundup_id": "voteballots",
+      "title": "VOTE",
+      "category": "civic",
+      "description": "Congressional member cards · Independent satire",
+      "video_count": 2,
+      "videos": [
+        {
+          "video_id": "chuck-schumer",
+          "title": "Chuck Schumer",
+          "thumbnail_url": "/member/vote/comics/schumer-card-loop.webp",
+          "poster_url": "/member/vote/comics/schumer-card-still.webp",
+          "source_url": "/member/vote/comics/schumer-card-loop.mp4",
+          "duration_seconds": 4,
+          "member_card": {
+            "name": "Chuck Schumer",
+            "chamber": "U.S. Senate",
+            "constituency": "New York",
+            "hashtag": "#ChuckSchumerOUT",
+            "still_url": "/member/vote/comics/schumer-card-still.webp",
+            "animation_url": "/member/vote/comics/schumer-card-loop.webp",
+            "official_url": "https://www.schumer.senate.gov/",
+            "udp_score": null,
+            "cu_score": null
+          }
+        },
+        {
+          "video_id": "hakeem-jeffries",
+          "title": "Hakeem Jeffries",
+          "thumbnail_url": "/member/vote/comics/jeffries-card-loop.webp",
+          "poster_url": "/member/vote/comics/jeffries-card-still.webp",
+          "source_url": "/member/vote/comics/jeffries-card-loop.mp4",
+          "duration_seconds": 4,
+          "member_card": {
+            "name": "Hakeem Jeffries",
+            "chamber": "U.S. House",
+            "constituency": "New York · District 8",
+            "hashtag": "#ChuckJeffriesOUT",
+            "still_url": "/member/vote/comics/jeffries-card-still.webp",
+            "animation_url": "/member/vote/comics/jeffries-card-loop.webp",
+            "official_url": "https://jeffries.house.gov/about/",
+            "udp_score": null,
+            "cu_score": null
+          }
+        }
+      ]
+    },
+    "identity": "Congressional member cards · Independent satire",
+    "topic": "House & Senate",
+    "credit": "Drawn with Meta Muse · Animated with Alibaba Wan",
+    "disclosure": "Independent editorial caricatures. No affiliation with or endorsement by the people depicted. UDP and CU scores are pending and have not been computed. Office and constituency references link to official congressional pages. The Vote Dispatch retains the campaign's editorial content.",
+    "voice_resource_url": "https://vote.foundups.com/contact"
+  }
+}

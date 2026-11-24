@@ -89,6 +89,19 @@ await check('public and member video routes have separate exact selectors', () =
   assert.equal(route.resolveMember(new URL('https://hpc.foundups.com/member/?foundup=hpc')), null);
   assert.equal(route.hostScope(new URL('https://hpc.foundups.com/')), 'hpc');
   assert.equal(route.hostScope(new URL('https://hpc.foundups.com.example.org/')), null);
+  for (const host of ['vote.foundups.com', 'vote.mtrout.com', 'vote.undaodu.chatgpt.site', 'vote.localhost']) {
+    assert.equal(route.resolve(new URL('https://' + host + '/')), 'voteballots');
+    assert.equal(route.resolve(new URL('https://' + host + '/member/?foundup=hpc')), 'voteballots');
+    assert.equal(route.resolve(new URL('https://' + host + '/dispatch')), null);
+    assert.equal(route.resolve(new URL('https://' + host + '/contact')), null);
+    assert.equal(route.resolve(new URL('https://' + host + '/f/voteballots/app')), null);
+  }
+  assert.equal(route.hostScope(new URL('https://vote.foundups.com.example.org/')), null);
+  assert.equal(route.resolve(new URL('https://foundups.com/member/?foundup=voteballots')), null);
+  assert.equal(route.resolveMember(new URL('https://foundups.com/member/?foundup=voteballots')), 'voteballots');
+  assert.equal(route.resolve(new URL('https://play.foundups.com/member/?foundup=voteballots')), 'voteballots');
+  assert.equal(route.resolve(new URL('https://play.foundups.com/member/?foundup=voteballots&foundup=hpc')), null);
+  assert.equal(route.resolve(new URL('https://hpc.foundups.com/member/?foundup=voteballots')), 'hpc');
   const publicUrl = 'https://hpc.foundups.com/';
   assert.equal(route.discoveryPath('hpc', publicUrl), publicUrl);
   assert.equal(route.discoveryPath('hpc', ORIGIN + '/member/?foundup=hpc'), publicUrl);

@@ -33,7 +33,8 @@
   <script>
     // Normalize the dedicated host before any other product prepares the shell.
     const dedicatedVideoHost = window.mallVideoProjection?.hostScope(window.location);
-    if (dedicatedVideoHost && window.location.search) {
+    if (dedicatedVideoHost && window.location.search &&
+        !(dedicatedVideoHost === 'voteballots' && window.location.hostname === 'play.foundups.com')) {
       window.history.replaceState(window.history.state, '', window.location.pathname + window.location.hash);
     }
     if (!dedicatedVideoHost || !window.mallVideoProjection.resolve(window.location)) {

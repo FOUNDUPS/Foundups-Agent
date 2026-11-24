@@ -33,27 +33,6 @@ if (radio) {
   if (radio.error) showError();
 }
 
-// Native picture media queries supply stills for reduced motion, including without JS.
-const portraits = document.querySelector('.cover-portraits');
-if (portraits) {
-  const sources = portraits.querySelectorAll('picture source');
-  const toggle = portraits.querySelector('.cover-portraits-toggle');
-  let paused = false;
-  const updatePortraits = () => {
-    for (const source of sources) {
-      source.media = paused || document.hidden ? 'not all' : '(prefers-reduced-motion: no-preference)';
-    }
-  };
-  toggle.hidden = false;
-  toggle.addEventListener('click', () => {
-    paused = !paused;
-    toggle.textContent = paused ? 'Play portraits' : 'Pause portraits';
-    updatePortraits();
-  });
-  document.addEventListener('visibilitychange', updatePortraits);
-  updatePortraits();
-}
-
 const ticker = document.querySelector('.cover-ticker');
 if (ticker) {
   const track = ticker.querySelector('.cover-ticker-track');
