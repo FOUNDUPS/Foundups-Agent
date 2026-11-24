@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from urllib.parse import urlsplit
 
 import pytest
 
@@ -64,8 +63,8 @@ def test_vote_member_cards_keep_local_art_unknown_scores_and_separate_hpc_scope(
     records = lane["videos"]
     assert lane["video_count"] == len(records) == 2
     expected = {
-        "chuck-schumer": ("Chuck Schumer", "U.S. Senate", "New York", "#SchumerOUT", "www.schumer.senate.gov"),
-        "hakeem-jeffries": ("Hakeem Jeffries", "U.S. House", "New York · District 8", "#JeffriesOUT", "jeffries.house.gov"),
+        "chuck-schumer": ("Chuck Schumer", "U.S. Senate", "New York", "#SchumerOUT", "https://www.schumer.senate.gov/"),
+        "hakeem-jeffries": ("Hakeem Jeffries", "U.S. House", "New York · District 8", "#JeffriesOUT", "https://jeffries.house.gov/about/"),
     }
     assert {record["video_id"] for record in records} == set(expected)
     for record in records:
@@ -78,28 +77,27 @@ def test_vote_member_cards_keep_local_art_unknown_scores_and_separate_hpc_scope(
             "name", "chamber", "constituency", "hashtag", "still_url", "animation_url", "official_url",
             "udp_score", "cu_score",
         }
-        name, chamber, constituency, hashtag, official_host = expected[record["video_id"]]
+        name, chamber, constituency, hashtag, official_url = expected[record["video_id"]]
         assert (record["title"], member["name"], member["chamber"], member["constituency"], member["hashtag"]) == (
             name, name, chamber, constituency, hashtag,
         )
         assert member["udp_score"] is None and member["cu_score"] is None
-        official = urlsplit(member["official_url"])
-        assert official.scheme == "https" and official.hostname == official_host
+        assert member["official_url"] == official_url
         assert record["duration_seconds"] == 4
         assert record["thumbnail_url"] == member["animation_url"]
         assert record["poster_url"] == member["still_url"]
-        for value, suffix in [
-            (record["source_url"], ".mp4"),
-            (member["animation_url"], ".webp"),
-            (member["still_url"], ".webp"),
+        slug = {"chuck-schumer": "schumer", "hakeem-jeffries": "jeffries"}[record["video_id"]]
+        for value, filename in [
+            (record["source_url"], "loop.mp4"),
+            (member["animation_url"], "loop.webp"),
+            (member["still_url"], "still.webp"),
         ]:
-            asset = urlsplit(value)
-            assert not (asset.scheme or asset.netloc or asset.query or asset.fragment)
-            assert asset.path.startswith("/member/vote/comics/")
-            relative = Path(asset.path).relative_to("/member/vote")
+            # Exact reviewed paths also reject schemes, queries, fragments and traversal.
+            assert value == f"/member/vote/comics/{slug}-card-{filename}"
+            relative = Path(value).relative_to("/member/vote")
             path = (web / relative).resolve()
             assert path.is_relative_to((web / "comics").resolve())
-            assert path.suffix == suffix and path.is_file() and path.stat().st_size > 0
+            assert path.is_file() and path.stat().st_size > 0
 
     scoped = json.loads(CATALOG_PATH.with_name("mall-public-video-catalog.json").read_text(encoding="utf-8"))
     assert set(scoped) == {"hpc"}
