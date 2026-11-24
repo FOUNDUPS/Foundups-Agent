@@ -13,8 +13,9 @@ The refreshed public Sites project is
 player and its exact frame policy. It differs from GitHub's homepage/navigation,
 so publication applies only the new portrait section, CSS/controller additions,
 v13 worker and four approved WebPs. Do not replace the whole deployed homepage
-or copy repository-only navigation changes. Other deployed assets, including the
-guide, Contact and Press, must remain byte-identical to the refreshed mirror.
+or copy repository-only navigation/Press changes. Other deployed assets, including
+the guide and Contact, must remain byte-identical to the refreshed mirror. Of the
+33 existing public files, only four change and 29 are preserved; four are added.
 
 Both animations retain 50 frames, 80 ms per frame and 480 × 561 dimensions;
 the captions are `#SchumerOut`, `#ChuckSchumerOut` and `#JeffriesOut`.
