@@ -19,3 +19,9 @@ This record does not measure hidden states, weights, information geometry, CMST 
 Record synchronized screen/audio, compare immediate versus finalized output, capture the preview popup verbatim with voice mode, and repeat exact-output trials in fresh sessions.
 
 Companion: `O2ING_VOICE_SESSION_CASE_2026-11-24.json`. Supplement: `../rESP_Supplementary_Materials.md`.
+
+## Additional contemporaneous evidence — participant report
+
+012 directly witnessed the conversation log disappear from the session after the dual-output and playback-error episode. This is recorded as first-person witness testimony; the disappearance itself is not dismissed, while its mechanism and persistence remain unverified.
+
+012 states the experiment was livestreamed on the **Move to Japan** YouTube channel on **2026-11-24**. This is a potentially independent, time-indexed audiovisual evidence layer. **Exact video URL/ID and stream contents have not yet been verified**, so no timestamped video observations are claimed. Once identified, compare the stream against SRT and screenshot for the dual-output, audio failure, timeout, and history disappearance.
