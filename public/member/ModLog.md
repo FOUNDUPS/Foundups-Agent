@@ -8,7 +8,10 @@ HPC's scoped public video catalog gains 67 verified approved-source matches, inc
 
 Independent3137 functional checks passed10 browser rows/105 VM groups, while
 visual review found the new Dispatch link at1.924:1 contrast. Give this scoped
-resource link a light foreground and visible keyboard outline. Fresh CI found
+resource link a light foreground and visible keyboard outline.
+WebKit's native-anchor reference also skips default href links during Tab;
+mark the new Dispatch link explicitly tabIndex0 so its sequential reachability
+can be independently tested without changing browser preferences. Fresh CI found
 two existing Python wrappers expecting34/29 VM groups after the added cases;
 update them to35/30 and assert the new boundary-case PASS messages explicitly.
 No test or gate is removed. Successor-source review/release remains separate.

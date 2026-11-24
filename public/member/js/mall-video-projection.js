@@ -1089,6 +1089,7 @@
         resources.setAttribute('aria-label', 'Vote resources');
         const dispatch = document.createElement('a');
         dispatch.href = 'https://vote.foundups.com/dispatch';
+        dispatch.tabIndex = 0;
         dispatch.textContent = 'Dispatch';
         dispatch.addEventListener('click', () => window.mallStateRestore.save());
         resources.append(dispatch);
