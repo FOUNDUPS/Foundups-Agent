@@ -1,0 +1,111 @@
+name: HPC WikiTube refresh
+
+on:
+  schedule:
+    # UTC, every six hours (03:17 / 09:17 / 15:17 / 21:17 Japan).
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish eligible HPC collection changes
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - '.github/workflows/hpc-wikitube-refresh.yml'
+      - 'scripts/refresh_mall_catalog.py'
+      - 'scripts/publish_hpc_catalog.cjs'
+      - 'scripts/tests/test_publish_hpc_catalog.cjs'
+      - 'modules/communication/youtube_channel_pull/**'
+      - 'modules/foundups/hpc/mall_projection.json'
+      - 'public/member/mall-public-video-catalog.json'
+
+permissions:
+  contents: read
+
+# Hosted runner owns cancellation/timeout and descendant cleanup. Missed runs
+# are skipped; the next complete uploads scan catches up, with no replay loop.
+concurrency:
+  group: hpc-wikitube-catalog
+  cancel-in-progress: false
+
+jobs:
+  security:
+    uses: ./.github/workflows/security-scan.yml
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --require-hashes --no-deps -r requirements-trust-bootstrap.txt
+      - run: python -m pip install pytest==9.0.3
+      - name: Validate admission and collection-only release contracts
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: |
+          python -B -m pytest -q -c /dev/null --noconftest -o pythonpath=. -p no:cacheprovider modules/communication/youtube_channel_pull/tests/test_scoped_refresh.py modules/foundups/pfmall/tests/test_mall_video_catalog.py public/member/tests/test_refresh_catalog_safety.py
+          node --test scripts/tests/test_publish_hpc_catalog.cjs
+  refresh:
+    needs: [security, contracts]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --require-hashes --no-deps -r requirements-trust-bootstrap.txt
+      - name: Install public metadata client
+        run: python -m pip install google-api-python-client==2.193.0 httplib2==0.31.2
+      - name: Refresh approved uploads and record new-source review proposals
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: python -B scripts/refresh_mall_catalog.py --refresh-scoped-source hpc --seed-live --discover --apply
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          create_credentials_file: true
+          export_environment_variables: true
+      - name: Install existing pinned Hosting client without install scripts
+        run: npm install --prefix "$RUNNER_TEMP/hpc-hosting" --ignore-scripts --no-audit --no-fund firebase-tools@14.27.0
+      - name: Publish or inspect collection-only release
+        env:
+          FIREBASE_CLI_ROOT: ${{ runner.temp }}/hpc-hosting/node_modules/firebase-tools
+          PUBLISH: ${{ github.event_name == 'schedule' || inputs.publish }}
+        run: |
+          args=()
+          if [ "$PUBLISH" = true ]; then args+=(--apply); fi
+          node scripts/publish_hpc_catalog.cjs --source-sha "$GITHUB_SHA" --refresh-receipt docs/audits/pfmall_youtube_ingest/hpc_refresh.json --receipt "$RUNNER_TEMP/hpc-release.json" "${args[@]}"
+      - name: Retain scoped source and release receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hpc-wikitube-${{ github.run_id }}
+          retention-days: 90
+          if-no-files-found: warn
+          path: |
+            modules/foundups/hpc/mall_projection.json
+            public/member/mall-public-video-catalog.json
+            docs/audits/pfmall_youtube_ingest/hpc_refresh.json
+            docs/audits/pfmall_youtube_ingest/hpc_discovery_proposals.json
+            ${{ runner.temp }}/hpc-release.json

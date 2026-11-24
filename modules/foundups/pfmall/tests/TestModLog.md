@@ -1,5 +1,11 @@
 # p.fMALL Test ModLog
 
+## 2026-11-25 — Growing HPC collection with retained review holds
+
+Hosted broad test at `82466032895dedaa0b7f017b2be9204ff14a1489` found a fixed eight-video assertion in the isolated playback-probe fixture (1 failed, 1,856 passed; dependent evidence upload then lacked its skipped output). The same fixture also protects four diagnostic-only exclusions; one authentic hashtag match had crossed its prior editorial disposition. Preserve all nine unique recorded content/diagnostic holds in the curation input, and replace only the obsolete fixed size with exact original-eight prefix/order, unique IDs and the requested regular-video identity. Retain all four diagnostic exclusion assertions. No production player, probe allowlist or authorization gate is weakened.
+
+Corrected overlay: isolated probe VM six passed; complete matching Mall/member/simulator/stream-resolver Python contract selection 1,857 passed (one inherited OAuth-manager deprecation warning). Focused ingestion/discovery/projection 115 passed and publisher 18 passed are overlapping/separate scopes, not an aggregate coverage total.
+
 ## 2026-11-22 — HPC source-selected Vote skin
 
 - Reconciled the catalog rebuild assertion to `/contact#hpc`; it retains the exact destination and full projection/idempotency checks.

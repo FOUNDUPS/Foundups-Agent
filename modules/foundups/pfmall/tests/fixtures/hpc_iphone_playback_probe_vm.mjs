@@ -331,7 +331,12 @@ assert.match(refHtml, /<a id="hpc-probe-return" href="\/member\/\?foundup=hpc">/
 
 // 2. Four diagnostic-only Shorts remain absent from public HPC catalog
 const admittedIds = new Set(publicHpcCatalog.hpc.lane.videos.map((v) => v.video_id));
-assert.equal(admittedIds.size, 8);
+assert.equal(admittedIds.size, publicHpcCatalog.hpc.lane.videos.length, 'Public video IDs stay unique');
+assert.deepEqual([...admittedIds].slice(0, 8), [
+  'iJuguXpbRR4', 'sSzWdw7MNjs', 'BXCzUOh9Y8M', 'OTTz58wPi24',
+  'fp2BkIS2FNI', 'DDAfdpJeUP0', 'Pdz1Q5tHmJQ', 'urXOSlVgPdk'
+], 'Original reviewed queue identities/order survive incremental admission');
+assert.ok(admittedIds.has('8qO3908bKAM'), 'Requested regular video is admitted');
 for (const unadmitted of ['R7xm4MZ9N4w', 'TppBUj_7lC0', 'qNFSBWXhZSY', 'B0P1Zci5Pxo']) {
   assert.equal(admittedIds.has(unadmitted), false, `Unadmitted Short ${unadmitted} must not enter public catalog`);
 }

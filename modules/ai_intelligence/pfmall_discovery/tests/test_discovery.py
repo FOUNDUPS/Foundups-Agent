@@ -12,7 +12,7 @@ import pytest
 from pathlib import Path
 
 from modules.ai_intelligence.pfmall_discovery.src.youtube_discovery import (
-    DiscoveryProposal,
+    DiscoveryProposal, search_youtube,
 )
 from modules.ai_intelligence.pfmall_discovery.src.foundup_matcher import (
     CatalogTarget,
@@ -23,6 +23,17 @@ from modules.ai_intelligence.pfmall_discovery.src.foundup_matcher import (
 from modules.ai_intelligence.pfmall_discovery.src.proposal_generator import (
     format_proposal_summary,
 )
+
+
+def test_strict_search_failure_never_logs_provider_credential_text(caplog):
+    class YouTube:
+        def search(self):
+            raise ValueError("provider URL contains PRIVATE_CREDENTIAL_MARKER")
+
+    with pytest.raises(RuntimeError, match="YouTube discovery incomplete"):
+        search_youtube(YouTube(), "#Hasan4Speaker", raise_on_error=True)
+    assert "PRIVATE_CREDENTIAL_MARKER" not in caplog.text
+    assert "ValueError" in caplog.text
 
 
 class TestDiscoveryProposal:

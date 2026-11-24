@@ -1,6 +1,6 @@
 # Hasan Piker Coalition
 
-HPC is an independent satirical FoundUp for discovering attributed political-media clips. The first collection is SchumerOUT, sourced from public Move2Japan Shorts. [Vote/Ballots](../voteballots/) is its civic parent in the FoundUp registry.
+HPC is an independent satirical FoundUp for discovering attributed political-media videos. The collection includes public Move2Japan videos matching #SchumerOUT, #HasanForSpeaker or #Hasan4Speaker. Regular videos and the previously reviewed Shorts share one collection. [Vote/Ballots](../voteballots/) is its civic parent in the FoundUp registry.
 
 The PoC is a public projection of the existing Play FoundUps Mall. It uses the
 shared grid, player, gestures and browsing state. On a phone, **Voice Your
@@ -30,7 +30,7 @@ The manifest's capability and agent-route lists are empty.
 
 ## DAEmon Outputs
 
-The PoC is a browser view with no HPC DAEmon.
+The PoC is a browser view. The product's [six-hour collection job](../../../.github/workflows/hpc-wikitube-refresh.yml) uses the existing channel-pull, discovery and scoped catalog owners. Approved Move2Japan matches can be admitted automatically after public metadata checks. New channels remain review proposals. See the [interface](INTERFACE.md#media-contract) for source and release gates; a workflow file alone does not establish an active schedule.
 
 ## Data / Telemetry Namespace
 
