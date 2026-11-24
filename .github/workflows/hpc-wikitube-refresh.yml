@@ -45,6 +45,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --require-hashes --no-deps -r requirements-trust-bootstrap.txt
       - run: python -m pip install pytest==9.0.3
       - name: Validate admission and collection-only release contracts
         env:
@@ -69,6 +71,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --require-hashes --no-deps -r requirements-trust-bootstrap.txt
       - name: Install public metadata client
         run: python -m pip install google-api-python-client==2.193.0 httplib2==0.31.2
       - name: Refresh approved uploads and record new-source review proposals
