@@ -1,6 +1,8 @@
 # Kids Episodes
 
-Working name for `kids_episodes`, a story-to-linked-episodes educational FoundUp in the EDUIT context, using the existing YouTube production work.
+Kids Episodes (`kids_episodes`) is the existing nested Storytime / Us Story Time FoundUp under EDUIT (`eduit`) in the FoundUps Mall. Storytime is the learner experience and catalog; `@Us_Story_Time` is the selected YouTube destination, not a new FoundUp or proof of publisher authorization. The parent edge records discovery lineage only.
+
+Storytime consumes the existing EDUIT game-scene, deterministic replay and local export path and the [shared video render/assembly and optional distribution tool](../../communication/youtube_shorts/docs/VIDEO_PROVENANCE_RSI_REWARDS_POC.md#architectural-correction-shared-tool-not-a-channel-owned-product-012-2026-11-16). Preserve those component owners; do not register them as child FoundUps or infer a general replay-export service is deployed. Upload remains a separate, explicitly authorized operation through the existing uploader; no direct child posting.
 
 **State:** registered, discoverable-only, incubating candidate. The product contract is specified; local renderer work belongs to `modules/communication/youtube_shorts`. No running production service, scheduled worker, public route, token, or deployed editor is claimed by this registration.
 
