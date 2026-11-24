@@ -4,7 +4,7 @@
 
 ### youtube_discovery.py
 
-#### `search_youtube(youtube_service, query, max_results=25, search_type="video")`
+#### `search_youtube(youtube_service, query, max_results=25, search_type="video", raise_on_error=False)`
 
 Search YouTube for videos or channels.
 
@@ -13,6 +13,7 @@ Search YouTube for videos or channels.
 - `query`: Search query string
 - `max_results`: Maximum results (default 25)
 - `search_type`: "video" or "channel"
+- `raise_on_error`: optional strict callers receive a sanitized RuntimeError instead of an empty/partial result on provider failure. Exception URLs and credentials are never logged. HPC uses strict mode; discovery/admission remains proposals-only.
 
 **Returns:** `List[DiscoveryProposal]`
 

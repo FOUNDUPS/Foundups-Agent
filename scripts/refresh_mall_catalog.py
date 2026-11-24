@@ -25,6 +25,10 @@ import logging
 import os
 import re
 import sys
+import hashlib
+import tempfile
+from copy import deepcopy
+from collections import Counter
 from pathlib import Path
 from datetime import datetime
 
@@ -38,6 +42,7 @@ logger = logging.getLogger(__name__)
 CATALOG_PATH = REPO_ROOT / "public" / "member" / "mall-video-catalog.json"
 SCOPED_CATALOG_PATH = CATALOG_PATH.with_name("mall-public-video-catalog.json")
 SCOPED_PROJECTIONS = ("modules/foundups/hpc/mall_projection.json",)
+HPC_REFRESH_RECEIPT = REPO_ROOT / "docs/audits/pfmall_youtube_ingest/hpc_refresh.json"
 SCHUMER_OUT = re.compile(r"\bschumer[\s_-]*out\b", re.IGNORECASE)
 
 
@@ -69,7 +74,7 @@ def save_catalog(catalog: list, dry_run: bool = True) -> None:
     logger.info(f"Saved catalog to {CATALOG_PATH}")
 
 
-def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT) -> tuple[list, dict]:
+def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT, *, projection_override=None) -> tuple[list, dict]:
     """Build public-only media lanes from reviewed records and canonical identities."""
     def read_json(relative_path):
         return json.loads((repo_root / relative_path).read_text(encoding="utf-8"))
@@ -79,7 +84,7 @@ def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT) -> tu
     lanes = {entry["foundup_id"]: entry for entry in catalog}
     scoped = {}
     for path in SCOPED_PROJECTIONS:
-        config = read_json(path)
+        config = projection_override if projection_override is not None else read_json(path)
         foundup_id = config["foundup_id"]
         entry = entries[foundup_id]
         manifest = read_json(entry["manifest_path"])
@@ -88,21 +93,28 @@ def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT) -> tu
                 or manifest["entry_url"] or source["source_type"] != "youtube_channel"):
             raise ValueError(f"Invalid public video projection contract for {foundup_id}")
 
-        reviewed = {}
+        reviewed, seen_ids = {}, set()
         for video in config["videos"]:
             video_id = video["video_id"]
-            if video_id in reviewed or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+            if video_id in seen_ids or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
                 raise ValueError(f"Invalid or duplicate YouTube ID for {foundup_id}")
+            seen_ids.add(video_id)
+            if video.get("publication_eligible") is False:
+                continue
+            source_url = video.get("source_url", f"https://www.youtube.com/shorts/{video_id}")
+            if source_url not in (f"https://www.youtube.com/shorts/{video_id}",
+                                   f"https://www.youtube.com/watch?v={video_id}"):
+                raise ValueError("Invalid scoped YouTube source URL")
             reviewed[video_id] = {
                 "video_id": video_id,
                 "title": video["title"],
-                "thumbnail_url": f"https://i.ytimg.com/vi/{video_id}/oardefault.jpg",
+                "thumbnail_url": video.get("thumbnail_url", f"https://i.ytimg.com/vi/{video_id}/oardefault.jpg"),
                 "embed_url": f"https://www.youtube.com/embed/{video_id}",
-                "source_url": f"https://www.youtube.com/shorts/{video_id}",
+                "source_url": source_url,
                 "timestamp": video["timestamp"],
                 "duration_seconds": video["duration_seconds"],
             }
-        if not reviewed:
+        if not config["videos"]:
             raise ValueError(f"Public video projection {foundup_id} has no reviewed videos")
 
         # Relate the derived collection without rewriting the general source feed.
@@ -114,9 +126,10 @@ def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT) -> tu
             {
                 **reviewed[video["video_id"]],
                 "editorial_label": video["editorial_label"],
-                "source_label": source["entity"],
+                "source_label": video.get("source_label", source["entity"]),
             }
             for video in config["videos"]
+            if video["video_id"] in reviewed
         ]
         previous = lanes.get(foundup_id)
         lane = {
@@ -130,7 +143,7 @@ def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT) -> tu
             "source_id": source["source_id"],
             "source_handle": source["source_handle"],
             "parent_channels": [source["foundup_id"]],
-            "derivation_method": "manual_curation",
+            "derivation_method": "approved_source_hashtag_refresh" if config.get("refresh_policy") else "manual_curation",
             "category": manifest["category"],
             "tags": ["012-lane", "political-media", config["topic"].lstrip("#").lower()],
             "topic_family": "media",
@@ -145,12 +158,15 @@ def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT) -> tu
             "tier": manifest["tier"],
             "lifecycle_stage": manifest["lifecycle_stage"],
             "launch_readiness": manifest["launch_readiness"],
-            "poster_url": videos[0]["thumbnail_url"],
+            "poster_url": videos[0]["thumbnail_url"] if videos else "",
             "video_count": len(videos),
             "videos": videos,
         }
         # The global Mall offers discovery. Playback belongs to the fixed public field.
-        lanes[foundup_id] = {**lane, "videos": [], "video_count": 0, "public_poc_url": entry["poc_url"]}
+        lanes[foundup_id] = {
+            **lane, "derivation_method": previous["derivation_method"] if previous else "manual_curation",
+            "videos": [], "video_count": 0, "public_poc_url": entry["poc_url"],
+        }
         scoped[foundup_id] = {
             "lane": lane,
             "identity": config["identity"],
@@ -235,6 +251,119 @@ def audit_scoped_youtube_source(youtube, channel_id: str) -> dict:
         "non_public_metadata_count": non_public_count,
         "candidates": sorted(candidates, key=lambda v: v["timestamp"], reverse=True),
     }
+
+
+def seed_hpc_from_live(config: dict, public: dict) -> dict:
+    """Resume the published queue, retaining reviewed local editorial corrections."""
+    from modules.communication.youtube_channel_pull.src.scoped_refresh import APPROVED_CHANNEL_ID
+
+    lane = public["hpc"]["lane"]
+    if lane["foundup_id"] != "hpc" or lane["source_id"] != APPROVED_CHANNEL_ID:
+        raise ValueError("Published HPC source binding changed")
+    local = {video["video_id"]: video for video in config["videos"]}
+    result = deepcopy(config)
+    result["videos"] = []
+    seen = set()
+    for video in lane["videos"]:
+        video_id = video["video_id"]
+        if not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id) or video_id in seen:
+            raise ValueError("Invalid published HPC queue identity")
+        seen.add(video_id)
+        result["videos"].append({**video, **local.get(video_id, {})})
+    result["videos"].extend(video for video in config["videos"] if video["video_id"] not in seen)
+    return result
+
+
+def write_scoped_outputs(outputs: dict) -> None:
+    """Stage complete output before replacement; receipt is the last write gate."""
+    staged, originals, replaced = {}, {}, []
+    try:
+        for destination, content in outputs.items():
+            originals[destination] = destination.read_bytes() if destination.exists() else None
+            with tempfile.NamedTemporaryFile(dir=destination.parent, delete=False) as temporary:
+                temporary.write(content)
+                staged[destination] = Path(temporary.name)
+        for destination, temporary in staged.items():
+            temporary.replace(destination)
+            replaced.append(destination)
+    except Exception:
+        for destination in reversed(replaced):
+            if originals[destination] is None:
+                destination.unlink(missing_ok=True)
+            else:
+                destination.write_bytes(originals[destination])
+        raise
+    finally:
+        for temporary in staged.values():
+            temporary.unlink(missing_ok=True)
+
+
+def refresh_hpc_collection(youtube, *, apply=False, seed_live=False, discover=False) -> dict:
+    """Refresh only HPC; the general Mall and other FoundUps are never written."""
+    from modules.communication.youtube_channel_pull.src.scoped_refresh import (
+        refresh_scoped_projection, ensure_refresh_fresh, matched_topics,
+    )
+    config_path = REPO_ROOT / SCOPED_PROJECTIONS[0]
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    catalog = load_catalog()
+    source = next(item for item in catalog if item["foundup_id"] == config["source_foundup_id"])
+    old_public = json.loads(SCOPED_CATALOG_PATH.read_text(encoding="utf-8"))
+    if seed_live:
+        import urllib.request
+        # Fixed public endpoint, no credentials or caller-controlled destination.
+        with urllib.request.urlopen("https://hpc.foundups.com/member/mall-public-video-catalog.json", timeout=20) as response:
+            live = json.loads(response.read(2_000_001))
+        config = seed_hpc_from_live(config, live)
+    updated, receipt = refresh_scoped_projection(youtube, config, source)
+    ensure_refresh_fresh(receipt)
+    # Preserve all admission/removal evidence without retaining thousands of
+    # unrelated non-matching upload IDs in the collection's public work record.
+    receipt["exclusion_counts"] = dict(Counter(item["reason"] for item in receipt["excluded"]))
+    retained_ids = {video["video_id"] for video in config["videos"]}
+    receipt["excluded"] = [item for item in receipt["excluded"]
+                           if item["reason"] != "no_topic_match" or item["video_id"] in retained_ids]
+    # Keep the normal generator as the single projection owner. Supply the
+    # prospective config without temporarily changing repository files.
+    _, generated = project_public_video_lanes(catalog, projection_override=updated)
+    public = {**old_public, "hpc": generated["hpc"]}
+    projection_bytes = (json.dumps(updated, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    catalog_bytes = (json.dumps(public, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    receipt["projection_sha256"] = hashlib.sha256(projection_bytes).hexdigest()
+    receipt["catalog_sha256"] = hashlib.sha256(catalog_bytes).hexdigest()
+    receipt["scope"] = "hpc"
+    proposals = []
+    if discover:
+        from modules.ai_intelligence.pfmall_discovery.src.youtube_discovery import search_youtube
+        # Broad discovery remains proposals-only. Search snippets alone are
+        # insufficient: reconcile real metadata before recording a topic match.
+        candidates = {}
+        for query in ("#SchumerOUT", "#HasanForSpeaker", "#Hasan4Speaker"):
+            for proposal in search_youtube(youtube, query, max_results=25, raise_on_error=True):
+                if proposal.video_id:
+                    candidates.setdefault(proposal.video_id, proposal)
+        ids = list(candidates)
+        for offset in range(0, len(ids), 50):
+            response = youtube.videos().list(part="snippet,status,contentDetails", id=",".join(ids[offset:offset + 50])).execute()
+            for video in response.get("items", []):
+                snippet = video["snippet"]
+                if snippet.get("channelId") == source["source_id"]:
+                    continue
+                matches = matched_topics(snippet)
+                if matches:
+                    proposal = candidates[video["id"]].to_dict()
+                    proposals.append({**proposal, "title": snippet["title"], "channel_id": snippet["channelId"],
+                                      "channel_title": snippet["channelTitle"], "matched_topics": matches,
+                                      "review_status": "proposed", "admission": "new_source_review_required"})
+    if apply:
+        outputs = {config_path: projection_bytes, SCOPED_CATALOG_PATH: catalog_bytes}
+        if discover:
+            outputs[HPC_REFRESH_RECEIPT.parent / "hpc_discovery_proposals.json"] = (
+                json.dumps({"checked_at": receipt["checked_at"], "scope": "hpc", "proposals": proposals}, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+        outputs[HPC_REFRESH_RECEIPT] = (json.dumps(receipt, indent=2) + "\n").encode("utf-8")
+        write_scoped_outputs(outputs)
+    logger.info("HPC refresh: %s additions, %s eligible, %s reviewed-source proposals%s",
+                len(receipt["added_ids"]), len(receipt["eligible_ids"]), len(proposals), "" if apply else " [DRY-RUN]")
+    return receipt
 
 
 def refresh_catalog(
@@ -349,6 +478,9 @@ def main():
     parser = argparse.ArgumentParser(description="Refresh Mall Video Catalog")
     parser.add_argument("--scoped-only", action="store_true", help="Project reviewed public lanes without YouTube credentials")
     parser.add_argument("--audit-scoped-source", choices=("hpc",), help="Read-only official YouTube candidate audit")
+    parser.add_argument("--refresh-scoped-source", choices=("hpc",), help="Refresh approved HPC uploads and public eligibility")
+    parser.add_argument("--seed-live", action="store_true", help="Resume HPC's published queue before a scoped refresh")
+    parser.add_argument("--discover", action="store_true", help="Also record reviewed-source proposals using existing discovery")
     parser.add_argument("--full", action="store_true", help="Fetch ALL videos (quota heavy)")
     parser.add_argument("--info-only", action="store_true", help="Only fetch channel info (cheap) - RUN ONCE")
     parser.add_argument("--delta", action="store_true", help="Only fetch NEW videos since last run (efficient)")
@@ -358,7 +490,22 @@ def main():
     dry_run = not args.apply
     mode_suffix = "" if args.apply else " [DRY-RUN]"
 
-    if args.audit_scoped_source:
+    if (args.seed_live or args.discover) and not args.refresh_scoped_source:
+        parser.error("--seed-live and --discover require --refresh-scoped-source")
+    if args.refresh_scoped_source:
+        if args.scoped_only or args.audit_scoped_source or args.info_only or args.delta or args.full:
+            parser.error("--refresh-scoped-source cannot be combined with another refresh mode")
+        api_key = os.environ.get("YOUTUBE_API_KEY")
+        if not api_key:
+            parser.error("HPC refresh requires existing public Data API access in YOUTUBE_API_KEY")
+        try:
+            import httplib2
+            from googleapiclient.discovery import build
+            youtube = build("youtube", "v3", developerKey=api_key, cache_discovery=False, http=httplib2.Http(timeout=20))
+            refresh_hpc_collection(youtube, apply=args.apply, seed_live=args.seed_live, discover=args.discover)
+        except Exception as error:
+            parser.exit(1, f"HPC refresh incomplete; no publication performed: {type(error).__name__}\n")
+    elif args.audit_scoped_source:
         if args.scoped_only or args.info_only or args.delta or args.full or args.apply:
             parser.error("--audit-scoped-source is read-only and must run alone")
         configs = [json.loads((REPO_ROOT / path).read_text(encoding="utf-8")) for path in SCOPED_PROJECTIONS]

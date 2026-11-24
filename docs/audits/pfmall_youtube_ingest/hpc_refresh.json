@@ -1,0 +1,709 @@
+{
+  "schema_version": "hpc_youtube_refresh.v1",
+  "foundup_id": "hpc",
+  "complete": true,
+  "source_channel_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+  "uploads_playlist": "UU-LSSlOZwpGIRIYihaz8zCw",
+  "checked_at": "2026-11-24T22:23:42Z",
+  "expires_at": "2026-11-25T22:23:42Z",
+  "scan_mode": "full",
+  "reached_frontier": false,
+  "last_seen_upload_id": "TsIOvI85FL4",
+  "pages": 87,
+  "scanned_unique_ids": 4345,
+  "duplicate_ids": [],
+  "metadata_ids_checked": 4345,
+  "api_requests": {
+    "channels": 1,
+    "playlistItems": 87,
+    "videos": 87
+  },
+  "added_ids": [],
+  "eligible_ids": [
+    "iJuguXpbRR4",
+    "sSzWdw7MNjs",
+    "BXCzUOh9Y8M",
+    "OTTz58wPi24",
+    "fp2BkIS2FNI",
+    "DDAfdpJeUP0",
+    "Pdz1Q5tHmJQ",
+    "urXOSlVgPdk",
+    "8qO3908bKAM",
+    "ZDmJIBv2oew",
+    "4LiUt-1oVF4",
+    "5tZK9guOwVw",
+    "kwwkihx-1ao",
+    "WK218apDX3U",
+    "fn3tBg8wdj0",
+    "Q3AV76UkPr0",
+    "SXbWvcY0EbI",
+    "6Js3aCtqKHc",
+    "Su0xYTzz_W0",
+    "-auQIekj8fw",
+    "KXAJZ2ND5y0",
+    "-8u_0NEKa-U",
+    "CDveoWt62yo",
+    "6-AVXhVCNHI",
+    "Y-3rA4Cxk3s",
+    "T-f9ESVRD_k",
+    "Lz8ls0Pd928",
+    "M4KL6X6qKpM",
+    "MVKbJ0ZV9tY",
+    "4hR8iwIc4fk",
+    "qZX1Ns9KsMM",
+    "dtvy1bjWd9w",
+    "cufkaOxOHuw",
+    "jyWegedWVJw",
+    "9jI415Chgo4",
+    "m8Q7fxCjyz0",
+    "AsRlhExRH0E",
+    "w7sBe28RA4w",
+    "QTqlAXRT8Q8",
+    "YL2XY1jlQg0",
+    "Hl8O10bflJo",
+    "42xQWEQYx4g",
+    "OufzeNeK_Yg",
+    "h7WEs9GfKvo",
+    "e1Af7JcPmkU",
+    "zLag1Xe8Hj4",
+    "fKBGcu5HchM",
+    "oClA0ZLAYd0",
+    "2LpSNmtn3hQ",
+    "pA4Mk85sHOA",
+    "DHCmdOHVXm0",
+    "eMJJUPWnYls",
+    "37XMLb7kZVc",
+    "O-hv-PniaQc",
+    "NJpnmB5Q80g",
+    "5QDg8z5X8Xg",
+    "imMEoQ1HewU",
+    "fkjKzp-1q_I",
+    "D-PUj99_Sb0",
+    "zTsZGoKaGW4",
+    "_FWuxORfICw",
+    "dF7-GswEOPs",
+    "7_Tt8t2nkGM",
+    "WTnEMHcmlBk",
+    "reZ3BIUSJyY",
+    "3wRtfnkpZVU",
+    "MGgMynR-ASQ",
+    "Rq92qjmFTZM",
+    "NnZyt8lwyC8",
+    "zxOwUIvaABg",
+    "bJIbM5TWLAY",
+    "TSULgvrOjVw",
+    "sOXP9HklKA4",
+    "hn7Pr4spUWQ",
+    "y4KHfSpEzZs",
+    "LDHYjA4VQY4",
+    "I1QIRCBYb2k",
+    "B0P1Zci5Pxo",
+    "d4_GIla3VZg",
+    "ayR6bG_qANw",
+    "xptQ0bkIZeg"
+  ],
+  "excluded": [
+    {
+      "video_id": "TsIOvI85FL4",
+      "reason": "not_processed"
+    },
+    {
+      "video_id": "DSmwKktffwU",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "FH_B3Y0KNDM",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "Kh95iJV4Tw0",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "fCgjN4LT-Xw",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "7adrWPs4uBE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "aXi5pMTFatM",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "tLwE4Kvc0IM",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "ripBJpFoQZQ",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "bQqc34MjsvM",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "rFzQ79ptsj4",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "LqMN_jNYgCw",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "b0iUItgFRwQ",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "wLbxpzVJMJM",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "av9IKG2CnAg",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "l-oPU5nLpio",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "OdfSyDtMzX4",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "oHIOL-6vhMs",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "sfztToRwy8I",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "KAXhsFRl4JQ",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "q3_oltB1nxE",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "9m2O-_sf6ak",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "g_5JgjoWTKM",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "xmnJMm9RlhA",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "ogjj9_vLc1I",
+      "reason": "not_embeddable"
+    },
+    {
+      "video_id": "DAvAh_Ru5js",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "SeaLaXYAsjE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "t4dK1C8lI0c",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "Qd5DsiywqJk",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "_t0jHzNYjZw",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "llkkwIDwuEY",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "GWMBaucZdrU",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "lxH7abl2uDA",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "LtNVJ-b6cwE",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "5026onGxroA",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "AXLnhuYsnhc",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "fPRK8kq8rxs",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "PwED2UIFD-k",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "WLwEky0mFV4",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "hBPi1Q6cPQo",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "nFYBNULZU1E",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "8s04rxviUiM",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "-a1WLDK_a5E",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "kgM0Bz5AlNE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "1t9ydCwpdbs",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "-YwtwKXlYso",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "KKbUnxig3Co",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "kovQEb8VAh8",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "LSAY8vq_SxY",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "rYMMKucMoaQ",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "R-uQNJDeNqM",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "SDBuL7Kee00",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "5xZDH-G4_cU",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "zL5dpsxF1VI",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "E7xFuE3dUqA",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "EcwQ7rqeuoo",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "5eQ85FxTLL4",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "DXw7NgnPKs0",
+      "reason": "not_embeddable"
+    },
+    {
+      "video_id": "n_N8RwMDZZE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "adzMztJieWU",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "nwEyKvLEvPo",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "fglvMCgHkqg",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "LuJ2xaqA0HY",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "93CMq80fkAE",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "noSa9VW7leA",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "hy0Fc4HPthE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "FhDOgImTQa4",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "szKj_rla_Bc",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "NNvSEAaeNyA",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "2k0NKJrwcaM",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "vny3v5ZwOOY",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "HXavgb6vfFw",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "Nbdnevaq8SQ",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "Yd9jOrFbjxc",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "NNJ1sXVkcS0",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "FyvbfFyeEQ4",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "8WUBLuVzuXs",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "UKR75IqxeUs",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "UBgPzTaOwd0",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "tqok3kiwADk",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "MDJicp3EtEA",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "zn35Zkjuk3k",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "FWpp-_Z7PEo",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "ioze6pZsDw4",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "As4JHtfMDUA",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "gAd61wgqsFA",
+      "reason": "not_processed"
+    },
+    {
+      "video_id": "zE2QaHPdvjQ",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "X4Or-o7iAf0",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "UTPDcFAtAGQ",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "1KWgSS-O9Gk",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "UIzpDFnHlSI",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "YgKMqQ05BrY",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "S60wo_QAPiY",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "43nmSHX5asI",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "CcuGNbZrEj4",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "UMZC_jFpRX0",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "5paCucAbejc",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "Xj589Ow6Rtg",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "wsikDlxx6Qg",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "RdBUxn6Nqbk",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "T5Is95qd5iU",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "zM0QqwdHsDA",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "gGhm1gE7MJo",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "QcNmTAt1hww",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "3hNG_rL4nlI",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "EHCQPSPO9Ac",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "AcZMegIOFOs",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "JqLWCOTEF28",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "OneWtDiHeq8",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "emlkjsnZx7M",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "Zfi-YJ83vkE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "aKBHpaPLxdE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "LCzccTK-lGc",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "cxQD7MFViS8",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "UMNJ-o4lHv0",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "_B7anOXF4J4",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "1m6TiAOEkY8",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "ZSL5NoDfwwc",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "M9vpBt1Z9Pc",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "3FBrIUi4DUU",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "Qo-D6hdA7C8",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "gr0NGu4R09c",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "LJmUQhupZjg",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "Nct7DSaBVmU",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "05U8o45Yvbo",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "odrXyqbXIQo",
+      "reason": "age_restricted"
+    },
+    {
+      "video_id": "gquKI6ip1mQ",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "GUJhDe7DgJE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "w6RYjr2vL30",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "mejdY2PHrG0",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "u4OuwRIX1sc",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "Ewx5dhokLbE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "8TM6bhXcsXE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "GzAyxpJWXZw",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "mw9KfSvTBKo",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "F1sWdsXi6kg",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "vwtldvOtdnA",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "B8TE1dYcmG8",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "kKtqkEhAJ60",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "w4HMxF4fX8o",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "G6L5rh4iNJY",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "4HWt9tYJYbE",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "_QgdiOYOidU",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "U1QjloA17S4",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "HtM7AfFUaPM",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "RoVoU2zzv2A",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "wwupJI17W7k",
+      "reason": "region_restricted"
+    },
+    {
+      "video_id": "iKaWiEHJoWY",
+      "reason": "region_restricted"
+    }
+  ],
+  "projection_sha256": "a9ddc02b3e1b44ddb7469cbfc0c7779bde9705ae9da18635022220ed0d744e2c",
+  "catalog_sha256": "a8a6357b0693a35153360c929a63522688d656f02099518699c4b56f91f69cbb",
+  "scope": "hpc",
+  "exclusion_counts": {
+    "not_processed": 2,
+    "no_topic_match": 4116,
+    "region_restricted": 105,
+    "age_restricted": 39,
+    "not_embeddable": 2
+  }
+}

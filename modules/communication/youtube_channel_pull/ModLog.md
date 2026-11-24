@@ -1,5 +1,9 @@
 # YouTube Channel Pull - Development Log
 
+## 2026-11-25 — HPC approved-source refresh
+
+Added pure bounded `scoped_refresh` with exact approved-source binding, authoritative metadata/creator checks, case-insensitive actual-field matching, retained IDs/editorial state, incremental frontier support and full-scan backfill. Added normal-entry and failure tests; core/integration subset initially 41 passed. Existing general scheduler remains review-first. HPC's six-hour workflow and publisher own runtime execution, with no resident process or new scheduler database. WSP 22/50/71/91/97; operational evidence belongs to HPC ModLog and its scoped receipts.
+
 ## [2026-04-17] Channel Info Fetch & Avatar Support
 
 **Change Type**: Feature

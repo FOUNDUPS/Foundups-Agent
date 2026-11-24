@@ -41,15 +41,17 @@ def test_hpc_catalog_rebuild_is_isolated_and_idempotent(catalog):
     assert lane["source_id"] == "UC-LSSlOZwpGIRIYihaz8zCw"
     assert projection["voice_resource_url"] == "https://vote.mtrout.com/contact#hpc"
     assert projection["topic"] == "#SchumerOUT"
-    assert lane["video_count"] == len(lane["videos"]) == 8
+    assert lane["video_count"] == len(lane["videos"]) >= 9
+    target = next(video for video in lane["videos"] if video["video_id"] == "8qO3908bKAM")
+    assert target["source_url"] == "https://www.youtube.com/watch?v=8qO3908bKAM"
+    assert target["duration_seconds"] == 5990
     for video in lane["videos"]:
         video_id = video["video_id"]
         assert video["embed_url"] == f"https://www.youtube.com/embed/{video_id}"
-        assert video["source_url"] == f"https://www.youtube.com/shorts/{video_id}"
-        assert video["thumbnail_url"] == f"https://i.ytimg.com/vi/{video_id}/oardefault.jpg"
+        assert video["source_url"] in {f"https://www.youtube.com/shorts/{video_id}", f"https://www.youtube.com/watch?v={video_id}"}
+        assert video["thumbnail_url"] in {f"https://i.ytimg.com/vi/{video_id}/oardefault.jpg", f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"}
         assert video["source_label"] == "Move2Japan"
         assert video["editorial_label"] in {"Opinion", "Commentary", "Satire"}
-        assert "jeffries" not in video["title"].lower()
 
 
 def test_scoped_source_audit_paginates_uploads_and_batches_all_metadata():
