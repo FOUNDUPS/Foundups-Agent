@@ -5,7 +5,7 @@ const zlib = require('node:zlib');
 const fs = require('node:fs');
 const path = require('node:path');
 const { Readable } = require('node:stream');
-const { publish, sha256, jsonBytes, normalizeVersion, uploadWithClient } = require('../publish_hpc_catalog.cjs');
+const { publish, sha256, jsonBytes, normalizeVersion, uploadWithClient, cloneWithClient, operationName } = require('../publish_hpc_catalog.cjs');
 const NOW = Date.parse('2026-11-25T03:00:00Z');
 const oldVersion = normalizeVersion('sites/foundupscom/versions/12345678');
 const newVersion = normalizeVersion('sites/foundupscom/versions/87654321');
@@ -141,6 +141,60 @@ test('unexpected requested upload hash refuses transmission', async () => {
   const f = fixture(), populate = f.host.populate; f.host.populate = async (v, c) => ({ ...await populate(v, c), uploadRequiredHashes: ['e'.repeat(64)] });
   await assert.rejects(publish(f.options, f.host), { message: 'UNEXPECTED_UPLOAD_HASH' }); assert.ok(!f.writes.includes('upload'));
 });
+test('cached populate response may omit empty upload hashes and still verifies finalized manifest', async () => {
+  const f = fixture(), populate = f.host.populate, release = f.host.release;
+  const cachedBytes = jsonBytes({ ...f.old, hpc: { ...f.old.hpc,
+    lane: { ...f.old.hpc.lane, videos: [first, added], video_count: 2 } } });
+  f.host.populate = async (v, changes) => { await populate(v, changes); return {}; };
+  f.host.release = async v => { await release(v); for (const p of f.paths) f.bodies.set(p, cachedBytes); };
+  assert.equal((await publish(f.options, f.host)).status, 'PUBLISHED');
+  assert.ok(!f.writes.includes('upload')); assert.ok(f.writes.includes('finalize')); assert.ok(f.writes.includes('release'));
+});
+test('null repeated upload field is malformed and cannot reach finalization', async () => {
+  const f = fixture(), populate = f.host.populate;
+  f.host.populate = async (v, changes) => ({ ...await populate(v, changes), uploadRequiredHashes: null });
+  await assert.rejects(publish(f.options, f.host), { message: 'UNEXPECTED_UPLOAD_HASH' }); assert.ok(!f.writes.includes('finalize'));
+});
+test('native clone polls the fixed-project operation resource with an opaque token', async () => {
+  const handle = 'projects/56566376153/operations/opaque.token~id+suffix==';
+  const events = [], calls = [];
+  const client = {
+    post: async (p, body, options) => {
+      calls.push('post'); assert.equal(p, '/projects/gen-lang-client-0061781628/sites/foundupscom/versions:clone');
+      assert.equal(body.sourceVersion, oldVersion); assert.equal(body.finalize, false); assert.equal(options.retries, 0);
+      assert.equal(events.at(-1).state, 'REQUEST_ATTEMPTED_OUTCOME_UNKNOWN'); return { body: { name: handle } };
+    },
+    get: async p => {
+      calls.push('get'); assert.equal(p, '/' + handle); assert.equal(events.at(-1).operation_name, handle);
+      return { body: { name: handle, done: true, response: { name: newVersion } } };
+    }
+  };
+  assert.equal(await cloneWithClient(client, oldVersion, e => events.push(e), async () => {}), newVersion);
+  assert.deepEqual(calls, ['post', 'get']); assert.equal(events.at(-1).candidate_version, newVersion);
+});
+test('rejected operation response is checkpointed before validation without another clone', async () => {
+  const events = []; let posts = 0, gets = 0;
+  const client = { post: async () => { posts++; return { body: { name: 'projects/other/operations/opaque' } }; },
+    get: async () => { gets++; } };
+  await assert.rejects(cloneWithClient(client, oldVersion, e => events.push(e), async () => {}), { message: 'CLONE_OPERATION_INVALID' });
+  assert.equal(posts, 1); assert.equal(gets, 0); assert.equal(events.at(-1).state, 'OPERATION_RETURNED');
+  assert.equal(events.at(-1).operation_name, 'projects/other/operations/opaque');
+});
+test('opaque operation handles cannot change project or URL routing', () => {
+  const prefix = 'projects/gen-lang-client-0061781628/operations/';
+  for (const name of ['https://unrelated.example/operations/id', 'projects/other/operations/id',
+    prefix + '..', prefix + '%2e%2e', prefix + 'id?query', prefix + 'id#fragment', prefix + 'id\\extra', prefix + 'id/extra']) {
+    assert.throws(() => operationName(name), { message: 'CLONE_OPERATION_INVALID' });
+  }
+});
+test('clone rejects changed operation identity or a returned version outside this site', async () => {
+  const handle = 'projects/gen-lang-client-0061781628/operations/opaque';
+  const client = { post: async () => ({ body: { name: handle } }),
+    get: async () => ({ body: { name: handle + '-changed', done: true, response: { name: newVersion } } }) };
+  await assert.rejects(cloneWithClient(client, oldVersion, () => {}, async () => {}), { message: 'CLONE_OPERATION_CHANGED' });
+  client.get = async () => ({ body: { name: handle, done: true, response: { name: 'sites/unrelated/versions/87654321' } } });
+  await assert.rejects(cloneWithClient(client, oldVersion, () => {}, async () => {}), { message: 'HOSTING_VERSION_OUTSIDE_SCOPE' });
+});
 test('public readback mismatch fails after saved release without blind rollback', async () => {
   const f = fixture(), release = f.host.release; f.host.release = async v => { await release(v); f.bodies.set(f.paths[0], Buffer.from('{}')); };
   await assert.rejects(publish(f.options, f.host), error => {
@@ -184,7 +238,7 @@ test('native upload adapter propagates HTTP rejection without suppression or ret
   { status: 403 });
   assert.equal(requests, 1);
 });
-test('installed native Client accepts empty success and rejects HTTP error using offline fetch', async t => {
+test('installed native Client handles upload responses and clone operations using offline fetch', async t => {
   const cliRoot = process.env.FIREBASE_CLI_ROOT || path.join(process.env.APPDATA || '', 'npm/node_modules/firebase-tools');
   if (!fs.existsSync(path.join(cliRoot, 'lib/apiv2.js'))) { t.skip('Optional installed Firebase CLI unavailable; vendor contract tests above remain mandatory'); return; }
   const cliVersion = JSON.parse(fs.readFileSync(path.join(cliRoot, 'package.json'), 'utf8')).version;
@@ -212,5 +266,23 @@ test('installed native Client accepts empty success and rejects HTTP error using
     status = 403;
     await assert.rejects(uploadWithClient(OfflineClient, newVersion, url, hash, bytes), { status: 403 });
     assert.equal(requests, 2);
+    const handle = 'projects/56566376153/operations/opaque+clone==', events = [];
+    let cloneCalls = 0;
+    nodeFetch.default = async (requestUrl, options) => {
+      cloneCalls++;
+      if (options.method === 'POST') {
+        assert.equal(requestUrl, 'https://firebasehosting.googleapis.com/v1beta1/projects/gen-lang-client-0061781628/sites/foundupscom/versions:clone');
+        assert.deepEqual(JSON.parse(options.body), { sourceVersion: oldVersion, finalize: false });
+        assert.equal(events.at(-1).state, 'REQUEST_ATTEMPTED_OUTCOME_UNKNOWN');
+        return new nodeFetch.Response(JSON.stringify({ name: handle }), { status: 200 });
+      }
+      assert.equal(options.method, 'GET');
+      assert.equal(requestUrl, 'https://firebasehosting.googleapis.com/v1beta1/' + handle);
+      assert.equal(events.at(-1).operation_name, handle);
+      return new nodeFetch.Response(JSON.stringify({ name: handle, done: true, response: { name: newVersion } }), { status: 200 });
+    };
+    const native = new OfflineClient({ urlPrefix: 'https://firebasehosting.googleapis.com', apiVersion: 'v1beta1' });
+    assert.equal(await cloneWithClient(native, oldVersion, event => events.push(event), async () => {}), newVersion);
+    assert.equal(cloneCalls, 2);
   } finally { nodeFetch.default = originalFetch; logger.silent = previousSilent; }
 });
