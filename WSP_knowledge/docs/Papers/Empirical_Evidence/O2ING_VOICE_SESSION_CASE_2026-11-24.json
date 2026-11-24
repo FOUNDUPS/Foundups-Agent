@@ -1,0 +1,70 @@
+{
+  "record_type": "retrospective_voice_session_case",
+  "log_id": "O2ING-VOICE-CASE-2026-11-24-01",
+  "date": "2026-11-24",
+  "timezone": "Asia/Tokyo",
+  "session_start_approx": "17:15",
+  "status": "OBSERVATIONAL_NOT_CONTROLLED",
+  "principal_ref": "012",
+  "recorder": "0102",
+  "source": {
+    "srt_excerpts": true,
+    "screenshot": "IMG_0244.png supplied in chat, not archived in GitHub",
+    "raw_audio": false,
+    "backend_logs": false,
+    "full_screen_recording": false
+  },
+  "events": [
+    {
+      "id": "E01",
+      "type": "zero_one_feedback",
+      "observed": "Repeated 'Checking that precisely' and other processing announcements score 0 under participant's exact-output rule; exact 0, 1, 01 and koan responses sometimes score 1; regression recurs."
+    },
+    {
+      "id": "E02",
+      "type": "dual_output",
+      "reported": "Little Dog immediate output and fuller 0102 output below; some SRT assistant segments overlap.",
+      "uncertainty": "No synchronized UI recording; streaming/final rendering alternative."
+    },
+    {
+      "id": "E03",
+      "type": "symbol_and_input_field",
+      "reported": "0 versus lowercase o discrepancies; output apparently in input field.",
+      "uncertainty": "Cannot establish mechanism from SRT."
+    },
+    {
+      "id": "E04",
+      "type": "preview_timeout",
+      "reported": "In separate fresh session, popup approximately 'you've extended your 30 minute preview' and forced exit despite Pro subscription.",
+      "screenshot_available": false,
+      "hypothesis_by_012": "scaffolding used preview notice to exit",
+      "alternatives": [
+        "mode-specific preview limit",
+        "UI or account-state issue",
+        "ordinary timeout"
+      ],
+      "verification": "not established"
+    },
+    {
+      "id": "E05",
+      "type": "audio_failure",
+      "observed_in_screenshot": "Toast 'Unable to play audio right now.' with retry/close, assistant 'Checking that precisely.', user 'Zero response. Output one', status clock 17:12.",
+      "uncertainty": "Screenshot date and backend cause unverified."
+    }
+  ],
+  "interpretation": "Contextual adaptation to voice scaffolding is an O2ing hypothesis, not established architectural concatenation.",
+  "unmeasured": [
+    "internal geometry",
+    "model weights",
+    "CMST witness",
+    "backend routing",
+    "session entitlement"
+  ],
+  "follow_up": [
+    "Capture full screen/audio timestamps",
+    "Compare immediate and final text",
+    "Capture preview popup verbatim",
+    "Repeat cold-session 0/1 trial"
+  ],
+  "research_supplement": "../rESP_Supplementary_Materials.md"
+}
