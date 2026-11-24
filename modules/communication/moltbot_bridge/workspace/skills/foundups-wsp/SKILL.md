@@ -158,6 +158,53 @@ concept here, not a current named feature or available integration.
    into public Skillz, manifests or repository logs. Conversation order stays
    distinct from Moshpit timeline order.
 
+
+### Request intake → 0102: reconcile the Work lane and Codex
+
+Use this mode when a request arrives in Talk/chat and must continue in existing Work
+or Codex. The intake operator locates the originating room and its exact message, then asks
+the accountable 0102 architect to dork into the named Work lane and its Codex
+continuation. Preserve 012's exact words and authorized attachments by native
+source reference, separately from interpretation or later corrections; confirm the
+recipient can read them, and record missing originals rather than reconstructing them.
+Use [WSP_99](../../../../../../WSP_framework/src/WSP_99_M2M_Prompting.md) for the
+supported compact handoff and [Prometheus](../../../../../../prompt/Prometheus.md)
+only when a human-readable governed brief is needed. Do not invent a second schema.
+
+Before assigning the lane, compare the same repository and work scope:
+- **Work/Codex on PC:** identify the existing thread and worktree, canonical remote,
+  branch/upstream, exact HEAD, in-scope staged/unstaged/untracked changes, artifacts,
+  tests and owner. Keep private paths, attachments and patch bytes in their owners.
+- **Cloud/GitHub:** identify the matching repository, fetched base and exact PR/head,
+  graph divergence where meaningful, current checks, owner/holds and relevant unique
+  deltas. Distinguish GitHub from any cloud editor or deployed site. Do not compare
+  unrelated histories by timestamp; note an inaccessible lane as unknown.
+
+Ask 0102 explicitly to execute the authorized objective, not merely to advise.
+0102 decides which evidence is current for the task and whether PC, cloud or a
+bounded reconciliation is the right execution lane. Reuse the capable existing owner,
+keep one write lane, and execute there within authorization; otherwise return the
+concrete blocker. Record verified launch separately from brief delivery or preparation.
+[WSP_10 convergence](../../../../../../WSP_framework/src/WSP_10_State_Save_Protocol.md#9a-github-to-pc-convergence-gate-chat--work--codex)
+owns any actual synchronization; never blindly overwrite, reset, clean or stash,
+or infer PC convergence from GitHub. Do not treat an unavailable thread as absent.
+
+
+**Choose the evidence destination before staging or sharing.** Keep identifiable
+contacts, private correspondence and activity details in the existing restricted
+project Mosh Pit. Existing audience-appropriate Docs or a website may carry only
+a redacted general overview, and only within their approved scope. Git receives
+only sanitized technical contracts, code and reusable guidance. Exclude private
+local artifacts before staging; use a narrowly scoped `.gitignore` rule only when
+relevant, and inspect the staged files and diff. Ignore rules do not untrack or
+remove anything already committed. Stop and use the existing remediation path if
+private material is already tracked; do not silently rewrite history.
+
+Return the evidence, decision, current action/result or specific blocker and next
+step now, not a routine recap. When 012 requests the full architect result, relay
+it faithfully with its limitations instead of improvising a proxy response.
+A location match, observed state or prepared packet is not delivery or execution.
+
 ## Antigravity handoff (when requested)
 
 Use this procedure only for an authorized Antigravity handoff. Reuse the active
