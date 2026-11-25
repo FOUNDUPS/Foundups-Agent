@@ -13,6 +13,7 @@ no submission service or editor authorization is implied.
 Right swipe on the tucked rail now defaults to selecting Next while staying
 hidden. The pending selection starts no provider work. Tap restores it paused;
 visible Play starts playback. Explicitly saved next/reveal remains available.
+Touch restoration does not depend on the browser emitting a compatibility click.
 This supersedes the November 23 default. Physical Safari/Home Screen and
 production delivery remain separate gates; no new Voice or model is delivered.
 

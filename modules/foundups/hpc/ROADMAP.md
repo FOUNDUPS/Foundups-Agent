@@ -14,6 +14,9 @@ retains the existing contribution gate. No new auth selector or admission.
 
 Latest tucked-tab default: next clip **stays hidden**. Selection-only catalog
 continuation starts no hidden provider; restore shows the pending clip paused.
+The shared rail handles deliberate touch taps directly. A live Chromium touch
+reproduction and a click-suppressed fixture exposed the prior missing-click
+boundary; physical Safari/Home Screen verification remains open.
 Preserve saved next/reveal and other gesture choices. Dependencies: shared state,
 queue/player and dock owners. Acceptance: existing browser/queue/preference
 fixtures plus independent review, exact-source preview, real media and physical

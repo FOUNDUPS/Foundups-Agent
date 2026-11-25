@@ -473,7 +473,7 @@ await check('camera handoff carries only bounded canonical public caller URLs an
 });
 
 await check('isolated v26 controls, gestures and home previews are read-only while unrelated hosts remain unselected', () => {
- for (const family of ['controls', 'gestures', 'home']) {
+ for (const family of ['controls', 'gestures', 'home', 'home2']) {
   for (const domain of ['web.app', 'firebaseapp.com']) {
     const location = new URL('https://foundupscom--play-v26-' + family + '-abc123.' + domain + '/member/?foundup=hpc');
     const h = runtime(location.href);
@@ -489,6 +489,10 @@ await check('isolated v26 controls, gestures and home previews are read-only whi
  }
   assert.equal(runtime('https://foundupscom--random-controls-abc123.web.app/member/').api.hostScope(
     new URL('https://foundupscom--random-controls-abc123.web.app/member/')), null);
+  for (const family of ['home22', 'home2-extra']) {
+    const rejected = 'https://foundupscom--play-v26-' + family + '-abc123.web.app/member/';
+    assert.equal(runtime(rejected).api.hostScope(new URL(rejected)), null);
+  }
 });
 
 console.log(JSON.stringify({ checks, real_auth: 'UNEXECUTED', membership_editor: 'UNEXECUTED',

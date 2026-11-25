@@ -11,7 +11,7 @@
     ['hpc.foundups.com', 'hpc'],
     ['play.foundups.com', 'mall']
   ]);
-  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-(?:controls|gestures|home))-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
+  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-(?:controls|gestures|home|home2))-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
     dedicatedHosts.set(window.location.hostname, 'mall');
   }
   const publicScopes = new Set(['hpc', 'voteballots']);

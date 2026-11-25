@@ -1,3 +1,12 @@
+## 2026-11-25 — Tucked tap without compatibility click
+
+Extend tucked-next-stays-hidden in the existing phone browser fixture: suppress
+compatibility click, deliver a hit-tested small-motion touch sequence and require
+paused restoration of the selected ID with no hidden provider work. The new
+assertion failed in Chromium and WebKit on df91 runtime, while the other ten
+focused rows passed. This controlled case complements the independent real
+HTTPS touch reproduction; it does not establish physical iPhone behavior.
+
 ## 2026-11-25 — VOTE typed native/image media regression
 
 CI3137:2 failed/1892 passed because Python VM wrappers retained the prior34/29

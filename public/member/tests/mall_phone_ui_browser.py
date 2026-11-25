@@ -1386,7 +1386,11 @@ def tucked_next_stays_hidden(page):
     page.screenshot(path=str(OUT.with_name(OUT.stem+'-'+REPORT['engine']+'-tucked-next.png')))
     # Let the compatibility-click fence expire before a new intentional tap.
     page.wait_for_timeout(450)
-    rail.tap()
+    # A real touch sequence need not emit a compatibility click (observed on
+    # the HTTPS preview). Isolate that boundary rather than letting click hide
+    # a missing touchend tap path in this controlled provider fixture.
+    rail.evaluate("e=>e.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation()},true)")
+    app_touch(page, rail, dx=2, dy=3)
     page.wait_for_function("!mallVideoPlayer.isTucked()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='manual-play'")
     assert_true(page.evaluate('mallVideoPlayer.getCurrentIndex()') == 2, 'Tap changed the selected video')
     assert_true(page.evaluate('fixturePlayback.plays') == before['plays'], 'Restoration auto-started a hidden selection')
@@ -1394,7 +1398,7 @@ def tucked_next_stays_hidden(page):
     page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.15")
     expect(page.locator('#videoPlayerFullscreen iframe')).to_have_count(1)
     return {'two_hit_tested_right_swipes_stay_hidden': True, 'no_hidden_provider_work': True,
-            'tap_reveals_selected_clip_paused': True, 'visible_play_advances_time': True,
+            'tap_without_compatibility_click_reveals_paused': True, 'visible_play_advances_time': True,
             'physical_iPhone': 'UNEXECUTED'}
 
 

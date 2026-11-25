@@ -2702,7 +2702,14 @@
       handleTracking = false;
       var dx = e.changedTouches[0].clientX - handleStartX;
       var dy = e.changedTouches[0].clientY - handleStartY;
-      if (dx <= -UNTUCK_SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
+      if (Math.abs(dx) < 15 && Math.abs(dy) < 15) {
+        // Some touch sequences deliver no compatibility click. Restore on the
+        // deliberate touch tap itself, and fence any later click echo.
+        if (performance.now() < gestureClickBlockedUntil) return;
+        e.preventDefault();
+        gestureClickBlockedUntil = performance.now() + 400;
+        untuck();
+      } else if (dx <= -UNTUCK_SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
         untuck();
       } else if (dx >= Math.max(16, Math.min(32, tuckHandle.clientWidth * .5)) && Math.abs(dx) > Math.abs(dy) * 1.4) {
         var action = videoOptions().tuckedSwipeRight || 'next-hidden';

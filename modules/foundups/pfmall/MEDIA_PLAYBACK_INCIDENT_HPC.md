@@ -1,5 +1,33 @@
 # Shared Mall media incident · HPC-P01–P08
 
+## 2026-11-25 — Tucked rail touch tap without click
+
+- **incident_id / owner:** PFMALL-MEDIA-20261111-HPC; shared member player rail,
+  HPC acceptance surface. Existing H1H paused restoration requirement.
+- **reproduction/environment:** exact df91 preview, Windows11 build26300,
+  Chromium143.0.7499.4, fresh browser context, 390x844 touch/mobile emulation.
+  Right swipe selected sSzWdw7MNjs while tucked with zero iframe. A trusted tap
+  delivered touchend but no observed click and remained hidden for8s. Physical
+  Safari and installed iPhone PWA remain NOT_VERIFIED.
+- **cause/uncertainty:** the app handled swipe touchend but relied solely on
+  compatibility click for taps. Pointer click and left swipe restored within
+  about0.8s; explicit Play advanced real media time. This is before provider
+  creation, not a YouTube loading timeout. Why this browser sequence omitted
+  compatibility click remains uncertain.
+- **fix/bounded mitigation:** existing rail handles deliberate <15px touchend
+  taps directly with preventDefault and400ms click-echo fence. Next/stay-hidden,
+  paused hidden media, cancellation, multi-touch and scroll boundaries remain.
+- **regression/evidence:** existing tucked-next-stays-hidden fixture suppresses
+  compatibility click; red in both engines before repair. Independent private
+  diagnostic7e9b74b19f35a5205ce46c9f02978bba48280da256c360f32b928d427e8f9868
+  retains events, provider states, advancing times and six screenshot hashes.
+- **rejected approaches:** extending provider timeout, treating a pointer-click
+  pass as touch proof, hidden playback, provider overlays, or broad gesture
+  replacement. Original failed HTTPS acceptance is preserved.
+- **status/timestamp/next:** REPRODUCED and corrective implementation candidate,
+  2026-11-25 JST. Qualify successor regression/security/independent review and
+  source-bound preview; then obtain separate physical phone acceptance.
+
 ## 2026-11-25 — Optional local-media source rejection
 
 - **incident_id:** PFMALL-MEDIA-20261111-HPC; provider-specific native VOTE finding.

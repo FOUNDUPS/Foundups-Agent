@@ -58,6 +58,11 @@ Play starts it. Keep the independently configurable `next-reveal`, `restore`
 and `none` choices and any explicitly saved selection. The same bounded queue
 owner may fetch one catalog page while tucked; restore/close/filter/scope/new
 selection invalidate stale results. Native YouTube controls remain untouched.
+The rail handles a deliberate touch tap directly, without requiring a browser
+compatibility click; a 400ms echo fence prevents duplicate activation. Cancelled,
+multi-touch and scrolling sequences remain outside this tap path.
+The exact `play-v26-home2` read-only preview family qualifies this correction
+on a fresh origin, preserving the earlier `play-v26-home` release for comparison.
 
 State API additions: `getScopedPresentation()` and
 `setScopedPresentation('grid'|'theater')` operate only after selecting a video
