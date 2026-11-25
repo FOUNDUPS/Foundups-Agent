@@ -128,8 +128,14 @@ async function publish(options, host) {
       result.status = replacements.size ? 'PLANNED' : 'UNCHANGED'; save('FINISHED'); return result;
     }
     fresh(receipt, bytes, now());
+    result.cloud_mutations_attempted = ['clone_current_live'];
+    result.clone_request = { state: 'ATTEMPTED_OUTCOME_UNKNOWN', source_version: baseline.version };
     save('CLONE_CURRENT_LIVE');
-    const candidate = normalizeVersion(await host.clone(baseline.version));
+    const candidate = normalizeVersion(await host.clone(baseline.version, event => {
+      // This receipt is private. Never emit the opaque provider operation name.
+      result.clone_request = { ...result.clone_request, ...event };
+      save('CLONE_CURRENT_LIVE');
+    }));
     requireThat(candidate !== baseline.version, 'CLONE_REUSED_LIVE_VERSION');
     result.candidate_version = candidate; result.cloud_writes.push('cloned_current_live'); save('VERIFY_CLONE');
     const cloned = await host.getVersion(candidate);
@@ -138,9 +144,11 @@ async function publish(options, host) {
     const changes = Object.fromEntries([...replacements].map(([target, value]) => [target, value.hash]));
     const populated = await host.populate(candidate, changes); result.cloud_writes.push('populated_only_catalog_paths'); save('UPLOAD_CATALOGS');
     const byHash = new Map([...replacements.values()].map(v => [v.hash, v.compressed]));
-    requireThat(Array.isArray(populated.uploadRequiredHashes) && new Set(populated.uploadRequiredHashes).size === populated.uploadRequiredHashes.length &&
-      populated.uploadRequiredHashes.every(hash => byHash.has(hash)), 'UNEXPECTED_UPLOAD_HASH');
-    for (const hash of populated.uploadRequiredHashes) await host.upload(candidate, populated.uploadUrl, hash, byHash.get(hash));
+    // Protobuf JSON omits an empty repeated field when content is cached.
+    const requiredHashes = plain(populated) && populated.uploadRequiredHashes === undefined ? [] : populated?.uploadRequiredHashes;
+    requireThat(Array.isArray(requiredHashes) && new Set(requiredHashes).size === requiredHashes.length &&
+      requiredHashes.every(hash => byHash.has(hash)), 'UNEXPECTED_UPLOAD_HASH');
+    for (const hash of requiredHashes) await host.upload(candidate, populated.uploadUrl, hash, byHash.get(hash));
     const expected = { ...originalMap, ...changes };
     save('FINALIZE_AND_VERIFY');
     await host.finalize(candidate, prior.config);
@@ -193,6 +201,38 @@ async function uploadWithClient(Client, name, url, hash, bytes) {
     headers: { 'Content-Type': 'application/octet-stream' },
     timeout: 15000, retries: 0, responseType: 'json' });
 }
+function operationName(name) {
+  // Hosting discovery declares projects/{project}/operations/{opaque_id}.
+  // Keep the service-returned token opaque rather than guessing its alphabet.
+  requireThat(typeof name === 'string' && name.length <= 4096 &&
+    /^projects\/(?:gen-lang-client-0061781628|56566376153|-)\/operations\/[^/]+$/.test(name), 'CLONE_OPERATION_INVALID');
+  const expectedPath = '/v1beta1/' + name;
+  const url = new URL(expectedPath, 'https://firebasehosting.googleapis.com');
+  requireThat(url.pathname === expectedPath && !url.search && !url.hash, 'CLONE_OPERATION_INVALID');
+  return name;
+}
+async function cloneWithClient(client, name, checkpoint = () => {}, sleep = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))) {
+  const source = normalizeVersion(name);
+  checkpoint({ state: 'REQUEST_ATTEMPTED_OUTCOME_UNKNOWN', source_version: source });
+  let operation = (await client.post(`/projects/${PROJECT}/sites/${SITE}/versions:clone`, {
+    sourceVersion: source, finalize: false }, { timeout: 15000, retries: 0 })).body;
+  // Preserve a bounded handle before interpreting it. A rejected response may
+  // already have created a draft and must remain recoverable without retrying.
+  const returnedName = typeof operation?.name === 'string' ? operation.name : null;
+  checkpoint({ state: 'OPERATION_RETURNED', operation_name: returnedName?.slice(0, 4096),
+    operation_name_truncated: returnedName !== null && returnedName.length > 4096 });
+  const handle = operationName(returnedName);
+  for (let polls = 0; !operation.done; polls++) {
+    requireThat(polls < 100 && (operation.done === undefined || operation.done === false), 'CLONE_OPERATION_INVALID');
+    await sleep(250);
+    operation = (await client.get('/' + handle, { timeout: 15000 })).body;
+    requireThat(plain(operation) && operation.name === handle, 'CLONE_OPERATION_CHANGED');
+  }
+  requireThat(operation.done === true && !operation.error, 'CLONE_OPERATION_FAILED');
+  const candidate = normalizeVersion(operation.response?.name);
+  checkpoint({ state: 'OPERATION_COMPLETED', candidate_version: candidate });
+  return candidate;
+}
 async function createHost(cliRoot, cwd) {
   const cliPath = name => path.join(cliRoot, 'lib', name);
   const version = JSON.parse(fs.readFileSync(path.join(cliRoot, 'package.json'), 'utf8')).version;
@@ -225,15 +265,7 @@ async function createHost(cliRoot, cwd) {
       return files;
     },
     readPublic,
-    async clone(name) {
-      let operation = (await client.post(`/projects/${PROJECT}/sites/${SITE}/versions:clone`, {
-        sourceVersion: normalizeVersion(name), finalize: false }, { timeout: 15000, retries: 0 })).body;
-      for (let polls = 0; !operation.done; polls++) {
-        requireThat(polls < 100 && /^(?:projects\/(?:gen-lang-client-0061781628|56566376153|-)\/)?sites\/foundupscom\/operations\/[A-Za-z0-9_-]+$/.test(operation.name || ''), 'CLONE_OPERATION_INVALID');
-        await new Promise(resolve => setTimeout(resolve, 250)); operation = await get(operation.name);
-      }
-      requireThat(!operation.error, 'CLONE_OPERATION_FAILED'); return normalizeVersion(operation.response?.name);
-    },
+    clone: (name, checkpoint) => cloneWithClient(client, name, checkpoint),
     async populate(name, files) { return (await client.post('/' + normalizeVersion(name) + ':populateFiles', { files }, { timeout: 15000, retries: 0 })).body; },
     upload: (name, url, hash, bytes) => uploadWithClient(Client, name, url, hash, bytes),
     finalize: (name, config) => client.patch('/' + normalizeVersion(name), { status: 'FINALIZED', config }, {
@@ -279,5 +311,5 @@ async function main() {
     process.stdout.write(JSON.stringify({ status: result.status, applied: result.applied, paths: result.paths?.map(p => p.path), receipt: output }) + '\n');
   } finally { clearInterval(heartbeat); clearTimeout(deadline); }
 }
-module.exports = { publish, fresh, videosOf, collectionDocument, fileMap, normalizeVersion, createHost, uploadWithClient, sha256, jsonBytes, parse };
+module.exports = { publish, fresh, videosOf, collectionDocument, fileMap, normalizeVersion, createHost, uploadWithClient, cloneWithClient, operationName, sha256, jsonBytes, parse };
 if (require.main === module) main().catch(error => { process.stdout.write(JSON.stringify({ status: 'FAILED', error_code: error.safeCode || 'PUBLICATION_FAILED' }) + '\n'); process.exitCode = 1; });
