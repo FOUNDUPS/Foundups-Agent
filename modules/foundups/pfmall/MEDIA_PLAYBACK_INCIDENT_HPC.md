@@ -28,6 +28,15 @@
   2026-11-25 JST. Qualify successor regression/security/independent review and
   source-bound preview; then obtain separate physical phone acceptance.
 
+The first29a correction passed its focused twelve browser rows, but the full
+hosted phone run45520826054 exposed immediate Play/menu suppression. Its global
+tap echo fence also blocked a different grip click for400ms. Narrow that new
+fence to the rail's closure; retain the preexisting global swipe fence. Direct
+tap in the existing click-suppressed case removes the helper's460ms settling
+delay and keeps immediate menu/Play covered. Preserve the failed29a receipt;
+the home2 stage was never published. Full phone/policy and successor exact-source
+review are required; no timeout or acceptance is weakened.
+
 ## 2026-11-25 — Optional local-media source rejection
 
 - **incident_id:** PFMALL-MEDIA-20261111-HPC; provider-specific native VOTE finding.

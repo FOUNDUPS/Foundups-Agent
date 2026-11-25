@@ -2673,9 +2673,10 @@
     var handleStartX = 0;
     var handleStartY = 0;
     var handleTracking = false;
+    var handleClickBlockedUntil = 0;
 
     tuckHandle.addEventListener('click', function (event) {
-      if (performance.now() < gestureClickBlockedUntil) { event.preventDefault(); return; }
+      if (performance.now() < Math.max(gestureClickBlockedUntil, handleClickBlockedUntil)) { event.preventDefault(); return; }
       untuck();
     });
 
@@ -2707,7 +2708,7 @@
         // deliberate touch tap itself, and fence any later click echo.
         if (performance.now() < gestureClickBlockedUntil) return;
         e.preventDefault();
-        gestureClickBlockedUntil = performance.now() + 400;
+        handleClickBlockedUntil = performance.now() + 400;
         untuck();
       } else if (dx <= -UNTUCK_SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
         untuck();

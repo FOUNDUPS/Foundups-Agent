@@ -1390,7 +1390,7 @@ def tucked_next_stays_hidden(page):
     # the HTTPS preview). Isolate that boundary rather than letting click hide
     # a missing touchend tap path in this controlled provider fixture.
     rail.evaluate("e=>e.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation()},true)")
-    app_touch(page, rail, dx=2, dy=3)
+    rail.tap()
     page.wait_for_function("!mallVideoPlayer.isTucked()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='manual-play'")
     assert_true(page.evaluate('mallVideoPlayer.getCurrentIndex()') == 2, 'Tap changed the selected video')
     assert_true(page.evaluate('fixturePlayback.plays') == before['plays'], 'Restoration auto-started a hidden selection')

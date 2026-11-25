@@ -2,6 +2,12 @@
 
 ## 2026-11-25 — Tucked rail touch restoration
 
+The29a hosted phone suite caught immediate Video-menu suppression after restore:
+the new tap echo fence shared the grip's global swipe guard. Scope only this tap
+echo fence to the rail and deliver direct tap in the existing regression, without
+the helper's460ms settling delay. Keep the failing hosted evidence and require
+full phone/policy qualification before the successor preview.
+
 The df91 HTTPS preview independently reproduced a trusted touchend without
 compatibility click, leaving the selected clip hidden. Pointer click and left
 swipe restored immediately, before provider readiness. Handle a deliberate

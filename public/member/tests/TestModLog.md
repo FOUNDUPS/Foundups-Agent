@@ -1,7 +1,12 @@
 ## 2026-11-25 — Tucked tap without compatibility click
 
+The29a full hosted run caught both floating-frame-controls and the hidden-policy
+manual Play case: the global400ms tap fence blocked a distinct grip click. Scope
+the new echo fence to the rail. Direct tap replaces the settling helper so the
+click-suppressed case now exercises immediate menu/Play; no assertion is removed.
+
 Extend tucked-next-stays-hidden in the existing phone browser fixture: suppress
-compatibility click, deliver a hit-tested small-motion touch sequence and require
+compatibility click, deliver a hit-tested direct tap and require
 paused restoration of the selected ID with no hidden provider work. The new
 assertion failed in Chromium and WebKit on df91 runtime, while the other ten
 focused rows passed. This controlled case complements the independent real
