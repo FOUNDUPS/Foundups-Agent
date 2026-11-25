@@ -80,10 +80,11 @@
     "channel_reported": "Move to Japan",
     "date_reported": "2026-11-24",
     "participant_claim": "The full experiment was captured live.",
-    "video_url": null,
-    "video_id": null,
+    "video_url": "https://www.youtube.com/watch?v=TsIOvI85FL4",
+    "video_id": "TsIOvI85FL4",
     "verified_by_recorder": false,
-    "review_status": "awaiting exact stream URL or video ID",
-    "experimental_layer": "Potential contemporaneous audiovisual record allowing time-aligned comparison of spoken response, rendered response, interface errors and disappearance of chat log."
+    "review_status": "source pointer identified; playback, event offsets and channel attribution not independently verified",
+    "experimental_layer": "Potential contemporaneous audiovisual record allowing time-aligned comparison of spoken response, rendered response, interface errors and disappearance of chat log.",
+    "source_pointer": "URL supplied by 012 in the archived companion session; matching watch-page metadata located."
   }
 }
