@@ -11,6 +11,35 @@ WebP/still fallback exposes image identity and null time. Six integrated
 native/image/motion browser rows pass; physical iPhone, exact-head review and
 release remain separate. No Sites/DNS/Auth/model/calling release. WSP5/10/15/22/50/71/91/97.
 
+## 2026-11-25 — Shared congressional card collection (release held)
+
+- Add two typed member-media records and approved artwork derivatives for the
+  existing Play FoundUps tile/player. The intended VOTE entry is a fixed handoff
+  to that collection. Preserve the Dispatch at a separate working path, plus the
+  original guide and contact/script/skin flow. Remove the earlier unpublished
+  Dispatch portrait-section change; do not duplicate the shared shell.
+- Exact labels: Chuck Schumer / U.S. Senate / New York and Hakeem Jeffries /
+  U.S. House / New York District 8. Official congressional pages were checked.
+  Use #SchumerOUT and #JeffriesOUT; show UDP/CU Pending without scores.
+- MPS: C3 + I4 + D4 + Impact4 = 15/P1. One bounded card-media layer, existing
+  owners and no provider/model generation. Approved Muse/Wan files supply native
+  reduced-motion stills, animated WebP tiles and silent four-second MP4 playback.
+- WSP 00 native awakening/strict gate passed in the isolated source. Source-bound
+  Holo semantic retrieval returned an authority mismatch; lexical context retained
+  UNKNOWN freshness/index gap. Direct owner docs/test inventory resolved noise,
+  omitted tests and absent optional memory files. No reindex or new runtime agent.
+- Live Chrome identified HPC `/member/hpc-v25/`, Build v25. Its shared core maps
+  to `bd0510c5c2e333d07b1bb02340ca91b291420164`; B26 preview metadata names
+  `187c79a5128c12be05d7f9cc2974b4c414946208`. Current main is older. Active HPC
+  home/dock work must be preserved; source tests do not authorize overwriting it.
+- Local shared/member suites passed 2292 tests; updated route/state and actual
+  boot VMs passed 23/26 checks. Repeated CUA timeouts left the new 390px shared
+  tile/viewer/return comparison UNVERIFIED. No new shared or Sites release occurred.
+- WSP 10/22/50/71/91/97: PR #2453 remains the recoverable draft and scoped receipt.
+  Source implementation is IMPLEMENTED_NOT_VALIDATED for public operation. Admit
+  into the existing shared release, verify exact bounds and return, then release
+  the fixed VOTE entry and preserve Dispatch; no registrar changes are required.
+
 ## 2026-11-22 — HPC skin and local editable call scripts
 
 - Reuse the manual contact page, directory and service worker; add an opt-in

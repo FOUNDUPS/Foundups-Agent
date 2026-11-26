@@ -1,5 +1,68 @@
 # Vote release accounting and launch checklist
 
+## 2026-11-25 Shared congressional deck
+
+[PR #2453](https://github.com/FOUNDUPS/Foundups-Agent/pull/2453) is a **draft** for
+two individual typed member cards in the actual shared Play FoundUps Mall. The
+earlier Dispatch portrait section was superseded before publication. The source
+adds a fixed VOTE → shared-collection handoff, no separate Mall shell or viewer.
+
+Observed Sites state remains public version 12, project
+`appgprj_6aee6646e6ac81918ac2624d5d1db413`, mirror
+`8c40f15770ba78b622a23ebfe3d2d04533a22f99`. At the eventual release, preserve its
+existing Dispatch as `/dispatch`, including the campaign art, crying Schumer,
+song/radio and original tool links. The 33-file baseline is retained locally;
+no superseded section was deployed. `/guide` and `/contact` remain their current
+working pages, including the local call-script composer and skin selector.
+
+The shared release is separate. Chrome observed production HPC at
+`https://hpc.foundups.com/member/hpc-v25/`, visibly Build v25. Recovered core files
+match shared source `bd0510c5c2e333d07b1bb02340ca91b291420164` after newline
+normalization. The separately verified B26 Gestures preview names source
+`187c79a5128c12be05d7f9cc2974b4c414946208`, version `ee887c714947b74a`; it is not
+the production B25 comparison. Active HPC home/search/dock changes must retain
+their owner and exact current source. Do not publish older main files over them.
+
+Acceptance remaining: admit the optional card extension into the current shared
+release; verify two initial tiles, the real common viewer, reduced motion and
+close/Back restoration beside HPC at identical 390 × 844 and desktop viewports;
+save actual screenshots and measurements; then publish the VOTE handoff and
+Dispatch path. CUA repeatedly timed out before this new flow could be observed.
+The former 390px Dispatch-section preview is superseded and is not phone-deck
+acceptance. No physical-phone, new live-card flow or completed release is claimed.
+
+The action labels are #SchumerOUT / #JeffriesOUT. Both UDP and CU fields
+are Pending. Committee/leadership labels are omitted. Official office/constituency
+sources: [Schumer](https://www.schumer.senate.gov/) and
+[Jeffries](https://jeffries.house.gov/about/).
+
+Local correction receipt, 2026-11-25: with explicit headless-browser
+authorization, a read-only recovered-v25 fixture now verifies both cards at
+390 × 844, 320 × 844 and 1440 × 1000. Both silent MP4s advance, expand and
+return to the grid. Reduced motion selects the still and disables autoplay.
+The compact dog/VOTE header and small trusted HPC banner replace the redundant
+VOTE-only headings. The existing expand control occupies the artwork corner,
+clear of fully wrapped names and office text; native grid density is retained.
+Portrait panels remain centered at 9:16 inside the common player stage.
+The narrow typed-media selection bypasses only the YouTube-specific minimum
+trigger width; ordinary YouTube selection retains that guard.
+
+The screenshots and `vote-shared-mall-measurements.json` describe a local
+fixture, not current shared-owner integration, a deployed build or physical
+phone qualification. The 390px HPC comparison uses the same 372 × 210.59375px
+floating stage. HPC's native desktop startup remains theater while VOTE opens
+on its two tiles. All 2,705 broader Python tests passed before the final narrow
+tile adjustment; its subsequent focused field/catalog replay passed 216 tests.
+The Vote Node suites passed 137 checks and state/boot VMs passed 23/26.
+Publication remains held until the active HPC owner integrates the tested
+extension, exact-head required checks pass and the resulting live scope is
+verified. No Sites version or domain forwarding was changed.
+
+`hasan4speaker.com` was observed returning 301 to Vote's root with a browser
+User-Agent; its forwarder cannot preserve the original host after redirect.
+The new release keeps an explicit Dispatch path. No registrar or domain-setting
+change was made or claimed. Keep this separate from shared-PWA admission.
+
 ## 2026-11-22 Source-selected skin handoff
 
 HPC's Voice link now carries `https://vote.mtrout.com/contact#hpc`, selecting

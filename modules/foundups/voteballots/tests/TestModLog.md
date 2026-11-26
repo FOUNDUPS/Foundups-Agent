@@ -11,6 +11,17 @@ tests. Integrated exact-head results are recorded with the shared release.
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-25] — Fixed shared-deck handoff, publication held
+
+- Reuse the existing public worker/guide fixture for the proposed fixed PWA entry:
+  every original guide ID retains its destination; arbitrary query/fragment input
+  cannot select another destination; no-JS links retain Dispatch, guide and Contact.
+- The earlier Dispatch portrait-section test/implementation was superseded before
+  publication. Its screenshots are not evidence for the new shared tile/viewer flow.
+- Shared source verification: 2292 member/pfMALL tests, 23 state/route VM checks and
+  26 actual member boot checks passed. New real-browser deck acceptance is pending
+  because CUA timed out repeatedly. No physical-phone or new public release claim.
+
 ## [2026-11-22] — Source-selected HPC handoff
 
 - 136 passed across existing contact, coalition and public-worker suites.
