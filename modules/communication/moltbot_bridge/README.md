@@ -1,3 +1,30 @@
+## Adaptive relay watcher — 2026-11-14
+
+`src/reddog_relay_watcher.py` implements the bounded checker requested in
+[issue #2385](https://github.com/FOUNDUPS/Foundups-Agent/issues/2385).
+An existing resident host can call `RelayWatcher.tick()` or its bounded `run()`;
+neither starts a service or acquires connectors. First read is due after 60
+seconds. Successful reads with no new admitted external messages back off through
+120, 240, 480, 960, 1920 and 3600 seconds. New admitted activity resets 60 seconds
+before downstream effects, so a failed ACK/forward cannot suppress the reset.
+Repeated IDs, reordered content and the receiver's own ACKs do not reset it.
+Provider errors remain unknown observations with a separate retry deadline.
+
+The watcher reuses `DelayUtils`, ModuleDB/DatabaseManager and the shared runtime
+operation lock. Its store atomically retains the source revision, observed
+message IDs/digests and ACK/forward operations. It stores metadata, not message
+bodies or credentials. An uncertain effect must be reconciled before retry;
+pending content must be refetched with the same ID and digest after restart.
+
+This is a **local implementation, not an enabled relay**. Live use requires the
+existing admitted host to supply authenticated native read/ACK/forward/reconcile
+capabilities, a reviewed document decoder, current use-time authority and real
+finite call deadlines. `GoogleDocsRelayReader` adapts an injected Docs read; it
+does not make cloud MCP tools callable from local Python. No default connector,
+decoder, supervisor registration or unattended Python-to-cloud invocation exists
+in this slice. See [the interface contract](INTERFACE.md#adaptive-relay-watcher).
+Moshpit, Gmail drafts and the separate Wave/UI work are not wired as transports.
+
 ## Supervisor startup advisory analysis — 2026-11-05
 
 The resident supervisor initializes the existing Overseer without acquiring

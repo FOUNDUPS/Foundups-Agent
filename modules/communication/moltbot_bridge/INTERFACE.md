@@ -1,3 +1,62 @@
+## Adaptive relay watcher
+
+Entry points: `src/reddog_relay_watcher.py`, `src/reddog_relay_poll_store.py`
+and `src/reddog_relay_google_docs.py`. This is an unregistered library for the
+existing resident owner, not a daemon, delivery authority or new transport.
+
+| Contract | Requirement |
+| --- | --- |
+| `RelaySource(provider, account, container, receiver, destination)` | Immutable binding per account/container; changing receiver or destination rejects the existing checkpoint. |
+| `RelayPollStore(db, repo_root=..., allowed_root=...)` | Explicit existing DatabaseManager using an outside-repository private SQLite file. One fixed local disk/host; no network shares, hard links, symlink aliases or replaced DB identity. Backend, canonical path and file identity are rechecked around transactions. |
+| `RelayBindings(read, admit, perform, reconcile, timeout_seconds)` | All four callables required; positive timeout at most 60 seconds. No fallback credentials or connector. |
+| `read(source, watermark, timeout_seconds=...)` | Complete normalized `RelaySnapshot(source_key, watermark, messages, complete=True)` with at most 1000 messages; provider failures must remain errors, not empty snapshots. |
+| `admit(source, message)` | Literal boolean from host authentication/scope/current-authority checks; messages and their claimed sender are data, not authority. |
+| `perform(source, message, phase, operation_id, attempt, timeout_seconds=...)` | Existing host ACK or forward capability, including use-time authority. Called only after durable INFLIGHT; returns bound `EffectProof`. |
+| `reconcile(...)` | Same arguments; returns authenticated provider proof for the exact operation and attempt. A lookup miss or eventual-consistency gap is UNKNOWN. |
+| `EffectProof(operation_id, attempt, outcome, proof_id)` | APPLIED, TERMINAL_NOT_APPLIED or UNKNOWN. Applied/terminal-negative evidence requires a bounded opaque proof ID. Only final authoritative non-application allows another numbered attempt. |
+| `RelayWatcher.tick()` | One due read under the existing machine-wide lock; first invocation persists a 60-second deadline. Missing bindings returns BLOCKED_CONNECTOR_BINDINGS. |
+| `RelayWatcher.run(stop_event, max_checks=...)` | Runs on the caller's existing thread for 1–10000 checks; interruptible waits at most 60 seconds. No background thread or service creation. |
+
+`RelayMessage(message_id, sender, recipient, kind, payload)` is ephemeral; payload
+is at most 16 KiB. Operation IDs bind the full source/destination binding, message
+identity/content digest and phase. ACK must be confirmed before that message's
+forward. There is no guarantee of cross-message delivery order while an earlier
+operation is blocked. The 10000-message ledger cap blocks ingestion without
+evicting prior identities. Replaying an applied operation does not resend it.
+
+Message/operation insertion, source revision and next deadline share one SQLite
+transaction. `observed_at` changes only after a valid successful read. Provider
+errors update `last_attempt_at` and retry scheduling without changing observation
+time, revision or idle interval. Backwards clocks before/during a read block
+observation and effects. Pending bodies absent or changed on refetch remain
+blocked; metadata persistence is not a complete source archive.
+
+The process lock is the active **same-host** exclusion mechanism. Persisted
+owner/generation fields record history, not a distributed lease or authority.
+The host must use one designated private database for this mailbox and must
+prevent independently copied databases or other hosts from becoming writers.
+Path checks do not provide OS isolation against an actor mutating storage.
+Identity validation is per store lifetime. A fresh constructor after DB loss or
+replacement cannot establish continuity with the old ledger. Restart acceptance
+requires retaining the same database and its WAL, not provisioning an empty file.
+No provider-level exactly-once or managed-host restart guarantee is claimed.
+
+`GoogleDocsRelayReader(read_document, decode_messages)` invokes the supplied
+`read_document(document_id=..., timeout_seconds=...)` capability and checks the
+exact document ID, nonempty opaque revision and returned tab/body structure.
+It accepts the native normalized document mapping or its `structuredContent`
+wrapper. The host must authenticate the selected account and fetch **all tabs**
+without a partial-fields projection. Returned shape alone cannot prove those
+obligations. The reviewed decoder must return a tuple of `RelayMessage` objects.
+Even an unchanged revision is decoded again to recover unresolved bodies.
+
+Timeout arguments are contractual: the host bindings must enforce deadlines;
+`run()` does not interrupt a hanging callback. No live host bindings or registered
+caller are supplied here. Native read access in a chat does not establish an
+unattended local invoker, write permission, forward eligibility or receiver ACK.
+Admitted host invocation, provider receipt verification and managed runtime
+restart acceptance remain separate activation gates.
+
 ## Ollama fallback configuration contract — 2026-10-29
 
 `initialize_control_plane_state` assigns `_ollama_model` from

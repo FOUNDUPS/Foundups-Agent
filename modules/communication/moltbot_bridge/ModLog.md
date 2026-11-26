@@ -107,6 +107,28 @@ and withdrew its guest session. See the same contract for cloud staging gates.
   only; next promotion requires exact-head review/security/CI under current
   ownership and separately authorized publication.
 
+## 2026-11-14 — Durable adaptive relay checker, not activated
+
+WSP00/22/50/78/97/99; issue #2385. Added a bounded `RelayWatcher` under the existing
+bridge owner using shared DelayUtils, ModuleDB transactions and the runtime
+operation lock. Persist revision/deadline, message digests and ACK/forward attempt
+proofs atomically; reconcile ambiguous effects before replay. New admitted
+activity resets the 60-second policy independently of downstream success.
+Provider failures preserve prior observation timestamps and idle intervals.
+
+Independent review reproduced hard-linked SQLite aliases bypassing path-based
+lock identity. The candidate now rejects hard links and validates backend, path
+and device/inode identity around transactions. Clock rollback during a provider
+read also blocks observation without fabricating a fresh timestamp. Added a
+Google Docs reader adapter using an injected existing native read capability and
+reviewed decoder; returned shape does not prove authenticated, complete retrieval.
+
+Tests cover actual SQLite transactions, fresh child-process crash recovery and
+same-host lock contention using synthetic providers. See tests/TestModLog.md for
+the scoped run. No live relay, connector binding, runtime admission, cross-host
+lease, credentials change, publication, deployment or Moshpit transport follows.
+Existing host read/effect/reconciliation bindings and decoder are still required.
+
 ## 2026-11-05 — Lightweight supervisor advisory analysis
 
 The background supervisor was acquiring a second native model owner while main

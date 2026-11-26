@@ -1,5 +1,24 @@
 # TestModLog
 
+## 2026-11-14 — Exact activity polling policy, offline only
+
+New `test_delay_utils.py` uses the actual DelayUtils owner. 32 cases passed:
+initial/exact empty-read sequence and sustained cap, reset from every interval,
+unknown observation preservation, malformed interval and activity rejection,
+and legacy YouTube delay compatibility. No pre-existing delay test was found
+in the module inventory; this distinct contract is not duplicated from the
+session/model/runtime suites. The test has no sleeps, provider calls or storage.
+
+Command from task checkout, using vetted primary-checkout Python with `-B`,
+`PYTHONDONTWRITEBYTECODE=1`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`:
+`python -B -m pytest -q --import-mode=importlib -p no:cacheprovider modules/infrastructure/shared_utilities/tests/test_delay_utils.py`.
+Result: 32 passed, 0 failed, two existing asyncio-option configuration warnings
+with plugin autoload disabled; duration0.15s. `git diff --check` passed.
+Independent verifier `poll_policy_verifier` also ran32 cases successfully and
+accepted the final source/test bytes and documented scope; no blocking findings.
+This proves policy behavior only. Shared access, durable dedup/cursor/checkpoint,
+process restart, exactly-once delivery and scheduler activation were not tested.
+
 ## 2026-11-05 — Exact role/native startup resolution
 
 Added24 test-first actual-callable controls, canonical unit/collectable without

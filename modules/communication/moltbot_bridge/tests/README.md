@@ -14,6 +14,32 @@ hygiene. These offline cases use synthetic state and do not dispatch workers.
 Run with bytecode/plugins disabled, `--noconftest --import-mode=importlib`, an
 empty pytest config and `-p no:cacheprovider` as for the other bounded suites.
 
+## Adaptive relay watcher
+
+`test_reddog_relay_watcher.py` exercises the actual watcher, ModuleDB-backed
+SQLite store, Google Docs reader adapter and machine-wide operation lock with
+synthetic provider/authority inputs. Coverage includes persisted 60-to-3600
+second polling, accepted-activity reset despite blocked delivery, duplicates,
+reordering, own ACKs, provider errors, observation provenance, rollback during
+reads, atomic ingestion, source/attempt proof binding and uncertain-effect replay.
+Two real child-process exits simulate death immediately before and after a
+provider effect, then verify recovery in a fresh process. A separate process
+holds the actual lock while a competing watcher is refused. Storage alias and
+replacement controls reject before provider access.
+
+Run from the selected repository root with the vetted interpreter, bytecode and
+pytest plugin autoload disabled, `--import-mode=importlib -p no:cacheprovider`
+and an explicit unique `--basetemp` outside Git. Include the shared policy suite:
+
+```text
+python -B -m pytest -q --import-mode=importlib -p no:cacheprovider --basetemp <private-test-root> modules/communication/moltbot_bridge/tests/test_reddog_relay_watcher.py modules/infrastructure/shared_utilities/tests/test_delay_utils.py
+```
+
+Fixture DB configuration and DatabaseManager reset are test-only. Tests create
+no real provider clients and do not prove live credentials, complete authenticated
+Docs retrieval, provider receipt authenticity, managed voice-host restart or
+cross-host exclusion. Connector deadline enforcement remains a host obligation.
+
 ## Supervisor model-free startup
 
 `test_supervisor_model_startup.py` executes actual startup/plan methods with

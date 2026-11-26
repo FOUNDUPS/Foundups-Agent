@@ -1,5 +1,12 @@
 # shared_utilities
 
+The optional `DelayUtils.calculate_activity_poll_delay` policy supplies exact
+1, 2, 4, 8, 16, 32, 60-minute polling intervals, capped at 60 and reset to 1 on
+new accepted activity. Unknown observations hold the current interval. This is
+a pure utility, not an enabled checker. Shared-container access, durable cursor
+and deduplication recovery, and scheduler activation remain blocked/unverified;
+see INTERFACE for the integration boundary. Existing YouTube delays are unchanged.
+
 Legacy code/triage backend selection now uses the existing role owner for both
 the file and an explicit native key. Custom file names are never guessed into
 native IDs. The declared defaults remain configurable through scoped role keys;
