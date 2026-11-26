@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1789074906705,
+      "tag": "0000_square_jack_power",
+      "breakpoints": true
+    }
+  ]
+}
