@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 450,
+      "embed_url": "https://www.youtube.com/embed/W5TakB17F14",
+      "source_url": "https://www.youtube.com/watch?v=W5TakB17F14",
+      "thumbnail_url": "https://i.ytimg.com/vi/W5TakB17F14/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:16:20Z",
+      "title": "eSingularity Educational Initiative",
+      "video_id": "W5TakB17F14"
+    },
+    {
+      "duration_seconds": 450,
+      "embed_url": "https://www.youtube.com/embed/W1bExmAcGNA",
+      "source_url": "https://www.youtube.com/watch?v=W1bExmAcGNA",
+      "thumbnail_url": "https://i.ytimg.com/vi/W1bExmAcGNA/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:00:10Z",
+      "title": "My ProFounder Experience Part 1",
+      "video_id": "W1bExmAcGNA"
+    },
+    {
+      "duration_seconds": 523,
+      "embed_url": "https://www.youtube.com/embed/vzeaVEhL1zY",
+      "source_url": "https://www.youtube.com/watch?v=vzeaVEhL1zY",
+      "thumbnail_url": "https://i.ytimg.com/vi/vzeaVEhL1zY/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:09:42Z",
+      "title": "Michael Traut's Vision",
+      "video_id": "vzeaVEhL1zY"
+    },
+    {
+      "duration_seconds": 114,
+      "embed_url": "https://www.youtube.com/embed/VZ66UiGseZY",
+      "source_url": "https://www.youtube.com/watch?v=VZ66UiGseZY",
+      "thumbnail_url": "https://i.ytimg.com/vi/VZ66UiGseZY/hqdefault.jpg",
+      "timestamp": "2026-01-13T02:10:26Z",
+      "title": "Mikey Scared of Frog",
+      "video_id": "VZ66UiGseZY"
+    },
+    {
+      "duration_seconds": 576,
+      "embed_url": "https://www.youtube.com/embed/vYVX0vLzYhw",
+      "source_url": "https://www.youtube.com/watch?v=vYVX0vLzYhw",
+      "thumbnail_url": "https://i.ytimg.com/vi/vYVX0vLzYhw/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:39:47Z",
+      "title": "Paradigm Shift and Global Education: The Key to Our Future?",
+      "video_id": "vYVX0vLzYhw"
+    },
+    {
+      "duration_seconds": 146,
+      "embed_url": "https://www.youtube.com/embed/vYpsvSubrnA",
+      "source_url": "https://www.youtube.com/watch?v=vYpsvSubrnA",
+      "thumbnail_url": "https://i.ytimg.com/vi/vYpsvSubrnA/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:34:56Z",
+      "title": "To all Filmmakers I have Camera Style",
+      "video_id": "vYpsvSubrnA"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0015.json",
+  "order": "catalog",
+  "page": 14,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

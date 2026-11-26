@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 383,
+      "embed_url": "https://www.youtube.com/embed/jO4Gz86dgsM",
+      "source_url": "https://www.youtube.com/watch?v=jO4Gz86dgsM",
+      "thumbnail_url": "https://i.ytimg.com/vi/jO4Gz86dgsM/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:06:57Z",
+      "title": "The world needs this!",
+      "video_id": "jO4Gz86dgsM"
+    },
+    {
+      "duration_seconds": 362,
+      "embed_url": "https://www.youtube.com/embed/jmzt7SCSF7w",
+      "source_url": "https://www.youtube.com/watch?v=jmzt7SCSF7w",
+      "thumbnail_url": "https://i.ytimg.com/vi/jmzt7SCSF7w/hqdefault.jpg",
+      "timestamp": "2026-01-14T16:28:33Z",
+      "title": "Angelgate is Real",
+      "video_id": "jmzt7SCSF7w"
+    },
+    {
+      "duration_seconds": 406,
+      "embed_url": "https://www.youtube.com/embed/JkbbG6jN0sY",
+      "source_url": "https://www.youtube.com/watch?v=JkbbG6jN0sY",
+      "thumbnail_url": "https://i.ytimg.com/vi/JkbbG6jN0sY/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:02:53Z",
+      "title": "Help Japan",
+      "video_id": "JkbbG6jN0sY"
+    },
+    {
+      "duration_seconds": 476,
+      "embed_url": "https://www.youtube.com/embed/jJq_DflAKX4",
+      "source_url": "https://www.youtube.com/watch?v=jJq_DflAKX4",
+      "thumbnail_url": "https://i.ytimg.com/vi/jJq_DflAKX4/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:35:58Z",
+      "title": "Virgin Learning and the Singularity",
+      "video_id": "jJq_DflAKX4"
+    },
+    {
+      "duration_seconds": 404,
+      "embed_url": "https://www.youtube.com/embed/jFQBD6EgfPg",
+      "source_url": "https://www.youtube.com/watch?v=jFQBD6EgfPg",
+      "thumbnail_url": "https://i.ytimg.com/vi/jFQBD6EgfPg/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:21:35Z",
+      "title": "The Role of the Teacher",
+      "video_id": "jFQBD6EgfPg"
+    },
+    {
+      "duration_seconds": 522,
+      "embed_url": "https://www.youtube.com/embed/JBCHxB4qSrI",
+      "source_url": "https://www.youtube.com/watch?v=JBCHxB4qSrI",
+      "thumbnail_url": "https://i.ytimg.com/vi/JBCHxB4qSrI/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:35:21Z",
+      "title": "My idea on religion part 1",
+      "video_id": "JBCHxB4qSrI"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0045.json",
+  "order": "catalog",
+  "page": 44,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

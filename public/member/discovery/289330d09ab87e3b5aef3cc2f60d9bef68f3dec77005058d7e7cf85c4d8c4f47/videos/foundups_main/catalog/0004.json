@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/wy4--0ntJVo",
+      "source_url": "https://www.youtube.com/watch?v=wy4--0ntJVo",
+      "thumbnail_url": "https://i.ytimg.com/vi/wy4--0ntJVo/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:17:27Z",
+      "title": "🌟 From Idea to Launch with AI #FoundUps #pAVS",
+      "video_id": "wy4--0ntJVo"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/TvMva7qBYpA",
+      "source_url": "https://www.youtube.com/watch?v=TvMva7qBYpA",
+      "thumbnail_url": "https://i.ytimg.com/vi/TvMva7qBYpA/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:15:52Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "TvMva7qBYpA"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/ys6xEuI8iso",
+      "source_url": "https://www.youtube.com/watch?v=ys6xEuI8iso",
+      "thumbnail_url": "https://i.ytimg.com/vi/ys6xEuI8iso/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:14:16Z",
+      "title": "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
+      "video_id": "ys6xEuI8iso"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/qZnaG4QSrEw",
+      "source_url": "https://www.youtube.com/watch?v=qZnaG4QSrEw",
+      "thumbnail_url": "https://i.ytimg.com/vi/qZnaG4QSrEw/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:12:40Z",
+      "title": "⚡ OpenClaw: Where AI Meets Entrepreneurship #FoundUps",
+      "video_id": "qZnaG4QSrEw"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/6LnH_cR3MUc",
+      "source_url": "https://www.youtube.com/watch?v=6LnH_cR3MUc",
+      "thumbnail_url": "https://i.ytimg.com/vi/6LnH_cR3MUc/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:11:02Z",
+      "title": "⚡ OpenClaw: Where AI Meets Entrepreneurship #FoundUps",
+      "video_id": "6LnH_cR3MUc"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/Y_QXRS4XyDM",
+      "source_url": "https://www.youtube.com/watch?v=Y_QXRS4XyDM",
+      "thumbnail_url": "https://i.ytimg.com/vi/Y_QXRS4XyDM/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:09:24Z",
+      "title": "✨ Innovation Never Sleeps #FoundUps #Startup #AI",
+      "video_id": "Y_QXRS4XyDM"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/foundups_main/catalog/0005.json",
+  "order": "catalog",
+  "page": 4,
+  "page_size": 6,
+  "record_id": "foundups_main",
+  "schema_version": 1,
+  "total": 44
+}

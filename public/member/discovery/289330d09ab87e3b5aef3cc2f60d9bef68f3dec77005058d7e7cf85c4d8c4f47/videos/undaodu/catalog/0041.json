@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 478,
+      "embed_url": "https://www.youtube.com/embed/l0XAC3dvBRA",
+      "source_url": "https://www.youtube.com/watch?v=l0XAC3dvBRA",
+      "thumbnail_url": "https://i.ytimg.com/vi/l0XAC3dvBRA/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:47:46Z",
+      "title": "Microseed Investor",
+      "video_id": "l0XAC3dvBRA"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/K_SmuxSVd0Y",
+      "source_url": "https://www.youtube.com/watch?v=K_SmuxSVd0Y",
+      "thumbnail_url": "https://i.ytimg.com/vi/K_SmuxSVd0Y/hqdefault.jpg",
+      "timestamp": "2026-01-29T06:16:12Z",
+      "title": "🚨 #FFCPLN Exposes #MAGA - 160 Songs! See Desc! 🔥",
+      "video_id": "K_SmuxSVd0Y"
+    },
+    {
+      "duration_seconds": 408,
+      "embed_url": "https://www.youtube.com/embed/kYWcMq3BD5I",
+      "source_url": "https://www.youtube.com/watch?v=kYWcMq3BD5I",
+      "thumbnail_url": "https://i.ytimg.com/vi/kYWcMq3BD5I/hqdefault.jpg",
+      "timestamp": "2026-01-14T12:58:32Z",
+      "title": "Doctor's Visit: Japan, Fever and Ticks",
+      "video_id": "kYWcMq3BD5I"
+    },
+    {
+      "duration_seconds": 488,
+      "embed_url": "https://www.youtube.com/embed/KXt1DtmE3XA",
+      "source_url": "https://www.youtube.com/watch?v=KXt1DtmE3XA",
+      "thumbnail_url": "https://i.ytimg.com/vi/KXt1DtmE3XA/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:31:27Z",
+      "title": "The eSingularity",
+      "video_id": "KXt1DtmE3XA"
+    },
+    {
+      "duration_seconds": 396,
+      "embed_url": "https://www.youtube.com/embed/kvXo8y04h8Y",
+      "source_url": "https://www.youtube.com/watch?v=kvXo8y04h8Y",
+      "thumbnail_url": "https://i.ytimg.com/vi/kvXo8y04h8Y/hqdefault.jpg",
+      "timestamp": "2026-01-14T17:15:45Z",
+      "title": "Mikey's Life",
+      "video_id": "kvXo8y04h8Y"
+    },
+    {
+      "duration_seconds": 505,
+      "embed_url": "https://www.youtube.com/embed/KSgqdsEFt2c",
+      "source_url": "https://www.youtube.com/watch?v=KSgqdsEFt2c",
+      "thumbnail_url": "https://i.ytimg.com/vi/KSgqdsEFt2c/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:47:09Z",
+      "title": "SEC Form D",
+      "video_id": "KSgqdsEFt2c"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0042.json",
+  "order": "catalog",
+  "page": 41,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

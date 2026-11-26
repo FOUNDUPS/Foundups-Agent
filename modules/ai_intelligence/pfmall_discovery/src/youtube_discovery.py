@@ -69,6 +69,7 @@ def search_youtube(
     query: str,
     max_results: int = 25,
     search_type: str = "video",
+    raise_on_error: bool = False,
 ) -> List[DiscoveryProposal]:
     """
     Search YouTube for videos or channels matching a query.
@@ -158,7 +159,10 @@ def search_youtube(
         logger.info(f"[DISCOVERY] Found {len(proposals)} {search_type}s for query: {query}")
 
     except Exception as e:
-        logger.error(f"[DISCOVERY] Search failed for query '{query}': {e}")
+        # Provider exception text can contain a developer key in its URL.
+        logger.error("[DISCOVERY] Search failed: %s", type(e).__name__)
+        if raise_on_error:
+            raise RuntimeError("YouTube discovery incomplete") from None
 
     return proposals
 

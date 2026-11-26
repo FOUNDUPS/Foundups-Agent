@@ -1,5 +1,186 @@
 # Member Area Interface
 
+## 2026-11-25 — Optional VOTE member cards
+
+The public Play selector `?foundup=voteballots` mounts exactly two reviewed
+records from the VOTE-owned `web/congressional-cards.json`. It uses the existing
+field, shared player, search dock, queue and return state. VOTE starts in tiles
+on desktop as well as phone. HPC retains its default desktop theater and
+explicit Home/grid choice. Apex member entry and protected VOTE application
+admission are unchanged; collection visibility grants no account capability.
+
+`mallVideoPlayer.isMemberCardVideo(video)` admits the optional `member_card`
+presentation only with bounded identity fields, null UDP/CU and matching local
+MP4/still/animated-WebP paths. Only that type bypasses the small-poster autoplay
+trigger; YouTube sizing, controls and visibility guards remain intact. The
+9:16 inner card fits the existing common stage. Text and Pending values remain
+outside the artwork; the tile's 44px expand target stays clear of that text.
+
+Approved silent four-second MP4s use the existing HTML5 branch. A native
+MEDIA_ERR_SRC_NOT_SUPPORTED (4) may select the approved animated WebP in the
+same card. That fallback reports `provider: image-animation`,
+`fallback: approved-animated-webp`, `nativeErrorCode: 4` and null media time;
+it is not evidence of decoded video playback. Its image button pauses to the
+approved still and supports keyboard activation. Hidden/returned/replaced
+cards stop animation, and reduced motion starts with stills and no autoplay.
+Deliberate Play remains possible. Observer, motion and stale media callbacks
+are cleaned up by the existing render generation and teardown owner.
+
+Both media forms loop; they do not synthesize ENDED events or queue timing.
+Explicit Next/Previous, search, expansion and return remain shared. Attribution,
+official profiles, independent disclosure, Dispatch/guide/contact links remain
+accessible. No scores are calculated. The fixed VOTE Sites handoff template
+is source only until its owning release is separately qualified.
+
+## 2026-11-25 — Scoped Home, shared theater dock and hidden selection
+
+**IMPLEMENTED_CANDIDATE; release/device acceptance remains open.** Fresh desktop
+HPC still opens the shared theater. Its header artwork and menu Home return to
+the HPC tile field, pause the retained player, and store explicit `grid` intent
+in the existing tab-local scoped position record. Reload and breakpoint changes
+respect this intent. No new URL selector or authentication permission is added.
+The separate Play Mall destination remains explicit; the campaign link is in
+the accessible independent-site disclosure.
+
+Scoped theater borrows the exact grid dock node through the existing loan and
+search-context contract: **main video → app thumbnail queue → shared dock**.
+Only one search is visible. Typing filters the queue without restarting media;
+Enter deliberately selects a matching clip. Returning restores the grid query.
+The HPC dock's single `+` is **Available actions**; its distinct grid **Add Video**
+tile opens the existing gated contribution review. A disabled/unconnected
+contribution handoff remains disabled and submits nothing.
+
+The fresh `tuckedSwipeRight` default is now `next-hidden`: select the next
+permitted clip and remain tucked. No provider is created, cued, loaded or played
+for that pending hidden selection; its snapshot is `selected-hidden` with no
+media time. Tap/left swipe reveals the selected clip paused. Explicit visible
+Play starts it. Keep the independently configurable `next-reveal`, `restore`
+and `none` choices and any explicitly saved selection. The same bounded queue
+owner may fetch one catalog page while tucked; restore/close/filter/scope/new
+selection invalidate stale results. Native YouTube controls remain untouched.
+The rail handles a deliberate touch tap directly, without requiring a browser
+compatibility click; a 400ms echo fence prevents duplicate activation. Cancelled,
+multi-touch and scrolling sequences remain outside this tap path.
+The exact `play-v26-home2` read-only preview family qualifies this correction
+on a fresh origin, preserving the earlier `play-v26-home` release for comparison.
+
+State API additions: `getScopedPresentation()` and
+`setScopedPresentation('grid'|'theater')` operate only after selecting a video
+scope. Optional `presentation` is validated in its existing session record;
+legacy positions remain readable. This is presentation state, never authority.
+The dated November 23 next/reveal default below is superseded by this section.
+
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** This continues existing
+PR #2439 from source `62f577ae10c73899d602332cbf69dd444a4aae85`; it does not
+replace the Mall or authorize a production release. Physical iPhone/Home Screen,
+audible output and installed-client migration remain separate open gates.
+
+App-owned title/back/expand/play chrome is removed from Floating, WikiTube and
+app Full Video. Attribution, Save/Share, Next/Previous, Collapse, Return and
+Close remain accessible in `+` → Video. Ordinary desktop theater/Enter retains
+its existing owner. Native YouTube title, branding, controls and input remain.
+
+The visible app gesture grip is the full-height left side of the framed video,
+outside the iframe. It supports floating drag and app gestures without covering
+provider controls. Full Video right-swipe selects the next clip and requests
+playback; Floating right-swipe tucks. The right-edge tucked rail spans the player
+height. 012 explicitly selected right-swipe → next clip and reveal; tapping or
+left-swiping restores the existing paused clip. Full Video and tucked right-swipe
+actions are independently configurable. Deliberate Next uses the permitted
+filtered queue and requests playback even when natural autoplay-next is off.
+
+`+` keeps AI first and collapses gesture defaults and playback commands. Its
+bottom Open DAEmon checkbox reveals observed activity from this tab only.
+The shared local projection is bounded to 100 entries, deduplicates playback
+ticks, allowlists event fields and stays in memory. It does not start a service,
+model, microphone, backend trace, code runner or persistent learning/audit store.
+Preview-only probe fields move behind DAEmon → Playback diagnostics; their
+script remains outside the committed public shell and requires explicit staging.
+
+Fully hidden YouTube remains paused; no unsupported background-audio toggle is
+offered. App Full Video is distinct from native provider/browser fullscreen.
+Touches beginning inside the cross-origin YouTube document belong to YouTube;
+the surrounding grip and accessible menu are the app alternatives. Spoken
+RedDog and browser-model admission remain undelivered. Existing AutoPost and
+manual civic-resource destinations retain their separate ownership.
+
+Candidate UI is visibly labeled **Build v26 · Gestures**. A separately owned
+`play-v26-gestures` preview family is public/read-only, with no member admission
+or Auth-domain grant. Source62, livev25 and comparison previews remain rollback
+references. Exact-source tests, independent review, served-asset/worker checks
+and phone evidence determine acceptance; a source edit is not delivery.
+
+## 2026-11-22 — Floating controls and camera candidate
+
+The shared floating player has a persistent external grip and side edges.
+Drag within the available viewport; keyboard arrows move the focused grip.
+Enter/click opens `+` → Video, which provides Play, Expand, Hide, Return and
+Close alternatives. The app floating title/expand row and app Play strip are
+removed. Provider controls remain exposed, and recovery remains available in
+Video. App gestures never intercept the cross-origin iframe interior.
+
+Outward pinch defaults to WikiTube; direct app Full Video is configurable.
+Separate optional inward-pinch and video-swipe-up return choices are stored in
+`pfmall_video_options_v1` without coupling the old frame/collapse fields. Until
+chosen, return gestures retain their current behavior. Full Video entry requests
+playback through the existing provider guard. Hidden/tucked YouTube pauses;
+its full-height rail restores the same paused player. Selection reveal remains
+an existing independent preference. No native-fullscreen pass is implied.
+
+The dock camera opens canonical public AutoPost in the same tab after saving
+Mall state. `cameraDestination()` includes only an allowlisted `return_to` URL,
+matching AutoPost's own parser. Red Dog on this dock stays in-page and calls the
+canonical conversation owner. Missing backend admission produces a closable
+availability message, not a Mall redirect or search dictation. Existing account
+avatar, product and legacy mode-sheet owners retain their separate behavior.
+No new AI model, voice capture, backend deployment or permission is introduced.
+See [the incident](../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
+## 2026-11-21 — v26 phone candidate (unreleased)
+
+Build v25 remains the frozen comparison at its existing preview. Build v26 uses a
+separate source receipt and preview channel; no production redirect or release is
+part of this change. Phone-layout browser fixtures are separate from physical
+Safari and installed-PWA evidence. The principal has opened v25 on an iPhone 11;
+v26 physical playback, audio and uninterrupted three-clip transitions are NOT_RUN.
+
+The shared pre-Fractal shell keeps one provider and one actionable bottom Search
+Dock while entering/leaving WikiTube or app Full Video. A fully hidden parked
+player pauses. Native YouTube controls and native fullscreen are not intercepted.
+The leading + retains discovery controls, AutoPost and Video Options; the trailing
++ is Add FoundUp on Play and Add Video in the HPC pilot. Video preferences affect
+app controls and qualified visible playback, never promise provider autoplay.
+
+Play public browsing and static FoundUp details correspond to the currently
+available public discovery surfaces. The requested future levels 1–2 public /
+level 3+ member policy is not a deployed graph ACL. The separate Fractal runtime
+`22374b161570b2cd0e265e1c2b8c1009fb599394` is not imported. Contributions remain
+unavailable until an authoritative service verifies current identity, membership
+and per-FoundUp editor permission (012 initially for HPC). A successful existing
+invite check only restores a manual review; it does not publish or grant editor
+permission. No six-month checkout is activated. Cross-origin HPC-to-Play
+contribution return is not connected and fails closed.
+
+The existing same-origin Play `/?signin=required` gate and `/sso-callback/` are
+preserved. Valid legacy `enter` links resolve public metadata rather than being
+silently intercepted as a Mall view. Auth/callback, deep links and existing invite
+flows are excluded from public landing normalization. Apex-to-Play routing is a
+pure tested plan only; no live apex redirect is installed.
+
+The full HPC banner opens <https://hasan4speaker.com/>. The distinct Mall return
+opens Play; Voice Your Opinion / Contact Congress retains
+<https://vote.mtrout.com/contact>. Vote/Contact whole-banner return links to HPC
+remain a different navigation contract.
+
+Browse AI is a separate compatibility pilot: no model is preloaded, no automatic
+cloud fallback, and no model capability is claimed. The explicit, checksum-bound
+41-byte WASM addition fixture is not an AI model. Actual model selection/download
+and WebGPU qualification remain later work, including same-runtime Safari/PWA
+checks. This dependency does not block the phone UI candidate.
+
+
 **Module**: `public/member/`
 **Version**: 2.4.0
 
@@ -49,21 +230,40 @@ current contracts.
 
 ## Public Interface
 
-### Public video projection
+### Public video projection & open Mall landing
 
-The dedicated HPC hostname selects a fixed guest video field from
-`mall-public-video-catalog.json`. FoundUps `/members` and `/members/`
-redirect to `/member/`. On FoundUps, `?foundup=hpc` selects the same
-field after the existing sign-in, invitation and username checks. The
-same-tab sign-in handoff retains the registered scope for up to 15 minutes
-and consumes it once after admission. Touch and narrow views use
-three portrait columns with six-item vertical batches. Tap or Enter replaces
-the selected thumbnail with the shared player across its original row.
-Neighboring thumbnails reflow around it. The corner control and pinch-out
-on a thumbnail or the player toolbar open immersive playback. Expansion
-retains the provider iframe.
-Close, Escape, Back or pinch-in on the surrounding chrome restores the grid
-anchor and focus.
+`play.foundups.com` mounts the open guest **Play FoundUps Mall** (`p.fMALL`)
+discovery landing across all catalog FoundUps without Clerk or Firestore
+account reads, while the dedicated `hpc.foundups.com` hostname mounts a fixed
+single-FoundUp guest video field from `mall-public-video-catalog.json` (its
+header artwork returns to its scoped tiles; a separate Play Mall link opens
+`https://play.foundups.com/`). Entering any
+FoundUp from `play.foundups.com` (`Enter FoundUp` on tiles, floating/WikiTube
+player, quick-view cards, or direct `/member/foundup.html` / `/f/{id}/app`
+routes) requires membership and passes through the `foundups.com` Member Portal
+(`https://foundups.com/member/?enter={foundup_id}`). FoundUps `/members` and
+`/members/` redirect to `/member/`. On `foundups.com`, `?foundup=hpc` and
+`?enter={foundup_id}` enforce the existing Clerk sign-in, invitation, and
+`@username` checks; the same-tab sign-in handoff (`pfmall_product_return_v1`)
+retains the requested member destination for up to 15 minutes and consumes it
+once after admission. Touch and narrow views use three portrait columns with six-item vertical
+batches. Tap or Enter opens or switches the selected clip in the single
+top-anchored floating player (`#videoPlayerFullscreen.video-player-floating`)
+above the grid while keeping the selected tile visible (`aria-current="true"`)
+and allowing the grid to scroll underneath (`--floating-player-clearance`).
+Swiping the floating player right (or activating `Tuck player`) tucks it to
+the right viewport edge and pauses hidden playback; tapping or swiping left on
+`.video-player-tuck-handle` (`Restore player`) restores it. Right swipe defaults
+to selecting the next clip while remaining hidden, as specified above.
+The corner control, `Open WikiTube`, or pinch-out on a thumbnail or the
+floating player chrome opens sequential WikiTube playback (`WikiTube video player`)
+and immediately attempts playback while retaining the live provider iframe.
+`Floating player` minimizes WikiTube back to the floating player; Close,
+Escape, Back, or pinch-in on floating or WikiTube chrome closes the player
+and restores grid anchor and focus. WikiTube advances sequentially on clip
+end and bounds consecutive auto-skips (`MAX_CONSECUTIVE_AUTO_SKIPS = 5`) across
+unavailable (`100`) or restricted (`101`, `150`) clips (`queueHalted = true`),
+halting immediately with `Play video` when autoplay is blocked.
 
 A viewport of at least 900 CSS px with a fine primary pointer and hover opens
 the shared theater. It displays the main player, then scoped video search, then
@@ -193,10 +393,22 @@ fallback. Auth, account, dynamic and cross-origin requests are not cached.
 
 ### Runtime Surface
 
-`/member/` is the admitted-user p.fMALL shell hosted from Firebase static assets.
-The root of `play.foundups.com` sends visitors to that shell on the same
-origin. The sign-in return page stays at the root with `signin=required`.
-Storage and service worker registrations are origin-local.
+`/member/` on `foundups.com` is the Clerk/invite/username-admitted Member
+Portal shell hosted from Firebase static assets, while `play.foundups.com`
+opens `/member/` directly as the unauthenticated open p.fMALL discovery
+landing for all FoundUps. Entering a FoundUp from `play.foundups.com` passes
+through `https://foundups.com/member/?enter={foundup_id}`, redirecting
+signed-out visitors to `https://foundups.com/?signin=required` (which opens the
+eligibility/sign-in modal) and resuming FoundUp entry after admission.
+Storage and service worker registrations are origin-local (`pfmall-member-v22`
+/ `Build v22`). Top-left `.mall-brand-cluster` renders `/logo-foundups.svg` +
+`.mall-brand-ln` (`FoundUPS on LinkedIn`), while Red Dog (`/logo-dog.png`) owns
+the bottom-right concierge/search anchor. Mall FoundUp tiles support hover-hold
+(`650ms`), touch press-and-hold (`450ms`), and `.mall-tile-flip-btn` / `i` / `f`
+to turn over and reveal WSP 109 `Outcome · Solution · Pain` (`mallTileField.flipTile(foundupId, flipped)`),
+and phone viewports (`mallTileField.isPhonePatchViewport()`) progressively
+patch-load grid/expanded DOM batches (`PHONE_PATCH_BATCH = 9`) and viewport
+poster images via `IntersectionObserver`.
 
 The ordinary Mall dock searches the loaded catalog. Tap or swipe up on its
 plus button for an anchored options panel and the public AutoPost link.
@@ -205,8 +417,10 @@ header repeats it beside the topic. Update the build and shell cache
 generation together. The runtime tests check their agreement.
 Search and dictated text wrap into a bounded editable field above the
 controls when they outgrow the compact pill. Enter or the search icon
-submits. The mic or a hold on Red Dog dictates into the search field using
-an installed local recognizer.
+submits. In ordinary Mall browse, the existing account avatar hold retains
+search dictation through an installed local recognizer. The separate dock
+microphone is replaced by Camera. In HPC and the shared player dock, Red Dog
+instead calls the canonical conversation owner and does not dictate search.
 On unsupported devices the control focuses the input for keyboard dictation.
 Release a hold or press the square Stop in Red Dog's position to finish
 dictation. The result stays editable, and hiding the dock or backgrounding
@@ -219,8 +433,9 @@ A query filters the current lane while
 the active clip continues. Selecting a result or submitting an idle queue
 starts a matching clip. The media area can scroll independently on short
 screens. Escape first dismisses options or leaves the input, then returns
-to the originating card. In the ordinary viewer, tapping Red Dog returns
-to the card and opens the concierge. In HPC it opens the public briefing.
+to the originating card. In HPC and the shared player dock, tapping Red Dog
+keeps this browsing context and opens the conversation owner or its closable
+availability message. Ordinary Mall account-avatar timing remains separate.
 Device model selection and resident speech follow the shared roadmap.
 
 It owns:
@@ -705,7 +920,7 @@ The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideApplie
 
 | Rule | Enforcement |
 |------|-------------|
-| No playability claim without API confirmation | `play_tile` reports `applied`, not `playing`; only the `videoPlayerOpen` event (emitted by `mallVideoPlayer`) is proof playback began. |
+| No playability claim without API confirmation | `play_tile` reports `applied`, not `playing`; `videoPlayerOpen` confirms the view opened. Provider `playing` plus advancing media time is required to establish playback. |
 | Policy denial is `status:"denied"`, not `"error"` | `set_layout` against a tier-disallowed preset returns `denied` with `error.code:"unsupported_density_for_device"`. |
 | Missing API is `api_unavailable`, not fabricated success | All seven commands return `error`/`api_unavailable` when their target API is absent; none synthesize DOM-based fallbacks. |
 | No silent canonical catalog mutation | `load_videos` requires API-confirmed `session_mode:true`; otherwise `error`/`session_mode_required`. |
@@ -757,3 +972,14 @@ mapping and authenticated speech/conversation are future slices, not implied by
 this presentation interface.
 
 Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.
+
+### Gesture refinement API additions
+
+`pfmall_video_options_v1` adds `fullVideoSwipeRight` (`next`, `previous`, `none`)
+and `tuckedSwipeRight` (`next-hidden`, `next-reveal`, `restore`, `none`). Read-only v1 migration
+supplies confirmed defaults without persisting or coupling earlier choices.
+`mallVideoPlayer.untuck({immediate:true})` reveals synchronously for deliberate
+queue selection. `save()`, `share()` and `enterFoundUp()` delegate to existing
+control owners. `canEnterFoundUp()` is a UI hint, not an authorization grant.
+The local-activity module exposes an in-memory Window-bound monitor and view;
+its feed is observed browser events, not a server/agent execution receipt.

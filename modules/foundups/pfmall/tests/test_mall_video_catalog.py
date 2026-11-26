@@ -41,15 +41,69 @@ def test_hpc_catalog_rebuild_is_isolated_and_idempotent(catalog):
     assert lane["source_id"] == "UC-LSSlOZwpGIRIYihaz8zCw"
     assert projection["voice_resource_url"] == "https://vote.mtrout.com/contact#hpc"
     assert projection["topic"] == "#SchumerOUT"
-    assert lane["video_count"] == len(lane["videos"]) == 8
+    assert lane["video_count"] == len(lane["videos"]) >= 9
+    target = next(video for video in lane["videos"] if video["video_id"] == "8qO3908bKAM")
+    assert target["source_url"] == "https://www.youtube.com/watch?v=8qO3908bKAM"
+    assert target["duration_seconds"] == 5990
     for video in lane["videos"]:
         video_id = video["video_id"]
         assert video["embed_url"] == f"https://www.youtube.com/embed/{video_id}"
-        assert video["source_url"] == f"https://www.youtube.com/shorts/{video_id}"
-        assert video["thumbnail_url"] == f"https://i.ytimg.com/vi/{video_id}/oardefault.jpg"
+        assert video["source_url"] in {f"https://www.youtube.com/shorts/{video_id}", f"https://www.youtube.com/watch?v={video_id}"}
+        assert video["thumbnail_url"] in {f"https://i.ytimg.com/vi/{video_id}/oardefault.jpg", f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"}
         assert video["source_label"] == "Move2Japan"
         assert video["editorial_label"] in {"Opinion", "Commentary", "Satire"}
-        assert "jeffries" not in video["title"].lower()
+
+
+def test_vote_member_cards_keep_local_art_unknown_scores_and_separate_hpc_scope(catalog):
+    web = CATALOG_PATH.parents[2] / "modules" / "foundups" / "voteballots" / "web"
+    projection = json.loads((web / "congressional-cards.json").read_text(encoding="utf-8"))
+    assert set(projection) == {"voteballots"}
+    lane = projection["voteballots"]["lane"]
+    assert lane["foundup_id"] == "voteballots"
+    records = lane["videos"]
+    assert lane["video_count"] == len(records) == 2
+    expected = {
+        "chuck-schumer": ("Chuck Schumer", "U.S. Senate", "New York", "#SchumerOUT", "https://www.schumer.senate.gov/"),
+        "hakeem-jeffries": ("Hakeem Jeffries", "U.S. House", "New York · District 8", "#JeffriesOUT", "https://jeffries.house.gov/about/"),
+    }
+    assert {record["video_id"] for record in records} == set(expected)
+    for record in records:
+        # This public record contains artwork and office identity, never visitor data or invented scores.
+        assert set(record) == {
+            "video_id", "title", "thumbnail_url", "poster_url", "source_url", "duration_seconds", "member_card",
+        }
+        member = record["member_card"]
+        assert set(member) == {
+            "name", "chamber", "constituency", "hashtag", "still_url", "animation_url", "official_url",
+            "udp_score", "cu_score",
+        }
+        name, chamber, constituency, hashtag, official_url = expected[record["video_id"]]
+        assert (record["title"], member["name"], member["chamber"], member["constituency"], member["hashtag"]) == (
+            name, name, chamber, constituency, hashtag,
+        )
+        assert member["udp_score"] is None and member["cu_score"] is None
+        assert member["official_url"] == official_url
+        assert record["duration_seconds"] == 4
+        assert record["thumbnail_url"] == member["animation_url"]
+        assert record["poster_url"] == member["still_url"]
+        slug = {"chuck-schumer": "schumer", "hakeem-jeffries": "jeffries"}[record["video_id"]]
+        for value, filename in [
+            (record["source_url"], "loop.mp4"),
+            (member["animation_url"], "loop.webp"),
+            (member["still_url"], "still.webp"),
+        ]:
+            # Exact reviewed paths also reject schemes, queries, fragments and traversal.
+            assert value == f"/member/vote/comics/{slug}-card-{filename}"
+            relative = Path(value).relative_to("/member/vote")
+            path = (web / relative).resolve()
+            assert path.is_relative_to((web / "comics").resolve())
+            assert path.is_file() and path.stat().st_size > 0
+
+    scoped = json.loads(CATALOG_PATH.with_name("mall-public-video-catalog.json").read_text(encoding="utf-8"))
+    assert set(scoped) == {"hpc"}
+    assert all("member_card" not in video for video in scoped["hpc"]["lane"]["videos"])
+    existing_ids = {video["video_id"] for entry in catalog for video in entry["videos"]}
+    assert set(expected).isdisjoint(existing_ids)
 
 
 def test_scoped_source_audit_paginates_uploads_and_batches_all_metadata():
@@ -190,11 +244,30 @@ class TestFoundUpEntryShape:
             "github_repo", "external_app", "internal_app", "internal_service",
         }
         for entry in catalog:
+            if entry["source_type"] == "project_candidate":
+                assert entry["discovery_kind"] == "candidate"
+                assert entry["canonical_foundup_id"] is None
+                assert entry["launch_readiness"] == "planning_only"
+                assert entry["videos"] == [] and entry["video_count"] == 0
+                continue
             assert entry["source_type"] in valid_types, f"Invalid source_type: {entry['source_type']}"
 
     def test_status_values(self, catalog: list[dict]):
         valid_statuses = {"active", "placeholder", "archived", "pending"}
         for entry in catalog:
+            if entry["status"] == "incubating":
+                assert entry["source_type"] == "internal_app"
+                assert entry["canonical_foundup_id"] == entry["foundup_id"]
+                assert entry["lifecycle_stage"] == "incubating"
+                assert entry["launch_readiness"] == "discoverable_only"
+                assert entry["videos"] == [] and entry["video_count"] == 0
+                continue
+            if entry["status"] == "specified":
+                assert entry["source_type"] == "project_candidate"
+                assert entry["canonical_foundup_id"] is None
+                assert entry["lifecycle_stage"] == "Specified"
+                assert entry["launch_readiness"] == "planning_only"
+                continue
             assert entry["status"] in valid_statuses, f"Invalid status: {entry['status']}"
 
     def test_tags_is_list(self, catalog: list[dict]):
@@ -367,9 +440,16 @@ class TestNonVideoFoundUps:
     NON_VIDEO_SOURCE_TYPES = {"github_repo", "external_app", "internal_app", "internal_service"}
 
     def test_external_url_present_for_non_video_types(self, catalog: list[dict]):
-        """Non-video source types must have external_url."""
+        """Launched destinations need URLs; unfinished apps retain a gated door."""
         for entry in catalog:
             if entry["source_type"] in self.NON_VIDEO_SOURCE_TYPES:
+                if entry["source_type"] == "internal_app" and entry.get("launch_readiness") == "discoverable_only":
+                    assert entry["canonical_foundup_id"] == entry["foundup_id"]
+                    assert entry["routing_prefix"] == "/f/" + entry["canonical_foundup_id"]
+                    assert entry["entry_copy"].strip(), "Unfinished app must explain its limits"
+                    assert entry["entry_url"] == ""
+                    assert entry["videos"] == [] and entry["video_count"] == 0
+                    continue
                 assert "external_url" in entry and entry["external_url"], (
                     f"Missing external_url in {entry['foundup_id']} "
                     f"(source_type={entry['source_type']})"
@@ -384,6 +464,47 @@ class TestNonVideoFoundUps:
                     f"external_url must be https in {entry['foundup_id']}: {url}"
                 )
 
+
+class TestDiscoveryCardIdentity:
+    """Explicit identities prevent creator lanes and plans becoming fake FoundUps."""
+
+    def test_canonical_identity_maps_registered_foundups_only(self, catalog):
+        registry_path = CATALOG_PATH.parents[2] / "modules/foundups/foundup_registry.json"
+        registered = {item["foundup_id"] for item in json.loads(registry_path.read_text(encoding="utf-8"))["entities"]}
+        for item in catalog:
+            assert "canonical_foundup_id" in item
+            canonical = item["canonical_foundup_id"]
+            assert canonical is None or canonical in registered
+        by_id = {item["foundup_id"]: item for item in catalog}
+        assert by_id["antifafm"]["canonical_foundup_id"] == "antifafm_001"
+        assert by_id["science_swarm"]["canonical_foundup_id"] == "science_swarm_hub"
+        assert len(catalog) == 17
+        assert sum(item["canonical_foundup_id"] is not None for item in catalog) == 14
+        assert by_id["kids_episodes"]["canonical_foundup_id"] == "kids_episodes"
+        for identifier in ("undaodu", "foundups_main"):
+            assert by_id[identifier]["canonical_foundup_id"] is None
+        assert not any(identifier.startswith("linkedin_") for identifier in by_id)
+        approved_linkedin = {
+            "undaodu": "https://www.linkedin.com/in/openstartup/",
+            "foundups_main": "https://www.linkedin.com/company/foundups/",
+            "esingularity_001": "https://www.linkedin.com/company/esingularity/",
+        }
+        assert {identifier: item["linkedin_url"] for identifier, item in by_id.items()
+                if item.get("linkedin_url")} == approved_linkedin
+
+    def test_house_is_planning_only_without_member_admission(self, catalog):
+        house = next(item for item in catalog if item["foundup_id"] == "foundups_house_project")
+        assert house["canonical_foundup_id"] is None
+        assert house["discovery_kind"] == "candidate"
+        assert house["source_type"] == "project_candidate"
+        assert house["launch_readiness"] == "planning_only"
+        assert house["entry_url"] == ""
+        assert not house.get("routing_prefix") and not house.get("data_namespace")
+        assert house["videos"] == [] and house["video_count"] == 0
+        assert house["public_plan_url"] == (
+            "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/"
+            "modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md"
+        )
 
 class TestDerivedLanes:
     """Test derived lane conditional fields."""

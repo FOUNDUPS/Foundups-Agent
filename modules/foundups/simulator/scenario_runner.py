@@ -172,11 +172,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out", default="modules/foundups/simulator/memory/runs", help="Output directory")
     parser.add_argument("--run-label", default="baseline", help="Label prefix for artifacts")
     parser.add_argument("--monte-carlo", type=int, default=0, help="Run N Monte Carlo samples")
+    parser.add_argument("--nested-attribution-audit", action="store_true",
+                        help="Print a standalone synthetic nested-attribution report; do not run a scenario")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
+    if args.nested_attribution_audit:
+        from .nested_attribution import fixture_report
+
+        print(json.dumps(fixture_report(), indent=2, sort_keys=True))
+        return 0
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
 

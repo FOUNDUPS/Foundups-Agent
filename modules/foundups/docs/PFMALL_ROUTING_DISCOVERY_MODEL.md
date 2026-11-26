@@ -14,7 +14,9 @@ This document defines the **target architecture** for p.fMALL routing. Current i
 | Feature | Status | Evidence |
 |---------|--------|----------|
 | URL structure `/member/*` | `IMPLEMENTED` | `public/member/index.html`, `member-sw.js` |
-| URL structure `/f/{foundup_id}` | `SPECIFIED_NOT_IMPLEMENTED` | Routes to `foundup.html?id=` not `/f/` prefix |
+| Open Mall discovery host (`play.foundups.com`) | `IMPLEMENTED` | `mall-video-projection.js` mounts open guest p.fMALL for all FoundUps; `Enter FoundUp` routes through `foundups.com` Member Portal |
+| Dedicated single-FoundUp host (`hpc.foundups.com`) | `IMPLEMENTED` | `mall-video-projection.js` mounts guest HPC Shorts projection; header returns to `play.foundups.com` |
+| URL structure `/f/{foundup_id}` | `IMPLEMENTED` (public landing) | `public/f/index.html` renders scope-free public landing; `/f/{id}/app` hands off to `foundups.com/member/` |
 | Launch catalog (JSON) | `IMPLEMENTED` | `mall-video-catalog.json`, `mall-catalog.json` |
 | Discovery by category | `IMPLEMENTED` | Projection chips in tile field UI |
 | HoloIndex cross-FoundUp search | `SPECIFIED_NOT_IMPLEMENTED` | No HoloIndex integration in mall UI |

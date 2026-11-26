@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 113,
+      "embed_url": "https://www.youtube.com/embed/RsjWKrrsejg",
+      "source_url": "https://www.youtube.com/watch?v=RsjWKrrsejg",
+      "thumbnail_url": "https://i.ytimg.com/vi/RsjWKrrsejg/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:31:49Z",
+      "title": "Invested.in",
+      "video_id": "RsjWKrrsejg"
+    },
+    {
+      "duration_seconds": 180,
+      "embed_url": "https://www.youtube.com/embed/RRYyFFjI2PA",
+      "source_url": "https://www.youtube.com/watch?v=RRYyFFjI2PA",
+      "thumbnail_url": "https://i.ytimg.com/vi/RRYyFFjI2PA/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:36:11Z",
+      "title": "Global Warming vs Global Education",
+      "video_id": "RRYyFFjI2PA"
+    },
+    {
+      "duration_seconds": 490,
+      "embed_url": "https://www.youtube.com/embed/rOLISA1Sv2A",
+      "source_url": "https://www.youtube.com/watch?v=rOLISA1Sv2A",
+      "thumbnail_url": "https://i.ytimg.com/vi/rOLISA1Sv2A/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:01:36Z",
+      "title": "Jonathan Ozeran I respect you I love you you are completely ignorant",
+      "video_id": "rOLISA1Sv2A"
+    },
+    {
+      "duration_seconds": 307,
+      "embed_url": "https://www.youtube.com/embed/RlVE-h0lzg0",
+      "source_url": "https://www.youtube.com/watch?v=RlVE-h0lzg0",
+      "thumbnail_url": "https://i.ytimg.com/vi/RlVE-h0lzg0/hqdefault.jpg",
+      "timestamp": "2026-01-14T17:13:21Z",
+      "title": "Foundup founder",
+      "video_id": "RlVE-h0lzg0"
+    },
+    {
+      "duration_seconds": 360,
+      "embed_url": "https://www.youtube.com/embed/RloPBvbt9xw",
+      "source_url": "https://www.youtube.com/watch?v=RloPBvbt9xw",
+      "thumbnail_url": "https://i.ytimg.com/vi/RloPBvbt9xw/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:20:36Z",
+      "title": "Education As A Natural Right",
+      "video_id": "RloPBvbt9xw"
+    },
+    {
+      "duration_seconds": 434,
+      "embed_url": "https://www.youtube.com/embed/RJKN_n9zfNo",
+      "source_url": "https://www.youtube.com/watch?v=RJKN_n9zfNo",
+      "thumbnail_url": "https://i.ytimg.com/vi/RJKN_n9zfNo/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:21:14Z",
+      "title": "Social Venture vs Non-Profit",
+      "video_id": "RJKN_n9zfNo"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0026.json",
+  "order": "catalog",
+  "page": 25,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

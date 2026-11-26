@@ -9,7 +9,7 @@
 // Auth flows (Clerk, Firebase) are NEVER cached.
 // Catalog is network-first with cache fallback.
 
-const CACHE_NAME = 'pfmall-member-v19';
+const CACHE_NAME = 'pfmall-member-v26';
 const POSTER_CACHE_NAME = 'pfmall-posters-v1';
 const PROPERTY_CACHE_NAME = 'pfmall-properties-v1';
 const MAX_POSTER_ENTRIES = 60;
@@ -21,29 +21,33 @@ const SHELL_ASSETS = [
   '/member/',
   '/member/manifest.json',
   '/member/hpc.webmanifest',
+  '/member/hpc-banner.webp',
   '/member/hpc-icon-180.png',
   '/member/hpc-icon-192.png',
   '/member/hpc-icon-512.png',
   '/member/css/member.css',
   '/member/css/account-concierge.css',
   '/member/css/mall-planes.css',
-  '/member/css/mall-tile-field.css',
-  '/member/css/mall-video-player.css?v=6',
-  '/member/css/mall-video-projection.css',
-  '/member/js/gesture-engine.js',
+  '/member/css/mall-tile-field.css?v=26',
+  '/member/css/mall-video-player.css?v=26',
+  '/member/css/mall-video-projection.css?v=26',
+  '/member/js/gesture-engine.js?v=26',
   '/member/js/shell-bridge-interceptor.js',
-  '/member/js/mall-planes.js?v=12',
-  '/member/js/mall-tile-field.js?v=6',
-  '/member/js/mall-video-player.js?v=6',
-  '/member/js/mall-video-projection.js?v=12',
+  '/member/js/mall-planes.js?v=26',
+  '/member/js/mall-discovery-pager.js?v=26',
+  '/member/js/mall-tile-field.js?v=26',
+  '/member/js/mall-video-player.js?v=26',
+  '/member/js/mall-video-projection.js?v=26',
+  '/member/js/mall-local-activity.js?v=26',
   '/member/js/account-concierge.js',
   '/js/reddog-fractal-focus.js',
   '/js/reddog-public-client.js',
   '/member/js/red-dog-concierge.js',
-  '/member/js/mall-state-restore.js?v=12',
+  '/member/js/mall-state-restore.js?v=26',
   '/move2japan/property-search.js',
   '/move2japan/move2japan.css',
   '/logo-dog.png',
+  '/logo-foundups.svg',
   '/favicon-32x32.png',
 ];
 
@@ -170,6 +174,17 @@ self.addEventListener('fetch', function(event) {
       // No fabricated empty catalog or fresh timestamp. Cached source bytes,
       // including observed_on, are returned unchanged when available.
       return new Response('{"error":"public_property_catalog_unavailable"}', {
+        status: 503, headers: { 'Content-Type': 'application/json', 'X-Offline-Fallback': '1' }
+      });
+    }));
+    return;
+  }
+
+  // Cache only requested public bounded pages. Never prefetch all videos.
+  // Generation-bound cursors reject mixed cached generations in the pager.
+  if (!url.search && /^\/member\/discovery\/(?:catalog\.json|[a-f0-9]{64}\/(?:catalog|videos\/[a-z0-9][a-z0-9_-]{0,63}\/catalog)\/\d{4}\.json)$/.test(url.pathname)) {
+    event.respondWith(networkFirst(event.request, CACHE_NAME, url.pathname, 'json', function() {
+      return new Response('{"error":"public_discovery_page_unavailable"}', {
         status: 503, headers: { 'Content-Type': 'application/json', 'X-Offline-Fallback': '1' }
       });
     }));

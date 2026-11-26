@@ -2,6 +2,14 @@
 
 ## Public API
 
+### scoped_refresh.py
+
+`refresh_scoped_projection(youtube, config, source, *, previous_receipt=None, now=None, max_pages=100)` returns `(updated_config, receipt)` without writes. It binds HPC to its existing approved Move2Japan channel, scans official uploads, reconciles batched metadata, preserves editorial state/order, and marks ineligible retained records `publication_eligible=False`. Callers must omit those records from public projection. New videos use authentic channel credits and watch URLs without inferring Shorts membership. An optional prior frontier bounds incremental scans; callers must use periodic complete scans for edited older hashtags. The product workflow uses complete scans every six hours.
+
+`ensure_refresh_fresh(receipt, *, now=None)` rejects incomplete, wrong-source, stale and future-dated receipts; TTL is at most 24 hours. `matched_topics(snippet)` returns actual title/description/tag match evidence for the three HPC campaign spellings. Errors are sanitized to avoid provider URLs leaking credentials. This scoped exception does not grant general channel-pull auto-admission.
+
+`config.editorial_exclusions` optionally maps video IDs to recorded review reasons. Those IDs remain held even when source metadata matches or is missing; explicit reviewed removal of the mapping precedes admission. Holds are source-independent editorial evidence, not fabricated availability results.
+
 ### channel_puller.py
 
 #### `fetch_channel_videos(youtube_service, channel_id, max_results=50)`

@@ -1,0 +1,14 @@
+---
+name: organize-foundups-drive
+description: File loose FoundUps Google Drive documents, uploads, and Mosh Pit ledgers in their verified project homes. Use during My Drive cleanup and before saving new project artifacts; use the owning workflow for publication or shared-drive changes.
+---
+
+# Organize FoundUps Drive
+
+Apply WSP_00 and WSP_97 through the existing FoundUps WSP skill. Use the connected Google Drive tools and the private project ledger to locate authoritative records. This skill does not grant permissions, trigger a schedule, or authorize account-wide unattended writes.
+
+1. **Find the home before saving.** Identify the account, project, artifact type, intended audience, and existing destination. List My Drive using pagination during a cleanup. Resolve lookalike folders by file ID, project provenance, and ancestry, not title. Reuse the authoritative document rather than making a new copy or ledger. Temporary intake is not a permanent home.
+2. **Check privacy before each move.** Read the item's existing direct/effective permissions and the full destination ancestry. A folder with shared ancestors is not a safe place for an owner-only ledger, even if its immediate settings look private. Never widen access or reduce an expected collaborator's access without authorization. If no appropriate private folder exists, create a single restricted project folder within the approved filing scope or leave the item and record why. A shortcut can reveal a title: do not use one to route around privacy.
+3. **Keep project and entity records distinct.** EDUIT operational records go in its restricted project home; entity governance, reinstatement and cross-entity records belong in Corporate Records. Put the YUMORI activity ledger in its current working-documents folder if the audiences match. Keep raw media, queued assets and release masters in the owning production workflow's agreed folders. Locate these homes using current Drive evidence; do not put private file IDs, links, correspondence or contact data in Git.
+4. **Move the original, verify the result.** Use a parent-only move for the exact file ID and confirmed old parent; preserve the file, links, revisions, bytes, and unrelated metadata. Verify the ID, parent chain and effective access after the move before marking it complete. Never delete or merge merely same-named files. Treat duplicates as verified only by content hash or byte comparison; isolate only within an authorized private archive. Leave ambiguous records, files owned by other people, pipeline-owned items, shortcuts and unexpected access changes untouched pending resolution.
+5. **Close with a short receipt.** Capture the verified move count, prior and new homes, and holds in the existing private operations record. Distinguish already-filed from moved and partial inventory from full coverage. Before closing a create/export job, verify its home so My Drive root does not become the default destination.

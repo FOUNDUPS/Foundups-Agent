@@ -365,6 +365,19 @@ Record the already announced June 4 MOE/SII commercial-building retrofit call as
 
 SII first-party October 30 notices confirm F-11 (equipment track) and F-14 (whole-facility track) fourth calls **CLOSED** at 17:00 JST (physical receipt). Both mention a possible fifth call, with no official opening, deadline, category rates or caps yet established. The GX program administrator published FY2026 F-03 first-call DC-track selection results on October 30; this is **not** a YUMORI eligibility or award receipt, and the second-call status remains PREANNOUNCED. F-13's official Fukui deadline is October 31 with possible earlier budget exhaustion; its page has not evidenced an extension or current unexhausted budget, so do not infer a current application slot from the calendar. No public-asset list or City filing route was promoted. Primary sources: https://sii.or.jp/setsubi07r/overview4.html , https://sii.or.jp/koujou07r/overview4.html , https://gx-area-hojo.jp/ , https://www.pref.fukui.lg.jp/doc/dengen/shin-energy/fukui-taiyokou.html . Status remains VERIFIED PROGRAM except F-01's separately retained ELIGIBILITY INQUIRY; no financial admission.
 
+## F-17 — 令和８年度 データセンター等デジタル基盤の脱炭素化に向けた環境配慮技術の開発・実証事業
+
+- Historical coverage catch-up verified 2026-11-25 JST; NOT a new official opening or November change.
+- Agency: 環境省 地球環境局 地球温暖化対策事業室.
+- Round: FY2026, opened 2026-05-11; closed 2026-06-11 15:00 JST (receipt). Four selections announced 2026-08-28. YUMORI.me/eSingularity.ai boundary: **VERIFIED PROGRAM only**; no project inquiry, eligibility, submission, selection or award established. No FY2027 call confirmed.
+- Published per-project annual ceilings: subsidy 1/2, up to ¥250M; commissioned research up to ¥300M; combined route ceiling ¥500M, with subsidy portion at 1/2 and separate component conditions. Normally up to four fiscal years, subject to annual review and budget; not a guaranteed four-year commitment.
+- Scope: genuine development AND real-equipment demonstration of digital-infrastructure CO2-reduction technologies, including new cooling, liquid cooling, unused-energy cooling and optimized controls. Standalone feasibility studies/PoCs, demonstrations without development, and development without real-equipment demonstration are excluded; commercialization expected within 2–3 years of completion. Domestic energy-related CO2 reduction, not ordinary equipment procurement or onsen renovation.
+- Relevant precedent: MOE's August 28 list includes POLASTECH's adsorption heat-pump R&D/demonstration using 50–55°C direct-liquid-cooling exhaust heat, and Tokyo Electric Power Renewable Power's renewable-heat cooling demonstration. These are other entities' selections, not YUMORI funding or partnerships.
+- Applicant/ownership: qualifying domestic R&D organization/company/university or eligible joint structure; distinguish lead research institution, full-time technical lead, site host and equipment owner. Commissioned route generally excludes durable equipment purchases and requires removal after final year; subsidy route may support retained equipment subject to asset restrictions. For subsidies, start/contracts/orders only after award; exclude costs covered by other national aid.
+- Relevance: a distinct, genuinely novel heat-recovery/cooling/controls R&D work package with a university or industrial partner; not base campus CapEx. Unresolved: novel technology and real-scale demo versus existing equipment integration, qualified technical lead and applicant, demonstrator site/use rights, CO2 baseline, commercialization and cost segregation, finance, intellectual property/equipment ownership. No eligibility conclusion or external action.
+- Internal preparation (not official deadline): review 2027-01-15; prepare candidate scope/partners by 2027-02-01; verify any new fiscal-year guide before use.
+- Official call: https://www.env.go.jp/press/press_04394.html ; May guide: https://www.env.go.jp/content/000397410.pdf ; selection notice: https://www.env.go.jp/press/press_05461.html . Historic application was by email with receipt confirmation (guide §6); administrative inquiries via guide §7, not a current eligibility inquiry.
+
 ## Other tracked programs
 
 - METI GX regional-co-creation / decarbonized-power-region investment programs: monitor for scale, regional and applicant fit; potentially relevant to later DC expansion, not assumed for Phase 1.
@@ -438,6 +451,9 @@ Grant reimbursement timing, bridging finance and actual award allocation must be
 reconciled with the delivery schedule before a deployment gate can pass.
 
 ## Change log
+
+### 2026-11-25 — F-17 historical coverage catch-up
+Retain the May 11–June 11 MOE data-center R&D demonstration round and August 28 selections for future-year preparation. No fresh official program change, eligibility promotion, outreach, or committed funding. See F-17 above.
 
 ### 2026-11-14 — P-02 national PPP/PFI sounding case intake opened (MLIT 2026-11-13)
 

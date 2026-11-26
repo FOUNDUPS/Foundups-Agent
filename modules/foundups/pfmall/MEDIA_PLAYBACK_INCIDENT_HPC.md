@@ -1,5 +1,247 @@
 # Shared Mall media incident · HPC-P01–P08
 
+## 2026-11-25 — Tucked rail touch tap without click
+
+- **incident_id / owner:** PFMALL-MEDIA-20261111-HPC; shared member player rail,
+  HPC acceptance surface. Existing H1H paused restoration requirement.
+- **reproduction/environment:** exact df91 preview, Windows11 build26300,
+  Chromium143.0.7499.4, fresh browser context, 390x844 touch/mobile emulation.
+  Right swipe selected sSzWdw7MNjs while tucked with zero iframe. A trusted tap
+  delivered touchend but no observed click and remained hidden for8s. Physical
+  Safari and installed iPhone PWA remain NOT_VERIFIED.
+- **cause/uncertainty:** the app handled swipe touchend but relied solely on
+  compatibility click for taps. Pointer click and left swipe restored within
+  about0.8s; explicit Play advanced real media time. This is before provider
+  creation, not a YouTube loading timeout. Why this browser sequence omitted
+  compatibility click remains uncertain.
+- **fix/bounded mitigation:** existing rail handles deliberate <15px touchend
+  taps directly with preventDefault and400ms click-echo fence. Next/stay-hidden,
+  paused hidden media, cancellation, multi-touch and scroll boundaries remain.
+- **regression/evidence:** existing tucked-next-stays-hidden fixture suppresses
+  compatibility click; red in both engines before repair. Independent private
+  diagnostic7e9b74b19f35a5205ce46c9f02978bba48280da256c360f32b928d427e8f9868
+  retains events, provider states, advancing times and six screenshot hashes.
+- **rejected approaches:** extending provider timeout, treating a pointer-click
+  pass as touch proof, hidden playback, provider overlays, or broad gesture
+  replacement. Original failed HTTPS acceptance is preserved.
+- **status/timestamp/next:** REPRODUCED and corrective implementation candidate,
+  2026-11-25 JST. Qualify successor regression/security/independent review and
+  source-bound preview; then obtain separate physical phone acceptance.
+
+The first29a correction passed its focused twelve browser rows, but the full
+hosted phone run45520826054 exposed immediate Play/menu suppression. Its global
+tap echo fence also blocked a different grip click for400ms. Narrow that new
+fence to the rail's closure; retain the preexisting global swipe fence. Direct
+tap in the existing click-suppressed case removes the helper's460ms settling
+delay and keeps immediate menu/Play covered. Preserve the failed29a receipt;
+the home2 stage was never published. Full phone/policy and successor exact-source
+review are required; no timeout or acceptance is weakened.
+
+## 2026-11-25 — Optional local-media source rejection
+
+- **incident_id:** PFMALL-MEDIA-20261111-HPC; provider-specific native VOTE finding.
+- **affected_owner / foundup_id:** shared native player/field; `voteballots`.
+  HPC remains the shared-player regression surface, not a new media engine.
+- **symptom/reproduction:** Windows Playwright WebKit rejects approved local
+  silent MP4 with native error4/NotSupportedError, time0, width0. Same bytes in
+  minimal URL and browser-blob controls also fail. Chromium decodes 480×562
+  H.264 Main/yuv420p level3.0 and advances1.8s. Availability and metadata alone
+  do not prove device playback. Physical iPhone Safari/PWA is NOT_VERIFIED.
+- **environment/revision:** Windows controlled B26 core2b4bf854 plus the
+  source-bound donor220206d9 optional-media port, observed 2026-11-25 JST.
+  This is not a deployed revision or a fresh production observation.
+- **hypotheses tested:** full and ranged delivery, minimal player and blob
+  delivery, native metadata/codec hints. `canPlayType` said probably despite
+  rejection; hints are not playback proof. Mall layout is not the demonstrated
+  cause. Specific decoder/environment cause remains unproven.
+- **fix/bounded mitigation:** validated local member cards alone may use the
+  approved animated WebP/still fallback. Reports image-animation/nativeError4
+  and null time. Pause, reduced motion, hidden state and teardown stop it;
+  Next/Previous reuse the queue. Native errors retain HTML5 classification.
+- **rejected:** treating image motion as decoded video, fake ENDED/time,
+  replacing YouTube, changing approved media bytes, interpreting Windows
+  WebKit as physical Safari, and relaxing public/member authorization.
+- **regression/evidence:** existing phone browser's VOTE native phone/desktop
+  and reduced-motion cases, six engine rows passed; checks decoded time or
+  actual changing image frames/stable pause separately. Existing catalog,
+  boot/state and VOTE worker tests cover record and access boundaries.
+- **references:** shared INTERFACE optional member cards; VOTE canonical JSON;
+  existing media-delivery contract. Private controls/receipts are retained by
+  the execution owner, not claimed as Brain/HoloIndex ingestion.
+- **status/supersession/next:** IMPLEMENTED_CANDIDATE, 2026-11-25 JST; no earlier
+  observation rewritten. Complete final exact-source regression, independent
+  review and isolated preview before separate live/device acceptance.
+
+## 2026-11-25 — Home/dock drift and next-hidden correction
+
+- **incident_id:** PFMALL-MEDIA-20261111-HPC (existing canonical incident).
+- **affected_owner / foundup_id:** shared member projection/player/state/field;
+  HPC first acceptance surface. No duplicate media or navigation owner.
+- **symptom/reproduction:** Windows Chrome live `/member/hpc-v25/` displays
+  Buildv25 and a plain search above the app queue. Clicking header identity
+  navigated to `https://play.foundups.com/member/` and credentials loading.
+  Provider recommendations are a separate row inside YouTube, not the app queue.
+- **environment/revisions:** observation2026-11-25JST; Chrome visible desktop,
+  browser mode. Candidate base187c79a5128c12be05d7f9cc2974b4c414946208,
+  remote main60eb7f321647a6736826f33fbceb0f90fe2b773b. Generic `/member/`
+  redirects HPC to the versioned v25 namespace; generic SW/hash alone is not
+  evidence of the active namespace or an installed phone's worker.
+- **confirmed causes:** source187 excludes HPC from desktop dock loan admission;
+  scoped theater selects the legacy search; header Home uses another destination.
+  These are independent of provider/session playback challenges.
+- **latest acceptance/fix:** keep fresh Windows theater. HPC artwork/Home parks
+  media and stores explicit grid in existing scoped tab state. The exact shared
+  dock goes below the app queue; actions plus differs from gated grid Add Video.
+  A disabled contribution handoff stays disabled and sends no submission.
+- **hidden navigation:** next-hidden supersedes the November23 default for
+  fresh preferences; explicit saved next-reveal remains. Hidden selection
+  disposes old playback/callbacks, records a pending identity with no media time,
+  and defers all provider load/cue/play. Restore materializes paused. Existing
+  queue owner admits one catalog page with unchanged scope/queue/index/intent.
+  Regression reproduced redundant visibility Pause observations canceling that
+  catalog intent; an already stopped provider no longer issues repeated Pause
+  intent. Actual playing/unknown providers still take the pause path.
+- **rejected approaches:** no new dock/player, no whole-PR revert, no cropping
+  provider controls or hidden audio. Avoid a new view query that would widen
+  strict AutoPost/auth return allowlists; existing scoped state owns the choice.
+- **regression/evidence:** existing phone `hpc-home-shared-desktop-dock`,
+  `tucked-next-stays-hidden`, branding/camera/clean-gesture checks; queue
+  hidden-page and cancellation cases; preference/scoped-state VM. Controlled
+  test screenshots are labeled fixtures. Exact-head/real-media and independently
+  reviewed preview receipts remain required; physical iPhone is NOT_VERIFIED.
+- **source references:** [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality)
+  and [player parameters](https://developers.google.com/youtube/player_parameters),
+  accessed2026-11-25JST. Keep provider minimum dimensions, visibility and controls.
+- **status/next:** IMPLEMENTED_CANDIDATE; independent review, final regression,
+  source-bound preview, device and release qualification remain. No production
+  or Brain/HoloIndex ingestion claim follows from this repository edit.
+
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** This continues existing
+PR #2439 from source `62f577ae10c73899d602332cbf69dd444a4aae85`; it does not
+replace the Mall or authorize a production release. Physical iPhone/Home Screen,
+audible output and installed-client migration remain separate open gates.
+
+App-owned title/back/expand/play chrome is removed from Floating, WikiTube and
+app Full Video. Attribution, Save/Share, Next/Previous, Collapse, Return and
+Close remain accessible in `+` → Video. Ordinary desktop theater/Enter retains
+its existing owner. Native YouTube title, branding, controls and input remain.
+
+The visible app gesture grip is the full-height left side of the framed video,
+outside the iframe. It supports floating drag and app gestures without covering
+provider controls. Full Video right-swipe selects the next clip and requests
+playback; Floating right-swipe tucks. The right-edge tucked rail spans the player
+height. 012 explicitly selected right-swipe → next clip and reveal; tapping or
+left-swiping restores the existing paused clip. Full Video and tucked right-swipe
+actions are independently configurable. Deliberate Next uses the permitted
+filtered queue and requests playback even when natural autoplay-next is off.
+
+`+` keeps AI first and collapses gesture defaults and playback commands. Its
+bottom Open DAEmon checkbox reveals observed activity from this tab only.
+The shared local projection is bounded to 100 entries, deduplicates playback
+ticks, allowlists event fields and stays in memory. It does not start a service,
+model, microphone, backend trace, code runner or persistent learning/audit store.
+Preview-only probe fields move behind DAEmon → Playback diagnostics; their
+script remains outside the committed public shell and requires explicit staging.
+
+Fully hidden YouTube remains paused; no unsupported background-audio toggle is
+offered. App Full Video is distinct from native provider/browser fullscreen.
+Touches beginning inside the cross-origin YouTube document belong to YouTube;
+the surrounding grip and accessible menu are the app alternatives. Spoken
+RedDog and browser-model admission remain undelivered. Existing AutoPost and
+manual civic-resource destinations retain their separate ownership.
+
+Candidate UI is visibly labeled **Build v26 · Gestures**. A separately owned
+`play-v26-gestures` preview family is public/read-only, with no member admission
+or Auth-domain grant. Source62, livev25 and comparison previews remain rollback
+references. Exact-source tests, independent review, served-asset/worker checks
+and phone evidence determine acceptance; a source edit is not delivery.
+
+Continuation receipt scope: incident PFMALL-MEDIA-20261111-HPC, shared member
+player/dock owners, FoundUp hpc. Baseline62 passed native bootstrap/strict tracker,
+17 preference groups, six selected phone cases and 18 queue callback cases.
+New candidate source requires its own tests and independent delivery evidence.
+The ordinary menu's probe selectors were traced to the staged test fixture,
+not a production backend. Rejected: a transparent iframe gesture shield, cropped
+provider UI, hidden YouTube playback and a fake daemon/code/model feed.
+References checked 2026-11-23: YouTube developer policies III.I.4–9,
+https://developers.google.com/youtube/terms/developer-policies/ . The existing
+Pointer Events iframe boundary reference remains applicable. No physical-device,
+Brain ingestion, production release or semantic freshness claim follows here.
+
+### Candidate verification receipt — 2026-11-23
+
+- status: IMPLEMENTED and TESTED in a frozen local overlay after source62;
+  not MERGED, production DEPLOYED or DEVICE_VERIFIED.
+- source review: independent seven-runtime-file SHA receipt, no remaining
+  source/security blocker; no physical/provider inference from source review.
+- regression: independent62 browser rows/18 queue callbacks; prefs19, local6,
+  probe7; root policy both engines, public-TV, guest,160 Python contracts and
+  existing account/worker/routing/property/entry suites passed.
+- confirmed defects corrected: side-rail width overflow; queued dialog-close
+  focus steal after Return; filtered explicit queue fallback; actual canonical
+  failure states omitted by local event projection. The early offscreen-focus
+  report was partly test-helper-induced; pre-helper assertions then isolated
+  the separate genuine queued-close defect. Preserve that distinction.
+- test reconciliation: intentional app chrome removal required visible Video
+  actions in the legacy policy fixture; all original error/geometry/queue/pause
+  assertions remain. Earlier failed/stale-source runs remain private evidence.
+- next action: bind committed source, hosted checks and isolated preview asset/
+  worker receipts, then obtain physical Safari/Home Screen tests. Runtime
+  emulation and a new preview URL cannot close the reported phone/provider gate.
+
+## Floating control continuation — 2026-11-22
+
+- incident_id: `PFMALL-MEDIA-20261111-HPC` (same shared owner)
+- affected_owner / foundup_id: `public/member` player, dock and state / `hpc` first
+- symptom: 012 reports working v25 playback on iPhone 16, with scrolling under
+  the player, but a disappearing gesture target, extra app Play/expand chrome,
+  short restore handle, missing main camera button and Red Dog leaving HPC.
+- environment: phone OS, standalone mode and delivered fingerprints UNKNOWN;
+  preserve USER_REPORTED. Source audit baseline `a3ea82607498651e903c685796693e855c87413a`.
+  Served v25 projection SHA-256 `e595f508f857de37bf8216365b7b4d0869c819b6cce2f26c8674bbac19d125f0`
+  at `/member/hpc-v25/js/mall-video-projection.js?v=25`. Generic `/member/`
+  assets are a different snapshot and do not identify this live app.
+- confirmed causes: floating geometry had no drag state; Restore was only
+  92px tall; app pinch hardcoded WikiTube; swipe-up hardcoded Next; the dock
+  microphone dictated search, and unavailable Red Dog became a Mall link.
+- fix: extend shared owners with clamped drag and permanent surrounding frame
+  targets, full-height inert tuck/restore, independent validated gesture options,
+  menu playback/expand/return alternatives, canonical camera handoff and in-page
+  conversation availability. Initial controlled Chromium/WebKit cases reproduce
+  the new behavior; final exact-source qualification remains separate.
+- provider boundary: fully hidden YouTube audio/video must pause. The frame
+  remains at least 200x200 with native input/controls. A rail is not a player.
+  Parent gestures do not capture inside cross-origin iframes. Reject cropping,
+  gesture shields, invisible audio and speculative OAuth as workarounds.
+- AI delivery boundary: live Hosting `2a4d064fac8b3170` has no guest API rewrite;
+  GET status paths return HTML and v25 has no API-root meta. The canonical
+  Python guest router is unmounted. Existing Gemini `chat` is not proof of
+  equivalent OpenRouter/session accounting. Mount the admitted host with durable
+  accounting, trusted ingress/visitor identity and server-held credentials before
+  enabling the client. No secret values or provider calls were inspected.
+- browser model boundary: no admitted language-model runtime exists. SmolLM2-360M
+  via WebLLM is a future opt-in benchmark, with runtime/model pinning, download
+  size, Cancel/Unload and physical-device measurements required. The 41-byte
+  WASM arithmetic fixture is not model inference. iPhone keyboard dictation is
+  distinct from qualified local in-browser speech recognition.
+- regression: extend `mall_phone_ui_browser.py`, preference VM and existing
+  media-policy/queue/guest-conversation suites; keep all prior lifecycle and
+  protected/public assertions. AutoPost tests independently own its bounded
+  `return_to` and capture-safe footer. Physical Safari/PWA and actual composed
+  camera return remain NOT_VERIFIED.
+- status: IMPLEMENTED_PENDING_VERIFICATION; no new release or phone pass.
+  Next: exact-source independent qualification and isolated preview readback.
+- references, accessed 2026-11-22:
+  [YouTube policy III.I.9](https://developers.google.com/youtube/terms/developer-policies/),
+  [player visibility/dimensions](https://developers.google.com/youtube/terms/required-minimum-functionality),
+  [iframe gesture boundary](https://www.w3.org/TR/pointerevents/latest/#the-touch-action-css-property),
+  [Safari 26 WebGPU](https://webkit.org/blog/17333/webkit-features-in-safari-26-0/),
+  [WebLLM model estimates](https://webllm.mlc.ai/models/).
+
+Earlier observations below retain their original sources and timestamps.
+
 - Incident ID: PFMALL-MEDIA-20261111-HPC
 - Retrieval terms: HPC YouTube bot sign-in, Mall inline playback, fixedVideoField, PWA embed failure.
 - Affected owner: shared Play FoundUps Mall member field, player, and state; FoundUp `hpc`

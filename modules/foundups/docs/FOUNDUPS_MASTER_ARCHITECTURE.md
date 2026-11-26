@@ -145,7 +145,7 @@ own acceptance and sequencing.
 | Reported local work | Carbon's report names commit `121c5066687c5ab7571ef52382e5d9c68494cc36`, a Fractal Tile Graph and local HPC → AutoPost → Back checks. This documentation audit could not retrieve that commit or independently replay its private receipts. |
 | Target / specified | Full 2D/3D/conversation graph navigation, evidence-bound builder drill-down, the Tools branch and later authorized co-building. Local media/voice fixtures are not live playback or live Simulator wiring. |
 
-The [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+The [documentation audit](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
 retains the source provenance, count discrepancies and next evidence needed.
 
 ## 2. Five-layer funnel
@@ -173,6 +173,22 @@ governance, privileged data, and protected work require current entitlement.
 p.fMALL is the mall: a shared Progressive Web App shell for media, FoundUp
 catalog discovery, navigation, and bounded presentation controls.
 
+- **Open landing (`play.foundups.com`)**: `play.foundups.com` mounts the open
+  guest p.fMALL discovery surface across all catalog FoundUps (just as
+  `hpc.foundups.com` mounts the dedicated single-FoundUp HPC Shorts projection)
+  without Clerk or Firestore admission reads.
+- **Admission and safe return (v26 candidate)**: public browsing and static
+  FoundUp metadata are separate from protected member or editor actions. The
+  candidate retains the existing same-origin Play sign-in gate, OAuth callback,
+  invite path and bounded intent restoration; admission does not auto-submit or
+  grant editor permission. The requested public levels 1–2 / protected level 3+
+  policy is not an implemented graph ACL, and contribution remains unavailable
+  until its authoritative service can check identity, membership and editor
+  scope. Cross-origin contribution return fails closed. See the current
+  [phone source boundary](PFMALL_MALL_NAVIGATION_CONTRACT.md#2026-11-21--v26-phone-candidate-unreleased).
+  The older blanket apex-portal wording remains
+  [historical source](https://github.com/FOUNDUPS/Foundups-Agent/blob/2a65e7983acb489084cecf1229fcfd582f68f19b/modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#L61),
+  not a new instruction to gate every public FoundUp view.
 - No wallet is needed for public discovery.
 - A visible `Enter FoundUp` affordance is required; gestures are enhancements,
   not the only path.
@@ -337,7 +353,7 @@ this document.
 | [Mall navigation](PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation) | Stable-target drill-down, caller restoration and revision-bound evidence |
 | [Mall roadmap](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation) | Census, parallel benchmark sampling, visualization and later reconciliation |
 | [Audit benchmark dispatch](../../../docs/operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19) | Existing scaffold/model/research owners and bounded comparison contracts |
-| [Fractal documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md) | Dated provenance, owner coverage, corrections and unresolved evidence |
+| [Fractal documentation audit](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md) | Dated provenance, owner coverage, corrections and unresolved evidence |
 | `FOUNDUPS_DISCORD_BLUEPRINT.md` | Community server structure |
 | `FOUNDUPS_ENTITLEMENT_TIERS.md` | Per-surface entitlement matrix |
 | `FOUNDUP_TEMPLATE.md` | Adding a FoundUp |

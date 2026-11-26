@@ -17,6 +17,7 @@ const search = require('../../move2japan/property-search.js');
 const runtime = html.match(/<script type="module" id="memberRuntime">([\s\S]*?)<\/script>/)?.[1];
 const boot = html.match(/<script id="productDiscoveryBoot">([\s\S]*?)<\/script>/)?.[1];
 const videoProjection = fs.readFileSync(path.join(here, '../js/mall-video-projection.js'), 'utf8');
+const stateSource = fs.readFileSync(path.join(here, '../js/mall-state-restore.js'), 'utf8');
 assert.ok(runtime && boot, 'the actual shared member script and product boot must exist');
 const script = new vm.Script(runtime.replace(/\bimport\(/g, '__import('), { filename: 'member/index.html#memberRuntime' });
 const ordinaryCatalog = [{ foundup_id: 'foundups', source_type: 'youtube' }, { foundup_id: 'move2japan', source_type: 'youtube' }];
@@ -41,7 +42,7 @@ function harness(options = {}) {
   });
   const state = { imports: [], reads: [], writes: [], fetches: [], admissions: [], identities: [],
     foundups: [], invites: [], opens: 0, field: [], planes: [], redirects: [], consumes: 0, returns: 0,
-    videoMounts: [], errors: [] };
+    videoMounts: [], errors: [], admissionConsumes: 0, memberAdmissions: [], reviews: [], history: [] };
   location.replace = value => state.redirects.push(value);
   const nodes = new Map();
   function node(id) {
@@ -53,6 +54,7 @@ function harness(options = {}) {
   const visibility = [];
   const document = { visibilityState: 'visible', body: { classList: { add() {}, remove() {} }, appendChild() {} },
     getElementById: node, createElement: () => node('temporary'),
+    querySelector() { return null; },
     addEventListener(type, handler) { if (type === 'visibilitychange') visibility.push(handler); } };
   const storage = new Map(options.pendingCode ? [['pendingInviteCode', options.pendingCode]] : []);
   const localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) };
@@ -64,6 +66,7 @@ function harness(options = {}) {
     addListener(callback) { listeners.push(callback); },
   };
   const redDog = {
+    setMemberAdmission(value) { state.memberAdmissions.push(value); },
     setDiscoveryAdmission(value) {
       state.admissions.push(value);
       state.admitted = value;
@@ -75,6 +78,7 @@ function harness(options = {}) {
     open() { state.opens++; }, close() {},
   };
   const win = { location, document, localStorage, Clerk: clerk, redDog,
+    history: { replaceState(_, __, value) { state.history.push(value); page = new URL(value, page.href); } },
     Move2JapanSearch: search, FOUNDUPS_CLERK_APPEARANCE: {},
     mallStateRestore: {
       rememberMemberVideoReturn() { state.returns++; },
@@ -88,6 +92,9 @@ function harness(options = {}) {
   };
   vm.runInNewContext(videoProjection, { window: win, URLSearchParams });
   win.mallVideoProjection.mount = scope => state.videoMounts.push(scope);
+  win.mallVideoProjection.showContributionReview = (intent, admitted) => {
+    state.reviews.push({ intent: JSON.parse(JSON.stringify(intent)), admitted }); return true;
+  };
   if (options.staleVideoResolver) win.mallVideoProjection.resolve = () => 'hpc';
   let fetchNumber = 0;
   const fetch = async (url, init) => {
@@ -107,15 +114,25 @@ function harness(options = {}) {
       getDocs: async query => options.getDocs ? options.getDocs(query) : ({ empty: true, docs: [] }),
     },
   };
-  const context = vm.createContext({ window: win, document, localStorage, fetch, URL, URLSearchParams,
+  const session = options.session || new Map();
+  const sessionStorage = { getItem: key => session.get(key) ?? null,
+    setItem: (key, value) => session.set(key, value), removeItem: key => session.delete(key) };
+  const context = vm.createContext({ window: win, document, localStorage, sessionStorage, fetch, URL, URLSearchParams,
     console: { log() {}, warn: (...args) => state.errors.push(args), error: (...args) => state.errors.push(args) },
     setTimeout(callback, ms) { timers.push({ callback, ms }); if (ms < 8000) queueMicrotask(callback); return timers.length; },
     clearTimeout() {},
     __import: async specifier => { state.imports.push(specifier); return modules[specifier]; },
   });
+  if (options.realState) {
+    vm.runInContext(stateSource, context);
+    if (options.admissionIntent) assert.equal(win.mallStateRestore.rememberAdmissionIntent(options.admissionIntent), true);
+    if (options.admissionRaw) session.set('pfmall_admission_intent_v1', options.admissionRaw);
+    const consume = win.mallStateRestore.consumeAdmissionIntent;
+    win.mallStateRestore.consumeAdmissionIntent = function() { state.admissionConsumes++; return consume(); };
+  }
   if (options.bootVideo) vm.runInContext(boot, context);
   script.runInContext(context);
-  return { state, win, nodes, timers, storage, visibility,
+  return { state, win, nodes, timers, storage, session, visibility,
     emit(account) { win.Clerk.user = account; listeners.forEach(callback => callback({ user: account })); },
   };
 }
@@ -351,6 +368,156 @@ await check('the explicit videos entry expands the existing Move2Japan channel i
   assert.equal(h.state.field[0][0], 'initialize');
   assert.deepEqual(h.state.field[1], ['expand', 1]);
   assert.equal(h.state.planes.length, 1);
+});
+
+await check('play.foundups.com mounts the open Mall landing without Clerk or Firestore account reads', async () => {
+  const h = harness({ url: 'https://play.foundups.com/member/', bootVideo: true, noClerk: true });
+  await flush();
+  assert.deepEqual(h.state.videoMounts, ['mall']);
+  assert.deepEqual(h.state.imports, []);
+  assert.deepEqual(h.state.reads, []);
+  assert.equal(h.state.consumes, 0);
+});
+
+await check('Play VOTE collection is public while member entry and auth remain gated', async () => {
+  const open = harness({ url: 'https://play.foundups.com/member/?foundup=voteballots', bootVideo: true, noClerk: true });
+  await flush();
+  assert.deepEqual(open.state.videoMounts, ['voteballots']);
+  assert.deepEqual(open.state.imports, []);
+  assert.deepEqual(open.state.reads, []);
+  assert.deepEqual(open.state.writes, []);
+  assert.equal(open.state.consumes, 0);
+  for (const url of ['https://foundups.com/member/?foundup=voteballots',
+    'https://play.foundups.com/member/?foundup=voteballots&auth=failed',
+    'https://foundups.com/member/?enter=voteballots']) {
+    const gated = harness({ url, bootVideo: true });
+    await flush();
+    assert.deepEqual(gated.state.videoMounts, []);
+    assert.deepEqual(gated.state.writes, []);
+    assert.match(gated.win.location.href, /^https:\/\/(?:play\.)?foundups\.com\/\?signin=required$/);
+  }
+});
+
+await check('FoundUp entry handoff through foundups.com requires Clerk, invite, and username before opening FoundUp', async () => {
+  const entryUrl = 'https://foundups.com/member/?enter=gotjunk_001';
+  const signedOut = harness({ url: entryUrl });
+  await flush();
+  assert.equal(signedOut.win.location.href, 'https://foundups.com/?signin=required');
+  assert.equal(signedOut.state.returns, 1);
+  assert.equal(signedOut.state.consumes, 0);
+
+  for (const [data, gate] of [[{ username: 'alpha' }, 'inviteGate'], [admitted(''), 'usernameModal']]) {
+    const gated = harness({ url: entryUrl, user: user('A'), data });
+    await flush();
+    assert.equal(gated.nodes.get(gate)?.style.display, 'flex');
+    assert.equal(gated.state.consumes, 0);
+    assert.deepEqual(gated.state.redirects, []);
+  }
+
+  const directAdmitted = harness({ url: entryUrl, user: user('A'), data: admitted('alpha') });
+  await flush();
+  assert.deepEqual(directAdmitted.state.redirects, ['/member/foundup.html?id=gotjunk_001']);
+
+  const returnAdmitted = harness({
+    url: 'https://foundups.com/member/',
+    user: user('A'),
+    data: admitted('alpha'),
+    productReturn: '/member/foundup.html?id=gotjunk_001'
+  });
+  await flush();
+  assert.deepEqual(returnAdmitted.state.redirects, ['/member/foundup.html?id=gotjunk_001']);
+});
+
+await check('Play read-only detail links are public and perform no account reads', async () => {
+  const h = harness({ url: 'https://play.foundups.com/member/?enter=gotjunk_001', bootVideo: true, noClerk: true });
+  await flush();
+  assert.deepEqual(h.state.redirects, ['/member/foundup.html?id=gotjunk_001']);
+  assert.deepEqual(h.state.videoMounts, []);
+  assert.deepEqual(h.state.imports, []);
+  assert.deepEqual(h.state.reads, []);
+  assert.deepEqual(h.state.writes, []);
+});
+
+await check('malformed Play entry targets cannot become public detail redirects or contribution writes', async () => {
+  for (const search of ['?enter=__proto__', '?enter=constructor', '?enter=a&enter=b', '?enter=https://other.example']) {
+    const h = harness({ url: 'https://play.foundups.com/member/' + search, bootVideo: true });
+    await flush();
+    assert.deepEqual(h.state.redirects, []);
+    assert.deepEqual(h.state.videoMounts, []);
+    assert.deepEqual(h.state.writes, []);
+    assert.equal(h.win.location.href, 'https://play.foundups.com/?signin=required');
+  }
+});
+
+await check('same-host admission intents survive sign-out, invite and username gates without consumption', async () => {
+  const intent = { action: 'add-video', foundupId: 'hpc', videoId: 'abcDEF_12-3', returnPath: '/member/?foundup=hpc' };
+  const signedOut = harness({ url: 'https://play.foundups.com/member/?admission=resume', realState: true, admissionIntent: intent });
+  await flush();
+  assert.equal(signedOut.win.location.href, 'https://play.foundups.com/?signin=required');
+  assert.equal(signedOut.state.admissionConsumes, 0);
+  assert.equal(signedOut.session.has('pfmall_admission_intent_v1'), true);
+  assert.deepEqual(signedOut.state.reviews, []);
+  for (const [data, gate] of [[{ username: 'alpha' }, 'inviteGate'], [admitted(''), 'usernameModal']]) {
+    const h = harness({ url: 'https://play.foundups.com/member/?admission=resume', user: user('A'),
+      data, realState: true, admissionIntent: intent });
+    await flush();
+    assert.equal(h.nodes.get(gate)?.style.display, 'flex');
+    assert.equal(h.state.admissionConsumes, 0);
+    assert.equal(h.session.has('pfmall_admission_intent_v1'), true);
+    assert.deepEqual(h.state.reviews, []);
+  }
+});
+
+await check('post-invite replay consumes actual typed state once and opens review without auto-submit', async () => {
+  const intent = { action: 'add-video', foundupId: 'hpc', videoId: 'abcDEF_12-3', returnPath: '/member/?foundup=hpc#account' };
+  const h = harness({ url: 'https://play.foundups.com/member/?admission=resume', user: user('A'),
+    data: admitted('alpha'), realState: true, admissionIntent: intent });
+  await flush();
+  assert.equal(h.state.admissionConsumes, 1);
+  assert.deepEqual(h.state.memberAdmissions, [true]);
+  assert.deepEqual(h.state.history, [intent.returnPath]);
+  assert.deepEqual(h.state.videoMounts, ['hpc']);
+  assert.equal(h.state.reviews.length, 1);
+  assert.equal(h.state.reviews[0].admitted, true);
+  assert.equal(h.state.reviews[0].intent.action, intent.action);
+  assert.equal(h.state.reviews[0].intent.videoId, intent.videoId);
+  assert.equal(h.session.has('pfmall_admission_intent_v1'), false);
+  assert.equal(h.win.mallStateRestore.consumeAdmissionIntent(), null);
+  assert.deepEqual(h.state.writes, []);
+  assert.deepEqual(h.state.fetches, []);
+  const replay = harness({ url: 'https://play.foundups.com/member/?admission=resume', user: user('A'),
+    data: admitted('alpha'), realState: true, session: h.session });
+  await flush();
+  assert.deepEqual(replay.state.reviews, []);
+  assert.deepEqual(replay.state.writes, []);
+  assert.equal(replay.state.fetches.some(call => call.init?.method === 'POST'), false);
+});
+
+await check('account return opens the account while new-FoundUp return stays an explicit disabled review', async () => {
+  for (const action of ['account', 'add-foundup']) {
+    const h = harness({ url: 'https://play.foundups.com/member/?admission=resume', user: user('A'),
+      data: admitted('alpha'), realState: true, admissionIntent: { action, returnPath: '/member/' } });
+    await flush();
+    assert.deepEqual(h.state.videoMounts, ['mall']);
+    assert.equal(h.state.opens, action === 'account' ? 1 : 0);
+    assert.equal(h.state.reviews.length, action === 'add-foundup' ? 1 : 0);
+    assert.deepEqual(h.state.writes, []);
+    assert.equal(h.state.fetches.some(call => call.init?.method === 'POST'), false);
+  }
+});
+
+await check('tampered admission data cannot resume review or become a return redirect', async () => {
+  for (const patch of [{ returnPath: 'https://other.example/member/' }, { capabilities: null }, { createdAt: 0 }, { action: 'publish' }]) {
+    const raw = JSON.stringify({ version: 1, createdAt: Date.now(), action: 'add-foundup', returnPath: '/member/', ...patch });
+    const h = harness({ url: 'https://play.foundups.com/member/?admission=resume', user: user('A'),
+      data: admitted('alpha'), realState: true, admissionRaw: raw });
+    await flush();
+    assert.deepEqual(h.state.reviews, []);
+    assert.deepEqual(h.state.history, []);
+    assert.deepEqual(h.state.redirects, []);
+    assert.equal(h.session.has('pfmall_admission_intent_v1'), false);
+    assert.deepEqual(h.state.writes, []);
+  }
 });
 
 console.log(`${passed} actual member boot checks passed`);

@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 88,
+      "embed_url": "https://www.youtube.com/embed/4jRuSRgue7U",
+      "source_url": "https://www.youtube.com/watch?v=4jRuSRgue7U",
+      "thumbnail_url": "https://i.ytimg.com/vi/4jRuSRgue7U/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:07:18Z",
+      "title": "e-Revolution chant",
+      "video_id": "4jRuSRgue7U"
+    },
+    {
+      "duration_seconds": 435,
+      "embed_url": "https://www.youtube.com/embed/4jhtG6E1cjE",
+      "source_url": "https://www.youtube.com/watch?v=4jhtG6E1cjE",
+      "thumbnail_url": "https://i.ytimg.com/vi/4jhtG6E1cjE/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:46:16Z",
+      "title": "Documentaries",
+      "video_id": "4jhtG6E1cjE"
+    },
+    {
+      "duration_seconds": 59,
+      "embed_url": "https://www.youtube.com/embed/4iLXzgZZMoc",
+      "source_url": "https://www.youtube.com/watch?v=4iLXzgZZMoc",
+      "thumbnail_url": "https://i.ytimg.com/vi/4iLXzgZZMoc/hqdefault.jpg",
+      "timestamp": "2026-01-13T02:05:18Z",
+      "title": "Parent's Day in Kindergarten, Take 1",
+      "video_id": "4iLXzgZZMoc"
+    },
+    {
+      "duration_seconds": 272,
+      "embed_url": "https://www.youtube.com/embed/4E6D7HExLQk",
+      "source_url": "https://www.youtube.com/watch?v=4E6D7HExLQk",
+      "thumbnail_url": "https://i.ytimg.com/vi/4E6D7HExLQk/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:27:14Z",
+      "title": "Flatening Global Education",
+      "video_id": "4E6D7HExLQk"
+    },
+    {
+      "duration_seconds": 480,
+      "embed_url": "https://www.youtube.com/embed/4drFhuw49KM",
+      "source_url": "https://www.youtube.com/watch?v=4drFhuw49KM",
+      "thumbnail_url": "https://i.ytimg.com/vi/4drFhuw49KM/hqdefault.jpg",
+      "timestamp": "2026-01-12T20:13:00Z",
+      "title": "FundUp and the Entrepreneur: You Must Watch This",
+      "video_id": "4drFhuw49KM"
+    },
+    {
+      "duration_seconds": 446,
+      "embed_url": "https://www.youtube.com/embed/4aZ3-ucK4PI",
+      "source_url": "https://www.youtube.com/watch?v=4aZ3-ucK4PI",
+      "thumbnail_url": "https://i.ytimg.com/vi/4aZ3-ucK4PI/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:36:27Z",
+      "title": "Catalyst vs. Reaction",
+      "video_id": "4aZ3-ucK4PI"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/undaodu/catalog/0078.json",
+  "order": "catalog",
+  "page": 77,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

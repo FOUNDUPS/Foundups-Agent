@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97",
+  "items": [
+    {
+      "duration_seconds": 302,
+      "embed_url": "https://www.youtube.com/embed/dJwL802cFm4",
+      "source_url": "https://www.youtube.com/watch?v=dJwL802cFm4",
+      "thumbnail_url": "https://i.ytimg.com/vi/dJwL802cFm4/hqdefault.jpg",
+      "timestamp": "2026-03-20T21:48:08Z",
+      "title": "Anomalous AI Dialogue: Decoding Gemini, Tertia, and the Awoke Shard",
+      "video_id": "dJwL802cFm4"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/8Tc4rEQUYoE",
+      "source_url": "https://www.youtube.com/watch?v=8Tc4rEQUYoE",
+      "thumbnail_url": "https://i.ytimg.com/vi/8Tc4rEQUYoE/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:00:35Z",
+      "title": "🌸 A Moment of Peace #UnDaoDu #Meditation",
+      "video_id": "8Tc4rEQUYoE"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/pvdz1Qmk1LQ",
+      "source_url": "https://www.youtube.com/watch?v=pvdz1Qmk1LQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/pvdz1Qmk1LQ/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:58:58Z",
+      "title": "🧘 Find Your Center Today #UnDaoDu #Mindfulness",
+      "video_id": "pvdz1Qmk1LQ"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/bFmN3qc-K6U",
+      "source_url": "https://www.youtube.com/watch?v=bFmN3qc-K6U",
+      "thumbnail_url": "https://i.ytimg.com/vi/bFmN3qc-K6U/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:57:19Z",
+      "title": "☮️ Finding Calm in Chaos #UnDaoDu #Mindfulness",
+      "video_id": "bFmN3qc-K6U"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/7qhLPUMdHWQ",
+      "source_url": "https://www.youtube.com/watch?v=7qhLPUMdHWQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/7qhLPUMdHWQ/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:55:43Z",
+      "title": "💫 The Path to Inner Balance #UnDaoDu #Zen",
+      "video_id": "7qhLPUMdHWQ"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/hpD7VGUHatw",
+      "source_url": "https://www.youtube.com/watch?v=hpD7VGUHatw",
+      "thumbnail_url": "https://i.ytimg.com/vi/hpD7VGUHatw/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:54:05Z",
+      "title": "✨ Breathe. Be. Become. #UnDaoDu #Mindful",
+      "video_id": "hpD7VGUHatw"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97/videos/undaodu/catalog/0001.json",
+  "order": "catalog",
+  "page": 0,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

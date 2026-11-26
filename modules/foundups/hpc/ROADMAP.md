@@ -1,5 +1,406 @@
 # HPC roadmap
 
+## H3 · Automatic collection refresh — 2026-11-25
+
+**CHANGES_POC_ACCEPTANCE:** regular videos join reviewed Shorts in the existing WikiTube queue. Implemented and locally validated: approved Move2Japan uploads, actual-field hashtag matching, public/embedding filters, stable queue IDs/editorial labels, duplicate-free reruns, preserved review holds, new-source review proposals, six-hour product workflow and reversible collection-only publisher. Initial official scan: 4,345 uploads, 73 metadata matches beyond the original eight; restoring nine unique prior content/diagnostic holds yields 67 publishable additions and 75 eligible videos. Repeat run: zero additions. Native read-only release planning preserves all 178 live files except the two admitted catalog replacements. Source merge, hosted recurrence and live readback are separate gates recorded in ModLog. Preserve #2439's player/navigation ownership and #2453's Vote cards; this slice changes neither UI.
+
+## 2026-11-25 — H1H Home/dock and hidden Next acceptance
+
+**CHANGES_POC_ACCEPTANCE / IMPLEMENTED_CANDIDATE.** Keep fresh Windows theater,
+but make the HPC artwork/Home return to scoped tiles and persist the explicit
+grid choice in existing tab state. Reuse the exact grid dock below the app
+thumbnail queue in TV. Its plus opens actions; the distinct grid Add Video
+retains the existing contribution gate. No new auth selector or admission.
+
+Latest tucked-tab default: next clip **stays hidden**. Selection-only catalog
+continuation starts no hidden provider; restore shows the pending clip paused.
+The shared rail handles deliberate touch taps directly. A live Chromium touch
+reproduction and a click-suppressed fixture exposed the prior missing-click
+boundary; physical Safari/Home Screen verification remains open.
+Preserve saved next/reveal and other gesture choices. Dependencies: shared state,
+queue/player and dock owners. Acceptance: existing browser/queue/preference
+fixtures plus independent review, exact-source preview, real media and physical
+Safari/Home Screen checks. Evidence and current blockers belong to the
+[shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md); this does not promote
+the FoundUp lifecycle or claim production delivery.
+
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE / acceptance open.** Continue #2439 at source62;
+qualify clean app surfaces, configurable Full Video next and tucked next/reveal,
+full-height external grip, and opt-in current-tab DAEmon through the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate).
+No hidden YouTube audio, Voice/model delivery or lifecycle-stage promotion.
+Independent exact-source and phone evidence remain required.
+
+## 2026-11-22 — Floating controls and camera continuation
+
+**CHANGES_POC_ACCEPTANCE / IMPLEMENTED_PENDING_VERIFICATION** in the existing
+#2439 continuation. 012 reports v25 playback working on an iPhone 16; the OS,
+standalone mode and delivered phone fingerprints were not supplied. Preserve
+that USER_REPORTED result separately from controlled browser/device acceptance.
+
+- Extend the shared player with viewport-clamped dragging, persistent frame-edge
+  gesture targets and a video-height Restore rail. Scrolling continues beneath
+  it. Native YouTube input remains unobstructed. App gestures cannot capture
+  touches inside the cross-origin provider document.
+- Remove the redundant floating title/expand row and persistent app Play strip.
+  Keep single-pointer/keyboard actions in `+` → Video and native provider Play.
+  Outward pinch defaults to WikiTube as confirmed by this feedback; direct app
+  Full Video is selectable. Pinch-in and swipe-up returns are independent saved
+  choices. Existing return behavior remains until a return choice is selected.
+- Fully hidden YouTube playback pauses, as required by provider policy. A larger
+  restore rail is not a visible player and cannot justify background audio.
+  Keep `revealSelectedPlayer` and visible sequential playback settings.
+- Replace the separate dock microphone with the canonical public AutoPost
+  camera handoff, saving Mall state and passing only an allowlisted `return_to`.
+  The companion AutoPost owner supplies Camera/Preview/Options/Return. Its full
+  shared search/conversation dock remains a separately missing connector.
+- Red Dog tap/hold opens its existing conversation owner without navigating to
+  another FoundUp or dictating into search. An unavailable service stays in-page
+  with Back to browsing. This is not delivered spoken AI: the qualified public
+  backend host, durable accounting/ingress/secret bindings and browser speech
+  path are missing. No browser language model is admitted. The existing 41-byte
+  WASM test is only compatibility evidence.
+
+Allocation: C3/I4/D4/Impact4 = **15/P1**, extending existing owners. Accept only
+after independent source review, shared browser/VM regressions, exact-head CI,
+source-bound preview and physical Safari/Home Screen testing. No production
+deployment, new calling engine, automatic model download or lifecycle promotion
+follows from this record. The [shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md)
+owns evidence and the [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns shared behavior.
+
+## 2026-11-22 - main reconciliation candidate in existing PR #2439
+
+Inputs are phone head `2a65e7983acb489084cecf1229fcfd582f68f19b` and main
+`dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b`. 012 permits a normal main-into-
+feature reconciliation; landing the PR and publication remain unauthorized.
+Preserve the tested v26 return/navigation/player and current main contracts,
+all dated Canvas decisions and accepted main-only work. No Fractal runtime or
+held gesture defaults are imported.
+
+Diagnostic probe code remains in existing test fixtures, not committed public
+Hosting paths. Preview assembly must explicitly copy the canonical fixtures and
+generate fresh source/build/catalog/probe/Hosting metadata outside Git. The
+candidate reuses the 29 worker cases, six existing probe cases and ten metadata
+groups, with additive source-hash and guard coverage in the existing workflow.
+Exact composed-source tests, independent review, security/CodeQL and hosted CI
+must qualify the eventual head. No new preview, live change, physical Safari/PWA
+or real YouTube/sound result is claimed by this reconciliation entry.
+
+## 2026-11-22 - main reconciliation candidate
+
+Reconcile canonical main `dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b` with the
+qualified phone source `2a65e7983acb489084cecf1229fcfd582f68f19b` in existing
+PR #2439. Preserve current shared acceptance and the dated source receipts
+below. Prior exact-head tests qualify their recorded sources only; the resulting
+candidate needs its own validation. No publication or physical iPhone result
+follows from conflict resolution, and the separate Fractal runtime is not a
+phone-release prerequisite.
+
+## 2026-11-22 - selective v26 reversible return; existing PR #2439
+
+0102 resumes the existing clean #2439 source lane at
+`5e0f87e1d4faad4de8748e83c71d02953640cb40`. Canonical main was inspected at
+`dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b`; the branch remains conflicting.
+This bounded continuation follows the current shared navigation contract's
+[section 14](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences).
+It preserves the Canvas funding/Voice decisions and all prior dated evidence.
+
+Adopt only reversible Mall return, confirmed video-tile tap destinations and
+navigation from the private review bundle. Floating is the confirmed tile-tap
+default; frame destination remains independent. No guest Fractal client,
+prototype lenses, face loans, or unresolved pinch/swipe defaults are adopted.
+The three gesture defaults remain open; no new gesture control is advertised.
+
+Mall return pauses a controllable ready provider behind the Mall while retaining
+the clip, queue/query and observed position. Existing history/field owners
+restore caller scroll and focus. Forward restores paused; a deliberate visible
+selection may request playback. Unsafe or unready providers are disposed with
+an honest continuity-unavailable state. Final Close destroys playback. The
+still-visible selected field retains its own pager until a scope change; late
+page completion cannot recreate a closed player. One bottom dock remains.
+
+The direct unavailable-conversation dog returns to Play Mall with an accessible
+Mall name; campaign banner and Voice destinations remain distinct. Separately
+reviewed DOM/text rendering repairs cover history and two exception messages.
+They do not change admission, membership, editor permissions or URL policy.
+
+Controlled Chromium/WebKit results, exact source hashes, independent reviews
+and the red-to-green Close/reopen paging case are recorded in the
+[member test log](../../../public/member/tests/TestModLog.md). The historical
+aggregate's 56-case PASS does not qualify this selective composition. Hosted
+checks/CodeQL, conflict reconciliation, preview parity, physical Safari/PWA and
+real-provider playback remain separate gates. No merge or publication is part
+of this change; live v25 and both frozen previews remain untouched.
+
+## 2026-11-21 - v26 phone candidate; v25 frozen comparison
+
+Current work starts from `9b85e9cbb874b3720e453d3e3d3a3974dca53504`.
+Keep v25 and its exact-source artifact/results frozen for comparison. The
+changed v26 source has no combined runtime, deployment or physical PASS recorded
+by this entry; dated results below remain bound to their original SHAs.
+
+The phone subset reuses the shared player and existing bottom dock. Its leading
+`+` holds Video Options and a separate on-demand Browse AI pilot; the trailing
+`+` opens contribution review. One visible dock, player/grid clearance, hidden
+playback pause, rotation/return and desktop preservation remain acceptance gates.
+Compact Play chrome and the HPC banner reuse the existing identity owner. The
+banner targets `https://hasan4speaker.com/`, with a distinct Play Mall return.
+These are [source destinations](../../../public/member/js/mall-video-projection.js),
+not deployed navigation receipts.
+
+Browse AI is a confirmed 41-byte WASM addition compatibility test, not an AI
+model/runtime. No preload or cloud fallback; WebGPU remains UNQUALIFIED until
+the exact physical Safari/PWA cases are tested. See the
+[member roadmap](../../../public/member/ROADMAP.md).
+
+Graph work referenced as `22374b` is not integrated. Depth access and backend
+writer actions stay unavailable/fail closed pending their service owner;
+sign-in/invite continuity grants no editor permission. Paid access is proposed.
+Next: qualify combined v26 source, verify isolated HTTPS assets/worker, then
+capture real media advancement on physical iPhone Safari and installed PWA
+on Wi-Fi and cellular.
+
+## 2026-11-21 JST — v25 phone preview awaiting publisher sign-in
+
+Build v25 passed security and all five qualification gates on
+`bd0510c5c2e333d07b1bb02340ca91b291420164`. The artifact binds the player,
+styles, worker, entry points and current discovery generation to that source.
+[Qualification run](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44689762799) ·
+[Artifact](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44689762799/artifacts/14608356242)
+
+**P0 under WSP 15 (3 complexity + 5 importance + 5 deferability + 4 impact = 17).**
+012 needs an isolated release to test the player. The Firebase plugin is enabled.
+The Firebase CLI returned `Failed to authenticate, have you run firebase login?`
+when listing channels on `foundupscom` in `gen-lang-client-0061781628`. The public
+`play-v24-iphone` probe still reports v24 and gives its Hosting version as
+`unverified`. The owner of this delivery is 0102. Resume at authenticated
+channel readback, preserve the complete baseline version and its configuration,
+then release and verify `play-v25-iphone`. The release ID, URL and expiry are
+pending. Physical Safari, Home Screen and real-provider acceptance follow publication.
+
+## 2026-11-20 - Integrated v25 automated qualification PASS; publication pending
+
+Controlled runtime qualification is PASS on
+`472e3977d0cfc6948662b85de5161993eeb4faf4`. The preview is not published;
+real YouTube playback and physical iPhone acceptance remain UNEXECUTED.
+
+012's current prototype gate is one top-anchored shared player, the existing
+video field scrolling beneath it, and one tile tap requesting playback with
+WikiTube queue continuation. HPC remains the shared Mall test pad. Cards,
+fractal navigation and another application are not prerequisites for this slice.
+
+The candidate is based on `75c838b6eab19807487ee02c4b2f9367e580547e`, the
+committed v23 continuation underlying the existing v24 preview. It repairs the
+wrapper's reset of floating-player scroll padding and adds one muted retry for
+an actual browser autoplay rejection during visible startup. Late rejection
+callbacks cannot replace playing, paused or provider-error status. The existing
+single player, visibility checks, native controls and bounded queue remain the
+owners of playback.
+
+Source repair commit: `3f6dc9f550181864b6fdb6aaa7a9ca9a6f765128` on
+`fix/hpc-phone-start-scroll-20261120`. Hosted qualification PASS on exact commit
+`a882d6d40302a1f682b82d372575b20108ce9ef2`:
+[run 44666808469](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44666808469).
+The existing security gate and both Chromium/WebKit player-policy and delayed
+queue suites pass. This includes the new 390 x 844 startup/scroll case and the
+retained 375px floating-player, gesture and queue controls. The hosted runner
+resolves the earlier local browser-launch limitation without changing local
+permissions. This PASS qualifies the native-source repair, not the newly
+integrated v25 candidate. Its provider/network events are controlled; real
+YouTube time progression and physical iPhone Safari/PWA remain UNEXECUTED.
+See `public/member/tests/TestModLog.md` for source hashes and retained evidence.
+
+The v24 recovery blocker is resolved for the observed Mall/HPC surface. The
+six changed Mall shell files, catalog metadata and diagnostic probe were
+recovered from the public preview. All 206 referenced discovery JSON assets
+were retrieved with no missing references. The existing offline exporter, with
+only `hero_label` added to its metadata allowlist, reproduces every asset byte
+for byte at generation
+`253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d`
+(17 metadata records and 1,205 videos). Original ephemeral staging is no longer
+required to reconstruct this scope. Historical overlay authorship and a full
+Hosting clone are not established by this recovery.
+
+The initial integration assembled on `dba56a6f20efd932971683ece710cba7e1921488`
+retained those v24 behaviors, the qualified player and the scroll-clearance fix.
+Its build label, versioned assets and member cache advance together to v25.
+The root, public-directory and FoundUp detail pages use the same v25 projection
+reference; the existing host allowlist adds only `play-v25-iphone`. The
+diagnostic probe retains source `313d8168205178cf5387e1912bd5e462d1dafaa9`.
+Local integrated checks are logged: 159 targeted pytest checks and 29
+actual-worker VM cases passed. The complete 222-path recovery/integration hash
+manifest passed before the subsequent player rotation repair; it is historical
+bundle-parity evidence, not a whole-current-source acceptance receipt.
+The two exact public SDK source bindings were independently reviewed, applied
+by the release owner and confirmed by a third review.
+
+Integrated [run 44684325801](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44684325801)
+on `58627755e4942f72852367fb7be68790dca706e8` FAILED the public-TV gate.
+Security and the other four gates (player policy, delayed queue callbacks,
+worker/state VM and static contracts) passed. Chromium's public-TV portion
+passed; WebKit passed initial portrait and landscape, then failed the return
+to 390 x 844 portrait. Its stage had resized correctly, but the player retained
+the landscape header offset (top 132px instead of 165px) and zero grid
+clearance. The first row overlapped the player by 117.797px, and a Member
+Portal control also intersected it. The synchronous window-resize geometry
+update did not track the final responsive header/player boxes.
+
+The follow-up source repair observes only the existing header and player with
+one guarded `ResizeObserver`, then reruns the existing geometry calculation
+while floating/theater mode is open. It adds no playback request, timer or
+iframe and preserves the existing resize/pause guards. The existing public-TV
+assertion now also rejects portrait header overlap; its 90ms wait, minimum
+stage size, visibility and tile-clearance checks are unchanged. Retest
+[44685419171](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44685419171)
+on `9161711822556f3648968191348d30e053ef02f3` repeated the same WebKit rotation
+failure; security and the other four gates passed.
+
+Instrumented public-TV runs then passed 92/92 at `a818ac1c`
+([44686567252](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44686567252))
+and 100/100 at `c7de04bf`
+([44687274822](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44687274822)).
+The plain control at `ba11b0b4`
+([44687859449](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44687859449))
+failed its first portrait return under the unchanged 90ms requirement. All
+viewport measurements were already 390 x 844 and the header bottom was
+159.1875px, but player top remained 132px and clearance 0. About 207ms later
+they corrected automatically to 165px/159px, before explicit synchronization.
+This proves delayed geometry updating; the earlier instrumented passes do not
+prove its cause or eliminate the plain-control failure.
+
+The current candidate adds one live media-query owner using the exact CSS
+predicate `(orientation: landscape) and (max-height: 500px)`. Its guarded change
+handler invokes the existing geometry calculation, which reads that query's
+`.matches` instead of duplicating viewport dimensions. Observer, resize/pause
+and media behavior remain unchanged.
+
+Final controlled [run 44688858246](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44688858246)
+on `472e3977d0cfc6948662b85de5161993eeb4faf4` passed all five qualification
+gates and security (53 regression tests, zero unreviewed findings). Public TV passed 100/100,
+including all five plain WebKit portrait returns at the original 90ms limit,
+later paging and desktop checks. Queue callbacks passed 18/18, worker/state VM
+29 and static contracts 159. The plain-control test is byte-identical to the
+failed `ba11b0b4` run; only the player changed among their recorded source
+hashes. This qualifies the tested fix under controlled providers, without
+claiming a browser-engine cause or real YouTube/device acceptance. The
+subsequent documentation-head run passed as recorded above.
+
+At handoff, the publishing CLI needed authentication and the Cloud Shell
+attempt had failed to open. The committed probe receipt identifies the
+unpublished candidate. Source and release fields are filled by the publisher
+after Hosting allocates the version.
+
+Next work, in order:
+
+1. Authenticate the authorized Firebase publisher for existing project
+   `gen-lang-client-0061781628`, site `foundupscom`. Read the old immutable
+   Hosting release, configuration and manifest, preserving unchanged assets
+   outside the recovered Mall/HPC scope. The public reconstruction is not a
+   complete Hosting clone; original ephemeral staging is no longer required.
+2. Publish only the isolated `play-v25-iphone` candidate. Bind the receipt to
+   the qualified source SHA and actual immutable release, then verify delivered
+   hashes, cache generation and Build v25. Provide the verified
+   `/member/?foundup=hpc` URL; `/member/` alone is the general Mall.
+3. Record physical Safari/Home Screen results before production promotion.
+   The phone must show **Build v25**; the player must stay anchored while tiles
+   scroll beneath it; one tile tap must request playback and allow the bounded
+   muted fallback; and the queue must continue without creating a second
+   player. Record advancing real media time and return/restore behavior. Check
+   that the existing desktop WikiTube layout, selection and queue still work.
+   A genuine provider refusal remains a visible failure, not a playback PASS.
+
+The existing [v24 HPC preview](https://foundupscom--play-v24-iphone-3rrzxm0r.web.app/member/?foundup=hpc)
+still serves the previous runtime. A cloud-browser attempt timed out after its
+existing Play recovery; no explicit bot/sign-in challenge or advancing video
+time was observed. Do not label that timeout as a diagnosed authentication fault.
+WSP 97 keeps source, controlled validation, delivered version and device
+acceptance distinct. No production merge or owned open PR was created.
+
+## 2026-11-16 - Build v22 direct continuation and policy qualification
+
+012 explicitly authorized the existing v21 continuation through tests, push,
+draft PR and isolated preview. WSP 110 section 2.1 principal handoff records
+previous owner `pfmall-truth-author`, accepting direct Codex continuation,
+expected native head `1b5b77323325b855faf25d4a04ba3e671462084e`, and preserved
+header/entity commits `fe9e9afe4fd94e23ce027e7ae125ced075b53ba6` and
+`bfcd7d0de721288260fafcadc9fd71bcc1bb0485`. No exclusive lease or native-agent
+ACK is invented. Recheck head and all working state before ff-only native
+integration and use a guarded same-branch push. No production deploy or merge.
+
+The v21 hidden-player release defect described below is repaired in the v22
+source candidate: tuck/dismiss/document hide pause playback and cancel loading,
+start and recovery timers. Closed/tucked/hidden/offscreen stages cannot start;
+late READY/PLAYING/ENDED/error/recovery callbacks enforce that boundary. Untuck
+keeps the same iframe paused for explicit visible Play. Scripted playback
+retains the 200 x 200 stage and more-than-half-visible gate; continuous partial
+visibility is not redefined as a universal 50-percent pause rule. One stage
+observer reuses the central pause helper; chrome timers remain separate.
+Generic third-party iframe and opacity-only hiding are outside this YouTube fix.
+
+Build label, shell cache and versioned assets move together to v22. Existing
+browser fixtures now reject hidden audio rather than certifying it. Controlled
+Chromium/WebKit player-policy and header/entity runners pass, including pending
+WikiTube recovery cancellation, same-frame manual return, provider error
+taxonomy, rotation and exact far-scroll restoration. Targeted pytest: 209 pass;
+direct Node state/cache VM: 24 pass (overlaps its pytest wrapper). These are
+source/fixture results, not real YouTube or physical iPhone acceptance.
+
+See [before/after regression matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md)
+for preserved routes, actions, gestures and explicit acceptance changes.
+Native integration, remote push/PR/checks and fresh preview parity are separate
+receipts. Physical Safari/PWA on Wi-Fi/cellular remains unexecuted as a structured
+matrix. Principal-reported VPN-off playback is retained without invented numeric
+telemetry. WSP 22, 50, 71, 91, 97 and 110 apply.
+
+## 2026-11-16 small-sprint reconciliation (candidate on native Build v21)
+
+CHANGES_POC_ACCEPTANCE: 012 now requests one visible, top-anchored shared
+player with the grid scrolling beneath it. This supersedes H1's earlier
+selected-row placement. Preserve one media instance, selection, queue,
+close/Back restoration and both phone and desktop browsing. Full offscreen
+tuck with continuing audio is a release blocker, not accepted behavior.
+
+The first bounded source candidate reuses the whole supplied wide satire
+artwork in the existing left HPC header, keeps Build v21 directly above it,
+and leaves the separate right Voice / Contact Congress control unchanged.
+It reuses the existing repository artwork (`hpc-banner.webp`), concise HPC
+semantics, Mall return link and independent-site disclosure. The new asset
+is declared in the shell precache; release generation and deployed parity
+still require the existing release owner. This is not a new deployed build.
+
+Vote and Contact Congress return links are implemented separately in draft
+PR [#2411](https://github.com/FOUNDUPS/Foundups-Agent/pull/2411), head
+`5c7c22554be86b9ec1c8cbcd3cb5b5c12e85098d`: the entire top HPC banner
+returns to `https://hpc.foundups.com`; distinct Red Dog links return to
+`https://play.foundups.com`. The draft is unmerged in this reconciliation.
+Its 129 Node / 132 controlled Chromium-WebKit checks do not prove production
+or physical iPhone navigation. Keep that PR separate from Mall/player work.
+
+Continue with one public Mall entity/loading slice, then other creators'
+qualified video tests, shared player repair and WikiTube search/sequential
+playback. The wider design remains under discussion. See the
+[Mall roadmap](../pfmall/ROADMAP.md), [navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md)
+and [shared incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+
+Release blocker on source `1b5b77323325b855faf25d4a04ba3e671462084e`:
+`mall-video-player.js` `tuck()` does not pause, `canStartYouTube()` returns
+true when tucked, and the matching CSS moves the whole player offscreen.
+The existing player owner must pause fully hidden/dismissed playback and
+remove the visibility bypass. Displayed player minimum 200 x 200 and
+unobscured native controls remain required; scripted autoplay requires more
+than half the player visible. The visible stage's minimum height does not
+qualify the hidden state. Sources: [YouTube policies](https://developers.google.com/youtube/terms/developer-policies)
+and [required minimum functionality](https://developers.google.com/youtube/terms/required-minimum-functionality).
+
+Physical Safari and installed-PWA Wi-Fi/cellular receipts remain incomplete.
+012's VPN-on challenge and VPN-off playback/Wi-Fi continuation are principal
+reports, not independently captured player telemetry or proof that Clerk
+authentication fixes YouTube session state. Keep provider challenges,
+embedding restrictions and app defects separate. No production deployment
+or release approval is claimed by this candidate.
+
 | Stage | Status | Dependencies | Acceptance criteria and evidence |
 | --- | --- | --- | --- |
 | 0 · Genesis | Existing implementation | WSP 109, Vote ID, registry and manifest validators | Eight intake artifacts, valid genesis envelope, canonical `hpc` registry and `/f/hpc` namespace. Evidence in [intake](docs/intake/INTAKE_SOURCE.md) and [ModLog](ModLog.md). |
@@ -7,6 +408,10 @@
 | 2 · Prototype | Specified; follows accepted PoC layout/playback | PoC acceptance, provenance and rights policy, shared preference owner and privacy review | Nomination, duplicate/source review, moderation, discoverable filters, persistent seven-level preferences, edit/clear, and abuse tests. Admitted speech/model and AutoPost integrations use shared owners. Accepted events remain separate from evidence and economics. |
 | 3 · MVP | Specified | Qualified moderation and escalation, independent Voice admission, preference aggregation and governance review | Moderated community submissions, working consented Voice handoff and recovery, reproducible aggregate reports and governance interfaces with correction and appeal. |
 | 4 · Federation | Specified | WSP 103/104 interoperability, verified Vote/Voice interfaces and tenant isolation | Cross-FoundUp discovery, versioned context with consent, provenance and access scopes preserved in conformance tests. |
+
+For the Stage 2 Canvas slice, first qualify the H1H presentation-only pass.
+H2 follow-ons remain future notes, not dependencies; Voice retains its later
+Stage 3 gate.
 
 ## Shared preferences and evidence
 
@@ -217,7 +622,9 @@ component across the Mall, every FoundUp and their fractal views, including
 separate owner or the limit of the requirement. The authoritative behavior
 matrix is [shared navigation contract section 14](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences).
 This supersedes HPC-only wording, the formerly deferred shared-dock scope,
-forced WikiTube entry and fixed player up/down behavior where they conflict.
+forced WikiTube entry on a deliberate tile tap and fixed player up/down
+behavior where they conflict. The default-entry decision below is distinct
+from the Floating default for a selected Video tile.
 The prior [Mosh Pit](https://docs.google.com/document/d/1a4TqtdnCKiQMx36hw2uObQ0YX3XGw66bDY09_vBWEm8/edit)
 entry `HPC-SEARCH-DOCK-PILOT-20261121` is the pilot history; this correction
 extends its scope and finalizes the default tile-tap behavior.
@@ -271,6 +678,41 @@ boundaries, Back, keyboard/safe areas, rotation intent and stored preferences.
 Physical iPhone Safari/PWA, desktop, source merge and production release each
 need their own receipt. No runtime or deployment acceptance is closed here.
 
+#### Default entry and Canvas presentation-only pass — 012, 2026-11-21
+
+**SPECIFIED_NOT_IMPLEMENTED; Canvas parity UNVERIFIED.** On default entry,
+desktop/PC opens WikiTube TV in the available app window, skipping the Mall
+grid; phone opens the responsive Mall grid. Explicit deep links, deliberately
+chosen navigation and Back take precedence over the default. Reuse viewport
+and input-capability rules rather than device-model guessing; qualify hybrid
+inputs and breakpoint boundaries. Desktop viewport overrides do not prove
+phone Safari or Home Screen behavior.
+
+The Canvas first pass is presentation only: the Mall tile is the card face,
+with a recognizable portrait and readable UI name. Reuse the actual v26 Video
+grid component and layout tokens, not a visually similar second grid. Match
+outer dimensions, aspect, spacing, columns and breakpoints only within the
+same surface, viewport, settings and player/scrollbar state; do not impose a
+global 3:4 ratio. Templates and crops follow the actual slot, and art master
+dimensions are subordinate.
+
+Test the same portrait resizing/repositioning through Grid, Floating,
+WikiTube half/top stage and app fullscreen, or the direct destination selected
+in shared Tile Settings. Grid tap does not flip. Canvas fullscreen inward
+pinch returns to the originating card grid, with an accessible button/keyboard
+equivalent; preserve the scroll container, anchor, offset and focus. Native
+provider fullscreen remains distinct.
+
+When Canvas exists, compare both views at identical 414 × 896, 390 × 844 and
+393 × 852 CSS viewports and both sides of shared breakpoints. Record actual
+rectangles and computed tokens, crop/face safe area and return continuity.
+Separate calculated, desktop-override and physical Safari/Home Screen results.
+The inspected HPC Video state computed 3:4; that observation is not a global
+constraint. No Canvas CSS/viewer or measurement currently establishes parity.
+Use one reusable still portrait master with derived crop/size variants, not
+four commissions. Funding, votes, scores, detail/flip panels, progressive
+content density and gameplay are not acceptance for this pass.
+
 ## 2026-11-16 — Return navigation, concise HPC identity and changed phone acceptance
 
 Historical source: 012's November 16 direction. **CHANGES_POC_ACCEPTANCE** for the top-anchored phone player and return navigation; the larger shared floating dock was **LATER_STAGE** at that time. H1H / PFDOCK-20261121 supersedes that deferral and defines the current cross-FoundUp requirement. The previous selected-tile/original-row phone placement is superseded, with desktop and ordinary Mall behavior retained except for the explicit H1H changes. These requirements are specified, not an implementation or deployment receipt.
@@ -309,12 +751,53 @@ this campaign must reuse shared Mall owners and avoid a second frontend.
 3. Add the four top selectors to the current shell. Use the nine fictional
    cards in INTERFACE, reviewed portrait assets and source-attributed clips.
    No-result, Back, keyboard, phone/desktop and one-player behavior must pass.
+   Canvas is a separate collection: use H1H's presentation-only gate and the
+   future notes below; it does not replace these nine fictional cards.
 4. Adapt the existing press owner to an HPC Press Wire view. Preserve the raw
    draft separately from publication copy; fact-check factual bridges and label
    satire/nonendorsement. No live-voting or published-release claim before
    actual route/content verification.
 5. Only then consider shared preferences and admitted DAE workflows. This
    documentation request sends no email, chat message or comment.
+
+### Canvas follow-on and future roadmap — 012, 2026-11-21
+
+These are **future design notes, not v26 presentation-pass dependencies**.
+Keep the seated Senate collection separate from the nine fictional Dream Team
+cards above. Use stable subject IDs and source dates; unknown data stays
+unknown. No art commission, runtime change or release follows from this entry.
+
+- **Shared Canvas/card engine or Tool, all FoundUps:** reuse rendering and
+  presentation with injected FoundUp-specific content providers; HPC Funding
+  is one provider. Keep this follow-on beside the Canvas entry. Future
+  brainstorm only: 012 specifies what to populate; Red Dog finds and verifies
+  sources, then prepares a lean collection JSON manifest and per-card JSON
+  through the shared tool. No separate task or implementation is created.
+- **Progressive content:** Floating may later place compact stats beside the
+  portrait; WikiTube may show a smaller portrait and more information; app
+  fullscreen may show sourced state represented, tenure, funding and voting
+  record. A tap inside fullscreen may reveal detail or switch panels, with an
+  optional reduced-motion-safe card reveal. Text/data and any future qualified
+  score belong in UI, not the portrait. This does not override grid tap routing.
+- **Funding Tool tile:** a separate first-class, read-only HPC Tool shows
+  sources, ingestion modules and actual status, dates, revisions, filing/receipt
+  links and provenance for each Canvas figure. Reuse existing Vote/evidence
+  owners. Keep candidate receipts separate from outside support/oppose spending;
+  qualify stable candidate/committee IDs, amendments, deduplication, coverage and
+  dated receipts before deriving anything. A dated funding pledge/news item
+  retains exact scope and a primary link; it changes no score and proves no
+  later filing compliance.
+- **Voice Tool, later Stage 3:** constituent-office queue, message preparation
+  and a user-confirmed call only; no auto-dial, automatic voicemail or calls
+  from this planning lane.
+- **Side-by-side card comparison:** a separate future exploration.
+
+#### Future Roadmap > Games
+
+**Poly Magic** is a working title for original two-player card-versus-card
+battles using the same Canvas cards, with possible special abilities. Rules
+are deliberately open. No rules commitment, game build or change to v25/v26
+scope is authorized.
 
 ### Requested worker dispatch (planning, not runtime evidence)
 

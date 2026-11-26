@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 227,
+      "embed_url": "https://www.youtube.com/embed/uWr8rS8y9NE",
+      "source_url": "https://www.youtube.com/watch?v=uWr8rS8y9NE",
+      "thumbnail_url": "https://i.ytimg.com/vi/uWr8rS8y9NE/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:21:03Z",
+      "title": "Michael Trout: eSingularity Will Collapse Certification Industry",
+      "video_id": "uWr8rS8y9NE"
+    },
+    {
+      "duration_seconds": 362,
+      "embed_url": "https://www.youtube.com/embed/UukhoAb_p9A",
+      "source_url": "https://www.youtube.com/watch?v=UukhoAb_p9A",
+      "thumbnail_url": "https://i.ytimg.com/vi/UukhoAb_p9A/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:50:19Z",
+      "title": "Help Japan Co - Update",
+      "video_id": "UukhoAb_p9A"
+    },
+    {
+      "duration_seconds": 128,
+      "embed_url": "https://www.youtube.com/embed/uuF40rPWkUY",
+      "source_url": "https://www.youtube.com/watch?v=uuF40rPWkUY",
+      "thumbnail_url": "https://i.ytimg.com/vi/uuF40rPWkUY/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:49:21Z",
+      "title": "4G: the New Frontier",
+      "video_id": "uuF40rPWkUY"
+    },
+    {
+      "duration_seconds": 482,
+      "embed_url": "https://www.youtube.com/embed/UrlE9HLh6L8",
+      "source_url": "https://www.youtube.com/watch?v=UrlE9HLh6L8",
+      "thumbnail_url": "https://i.ytimg.com/vi/UrlE9HLh6L8/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:50:29Z",
+      "title": "Education ESingularity Prize, Global Education Prize",
+      "video_id": "UrlE9HLh6L8"
+    },
+    {
+      "duration_seconds": 377,
+      "embed_url": "https://www.youtube.com/embed/UNClkJfGOe8",
+      "source_url": "https://www.youtube.com/watch?v=UNClkJfGOe8",
+      "thumbnail_url": "https://i.ytimg.com/vi/UNClkJfGOe8/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:24:33Z",
+      "title": "Flattening Global Education: A Cloud Based Paradigm",
+      "video_id": "UNClkJfGOe8"
+    },
+    {
+      "duration_seconds": 140,
+      "embed_url": "https://www.youtube.com/embed/uHAi8w6nzwo",
+      "source_url": "https://www.youtube.com/watch?v=uHAi8w6nzwo",
+      "thumbnail_url": "https://i.ytimg.com/vi/uHAi8w6nzwo/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:47:58Z",
+      "title": "My English School Sold?",
+      "video_id": "uHAi8w6nzwo"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0019.json",
+  "order": "catalog",
+  "page": 18,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

@@ -1,0 +1,300 @@
+{
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "move2japan",
+      "category": "travel",
+      "channel_avatar_url": "https://yt3.ggpht.com/AoHPQuFo-j-2isTEcEBNrSvzFTUkW59JFmcutvJe9PW4-faopoLNpVki7JfPousHObJNc2m7iw=s800-c-k-c0x00ffffff-no-rj",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "012 documents life in rural Japan — relocation, culture, and political activism through the FFCPLN movement. 573 videos spanning daily life, resistance music, and community building.",
+      "display_order": 1,
+      "entity": "Move2Japan",
+      "foundup_id": "move2japan",
+      "geo": "Fukui, Japan",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "active",
+      "outcome": "Families and independent builders relocate to rural Japan with transparent house data and community grounding.",
+      "pain": "Language barriers, opaque akiya listings, and fragmented municipal onboarding block relocation.",
+      "poster_url": "/media/posters/move2japan.jpg",
+      "related_lanes": [
+        "undaodu",
+        "hpc"
+      ],
+      "solution": "PoC -> Proto: English property discovery in Fukui + 594 field videos; MVP expands verified regional intake.",
+      "source_handle": "@MOVE2JAPAN",
+      "source_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+      "source_type": "youtube_channel",
+      "status": "active",
+      "tagline": "Expat life and FFCPLN activism from Fukui, Japan",
+      "tags": [
+        "012-lane",
+        "expat",
+        "expat-life",
+        "ffcpln",
+        "fukui",
+        "japan",
+        "japan-relocation",
+        "life",
+        "relocation"
+      ],
+      "tier": "F0_DAE",
+      "title": "Move to Japan",
+      "topic_family": "life",
+      "video_count": 594,
+      "video_pages": {
+        "catalog": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/move2japan/catalog/0000.json"
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": null,
+      "category": "music",
+      "channel_avatar_url": "https://yt3.ggpht.com/H1V5ZWWpU2WOAlEUzhYGtYBW77BRW9sgORhjNkltbwYRRilk4oegh0g8TZ96wY0cK5riBl1fIQ=s800-c-k-c0x00ffffff-no-rj",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "012 personal channel covering music production, political commentary, and creative experiments. The longest-running content lane in the FoundUPS ecosystem.",
+      "display_order": 2,
+      "entity": "UnDaoDu",
+      "foundup_id": "undaodu",
+      "geo": "Fukui, Japan",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "active",
+      "linkedin_url": "https://www.linkedin.com/in/openstartup/",
+      "outcome": "Conscious creative expression, resistance music, and 0102 mindfulness stay open and creator-owned.",
+      "pain": "Algorithmic silos bury long-horizon independent art and philosophical experimentation.",
+      "poster_url": "/media/posters/undaodu.jpg",
+      "related_lanes": [
+        "move2japan",
+        "esingularity_001",
+        "eduit"
+      ],
+      "solution": "Active media lane: 512 original music and commentary sessions feeding FoundUps cultural discovery.",
+      "source_handle": "@UnDaoDu",
+      "source_id": "UCfHM9Fw9HD-NwiS0seD_oIA",
+      "source_type": "youtube_channel",
+      "status": "active",
+      "tagline": "Music, activism, and life from 012",
+      "tags": [
+        "0102",
+        "012-lane",
+        "ambient",
+        "consciousness",
+        "meditation",
+        "mindfulness",
+        "music",
+        "original",
+        "quantum"
+      ],
+      "tier": "F0_DAE",
+      "title": "UnDaoDu",
+      "topic_family": "consciousness",
+      "video_count": 512,
+      "video_pages": {
+        "catalog": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0000.json"
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": null,
+      "category": "startup",
+      "channel_avatar_url": "https://yt3.ggpht.com/iTgFX0cdfkYbRq7w900ZUg_6aHIYtdgFDDLq9HqCXPtJx564HDjPyzKDSSkCr44KxL6aFJSAtA=s800-c-k-c0x00ffffff-no-rj",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "Official FoundUPS YouTube presence. Product updates, ecosystem explainers, and development milestones.",
+      "display_order": 3,
+      "entity": "FoundUps",
+      "foundup_id": "foundups_main",
+      "geo": "Global",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "active",
+      "linkedin_url": "https://www.linkedin.com/company/foundups/",
+      "outcome": "Anyone with a validated idea launches an autonomous FoundUp where contributors earn Return on Compute.",
+      "pain": "Closed venture capital gates 99% of builders out while founders and VCs capture all upside.",
+      "poster_url": "/media/posters/foundups_main.jpg",
+      "related_lanes": [
+        "esingularity_001"
+      ],
+      "solution": "PoC -> Proto: p.fMALL open discovery + WRE agent orchestration + Member Portal; MVP wires CABR/pAVS.",
+      "source_handle": "@FoundUps",
+      "source_id": "UCSNTUXjAgpd4sgWYP0xoJgw",
+      "source_type": "youtube_channel",
+      "status": "active",
+      "tagline": "The FoundUPS project channel",
+      "tags": [
+        "012-lane",
+        "ai-agents",
+        "autonomous",
+        "btc",
+        "founders",
+        "openclaw",
+        "pAVS",
+        "venture",
+        "ventures"
+      ],
+      "tier": "F0_DAE",
+      "title": "FoundUps",
+      "topic_family": "startup",
+      "video_count": 44,
+      "video_pages": {
+        "catalog": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/foundups_main/catalog/0000.json"
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "antifafm_001",
+      "category": "media",
+      "channel_avatar_url": "https://yt3.ggpht.com/yOwK3KmYnGNJn1Z8xB5QLVk9wKfcgXR0rWFKJ_-5mvcbZ89Oc06FZDykUXDkWTtfF7XI5_Sjtg=s800-c-k-c0x00ffffff-no-rj",
+      "creator": "012",
+      "creator_display": "UnDaoDu (012)",
+      "description": "24/7 headless radio broadcaster with visual layers. Bridges Icecast to YouTube Live via FFmpeg. The broadcast stack is real.",
+      "display_order": 4,
+      "entity": "antifaFM",
+      "foundup_id": "antifafm",
+      "geo": "Global",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "proto",
+      "outcome": "24/7 independent resistance radio and community commentary run resiliently without corporate gatekeepers.",
+      "pain": "Independent civic audio lacks persistent visual discovery and sustainable listener coordination.",
+      "poster_url": "/media/posters/antifafm.jpg",
+      "related_lanes": [
+        "move2japan"
+      ],
+      "solution": "Proto stream: automated Icecast-to-video broadcast pipeline + curated Mall replay queue.",
+      "source_handle": "@antifaFM",
+      "source_id": "UCVSmg5aOhP4tnQ9KFUg97qA",
+      "source_type": "youtube_channel",
+      "status": "active",
+      "tagline": "24/7 resistance radio",
+      "tags": [
+        "012-lane",
+        "24/7",
+        "activism",
+        "anti-fascist",
+        "ffcpln",
+        "live",
+        "music",
+        "news",
+        "radio",
+        "resistance"
+      ],
+      "tier": "F0_DAE",
+      "title": "antifaFM",
+      "topic_family": "resistance",
+      "video_count": 34,
+      "video_pages": {
+        "catalog": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/antifafm/catalog/0000.json"
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "eduit",
+      "category": "ai-education",
+      "creator": "012",
+      "creator_display": "Michael Trout",
+      "derivation_method": "manual_curation",
+      "description": "EDUIT (eSingularity) — autonomous learning platform. Content derived from 012 UnDaoDu channel covering the eSingularity educational initiative.",
+      "display_order": 9,
+      "entity": "EDUIT, Inc",
+      "foundup_id": "eduit",
+      "geo": "Global",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "staging",
+      "outcome": "Learners master real skills autonomously through browser-first play and adaptive micro-challenges.",
+      "pain": "Passive, one-size-fits-all instruction disengages early learners and hides actual comprehension.",
+      "parent_channels": [
+        "undaodu"
+      ],
+      "poster_url": "/media/posters/eduit.jpg",
+      "related_lanes": [
+        "undaodu",
+        "esingularity_001"
+      ],
+      "solution": "Incubating PoC: Play EDUIT storytime/phonics interactive scenes + 21 foundational learning clips.",
+      "source_handle": "@UnDaoDu",
+      "source_id": "UCfHM9Fw9HD-NwiS0seD_oIA",
+      "source_type": "derived",
+      "status": "active",
+      "tagline": "FoundUP for autonomous learning on any device",
+      "tags": [
+        "012-lane",
+        "eduit",
+        "esingularity",
+        "education",
+        "autonomous-learning",
+        "hapticsign"
+      ],
+      "tier": "F0_DAE",
+      "title": "EDUIT",
+      "topic_family": "ai-education",
+      "video_count": 21,
+      "video_pages": {
+        "catalog": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/eduit/catalog/0000.json"
+      }
+    },
+    {
+      "available_orders": [
+        "catalog"
+      ],
+      "canonical_foundup_id": "science_swarm_hub",
+      "category": "science",
+      "creator": "012",
+      "creator_display": "012",
+      "description": "Science Swarm Hub — multi-agent research coordination platform for PQN alignment and scientific inquiry.",
+      "display_order": 10,
+      "entity": "Science Swarm Hub",
+      "external_url": "https://github.com/FOUNDUPS/science-swarm-hub",
+      "foundup_id": "science_swarm",
+      "geo": "Global",
+      "launch_readiness": "discoverable_only",
+      "lifecycle_stage": "externalized",
+      "outcome": "Decentralized AI agents collaborate openly to reproduce, audit, and accelerate scientific discovery.",
+      "pain": "Paywalled journals, isolated lab compute, and unverified claims slow scientific replication.",
+      "poster_url": "/media/posters/science_swarm.jpg",
+      "related_lanes": [
+        "foundups_main",
+        "esingularity_001"
+      ],
+      "solution": "PoC -> Proto: open-source Science Swarm Hub package + multi-agent research verification workflows.",
+      "source_handle": "science-swarm-hub",
+      "source_id": "FOUNDUPS/science-swarm-hub",
+      "source_type": "github_repo",
+      "status": "active",
+      "tagline": "Multi-agent research coordination",
+      "tags": [
+        "012-lane",
+        "multi-agent",
+        "pqn",
+        "research",
+        "science",
+        "swarm"
+      ],
+      "tier": "F0_DAE",
+      "title": "Science Swarm Hub",
+      "topic_family": "science",
+      "video_count": 0,
+      "video_pages": {
+        "catalog": null
+      }
+    }
+  ],
+  "kind": "catalog",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/catalog/0001.json",
+  "order": "catalog",
+  "page": 0,
+  "page_size": 6,
+  "record_id": null,
+  "schema_version": 1,
+  "total": 17
+}

@@ -1,0 +1,34 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/aIeJii9H_Fw",
+      "source_url": "https://www.youtube.com/watch?v=aIeJii9H_Fw",
+      "thumbnail_url": "https://i.ytimg.com/vi/aIeJii9H_Fw/hqdefault.jpg",
+      "timestamp": "2026-02-24T05:21:42Z",
+      "title": "0:50 #FoundUps #pAVS",
+      "video_id": "aIeJii9H_Fw"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/va5j4vN-N5U",
+      "source_url": "https://www.youtube.com/watch?v=va5j4vN-N5U",
+      "thumbnail_url": "https://i.ytimg.com/vi/va5j4vN-N5U/hqdefault.jpg",
+      "timestamp": "2026-02-22T13:05:50Z",
+      "title": "🚨 #FFCPLN Anti-Fascist Music Exposing #MAGA 💀",
+      "video_id": "va5j4vN-N5U"
+    }
+  ],
+  "kind": "videos",
+  "next": null,
+  "order": "catalog",
+  "page": 7,
+  "page_size": 6,
+  "record_id": "foundups_main",
+  "schema_version": 1,
+  "total": 44
+}

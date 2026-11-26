@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/mRTLCmIIzZk",
+      "source_url": "https://www.youtube.com/watch?v=mRTLCmIIzZk",
+      "thumbnail_url": "https://i.ytimg.com/vi/mRTLCmIIzZk/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:31:45Z",
+      "title": "🌟 From Idea to Launch with AI #FoundUps #pAVS",
+      "video_id": "mRTLCmIIzZk"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/7wgS02tOBGE",
+      "source_url": "https://www.youtube.com/watch?v=7wgS02tOBGE",
+      "thumbnail_url": "https://i.ytimg.com/vi/7wgS02tOBGE/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:31:08Z",
+      "title": "✨ Innovation Never Sleeps #FoundUps #Startup #AI",
+      "video_id": "7wgS02tOBGE"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/S2uzyjH4tLE",
+      "source_url": "https://www.youtube.com/watch?v=S2uzyjH4tLE",
+      "thumbnail_url": "https://i.ytimg.com/vi/S2uzyjH4tLE/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:30:30Z",
+      "title": "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
+      "video_id": "S2uzyjH4tLE"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/ExoEfFW-4BM",
+      "source_url": "https://www.youtube.com/watch?v=ExoEfFW-4BM",
+      "thumbnail_url": "https://i.ytimg.com/vi/ExoEfFW-4BM/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:29:52Z",
+      "title": "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
+      "video_id": "ExoEfFW-4BM"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/nk07Y8lcd9w",
+      "source_url": "https://www.youtube.com/watch?v=nk07Y8lcd9w",
+      "thumbnail_url": "https://i.ytimg.com/vi/nk07Y8lcd9w/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:29:16Z",
+      "title": "🌟 From Idea to Launch with AI #FoundUps #pAVS",
+      "video_id": "nk07Y8lcd9w"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/cJ7BAWKjxc0",
+      "source_url": "https://www.youtube.com/watch?v=cJ7BAWKjxc0",
+      "thumbnail_url": "https://i.ytimg.com/vi/cJ7BAWKjxc0/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:28:38Z",
+      "title": "🌟 From Idea to Launch with AI #FoundUps #pAVS",
+      "video_id": "cJ7BAWKjxc0"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/foundups_main/catalog/0003.json",
+  "order": "catalog",
+  "page": 2,
+  "page_size": 6,
+  "record_id": "foundups_main",
+  "schema_version": 1,
+  "total": 44
+}

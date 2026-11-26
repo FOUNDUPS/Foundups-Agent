@@ -3,9 +3,10 @@
 
 <head>
   <meta charset="UTF-8">
-  <script src="/member/js/mall-video-projection.js"></script>
+  <script src="/member/js/mall-video-projection.js?v=26"></script>
   <script>
-    if (window.mallVideoProjection?.hostScope(window.location)) window.location.replace('/member/');
+    const publicLanding = window.mallVideoProjection?.dedicatedLandingPath(window.location);
+    if (publicLanding) window.location.replace(publicLanding);
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <title>FoundUPS — Where Will You Aim Your Compute?</title>
@@ -72,7 +73,8 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
     rel="stylesheet">
 
-  <!-- Clerk Authentication SDK -->
+  <!-- Clerk Authentication SDK (mounted only on non-dedicated Member Portal origins) -->
+  <template id="gatewayClerkSdk">
   <script
     async
     crossorigin="anonymous"
@@ -80,6 +82,12 @@
     src="https://supreme-oyster-20.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
     type="text/javascript"
   ></script>
+  </template>
+  <script>
+    if (window.mallVideoProjection?.shouldLoadMemberAuth(window.location) !== false) {
+      document.head.appendChild(document.getElementById('gatewayClerkSdk').content.cloneNode(true));
+    }
+  </script>
   <script>
     // FoundUPS Clerk Theme - Dark premium aesthetic
     window.FOUNDUPS_CLERK_APPEARANCE = {
@@ -1427,6 +1435,7 @@
       </a>
     </div>
     <div class="nav-right">
+      <a href="https://play.foundups.com/" class="btn-ghost" aria-label="Play FoundUps Mall — Open Discovery" style="padding:5px 10px;font-size:0.7rem;">Play</a>
       <a href="/f/" class="btn-ghost" aria-label="FX — FoundUps Exchange" style="padding:5px 10px;font-size:0.7rem;">FX</a>
       <a href="#how" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">How</a>
       <a href="#roc" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">ROC</a>
@@ -1469,7 +1478,7 @@
       <div class="steps">
         <div class="step reveal">
           <div class="step-num">00</div>
-          <h3>Browse <span id="foundupTicker" style="font-family:var(--mono);color:var(--cyan);font-size:0.85em;">15</span> FoundUPS</h3>
+          <h3>Browse <span id="foundupTicker" style="font-family:var(--mono);color:var(--cyan);font-size:0.85em;">FoundUps and projects</span></h3>
           <p>Add your FoundUPS (coming soon).</p>
         </div>
         <div class="step reveal">
@@ -1672,7 +1681,7 @@
     function navigateToMember(statusText) {
       handoffStatus.textContent = statusText || 'Opening FoundUPS Mall...';
       handoffOverlay.classList.add('show');
-      setTimeout(() => { window.location.href = '/member/'; }, 600);
+      setTimeout(() => { window.location.href = window.mallVideoProjection?.authCompletionPath(window.location) || '/member/'; }, 600);
     }
 
     // ─── ENTER BUTTON LOGIC ───
@@ -1699,6 +1708,15 @@
       if (window.Clerk.user) {
         enterBtn.textContent = 'ENTER';
         enterBtn.title = 'Enter the Mall';
+      }
+
+      if (new URLSearchParams(window.location.search).get('signin') === 'required') {
+        await window.Clerk.load({ appearance: window.FOUNDUPS_CLERK_APPEARANCE });
+        if (window.Clerk.user) {
+          navigateToMember('Continuing to FoundUPS Mall...');
+        } else {
+          openModal(disclaimerModal);
+        }
       }
 
       // Listen for Clerk auth state changes
@@ -1765,7 +1783,7 @@
       const inviteInput = document.getElementById('disclaimerInviteCode');
       if (inviteInput && inviteInput.value.length >= 10) {
         localStorage.setItem('pendingInviteCode', inviteInput.value.toUpperCase());
-        console.log('[Clerk] Cached invite code:', inviteInput.value);
+        console.log('[Clerk] Invite code cached for admission');
       }
 
       // Visual feedback
@@ -1793,13 +1811,13 @@
         await window.Clerk.client.signIn.authenticateWithRedirect({
           strategy: strategy,
           redirectUrl: window.location.origin + '/sso-callback/',
-          redirectUrlComplete: window.location.origin + '/member/'
+          redirectUrlComplete: window.location.origin + (window.mallVideoProjection?.authCompletionPath(window.location) || '/member/')
         });
       } catch (err) {
         console.error('[Clerk] OAuth error:', err);
         // Fallback to generic sign-in if direct OAuth fails
         window.Clerk.redirectToSignIn({
-          redirectUrl: window.location.origin + '/member/'
+          redirectUrl: window.location.origin + (window.mallVideoProjection?.authCompletionPath(window.location) || '/member/')
         });
       }
     }
@@ -1947,7 +1965,7 @@
     const backToDisclaimer = document.getElementById('backToDisclaimer');
 
     // Show sign in modal
-    showSignInModalBtn.addEventListener('click', (e) => {
+    showSignInModalBtn?.addEventListener('click', (e) => {
       e.preventDefault();
       disclaimerModal.style.display = 'none';
       openModal(signInModal);
@@ -2287,51 +2305,7 @@
     // === BUILD CANVAS moved to external module: public/js/foundup-cube.js ===
     // Auto-initializes on #buildCanvas.
 
-    // === FoundUP Ticker — realistic deterministic growth ===
-    // Model: builders(t) * ~1 FoundUP/week, builders grow ~1/month
-    // Deterministic: same number for every visitor, no backend.
-    // State is computed from start date — always increasing, never resets.
-    (function () {
-      const el = document.getElementById('foundupTicker');
-      if (!el) return;
-
-      const DAY_MS = 86400000;
-      const START = Date.UTC(2026, 3, 1, 0, 0);  // April 1 2026 00:00 UTC
-      const N0 = 15;                              // FoundUPS that exist today
-
-      // Mulberry32 — deterministic PRNG
-      function mulberry32(seed) {
-        return function () {
-          seed |= 0; seed = seed + 0x6D2B79F5 | 0;
-          let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-          t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-          return ((t ^ t >>> 14) >>> 0) / 4294967296;
-        };
-      }
-
-      function getCount() {
-        const now = Date.now();
-        const days = Math.max(0, Math.floor((now - START) / DAY_MS));
-        let total = N0;
-
-        for (let d = 0; d < days; d++) {
-          // Builders: starts at 1 (012), +1 per month slowly
-          const builders = 1 + Math.floor(d / 30);
-          // Each builder adds ~1 FoundUP per week = ~1/7 chance per day
-          const chance = builders / 7;
-          const rng = mulberry32(d * 7919 + 42);
-          if (rng() < chance) total += 1;
-        }
-        return total;
-      }
-
-      el.textContent = getCount().toLocaleString();
-
-      // Re-check once per hour (catches day boundary)
-      setInterval(() => {
-        el.textContent = getCount().toLocaleString();
-      }, 3600000);
-    })();
+    // Discovery counts await canonical classification; no synthetic growth claim.
 
     // === ROC Canvas — network visualization ===
     (function () {

@@ -1,5 +1,27 @@
 # Vote/Ballots FoundUp — Interface Contract
 
+## 2026-11-25 — Shared member-card collection
+
+The canonical two-record `web/congressional-cards.json` supplies the shared
+Play selector `?foundup=voteballots`. Chuck Schumer / U.S. Senate / New York
+and Hakeem Jeffries / U.S. House / New York District 8 retain their reviewed
+artwork, `#SchumerOUT` / `#JeffriesOUT` labels and official profile references.
+UDP/CU remain null and display Pending. Credits and independent satire
+disclosure remain accessible. No score, verification or membership is inferred.
+
+Names/office/labels surround the art in the existing tile and common player
+stage; no replacement shell. Silent MP4s loop. A validated local native error4
+can use approved animated WebP; that is explicitly an image animation with
+null media time. Still/pause, reduced motion, Next/Previous, cleanup and return
+follow the [shared contract](../../../public/member/INTERFACE.md#2026-11-25--optional-vote-member-cards).
+HPC content and YouTube requirements are unaffected.
+
+`web/deck-entry.html/js/css` is a fixed handoff template to
+`https://play.foundups.com/member/?foundup=voteballots`, preserving bookmarked
+guide fragments and Dispatch/guide/contact fallbacks. Its owning Sites release
+must first verify the live shared collection. This runtime port does not
+publish that entry, replace Dispatch or alter `/f/voteballots/app` admission.
+
 **Version**: 0.1.0  
 **Date**: 2026-04-21  
 **Status**: Design Specification  

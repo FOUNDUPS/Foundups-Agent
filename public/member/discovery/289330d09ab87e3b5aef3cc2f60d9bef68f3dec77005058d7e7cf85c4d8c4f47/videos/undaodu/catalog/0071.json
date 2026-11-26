@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 164,
+      "embed_url": "https://www.youtube.com/embed/9SeCQ609I5s",
+      "source_url": "https://www.youtube.com/watch?v=9SeCQ609I5s",
+      "thumbnail_url": "https://i.ytimg.com/vi/9SeCQ609I5s/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:08:06Z",
+      "title": "eRevolution: Global Education Solution",
+      "video_id": "9SeCQ609I5s"
+    },
+    {
+      "duration_seconds": 360,
+      "embed_url": "https://www.youtube.com/embed/9rMn-KzImX4",
+      "source_url": "https://www.youtube.com/watch?v=9rMn-KzImX4",
+      "thumbnail_url": "https://i.ytimg.com/vi/9rMn-KzImX4/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:38:21Z",
+      "title": "A fundraiser and education for eduwit?",
+      "video_id": "9rMn-KzImX4"
+    },
+    {
+      "duration_seconds": 198,
+      "embed_url": "https://www.youtube.com/embed/9jiajcHHrAU",
+      "source_url": "https://www.youtube.com/watch?v=9jiajcHHrAU",
+      "thumbnail_url": "https://i.ytimg.com/vi/9jiajcHHrAU/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:18:47Z",
+      "title": "What is Foundup?",
+      "video_id": "9jiajcHHrAU"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/9hJ-2nNo-SU",
+      "source_url": "https://www.youtube.com/watch?v=9hJ-2nNo-SU",
+      "thumbnail_url": "https://i.ytimg.com/vi/9hJ-2nNo-SU/hqdefault.jpg",
+      "timestamp": "2026-01-30T03:58:25Z",
+      "title": "👀 #FFCPLN Exposes #MAGA - 160 Songs! See Desc!",
+      "video_id": "9hJ-2nNo-SU"
+    },
+    {
+      "duration_seconds": 119,
+      "embed_url": "https://www.youtube.com/embed/9aouJ_ar4Aw",
+      "source_url": "https://www.youtube.com/watch?v=9aouJ_ar4Aw",
+      "thumbnail_url": "https://i.ytimg.com/vi/9aouJ_ar4Aw/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:25:00Z",
+      "title": "Microsoft vs. Google Face Off | We need your help!",
+      "video_id": "9aouJ_ar4Aw"
+    },
+    {
+      "duration_seconds": 360,
+      "embed_url": "https://www.youtube.com/embed/8_DUQaqY6Tc",
+      "source_url": "https://www.youtube.com/watch?v=8_DUQaqY6Tc",
+      "thumbnail_url": "https://i.ytimg.com/vi/8_DUQaqY6Tc/hqdefault.jpg",
+      "timestamp": "2026-01-10T09:14:02Z",
+      "title": "Education Singularity",
+      "video_id": "8_DUQaqY6Tc"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0072.json",
+  "order": "catalog",
+  "page": 71,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

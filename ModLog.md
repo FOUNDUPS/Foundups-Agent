@@ -1,3 +1,25 @@
+## 2026-11-23 — Shared Mall clean gesture continuation
+
+The existing v26 #2439 lane supplies configurable mode-specific right swipes,
+clean app video surfaces, full-height external grips and a bounded opt-in local
+DAEmon projection. Shared queue, preference, provider, attribution, membership
+and return owners remain authoritative. Exact-source browser/static/VM evidence
+and independent product review are recorded in the existing member TestModLog
+and shared media incident. Physical phone/provider and production acceptance
+remain open; no Voice/model/backend service or hidden YouTube audio is claimed.
+WSP00/10/15/22/30/50/71/91/97 apply. No Moshpit or Google Drive content is changed.
+
+## 2026-11-22 — Shared Mall floating control continuation
+
+Extend the existing v26 lane under WSP 00/10/15/22/30/97, with shared ownership,
+preserved provider controls and public/protected boundaries. HPC qualifies
+bounded drag, persistent frame gestures, full-height restore, independent Video
+settings, canonical camera handoff and in-page Red Dog availability. The external
+AutoPost owner supplies its separately reviewed capture-safe footer. Existing
+roadmaps/interfaces/intake and one canonical incident retain implementation,
+test, preview, backend/model/speech and physical-device distinctions. Production
+and formal lifecycle promotion remain separate acceptance gates.
+
 ## 2026-11-21 — Shared Search Dock and player behavior requirements
 
 PFDOCK-20261121 records 012's correction across all FoundUps/fractal views,
@@ -47,6 +69,26 @@ through existing indexes and owner ModLogs. Preserve historical evidence and
 unresolved tile-count differences. This is documentation reconciliation, not
 execution of Carbon's census, a new graph engine, runtime activation or merge.
 WSP 10/15/22/50/71/80/83/84/97/99/108 apply; WSP 110 is draft guidance.
+
+## 2026-11-16 - v23 root cache ownership and optional gateway opener
+
+Confirmed against clean `1b2551b69babd6e5d0eadcccaf033087c4f1520d` after the
+read-only PR #2196 reuse audit. Root-worker activation could delete Mall and
+other owners' caches, and the absent legacy sign-in opener stopped subsequent
+listener initialization. This is a focused repair, not a merge of #2196.
+
+`public/sw.js` now uses root generation v2 and retires only obsolete numeric
+`foundups-root-vN` entries. Foreign cache names and sentinel bytes survive.
+The gateway guards only the optional opener; existing Close, Back, Google and
+LinkedIn handlers remain. Routes, admission policy, user storage and member
+worker/player sources are unchanged.
+
+Regression controls reproduced foreign-cache deletion first, then the actual
+missing-button TypeError after the SW repair. Final VM: 29 passed; affected
+existing gateway/PWA/state pytest: 201 passed (includes the VM wrapper).
+Independent source review accepted the narrow repair. These are local controlled
+checks, not live authentication, physical PWA or production verification.
+No #2196 security disposition, merge, preview or production publication follows.
 
 ## 2026-11-14 — Reconcile the nested Claude instruction pointer
 

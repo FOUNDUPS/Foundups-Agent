@@ -1,5 +1,16 @@
 # Vote/Ballots FoundUp
 
+## Shared member-card collection — 2026-11-25 candidate
+
+The two reviewed cards in `web/congressional-cards.json` are surfaced by
+Play's shared `?foundup=voteballots` projection. Six approved local media
+derivatives remain here; the Mall owns rendering/player/dock/return behavior.
+`#SchumerOUT` and `#JeffriesOUT` are editorial labels; UDP/CU remain null/Pending.
+See the [current interface](INTERFACE.md#2026-11-25--shared-member-card-collection)
+for native/image fallback and motion boundaries. The fixed `deck-entry` template
+is not a published Sites change; Dispatch, guide, contact and protected member
+application admission retain their separate owners and release gates.
+
 **Status**: Public informational Sites live. Candidate and funding application remains an internal PoC.
 
 **Module Version**: 0.6.0 (`src/__init__.py`)  

@@ -148,7 +148,12 @@
     var primaryCtaHtml = '';
     var secondaryLinkHtml = '';
     var ctaDef = SOURCE_TYPE_CTA[item.source_type];
-    var memberProjection = window.mallVideoProjection?.memberPath(item.foundup_id);
+    var entryId = window.mallVideoProjection?.canonicalEntryId
+      ? window.mallVideoProjection.canonicalEntryId(item)
+      : (Object.prototype.hasOwnProperty.call(item, 'canonical_foundup_id') ? item.canonical_foundup_id : item.foundup_id);
+    var memberProjection = entryId && window.mallVideoProjection?.memberPath(entryId);
+    var openMall = !!window.mallVideoProjection?.isOpenMallHost?.(window.location);
+    var portalEntryUrl = openMall && entryId ? window.mallVideoProjection.memberPortalUrl(entryId) : '';
     var ctaUrl = '';
     if (isNonVideo && ctaDef) {
       ctaUrl = item[ctaDef.urlField] || '';
@@ -157,7 +162,44 @@
       }
     }
 
-    if (memberProjection) {
+    if (isNonVideo && ctaDef && item.source_type !== 'github_repo' &&
+        ['discoverable_only', 'incubating', 'specified', 'planning_only'].some(function (status) {
+          return (item.launch_readiness || item.lifecycle_stage || item.status) === status;
+        })) {
+      ctaDef = Object.assign({}, ctaDef, { label: 'View project information' });
+      try {
+        var publicInfo = new URL(ctaUrl);
+        if (publicInfo.protocol !== 'https:' || !publicInfo.hostname || publicInfo.username || publicInfo.password) ctaUrl = '';
+      } catch (e) { ctaUrl = ''; }
+    }
+
+    if (!entryId) {
+      var candidate = item.discovery_kind === 'candidate';
+      sourceContext = '<p class="fv-source-context">' +
+        (candidate ? 'Project candidate \u00b7 Planning' : 'Source channel \u00b7 not a separate FoundUp') + '</p>';
+      var publicSource = '';
+      try {
+        var sourceValue = item.public_plan_url || item.external_url || item.source_url || '';
+        var target = new URL(sourceValue, window.location.origin);
+        if (target.protocol === 'https:' && !target.username && !target.password &&
+            sourceValue) publicSource = target.href;
+      } catch (e) { /* Unverified source has no link. */ }
+      if (publicSource) {
+        primaryCtaHtml = '<a class="fv-primary-cta" href="' + esc(publicSource) +
+          '" target="_blank" rel="noopener noreferrer">' + (candidate ? 'View project plan' : 'Open source') + '</a>';
+      }
+      if (candidate) secondaryLinkHtml = '<p class="fv-source-context">Join / submissions are not available here yet.</p>';
+    } else if (openMall) {
+      if (memberProjection) {
+        primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
+        secondaryLinkHtml = '<a href="' + esc(portalEntryUrl) + '" class="fv-secondary-link">Enter FoundUp via Member Portal \u2197</a>';
+      } else {
+        primaryCtaHtml =
+          '<a href="' + esc(portalEntryUrl) + '" class="fv-primary-cta">Enter FoundUp \u00b7 Member Portal \u2197</a>';
+        secondaryLinkHtml =
+          '<a href="/f/" class="fv-secondary-link">Public directory</a>';
+      }
+    } else if (memberProjection) {
       primaryCtaHtml = '<a href="' + esc(memberProjection) + '" class="fv-primary-cta">Browse Shorts</a>';
     } else if (isNonVideo && ctaDef && ctaUrl) {
       // Non-video: primary CTA is the source action (View Repo, Open App, Open Service)
@@ -168,11 +210,26 @@
         '</a>';
       // Secondary: demoted entry-page link
       secondaryLinkHtml =
-        '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-secondary-link">More about ' + esc(displayName) + '</a>';
+        '<a href="/member/foundup.html?id=' + encodeURIComponent(entryId) + '" class="fv-secondary-link">More about ' + esc(displayName) + '</a>';
     } else {
       // Video-backed: primary CTA is entry page
       primaryCtaHtml =
-        '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-primary-cta">Open FoundUp</a>';
+        '<a href="/member/foundup.html?id=' + encodeURIComponent(entryId) + '" class="fv-primary-cta">Open FoundUp</a>';
+    }
+
+    var linkedinUrl = propertySourceUrl(item.linkedin_url);
+    if (linkedinUrl) {
+      secondaryLinkHtml = (secondaryLinkHtml ? secondaryLinkHtml + ' \u00b7 ' : '') +
+        '<a href="' + esc(linkedinUrl) + '" target="_blank" rel="noopener noreferrer" class="fv-secondary-link">LinkedIn \u2197</a>';
+    }
+
+    var ospHtml = '';
+    if (item.outcome || item.solution || item.pain) {
+      ospHtml = '<div class="fv-osp">' +
+        (item.outcome ? '<div class="fv-osp-item"><span class="fv-osp-label fv-osp-outcome">Outcome</span><p>' + esc(item.outcome) + '</p></div>' : '') +
+        (item.solution ? '<div class="fv-osp-item"><span class="fv-osp-label fv-osp-solution">Solution</span><p>' + esc(item.solution) + '</p></div>' : '') +
+        (item.pain ? '<div class="fv-osp-item"><span class="fv-osp-label fv-osp-pain">Pain</span><p>' + esc(item.pain) + '</p></div>' : '') +
+      '</div>';
     }
 
     body.innerHTML =
@@ -186,6 +243,7 @@
       '</div>' +
       sourceContext +
       '<p class="fv-tagline">' + esc(displayTagline) + esc(videoHint) + '</p>' +
+      ospHtml +
       '<div class="fv-actions">' +
         primaryCtaHtml +
       '</div>' +

@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/YOqp9Q_39TE",
+      "source_url": "https://www.youtube.com/watch?v=YOqp9Q_39TE",
+      "thumbnail_url": "https://i.ytimg.com/vi/YOqp9Q_39TE/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:58:08Z",
+      "title": "🌟 From Idea to Launch with AI #FoundUps #pAVS",
+      "video_id": "YOqp9Q_39TE"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/dZXYP-k0-rg",
+      "source_url": "https://www.youtube.com/watch?v=dZXYP-k0-rg",
+      "thumbnail_url": "https://i.ytimg.com/vi/dZXYP-k0-rg/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:56:33Z",
+      "title": "💡 pAVS: Peer-to-Peer Autonomous Ventures #FoundUps",
+      "video_id": "dZXYP-k0-rg"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/SGHkdKPCKYE",
+      "source_url": "https://www.youtube.com/watch?v=SGHkdKPCKYE",
+      "thumbnail_url": "https://i.ytimg.com/vi/SGHkdKPCKYE/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:54:57Z",
+      "title": "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
+      "video_id": "SGHkdKPCKYE"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/v9hxsnEXUHc",
+      "source_url": "https://www.youtube.com/watch?v=v9hxsnEXUHc",
+      "thumbnail_url": "https://i.ytimg.com/vi/v9hxsnEXUHc/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:53:21Z",
+      "title": "🧠 AI + Humans = Better Startups #FoundUps #OpenClaw",
+      "video_id": "v9hxsnEXUHc"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/cUESQj7kM-4",
+      "source_url": "https://www.youtube.com/watch?v=cUESQj7kM-4",
+      "thumbnail_url": "https://i.ytimg.com/vi/cUESQj7kM-4/hqdefault.jpg",
+      "timestamp": "2026-02-24T05:25:37Z",
+      "title": "0:50 #FoundUps #pAVS",
+      "video_id": "cUESQj7kM-4"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/ckYIUKLT2a8",
+      "source_url": "https://www.youtube.com/watch?v=ckYIUKLT2a8",
+      "thumbnail_url": "https://i.ytimg.com/vi/ckYIUKLT2a8/hqdefault.jpg",
+      "timestamp": "2026-02-24T05:24:01Z",
+      "title": "0:51 #FoundUps #pAVS",
+      "video_id": "ckYIUKLT2a8"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/foundups_main/catalog/0007.json",
+  "order": "catalog",
+  "page": 6,
+  "page_size": 6,
+  "record_id": "foundups_main",
+  "schema_version": 1,
+  "total": 44
+}

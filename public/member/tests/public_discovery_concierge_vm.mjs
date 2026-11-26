@@ -19,6 +19,33 @@ const memberRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = readFileSync(join(memberRoot, 'js/account-concierge.js'), 'utf8');
 const gestureSource = readFileSync(join(memberRoot, 'js/gesture-engine.js'), 'utf8');
 const memberHTML = readFileSync(join(memberRoot, 'index.html'), 'utf8');
+
+test('actual history thumbnail URL owner accepts only qualified image schemes', () => {
+  const marker = '  function historyThumbnailUrl(raw) {';
+  const start = source.indexOf(marker);
+  const end = source.indexOf('  function renderWatchHistory()', start);
+  assert.ok(start > 0 && start === source.lastIndexOf(marker) && end > start && end-start < 1500);
+  function actual(href) {
+    const context = { URL, window: { location: new URL(href) } };
+    runInNewContext(source.slice(start, end) + '\nthis.actual = historyThumbnailUrl;', context);
+    return context.actual;
+  }
+  const safe = actual('https://play.foundups.com/member/');
+  assert.equal(safe('/logo-dog.png'), 'https://play.foundups.com/logo-dog.png');
+  assert.equal(safe('https://i.ytimg.com/vi/fixture/hqdefault.jpg'), 'https://i.ytimg.com/vi/fixture/hqdefault.jpg');
+  for (const value of [null, {}, 7, '', ' ', 'x'.repeat(2049), 'javascript:void(0)',
+      '\tJaVaScRiPt:void(0)', 'data:image/svg+xml,<svg/>', 'blob:https://play.foundups.com/fixture',
+      'file:///fixture.png', 'https://[invalid', 'https://fixture:fixture@example.invalid/image',
+      'http://play.foundups.com/image', 'http://example.invalid/image']) assert.equal(safe(value), '');
+  for (const base of ['http://localhost:9000/member/', 'http://127.0.0.1:9000/member/', 'http://[::1]:9000/member/']) {
+    const local = actual(base), url = new URL(base);
+    assert.equal(local('/image.png'), url.origin + '/image.png');
+    url.port = '9001';
+    assert.equal(local(url.href), '');
+    assert.equal(local('http://example.invalid/image'), '');
+  }
+  assert.equal(actual('http://public.example/member/')('/image.png'), '');
+});
 const planeHTML = memberHTML.match(/<aside\b[^>]*id="accountPlane"[^>]*>[\s\S]*?<\/aside>/)?.[0];
 const formHTML = memberHTML.match(/<template\b[^>]*id="move2japanSearchTemplate"[^>]*>([\s\S]*?)<\/template>/)?.[1];
 assert.ok(planeHTML && formHTML, 'fixture uses the real member plane and domain template');
@@ -29,9 +56,9 @@ const decode = value => String(value).replace(/&#x([\da-f]+);/gi, (_, hex) => St
 const voidTags = new Set(['INPUT', 'IMG', 'BR', 'HR', 'META', 'LINK', 'PATH', 'POLYLINE', 'LINE']);
 
 class Element {
-  constructor(tag, document) {
+  constructor(tag, document, nodeType = 1) {
     this.tagName = tag.toUpperCase();
-    this.nodeType = 1;
+    this.nodeType = nodeType;
     this.ownerDocument = document;
     this.attributes = new Map();
     this.children = [];
@@ -76,7 +103,7 @@ class Element {
   get isConnected() { return !!this.ownerDocument && this.ownerDocument.contains(this); }
   get firstChild() { return this.children[0] || null; }
   get nextSibling() {
-    const siblings = this.parentElement?.children || [];
+    const siblings = this.parentNode?.children || [];
     return siblings[siblings.indexOf(this) + 1] || null;
   }
   get textContent() { return this._text + this.children.map(child => child.textContent).join(''); }
@@ -122,24 +149,31 @@ class Element {
   removeAttribute(name) { this.attributes.delete(name); }
   appendChild(child) { return this.insertBefore(child, null); }
   insertBefore(child, reference) {
+    if (child.nodeType === 11) {
+      for (const nested of [...child.children]) this.insertBefore(nested, reference);
+      return child;
+    }
     child.remove();
     const at = reference ? this.children.indexOf(reference) : this.children.length;
     assert.ok(at >= 0, 'insertBefore reference belongs to parent');
     this.children.splice(at, 0, child);
-    child.parentElement = child.parentNode = this;
+    child.parentNode = this;
+    child.parentElement = this.nodeType === 1 ? this : null;
     return child;
   }
   remove() {
-    if (!this.parentElement) return;
-    const parent = this.parentElement;
+    if (!this.parentNode) return;
+    const parent = this.parentNode;
     parent.children.splice(parent.children.indexOf(this), 1);
     this.parentElement = this.parentNode = null;
   }
-  replaceChildren() {
+  replaceChildren(...children) {
     if (this.children.some(child => child.contains(this.ownerDocument?.activeElement))) {
       this.ownerDocument.activeElement = this.ownerDocument.body;
     }
     for (const child of [...this.children]) child.remove();
+    this._text = '';
+    for (const child of children) this.appendChild(child);
   }
   contains(node) { return this === node || this.children.some(child => child.contains(node)); }
   matches(selector) {
@@ -216,6 +250,7 @@ function createFixture(mode = 'product-discovery', setup) {
   const doc = new Element('document');
   doc.ownerDocument = doc;
   doc.createElement = tag => new Element(tag, doc);
+  doc.createDocumentFragment = () => new Element('#document-fragment', doc, 11);
   doc.getElementById = id => doc.querySelector('#' + id);
   doc.body = doc.createElement('body');
   doc.appendChild(doc.body);

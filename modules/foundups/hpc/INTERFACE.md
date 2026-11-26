@@ -1,5 +1,42 @@
 # HPC interface
 
+## 2026-11-25 — Home, bottom dock and tucked selection
+
+The [shared interaction contract](../../../public/member/INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)
+owns this candidate. Fresh desktop opens WikiTube/theater; the HPC artwork or
+Home returns to HPC tiles and remembers that choice in this tab through reload
+and resize. Phone keeps its three-column field. The exact shared actions/search
+dock sits below the app thumbnail queue in theater and floats below grid content.
+Its plus opens Available actions. The distinct grid plus opens gated Add Video;
+no submission service or editor authorization is implied.
+
+Right swipe on the tucked rail now defaults to selecting Next while staying
+hidden. The pending selection starts no provider work. Tap restores it paused;
+visible Play starts playback. Explicitly saved next/reveal remains available.
+Touch restoration does not depend on the browser emitting a compatibility click.
+This supersedes the November 23 default. Physical Safari/Home Screen and
+production delivery remain separate gates; no new Voice or model is delivered.
+
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,
+configurable right-swipe queue/reveal actions, full-height external gesture grip
+and opt-in bounded current-tab DAEmon. See the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate) and
+[canonical media incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+Native provider controls and ordinary desktop theater remain; physical phone
+and production acceptance are open. No model, mic or backend service is added.
+
+## 2026-11-22 — Phone control clarification
+
+HPC consumes the shared [floating control contract](../../../public/member/INTERFACE.md#2026-11-22--floating-controls-and-camera-candidate).
+The player can be moved using persistent app-owned frame targets, tucked to a
+video-height restore rail and expanded by the configured outward pinch. Its
+YouTube interior retains native input. Hidden playback pauses; visible autoplay
+and reveal-on-selection remain separate settings. The dock camera delegates to
+AutoPost, and the dock dog opens canonical conversation/availability in-place.
+An unavailable service is not a voice or browser-model implementation. Current
+candidate qualification and phone evidence are recorded in the roadmap/incident.
+
 ## Entry and authority
 
 | Surface | Contract |
@@ -9,14 +46,26 @@
 | `hpc.foundups.com/` | Public entrance. The dedicated host selects the guest projection at `/member/`. |
 | `/f/hpc/app` | Existing protected tenant handoff. HPC declares no tenant bundle, account grant or agent routes. |
 | Voice Your Opinion | The phone header's right action opens Vote's manual [Contact Congress with the HPC skin](https://vote.mtrout.com/contact#hpc). The public projection carries the registered skin fragment; no browser referrer is required. Desktop keeps the action in the bottom anchor. Back restores the video anchor and offset. |
-| Hasan portrait | The header portrait opens the master Mall at `https://foundups.com/member/`. Ordinary member admission still applies there. |
+| HPC header artwork / Home | Return to the HPC-scoped tile field, keeping the current URL and tab-local position/presentation. The separate Play Mall link opens the master Mall; the independent-site disclosure retains the campaign link. |
 | HPC Home Screen app | `hpc.webmanifest` registers **Hasan Piker Coalition**, short name **HPC**, with a scoped launch URL and standalone display. The supplied satirical artwork provides the portrait and 180 px Apple touch icon. |
 
 The registry's `parent_foundup_id: voteballots` expresses the editorial and civic relationship. It delegates no access, ownership, wallet, token or execution authority. HPC uses the FoundUp manifest namespace `idb_hpc`. The shared Mall state owner stores the tab-local video anchor, offset and scoped query. Shared player saves and history remain browser-local and keyed by FoundUp and video. The dedicated host is available to guests. The same-tab member sign-in return stores the registered scope and is consumed after admission. Server-side capability checks retain authority.
 
 ## Media contract
 
-`mall_projection.json` is the reviewed curation input. Run `python scripts/refresh_mall_catalog.py --scoped-only --apply` to regenerate the shared discovery card and public video projection. YouTube is authoritative for creator, video ID, title, publication and availability. The 2026-11-11 source pass found eight eligible public, embeddable Shorts. Repeat candidate discovery with `--audit-scoped-source hpc` using an approved public Data API key. Review Shorts membership and eligibility before changing curation. Tiles use original portrait thumbnails. The shared player credits Move2Japan and links to the original Short.
+`mall_projection.json` is the curation input. YouTube is authoritative for creator, video ID, title, publication and availability. The November 11 source pass found the eight reviewed Shorts below. The November 25 refresh extends this collection to regular videos, including [HasanAbi 4 House Speaker](https://www.youtube.com/watch?v=8qO3908bKAM), verified as public, embeddable and 5,990 seconds long. Duration or title does not establish Shorts membership.
+
+Run `python scripts/refresh_mall_catalog.py --refresh-scoped-source hpc --seed-live --discover --apply` with the existing public `YOUTUBE_API_KEY`. Without `--apply`, refresh writes nothing. This mode writes only HPC curation, the scoped public catalog, and HPC audit artifacts; it does not refresh the general Mall. The older `--scoped-only` generator remains the offline projection owner.
+
+Only the established Move2Japan channel `UC-LSSlOZwpGIRIYihaz8zCw` is approved for automatic admission. Case-insensitive matches must occur in the actual title, description or tags for SchumerOUT, HasanForSpeaker or Hasan4Speaker. Metadata must show public, processed and embeddable, without region/age restrictions or live/upcoming status. Missing/ineligible existing entries remain in curation but are excluded from publication. New records carry actual per-video creator credits and a neutral Commentary label; content genre is not inferred from a headline. Preserve existing editorial labels, IDs and relative queue order, and append new matches in publication order. Existing reviewed Shorts retain portrait presentation; new entries use ordinary watch URLs and thumbnails.
+
+Recorded `editorial_exclusions` preserve the six content decisions in the [source reconciliation](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md#source-reconciliation) and the four isolated diagnostic-only IDs (nine unique IDs, with one overlap). A matching hashtag does not reverse a review hold. An explicit curation review must remove the recorded hold before a later refresh may admit that video. These are editorial dispositions, not assertions of current YouTube unavailability. Historical format-only exclusions do not apply to the new regular-video requirement.
+
+The product workflow runs every six hours at 03:17, 09:17, 15:17 and 21:17 Japan time. It performs a bounded complete uploads scan to catch changed hashtags on older uploads, with incremental admission by video ID. At the observed 4,345 uploads this used 175 Data API requests per source scan. Three broader discovery searches add about 300 quota units per run; candidates from new channels remain `proposed` in `hpc_discovery_proposals.json`. Search snippets are reconciled with real video metadata. No new source is auto-approved.
+
+Refresh receipts expire after 24 hours and bind the exact generated catalog bytes. Publication uses `scripts/publish_hpc_catalog.cjs`, which clones the current live Hosting version and changes only HPC's videos/count in existing root/versioned public catalogs. It compares every other file hash and the Hosting config, rechecks the live head before release, and reads back both public catalogs. The saved prior version is the rollback target. Firebase supplies no atomic release precondition; observed head checks reduce that remaining concurrency window. The hosted runner owns timeout/cancellation and process cleanup; overlaps wait, missed runs are skipped, and the next full scan catches up. A failed source/security/release check preserves the current release and requires inspection of its receipt before retrying.
+
+The [source receipt](../../../docs/audits/pfmall_youtube_ingest/hpc_refresh.json), [workflow runs](https://github.com/FOUNDUPS/Foundups-Agent/actions/workflows/hpc-wikitube-refresh.yml) and ModLog record configuration, execution and publication separately. This is a product job, not a personal reminder or modification of YouTube recommendations.
 
 The collection is creator commentary and satire, with political opinion and advocacy labeled separately from factual reporting. A headline or description is the creator's wording. Vote's contact resource links to official directories.
 
@@ -46,32 +95,29 @@ Enter or the search button starts the next match, with the first match used
 when the current clip is outside the results or last.
 
 The touch grid displays #SchumerOUT in three portrait columns with vertical
-batches and an end state. Tap or Enter replaces the selected thumbnail with
-the shared player across its original row. Neighboring tiles reflow. The
-corner button or pinch-out on a thumbnail or the active player's toolbar
-opens immersive playback with the same iframe. Close, Escape, Back or pinch-in
-on the surrounding chrome restores the tile and focus. YouTube owns touches
+batches and an end state. Tap or Enter uses the configured shared Floating,
+WikiTube or Full Video path. The default Floating player stays above scrolling
+tiles; the app's external grip and accessible Video actions change its view.
+Close, Escape, Back or configured pinch-in restores the tile and focus. YouTube owns touches
 inside the iframe. The provider viewport is at least 200 × 200. A thumbnail
 below 120 × 70 selects the player and offers explicit Play. [YouTube embed requirements](https://developers.google.com/youtube/terms/required-minimum-functionality).
 
 The header shows the loaded Mall build beside #SchumerOUT. The same number
 appears in **More options**.
 
-The shared floating phone dock puts **More options** at the left, scoped
-search and its dictation microphone in the middle, and **Red Dog** at the
+The shared floating phone dock puts **Available actions** at the left, scoped
+search in the middle, **AutoPost camera**, and **Red Dog** at the
 right. Longer queries expand into an editable field above those controls. Search
 submits against the loaded collection. Its results keep the source IDs and
-the same in-place player. The microphone fills the field when the browser has
-local recognition available. Otherwise it focuses the field for keyboard
-dictation. The visitor submits the resulting query. **More options** opens
+the same shared player. Keyboard dictation remains controlled by the browser.
+The visitor submits the resulting query. **Available actions** opens
 Home, the independent-site disclosure, and device-model availability. The
 Browser AI shows its unavailable state until an admitted model is connected.
-Tap Red Dog to open the public read-only briefing or hold for local search
-dictation on supported devices. Release the hold or tap the square **Stop**
-in Red Dog's position to finish. The transcript remains editable until submitted.
+Red Dog uses its in-page conversation/availability owner. It does not navigate
+to another FoundUp or claim that a model or microphone is connected.
 
-The expanded viewer keeps the search pill between the video and its
-horizontally scrollable queue. Filtering during playback keeps the active
+The expanded viewer keeps the shared search/actions dock below its
+horizontally scrollable app queue. Filtering during playback keeps the active
 iframe and stays within the HPC collection. The scope-specific options and
 public briefing do not grant member or agent access.
 
