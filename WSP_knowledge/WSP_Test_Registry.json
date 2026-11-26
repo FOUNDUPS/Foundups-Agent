@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1884,
+  "total_tests": 1885,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -948,6 +948,21 @@
       "description": ""
     },
     {
+      "id": "test::holo_index::tests::test_diagnose_index_docs_pipeline",
+      "path": "holo_index/tests/test_diagnose_index_docs_pipeline.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Focused truth-boundary tests for the read-only docs diagnostic."
+    },
+    {
       "id": "test::holo_index::tests::test_doc_type_filtering",
       "path": "holo_index/tests/test_doc_type_filtering.py",
       "owner": "holo_index",
@@ -1379,7 +1394,7 @@
       "path": "holo_index/tests/test_holoindex_memex_evidence_bundle.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-02",
+      "shard_id": "holo-index-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1829,7 +1844,7 @@
       "path": "holo_index/tests/test_qwen_advisor_stub.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

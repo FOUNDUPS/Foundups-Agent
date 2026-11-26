@@ -316,6 +316,34 @@ are bounded. Cache identity is platform-aware and locked; Git calls remain
 outside the lock, so duplicate cold loads are allowed but bounded. Full-path
 intent remains catalog-independent.
 
+### Docs-pipeline diagnostic
+
+`holo_index/scripts/diagnose_index_docs_pipeline.py` is a report-only CLI.
+`--help` performs no diagnostic work. A full run uses the canonical
+SentenceTransformer flat/Hugging Face snapshot resolver without loading the
+model, evaluates docs filters relative to their discovery roots, and observes
+persisted `navigation_docs` metadata through SQLite `mode=ro`/`query_only`.
+It reports target rejection separately from intentional policy exclusions and
+requires exactly one raw, case-sensitive, repository-relative POSIX row for
+each canonical module `README.md` and `INTERFACE.md` target. Canonical roots
+come from bounded read-only `git ls-files`, not the live filesystem; the
+current policy excludes `economy/src`, `foundups/docs`,
+`gamification/_archived_duplicates_per_wsp3`, and `telemetry/feedback` (164 roots at initial Aug 2026 baseline).
+Untracked files cannot alter the target count. Missing,
+duplicate, absolute/mixed, `./`, `../`, backslash, wrong-case, and malformed
+forms produce stable bounded H7 classifications and cannot be normalized into
+healthy evidence. Every `path` row is counted across SQLite string, integer,
+float, boolean, null, and blob representations before typed classification.
+SQLite reads page at 128 rows and fails closed at 4,096 path rows, 4,096 bytes
+per stored value, or 4 MiB cumulative path bytes. Link components and hard
+links are rejected before open; connection, elapsed-query, and VM-step budgets
+fail with stable redacted codes. The path-row SELECT and collection COUNT share
+one explicit read transaction, including under rollback-journal mode, and the
+observer always removes its progress handler, rolls back, and closes. Output
+excludes raw local roots and exception text. The only subprocess is bounded
+read-only `git ls-files`; the CLI has no index, Chroma-write, repository-write,
+repair, or service-control authority.
+
 The JSON machine specification is authoritative. Its complete response schema
 is structurally compiled by `holo_index.query_result_contract_schema` and
 enforced by `holo_index.query_result_contract`: successful owner

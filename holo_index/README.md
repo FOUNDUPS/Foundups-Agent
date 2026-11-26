@@ -71,6 +71,30 @@ root README/INTERFACE blobs. The exact-main refresh and broad RSI query above
 live-accepted that repair without a false Tier-0 target; this prose is never
 promotion evidence.
 
+## Read-only docs-pipeline diagnostic
+
+`python holo_index/scripts/diagnose_index_docs_pipeline.py` diagnoses docs
+source admission, offline model-cache presence, and persisted metadata path
+compatibility without invoking an indexer. `--help` exits before any probe.
+The live metadata observation opens `vectors/chroma.sqlite3` through SQLite
+`mode=ro` plus `query_only`; it never constructs a Chroma client. Reports use
+stable classifications and counts without emitting local checkout/model paths
+or exception text. H7 mirrors the strict consumer contract: every canonical
+module target derived from bounded read-only Git evidence must have exactly one
+raw, case-sensitive, repository-relative POSIX `README.md` row and one
+`INTERFACE.md` row. The tracked policy yielded 164 roots at its Aug 2026 baseline,
+excludes four exact structural/archive/data shelves shared with the pending core
+health gate, and cannot be changed by untracked files. Absolute/mixed forms,
+duplicates, missing rows, dot/traversal prefixes, backslashes, wrong case, and
+malformed rows are rejected; null and non-string values are counted before
+typed classification and cannot disappear from the caps. SQLite path reads use
+128-row pages and fail closed above 4,096 rows, 4,096 bytes per stored value,
+or 4 MiB total path bytes. Link components and hard links are rejected; busy,
+elapsed-query, and VM-step budgets return stable redacted classifications.
+The path rows and total count are read inside one explicit SQLite snapshot;
+progress-handler removal, rollback, and close run on every completion path.
+This diagnostic does not repair, reindex, or restart any service.
+
 ## Closed command-import boundary
 
 Bounded command modules such as `holo_index.cli.commands.bundle_json` load

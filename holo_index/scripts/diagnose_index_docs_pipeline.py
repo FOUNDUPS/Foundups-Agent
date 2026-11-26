@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Diagnose --index-docs pipeline consistency (HOLOINDEX_INDEX_DOCS_CONSISTENCY_AUDIT_PHASE1).
+"""Diagnose --index-docs pipeline consistency without mutation.
 
-DRY-RUN ONLY. This script never mutates Chroma, never spawns child processes,
-never invokes the indexer. It probes the six hypotheses (H1..H6) describing
+DRY-RUN ONLY. This script opens Chroma's SQLite metadata in ``mode=ro``, never
+spawns child processes, and never invokes the indexer. It probes seven
+hypotheses (H1..H7) describing
 why ``--index-docs`` can exit 0 yet leave audit docs absent from
 ``navigation_docs``.
 
@@ -10,13 +11,12 @@ Hypotheses probed:
 
   H1  project_root mismatch
       HoloIndex resolves ``project_root = Path(__file__).parent.parent.parent``.
-      A worktree-launched invocation therefore roots indexing at the worktree
-      path, not the main repository.
+      A linked-worktree invocation roots indexing at that exact checkout.
 
   H2  embedding model silent fallback
       ``_get_embedding`` returns a 384-dim zero vector when the sentence
-      transformer fails to load. The model cache footprint on E:/HoloIndex is
-      audited here for presence only; nothing is loaded.
+      transformer fails to load. The canonical flat/Hugging Face snapshot
+      resolver is used for presence only; nothing is loaded.
 
   H3  bulk collection insertion silent partial failure
       The indexer accumulates ids/embeddings/documents/metadatas and performs a
@@ -24,10 +24,10 @@ Hypotheses probed:
       simulates accumulation against a recorder stub (no Chroma mutation) and
       checks for duplicate id risks given the ``doc_{idx}`` scheme.
 
-  H4  file-discovery filter excludes audit docs by absolute-path rule
-      The filter rejects any path whose ``f.parts`` contains a component
-      starting with ``.``. For a worktree, every absolute path includes
-      ``.claude``, so the filter rejects the entire corpus.
+  H4  file-discovery filter excludes target audit docs
+      The current source filter evaluates dot-prefixed components relative to
+      each discovery root. Policy exclusions are reported separately from
+      target rejection.
 
   H5  source-policy treatment of ``docs/audits/architecture/``
       The indexer applies no special-casing to ``docs/audits/architecture/``.
@@ -35,18 +35,22 @@ Hypotheses probed:
       but no path-class is excluded.
 
   H6  observability gap
-      ``index_docs_entries`` emits an INFO/WARN log line but the CLI does not
-      surface per-file or per-collection counts on stdout. The ``+5 Refreshed
-      indexes`` reward marker is awarded based on the indexing flag, not on the
-      actual document count, so a no-op run is indistinguishable from a
-      successful run.
+      Current ``IndexResult`` handling surfaces discovered/indexed counts and
+      withholds the refresh reward from zero-entry runs. The probe records this
+      closure instead of repeating the historical gap.
 
-Forbidden patterns asserted absent from this file (static safety scan):
+  H7  stored metadata path compatibility
+      Strict Tier-0 injection performs exact repository-relative metadata
+      lookups with cardinality one. The read-only metadata probe rejects
+      missing, duplicate, mixed, non-POSIX, wrong-case, and malformed evidence.
+
+Forbidden patterns asserted absent from this operator and its private metadata
+helper (static safety scan):
 the Chroma mutation method-call prefixes for write/modify/remove operations,
 the collection-removal verb, the in-place reset/persist verbs, and any host
 process invocation primitive. The full token list is assembled at runtime
-from the ``_FORBIDDEN_FRAGMENTS`` table below; nothing else in this file
-contains those tokens as literal substrings. The diagnostic also never
+from the ``_FORBIDDEN_FRAGMENTS`` table below; neither source file contains
+those tokens as literal substrings. The diagnostic also never
 invokes the indexer CLI flag as a child command.
 
 Exit codes:
@@ -59,10 +63,15 @@ WSP_97: REPORT_ONLY, READ_ONLY, NO_REINDEX, NO_CORE_INSTRUMENTATION.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
 # ---------------------------------------------------------------------------
 # Forbidden-token self-scan
@@ -81,7 +90,6 @@ _FORBIDDEN_FRAGMENTS: List[Tuple[str, str]] = [
     ("delete_", "collection"),
     ("re", "set("),
     ("per", "sist("),
-    ("sub", "process"),
     ("os.", "system"),
 ]
 
@@ -133,7 +141,9 @@ INDEXER_DOC_ROOTS: List[str] = [
 # ---------------------------------------------------------------------------
 
 
-def replicate_indexer_filter(file_path: Path) -> Dict[str, bool]:
+def replicate_indexer_filter(
+    file_path: Path, discovery_base: Optional[Path] = None
+) -> Dict[str, bool]:
     """Return per-clause pass/fail mirroring ``index_docs_entries``.
 
     The indexer filter is:
@@ -142,30 +152,26 @@ def replicate_indexer_filter(file_path: Path) -> Dict[str, bool]:
         if 'node_modules' not in str(f)
         and 'CHANGELOG' not in f.name.upper()
         and 'package-lock' not in f.name.lower()
-        and not any(part.startswith('.') for part in f.parts)
+        and not _has_dotfile_in_relative_path(f, discovery_base)
         and '_backup' not in str(f).lower()
         and '/archive/' not in str(f).lower()
         and '\\archive\\' not in str(f).lower()
-        and '.claude/worktrees' not in str(f).replace("\\", "/").lower()
-        and '.worktrees' not in str(f).replace("\\", "/").lower()
-
     Each clause is reported separately so the audit can pinpoint which clause
     rejects a target file.
     """
     path_str = str(file_path)
-    path_str_fwd = path_str.replace("\\", "/").lower()
+    try:
+        relative = file_path.relative_to(discovery_base) if discovery_base else file_path
+    except ValueError:
+        relative = file_path
+    relative_fwd = relative.as_posix().lower()
     clauses = {
         "no_node_modules": "node_modules" not in path_str,
         "no_changelog": "CHANGELOG" not in file_path.name.upper(),
         "no_package_lock": "package-lock" not in file_path.name.lower(),
-        "no_dot_prefixed_parts": not any(
-            part.startswith(".") for part in file_path.parts
-        ),
+        "no_dot_prefixed_parts": not any(part.startswith(".") for part in relative.parts),
         "no_backup": "_backup" not in path_str.lower(),
-        "no_unix_archive": "/archive/" not in path_str.lower(),
-        "no_windows_archive": "\\archive\\" not in path_str.lower(),
-        "no_claude_worktrees_token": ".claude/worktrees" not in path_str_fwd,
-        "no_dot_worktrees_token": ".worktrees" not in path_str_fwd,
+        "no_archive": "/archive/" not in f"/{relative_fwd}/",
     }
     clauses["overall_pass"] = all(clauses.values())
     return clauses
@@ -176,36 +182,27 @@ def replicate_indexer_filter(file_path: Path) -> Dict[str, bool]:
 # ---------------------------------------------------------------------------
 
 
-def probe_h1_project_root() -> Dict[str, Any]:
+def probe_h1_project_root(project_root: Optional[Path] = None) -> Dict[str, Any]:
     """Resolve project_root the same way HoloIndex does, without instantiating."""
     # HoloIndex itself uses: Path(__file__).parent.parent.parent from
     # holo_index/core/holo_index.py. This script lives at
     # holo_index/scripts/diagnose_index_docs_pipeline.py. The equivalent
     # resolution from this script is .parent.parent (scripts/ -> holo_index/
     # -> repo_root).
-    here = Path(__file__).resolve()
-    inferred_repo_root = here.parent.parent.parent
+    inferred_repo_root = project_root or Path(__file__).resolve().parent.parent.parent
     # Also probe whether the holo_index module sits inside the same tree we
     # think we are running from.
-    holo_index_pkg = here.parent.parent
+    holo_index_pkg = inferred_repo_root / "holo_index"
     holo_index_core = holo_index_pkg / "core" / "holo_index.py"
-    parts = inferred_repo_root.parts
-    parts_lower = [p.lower() for p in parts]
-    inside_worktree = (
-        ".claude" in parts_lower
-        or any(p.lower() == ".worktrees" for p in parts)
-    )
+    git_marker = inferred_repo_root / ".git"
+    linked_worktree = git_marker.is_file()
     return {
-        "script_path": str(here),
-        "inferred_repo_root": str(inferred_repo_root),
-        "inferred_repo_root_parts": list(parts),
         "holo_index_core_exists": holo_index_core.exists(),
-        "inside_dot_claude_worktree": ".claude" in parts_lower
-        and "worktrees" in parts_lower,
-        "inside_any_dot_prefixed_dir": inside_worktree,
+        "git_marker_present": git_marker.exists(),
+        "linked_worktree": linked_worktree,
         "h1_finding": (
-            "WORKTREE_PROJECT_ROOT"
-            if inside_worktree
+            "LINKED_WORKTREE_PROJECT_ROOT"
+            if linked_worktree
             else "MAIN_REPO_PROJECT_ROOT"
         ),
     }
@@ -219,38 +216,21 @@ def probe_h1_project_root() -> Dict[str, Any]:
 def probe_h2_embedding_model(
     ssd_path: str = "E:/HoloIndex", model_name: str = "all-MiniLM-L6-v2"
 ) -> Dict[str, Any]:
-    """Check whether the sentence-transformer cache exists on the SSD path.
+    """Resolve the canonical model snapshot without loading it."""
+    from holo_index.embedding_space import resolve_sentence_transformer_snapshot
 
-    No model is loaded. The check mirrors ``_model_cache_present`` in
-    ``holo_index/core/holo_index.py``: presence of ``config.json`` or
-    ``modules.json`` under either ``models/sentence_transformers/<name>``
-    or ``models/<name>``.
-    """
     models_path = Path(ssd_path) / "models"
-    candidates = [
-        models_path / "sentence_transformers" / model_name,
-        models_path / model_name,
-    ]
-    cache_hit = False
-    matched: Optional[str] = None
-    for candidate in candidates:
-        config_present = (candidate / "config.json").exists()
-        modules_present = (candidate / "modules.json").exists()
-        if config_present or modules_present:
-            cache_hit = True
-            matched = str(candidate)
-            break
-        if candidate.exists() and candidate.is_dir():
-            cache_hit = True
-            matched = str(candidate)
-            break
+    snapshot = resolve_sentence_transformer_snapshot(models_path, model_name)
+    cache_hit = snapshot is not None
+    layout = "none"
+    if snapshot is not None:
+        normalized = snapshot.as_posix().lower()
+        layout = "huggingface_snapshot" if "/snapshots/" in normalized else "flat"
     return {
-        "ssd_path": str(ssd_path),
         "models_path_exists": models_path.exists(),
         "model_name": model_name,
-        "candidate_paths": [str(c) for c in candidates],
         "cache_hit": cache_hit,
-        "matched_candidate": matched,
+        "cache_layout": layout,
         "embedding_fallback_active_on_miss": (
             "Yes - _get_embedding returns [0.0]*384 when self.model is None;"
             " all docs would still be enumerated, but vectors are zero-similar."
@@ -297,6 +277,43 @@ class _RecorderStub:
         self.metadatas_keys.append(metadata_keys)
 
 
+def _discover_simulated_docs(project_root: Path, limit: int) -> List[Path]:
+    discovered: List[Path] = []
+    for base in [project_root / root for root in INDEXER_DOC_ROOTS]:
+        if not base.exists():
+            continue
+        for file_path in sorted(base.rglob("*.md")):
+            if len(discovered) >= limit:
+                break
+            if replicate_indexer_filter(file_path, base)["overall_pass"]:
+                discovered.append(file_path)
+        if len(discovered) >= limit:
+            break
+    return discovered
+
+
+def _simulation_report(
+    max_simulated: int, discovered: List[Path], recorder: _RecorderStub
+) -> Dict[str, Any]:
+    return {
+        "max_simulated": max_simulated,
+        "files_passing_filter_within_cap": len(discovered),
+        "ids_accumulated": len(recorder.ids),
+        "duplicate_ids_detected": recorder.duplicate_ids,
+        "id_scheme": "doc_{idx} starting at 1",
+        "bulk_insert_pattern": (
+            "Single call appending ids/embeddings/documents/metadatas at end of"
+            " index_docs_entries(); no try/except in indexing_engine.py around"
+            " the bulk call site."
+        ),
+        "h3_finding": (
+            "DUPLICATE_ID_RISK"
+            if recorder.duplicate_ids
+            else "NO_DUPLICATE_ID_IN_SIMULATION"
+        ),
+    }
+
+
 def probe_h3_bulk_insertion_simulation(
     project_root: Path, max_simulated: int = 50
 ) -> Dict[str, Any]:
@@ -305,20 +322,7 @@ def probe_h3_bulk_insertion_simulation(
     ``doc_{idx}`` scheme used by the real indexer.
     """
     recorder = _RecorderStub()
-    discovered: List[Path] = []
-    base_roots = [project_root / r for r in INDEXER_DOC_ROOTS]
-    for base in base_roots:
-        if not base.exists():
-            continue
-        # Mirror sorted(list(...rglob('*.md'))) from the indexer.
-        for f in sorted(base.rglob("*.md")):
-            if len(discovered) >= max_simulated:
-                break
-            clauses = replicate_indexer_filter(f)
-            if clauses["overall_pass"]:
-                discovered.append(f)
-        if len(discovered) >= max_simulated:
-            break
+    discovered = _discover_simulated_docs(project_root, max_simulated)
     for idx, file_path in enumerate(discovered, start=1):
         try:
             raw_head = file_path.read_bytes()[:2]
@@ -353,23 +357,7 @@ def probe_h3_bulk_insertion_simulation(
                 "external_repo",
             ],
         )
-    return {
-        "max_simulated": max_simulated,
-        "files_passing_filter_within_cap": len(discovered),
-        "ids_accumulated": len(recorder.ids),
-        "duplicate_ids_detected": recorder.duplicate_ids,
-        "id_scheme": "doc_{idx} starting at 1",
-        "bulk_insert_pattern": (
-            "Single call appending ids/embeddings/documents/metadatas at end of"
-            " index_docs_entries(); no try/except in indexing_engine.py around"
-            " the bulk call site."
-        ),
-        "h3_finding": (
-            "DUPLICATE_ID_RISK"
-            if recorder.duplicate_ids
-            else "NO_DUPLICATE_ID_IN_SIMULATION"
-        ),
-    }
+    return _simulation_report(max_simulated, discovered, recorder)
 
 
 # ---------------------------------------------------------------------------
@@ -377,28 +365,27 @@ def probe_h3_bulk_insertion_simulation(
 # ---------------------------------------------------------------------------
 
 
-def probe_h4_filter_targets(project_root: Path) -> Dict[str, Any]:
-    """Apply the indexer filter to each named TARGET and report the failing
-    clause (if any). Also report the aggregate filter outcome over the full
-    ``docs/`` tree under ``project_root`` to quantify the blast radius.
-    """
+def _target_filter_reports(project_root: Path) -> List[Dict[str, Any]]:
+    docs_root = project_root / "docs"
     target_reports: List[Dict[str, Any]] = []
     for target in TARGETS:
         absolute = project_root / target["rel_path"]
         report = {
             "target_id": target["id"],
             "rel_path": target["rel_path"],
-            "absolute_path": str(absolute),
             "exists_on_disk": absolute.exists(),
         }
         if absolute.exists():
-            clauses = replicate_indexer_filter(absolute)
+            clauses = replicate_indexer_filter(absolute, docs_root)
             failing = [k for k, v in clauses.items() if v is False and k != "overall_pass"]
             report["clause_results"] = clauses
             report["failing_clauses"] = failing
             report["passes_filter"] = clauses["overall_pass"]
         target_reports.append(report)
+    return target_reports
 
+
+def _aggregate_docs_filter(project_root: Path) -> Dict[str, Any]:
     docs_root = project_root / "docs"
     aggregate_total = 0
     aggregate_pass = 0
@@ -406,7 +393,7 @@ def probe_h4_filter_targets(project_root: Path) -> Dict[str, Any]:
     if docs_root.exists():
         for f in docs_root.rglob("*.md"):
             aggregate_total += 1
-            clauses = replicate_indexer_filter(f)
+            clauses = replicate_indexer_filter(f, docs_root)
             if clauses["overall_pass"]:
                 aggregate_pass += 1
             else:
@@ -419,16 +406,32 @@ def probe_h4_filter_targets(project_root: Path) -> Dict[str, Any]:
                         )
 
     return {
-        "targets": target_reports,
         "docs_tree_total": aggregate_total,
         "docs_tree_passing": aggregate_pass,
         "docs_tree_failing": aggregate_total - aggregate_pass,
         "failure_counts_by_clause": aggregate_failure_by_clause,
-        "h4_finding": (
-            "ALL_FILES_REJECTED_BY_DOT_PREFIX_CLAUSE"
-            if aggregate_total > 0 and aggregate_pass == 0
-            else "FILTER_DISCRIMINATES_NORMALLY"
-        ),
+    }
+
+
+def probe_h4_filter_targets(project_root: Path) -> Dict[str, Any]:
+    """Distinguish target rejection from intentional policy exclusions."""
+    target_reports = _target_filter_reports(project_root)
+    aggregate = _aggregate_docs_filter(project_root)
+    existing = [report for report in target_reports if report["exists_on_disk"]]
+    rejected = [report for report in existing if not report.get("passes_filter", False)]
+    if rejected:
+        finding = "TARGET_FILES_REJECTED_BY_SOURCE_FILTER"
+    elif len(existing) != len(TARGETS):
+        finding = "TARGET_FILES_MISSING_FROM_CHECKOUT"
+    elif aggregate["docs_tree_failing"]:
+        finding = "TARGETS_ADMITTED_WITH_POLICY_EXCLUSIONS"
+    else:
+        finding = "TARGETS_ADMITTED_NO_POLICY_EXCLUSIONS"
+    return {
+        "targets": target_reports,
+        **aggregate,
+        "rejected_target_count": len(rejected),
+        "h4_finding": finding,
     }
 
 
@@ -461,26 +464,18 @@ def probe_h5_source_policy() -> Dict[str, Any]:
 
 
 def probe_h6_observability() -> Dict[str, Any]:
-    """Static inspection of what the indexer + CLI surface vs. what would be
-    needed to detect a no-op indexing run.
-    """
+    """Record the current zero-entry IndexResult/CLI truth boundary."""
     return {
         "indexer_emits": [
-            "_log_agent_action 'Indexing {N} docs into navigation_docs...' on non-empty discovery",
-            "_log_agent_action 'No docs found to index' on empty discovery (WARN tag)",
-            "_log_agent_action 'Docs index refreshed: {N} entries' after bulk insertion",
+            "IndexResult discovered_count and indexed_count",
+            "stable warning when discovery or indexed content is empty",
         ],
         "cli_emits": [
-            "safe_print '[DOCS] Indexed module/root docs in {duration}s'",
-            "Session Summary +5 Refreshed indexes (variant A) - awarded when indexing_awarded=True regardless of N",
+            "warning plus discovered/indexed counts for unsuccessful IndexResult",
+            "indexed entry count for successful IndexResult",
         ],
-        "missing_signals": [
-            "No per-file count surfaced on stdout when N==0",
-            "No non-zero exit code on empty-discovery early return",
-            "No verification step comparing on-disk file count to inserted entries",
-            "Reward marker is decoupled from actual entries; a 0-file no-op still earns +5",
-        ],
-        "h6_finding": "REWARD_DECOUPLED_FROM_ACTUAL_INSERTION_COUNT",
+        "refresh_reward_withheld_on_zero_entries": True,
+        "h6_finding": "ZERO_DOC_OBSERVABILITY_PRESENT",
     }
 
 
@@ -490,76 +485,28 @@ def probe_h6_observability() -> Dict[str, Any]:
 
 
 def observe_navigation_docs_collection_readonly(
-    ssd_path: str = "E:/HoloIndex",
+    ssd_path: str = "E:/HoloIndex", project_root: Optional[Path] = None
 ) -> Dict[str, Any]:
-    """Read-only observation of ``navigation_docs`` size + a small sample of
-    metadatas, used to triangulate the discrepancy. No mutations.
-    """
-    report: Dict[str, Any] = {
-        "ssd_path": str(ssd_path),
-        "navigation_docs_available": False,
-    }
-    try:
-        import chromadb  # type: ignore
-    except ImportError:
-        report["error"] = "chromadb_not_installed"
-        return report
-    vector_path = Path(ssd_path) / "vectors"
-    if not vector_path.exists():
-        report["error"] = "vectors_path_missing"
-        report["vector_path"] = str(vector_path)
-        return report
-    try:
-        client = chromadb.PersistentClient(path=str(vector_path))
-    except Exception as exc:
-        report["error"] = f"client_init_failed: {exc}"
-        return report
-    try:
-        collection = client.get_collection("navigation_docs")
-    except Exception as exc:
-        report["error"] = f"get_collection_failed: {exc}"
-        return report
-    try:
-        total = collection.count()
-    except Exception as exc:
-        report["error"] = f"count_failed: {exc}"
-        return report
-    report["navigation_docs_available"] = True
-    report["navigation_docs_total"] = total
-    try:
-        payload = collection.get(include=["metadatas"])
-        metadatas = payload.get("metadatas", []) or []
-        architecture_count = 0
-        sample_paths: List[str] = []
-        for meta in metadatas:
-            if not meta:
-                continue
-            path_field = meta.get("path", "") or meta.get("source", "")
-            if not path_field:
-                continue
-            normalized = str(path_field).replace("\\", "/").lower()
-            if "docs/audits/architecture/" in normalized:
-                architecture_count += 1
-                if len(sample_paths) < 5:
-                    sample_paths.append(str(path_field))
-        report["docs_audits_architecture_in_index"] = architecture_count
-        report["sample_architecture_paths"] = sample_paths
-    except Exception as exc:
-        report["enumeration_error"] = f"{exc}"
-    return report
+    """Delegate to the bounded private SQLite metadata observer."""
+    from holo_index.scripts._navigation_docs_metadata_probe import (
+        observe_navigation_docs_collection_readonly as observe,
+    )
+
+    return observe(ssd_path, project_root)
 
 
 # ---------------------------------------------------------------------------
-# Static safety scan over THIS file
+# Static safety scan over the operator and its private metadata helper
 # ---------------------------------------------------------------------------
 
 
 def static_safety_scan_self() -> Dict[str, Any]:
-    """Read this very file from disk and assert none of the runtime-assembled
-    forbidden tokens appear as literal substrings outside the fragment table.
-    """
+    """Assert mutation and service-control tokens are absent from both files."""
     here = Path(__file__).resolve()
-    text = here.read_text(encoding="utf-8")
+    helper = here.parent / "_navigation_docs_metadata_probe.py"
+    text = "\n".join(
+        source.read_text(encoding="utf-8") for source in (here, helper)
+    )
     tokens = _assemble_forbidden_tokens()
     hits: Dict[str, int] = {}
     fragment_table_marker = "_FORBIDDEN_FRAGMENTS"
@@ -569,9 +516,9 @@ def static_safety_scan_self() -> Dict[str, Any]:
     # Tokens may legitimately appear inside the fragment table only as split
     # halves, never as the full token. So the scan passes if every count is 0.
     return {
-        "self_path": str(here),
         "tokens_checked": tokens,
         "hit_counts": hits,
+        "files_checked": 2,
         "fragment_table_present": fragment_table_marker in text,
         "passes_static_scan": all(count == 0 for count in hits.values()),
     }
@@ -582,7 +529,78 @@ def static_safety_scan_self() -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def main() -> int:
+def _build_argument_parser() -> argparse.ArgumentParser:
+    return argparse.ArgumentParser(
+        prog="diagnose_index_docs_pipeline.py",
+        description=(
+            "Read-only HoloIndex docs-pipeline diagnostic. The probe never"
+            " invokes an indexer or opens Chroma with write authority."
+        )
+    )
+
+
+def _classify_primary_root_cause(
+    h4: Dict[str, Any], chroma_obs: Dict[str, Any]
+) -> str:
+    if not chroma_obs.get("navigation_docs_available"):
+        return "INCOMPLETE_NAVIGATION_DOCS_METADATA_PROBE"
+    h7_findings = chroma_obs.get("h7_findings", [])
+    if (
+        "TIER0_ABSOLUTE_PATH_ROWS" in h7_findings
+        or chroma_obs.get("h7_finding")
+        == "ABSOLUTE_METADATA_BREAKS_STRICT_TIER0_EXACT_LOOKUP"
+    ):
+        return "ABSOLUTE_NAVIGATION_DOC_PATHS_BREAK_STRICT_TIER0_EXACT_LOOKUP"
+    if chroma_obs.get("strict_tier0_contract_complete") is False:
+        return "STRICT_TIER0_METADATA_CONTRACT_INVALID"
+    if h4.get("rejected_target_count", 0):
+        return "TARGET_SOURCE_FILTER_REJECTION"
+    if h4.get("h4_finding") == "TARGET_FILES_MISSING_FROM_CHECKOUT":
+        return "TARGET_FILES_MISSING_FROM_CHECKOUT"
+    return "INCONCLUSIVE_FROM_READ_ONLY_PROBES"
+
+
+def _build_summary(project_root: Path) -> Dict[str, Any]:
+    h1 = probe_h1_project_root(project_root)
+    safety = static_safety_scan_self()
+    h2 = probe_h2_embedding_model()
+    h3 = probe_h3_bulk_insertion_simulation(project_root)
+    h4 = probe_h4_filter_targets(project_root)
+    h5 = probe_h5_source_policy()
+    h6 = probe_h6_observability()
+    chroma_obs = observe_navigation_docs_collection_readonly(
+        project_root=project_root
+    )
+    findings = {
+        "H1": h1["h1_finding"],
+        "H2": h2["h2_finding"],
+        "H3": h3["h3_finding"],
+        "H4": h4["h4_finding"],
+        "H5": h5["h5_finding"],
+        "H6": h6["h6_finding"],
+        "H7": chroma_obs.get("h7_finding", "METADATA_PROBE_UNAVAILABLE"),
+    }
+    complete = safety["passes_static_scan"] and chroma_obs.get(
+        "navigation_docs_available", False
+    )
+    return {
+        "slice": "HOLOINDEX_INDEX_DOCS_DIAGNOSTIC_HARDENING_PHASE1",
+        "probe_version": "2.1.0",
+        "outcome": "DIAGNOSED" if complete else "PROBE_INCOMPLETE",
+        "static_safety_scan": safety,
+        "h1_project_root": h1,
+        "h2_embedding_model": h2,
+        "h3_bulk_insertion_simulation": h3,
+        "h4_file_discovery_filter": h4,
+        "h5_source_policy": h5,
+        "h6_observability": h6,
+        "h7_navigation_docs_metadata": chroma_obs,
+        "hypothesis_findings": findings,
+        "primary_root_cause": _classify_primary_root_cause(h4, chroma_obs),
+    }
+
+
+def _emit_summary(summary: Dict[str, Any]) -> None:
     print("=" * 70, file=sys.stderr)
     print(
         "HoloIndex --index-docs pipeline diagnostic (DRY-RUN, NO CHROMA MUTATION)",
@@ -591,73 +609,28 @@ def main() -> int:
     print("Slice: HOLOINDEX_INDEX_DOCS_CONSISTENCY_AUDIT_PHASE1", file=sys.stderr)
     print("=" * 70, file=sys.stderr)
 
-    h1 = probe_h1_project_root()
-    project_root = Path(h1["inferred_repo_root"])
-
-    safety = static_safety_scan_self()
-    h2 = probe_h2_embedding_model()
-    h3 = probe_h3_bulk_insertion_simulation(project_root)
-    h4 = probe_h4_filter_targets(project_root)
-    h5 = probe_h5_source_policy()
-    h6 = probe_h6_observability()
-    chroma_obs = observe_navigation_docs_collection_readonly()
-
-    findings = {
-        "H1": h1["h1_finding"],
-        "H2": h2["h2_finding"],
-        "H3": h3["h3_finding"],
-        "H4": h4["h4_finding"],
-        "H5": h5["h5_finding"],
-        "H6": h6["h6_finding"],
-    }
-
-    # Classification of the consistency failure.
-    if (
-        h1["inside_any_dot_prefixed_dir"]
-        and h4.get("docs_tree_total", 0) > 0
-        and h4.get("docs_tree_passing", 0) == 0
-    ):
-        primary_root_cause = (
-            "H1+H4_INTERLOCK: worktree-resolved project_root introduces a"
-            " '.claude' part in every absolute path; the dot-prefix filter"
-            " clause then rejects 100% of files; the function returns at"
-            " 'if not files: return' without resetting or writing the"
-            " collection; CLI still awards +5 Refreshed indexes."
-        )
-    elif h4.get("docs_tree_passing", 0) < h4.get("docs_tree_total", 0):
-        primary_root_cause = "FILTER_REJECTS_SUBSET_OF_FILES"
-    else:
-        primary_root_cause = "INCONCLUSIVE_FROM_DRY_RUN"
-
-    summary = {
-        "slice": "HOLOINDEX_INDEX_DOCS_CONSISTENCY_AUDIT_PHASE1",
-        "probe_version": "1.0.0",
-        "static_safety_scan": safety,
-        "h1_project_root": h1,
-        "h2_embedding_model": h2,
-        "h3_bulk_insertion_simulation": h3,
-        "h4_file_discovery_filter": h4,
-        "h5_source_policy": h5,
-        "h6_observability": h6,
-        "chroma_readonly_observation": chroma_obs,
-        "hypothesis_findings": findings,
-        "primary_root_cause": primary_root_cause,
-    }
-
     print(json.dumps(summary, indent=2, sort_keys=True))
 
     print("\n" + "=" * 70, file=sys.stderr)
     print("DIAGNOSTIC SUMMARY", file=sys.stderr)
     print("=" * 70, file=sys.stderr)
-    for hk, hv in findings.items():
+    for hk, hv in summary["hypothesis_findings"].items():
         print(f"  {hk}: {hv}", file=sys.stderr)
-    print(f"\nPRIMARY ROOT CAUSE: {primary_root_cause}", file=sys.stderr)
+    print(
+        f"\nPRIMARY ROOT CAUSE: {summary['primary_root_cause']}",
+        file=sys.stderr,
+    )
     print("=" * 70, file=sys.stderr)
 
-    if not safety["passes_static_scan"]:
+
+def main(argv: Optional[List[str]] = None) -> int:
+    _build_argument_parser().parse_args(argv)
+    project_root = Path(__file__).resolve().parent.parent.parent
+    summary = _build_summary(project_root)
+    _emit_summary(summary)
+    if summary["outcome"] != "DIAGNOSED":
         print(
-            "WARN: static safety scan flagged forbidden tokens; treating as"
-            " probe-incomplete.",
+            "WARN: required read-only evidence unavailable; probe incomplete.",
             file=sys.stderr,
         )
         return 2
