@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foundups.org/schemas/tile_graph_patch.v1.json",
+  "title": "PlayFoundups Mall Fractal Tile Graph Patch v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patch_id",
+    "base_graph_etag",
+    "tenant",
+    "op",
+    "target_tile_id",
+    "payload"
+  ],
+  "properties": {
+    "patch_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{4,128}$"
+    },
+    "base_graph_etag": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["012_architect", "public_mall"]
+    },
+    "tenant": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,63}$"
+    },
+    "op": {
+      "type": "string",
+      "enum": [
+        "ADD_BLUE_TILE",
+        "WIRE_SOCKET_EDGE",
+        "RENAME_DISPLAY_LABEL",
+        "PROMOTE_STATE",
+        "REORDER_CHILDREN",
+        "UPDATE_PRIVATE_NOTE"
+      ]
+    },
+    "target_tile_id": {
+      "type": "string",
+      "pattern": "^tile:[a-z0-9_]+:[A-Za-z0-9._-]+$"
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "op": { "const": "ADD_BLUE_TILE" } },
+        "required": ["op"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["display_name"],
+            "anyOf": [
+              { "required": ["tile_id"] },
+              { "required": ["parent_tile_id"] }
+            ],
+            "properties": {
+              "tile_id": {
+                "type": "string",
+                "pattern": "^tile:[a-z0-9_]+:[A-Za-z0-9._-]+$"
+              },
+              "parent_tile_id": {
+                "type": "string",
+                "pattern": "^tile:[a-z0-9_]+:[A-Za-z0-9._-]+$"
+              },
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "tile_kind": {
+                "type": "string",
+                "enum": [
+                  "system_cube",
+                  "opus_series",
+                  "opus_item",
+                  "community_fractal",
+                  "foundup_venture",
+                  "market_override",
+                  "wikitube_stream",
+                  "mockup_cube",
+                  "code_module",
+                  "socket_slot",
+                  "licensable_engine"
+                ]
+              },
+              "visibility_scope": {
+                "type": "string",
+                "enum": ["public", "principal_only"]
+              },
+              "owner_namespace": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{1,63}$"
+              },
+              "action_target": { "type": "object" },
+              "search_keywords": {
+                "type": "array",
+                "items": { "type": "string", "maxLength": 120 }
+              },
+              "author_aliases": {
+                "type": "array",
+                "items": { "type": "string", "maxLength": 120 }
+              },
+              "domain_override_manifest": { "type": "object" },
+              "evidence_status": { "type": "string", "maxLength": 120 },
+              "metadata": { "type": "object" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "op": { "const": "WIRE_SOCKET_EDGE" } },
+        "required": ["op"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "anyOf": [
+              { "required": ["to_tile_id"] },
+              { "required": ["target_id"] }
+            ],
+            "properties": {
+              "to_tile_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "target_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "edge_field": {
+                "type": "string",
+                "enum": [
+                  "imports_tiles",
+                  "used_by_foundups",
+                  "reusable_candidates",
+                  "cross_links",
+                  "collection_refs",
+                  "calls",
+                  "reads_from",
+                  "evaluates",
+                  "runs_through",
+                  "produces_receipt",
+                  "verified_by"
+                ]
+              },
+              "action": {
+                "type": "string",
+                "enum": ["add", "remove"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "op": { "const": "RENAME_DISPLAY_LABEL" } },
+        "required": ["op"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["display_name"],
+            "properties": {
+              "display_name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "op": { "const": "PROMOTE_STATE" } },
+        "required": ["op"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["state"],
+            "properties": {
+              "state": {
+                "type": "string",
+                "enum": ["GREEN", "AMBER", "BLUE", "GRAY", "RED"]
+              },
+              "reason": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "evidence_ref": {
+                "type": "string",
+                "maxLength": 300
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "op": { "const": "REORDER_CHILDREN" } },
+        "required": ["op"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["children_tile_ids"],
+            "properties": {
+              "children_tile_ids": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^tile:[a-z0-9_]+:[A-Za-z0-9._-]+$"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "op": { "const": "UPDATE_PRIVATE_NOTE" } },
+        "required": ["op"]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["note"],
+            "properties": {
+              "note": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              },
+              "category": {
+                "type": "string",
+                "maxLength": 80
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

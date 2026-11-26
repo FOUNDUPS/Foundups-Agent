@@ -11,6 +11,8 @@ mutate Holo replicas or trigger a Holo reindex.
 | `test_shell_core.py` | Manifest validation/discovery, catalog, route, tile, shell boot |
 | `test_api.py` | Dict adapter and default-shell behavior |
 | `test_http_api.py` | FastAPI JSON routes |
+| `test_fractal_tile_graph.py` | Fractal Tile Graph schema, dual scoring (`WSP 15` & `mall_rescue_score`), cycle/DAG validation, repo builder, dual-scope projection, ETag isolation, Sprint 2 `Tools -> Benchmark` walkthrough & 5-question readback, typed edges, duplicate-cluster privacy, context helpers, and public exporter |
+| `test_tile_graph_patch_api.py` | Authenticated atomic `POST /pfmall/tile-graph/patches` & `GET /pfmall/tile-graph`, SQLite WAL concurrency, idempotency, tamper `409`, tenant isolation, WSP 71 leak gate, typed edge patch survival, and regeneration survival |
 | `test_clerk_proposal_intake.py` | Real RSA-signed Clerk-shaped session -> actual HTTP draft route, body/auth/wire bounds; no live provider identity |
 | `test_shell_ui.py` | Static shell and route handoff |
 | `test_member_catalog_export.py` | Canonical member projection/export |
