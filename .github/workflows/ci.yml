@@ -452,7 +452,7 @@ jobs:
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite inventory
       - name: Verify 35 rotation controls in a separate minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite rotation
-      - name: Verify 114 pre-save audit and directive/save/upload boundary controls
+      - name: Verify 115 pre-save audit and directive/save/upload boundary controls
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite directives
       - name: Verify frozen stream requests and calendar occupancy in a separate minimal child
         run: python -I -B .github/scripts/youtube_repair_offline.py --suite calendar

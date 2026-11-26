@@ -1,5 +1,9 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-11-16 — Antifa FM canonical channel lock, shorts-policy scheduled gate, and unverified readback boundary
+
+WSP00/10/11/15/22/50/71/84/97; 16/P1. Enforced canonical Antifa FM channel `UCVSmg5aOhP4tnQ9KFUg97qA` on `CHANNEL_POLICIES["antifafm"]` (`require_expected_channel=True`, `canonical_channel_id="UCVSmg5aOhP4tnQ9KFUg97qA"`, `credential_set_env="YT_UPLOAD_CREDENTIAL_SET_ANTIFAFM"`) so missing pins, FoundUps set-10 mismatches (`UCSNTUXjAgpd4sgWYP0xoJgw`), and relabeled env pins all fail closed. Added `schedule_short(...)` and gated `publish_video(..., publish_at=...)` to require `privacy="private"`, `policy_surface="shorts"` (preserving descriptor SHA256 claims and durable `unknown` observations), and explicit `YT_ALLOW_SCHEDULED_PUBLISH_AT="true"`. Renamed result field to `requested_publish_at` with `schedule_readback_verified=False`. Isolated `YT_012_MANIFEST_*` paths in `test_youtube_publisher_boundary.py`. No live YouTube upload or resident activation executed.
+
 ## 2026-11-02 — Clean picture and adaptive words in both player sizes
 
 WSP00/15/22/50/84/97;15/P1. Governed lexical retrieval retains UNKNOWN freshness

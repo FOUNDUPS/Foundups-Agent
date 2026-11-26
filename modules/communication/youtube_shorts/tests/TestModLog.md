@@ -1,5 +1,9 @@
 # YouTube Shorts TestModLog
 
+## 2026-11-16 — Antifa FM canonical channel lock, shorts-policy publishAt gate, and isolated queue state
+
+Extended `test_youtube_publisher_boundary.py` (with `tmp_path` isolation of `YT_012_MANIFEST_*` state files) and `test_operator_upload_policy.py`: covers missing `YT_UPLOAD_CHANNEL_ID_ANTIFAFM`, relabeled FoundUps env pin with matching FoundUps service, canonical pin with FoundUps service mismatch, `YT_UPLOAD_CREDENTIAL_SET_ANTIFAFM` override, refusal of `publish_at` when `policy_surface!="shorts"` or `YT_ALLOW_SCHEDULED_PUBLISH_AT!="true"`, durable SHA256 `unknown` claim retention on `schedule_short` (`requested_publish_at`, `schedule_readback_verified=False`), and rejection of non-private/naive/empty/past timestamps. 44/44 combined publisher/policy/headless-staging offline cases pass repeatably. No live OAuth or YouTube write claimed.
+
 27 audit correction: compact844×390 was incorrectly assigned a56px tablet floor
 by the width-only harness. The frozen case is a landscape phone with48px floor.
 Corrected only device classification, retained red evidence, and reran unchanged

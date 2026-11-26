@@ -55,9 +55,17 @@ def run_ai_shorts_generator(
     cmd.append(input_ref)
 
     try:
-        subprocess.run(cmd, cwd=str(repo), capture_output=True, check=True)
-    except subprocess.CalledProcessError as e:
-        raise ExternalToolError(f"AI shorts generator failed: {e.stderr.decode(errors='ignore')}")
+        subprocess.run(
+            cmd,
+            cwd=str(repo),
+            capture_output=True,
+            check=True,
+            timeout=600,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+        stderr = e.stderr.decode(errors="ignore") if getattr(e, "stderr", None) else str(e)
+        raise ExternalToolError(f"AI shorts generator failed: {stderr}") from e
 
     latest = _find_latest_short(repo)
     if not latest:
