@@ -3623,6 +3623,26 @@ Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
 - Run Trace and wardrobe grounding receipts now carry semantic required/grounded/missing counts plus a coverage digest.
 - Version 0.3.65 -> 0.3.66 (package.json + EXTENSION_VERSION + README + contract-test assertions).
 
+## 2026-07-13 - REDDOG_PROMPT_LIBRARY_AND_M2M_REGISTRY_AUDIT_PHASE1 (decision-only)
+
+- Audited the prompt/M2M surfaces needed for RedDog to stop relying on 012 copy/paste orchestration.
+- Finding: prompt templates, WSP_99 M2M, prompt fixtures, typed grounding, Fusion quorum, and runtime gates exist, but no canonical executed-prompt library / PromptReceipt / PromptRun / PromptOutcome registry exists.
+- Recorded HoloIndex query-only evidence and `HOLOINDEX_REDDOG_PROMPT_LIBRARY_M2M_REGISTRY_INDEX_GAP_PHASE1`; RedDog runtime remains query-only and WRE/CI owns future prompt-library indexing.
+- Defined the WSP_15 sequence for prompt library contract, examples fixture library, M2M compilation gate, relevance/quorum gate, dry-run storage/retrieval/dispatch, outcome memory, HoloIndex freshness, and runtime consumption.
+
+## 2026-07-13 - REDDOG_PROMPT_LIBRARY_CONTRACT_PHASE1 (decision-only)
+
+- Defined the canonical prompt-library schemas: PromptTemplate, PromptReceipt, PromptRun, PromptOutcome, PromptPatternPromotion, and PromptLibraryFreshnessReceipt.
+- Bound dispatch eligibility to PromptReceipt approval: prompt relevance, Fusion quorum where required, typed grounding, HoloIndex freshness or fail-closed INDEX_GAP, M2M/raw_ref recovery, and no-action attestations.
+- Preserved WSP_99 as the agent-to-agent prompt layer and WSP_109 as a FoundUp domain profile, not a separate prompt registry.
+- Explicitly forbids worktree, shell, OpenClaw, Hermes, PR merge, HoloIndex re-index, and reward-settlement behavior in this contract slice.
+
+## 2026-07-13 - REDDOG_PROMPT_EXAMPLES_FIXTURE_LIBRARY_PHASE1 (non-runtime fixture library)
+
+- Added a pure-data prompt example fixture library for RedDog prompt authoring: positive WSP_109, HoloIndex, and runtime diagnostic prompts plus negative fixtures for missing Worker Prompt, wrong-slice drift, authority bypass, and external-research misclassification.
+- Added validation helpers and tests proving stable IDs, deterministic digests, positive/negative coverage, domain coverage, ASCII cleanliness, and no runtime side-effect imports.
+- Runtime consumption remains SPECIFIED_NOT_IMPLEMENTED; the extension does not yet retrieve or dispatch these examples.
+
 ## 2026-07-13 - REDDOG_DAEMON_PROMPT_AUTHORING_OVERRIDE_PHASE1 (prompt requests override log fast path, 0.3.65)
 
 - Fixed prompt-authoring requests that include DAEmon/log output so they no longer route to the instant local diagnostic fast path.
