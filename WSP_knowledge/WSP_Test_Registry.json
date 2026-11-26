@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1856,
+  "total_tests": 1859,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -2397,6 +2397,19 @@
       "description": "Request-truth contract tests for the exact OpenRouter Kimi K3 route."
     },
     {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_lego_scaffolding_benchmark_protocol",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_lego_scaffolding_benchmark_protocol.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline unit tests for Lego scaffolding benchmark protocol (mocks only)."
+    },
+    {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_audio_timing_benchmark",
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_audio_timing_benchmark.py",
       "owner": "modules/ai_intelligence/ai_gateway",
@@ -2827,7 +2840,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_openrouter_scheduled_discovery.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -16508,6 +16521,19 @@
       "description": "Runtime wiring tests for epoch ledger and Layer-D anchoring."
     },
     {
+      "id": "test::modules::foundups::simulator::tests::test_lego_topology_fixture_adapter",
+      "path": "modules/foundups/simulator/tests/test_lego_topology_fixture_adapter.py",
+      "owner": "modules/foundups/simulator",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline deterministic tests for `lego_topology_fixture_adapter`."
+    },
+    {
       "id": "test::modules::foundups::simulator::tests::test_lifecycle_stage_and_market",
       "path": "modules/foundups/simulator/tests/test_lifecycle_stage_and_market.py",
       "owner": "modules/foundups/simulator",
@@ -16631,7 +16657,7 @@
       "path": "modules/foundups/simulator/tests/test_smartdao_runtime_events.py",
       "owner": "modules/foundups/simulator",
       "suite_class": "unit",
-      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "shard_id": "modules-foundups-simulator-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21547,6 +21573,21 @@
       "description": ""
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_lego_block_projection",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_lego_block_projection.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline tests for WRE Lego block compiler, catalog reconciler, and conservative triage."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_wre_pytest_exact_id_collector",
       "path": "modules/infrastructure/wre_core/tests/test_wre_pytest_exact_id_collector.py",
       "owner": "modules/infrastructure/wre_core",
@@ -21737,7 +21778,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_test_registry.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

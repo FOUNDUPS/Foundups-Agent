@@ -52,6 +52,40 @@ validates the envelope before any pre-action, LLM call, or post-action,
 returning `gates_triggered=["wsp00_envelope:<CODE>"]` on rejection while
 preserving backwards compatibility for callers without envelopes.
 
+## Offline Lego block compiler, catalog reconciler & conservative triage — 2026-11-18
+
+`src/wre_lego_block_projection.py` exposes pure static AST block compilation and
+catalog reconciliation (`SCHEMA_VERSION = "wre_lego_block_projection.v1"`,
+`AGI_SCAFFOLDING_HYPOTHESIS = "HYPOTHESIS_UNDER_TEST"`), reusing
+`wre_test_registry_ast.module_effects` / `import_aliases` / `ast.parse` without
+importing or executing scanned target code:
+
+- `compute_exact_byte_provenance(checkout_bytes, committed_blob_bytes=None) -> ExactByteProvenance`:
+  records `git_blob_oid_sha1` (`blob <len>\0<bytes>` SHA-1), `git_blob_sha256`
+  (committed Git blob SHA-256), `checkout_bytes_sha256` (on-disk bytes SHA-256),
+  and `byte_status` (`CLEAN_EXACT_MATCH` | `EOL_CRLF_DRIFT` | `MODIFIED_CONTENT` |
+  `UNTRACKED`), keeping CRLF drift distinct from `CLEAN_EXACT_MATCH`.
+- `resolve_block_identity(...) -> BlockIdentity`: preserves rename-stable
+  `canonical_id` across file/directory renames via `RenameAliasRecord` lineage,
+  `foundup_id`, skill frontmatter `name`, `alias_map`, `git_rename_pairs`, and
+  recursive `parent_block_id` (`domain -> module -> subblock -> file`).
+- `project_lego_blocks(repo_root, ..., deletion_authorized=False) -> LegoProjectionReport`:
+  emits typed 1:N / M:N `CatalogRelation` edges (`FOUNDUP_TO_MODULE`,
+  `FOUNDUP_TO_MANIFEST`, `MODULE_TO_TEST_SHARD`, `SHARD_TO_TEST_FILE`,
+  `BLOCK_IMPORTS_BLOCK`), `CatalogDiagnostic` records
+  (`DUPLICATE_MANIFEST_FOUNDUP_ID`, `EXTERNAL_FOUNDUP_NO_LOCAL_MODULE`,
+  `MODULE_WITHOUT_FOUNDUP`, `MODULE_WITHOUT_TEST_SHARD`,
+  `QUARANTINED_TEST_ENTRY`), and conservative `BlockTriageRecord` classifications
+  (`CANDIDATE_ZERO_STATIC_CALLERS` vs `UNKNOWN_DYNAMIC_OR_EXTERNAL_CONSUMER` /
+  `INTENTIONAL_ENTRYPOINT_OR_STUB` with `contrary_evidence`, enforcing
+  `deletion_authorized=False`).
+- `admit_verified_capability_receipt(block, receipt, *, current_dependency_lock_sha256=None) -> LegoBlockRecord`:
+  scopes verification strictly to `capability_id` (`VERIFIED_CAPABILITY` vs
+  `STALE_PROVENANCE_MISMATCH`), rejecting `SIMULATED_TRANSITION_ONLY` with
+  `ValueError("simulated_evidence_cannot_verify_runtime")`.
+- `to_canonical_json(projection) -> str` and `to_m2m_compact(projection) -> str`:
+  deterministic canonical JSON (`projection_sha256`) and WSP 99 M2M serializers.
+
 ## Scientific repair operation, baseline verifier & canary orchestrator — 2026-11-16
 
 `src/repair_operation_contract.py` defines `ScientificRepairOperation`,

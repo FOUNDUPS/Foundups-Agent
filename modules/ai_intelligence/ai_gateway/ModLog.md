@@ -11,6 +11,21 @@ records exact source pins; existing native qualification history is retained.
 Validation: source/doc review and Markdown diff/link checks. No code, provider
 call, benchmark run, route/default change or new runtime receipt. WSP 15/22/50/84/97/110.
 
+## 2026-11-18 — Offline Lego scaffolding benchmark protocol
+
+Added `src/lego_scaffolding_benchmark_protocol.py` and
+`tests/test_lego_scaffolding_benchmark_protocol.py` composing
+`run_model_combination_benchmark` across the 4 stratified Lego task families
+(`dev = 8 (2x4)`, `held_out_a = 12 (3x4)`, `held_out_b = 12 (3x4)`). Enforces
+sealed `AuthorVisibleTaskSpec` projection, `MatchedAggregateBudget` across swarm
+member turns (`aggregate_budget_exceeded` sample rejection), single-axis
+`validate_controlled_ablation`, separate `provider_billed_usd` vs
+`subscription_quota_delta_pct` + `unmeasured_unknowns` accounting, cold
+`evaluate_fresh_session_transfer` leakage/regression gates, exact-byte
+`verify_rollback_restore`, and `AGI_SCAFFOLDING_HYPOTHESIS_STATUS = "HYPOTHESIS_UNDER_TEST"`.
+Seven offline mock unit tests pass alongside 13 existing harness tests; zero
+live model, GGUF/LM Studio, CLI, credential, or network calls. WSP 11/22/48/50/62/84/95/97/99/110.
+
 ## 2026-11-16 - Preserve distinct audio observations with identical output bytes
 
 Independent review of PR2399 found response-digest-only lookup discarded case or
