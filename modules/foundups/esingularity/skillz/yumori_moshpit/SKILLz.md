@@ -207,8 +207,9 @@ receipts in the Moshpit. Do not create another mailbox or activity ledger.
    applicable archived and trashed sent mail. Exhaust the relevant pagination;
    a snippet-only search is not complete coverage. Read disputed messages and
    their full threads without importing unrelated correspondence.
-2. Reconcile the union of scoped recipient, subject and distinctive-body
-   searches with existing Email Log IDs and Moshpit evidence children. Report
+2. Reconcile the primary-ID inventory from step 1, together with the union of
+   scoped recipient, subject and distinctive-body searches, against existing
+   Email Log IDs and Moshpit evidence children. Report
    missing IDs, duplicate canonical entries, incorrect local dates, unresolved
    lineage and state conflicts. State coverage totals and exclusions explicitly.
 3. Compare surviving drafts with actual provider-Sent envelopes, recipient
@@ -218,8 +219,8 @@ receipts in the Moshpit. Do not create another mailbox or activity ledger.
    require provider reconciliation; a surviving draft proves neither sent nor
    unsent. Missing log evidence never authorizes a resend.
 4. When a separately authorized correspondence action has occurred, verify its
-   actual provider state and metadata before reconciling one existing Email Log
-   event and one Moshpit evidence receipt. Use the native Docs revision/readback
+   actual provider state and metadata before upserting one event in the existing
+   Email Log and one Moshpit evidence receipt. Use the native Docs revision/readback
    guards above. Backfill beneath the actual event day, preserving historical
    narratives, source links and explicit supersession. Read back the destination
    to verify the receipt appears once with the correct date, lineage and state.
