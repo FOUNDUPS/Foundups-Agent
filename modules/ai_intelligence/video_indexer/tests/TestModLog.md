@@ -1,5 +1,40 @@
 # Video Indexer Tests - ModLog
 
+## 2026-11-16 — Local archive retrieval pilot & fail-closed DatasetBuilder regressions
+
+- Updated `test_index_integrity.py::test_dataset_builder_rejects_gemini_summary_but_accepts_verbatim`
+  to assert fail-closed rejection of raw unlabeled lists, unlabeled `segments` dicts,
+  `training_eligible=False` with `youtube_transcript`/`whisper_transcript`,
+  contradictory `indexer="gemini"` with `youtube_transcript` (`contradictory_metadata`),
+  and explicit speaker attribution on valid verbatim fixtures.
+- Added `test_local_archive_retrieval_and_dataset_builder.py` (21 offline synthetic test
+  items, WSP 62 compliant `< 800` lines / `<= 50` lines per function, zero private
+  paths/transcripts, zero network/ASR):
+  - `DatasetBuilder` & `transcript_admission_guard` eligibility/provenance veto order,
+    raw list & legacy dict rejection, music-channel exclusion, guest speaker filtering
+    with preserved context, untimed `None` timestamp handling, and `process_folder`
+    rejection/corrupt-JSON accounting.
+  - `LocalArchiveRetrievalPilot` `<= 10` record hard cap (`ValueError` on `>10` cap or
+    strict list, bounded truncation on directory scan), known-answer & stopword/OOV
+    adversarial not-found queries (including multi-term OOV L2-attenuation regression)
+    across JSON/SRT/VTT/JSONL/JSON3/TXT, `BLOCKED_MISSING_TRANSCRIPT` on
+    `scheduler_stub`/`.info.json`/`.mp4` with `subprocess.run` forbidden, genuine vs
+    partial vs `ABSENT` (`None`) timestamps, and lexical/CJK fallback.
+  - Five dedicated adversarial seam regressions across both `DatasetBuilder` and
+    `LocalArchiveRetrievalPilot`: (1) contradictory cross-layer metadata, (2) summaries
+    mislabeled as transcripts, (3) missing speakers never inventing `"012"` (preserving
+    `"unknown"` / `None`), (4) mixed speakers & `require_verified_speaker` attribution,
+    and (5) invalid (`NaN`, `Inf`, `bool`, `"01:99"`, inverted, dangling end) and
+    nonmonotonic timestamps (`TIMESTAMP_INVALID` / `TIMESTAMP_NONMONOTONIC` without
+    `&t=` deep links).
+- Fresh execution evidence (`python -B -m pytest -p no:cacheprovider`):
+  - `test_local_archive_retrieval_and_dataset_builder.py` (21) + `test_index_integrity.py` (5): **26 passed**
+  - `test_shorts_indexing_pass.py` + `test_action_surface.py` + `test_indexer_scheduler_order.py`: **32 passed**
+  - `modules/ai_intelligence/video_indexer/tests/ -m "not integration" -q`: **178 passed, 13 deselected**
+- Scope boundary: offline synthetic unit validation only (code-seam proofs kept separate
+  from direct archive file inspection); merge/deployment (pending) and blocked model
+  training / verbatim archive transcription remain separate gates. WSP 00/5/6/22/50/62/84/97.
+
 ## 2026-11-07 — No unattended paid enrichment after Studio indexing
 
 Extend the existing actual-cycle test with key-absent/key-present cases, a

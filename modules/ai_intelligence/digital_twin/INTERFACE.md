@@ -1,5 +1,46 @@
 # Digital Twin - Public Interface
 
+## VoiceLoRATrainer offline training contract (2026-11-16)
+
+```python
+from modules.ai_intelligence.digital_twin.src.lora_trainer import (
+    InspectedVoiceRecord,
+    ValidatedVoiceRecord,
+    VoiceDataset,
+    VoiceLoRATrainer,
+    VoiceTrainingConfig,
+    inspect_sft_record,
+    load_and_validate_jsonl,
+    load_and_validate_records,
+    validate_sft_record,
+)
+
+config = VoiceTrainingConfig(
+    base_model="Qwen/Qwen2.5-1.5B-Instruct",
+    data_path="training_data/nemo_test/voice_sft.jsonl",
+    local_files_only=True,
+    trust_remote_code=False,
+    eval_ratio=0.2,
+    split_seed=42,
+    require_verified_speaker=True,
+    require_explicit_admission=True,
+)
+trainer = VoiceLoRATrainer(config)
+readiness = trainer.check_runtime_readiness()
+inspected = inspect_sft_record({"user": "q", "assistant": "Unlabeled text."}, line_num=1)
+```
+
+### Security, direct-loader admission, diagnostic inspection, masking, and evaluation invariants
+- **Supply-chain & offline gate (WSP 71)**: `VoiceTrainingConfig.trust_remote_code` must be the exact boolean `False`; passing or mutating `True` (or any non-bool) raises `ValueError`. `local_files_only` defaults to `True`. Both `AutoTokenizer.from_pretrained` and `AutoModelForCausalLM.from_pretrained` enforce `trust_remote_code=False` and `local_files_only=config.local_files_only`.
+- **Direct fail-closed training admission (`src/lora_record_validator.py` & `src/lora_trainer.py`)**: `VoiceLoRATrainer` does not assume upstream `DatasetBuilder` gating. `require_verified_speaker=True` and `require_explicit_admission=True` are locked invariants in `VoiceTrainingConfig.validate()` (re-checked in `load_data()` and `train()`) and in `validate_sft_record()`, `_validate_record()`, `load_and_validate_records()`, and `load_and_validate_jsonl()` (passing `False` or non-bool raises `ValueError`). Every training record must carry all 5 explicit proofs: (1) `training_eligible is True`, (2) allowed verbatim provenance (`VERBATIM_SOURCE_FAMILIES`, zero disallowed/summary/conflict signals), (3) positive boolean consent (`consent`/`training_consent`/`voice_consent is True`), (4) verified principal speaker (`speaker` in `PRINCIPAL_SPEAKER_IDS` plus `speaker_verified is True` or `speaker_status == "verified"`), and (5) non-placeholder source/video `group_id` (`video_id`/`source_id`/`source_video`/`source` not in `PLACEHOLDER_GROUP_IDS`). Rows also fail closed with 1-based line numbers on malformed or non-finite (`NaN`/`Infinity`) JSON, empty files, non-dicts, blank `assistant` targets, cross-container contradictions (`transcript_source`, provenance family, `channel`, `consent`, `speaker`, `video_id`, timestamps), restricted music channels (`antifafm`, `ravingantifa`, `ffcpln_music`), summaries mislabeled as verbatim transcripts (`gemini*` models, summary payload keys, `is_verbatim=False`, or 3rd-person summary phrasing), mixed/non-012 speakers, and invalid/boolean/negative/colon-overflow (`"01:99"`)/inverted/dangling-end/nonmonotonic timestamps.
+- **Read-only diagnostic inspection vs lineage non-fabrication**: `inspect_sft_record(record, line_num) -> InspectedVoiceRecord` inspects untrusted or legacy rows without raising on missing metadata, preserving `speaker=None, speaker_status="unknown"` and `t_start=None, t_end=None, timestamp_status="unknown"` (never inventing `"012"` or `0.0`) while reporting `admissible_for_training: bool` and `rejection_reasons: tuple[str, ...]`. On admitted records without timestamps, `ValidatedVoiceRecord` and `VoiceDataset.record_lineage` likewise preserve `t_start=None, t_end=None, timestamp_status="unknown"` alongside verified `speaker` and `speaker_status="verified"`.
+- **Structural metadata scope & legacy producer boundary**: JSON metadata validation verifies explicit structural provenance/consent/speaker claims only — it does not prove cryptographic or biometric speaker authenticity. Legacy direct JSONL producers (`modules/ai_intelligence/video_indexer/src/nemo_data_builder.py` and `src/lora_data_converter.py`) omit required admission fields (and `NemoDataBuilder` defaults missing `video_id` to `"unknown"`) and are deterministically rejected at `VoiceLoRATrainer.load_data()` until upgraded.
+- **Causal LM label masking**: `load_data()` masks `system`, `user`, and assistant-header prompt tokens plus all `attention_mask == 0` padding positions to `-100` (`IGNORE_INDEX`), supervising only assistant response tokens (preserving the assistant's closing EOS token even when `pad_token_id == eos_token_id`). Examples whose prompt length leaves zero supervised assistant tokens after `max_seq_length` truncation raise `ValueError` instead of producing all-`-100` `NaN` loss.
+- **Group-disjoint held-out evaluation**: `load_data()` partitions examples into `trainer.train_dataset` and `trainer.eval_dataset` (`trainer.dataset` aliases `train_dataset`) grouped strictly by validated non-placeholder `group_id` (no per-row `__row_{idx}__` fallback in `_split_grouped_examples`) so segments from the same video never leak across train and eval. Datasets with `< 2` distinct groups fail closed (`ValueError`). `train()` wires `eval_dataset=self.eval_dataset` and `eval_strategy="epoch"` into `Trainer` / `TrainingArguments`, guards `fp16` and `paged_adamw_8bit` on CUDA + `bitsandbytes` availability, and CLI `main()` requires explicit `--confirm-consent`.
+- **Implementation vs offline evaluation vs deployment status**: Contract implemented in `src/lora_trainer.py` and `src/lora_record_validator.py`; verified offline via `105/105` unit tests in `tests/test_lora_trainer.py` (`258/258` across `digital_twin/tests/`) using synthetic fixtures and stub tokenizers/trainers; live QLoRA training and adapter deployment are **not executed / blocked** pending CUDA GPU hardware, `peft`/`bitsandbytes`/`accelerate` installation, verified verbatim corpus audit, and explicit 012 authorization.
+
+---
+
 ## VoiceMemory optional retrieval (2026-11-05)
 
 ```python

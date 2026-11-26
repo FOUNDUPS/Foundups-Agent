@@ -1,0 +1,105 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "87787840233c8660b1612873bfe99a027f68c772"
+  },
+  "execution_id": "LOCAL_YOUTUBE_ARCHIVE_RETRIEVAL_PILOT",
+  "execution_plane": "local_worktree_offline",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_10_State_Save_Protocol.md",
+      "WSP_framework/src/WSP_11_WRE_Standard_Command_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_71_Secrets_Management_Protocol.md",
+      "WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md",
+      "WSP_framework/src/WSP_77_Agent_Coordination_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+      "WSP_framework/src/WSP_99_M2M_Prompting.md"
+    ],
+    "retrieve_evidence": [
+      "Executed lexical HoloIndex owner queries via scripts/reddog_holoindex_owner_query_once.py with include_bundle=true for modules/ai_intelligence/video_indexer and modules/ai_intelligence/digital_twin, preserving freshness=UNKNOWN and index_gap_detected=true without reindexing.",
+      "Strictly separated code-seam inspection (verified at base 87787840233c8660b1612873bfe99a027f68c772, primary checkout 45267ddabb1e714aca6cfe6233f5a2daf5b836ca, and pre-delta checkpoint d9d8d4450cab656c1f1559524f5ddef11c291abf) from independent read-only on-disk artifact inspection (confirming zero verbatim YouTube/Whisper transcripts in local video_index JSONs, 3rd-person Gemini summary prose in legacy voice_sft.jsonl, CPU-only torch 2.11.0+cpu, and missing peft/bitsandbytes/accelerate packages).",
+      "Qualified staged Gemini Takeout scope read-only against official Google Takeout selector semantics (support.google.com/gemini/answer/16920332) and existing staging catalogs (archive_members_20260914T192242Z.sqlite3 with 59,538 outer members / 58,087,155,014 expanded bytes; activity_search.sqlite3 with 56,581 rows, training_eligible=0 on all rows): Takeout/Gemini/ holds only 1 custom Gem definition (1,795 B) and an empty scheduled-actions stub (11 B) with zero conversation history, whereas Takeout/My Activity/Gemini Apps/ holds individual activity log events (MyActivity.json 78,359,686 B, 56,581 events) plus 59,280 sibling binaries (51,908 .wav voice prompts [33.53 GB], 6,754 unextracted nested .zip blobs [23.61 GB], 341 .png, 228 .jpg, 36 extensionless blobs, 12 .mp4, 1 .pdf)."
+    ],
+    "research": [
+      "Inspected modules/ai_intelligence/video_indexer/src/dataset_builder.py, cli.py, src/action_surface.py, and holo_index/core/video_search.py plus modules/ai_intelligence/digital_twin/src/voice_memory.py, src/lora_trainer.py, and src/lora_data_converter.py at base 87787840233c8660b1612873bfe99a027f68c772 and pre-delta d9d8d4450cab656c1f1559524f5ddef11c291abf.",
+      "Audited five adversarial admission/retrieval seams across both modules: contradictory cross-layer metadata, summaries mislabeled as verbatim transcripts, missing speaker attribution ('012' fabrication), mixed/unverified speaker attribution, and invalid/inverted/dangling/nonmonotonic timestamps.",
+      "Verified exact Gemini SQLite ingestion boundaries and bounded <=10-sample + SQL aggregate audit: activity_search.sqlite3 ingested solely Takeout/My Activity/Gemini Apps/MyActivity.json (56,581 rows spanning 2025-01-07T07:27:25.097Z to 2026-09-11T22:36:15.756Z, 0 null/malformed timestamps, 21 year-months, 23 gaps >=72h up to 48.02d and 32.68d) and excluded Takeout/Gemini/, Takeout/Gemini in Workspace/Conversation History/ (7 JSON-in-.txt multi-turn thread files, 311,944 B, 148 ordered user/system turn pairs from 2026-03-10..2026-08-31), Takeout/My Activity/AI Mode/ (10 events), Takeout/NotebookLM/ (6 notebooks, 203 members), and 17 other My Activity subproducts (29,215 records)."
+    ],
+    "micro_pass": [
+      "modules/ai_intelligence/video_indexer/tests/test_local_archive_retrieval_and_dataset_builder.py (21 cases) and tests/test_index_integrity.py (5 cases): 26 passed offline covering <=10 record cap, BLOCKED_MISSING_TRANSCRIPT handling, OOV-attenuated TF-IDF scoring, contradictory metadata, disguised summaries, non-fabricated speaker_status ('verified'/'unverified_label'/'unknown'), mixed speakers, and invalid/nonmonotonic timestamps.",
+      "modules/ai_intelligence/digital_twin/tests/test_lora_trainer.py: 105 passed offline covering trust_remote_code=False and local_files_only=True enforcement, locked direct-loader fail-closed admission requiring all 5 explicit proofs (training_eligible=True, allowed verbatim provenance, boolean consent=True, verified principal speaker, and non-placeholder group_id without per-row fallback) across unlabeled and NemoDataBuilder/lora_data_converter-shaped rows, read-only inspect_sft_record() preservation of None/'unknown' without fabricating '012' or 0.0, non-finite/malformed JSONL rejection, cross-container metadata contradictions, mislabeled summary models/payloads/3rd-person prose, missing/mixed/unverified speaker rejection, invalid/colon-overflow/inverted/dangling/nonmonotonic timestamp rejection, -100 prompt and padding masking when pad_token_id == eos_token_id, overlong-prompt NaN guard, and deterministic video_id/source_id group-disjoint eval_dataset + eval_strategy=epoch wiring."
+    ],
+    "macro_pass": [
+      "modules/ai_intelligence/video_indexer/tests/ (-m 'not integration'): 178 passed, 13 deselected; youtube-selected-batch: 32 passed.",
+      "modules/ai_intelligence/digital_twin/tests/: 258 passed, 0 failed, 0 skipped; modules/infrastructure/wre_core/tests/test_wre_test_registry.py and scripts/tests/test_generate_reddog_backend_manifest.py: 48 passed."
+    ],
+    "hard_think": [
+      "Enforced epistemological separation: code inspection proves code-level admission/attribution seams only, whereas actual corpus contamination is established solely from direct read-only file inspection, and structural JSON metadata checks do not prove cryptographic/biometric speaker authenticity.",
+      "Closed direct-loader bypasses in VoiceLoRATrainer where upstream producers (NemoDataBuilder, lora_data_converter.py) write JSONL without DatasetBuilder: separated read-only inspect_sft_record() (preserving None/'unknown' without inventing '012' or 0.0) from locked fail-closed training admission requiring all 5 explicit proofs and non-placeholder group_id, while preventing CausalLM loss contamination or cross-split video_id leakage.",
+      "Proved 56,581 FTS rows in activity_search.sqlite3 != complete Gemini chat history: (1) user/assistant partition has 55,933 Prompted rows with non-empty response, 460 Prompted rows with empty response, and 188 non-prompt action rows (Used Gemini Apps=117, Created=49, Gave=16, Cleared=2, Selected=2; 646 total empty-response rows), while HTML-to-text stripping drops code fences/language tags (614 <pre>, 1,255 <code>), table delimiters (487 <table>), link hrefs (280 <a>), and Canvas/Gem structure; (2) 51,078 rows carry 59,280 attachedFiles references (58,956 resolve on disk; 324 across 175 rows missing from Takeout ZIP) plus 194 imageFile refs (73 present, 121 missing) ignored by attachments_count; (3) SQLite drops all 56,469 web thread URL entries (986 distinct threads), attachedFiles filenames, imageFile, subtitles, and activityControls, while raw MyActivity.json itself lacks turn indices, branching/edits, model versions, and active Gem IDs, leaves 6,754 nested .zip blobs unextracted, reflects Account Activity retention/deletion gaps, and excludes Workspace/AI Mode/other-account chats."
+    ],
+    "dialectic_sweep": [
+      "Compared heavyweight ChromaDB/SentenceTransformer/ASR pipelines and live QLoRA runs against a dependency-light local scikit-learn TF-IDF <=10-record retrieval pilot plus modular fail-closed DatasetBuilder/transcript_admission_guard and VoiceLoRATrainer/lora_record_validator contracts.",
+      "Rejected auto-transcribing raw media archives, equating My Activity > Gemini Apps FTS rows with thread-complete Gemini conversation exports, inventing principal speaker attribution on unlabeled segments, downloading remote HuggingFace code/weights, or running CPU/unconsented LoRA training."
+    ],
+    "first_principles": [
+      "Verified speaker attribution, product-specific Takeout provenance, and actual transcript/timestamp evidence must remain distinct from default labels or lossy activity indexes: unknown speaker stays None/'unknown' (never '012'), absent timing stays None/'unknown' (never 0.0), and My Activity event logs remain non-equivalent to structured multi-turn chat transcripts.",
+      "Ground-truth voice training requires verified verbatim transcripts, explicit principal consent, speaker diarization, and CUDA + 4-bit quantization dependencies; until all prerequisites exist, live training remains blocked while offline admission, masking, and group-split invariants are deterministically verified."
+    ],
+    "execute": [
+      "modules/ai_intelligence/video_indexer/src/transcript_admission_guard.py",
+      "modules/ai_intelligence/video_indexer/src/local_archive_parsers.py",
+      "modules/ai_intelligence/video_indexer/src/local_archive_retrieval.py",
+      "modules/ai_intelligence/video_indexer/src/dataset_builder.py",
+      "modules/ai_intelligence/video_indexer/src/action_surface.py",
+      "modules/ai_intelligence/video_indexer/cli.py",
+      "modules/ai_intelligence/video_indexer/tests/test_index_integrity.py",
+      "modules/ai_intelligence/video_indexer/tests/test_local_archive_retrieval_and_dataset_builder.py",
+      "modules/ai_intelligence/digital_twin/src/lora_record_validator.py",
+      "modules/ai_intelligence/digital_twin/src/lora_trainer.py",
+      "modules/ai_intelligence/digital_twin/tests/test_lora_trainer.py"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_10",
+    "WSP_11",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_71",
+    "WSP_73",
+    "WSP_77",
+    "WSP_84",
+    "WSP_97",
+    "WSP_99"
+  ],
+  "compliance_evidence": [
+    "Isolated worktree branch feat/local-youtube-archive-retrieval-pilot-20261116 anchored at base 87787840233c8660b1612873bfe99a027f68c772; primary checkout preserved untouched.",
+    "Zero model downloads, zero network/API calls, zero media decoding or Whisper ASR runs, zero live LoRA training, and zero private archive paths or raw transcripts/prompts committed to Git.",
+    "Live LoRA/QLoRA training, Gemini activity training admission (training_eligible=0 across all 56,581 rows), and production deployment remain explicitly BLOCKED pending verbatim transcripts, principal consent, speaker diarization, CUDA PyTorch runtime, and peft/bitsandbytes/accelerate installation.",
+    "modules/ai_intelligence/video_indexer/README.md",
+    "modules/ai_intelligence/video_indexer/INTERFACE.md",
+    "modules/ai_intelligence/video_indexer/ROADMAP.md",
+    "modules/ai_intelligence/video_indexer/ModLog.md",
+    "modules/ai_intelligence/video_indexer/tests/README.md",
+    "modules/ai_intelligence/video_indexer/tests/TestModLog.md",
+    "modules/ai_intelligence/digital_twin/README.md",
+    "modules/ai_intelligence/digital_twin/INTERFACE.md",
+    "modules/ai_intelligence/digital_twin/ROADMAP.md",
+    "modules/ai_intelligence/digital_twin/ModLog.md",
+    "modules/ai_intelligence/digital_twin/tests/README.md",
+    "modules/ai_intelligence/digital_twin/tests/TestModLog.md",
+    "WSP_knowledge/WSP_Test_Registry.json"
+  ]
+}
