@@ -1,12 +1,30 @@
 # Video Indexer Roadmap
 
-**WSP Compliance**: WSP 27 (DAE Architecture), WSP 77 (Agent Coordination)
-**Current Version**: V0.31.0 (2026-09-21)
-**Status**: PRODUCTION READY
+**WSP Compliance**: WSP 27 (DAE Architecture), WSP 77 (Agent Coordination), WSP 97 (Truth Boundary)
+**Current Version**: V0.32.0 (2026-11-16)
+**Status**: IMPLEMENTED & OFFLINE-VERIFIED (Merge/Deployment Pending; Verbatim Archive Transcription & Training BLOCKED)
 
 ---
 
-## LATEST: V0.19.3 - LIVE Prioritization + Daemon Mode
+## LATEST: V0.32.0 - Bounded Local Archive Retrieval Pilot & Fail-Closed `DatasetBuilder` (2026-11-16)
+
+### Implemented & Offline-Verified (`178 passed, 13 deselected`)
+- **Bounded `<=10`-record `LocalArchiveRetrievalPilot`** (`src/local_archive_retrieval.py`, `src/local_archive_parsers.py`, `src/transcript_admission_guard.py`, `src/action_surface.py`, `cli.py --local-pilot-manifest / --local-pilot-query`):
+  - Enforces hard `1 <= max_records <= 10` ceiling, read-only local parsing (`video_indexer` JSON, `yt-dlp` `.info.json`, JSONL, SRT, WebVTT, JSON3, `.txt`), and explicit `BLOCKED_MISSING_TRANSCRIPT` classification on `scheduler_stub` stubs, metadata-only `.info.json`, and raw media files (zero network calls, zero model downloads, zero Whisper/ASR/media decoding).
+  - OOV-attenuated `scikit-learn` TF-IDF (`TfidfVectorizer` + `cosine_similarity` weighted by restored L2 OOV norm + unit coverage) with lexical/CJK fallback; automatically downgrades cross-layer metadata conflicts (`provenance_conflict=True`) and mislabeled 3rd-person/Gemini summaries (`mislabeled_summary_suspected=True`) to `is_verbatim=False, training_eligible=False`; surfaces honest `speaker` (`None` when absent) and `speaker_status` (`verified`, `unverified_label`, `unknown`) plus `has_mixed_speakers` / `has_unknown_speakers`; enforces strict monotonic timestamps (`GENUINE`, `PARTIAL_START_ONLY`, `ABSENT`, `INVALID`, `NONMONOTONIC`, omitting `&t=` deep links when `has_genuine_timestamps=False`); returns `not_found=True` below threshold.
+  - Verified read-only against 10 local artifacts (`8` semantic summary records = `67` segments indexed, `2` `scheduler_stub` records classified `BLOCKED_MISSING_TRANSCRIPT`, `6/6` known-answer hits, `6/6` adversarial/OOV not-found queries returning `0` hits, `0/10` admitted by `DatasetBuilder`) and `26` synthetic unit regressions (`178 passed, 13 deselected` across full offline `video_indexer` suite).
+- **Fail-closed `DatasetBuilder` & shared admission guard** (`src/dataset_builder.py`, `src/transcript_admission_guard.py`):
+  - Rejects cross-layer metadata contradictions (`"contradictory_metadata"`), explicit `training_eligible=False`, `consent=False`, music-channel exclusions (`antifafm`, `ravingantifa`, `ffcpln_music`), disallowed non-verbatim provenance, raw unlabeled lists, unlabeled legacy dicts, and summaries disguised inside verbatim containers (`"mislabeled_summary_as_transcript"`).
+  - Enforces strict finite/range-checked monotonic timestamps (`"invalid_timestamps"`, `"nonmonotonic_timestamps"`) and honest speaker attribution (`require_speaker_attribution=True` by default, optional `require_verified_speaker=True`, never inventing `"012"` for missing/blank speakers, and excluding guest/unknown turns from target utterances and `VoiceClip`s while keeping honest context labels), with deterministic sorted folder processing and explicit rejection/error accounting.
+
+### Epistemological, Merge, Deployment & Archive Training Boundaries
+- **Code-Seam vs Artifact Inspection**: Code-seam audits at `877878402` and `d9d8d4450` establish code-level admission/attribution seams only; archive file counts and contents come from separate direct on-disk inspection.
+- **Merge & Deployment**: **PENDING** (isolated branch checkpoint; not yet merged or deployed).
+- **Verbatim Archive Transcription & Weight Training**: **BLOCKED** — direct inspection of local `memory/video_index` artifacts shows `0` verbatim YouTube/Whisper transcripts (`582` 3rd-person Gemini/Studio Ask semantic summaries + `876` `scheduler_stub` missing-transcript stubs), raw archive videos lack captions/diarization, explicit 012 training consent is ungranted, and local `.venv`/VRAM/disk prerequisites remain gated.
+
+---
+
+## V0.19.3 - LIVE Prioritization + Daemon Mode
 
 ### New Capabilities
 - **LIVE prioritization**: LIVE/Streamed/Premiered videos indexed FIRST
@@ -38,6 +56,7 @@
 | 8 | Quality Metrics | COMPLETE | Resolution/bitrate analysis (2026-01-11) |
 | 9 | Gemma Classifier | COMPLETE | Segment quality tier classification (2026-01-12) |
 | 10 | WSP 77 Validation | DESIGN READY | Parse validation + auto-repair (2026-01-14) |
+| 11 | Local Archive Pilot & Dataset Gate | OFFLINE VERIFIED | Bounded `<=10`-record TF-IDF pilot + fail-closed `DatasetBuilder` (2026-11-16); merge pending, training BLOCKED |
 
 ---
 

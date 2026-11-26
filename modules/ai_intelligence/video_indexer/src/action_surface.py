@@ -532,6 +532,21 @@ def _not_implemented(action_id: str) -> Dict[str, Any]:
 
 
 # =============================================================================
+# Bounded Local Archive Retrieval Pilot (offline, read-only, <= 10 records)
+# =============================================================================
+
+from modules.ai_intelligence.video_indexer.src.local_archive_retrieval import (  # noqa: E402
+    MAX_PILOT_RECORDS,
+    LocalArchiveRetrievalPilot,
+    PilotQueryHit,
+    PilotQueryResponse,
+    PilotRecordStatus,
+    PilotSegment,
+    run_local_archive_pilot,
+)
+
+
+# =============================================================================
 # Dispatcher
 # =============================================================================
 

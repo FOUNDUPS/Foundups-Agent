@@ -130,26 +130,26 @@ Thread → VoiceMemory → CommentDrafter → StyleGuardrails → DecisionPolicy
 
 **Menu access**: `main.py` → YouTube DAEs → Indexing → Option 5 (Enhance)
 
-#### 1.2 Training Corpus (P0) ✅ FOUNDATION BUILT
+#### 1.2 Training Corpus (P0) ⚠️ CONTAMINATED / BLOCKED FOR SFT (2026-11-16 Audit)
 
 | File | Entries | Size | Status |
 |------|---------|------|--------|
-| `training_data/voice_sft.jsonl` | 119 | 51.5 KB | ✅ |
-| `training_data/decision_sft.jsonl` | 161 | - | ✅ |
-| `training_data/dpo_pairs.jsonl` | 88 | - | ✅ |
+| `training_data/voice_sft.jsonl` | 119 | 51.5 KB | ⛔ BLOCKED (contaminated with 3rd-person Gemini summaries; lacks `training_eligible`/verbatim provenance) |
+| `training_data/decision_sft.jsonl` | 161 | - | ⚠️ Legacy summary-derived (not verbatim voice SFT) |
+| `training_data/dpo_pairs.jsonl` | 88 | - | ⚠️ Legacy summary-derived (not verbatim voice DPO) |
 
-**To rebuild with more data**: `python -m modules.ai_intelligence.video_indexer.src.nemo_data_builder`
+**Epistemological boundary (code seams vs on-disk artifact inspection)**: Code-level admission flaws in `lora_trainer.py` / `DatasetBuilder` prove only what unguarded code could admit; the `training_data/voice_sft.jsonl` contamination status above comes from separate direct read-only artifact inspection confirming 3rd-person Gemini summary prose and 0 verbatim YouTube/Whisper transcripts in the local `video_index` store. `VoiceLoRATrainer` now enforces all 5 explicit admission proofs (`training_eligible=True`, allowed verbatim provenance, positive boolean consent, verified principal speaker, and non-placeholder `group_id`) directly at its own loader boundary (`require_verified_speaker=True`, `require_explicit_admission=True` locked), deterministically rejecting unlabeled or legacy `NemoDataBuilder` / `lora_data_converter.py` outputs; note that JSON metadata checks verify structural claims rather than cryptographic/biometric speaker authenticity.
 
-#### 1.3 LoRA Training (P1) 🔲 NOT STARTED
+#### 1.3 LoRA Training (P1) ⛔ BLOCKED (Offline Trainer Hardened 2026-11-16)
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Qwen 2.5 1.5B model | ✅ | Verified at `E:\HuggingFace\models--Qwen--Qwen2.5-1.5B-Instruct\` |
-| lora_trainer.py | ✅ | Exists at `digital_twin/src/lora_trainer.py` |
-| Run training | 🔲 | Awaiting more enhanced data |
-| Validate output | 🔲 | - |
+| Base model (`Qwen/Qwen2.5-1.5B-Instruct`) | 🔲 | Requires verified local cache (`local_files_only=True`, `trust_remote_code=False`) |
+| `lora_trainer.py` + `lora_record_validator.py` offline implementation | ✅ | Implemented: `trust_remote_code=False` (WSP 71), `local_files_only=True`, locked direct-loader fail-closed admission requiring all 5 explicit proofs (`training_eligible=True`, verbatim provenance, `consent=True`, verified principal speaker, non-placeholder `group_id`) plus read-only `inspect_sft_record()` preserving `None`/`"unknown"` without inventing `"012"` or `0.0`, `-100` prompt & padding label masking (`pad_token_id == eos_token_id` safe + overlong-prompt NaN guard), deterministic `video_id`/`source_id` group-disjoint held-out `eval_dataset` + `eval_strategy="epoch"`, CUDA/`bitsandbytes` guards, CLI `--confirm-consent` |
+| `test_lora_trainer.py` offline evaluation | ✅ | `105/105` unit tests (`258/258` across `digital_twin/tests/`) pass offline on synthetic `tmp_path` fixtures and stub tokenizers/trainers |
+| Live QLoRA training & deployment | ⛔ | **BLOCKED / NOT EXECUTED**: blocked on 0 verbatim transcripts, ungranted 012 training consent + speaker diarization, CPU-only `torch 2.11.0+cpu` + missing `peft`/`bitsandbytes`/`accelerate`, 6 GiB Turing VRAM ceiling, and disk free-space constraints |
 
-**Output**: `models/voice_lora.bin`
+**Output (target, not produced)**: `models/voice_lora.bin`
 
 ---
 
@@ -244,8 +244,8 @@ Thread → VoiceMemory → CommentDrafter → StyleGuardrails → DecisionPolicy
 |--------|--------|---------|-------|
 | Videos enhanced | 454 | 454 (100%) | ✅ Phase 1.1 COMPLETE |
 | Quality Tier 2 rate | >70% | ~65% | Near target |
-| Training corpus entries | 500+ | 368 | Needs rebuild with full data |
-| Voice match score | >0.85 | N/A | Awaiting Phase 1.3 |
+| Training corpus entries | 500+ verbatim | 0 verbatim (368 legacy summary rows) | Legacy `voice_sft.jsonl` blocked (3rd-person Gemini summaries) |
+| Voice match score | >0.85 | N/A | Live Phase 1.3 training BLOCKED |
 | Decision accuracy | >0.80 | ~0.65 | Heuristic baseline |
 | Generation latency | <500ms | ~250ms | Qwen 1.5B ✅ |
 | Style violations | <5% | ~10% | Guardrails tuning needed |
@@ -288,6 +288,7 @@ Thread → VoiceMemory → CommentDrafter → StyleGuardrails → DecisionPolicy
 
 | Version | Date | Changes |
 |---------|------|---------|
+| V0.6.1 | 2026-11-16 | Offline `lora_trainer.py` + `lora_record_validator.py` direct-loader admission hardening (`105/105` offline tests, `258/258` module); separated code-seam audit from read-only `voice_sft.jsonl` artifact inspection; live QLoRA training BLOCKED |
 | V0.5.3 | 2026-01-22 | Phase 1.1 COMPLETE: All 454 videos enhanced (100%), menu integration added |
 | V0.5.2 | 2026-01-21 | First-principles audit: 454 videos indexed, 132 enhanced (29%), training corpus built |
 | V0.5.1 | 2026-01-20 | LinkedIn Digital Twin POC alignment |
