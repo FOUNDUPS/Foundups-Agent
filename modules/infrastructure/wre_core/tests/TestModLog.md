@@ -1162,6 +1162,25 @@ comparison is retained as the initial scalar-repair evidence, not rewritten.
 - Added outside-repo output, secret redaction, log-glob confinement, and
   concurrent scan regression coverage.
 
+## 2026-07-18: WRE_WORKTREE_REGISTRY_AND_CWD_HAZARD_GUARD_PHASE1
+
+**New** `test_wre_worktree_registry_guard.py`:
+- Proves a clean isolated worktree receives mutation admission while the
+  primary shared checkout is rejected even when checked out on a feature
+  branch.
+- Proves dirty status is represented only by a digest and no dirty path names
+  reach the routine receipt.
+- Proves dead-PID locks become bounded remediation candidates, live locks are
+  retained, and no automatic prune/remove/unlock primitive exists.
+- Proves detached owners, owner mismatch, malformed porcelain, HEAD mismatch,
+  device prefixes, symlink aliases, tampered receipts, and expired receipts
+  fail closed.
+- Proves all runner calls are argv-only read operations and the production
+  runner rejects destructive argv before subprocess execution.
+
+**Adjacent regression run**: new registry guard, existing WRE git-cwd guard,
+RedDog WRE cwd guard, and CodeAct guard integration.
+
 ## 2026-07-18: WRE_HOLO_SEMANTIC_PREFLIGHT_PHASE1
 
 **New** `test_memory_preflight_semantic_retrieval.py`:
