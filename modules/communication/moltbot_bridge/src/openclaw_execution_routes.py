@@ -106,6 +106,16 @@ async def execute_query(dae: Any, intent: Any) -> str:
     if schedule_response:
         return schedule_response
 
+    # Training commands: status, progress, batch trigger
+    try:
+        from .training_adapter import try_training_command
+
+        training_response = await try_training_command(intent.raw_message)
+        if training_response:
+            return training_response
+    except Exception as exc:
+        logger.warning("[OPENCLAW-DAE] Training adapter unavailable: %s", exc)
+
     # Build execution bundle with HoloIndex retrieval (single search, WSP 87/97)
     query_text = intent.extracted_task or intent.raw_message
     bundle = build_execution_bundle(query_text, route="holo_index", limit=5)

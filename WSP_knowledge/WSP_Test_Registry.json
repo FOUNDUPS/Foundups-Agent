@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1882,
+  "total_tests": 1883,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -13563,6 +13563,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Execute the real supervisor startup method without services or model effects."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_training_adapter",
+      "path": "modules/communication/moltbot_bridge/tests/test_training_adapter.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for the OpenClaw training adapter.\n\nValidates deterministic command matching and status/batch responses."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_webhook_receiver_auth",
