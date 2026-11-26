@@ -371,6 +371,14 @@ partial filesystem-order-dependent result. Module file discovery applies the
 same complete-or-empty rule to global entry overflow, depth overflow, and scan
 errors, and sorts only a complete verified result.
 
+`holo_index.query_freshness_gate` is the dependency-light authority for the
+shared freshness snapshot, binding normalization, maintenance reasons, and
+stable admission error mapping. HoloIndex production admission no longer
+imports the infrastructure bridge. The bridge retains a compatibility
+re-export so the resident owner and its existing callers observe the same
+objects and byte-compatible public outcomes; this ownership move does not
+change storage, receipts, lifecycle, models, providers, or timeouts.
+
 Maintenance is owned by the trusted host. Startup may route a maintenance
 request through governed WRE dispatch, but neither WRE routing nor the query
 adapter grants a worker direct index-write authority. Use --index or

@@ -503,6 +503,21 @@ Eight fixed stdlib unittest controls failed against the eager baseline and passe
 - Added authority selection coverage for configured and deterministic roots, dirty workspace overlays, unrelated repositories, dirty authorities, HEAD mismatch, invalid configuration, and workspace fallback.
 - Added owner request/response root-digest checks, forged-root rejection, post-query revalidation, and source guards against query-path mutation.
 
+## [2026-07-24] HOLOINDEX_NEUTRAL_FRESHNESS_AUTHORITY_P1A
+
+- RED proved the neutral module was absent, query admission still imported the
+  infrastructure owner, and the bridge still contained the decision logic:
+  5 focused failures.
+- Added AST import-boundary, cold-import provider/transport exclusion, exact
+  bridge re-export identity, and bridge-no-decision-implementation tests.
+- Focused GREEN combined those tests with canonical owner freshness,
+  raw-query admission, read-only guard, RedDog direct-query, and receipt
+  binding coverage: 108 passed and one optional platform symlink test skipped.
+- Wider no-instrumentation parity passed 214 tests with one optional symlink
+  skip. Focused branch coverage reached 92% (93 passed, one skip, one
+  deliberately deselected 20ms deadline test); that deadline regression passed
+  standalone without coverage overhead.
+
 ## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 
 - Added exact proof tests for foreign worktree receipts, maintenance,
