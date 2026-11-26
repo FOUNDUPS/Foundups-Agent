@@ -482,6 +482,40 @@ controller release remain pending; no upstream advisory or global-runtime cleara
 - No reindex, owner restart, exhaustive aggregate, or live owner acceptance was
   performed; committed exact-SHA maintenance/publication remains deferred.
 
+## [2026-08-16] Docs diagnostic truth-boundary hardening
+
+- Made `diagnose_index_docs_pipeline.py --help` exit before any diagnostic
+  probe and replaced its outdated flat-only model-cache mirror with the shared
+  flat/Hugging Face snapshot resolver.
+- Corrected source-filter diagnosis to evaluate paths relative to discovery
+  roots and to keep intentional `_backup` exclusions distinct from target
+  rejection. Removed the historical H6 reward-gap claim because current
+  `IndexResult` handling exposes zero counts and withholds refresh reward.
+- Replaced Chroma client construction with enforced SQLite `mode=ro` plus
+  `query_only` metadata observation. R2 now mirrors strict Tier-0 consumer
+  cardinality: exactly one raw case-sensitive POSIX README/INTERFACE row per
+  canonical module. Missing/duplicate, absolute/mixed, dot/traversal,
+  backslash, wrong-case, and malformed rows fail with stable classifications;
+  malformed comparison candidates never become healthy evidence. SQLite reads
+  now count every `path` row across all storage columns before typed extraction,
+  so null/non-string/blob values cannot bypass row or byte caps. The 164
+  canonical roots come from bounded read-only Git-tracked evidence with four
+  exact structural/archive/data exclusions; untracked files cannot alter the
+  target set. Reused the established artifact safety pattern to reject link
+  components and hard links, and added short connection, elapsed-query, and
+  SQLite VM-step budgets with redacted failure codes. R4 places the path-row
+  SELECT and collection COUNT inside one explicit read transaction so a
+  concurrent rollback-journal writer cannot produce mixed-snapshot evidence;
+  every path removes the progress handler, rolls back, and closes. The observer
+  remains in the private `_navigation_docs_metadata_probe.py` helper after the operator
+  crossed WSP_62's 800-line review threshold. The final operator/helper/test
+  files are 642/495/717 lines; their largest functions are 44/39/50 lines. No
+  indexer/core fix, reindex, repository mutation, or service control was added.
+  (WSP 15/22/50/62/87/97)
+- Reconciled the canonical registry to 1,517 test files; the RedDog backend
+  manifest remains unchanged because this operator diagnostic is outside its
+  runtime closure.
+
 ## [2026-08-16] Final maintenance publication clean-state proof
 
 - Added a clean exact-HEAD proof immediately before completed receipt write,
