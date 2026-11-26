@@ -206,6 +206,17 @@ def render_staff_document(path: str, title: str) -> bytes:
     return render(title, f'<article class="legal-document" data-page-section="{section}">{content}</article>', asset_base="/")
 
 
+def validate_public_file(name: str, data: bytes) -> None:
+    """Keep the internal-content gate; allow only the approved landing action."""
+    reviewed = data
+    vote_entry = ('<a class="button primary" href="https://vote.foundups.com/">'
+                  'Vote — contact Congress</a>').encode("utf-8")
+    if name in ("dist/index.html", "dist/web/index.html") and reviewed.count(vote_entry) == 1:
+        reviewed = reviewed.replace(vote_entry, b"", 1)
+    if Path(name).suffix not in (".png", ".svg") and (INTERNAL_MARKERS.search(reviewed) or b"\xef\xbf\xbd" in reviewed):
+        raise ValueError(f"Review internal or malformed content in {name}")
+
+
 def stage_release(output: Path) -> dict:
     if output.exists():
         raise FileExistsError("Release staging must use a new directory")
@@ -241,8 +252,7 @@ def stage_release(output: Path) -> dict:
     files["dist/LICENSE"] = (ARCHIVE / "dist/LICENSE").read_bytes()
 
     for name, data in files.items():
-        if Path(name).suffix not in (".png", ".svg") and (INTERNAL_MARKERS.search(data) or b"\xef\xbf\xbd" in data):
-            raise ValueError(f"Review internal or malformed content in {name}")
+        validate_public_file(name, data)
 
     output.mkdir(parents=True)
     for name, data in files.items():
