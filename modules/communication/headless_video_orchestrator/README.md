@@ -1,50 +1,19 @@
 # Headless Video Orchestrator
 
 **Domain**: `communication/`  
-**Purpose**: Assemble faceless music videos (audio + visuals) and hand off to existing scheduling/indexing systems.
+**Purpose**: Assemble faceless music videos (audio + visuals), run deterministic staging/benchmark verification, and prepare dry-run daily handoffs to existing upload/scheduling/indexing owners.
 
 ## Scope (Occam)
-- Build music videos from:
-  - Suno audio files (local library)
-  - Visual clips (generated or prebuilt)
-- Output ready-to-upload MP4s for Shorts (9:16) and longform (16:9).
-- Reuse existing modules for formatting and scheduling (no new platform auth).
+- Build music videos from local audio tracks and visual clips (`legacy` or `staging_720p` profiles; 4K disallowed).
+- Enforce explicit soundtrack mapping (`-map 0:v:0 -map 1:a:0`), `<180s` (`<=178.5s` default) Shorts ceiling, `720x1280` / `1280x720` `24fps` `H.264/yuv420p` `AAC 192k` staging, and optional clean audio fade-out.
+- Audit media streams, embedded `mov_text`/SRT lyric cues vs. stage directions, 16kHz mono RMS/onset-flux quantiles, satire factual-claim provenance, native crop sharpness, and `camera_only` vs. `stepped_character_action` truth labels.
+- Reuse `youtube_shorts/src/youtube_uploader.py` and `youtube_shorts_scheduler/src/schedule_tracker.py` (`preview_copy()` + `max_per_day=1`) without parallel uploaders, schedulers, or browser takeover.
 
 ## Reused Modules
-- `modules/communication/youtube_shorts/src/video_editor.py` (concat + 9:16 formatting)
-- `modules/platform_integration/youtube_shorts_scheduler/src/scheduler.py` (schedule unlisted)
-- `modules/platform_integration/youtube_shorts_scheduler/src/content_generator.py` (music titles/descriptions)
-- `modules/platform_integration/youtube_shorts_scheduler/src/index_weave.py` (index stub + description weave)
-
-## Optional Open-Source Tools
-- **AI-Youtube-Shorts-Generator** (auto-clip + crop): clone to `external_research/AI-Youtube-Shorts-Generator`
-  - Set `AI_SHORTS_REPO_PATH` if installed elsewhere.
-  - Adapter: `run_ai_shorts_generator(...)`
-
-## Output Locations
-- `memory/video_lab/music_videos/` (assembled outputs)
-- `memory/video_cache/` (downloaded source videos for reuse)
-
-## Quick Start
-```python
-from modules.communication.headless_video_orchestrator.src.orchestrator import (
-    HeadlessVideoOrchestrator,
-    MusicVideoRequest,
-)
-
-req = MusicVideoRequest(
-    audio_path="data/suno/track_01.mp3",
-    visual_paths=["memory/video_lab/visuals/v1.mp4", "memory/video_lab/visuals/v2.mp4"],
-    aspect="shorts",
-)
-
-out = HeadlessVideoOrchestrator().build_music_video(req)
-print(out.output_path)
-```
-
-## Notes
-- Uploading is done via existing YouTube Studio automation (scheduler).
-- Indexing is handled via stub at scheduling time, then full indexing via `video_indexer`.
+- `modules/communication/youtube_shorts/src/video_editor.py` (concat + legacy formatting)
+- `modules/communication/youtube_shorts/src/youtube_uploader.py` (sole YouTube upload seam, canonical channel pinning)
+- `modules/platform_integration/youtube_shorts_scheduler/src/schedule_tracker.py` (browser-free 1/day slot preview)
+- `modules/ai_intelligence/video_indexer` (post-schedule indexing owner)
 
 ## Preschool Story Time destination
 

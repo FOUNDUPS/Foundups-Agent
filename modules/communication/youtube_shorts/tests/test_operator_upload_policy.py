@@ -72,6 +72,24 @@ def test_short_upload_claim_precedes_insert_and_repeat_survives_new_uploader(upl
     assert calls["insert"] == 1
 
 
+def test_schedule_short_retains_durable_sha256_claim_and_unverified_readback_flag(upload_owner, monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    owner, uploader, path, calls, private = upload_owner
+    monkeypatch.setenv("YT_ALLOW_SCHEDULED_PUBLISH_AT", "true")
+    future_slot = (datetime.now(timezone.utc) + timedelta(days=2)).replace(microsecond=0)
+    res = uploader.schedule_short(str(path), "Scheduled Cut", "Daily body", publish_at=future_slot.isoformat())
+    assert res.privacy_status == "private"
+    assert res.requested_publish_at == future_slot.strftime("%Y-%m-%dT%H:%M:%SZ")
+    assert res.schedule_readback_verified is False
+    claims = private._read_json(private.state_path, {})["video_effect_claims"]
+    assert claims[-1]["outcome"] == "unknown"
+    # Second schedule attempt on same artifact bytes refuses before insert!
+    with pytest.raises(owner.YouTubeUploadPolicyBlocked, match="already claimed"):
+        uploader.schedule_short(str(path), "Retry Cut", "Daily body", publish_at=future_slot.isoformat())
+    assert calls["insert"] == 1
+
+
 @pytest.mark.parametrize("problem", ["pause", "unknown_identity", "unavailable", "stop", "disabled"])
 def test_final_upload_gate_blocks_public_api(upload_owner, monkeypatch, tmp_path, problem):
     owner, uploader, path, calls, private = upload_owner

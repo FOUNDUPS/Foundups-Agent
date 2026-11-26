@@ -1,17 +1,19 @@
 # Headless Video Orchestrator - Roadmap
 
-## Phase 0 (Current)
+## Phase 0 (Complete)
 - Scaffolding, docs, and minimal build pipeline (audio overlay + visuals concat).
 - Output Shorts (9:16) and longform (16:9) variants.
 
-## Phase 1
-- Auto-pull clip candidates from `video_indexer` for visuals.
-- Add music metadata (song name/artist) into scheduler templates.
-- Add Video Lab menu action to emit unlisted-ready assets.
+## Phase 1 (Current — Offline Staging & Benchmark Gate)
+- `staging_720p` (`720x1280` / `1280x720`, `24fps`, `H.264/yuv420p`, `AAC 192k`, `<180s` ceiling, explicit soundtrack mapping).
+- Media/SRT/16kHz signal audit, satire provenance gate, A/B/C cut-manifest & sharpness/motion-truth verifier, and browser-free 1/day dry-run staging via `ScheduleTracker.preview_copy()`.
+- Remaining gates before live daily release: dedicated Antifa FM OAuth credential set verified to `UCVSmg5aOhP4tnQ9KFUg97qA`, verified image/video generation budget for equal-excerpt creative renders, independent human/peer visual + listening review, and `videos.list(part="status")` schedule readback qualification.
 
 ## Phase 2
 - Visual generator integration (Veo3/Sora2) with deterministic prompts.
 - Per-track visual style presets (retro MTV, lyric visualizer, abstract loops).
+- Admitted visual generator integration (Nano Banana 2.1 / OpenRouter Flux storyboard + Gemini Omni 1.2 Flash or local stepped plates) under explicit cost bounds.
+- Retained RSI evaluation via WRE `PatternMemory` only after independent evaluation and held-out reuse.
 
 ## Phase 3
 - AI_overseer autonomous queue (generate -> schedule -> index).

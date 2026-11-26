@@ -122,11 +122,11 @@ from modules.communication.youtube_shorts.src.youtube_uploader import YouTubeSho
 uploader = YouTubeShortsUploader(channel="foundups-mall")
 ```
 
-Construction pins a channel role to one credential set and verifies the authorized YouTube channel before any upload. `foundups-mall` requires `YT_UPLOAD_CHANNEL_ID_FOUNDUPS_MALL`; a missing or mismatched pin fails closed.
+Construction pins a channel role to one credential set and verifies the authorized YouTube channel before any upload. `foundups-mall`, `us_story_time`, and `antifafm` require exact channel-ID environment pins (`YT_UPLOAD_CHANNEL_ID_*`); `antifafm` additionally enforces canonical channel `UCVSmg5aOhP4tnQ9KFUg97qA` so neither a missing pin nor relabeling `YT_UPLOAD_CHANNEL_ID_ANTIFAFM` to FoundUps `UCSNTUXjAgpd4sgWYP0xoJgw` can pass. `YT_UPLOAD_CREDENTIAL_SET_ANTIFAFM` selects a dedicated positive OAuth set for `antifafm`.
 
-#### `publish_video(...) -> YouTubePublishResult`
+#### `publish_video(...) -> YouTubePublishResult` & `schedule_short(...)`
 
-Uploads MP4, WebM, or QuickTime through an 8 MB resumable transport. The default privacy is `unlisted`; optional playlist insertion returns the authoritative playlist-item ID. Callers receive video/channel/playlist identities and URLs, never an OAuth token or local credential path.
+Uploads MP4, WebM, or QuickTime through an 8 MB resumable transport. The default privacy is `unlisted`; optional playlist insertion returns the authoritative playlist-item ID. Optional `publish_at` is accepted **only** when `privacy="private"`, `policy_surface="shorts"` (preserving descriptor SHA256 deduplication and durable unknown-outcome claims), and `YT_ALLOW_SCHEDULED_PUBLISH_AT="true"` is explicitly enabled, normalizing to UTC `status.publishAt` (`>=5` minutes in the future). `YouTubePublishResult.requested_publish_at` echoes the normalized request parameter while `schedule_readback_verified` stays `False` until independent `videos.list(part="status")` readback confirms persisted schedule state. Callers never receive OAuth tokens or local credential paths.
 
 #### `publish_foundups_media(...) -> YouTubePublishResult`
 

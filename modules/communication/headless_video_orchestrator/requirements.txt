@@ -1,0 +1,1 @@
+# Headless Video Orchestrator uses Python standard library plus host ffmpeg/ffprobe binaries.
