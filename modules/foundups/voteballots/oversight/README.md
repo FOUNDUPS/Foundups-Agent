@@ -13,12 +13,41 @@ Vote (`voteballots`) is the existing civic FoundUp and organizational umbrella f
 
 A dedicated internal Voice/Oversight experience is an **unresolved possibility**, not an approved feature or architecture. Do not add a manifest, tenant, domain, route, agent authority or implementation on that basis. Preserve the existing documentation and reference-site behavior. This classification supersedes any implication in older landing plans that a Voice destination is already live.
 
+## 2026-11-09 direct-navigation candidate — not published
+
+[PR #2328](https://github.com/FOUNDUPS/Foundups-Agent/pull/2328) continues the
+Phase One landing on the existing source. Its current contract is **Vote,
+House Rules, Team, Execution**, followed by expandable **Obstacle, Process,
+Result** explanations. Vote links to `https://vote.foundups.com/`; this does
+not activate a Voice runtime, a Mall tenant or automatic messages.
+
+The diagram keeps its highlighted destinations and uses plain, noninteractive
+connecting lines. Only the independent-state branch is dotted. Destination
+cards open their own screens directly. Repeated connector-label controls,
+"Why this connection?" and "Requirements" links are removed. Legacy edge
+fragment screens, source records, fictional exhibits and legal safeguards stay
+preserved; a cleaner interface does not waive authority or disclosure review.
+
+The public-release scan permits exactly one approved Vote action on each
+landing copy and still rejects internal content elsewhere. The existing release
+tests cover direct navigation and the narrow exception; the archive verifier
+and mirrored routes are unchanged. Cache version `v0.11.0` belongs to this
+candidate, not to a claimed deployment. The existing worker keeps origin/path
+scope and legacy fragment navigation.
+
+The [navigation audit](docs/DIRECT_NAVIGATION_AUDIT_20261109.md) distinguishes
+local component checks, hosted integration results and outstanding release
+requirements. No GitHub commit or green test proves a Sites publication.
+
 ## Phase One landing contract
 
 This section owns the current MAGA/Oversight and Vote/Voice handoff. Read the
 [release accounting](../docs/RELEASE_ACCOUNTING.md#2026-11-09-documentation-audit)
-for dated observations and the [Vote roadmap](../ROADMAP.md#magaoversight-phase-one)
-for sequencing. 012 scoped the 2026-11-09 slice to documentation.
+for the earlier live audit and the [Vote roadmap](../ROADMAP.md#magaoversight-phase-one)
+for sequencing. The initial November 9 slice was documentation-only; 012 then
+authorized the landing implementation and removal of intermediate map controls.
+The current contract below supersedes the earlier unresolved Voice destination,
+without rewriting historical audit observations or changing DNS.
 
 ### One application and its addresses
 
@@ -27,41 +56,35 @@ application. Its preferred address is [oversight.mtrout.com](https://oversight.m
 [maga.mtrout.com](https://maga.mtrout.com/),
 [oversight.vote.foundups.com](https://oversight.vote.foundups.com/) and the
 [original Sites address](https://oversight-hub-pwa.undaodu.chatgpt.site/) serve the
-same release directly. The proposed `oversight.voice.foundups.com` should reach
-that same application after DNS, TLS, routing and deep-link verification. The
-operator also mentioned `oversight.voice.mtrout.com` as a possible spelling.
-Both Voice-branded Oversight names returned NXDOMAIN in this audit. Any future
-alias or redirect uses the existing Sites project or an approved forwarding
-mechanism and preserves every working alias, the original Sites address, path,
-query and fragment behavior. Each browser origin has its own PWA state.
+same release directly according to the recorded deployment audit. Preserve
+those aliases, original history, paths, queries and fragments. Each browser
+origin retains its own PWA state. No redirect or domain change is part of this
+navigation candidate.
 
 **Vote** is the existing informational civic Site. `vote.mtrout.com`,
 `vote.foundups.com` and its original Sites address serve that separate public
-surface under the same FoundUp identity. **Voice** is the planned public
-stakeholder participation surface. 012's spoken direction names
-`https://voice.houseoutis.com/` as the landing's outbound destination. The
-copied prompt instead calls the first entry Vote and names `vote.foundups.com`.
-For the handoff, use the more specific spoken direction and keep Vote available
-in its existing role. Reopen the decision with 012 before substituting Vote for
-Voice. The Voice destination returned NXDOMAIN, so a live Voice link is gated
-on verifying that destination. The proposed `#SchumerOut` campaign copy is a
-separate editorial decision. The entry label in this contract is **Voice**.
+surface under the same FoundUp identity. The approved first landing action is
+**Vote**, linking to `https://vote.foundups.com/`. **Voice** refers to the later
+stakeholder participation work discussed with 012; no new runtime or hostname
+is activated here. The older documentation audit records tentative Voice names
+and NXDOMAIN observations. They are history, not the current outbound target.
+Campaign copy and automated contact workflows remain separate decisions.
 
 ### Four-entry landing
 
 The first screen gives a short purpose statement and four prominent entries in
-the order below. The future change edits the existing `public/overview.html`
-and shared presentation assets where needed. Use a single responsive landing,
-with large labeled touch targets on phones and conventional keyboard-accessible
-navigation on desktop. Place detailed materials behind these entries or below
-the first screen. Keep the existing staff and public links discoverable.
+the order below. The candidate changes the existing `public/overview.html`
+and shared presentation assets. Use a single responsive landing, with large
+labeled touch targets on phones and conventional keyboard-accessible navigation
+on desktop. Place detailed materials behind these entries or below the first
+screen. Keep existing staff and public links discoverable.
 
 | Order | Entry | Destination | Purpose |
 |---|---|---|---|
-| 01 | **Voice** | `https://voice.houseoutis.com/` | One outbound link after destination verification. The stakeholder PWA, messages to Congress, and participation flows are a later slice. |
+| 01 | **Vote** | `https://vote.foundups.com/` | One outbound link to the existing public surface. The stakeholder PWA, messages to Congress and participation flows are a later slice. |
 | 02 | **House Rules** | [`/templates/appendix-a-house-rules`](https://oversight.mtrout.com/templates/appendix-a-house-rules) | Explain the current House authority and the proposed 120th Congress rule changes. Keep Senate procedure and federal statutes separately sourced. The [House readiness package](https://oversight.mtrout.com/11-house-first-pwa) remains the supporting entry. |
 | 03 | **Team** | [`/templates/staffing-and-recruitment-plan`](https://oversight.mtrout.com/templates/staffing-and-recruitment-plan) | Connect staffing, counsel, investigators, forensic specialists and recruitment to the [hub charter](https://oversight.mtrout.com/templates/central-hub-charter) and [committee operating plan](https://oversight.mtrout.com/templates/committee-node-operating-plan). |
-| 04 | **Execution** | [`/explore`](https://oversight.mtrout.com/explore) | Enter the existing maps for investigations, records requests and subpoenas, depositions, hearings, evidence review, congressional action and separately authorized state referrals. Keep the [five-stage roadmap](https://oversight.mtrout.com/legislative-roadmap) as the process underneath. |
+| 04 | **Execution** | [`/explore#investigation`](https://oversight.mtrout.com/explore#investigation) | Enter the existing investigation workflow directly, retaining the structure map and [five-stage roadmap](https://oversight.mtrout.com/legislative-roadmap). |
 
 The House Rules and Team entries explain how the **proposed** hub would reduce
 duplicated work. Reuse the model charter and committee operating agreement to
@@ -86,17 +109,16 @@ discoverable-only manifest and absent admitted catalog entry leave the tenant
 launch gated. Public civic participation and the Mall's authenticated
 stakeholder interior use separate authority and access checks.
 
-For a future authorized landing implementation, retain the 155-file archive,
-13 historical mirror pairs, the public allowlist, all existing routes and deep
-links, the root and `/web/` worker scopes, the senator directory, both maps,
-research and templates, metadata, and `/accountability.json`, `/llms.txt` and
-`/map-data.json`. Recheck destination content and TLS, keyboard and touch
-navigation, both PWA scopes, and phone and desktop layouts. Review the result
-from public, House and Senate perspectives, with a separate verifier before
-publication. Follow the existing release procedure below. Keep credentials and
-confidential records out of both the reviewed stage and the publication log.
-The landing, DNS or redirect changes and the Voice runtime each require their
-own authorized slice and live readback.
+Retain the 155-file archive, 13 historical mirror pairs, the public allowlist,
+all existing routes and deep links, the root and `/web/` worker scopes, senator
+directory, both maps, research and templates, metadata, `/accountability.json`,
+`/llms.txt` and `/map-data.json`. Recheck destination content and TLS, keyboard
+and touch navigation, both PWA scopes, and phone and desktop layouts. Review
+the whole staged result from public, House and Senate perspectives, with a
+separate verifier before publication. Follow the existing release procedure
+below. Keep credentials and confidential records out of both the reviewed
+stage and publication log. DNS changes and the Voice runtime remain separate
+slices; this candidate still requires exact-head checks and live readback.
 
 ## Source and publication
 
@@ -110,10 +132,11 @@ The root and `/web/` retain their existing install scopes.
 
 The diagram on the landing opens `/explore`. The authority and investigation
 maps share the five-stage roadmap, evidence review, templates and decision
-gates. Boxes and connectors have separate fragment links, with a parent path,
-Back one level and Full map on each screen. The map works with static HTML and
-CSS. JavaScript moves focus on navigation. `/map-data.json` exposes the same
-reviewed records and trust boundary.
+gates. Highlighted boxes navigate directly; connector lines are decorative,
+not links or extra focus stops. Back one level and Full map remain. Old edge
+fragments still resolve for compatibility, without requiring an intermediate
+click. The map works with static HTML and CSS. JavaScript moves focus on
+navigation. `/map-data.json` retains reviewed records and the trust boundary.
 
 The four `public/map-*.json` source files supply nodes and connecting gates.
 Each node has a title, summary, parent, and optional fact, link and choice

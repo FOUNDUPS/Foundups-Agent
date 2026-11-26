@@ -24,7 +24,7 @@
 .map-row { display: grid; grid-template-columns: minmax(0, 1fr); gap: .55rem; }
 .map-row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .map-row-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.map-box, .map-wire { text-align: center; overflow-wrap: anywhere; }
+.map-box { text-align: center; overflow-wrap: anywhere; }
 .map-box {
   display: grid; align-content: center; min-height: 56px; padding: .55rem .65rem;
   border: 1px solid #91adb2; border-radius: .4rem; background: #e7efef;
@@ -32,16 +32,16 @@
 }
 .map-box-overview, .map-box-review, .map-box-decisions { background: var(--navy-light); color: white; }
 .map-box-coordination { background: #f4ead3; border-color: #b79d61; }
-.map-box:hover, .map-wire:hover { outline: 2px solid #52717e; outline-offset: -2px; }
-.map-wire { display: flex; flex-direction: column; align-items: center; min-height: 46px; font-weight: 650; line-height: 1.25; }
-.map-wire::before, .map-wire::after { content: ''; border-inline-start: 2px solid #52717e; min-height: .45rem; flex: 1; }
-.map-wire.conditional::before, .map-wire.conditional::after { border-inline-start-style: dashed; }
+.map-box:hover { outline: 2px solid #52717e; outline-offset: -2px; }
+.map-box:focus-visible { outline: 3px solid #52717e; outline-offset: 2px; }
+.map-connectors { display: block; width: 100%; height: 24px; pointer-events: none; }
+.map-connector { fill: none; stroke: #52717e; stroke-width: 2; }
+.map-connector.conditional { stroke-dasharray: 1 5; stroke-linecap: round; }
 .hub-figure figcaption { color: var(--muted); margin-top: .85rem; }
 
 @media (max-width: 760px) {
   .map-row { gap: .3rem; }
   .map-box { padding-inline: .35rem; }
-  .map-wire { min-height: 48px; }
 }
 
 @media print {
