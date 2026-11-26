@@ -1,3 +1,23 @@
+## 2026-11-27 — Recover current-main intake image closure
+
+WSP15 C3/I4/D4/Impact4=15/P1; RECONCILE PR #2227 a7109ba09 against main1e7d6992.
+Retain its Dockerfile,18-wheel hash lock and test-only transport; expand24→31
+immutable context files for graph imports, bounded child/Windows guard and bridge
+package initialization. Existing source/auth/HTTP assertions and server profile
+remain unchanged. Compose the workflow from current main, preserve checksum trust
+bootstrap and its triggers, and bootstrap the new test-side job before ordinary
+downloads. Every archive input triggers both PR and main qualification.
+Native WSP00 strict gate passed. Holo authority HEAD mismatch remains UNKNOWN;
+use the recovered exact-source audit, without reindexing or route changes.
+Local verification and hosted/image-security acceptance remain distinct. The
+Windows engine is unavailable; retain the original image security hold pending
+fresh exact-head Linux evidence, exact saved-image scan and independent review.
+No cloud/provider/session, production deployment or runtime admission occurs.
+Local offline regression:820 passed/3 live-server cases deselected on the
+existing vetted interpreter; its older dependencies do not qualify pinned Linux
+execution. Frozen old test ASTs, lock bytes, nomination job and complete trigger
+coverage pass static review. Exact committed archive/import checks follow locally.
+
 ## 2026-11-26 — Port Fractal Tile Graph backend, patch API, schemas, projections, client & paper onto post-HPC main
 
 - Ported `fractal_tile_graph.py`, `tile_graph_context.py`, `tile_graph_store.py`, `http_api.py` (`GET /pfmall/tile-graph`, `POST /pfmall/tile-graph/patches`), `member_catalog_export.py` (`export_fractal_tile_graph`), schemas, public projections, `sprint1_registry_benchmark_manifest.json`, `public/member/js/mall-tile-graph-client.js`, `public/member/js/pfmall-control-dispatcher.js`, and [PFMALL_Fractal_Tile_Elements_Architecture.md](../../../WSP_knowledge/docs/Papers/PFMALL_Fractal_Tile_Elements_Architecture.md) onto post-`#2459` `main`, keeping `#2459`'s `public/member` UI owners intact (`?fractal=1` UI shell reconciliation stays separate).

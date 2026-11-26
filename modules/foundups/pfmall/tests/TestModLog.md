@@ -1,5 +1,23 @@
 # p.fMALL Test ModLog
 
+## 2026-11-27 — Freeze recovered image acceptance against current main
+
+Reuse PR #2227's archive/blob, pin agreement, immutable image inventory and
+container ownership/resource assertions. Preserve all existing HTTP/auth oracles;
+only the explicit image transport opt-in is added to current main's wire fixture.
+Current-main closure requires31 context files, including four leaf imports and
+three bridge package-initialization dependencies. Keep the18 runtime wheel pins,
+main trust bootstrap and both complete input-trigger sets. Freeze this recovery
+before hosted execution. Local Docker engine access is unavailable; exact-head
+Linux build/inventory/three HTTP cases, exact saved-image current-DB scan and
+independent replacement acceptance remain required, with the security hold intact.
+
+Local seven-owner offline replay:820 passed/3 real_server deselected; no live
+listener starts. Primary vetted Python3.12.10 dependencies differ from the image
+pins, so this is regression evidence only. Static checks preserve every old
+test AST after removing the four-line opt-in, the complete main nomination job,
+18-wheel lock bytes, all31 trigger paths and exact27 copied-source/asset inventory.
+
 ## 2026-11-26 — Fractal Tile Graph backend & API test port onto post-HPC main
 
 - Ported `test_fractal_tile_graph.py`, `test_tile_graph_patch_api.py`, `test_member_catalog_export.py` additions, and `test_http_api.py` routes onto post-`#2459` `main` while aligning `schumerout` child count dynamically with `modules/foundups/hpc/mall_projection.json` and post-census tracked paths cleanly.
