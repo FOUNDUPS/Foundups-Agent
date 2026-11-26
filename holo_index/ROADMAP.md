@@ -222,15 +222,20 @@ this read-gate slice. Add descriptor-relative/final-handle path identity where
 hostile concurrent path replacement must be excluded; P0's bounded lstat-based
 no-follow checks do not claim to close that TOCTOU window.
 
-### P1: Neutral Freshness-Gate Contract Extraction / Dependency Inversion
+### P1A Complete: Neutral Freshness-Gate Authority / Dependency Inversion
 
-Extract the freshness/admission proof contract into a neutral HoloIndex-owned
-or shared infrastructure package, then invert both the owner service and raw
-clients onto that contract. Remove the current lower-level
-`holo_index.query_admission` dependency on the infrastructure-owned
-`HoloQueryFreshnessGate` without cloning proof semantics or changing reason
-codes. Require import-cycle, exact-receipt-parity, and owner/raw/direct
-cross-surface tests before retiring the P0 dependency direction.
+`holo_index.query_freshness_gate` now owns the behavior-identical freshness
+snapshot, normalization, maintenance-reason, and stable error mapping
+contract. `holo_index.query_admission` depends only on that HoloIndex authority
+and the infrastructure bridge is a compatibility re-export of the exact same
+objects. Import-boundary, provider/transport-light import, owner, raw
+admission, and direct-diagnostic parity regressions protect the inversion.
+
+**Still deferred:** explicit multi-repository store namespaces, receipt
+metadata migration, storage layout, owner lifecycle, semantic loader/model
+recovery, timeout/provider policy, and descriptor-relative/final-handle
+hardening. P1A does not make the shared `E:/HoloIndex` store current and does
+not change any P0 admission outcome or reason code.
 
 ## [2026-07-18] Operational Truth Boundary and WSP_62 Remediation
 

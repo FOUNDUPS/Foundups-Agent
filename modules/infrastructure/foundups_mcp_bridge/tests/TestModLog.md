@@ -1697,6 +1697,21 @@ execution remains pending. No production runtime activation or native admission.
 - Added matching-root success and mismatched-root fail-before-backend tests.
 - Re-ran the owner service, HTTP, runtime-safety, embedding, and supervisor suites.
 
+## [2026-07-24] Neutral freshness authority compatibility
+
+**WSP Protocol:** WSP 00, 22, 50, 62, 97
+
+**Change:** Added an exact identity-re-export contract for the bridge
+compatibility path and retained the existing owner freshness, embedding,
+generation, response, and runtime regressions.
+
+**Validation:** The initial focused owner/raw/direct matrix passed 108 tests
+with one optional platform symlink skip after a 5-failure RED boundary proof.
+The wider no-instrumentation matrix passed 214 with one skip. A focused
+coverage matrix reached 92%; the existing 20ms timeout regression was excluded
+from instrumentation and passed standalone because coverage overhead can move
+its failure earlier from STALE to UNKNOWN.
+
 ## [2026-07-20] Receipt-v2 maintenance fixture integrity repair
 
 **WSP Protocol:** WSP 00, 22, 50, 62, 97

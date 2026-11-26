@@ -693,6 +693,19 @@ controller release remain pending; no upstream advisory or global-runtime cleara
 - Added a public repository-root digest to generation-bound freshness snapshots and owner responses so a configured loopback owner cannot satisfy a query for a different same-HEAD worktree.
 - Kept maintenance ownership outside the query process: selection performs no worktree creation, Git mutation, collection write, or re-index.
 
+## [2026-07-24] HOLOINDEX_NEUTRAL_FRESHNESS_AUTHORITY_P1A
+
+- Moved the existing freshness snapshot, binding normalization, maintenance
+  reason, and stable error mapping implementation into the dependency-light
+  `holo_index.query_freshness_gate` authority.
+- Inverted `holo_index.query_admission` onto the HoloIndex-owned contract and
+  left the infrastructure bridge path as an exact compatibility re-export.
+- Preserved public objects, constants, error codes, reasons, and owner/raw
+  admission outcomes. Storage namespaces, owner lifecycle, semantic loading,
+  models, providers, timeouts, and P0 path behavior are unchanged.
+- Added import-boundary and re-export identity regressions plus focused
+  owner/raw/direct parity validation.
+
 ## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 
 - Added a reusable content-free read-only admission decision that reuses the

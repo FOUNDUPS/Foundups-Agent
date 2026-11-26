@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1878,
+  "total_tests": 1879,
   "quarantined_tests": 263,
   "tests": [
     {
@@ -1795,6 +1795,21 @@
       "description": ""
     },
     {
+      "id": "test::holo_index::tests::test_query_freshness_authority_boundary",
+      "path": "holo_index/tests/test_query_freshness_authority_boundary.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-03",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Dependency-inversion contract for the neutral query freshness authority."
+    },
+    {
       "id": "test::holo_index::tests::test_qwen_advisor_fmas",
       "path": "holo_index/tests/test_qwen_advisor_fmas.py",
       "owner": "holo_index",
@@ -1827,7 +1842,7 @@
       "path": "holo_index/tests/test_qwen_file_naming_trainer.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [
         "import_path_mutation"
       ],

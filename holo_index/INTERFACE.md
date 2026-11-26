@@ -514,6 +514,14 @@ The fixed `.holoindex_authority_blocked` marker is a durable fail-closed
 fallback when neither a newer checkout nor canonical invalidation can be
 published. Only exact regular marker content is recognized for recovery.
 
+The shared proof contract is owned by
+`holo_index.query_freshness_gate`. It exports
+`FreshnessSnapshot`, `HoloQueryFreshnessGate`, `normalize_binding`,
+`snapshot_error`, `maintenance_reason_for_error`, and the existing baseline
+and maintenance constants. The infrastructure bridge path is compatibility
+only and re-exports those exact objects; no transport, provider, semantic
+model, or storage-layout authority is attached to this module.
+
 Module hints accept only repository-relative components. Traversal, absolute
 paths, links, and reparse points are rejected; nested enumeration has fixed
 entry/depth bounds. Module-domain and WSP discovery fail closed on `cap + 1`

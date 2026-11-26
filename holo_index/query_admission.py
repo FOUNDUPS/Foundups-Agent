@@ -1,8 +1,8 @@
 """Fail-closed admission for read-only queries against a persistent store.
 
-The canonical owner service remains authoritative for RedDog. This helper
-reuses its freshness gate so raw CLI and direct diagnostic reads cannot bypass
-repository-root, SSD, generation, baseline, or maintenance proof.
+The HoloIndex-owned freshness authority is shared by the canonical RedDog
+owner, raw CLI, and direct diagnostic reads so no persistent consumer can
+bypass repository-root, SSD, generation, baseline, or maintenance proof.
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ from holo_index.repository_state import (
     REPOSITORY_STATE_UNAVAILABLE_CODE,
     read_repository_state,
 )
-from modules.infrastructure.foundups_mcp_bridge.src.holo_query_freshness_gate import (
+from holo_index.query_freshness_gate import (
     HoloQueryFreshnessGate,
     maintenance_reason_for_error,
     snapshot_error,

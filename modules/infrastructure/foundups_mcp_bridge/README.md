@@ -661,6 +661,13 @@ detail as generic semantic unavailability. Deterministic catalog/incomplete
 failures are not retried; lookup failure retains one bounded process-owned
 retry.
 
+Freshness decisions are owned by the dependency-light
+`holo_index.query_freshness_gate` module. The historical
+`src.holo_query_freshness_gate` path is a compatibility re-export of those
+exact objects; the bridge does not maintain a second proof implementation.
+This ownership inversion changes no owner response, reason code, storage
+layout, model/provider selection, lifecycle, or timeout.
+
 The RedDog read-only operational preflight calls the process-lifetime
 bootstrap automatically for E2E, report collection, audit enqueue, and
 OPENCLAW_AUTO_TASKS_ENABLED paths. Replica routing is mandatory and fail-
