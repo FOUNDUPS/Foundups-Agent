@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 722,
+      "embed_url": "https://www.youtube.com/embed/YfOileQWti4",
+      "source_url": "https://www.youtube.com/watch?v=YfOileQWti4",
+      "thumbnail_url": "https://i.ytimg.com/vi/YfOileQWti4/hqdefault.jpg",
+      "timestamp": "2026-01-13T02:02:28Z",
+      "title": "Foundups Partner Invitation",
+      "video_id": "YfOileQWti4"
+    },
+    {
+      "duration_seconds": 280,
+      "embed_url": "https://www.youtube.com/embed/yCryq0PkWmY",
+      "source_url": "https://www.youtube.com/watch?v=yCryq0PkWmY",
+      "thumbnail_url": "https://i.ytimg.com/vi/yCryq0PkWmY/hqdefault.jpg",
+      "timestamp": "2026-01-12T20:05:55Z",
+      "title": "How to Fund a Fund: Economic Development",
+      "video_id": "yCryq0PkWmY"
+    },
+    {
+      "duration_seconds": 556,
+      "embed_url": "https://www.youtube.com/embed/yC4MC6tBsJg",
+      "source_url": "https://www.youtube.com/watch?v=yC4MC6tBsJg",
+      "thumbnail_url": "https://i.ytimg.com/vi/yC4MC6tBsJg/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:27:36Z",
+      "title": "The 21st Century Education Revolution",
+      "video_id": "yC4MC6tBsJg"
+    },
+    {
+      "duration_seconds": 610,
+      "embed_url": "https://www.youtube.com/embed/yB5MeQXqUXU",
+      "source_url": "https://www.youtube.com/watch?v=yB5MeQXqUXU",
+      "thumbnail_url": "https://i.ytimg.com/vi/yB5MeQXqUXU/hqdefault.jpg",
+      "timestamp": "2026-01-12T20:16:16Z",
+      "title": "Crowdfunding Startups using Linkedin",
+      "video_id": "yB5MeQXqUXU"
+    },
+    {
+      "duration_seconds": 119,
+      "embed_url": "https://www.youtube.com/embed/y4iMhlfADeE",
+      "source_url": "https://www.youtube.com/watch?v=y4iMhlfADeE",
+      "thumbnail_url": "https://i.ytimg.com/vi/y4iMhlfADeE/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:11:01Z",
+      "title": "Leaving a Trail on Twitter",
+      "video_id": "y4iMhlfADeE"
+    },
+    {
+      "duration_seconds": 180,
+      "embed_url": "https://www.youtube.com/embed/xYFHMKrSArA",
+      "source_url": "https://www.youtube.com/watch?v=xYFHMKrSArA",
+      "thumbnail_url": "https://i.ytimg.com/vi/xYFHMKrSArA/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:28:17Z",
+      "title": "Michael Trout on the E-learning Singularity Initiative",
+      "video_id": "xYFHMKrSArA"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0008.json",
+  "order": "catalog",
+  "page": 7,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

@@ -1,3 +1,28 @@
+## Layer-2A current-window readiness & Connect-WRE separation — 2026-11-24
+
+- [x] Separate `database_lifetime` metrics from bounded `current_window` readiness
+  in `PatternMemory.get_telemetry_dashboard()`, `DashboardAlertMonitor.evaluate_metric_statuses()`,
+  `check_dashboard_health()`, and `dae_preflight.dashboard_readiness()` without
+  weakening 19/P0 custody gates or dropping `historical_critical_count`.
+- [x] Separate `total_executions` from per-metric `metric_samples` in root
+  `main.py` (`run_connect_wre`, `--connect-wre`) and `main_menu.py` (`_run_connect_wre`).
+- [ ] Layer-2B/2C handoffs: security guard hardening (`destructive_action_guard.py`,
+  `PathConstraintValidator`, `CapabilityToken`, `wre_worker_git_cwd_guard.py`) and
+  pinned orchestrator / inference / verifier wiring.
+
+## Layer-1 WSP_00 / WSP_97 worker contract & CodeAct hook — 2026-11-24
+
+- [x] Add pure-evaluation `src/wre_worker_wsp97_contract.py` (`validate_worker_wsp00_envelope`,
+  `build_worker_wsp97_prompt_contract`, `validate_worker_wsp97_receipt`) delegating
+  receipt verification to `tools.wsp97_execution_validator` (WSP 00 0.2A, WSP 84, WSP 97).
+- [x] Wire additive backwards-compatible `enforce_wsp00_envelope` pre-execution
+  hook into unpinned `src/codeact_executor.py` without touching manifest-pinned
+  `scripts/reddog_backend_manifest.json` files or 19/P0 custody gates.
+- [ ] Layer-2A/2B/2C handoffs: `--connect-wre` `retrieval_quality` gating,
+  security guard hardening (`destructive_action_guard.py`, `PathConstraintValidator`,
+  `CapabilityToken`, `wre_worker_git_cwd_guard.py`), and pinned orchestrator /
+  inference / verifier wiring with explicit `MAX_RUNTIME_FILES` bump.
+
 ## Scientific self-healing canary & fail-closed measured benefit — 2026-11-16
 
 - [x] Reconcile `branch_dispositions` (`MAIN_BRANCH`, `PROTECTED_BRANCH`,

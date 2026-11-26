@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 744,
+      "embed_url": "https://www.youtube.com/embed/bI57-63nWuk",
+      "source_url": "https://www.youtube.com/watch?v=bI57-63nWuk",
+      "thumbnail_url": "https://i.ytimg.com/vi/bI57-63nWuk/hqdefault.jpg",
+      "timestamp": "2026-01-14T16:07:47Z",
+      "title": "Morning Reflections in Japan",
+      "video_id": "bI57-63nWuk"
+    },
+    {
+      "duration_seconds": 413,
+      "embed_url": "https://www.youtube.com/embed/beg4rLxwgJA",
+      "source_url": "https://www.youtube.com/watch?v=beg4rLxwgJA",
+      "thumbnail_url": "https://i.ytimg.com/vi/beg4rLxwgJA/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:12:31Z",
+      "title": "Cooking with Mike: Making Omelets",
+      "video_id": "beg4rLxwgJA"
+    },
+    {
+      "duration_seconds": 245,
+      "embed_url": "https://www.youtube.com/embed/BDBlZ0bf3-s",
+      "source_url": "https://www.youtube.com/watch?v=BDBlZ0bf3-s",
+      "thumbnail_url": "https://i.ytimg.com/vi/BDBlZ0bf3-s/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:12:28Z",
+      "title": "HelpJapanCo.com Introduction",
+      "video_id": "BDBlZ0bf3-s"
+    },
+    {
+      "duration_seconds": 479,
+      "embed_url": "https://www.youtube.com/embed/B3DJ-XBbP5k",
+      "source_url": "https://www.youtube.com/watch?v=B3DJ-XBbP5k",
+      "thumbnail_url": "https://i.ytimg.com/vi/B3DJ-XBbP5k/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:15:44Z",
+      "title": "A Morning Walk in Japan",
+      "video_id": "B3DJ-XBbP5k"
+    },
+    {
+      "duration_seconds": 131,
+      "embed_url": "https://www.youtube.com/embed/B2_wv-THDrY",
+      "source_url": "https://www.youtube.com/watch?v=B2_wv-THDrY",
+      "thumbnail_url": "https://i.ytimg.com/vi/B2_wv-THDrY/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:46:06Z",
+      "title": "Did You Share Today?",
+      "video_id": "B2_wv-THDrY"
+    },
+    {
+      "duration_seconds": 148,
+      "embed_url": "https://www.youtube.com/embed/B2s9ww4Hi3o",
+      "source_url": "https://www.youtube.com/watch?v=B2s9ww4Hi3o",
+      "thumbnail_url": "https://i.ytimg.com/vi/B2s9ww4Hi3o/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:12:38Z",
+      "title": "Don Quixote's Challenge...",
+      "video_id": "B2s9ww4Hi3o"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/undaodu/catalog/0068.json",
+  "order": "catalog",
+  "page": 67,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

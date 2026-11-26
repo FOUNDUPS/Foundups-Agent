@@ -1,24 +1,138 @@
 # Member Mall tests
 
+## VOTE typed media qualification — 2026-11-25
+
+The existing `mall_phone_ui_browser.py` adds `vote-native-cards`,
+`vote-native-desktop` and `vote-reduced-motion`. The shared local route serves
+the seven canonical module payloads, including MP4 byte ranges. Media is not
+mocked: Chromium must decode 480×562 video and advance time; unsupported native
+sources must report the image-animation fallback, demonstrate changing frames,
+pause to a stable still and retain null media time. Both paths exercise cleanup,
+the common stage, two records, search, expansion/return and motion changes.
+Windows WebKit is not physical Safari or installed-PWA qualification.
+
+Run these with the repository-approved bounded environment, then the full
+existing suite and state/boot/catalog/worker regressions. Browser hashes include
+the canonical VOTE catalog and six assets. Existing controlled YouTube fixtures
+remain distinct from real-provider acceptance.
+
+## Home/dock and hidden Next qualification — 2026-11-25
+
+`mall_phone_ui_browser.py` adds `hpc-home-shared-desktop-dock` and
+`tucked-next-stays-hidden` to the existing matrix (66 rows with defensive
+history). It checks fresh Windows TV, exact shared-dock identity below the app
+queue, live filtering/Enter selection, scoped Home/reload/resize, gated grid
+Add Video and a single actions plus. Hidden right-swipe input advances exactly
+once without provider creation/cue/load/play; tap materializes paused and
+explicit visible Play advances fixture time. Chromium uses CDP touch and
+WebKit uses synthetic touch; neither is physical iPhone evidence.
+
+`mall_queue_callbacks_browser.py` preserves existing cases and adds hidden
+paging, empty/error pages, no duplicate request, filtered first/end boundaries,
+and stale-page cancellation after restore/close/new selection/scope. Existing
+preference VM covers all four tucked choices, legacy migration, explicit saved
+next/reveal and scoped presentation isolation. Real YouTube and delivery are
+separate gates; provider fixtures cannot close those checks.
+
+## Clean video gesture qualification — 2026-11-23
+
+`mall_phone_ui_browser.py --include-defensive` adds `clean-video-gestures` and
+`theater-clean-control-regression` while preserving previous cases (62 rows
+across Chromium/WebKit). It checks app-only chrome removal, hit-tested external
+full-height grips, provider minimum dimensions, full-video explicit Next with
+autoplay off, filtered/multipage/end queues, menu Save/Share/Enter, caller focus
+and original scroll, in-viewport tucked Next/reveal, Restore/no-action and
+manual Play. Chromium injects real CDP touch input; WebKit touch events here
+are synthetic. Neither is a physical iPhone or native-provider fullscreen pass.
+
+Run `node public/member/tests/mall_local_activity_vm.mjs` for opt-in events,
+getter-safe field projection, canonical diagnostic enums, deduplication,100-entry
+bound, listener lifecycle and absence of network/persistence/mic/model work.
+The existing phone CI invokes it; preferences (19), nested probe diagnostics (7)
+and the original queue/policy/worker suites remain required. The new preview
+host family is `play-v26-gestures` and its UI says Build v26 · Gestures. Keep
+real YouTube, audible output, installed-client migration and physical-device
+receipts separate from mocked provider and emulated-layout evidence.
+
+## Floating control continuation — 2026-11-22
+
+`mall_phone_ui_browser.py --case floating-frame-controls --case dog-and-camera-actions`
+checks responsive minimum provider size, moving the same frame, full-height
+restore, hidden pause, direct Full Video and unavailable-next-clip recovery,
+independent gesture returns, in-page unavailable Red Dog and the bounded camera
+caller URL. The desktop unready-return case also exercises the same options
+dialog while its regular dock is hidden. Use the full `--include-defensive`
+selection for shared shell/desktop/phone regression.
+
+Playback actions relocated from floating chrome are exercised through Video,
+including its persistent grip alternative; desktop theater retains its existing
+Back owner. The media-policy fixture still forces actual sub-200px geometry and
+asserts start refusal, preserving its original acceptance. The preference and
+routing VMs qualify read-only migration, independent choices, camera URL bounds
+and the explicit controls-preview host family. Existing account/product modes
+remain separate regressions. All provider and camera requests are controlled;
+these commands do not qualify real speech, AI, iPhone playback or camera return.
+
+With Chromium and Python Playwright installed, run
+`python -B public/member/tests/mall_guest_conversation_browser.py` from the
+repository root. It drives the HPC phone dock and real dialog at 390×844 using
+the scoped-video fixture's local assets. The guest API is intercepted. The
+test checks consent, the extension-owned FoundUp breadcrumb, draft staging
+without sending or overwriting text, the visible reply after Send, withdrawal,
+and clearing the transcript. No provider or cloud service is required.
+
 Read [TestModLog.md](TestModLog.md) before extending a fixture. It records the
 existing suites, historical results and their limits; those results are not a
 fresh test run.
 
-### Scoped video
+## Current v23 qualification
+
+The public Mall uses the existing six-item discovery pager and shared player.
+Selecting a video-backed card replaces the all-Mall field with that source's
+video grid. Portrait floats above the field; compact landscape retains the
+floating stage with a clear browsing region beside it. Back to Mall and the
+selected-scope logo restore browsing; the ordinary logo retains Member Portal.
+Only Catalog order is offered because per-video popularity is unavailable.
+
+Use the existing Python 3.12 Playwright runtime without installing dependencies:
+
+- `node public/member/tests/mall_discovery_pager_vm.mjs`: bounded requests,
+  schema/cursor/generation checks, retry, cancellation and no cross-lane fetches.
+- `node public/member/tests/mall_product_state_vm.mjs`: cache generation,
+  requested-only public pages, offline failures and unrelated cache preservation.
+- `python -B public/member/tests/mall_public_tv_browser.py`: actual public boot,
+  selected-only TV, network batches, queue and navigation/rotation regressions.
+- `python -B public/member/tests/mall_queue_callbacks_browser.py`: delayed queue
+  completion versus native Pause, query, hide, tuck, close and new selection;
+  provider-control/browser-zoom and explicit chrome gesture boundaries.
+- `mall_scoped_video_browser.py --player-policy`, `--header-only`,
+  `--discovery-cards`, `--entry-regressions`: retained HPC, header, cards,
+  entry gates, controls and state. The default legacy runner remains separate.
+
+Source hashes and final commit bindings belong in each run receipt; a command
+listed here is not a pass. Local routes, provider events and account state are
+controlled fixtures. Real YouTube playback and physical Safari/PWA on Wi-Fi and
+cellular remain separate. A physical browser must show advancing media time.
+
+### Scoped video (historical full-suite coverage)
 
 Run `python -B public/member/tests/mall_scoped_video_browser.py` with the
-existing Python Playwright and Chromium test runtime. It serves the real
+existing Python Playwright Chromium and WebKit test runtime. It serves the real
 shell from local files with a 31-video fixture and controlled provider events.
-The test covers vertical batching, playback in the selected tile's row,
-one active inline iframe, immersive
-promotion, Back and Escape, deep Vote return, orientation, diagnostics and
+The test covers vertical batching, top-anchored floating playback over a
+scrolling grid, swipe-right edge tuck and edge-handle restore, intentional
+pinch-in/pinch-out transitions with accessible button alternatives, one active
+provider iframe across switches and WikiTube sequential advancement, bounded
+error recovery, Back and Escape, deep Vote return, orientation, diagnostics and
 manual Play at 320 px. The desktop cases cover first-video startup,
 filtered queue advancement, keyboard selection, breakpoint continuity and
 civic-resource return. The phone cases check the selected install manifest,
-options, scoped search, fixture dictation and Red Dog return. The member
-case uses controlled Clerk and Firestore responses to check sign-in return,
-invitation denial, admitted theater and the public discovery link.
-`node public/member/tests/mall_product_state_vm.mjs` covers v16 installation,
+options, scoped search, fixture dictation and Red Dog return. The member case uses controlled Clerk and Firestore responses to check open
+guest discovery on `play.foundups.com`, `Enter FoundUp` handoff through the
+`foundups.com` Member Portal (`?enter={foundup_id}` -> sign-in -> invite gate ->
+admitted FoundUp entry), scoped HPC sign-in return, admitted theater, and the
+public discovery link.
+`node public/member/tests/mall_product_state_vm.mjs` covers v23 installation,
 obsolete Mall cache retirement and scoped offline behavior. Real YouTube time
 progression and physical-device gates are separate in the
 [incident](../../../modules/foundups/pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
@@ -59,7 +173,9 @@ For an isolated Hosting preview, stage
 `public/member/playback-probe/reference.html`, and a sanitized
 `public/member/playback-probe/deployment.json` (`source_sha`, `channel_id`,
 `hosting_version`, `mall_build`). Load the deferred probe
-script in the staged member document. `reference.html` accepts strictly
+script only in the staged member document; the committed shared document has
+no probe loader. Staged probe files and that injection remain preview-only.
+`reference.html` accepts strictly
 allowlisted `?v=<11-char Short ID>` (8 admitted HPC Shorts + 4 diagnostic-only
 Shorts) and `?host=youtube|nocookie` (`https://www.youtube.com` vs
 `https://www.youtube-nocookie.com`), retains selection across `Mall <-> official
@@ -107,3 +223,40 @@ python -B -m pytest public/member/tests/test_route_contract_bridge.py modules/fo
 Use a scratch `--basetemp` outside the checkout. These controlled local tests do
 not prove deployed routing, real browser layout, authentication-provider
 availability, token deployment, liquidity or trading.
+
+## v26 phone qualification
+
+The v26 candidate freezes v25 as a comparison. `mall_product_state_vm.mjs`
+executes the actual v26 worker, including direct v18/v25 cache retirement while
+preserving unrelated cache bytes. `mall_admission_preferences_vm.mjs` tests typed,
+expiring single-use review intents and video preferences; it grants no authority.
+`mall_browser_ai_pilot_vm.mjs` verifies the explicitly confirmed 41-byte WASM
+fixture and cancellation/hash limits; this is not a model or device qualification.
+
+Physical iPhone 11 acceptance uses a fresh v26 origin: compact Play header and
+filters/account access; HPC banner to Hasan's campaign, separate Mall return,
+Voice Contact Congress; exactly one bottom Search Dock through expand/collapse
+and Back. Then use one genuine tap and three distinct real YouTube clips with
+two natural transitions. Record IDs, advancing time, sound/mute, provider errors,
+Safari versus installed PWA and network context. A fallback tap is not a
+continuous-playback pass. Fully hidden/dismissed playback must pause.
+
+## Playback-probe release metadata
+
+Use `node scripts/tests/hpc_preview_metadata_vm.cjs` from the repository root.
+The pure `scripts/hpc_preview_metadata.cjs` factory/validator derives the build,
+discovery generation and probe digest from actual candidate assets and binds both
+source fields to the resolved commit. A tracked JSON cannot contain its own
+commit SHA: generate the staged record after resolving that commit, then include
+its bytes/hash as explicit derived release metadata in the reviewed manifest.
+Always regenerate it, even when it is unchanged in the Git diff from a preserved
+Hosting baseline. Never substitute an old channel, source, build or Hosting ID.
+
+`hostingVersion` must come from the new allocation when known; otherwise the
+record says `unverified`. `validateMetadata(..., {requireHosting:true})` refuses
+an unknown identity. This contract checks coherence, not the authenticity of a
+caller-supplied release identity or successful publication. Retain independent
+Hosting/readback and unsigned asset-parity receipts. Compare served runtime,
+metadata, worker and release receipt separately before investigating phone cache.
+The frozen v26 discrepancy and exact historical provenance are recorded in the
+TestModLog; no physical-iPhone result is inferred from those HTTP observations.

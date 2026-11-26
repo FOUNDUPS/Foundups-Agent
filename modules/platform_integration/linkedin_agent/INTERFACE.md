@@ -1,5 +1,10 @@
 # LinkedIn Agent Interface Documentation
 
+The [scheduled release contract](skillz/linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership)
+governs this editorial workflow. The legacy immediate company-post helper below
+is excluded; entering article content proves neither a schedule nor publication.
+This instruction change adds no scheduling API or unattended executor admission.
+
 The [research contract](skillz/linkedin_newsletters/references/research-verification.md) extends editorial instructions with source admission, Docs revision/read-back and private session records. Existing video-index and Digital Twin interfaces remain unchanged; this does not wire automatic data capture or training.
 
 

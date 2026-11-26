@@ -1,5 +1,14 @@
 # p.fMALL Platform Layer
 
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,
+configurable right-swipe queue/reveal actions, full-height external gesture grip
+and opt-in bounded current-tab DAEmon. See the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate) and
+[canonical media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md).
+Native provider controls and ordinary desktop theater remain; physical phone
+and production acceptance are open. No model, mic or backend service is added.
+
 **Status**: Implemented platform shell with bounded read surfaces; resident RedDog integration is not implemented here.
 **Entity type**: Platform layer, not a FoundUp and not an OpenClaw instance.
 
@@ -14,6 +23,25 @@ module owns manifest discovery, catalog projection, route resolution, optional
 state-overlay presentation, static shell assets, and policy objects used by the
 member Mall. It does not own a model, a durable RedDog conversation, worker
 execution, or FoundUp business logic.
+
+## Fractal discovery target — 2026-11-19
+
+The intended Mall lets a person open a FoundUp, inspect its parts, follow a
+dependency or reuse link, and return to the caller. A shared component retains
+one stable ID across the Mall, 3D cube and 0102 views. The
+[master architecture](../docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+owns identity, containment and typed relationships; the
+[navigation contract](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+owns caller, lens and selection restoration and permitted artifact access.
+
+The [roadmap](ROADMAP.md#fractal-tile-graph-and-agent-work-navigation) starts with
+an inclusive census and parallel bounded auditor samples. Functionality,
+integration and venture maturity remain separate evidence. The shared graph,
+builder-to-source navigation and Tools → Benchmark branch are targets; the
+implemented shell surfaces below do not establish that wiring. The
+[documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+separates inspected main source, the reported local `121c50666` graph and
+unverified runtime claims.
 
 ## Implemented surfaces
 
@@ -46,8 +74,13 @@ execution, or FoundUp business logic.
   not load content.
 - `verification_gap_guard.py` allows advisory anomaly surfacing and blocks AI
   finality for protected decisions.
-- `public/member/` is the Clerk-admitted member PWA. Its detailed
-  browser contract remains in `public/member/INTERFACE.md`.
+- `public/member/` powers both the Clerk-admitted member PWA on `foundups.com/member/`
+  and the open guest p.fMALL landing on `play.foundups.com` (plus dedicated
+  single-FoundUp guest Shorts on `hpc.foundups.com`). Visitors browse and play
+  catalog media openly on `play.foundups.com`, while entering any FoundUp
+  requires membership and passes through the `foundups.com` Member Portal
+  (`https://foundups.com/member/?enter={foundup_id}`). Detailed browser
+  contracts remain in `public/member/INTERFACE.md`.
 
 ## Optional real HTTP serving profile
 
@@ -100,6 +133,13 @@ can control existing Mall presentation APIs, but it is not a conversation
 transport and grants no resident identity, model credential, durable-session,
 work-order, OpenClaw-policy, or Hermes-execution authority.
 
+The bounded guest adapter is a separate prototype. It remains unavailable
+unless deployment explicitly supplies the same-origin canonical public API
+root. Opening it performs no request; explicit consent starts an in-memory,
+text-only public session. Only the question and canonical nonce/revision fields,
+plus an optional validated public route FoundUp ID, cross that boundary. Account
+identity, private context, browser storage, tools, and work authority do not.
+
 A production RedDog connection must arrive through a separately authenticated
 adapter. RedDog/0102 owns the continuous product identity and governed
 conversation state; OpenClaw supervises policy/control-plane admission; WRE
@@ -116,6 +156,7 @@ admitted leaf jobs. The browser remains an untrusted thin client. No text or
 | Optional state overlay | Implemented contract | Advisory provider data |
 | Member Mall UI and browser control dispatcher | Implemented | Presentation only |
 | Shell-local RedDog FAQ concierge | Implemented legacy shim | Static guidance only |
+| Bounded public RedDog guest adapter | Implemented source prototype; unconfigured by default | Canonical public admission API; effect ceiling NONE |
 | Authenticated resident RedDog conversation adapter | Specified, not implemented in p.fMALL | RedDog backend |
 | AutoPost Live mode and creator live-session service | Specified, not implemented | External AutoPost product/media adapter; separately authenticated durable creator backend |
 | Provider-confirmed live catalog projection | Planned | Scoped backend observation; public-safe fields only |

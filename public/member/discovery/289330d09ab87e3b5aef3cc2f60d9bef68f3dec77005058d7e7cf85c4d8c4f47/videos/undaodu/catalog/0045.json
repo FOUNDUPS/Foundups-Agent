@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/jaecyBNI0z8",
+      "source_url": "https://www.youtube.com/watch?v=jaecyBNI0z8",
+      "thumbnail_url": "https://i.ytimg.com/vi/jaecyBNI0z8/hqdefault.jpg",
+      "timestamp": "2026-01-30T03:45:39Z",
+      "title": "⚠️ #FFCPLN: The Playlist #MAGA Fears! 💀",
+      "video_id": "jaecyBNI0z8"
+    },
+    {
+      "duration_seconds": 361,
+      "embed_url": "https://www.youtube.com/embed/j9NACtcjXk4",
+      "source_url": "https://www.youtube.com/watch?v=j9NACtcjXk4",
+      "thumbnail_url": "https://i.ytimg.com/vi/j9NACtcjXk4/hqdefault.jpg",
+      "timestamp": "2026-01-13T02:17:16Z",
+      "title": "What's a Found Up?",
+      "video_id": "j9NACtcjXk4"
+    },
+    {
+      "duration_seconds": 475,
+      "embed_url": "https://www.youtube.com/embed/J5AL3x3jrew",
+      "source_url": "https://www.youtube.com/watch?v=J5AL3x3jrew",
+      "thumbnail_url": "https://i.ytimg.com/vi/J5AL3x3jrew/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:16:58Z",
+      "title": "Three Parts of Global Education Project",
+      "video_id": "J5AL3x3jrew"
+    },
+    {
+      "duration_seconds": 275,
+      "embed_url": "https://www.youtube.com/embed/i_v5G6BPmQs",
+      "source_url": "https://www.youtube.com/watch?v=i_v5G6BPmQs",
+      "thumbnail_url": "https://i.ytimg.com/vi/i_v5G6BPmQs/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:00:04Z",
+      "title": "Startup Dad updates on Foundups & moves over to Facebook",
+      "video_id": "i_v5G6BPmQs"
+    },
+    {
+      "duration_seconds": 109,
+      "embed_url": "https://www.youtube.com/embed/IZmROK6WXtg",
+      "source_url": "https://www.youtube.com/watch?v=IZmROK6WXtg",
+      "thumbnail_url": "https://i.ytimg.com/vi/IZmROK6WXtg/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:09:33Z",
+      "title": "A shout-out from Michael Traut",
+      "video_id": "IZmROK6WXtg"
+    },
+    {
+      "duration_seconds": 554,
+      "embed_url": "https://www.youtube.com/embed/iyQ6kY2dswU",
+      "source_url": "https://www.youtube.com/watch?v=iyQ6kY2dswU",
+      "thumbnail_url": "https://i.ytimg.com/vi/iyQ6kY2dswU/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:13:59Z",
+      "title": "The Education Singularity",
+      "video_id": "iyQ6kY2dswU"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0046.json",
+  "order": "catalog",
+  "page": 45,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

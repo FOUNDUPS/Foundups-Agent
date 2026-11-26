@@ -36,28 +36,28 @@
 }
 
 /* Public and admitted products reuse the account plane's modal owner. */
-.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"]) {
+.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"], [data-reddog-mode="public-video"]) {
   max-height: 90vh;
   max-height: 90dvh;
   overscroll-behavior: contain;
 }
-.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"]):not(.open) {
+.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"], [data-reddog-mode="public-video"]):not(.open) {
   visibility: hidden;
 }
-.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"]) [data-reddog-close] {
+.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"], [data-reddog-mode="public-video"]) [data-reddog-close] {
   min-width: 44px;
   min-height: 44px;
 }
-.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"]) [data-reddog-discovery] {
+.account-plane:is([data-reddog-mode="public-discovery"], [data-reddog-mode="product-discovery"], [data-reddog-mode="public-video"]) [data-reddog-discovery] {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Hide member UI before boot and after revocation. The member runtime alone
    selects admitted presentation after its actual stored account checks. */
-.account-plane[data-reddog-mode="product-discovery"] [data-reddog-browse-rows],
-.account-plane[data-reddog-mode="product-discovery"] [data-reddog-concierge],
-.account-plane[data-reddog-mode="product-discovery"] [hidden],
-.account-plane[data-reddog-mode="product-discovery"]:not([data-reddog-admitted="true"]) :is(
+.account-plane:is([data-reddog-mode="product-discovery"], [data-reddog-mode="public-video"]) [data-reddog-browse-rows],
+.account-plane:is([data-reddog-mode="product-discovery"], [data-reddog-mode="public-video"]) [data-reddog-concierge],
+.account-plane:is([data-reddog-mode="product-discovery"], [data-reddog-mode="public-video"]) [hidden],
+.account-plane:is([data-reddog-mode="product-discovery"], [data-reddog-mode="public-video"]):not([data-reddog-admitted="true"]) :is(
   [data-reddog-state], [data-reddog-identity], [data-reddog-foundups],
   [data-reddog-invites], [data-reddog-options], [data-reddog-tools],
   [data-reddog-channels], [data-reddog-briefing], [data-reddog-recommendations],
@@ -426,6 +426,138 @@
 }
 .reddog-mode-action-label {
   white-space: nowrap;
+}
+
+/* Quiet Red Dog conversation entry. The separate conversation client owns
+   network/session state; this shell only presents context and availability. */
+.reddog-conversation-entry {
+  padding: 0.65rem 0.7rem;
+  margin-bottom: 0.6rem;
+  border: 1px solid rgba(141, 113, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(141, 113, 255, 0.05);
+}
+.reddog-conversation-heading {
+  color: rgba(228, 226, 236, 0.9);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.reddog-conversation-context,
+.reddog-conversation-availability {
+  margin: 0.22rem 0 0;
+  color: rgba(228, 226, 236, 0.62);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+.reddog-conversation-open {
+  margin-top: 0.55rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(141, 113, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(141, 113, 255, 0.1);
+  color: rgba(228, 226, 236, 0.88);
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+.reddog-conversation-open:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Consent-bound guest client. Native dialog keeps the transcript out of the
+   page until the operator explicitly opens this separate public surface. */
+.reddog-guest-dialog {
+  box-sizing: border-box;
+  width: min(36rem, calc(100vw - 1.5rem));
+  max-width: calc(100vw - 1.5rem);
+  max-height: min(42rem, calc(100dvh - 1.5rem));
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid rgba(141, 113, 255, 0.28);
+  border-radius: 14px;
+  background: #0e0e1c;
+  color: #e4e2ec;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+}
+.reddog-guest-dialog::backdrop {
+  background: rgba(5, 5, 9, 0.72);
+  backdrop-filter: blur(5px);
+}
+.reddog-guest-title {
+  margin: 0 2.5rem 0.5rem 0;
+  font-size: 1rem;
+}
+.reddog-guest-disclosure,
+.reddog-guest-status,
+.reddog-guest-consent {
+  color: rgba(228, 226, 236, 0.72);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.reddog-guest-dialog .reddog-fractal-focus {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 0.75rem;
+  overflow-wrap: anywhere;
+}
+.reddog-guest-messages {
+  display: grid;
+  gap: 0.5rem;
+  max-height: min(18rem, 38dvh);
+  margin: 0.75rem 0;
+  overflow-y: auto;
+}
+.reddog-guest-message {
+  padding: 0.6rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(228, 226, 236, 0.07);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.reddog-guest-message.user {
+  background: rgba(141, 113, 255, 0.16);
+}
+.reddog-guest-form {
+  display: grid;
+  gap: 0.5rem;
+}
+.reddog-guest-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 5rem;
+  resize: vertical;
+  padding: 0.65rem;
+  border: 1px solid rgba(228, 226, 236, 0.24);
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.24);
+  color: inherit;
+  font: inherit;
+}
+.reddog-guest-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.reddog-guest-dialog :is(button, .reddog-guest-start, .reddog-guest-check,
+  .reddog-guest-end, .reddog-guest-close) {
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(141, 113, 255, 0.3);
+  border-radius: 9px;
+  background: rgba(141, 113, 255, 0.12);
+  color: inherit;
+  font: inherit;
+}
+.reddog-guest-account {
+  display: inline-block;
+  margin: 0.25rem 0 0.75rem;
+  color: #c5b8ff;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
 }
 
 /* Red Dog context briefing */

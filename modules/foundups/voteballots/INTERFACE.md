@@ -1,10 +1,47 @@
 # Vote/Ballots FoundUp — Interface Contract
 
+## 2026-11-25 — Shared member-card collection
+
+The canonical two-record `web/congressional-cards.json` supplies the shared
+Play selector `?foundup=voteballots`. Chuck Schumer / U.S. Senate / New York
+and Hakeem Jeffries / U.S. House / New York District 8 retain their reviewed
+artwork, `#SchumerOUT` / `#JeffriesOUT` labels and official profile references.
+UDP/CU remain null and display Pending. Credits and independent satire
+disclosure remain accessible. No score, verification or membership is inferred.
+
+Names/office/labels surround the art in the existing tile and common player
+stage; no replacement shell. Silent MP4s loop. A validated local native error4
+can use approved animated WebP; that is explicitly an image animation with
+null media time. Still/pause, reduced motion, Next/Previous, cleanup and return
+follow the [shared contract](../../../public/member/INTERFACE.md#2026-11-25--optional-vote-member-cards).
+HPC content and YouTube requirements are unaffected.
+
+`web/deck-entry.html/js/css` is a fixed handoff template to
+`https://play.foundups.com/member/?foundup=voteballots`, preserving bookmarked
+guide fragments and Dispatch/guide/contact fallbacks. Its owning Sites release
+must first verify the live shared collection. This runtime port does not
+publish that entry, replace Dispatch or alter `/f/voteballots/app` admission.
+
 **Version**: 0.1.0  
 **Date**: 2026-04-21  
 **Status**: Design Specification  
 
 ---
+
+## 2026-11-22 Browser-local contact skins
+
+`/contact#hpc` selects the independent HPC preset; unrecognized initial fragments
+select Vote Classic. Ordinary later page anchors do not reset a draft. The skin
+selector, three emoji tone controls and regeneration write an editable script to
+the existing `contact-notes` textarea. Core fields remain invariant across tone
+and wording changes. No audience or directory data enters the generator.
+
+`createCallScript({intro, callback, request, reason, tone, variant})` returns
+bounded plain text, or an empty string without a request. `resolveSkin(value)`
+admits only known presets. Output uses textarea values; no HTML evaluation,
+provider, persistence, submission or calling authority is introduced.
+An opt-in spokesperson template is a caller assertion, not verified membership.
+
 
 ## 2026-11-12 Vote cover and guide routes
 

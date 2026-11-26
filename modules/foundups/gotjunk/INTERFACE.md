@@ -1,5 +1,7 @@
 # GotJUNK? FoundUp - Interface Documentation
 
+> **Current direction — planned, not implemented:** AutoPost owns camera capture, media, and perception. The intended intelligent-camera handoff uses image evidence plus spoken or selected user intent to propose GotJunk, Shop, or another registered FoundUp, with user confirmation or correction before dispatch. A confirmed GotJunk report enters a distinct report workflow. The standalone camera, storage, AI, and deployment descriptions below are legacy interfaces and do not establish Mall integration, shared identity, report intake, or production cutover. See [ROADMAP.md](ROADMAP.md) and [PFMALL_MIGRATION_HANDOFF.md](PFMALL_MIGRATION_HANDOFF.md).
+
 ## Cloud Run Deployment
 
 **AI Studio Project ID**: `1R_lBYHwMJHOxWjI_HAAx5DU9fqePG9nA`

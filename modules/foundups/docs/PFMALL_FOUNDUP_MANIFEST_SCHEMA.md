@@ -372,3 +372,22 @@ The simulator (`modules/foundups/simulator/`) may serve as one PoC provider of s
 | `tier` enum | Matches `DAOTier` in `smartdao_spawning.py` | Aligned |
 | Shell contract consistency | `PFMALL_SHELL_CONTRACT.md` consistent with manifest schema | Verified |
 | Namespace guardrail | `test_namespace_guardrail.py` enforces `routing_prefix` and `data_namespace` | `IMPLEMENTED_IN_TESTS` |
+
+### Public project-candidate records (HPC/Play discovery reconciliation)
+
+A public discovery record with `source_type: project_candidate`,
+`discovery_kind: candidate`, and `canonical_foundup_id: null` is not a tenant
+manifest or a canonical FoundUp. The approved FoundUps House card retains its
+public planning source, `Specified` / `planning_only` labels and `housing`
+discovery category. It has no DAO tier, routing prefix, data namespace, runnable
+entry, verified house record or functional Join claim. These candidate labels
+do not extend `shell_core.py` tenant enums. The catalog truth gate separately
+validates the source-bound candidate contract and rejects unapproved candidate
+IDs, fabricated tier/binding/readiness, videos and private/unverified house data.
+
+Vote, Trade and MAGADOOM remain canonical `incubating` / `discoverable_only`
+projects in public browse/flip. Catalog admission is distinct from their module
+manifest declarations: absent runnable entry, their public catalog records do
+not claim `routing_prefix` or `data_namespace`. The existing Enter doorway uses
+canonical identity and retains the existing sign-in/admission behavior. No new
+manifest, route, public house record, checkout or launch is created here.

@@ -65,7 +65,7 @@ def test_origin_is_exact_and_not_identity(surface, origin):
         p.checked_surface(surface, origin)
 
 
-@pytest.mark.parametrize("field", ["principal_id", "role", "model", "foundup_id", "limit", "unlimited", "knowledge_answer"])
+@pytest.mark.parametrize("field", ["principal_id", "role", "model", "limit", "unlimited", "knowledge_answer"])
 def test_encounter_and_turn_reject_privilege_fields(store, field):
     gate, _ = store
     with pytest.raises(p.PublicAdmissionError):
@@ -73,6 +73,31 @@ def test_encounter_and_turn_reject_privilege_fields(store, field):
     session = encounter(gate)
     body = {"nonce": session["nonce"], "revision": 0, "message": "Hello", field: "0102"}
     with pytest.raises(p.PublicAdmissionError):
+        gate.reserve_turn(**COMMON, token=session["token"], body=body, now=NOW)
+
+
+def test_optional_foundup_scope_is_bounded_and_backwards_compatible(store):
+    gate, _ = store
+    session = encounter(gate)
+    scoped = gate.reserve_turn(
+        **COMMON, token=session["token"],
+        body={"nonce": session["nonce"], "revision": 0,
+              "message": "What is this?", "foundup_id": "hpc"}, now=NOW,
+    )
+    assert scoped.foundup_id == "hpc"
+    gate.finish_turn(token=session["token"], reservation_id=scoped.reservation_id, now=NOW)
+    session.update({"nonce": scoped.next_nonce, "revision": scoped.revision})
+    legacy = turn(gate, session, message="What is HPC?")
+    assert legacy.foundup_id is None
+
+
+@pytest.mark.parametrize("value", ["Private/Thing", "../hpc", "", "x"*81, 7, []])
+def test_optional_foundup_scope_rejects_invalid_identifiers(store, value):
+    gate, _ = store
+    session = encounter(gate)
+    body = {"nonce": session["nonce"], "revision": 0,
+            "message": "What is this?", "foundup_id": value}
+    with pytest.raises(p.PublicAdmissionError, match="public_foundup_id_invalid"):
         gate.reserve_turn(**COMMON, token=session["token"], body=body, now=NOW)
 
 

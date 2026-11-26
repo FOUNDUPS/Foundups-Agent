@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 203,
+      "embed_url": "https://www.youtube.com/embed/xK9PQ3O-lFU",
+      "source_url": "https://www.youtube.com/watch?v=xK9PQ3O-lFU",
+      "thumbnail_url": "https://i.ytimg.com/vi/xK9PQ3O-lFU/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:36:10Z",
+      "title": "The Value of Intuition",
+      "video_id": "xK9PQ3O-lFU"
+    },
+    {
+      "duration_seconds": 102,
+      "embed_url": "https://www.youtube.com/embed/xInTXKBl-g8",
+      "source_url": "https://www.youtube.com/watch?v=xInTXKBl-g8",
+      "thumbnail_url": "https://i.ytimg.com/vi/xInTXKBl-g8/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:38:16Z",
+      "title": "What is Your Emotional Currency?",
+      "video_id": "xInTXKBl-g8"
+    },
+    {
+      "duration_seconds": 197,
+      "embed_url": "https://www.youtube.com/embed/xCq3kJvy-bU",
+      "source_url": "https://www.youtube.com/watch?v=xCq3kJvy-bU",
+      "thumbnail_url": "https://i.ytimg.com/vi/xCq3kJvy-bU/hqdefault.jpg",
+      "timestamp": "2026-01-14T15:58:09Z",
+      "title": "Founder vs Startup",
+      "video_id": "xCq3kJvy-bU"
+    },
+    {
+      "duration_seconds": 445,
+      "embed_url": "https://www.youtube.com/embed/xbuqnDLKoH8",
+      "source_url": "https://www.youtube.com/watch?v=xbuqnDLKoH8",
+      "thumbnail_url": "https://i.ytimg.com/vi/xbuqnDLKoH8/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:18:08Z",
+      "title": "Part 3: The eSingularity (The Solution)",
+      "video_id": "xbuqnDLKoH8"
+    },
+    {
+      "duration_seconds": 193,
+      "embed_url": "https://www.youtube.com/embed/xBeZP1s--1Y",
+      "source_url": "https://www.youtube.com/watch?v=xBeZP1s--1Y",
+      "thumbnail_url": "https://i.ytimg.com/vi/xBeZP1s--1Y/hqdefault.jpg",
+      "timestamp": "2026-01-14T19:12:48Z",
+      "title": "Chase Quick Pay System Problems",
+      "video_id": "xBeZP1s--1Y"
+    },
+    {
+      "duration_seconds": 454,
+      "embed_url": "https://www.youtube.com/embed/XAjDIAIMo5E",
+      "source_url": "https://www.youtube.com/watch?v=XAjDIAIMo5E",
+      "thumbnail_url": "https://i.ytimg.com/vi/XAjDIAIMo5E/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:48:22Z",
+      "title": "Tommy and Mikey at the Music Store",
+      "video_id": "XAjDIAIMo5E"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/undaodu/catalog/0011.json",
+  "order": "catalog",
+  "page": 10,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

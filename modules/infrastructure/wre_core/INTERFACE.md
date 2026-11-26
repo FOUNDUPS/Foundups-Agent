@@ -1,3 +1,57 @@
+## Layer-2A current-window readiness evidence — 2026-11-24
+
+- `PatternMemory.get_telemetry_dashboard(self, *, since: Optional[str] = None, collection_id: Optional[str] = None, now: Optional[datetime] = None) -> Dict`:
+  - Preserves 0-arg `telemetry_scope="database_lifetime"` fields and `metric_evidence`.
+  - Adds `collection_scope` (`requested_scope`, `since`, `upper_bound`, `collection_id`, `evaluated_at`, `naive_timestamp_policy="excluded_ambiguous_timezone"`).
+  - Validates explicit timezone-aware `since` and `now` via `_parse_iso_utc_with_meta()` (rejecting zone-less strings or naive `datetime` and `since > evaluated_at` with `ValueError`); excludes zone-less rows (`naive_timestamp_excluded`) and future rows (`row_dt > evaluated_at`), reporting `future_rows`, `invalid_timestamp_rows`, `naive_timestamp_rows`, and `timestamp_assumption="naive_excluded_unknown_timezone"`.
+  - Telemetry writers (`record_retrieval()`, `store_variation()`, `increment_counter()`, `get_retrieval_stats()`) emit/compare explicit UTC ISO-8601 timestamps (`datetime.now(timezone.utc).isoformat()`).
+  - When `since` is supplied, computes read-only `current_metric_evidence`:
+    - `retrieval_coverage` (`window_bounded=True`, `time_basis="retrieval_timestamp"`, `COUNT(relevance_score)` denominator excluding `NULL`).
+    - `variation_win_rate` (`window_bounded=True`, `time_basis="variation_created_at"`, `test_status IN ('promoted', 'archived')`).
+    - `tot_confidence_rate`, `codeact_success_rate`, `codeact_gate_trigger_rate` (`window_bounded=False`, `time_basis="counter_last_updated"`, `counter_updated_in_window`).
+- `DashboardAlertMonitor.__init__(self, pattern_memory=None, *, current_since: Optional[str] = None, collection_id: Optional[str] = None)` (reading `WRE_DASHBOARD_CURRENT_SINCE` / `WRE_DASHBOARD_COLLECTION_ID` when args are `None`), `evaluate_metric_statuses(dashboard, *, require_minimum=True)`, `unknown_metrics(...)`, `check_all(...)`, `check_lifetime_all(...)`, `run_check(verbose=True, *, now=None)`, and `check_dashboard_health(*, pattern_memory=None, current_since=None, collection_id=None, now=None)`:
+  - Calls zero-arg `DashboardAlertMonitor()` when `pattern_memory`, `current_since`, and `collection_id` are `None`.
+  - `check_all()`, `unknown_metrics()`, and `run_check()` honor active `current_window` scope when `current_since` is configured while `check_lifetime_all()` / `check_dashboard_health()` retain lifetime `historical_alerts` and `historical_critical_count`.
+  - Returns `telemetry_scope`, `collection_identity` (including `upper_bound` and `naive_timestamp_policy`), `metric_statuses`, `metric_samples`, `historical_alerts`, `historical_critical_count`, `current_readiness`, `status`, `alerts`, `unknown_metrics`, `healthy`, `dashboard`, `insufficient_data`, `total_executions`, `min_samples`, `timestamp`.
+  - Excludes future-dated rows (`future_timestamp_excluded`) and zone-less rows (`naive_timestamp_excluded`) into `UNKNOWN`, marks historical-only metrics as `STALE_UNKNOWN` (`stale_historical_only`), fails closed on unwindowed cumulative counter breaches (`CRITICAL`/`WARNING`), and never promotes unwindowed cumulative counters to `PASS`.
+- `dae_preflight.dashboard_readiness(health, *, in_watch, interactive_menu=False, unresolved_admission_gates=())`:
+  - Preserves existing keys (`allowed`, `readiness`, `status`, `critical`, `warnings`, `unknown`, `evidence_valid`) and adds `current_readiness`, `historical_critical`, `unresolved_admission_gates` (defaulting to `("protected_admission_unverified",)` when omitted), `admission_authority_verified=False`, `unattended_work_allowed=False`, `worker_admission_granted=False`, and `model_admission_granted=False`.
+
+## Worker WSP_00 0.2A & WSP_97 contract — 2026-11-24
+
+`src/wre_worker_wsp97_contract.py` exposes three pure-evaluation entrypoints
+(zero shell/Git/filesystem mutation) and three frozen result dataclasses
+(`WorkerWSP00EnvelopeResult`, `WorkerWSP97PromptContract`,
+`WorkerWSP97ReceiptResult`):
+
+- `validate_worker_wsp00_envelope(envelope, *, expected_role=None, require_verifier_separation=False) -> WorkerWSP00EnvelopeResult`:
+  rejects non-Mapping envelopes (`FAIL_ENVELOPE_TYPE`), rejects `self == "012"`
+  (`FAIL_SELF_IS_012`) or non-`0102` self (`FAIL_INVALID_SELF`), enforces
+  `role in ALLOWED_WORKER_ROLES` (`FAIL_INVALID_ROLE`), rejects explicit
+  (`FAIL_ROLE_ESCALATION`) or `claimed_role`/`requested_role`
+  (`FAIL_IMPLICIT_ROLE_ESCALATION`) escalation, enforces
+  `origin in ALLOWED_ORIGINS` (`FAIL_INVALID_ORIGIN`) and non-empty
+  `principal_ref` (`FAIL_MISSING_PRINCIPAL_REF`), and rejects equal or missing
+  (when `require_verifier_separation=True`) `worker_id` / `verifier_id`
+  (`FAIL_SELF_VERIFICATION_PROHIBITED`).
+- `build_worker_wsp97_prompt_contract(*, role="worker", agent_profile="0102", contract_path=None) -> WorkerWSP97PromptContract`:
+  loads `WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.json` via
+  `tools.wsp97_execution_validator.load_contract` and renders CoT/CoR gates,
+  locked `self=0102`/`role`, `architect intent != worker truth`, and
+  `wsp97_execution_receipt.v1.1` requirements.
+- `validate_worker_wsp97_receipt(receipt, *, repo_root=None, expected_base=None, worker_id="", verifier_id="", contract_path=None) -> WorkerWSP97ReceiptResult`:
+  fails closed on self-verification (`FAIL_SELF_VERIFICATION_PROHIBITED`),
+  non-Mapping receipts (`FAIL_RECEIPT_INVALID_TYPE`), missing `repo_root`
+  (`FAIL_REPO_ROOT_REQUIRED`), or validator errors (`FAIL_RECEIPT_VALIDATION_ERROR`),
+  delegating canonical validation to `tools.wsp97_execution_validator.validate_execution_receipt`.
+
+`src/codeact_executor.py` adds optional `enforce_wsp00_envelope: bool = False`
+to `CodeActExecutor.__init__`. When `enforce_wsp00_envelope=True` or
+`"wsp00_envelope"` is present in `input_context`, `CodeActExecutor.execute()`
+validates the envelope before any pre-action, LLM call, or post-action,
+returning `gates_triggered=["wsp00_envelope:<CODE>"]` on rejection while
+preserving backwards compatibility for callers without envelopes.
+
 ## Offline Lego block compiler, catalog reconciler & conservative triage — 2026-11-18
 
 `src/wre_lego_block_projection.py` exposes pure static AST block compilation and

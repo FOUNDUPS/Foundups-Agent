@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/xA0aKuIfjpU",
+      "source_url": "https://www.youtube.com/watch?v=xA0aKuIfjpU",
+      "thumbnail_url": "https://i.ytimg.com/vi/xA0aKuIfjpU/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:42:43Z",
+      "title": "IT Market in DC. Something to be Aware Of",
+      "video_id": "xA0aKuIfjpU"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/X8zHoB0Sqfw",
+      "source_url": "https://www.youtube.com/watch?v=X8zHoB0Sqfw",
+      "thumbnail_url": "https://i.ytimg.com/vi/X8zHoB0Sqfw/hqdefault.jpg",
+      "timestamp": "2026-02-04T14:05:10Z",
+      "title": "🎵 #FFCPLN Exposes #MAGA - 160 Songs! See Desc! 🔥",
+      "video_id": "X8zHoB0Sqfw"
+    },
+    {
+      "duration_seconds": 575,
+      "embed_url": "https://www.youtube.com/embed/X84AKUi0kwg",
+      "source_url": "https://www.youtube.com/watch?v=X84AKUi0kwg",
+      "thumbnail_url": "https://i.ytimg.com/vi/X84AKUi0kwg/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:31:34Z",
+      "title": "South Florida Shakespeare Festival Idea",
+      "video_id": "X84AKUi0kwg"
+    },
+    {
+      "duration_seconds": 194,
+      "embed_url": "https://www.youtube.com/embed/x0WiY5OEzYc",
+      "source_url": "https://www.youtube.com/watch?v=x0WiY5OEzYc",
+      "thumbnail_url": "https://i.ytimg.com/vi/x0WiY5OEzYc/hqdefault.jpg",
+      "timestamp": "2026-01-14T16:13:46Z",
+      "title": "Foundup Corp",
+      "video_id": "x0WiY5OEzYc"
+    },
+    {
+      "duration_seconds": 162,
+      "embed_url": "https://www.youtube.com/embed/W_Kciz_mMV4",
+      "source_url": "https://www.youtube.com/watch?v=W_Kciz_mMV4",
+      "thumbnail_url": "https://i.ytimg.com/vi/W_Kciz_mMV4/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:34:18Z",
+      "title": "Raising Money Using Stock Warrants",
+      "video_id": "W_Kciz_mMV4"
+    },
+    {
+      "duration_seconds": 1232,
+      "embed_url": "https://www.youtube.com/embed/wZlCIno_C2U",
+      "source_url": "https://www.youtube.com/watch?v=wZlCIno_C2U",
+      "thumbnail_url": "https://i.ytimg.com/vi/wZlCIno_C2U/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:22:34Z",
+      "title": "An Intro to What a FoundUp Should Look Like",
+      "video_id": "wZlCIno_C2U"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0012.json",
+  "order": "catalog",
+  "page": 11,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

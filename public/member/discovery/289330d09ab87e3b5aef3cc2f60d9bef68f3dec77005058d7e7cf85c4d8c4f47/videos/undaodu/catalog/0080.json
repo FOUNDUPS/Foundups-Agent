@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 631,
+      "embed_url": "https://www.youtube.com/embed/35uuEmIYjZo",
+      "source_url": "https://www.youtube.com/watch?v=35uuEmIYjZo",
+      "thumbnail_url": "https://i.ytimg.com/vi/35uuEmIYjZo/hqdefault.jpg",
+      "timestamp": "2026-01-14T12:42:44Z",
+      "title": "Visit to our Pediatrician in Japan",
+      "video_id": "35uuEmIYjZo"
+    },
+    {
+      "duration_seconds": 187,
+      "embed_url": "https://www.youtube.com/embed/2ZNmDeOaPno",
+      "source_url": "https://www.youtube.com/watch?v=2ZNmDeOaPno",
+      "thumbnail_url": "https://i.ytimg.com/vi/2ZNmDeOaPno/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:28:33Z",
+      "title": "Leadership: tough decisions, friends, feelings, friends",
+      "video_id": "2ZNmDeOaPno"
+    },
+    {
+      "duration_seconds": 530,
+      "embed_url": "https://www.youtube.com/embed/2y-GXriUpPM",
+      "source_url": "https://www.youtube.com/watch?v=2y-GXriUpPM",
+      "thumbnail_url": "https://i.ytimg.com/vi/2y-GXriUpPM/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:14:49Z",
+      "title": "Dad and son at local park",
+      "video_id": "2y-GXriUpPM"
+    },
+    {
+      "duration_seconds": 186,
+      "embed_url": "https://www.youtube.com/embed/2y-djPcB4ac",
+      "source_url": "https://www.youtube.com/watch?v=2y-djPcB4ac",
+      "thumbnail_url": "https://i.ytimg.com/vi/2y-djPcB4ac/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:17:26Z",
+      "title": "Thoughts about funding a project.",
+      "video_id": "2y-djPcB4ac"
+    },
+    {
+      "duration_seconds": 414,
+      "embed_url": "https://www.youtube.com/embed/2S3YhVDiGBc",
+      "source_url": "https://www.youtube.com/watch?v=2S3YhVDiGBc",
+      "thumbnail_url": "https://i.ytimg.com/vi/2S3YhVDiGBc/hqdefault.jpg",
+      "timestamp": "2026-01-13T02:12:50Z",
+      "title": "Japanese Park Cloud Clan Fort Rescue",
+      "video_id": "2S3YhVDiGBc"
+    },
+    {
+      "duration_seconds": 361,
+      "embed_url": "https://www.youtube.com/embed/2Om2_W5E700",
+      "source_url": "https://www.youtube.com/watch?v=2Om2_W5E700",
+      "thumbnail_url": "https://i.ytimg.com/vi/2Om2_W5E700/hqdefault.jpg",
+      "timestamp": "2026-01-14T15:59:36Z",
+      "title": "The plight of Japan",
+      "video_id": "2Om2_W5E700"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0081.json",
+  "order": "catalog",
+  "page": 80,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 1029,
+      "embed_url": "https://www.youtube.com/embed/m7W9-HCVbGA",
+      "source_url": "https://www.youtube.com/watch?v=m7W9-HCVbGA",
+      "thumbnail_url": "https://i.ytimg.com/vi/m7W9-HCVbGA/hqdefault.jpg",
+      "timestamp": "2026-01-14T16:55:18Z",
+      "title": "Mayan Calendar and the Open Institution",
+      "video_id": "m7W9-HCVbGA"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/lZgZyXDjUzo",
+      "source_url": "https://www.youtube.com/watch?v=lZgZyXDjUzo",
+      "thumbnail_url": "https://i.ytimg.com/vi/lZgZyXDjUzo/hqdefault.jpg",
+      "timestamp": "2026-01-30T03:55:14Z",
+      "title": "❌ VIRAL: #FFCPLN Anti-MAGA Anthem! Link in Desc",
+      "video_id": "lZgZyXDjUzo"
+    },
+    {
+      "duration_seconds": 176,
+      "embed_url": "https://www.youtube.com/embed/Lz08gejqSUw",
+      "source_url": "https://www.youtube.com/watch?v=Lz08gejqSUw",
+      "thumbnail_url": "https://i.ytimg.com/vi/Lz08gejqSUw/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:06:15Z",
+      "title": "ESINGULARITY Commercial Ad Strategy by Michael Trout",
+      "video_id": "Lz08gejqSUw"
+    },
+    {
+      "duration_seconds": 528,
+      "embed_url": "https://www.youtube.com/embed/LWlBQr_hKH0",
+      "source_url": "https://www.youtube.com/watch?v=LWlBQr_hKH0",
+      "thumbnail_url": "https://i.ytimg.com/vi/LWlBQr_hKH0/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:21:39Z",
+      "title": "3 Surefire Ways to Flatten Global Education by 2034",
+      "video_id": "LWlBQr_hKH0"
+    },
+    {
+      "duration_seconds": 173,
+      "embed_url": "https://www.youtube.com/embed/lVuSj5QF0o4",
+      "source_url": "https://www.youtube.com/watch?v=lVuSj5QF0o4",
+      "thumbnail_url": "https://i.ytimg.com/vi/lVuSj5QF0o4/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:01:57Z",
+      "title": "The e-prize",
+      "video_id": "lVuSj5QF0o4"
+    },
+    {
+      "duration_seconds": 479,
+      "embed_url": "https://www.youtube.com/embed/lpZEHH1yq4Y",
+      "source_url": "https://www.youtube.com/watch?v=lpZEHH1yq4Y",
+      "thumbnail_url": "https://i.ytimg.com/vi/lpZEHH1yq4Y/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:13:20Z",
+      "title": "Singularity University",
+      "video_id": "lpZEHH1yq4Y"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0040.json",
+  "order": "catalog",
+  "page": 39,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

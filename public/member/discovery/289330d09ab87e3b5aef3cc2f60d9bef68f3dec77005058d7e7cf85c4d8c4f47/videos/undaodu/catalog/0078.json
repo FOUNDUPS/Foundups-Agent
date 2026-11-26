@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 393,
+      "embed_url": "https://www.youtube.com/embed/4-BQEVRcxRo",
+      "source_url": "https://www.youtube.com/watch?v=4-BQEVRcxRo",
+      "thumbnail_url": "https://i.ytimg.com/vi/4-BQEVRcxRo/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:54:18Z",
+      "title": "Enterprise 2.0: a new way of thinking about corporations, founded by founder's corp.",
+      "video_id": "4-BQEVRcxRo"
+    },
+    {
+      "duration_seconds": 283,
+      "embed_url": "https://www.youtube.com/embed/3wSyaaoI2eI",
+      "source_url": "https://www.youtube.com/watch?v=3wSyaaoI2eI",
+      "thumbnail_url": "https://i.ytimg.com/vi/3wSyaaoI2eI/hqdefault.jpg",
+      "timestamp": "2026-01-14T16:51:39Z",
+      "title": "Kiyomi kindergarten sports festival relay race",
+      "video_id": "3wSyaaoI2eI"
+    },
+    {
+      "duration_seconds": 535,
+      "embed_url": "https://www.youtube.com/embed/3WfuCiYXiBY",
+      "source_url": "https://www.youtube.com/watch?v=3WfuCiYXiBY",
+      "thumbnail_url": "https://i.ytimg.com/vi/3WfuCiYXiBY/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:27:37Z",
+      "title": "Tommy's First Day at Japanese Daycare: Cultural Differences",
+      "video_id": "3WfuCiYXiBY"
+    },
+    {
+      "duration_seconds": 533,
+      "embed_url": "https://www.youtube.com/embed/3uO4JW6qUT8",
+      "source_url": "https://www.youtube.com/watch?v=3uO4JW6qUT8",
+      "thumbnail_url": "https://i.ytimg.com/vi/3uO4JW6qUT8/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:54:44Z",
+      "title": "Call for Advisors!",
+      "video_id": "3uO4JW6qUT8"
+    },
+    {
+      "duration_seconds": 357,
+      "embed_url": "https://www.youtube.com/embed/3PMeRpqRo00",
+      "source_url": "https://www.youtube.com/watch?v=3PMeRpqRo00",
+      "thumbnail_url": "https://i.ytimg.com/vi/3PMeRpqRo00/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:12:38Z",
+      "title": "Social Venture, Integrators, Help Japan Co",
+      "video_id": "3PMeRpqRo00"
+    },
+    {
+      "duration_seconds": 600,
+      "embed_url": "https://www.youtube.com/embed/3M-6xUs67A0",
+      "source_url": "https://www.youtube.com/watch?v=3M-6xUs67A0",
+      "thumbnail_url": "https://i.ytimg.com/vi/3M-6xUs67A0/hqdefault.jpg",
+      "timestamp": "2026-01-12T20:15:25Z",
+      "title": "FoundUpCorp Shares Offering",
+      "video_id": "3M-6xUs67A0"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0079.json",
+  "order": "catalog",
+  "page": 78,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

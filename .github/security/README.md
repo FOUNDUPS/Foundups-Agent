@@ -1,3 +1,138 @@
+## HPC v26 main reconciliation metadata renewal - 2026-11-22
+
+The normal main-into-feature reconciliation preserves all 4,822 main and
+4,626 phone-branch approvals, with a 4,869-record union. The composed backend
+manifest retains all 1,494 main runtime entries and the verified phone shell
+checksum. Independent review and root verification matched every source digest.
+The new exact manifest SHA-256 is
+`0572ba8fe349b57595f68e0a4e5301d6e05586a7a63cb459f457d399ec7a1ed1`.
+
+Append only the 39 individually reviewed public source-path/checksum metadata
+bindings in `reviewed-hpc-phone-evidence.json` under
+`v26_main_reconciliation_manifest_renewal_20261122`, preserving every prior ID
+(4,908 total). These are exact-file renewals, not new credential classifications.
+Rules, exclusions, scanner, formula and coverage remain unchanged. Fresh exact
+candidate tree/history scans and hosted checks remain required; this review
+does not establish publication, merge-to-main or physical-phone acceptance.
+
+## HPC v26 defensive DOM renewal - 2026-11-22
+
+Run44975930482 on9327ad18 reported one tracked-tree generic-api-key binding at
+public/member/index.html:28 and zero introduced-history findings. Independent
+review and root verification confirmed the complete Clerk frontend SDK and
+flagged line unchanged from5e0f87e1 and the approved baseline. The two literal
+exception-message DOM repairs changed the exact whole-file digest to
+dda69e606301d6d6b292e61c042a412b5d1e1ac6dc5fd51544485ec09be1f6c4.
+
+Append only reviewed fingerprint
+cc1b71b27a263933220fa8ab7aa58476b092f4a55d2d7251b53c4e06f0d7be19,
+preserving all4,625 existing entries (4,626 total). Sanitized exact-source proof
+is in reviewed-hpc-phone-evidence.json under v26_defensive_dom_renewal_20261122.
+No matched value is recorded. Rules, exclusions, coverage and fingerprint
+formula remain unchanged. A new exact-head tracked-tree/history gate must pass;
+this renewal does not qualify CodeQL, browser/provider or device acceptance.
+
+## HPC v25 integrated shell review renewal — 2026-11-20
+
+Recovering the served v24 shell and advancing its build/asset references to v25
+changes two HTML file hashes. Independent review and root verification compared
+both complete public Clerk SDK elements with the approved `dba56a6f` source:
+the elements, flagged lines and line positions are byte-identical. The existing
+[source-bound evidence](reviewed-hpc-phone-evidence.json) retains the earlier
+review and adds `v25_integration_renewal` with both comparisons and exact bindings.
+
+Append only these two `generic-api-key` metadata bindings, preserving all 4,620
+previous entries (4,622 total):
+
+- `public/index.html`, line 80, file SHA-256 `f23e68ae06256b6c1b38b0ea039d914b6cbf0755255cb6ccebaebe38d1deed38`.
+- `public/member/index.html`, line 28, file SHA-256 `6c2e3bea8a9431c70fdea5bf579d25856bddee5fa6ac42e5633e5997ce29ad5f`.
+
+The sorted compact new-fingerprint-list SHA-256 is
+`187fc6de9c9629c94bdb7e493bbc82a797901d86528fd88048f49605bbd95fa3`.
+Scanner rules, exclusions, fingerprint formula and scan coverage remain unchanged.
+Fresh exact-head tracked-tree and introduced-history checks are required before
+the integrated browser qualification. This metadata review does not establish
+deployment or physical-phone playback.
+
+## HPC phone candidate review renewal — 2026-11-20
+
+The isolated phone qualification run [44663491734](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/44663491734)
+on `6d8d5ab3dab9e34db791ba9e0393a966184957fd` found 41 unreviewed
+whole-file bindings; its introduced-commit scan had zero findings. These are
+renewals of exact existing public metadata approvals, verified in
+[the source-bound review](reviewed-hpc-phone-evidence.json).
+
+All three flagged files are byte-identical to native `75c838b6`. All 41
+flagged lines match individually approved lines on main `06d0d813`; all 39
+backend-manifest path/checksum records also match freshly recomputed source
+SHA-256 values. Both complete Clerk frontend SDK elements match their existing
+publishable frontend classification, with independent element review.
+
+The candidate full-file digests are:
+
+- `public/index.html`: `8f97b7858ac46fd4eee3446a50a0312a1a2862889df1ecb19a488cb221bc7cd4`
+- `public/member/index.html`: `3a1edb1e729f1cdc3e2fb25ff1525c7bc5f7e856089f6bf375d5d5e3b579deab`
+- `scripts/reddog_backend_manifest.json`: `e0267cae429d3b70568fc6bbe49a34819a97243e3f9b6b7d8549b8d63fb2cd6d`
+
+Append exactly 41 bindings while preserving all 4,579 earlier entries and other
+fields (4,620 total). The sorted compact fingerprint-list SHA-256 is
+`2fdab5e90c25424a7cf65621b7cc970462ee906c6f39548a5951c3dd1ef0109e`.
+Scanner rules, exclusions, formula and coverage remain unchanged. A fresh
+exact-head gate and the browser suites are still required; this review is not
+physical-device or deployment acceptance.
+
+## HPC public guest review — 2026-11-20
+
+PR #2435 job 136139611051 on head `0d2c0fc20` reported 41 unreviewed
+current-tree findings and zero introduced-history findings. Against base
+`a9576b8e5`, the author and an independent reviewer found 39 unchanged
+manifest source digests, one unchanged public SDK identifier, and one existing
+bridge changelog line shifted from 4118 to 4126. Each previous fingerprint is
+in the base ledger. The manifest entries match their source Git blobs.
+Append only the 41 new whole-file, rule and line bindings; preserve the prior
+4,781 records. No rule, exclusion, history gate or scanning scope changes.
+Fresh hosted checks must accept the new head.
+
+## Publishing/checkpoint documentation re-review — 2026-11-20
+
+PR2433 head `43b84a1be5a932095c3ce51bdb67cfa1edeaba96` failed security
+job `135682223255`: three unreviewed current-tree findings, 213 already reviewed,
+zero introduced-history findings. New guidance/log prefixes changed whole-file
+digests and moved three unchanged, previously approved lines. Author and independent
+read-only verifier compared canonical Git LF bytes against base
+`908b47b369bb5c1f20478a751875617a51585108`; all flagged lines and their contexts
+are identical and all three prior fingerprints exist in the base approval list.
+
+| Existing file | Rule | Base → head line | Canonical head file SHA256 |
+| --- | --- | --- | --- |
+| `modules/communication/moltbot_bridge/ModLog.md` | generic-api-key | 4098 → 4118 | `55e039261fc2a941060ff907b16117f8aaff5c9901b88321feb301c30de4fe26` |
+| `modules/platform_integration/linkedin_agent/README.md` | linkedin-client-secret | 279 → 283 | `13e0fed2c18cdfc8aba29dabdd02251b544d7022e0d94338699d9101f90807a9` |
+| `modules/platform_integration/linkedin_agent/ModLog.md` | linkedin-client-secret | 1097 → 1123 | `593e020327d2c601dd98f82395334d31c00173e20b85d13f9a957724ff923193` |
+
+Append only these three independently recomputed current-file/rule/line bindings,
+preserving all 4,739 earlier entries and their order (4,742 at this step).
+
+The same PR's required manifest/index checks then rejected the Operations Skillz's
+stale content binding. The existing generator refreshed that one source hash;
+all 1,494 runtime members and every other source hash remain unchanged. Both
+consumer pins now bind canonical payload
+`63dfca54a090d275e0aabcf7e8a272e393abc275498a5b9d0ee2a7578d6d049a`;
+LF manifest file SHA256 is
+`d1b1a0b010c13f25aff12fffc54b0f1e5518436dbd4583d607314aa23c40cdfb`.
+Independent re-review against current main
+`cb4d60482cf412bb570502d3edc399ef9ddccd83` rehashed all 39 existing approved
+manifest source-path/SHA rows (37 generic-api-key, 2 discord-api-token): unchanged
+lines, prior approvals present, each source digest verified from staged Git bytes.
+The independently derived renewal recordset matched the author's (sorted canonical
+recordset SHA256 `992c718fe4990c91b988c35a16d721d954d78f8b0fdef6677b595f24b7caae15`).
+Append those 39 exact renewals too: 42 new bindings, 4,781 total.
+
+No credential values, new finding classification, scanner rule/exclusion,
+fingerprint formula, scope or failure handling changes. Retain the failed evidence;
+fresh exact-head tracked-tree/introduced-history scans and main checks remain
+required. All 53 existing security-gate regressions pass locally with UTF-8 and
+the existing Git Bash route; no fixture/assertion was weakened. WSP 71/97.
+
 ## Pre-build workflow metadata re-review - 2026-11-18
 
 Reconciled source `58500850772e17e0a4cb9d3c7f57f8afcd0d42be` onto main
@@ -1433,3 +1568,19 @@ Root and independent review append one whole-file/rule/line fingerprint only,
 retaining all2261 ordered entries (2262 total). The format protocol receipt binds
 actual source/job/review evidence. No rule, scope, gate or history behavior changes.
 Fresh hosted acceptance and separate parent GitGuardian disposition remain required.
+
+### 2026-11-22 — Preview-only loader source binding
+
+The shared member document no longer requests the preview-only probe fixture.
+Independent review verified that the existing public client SDK/configuration
+line is byte-identical. One exact-file binding was appended; all 4,908 prior
+approvals, scanner rules, history coverage and protected checks are retained.
+The source and review hashes are recorded in the existing HPC evidence file.
+
+### 2026-11-22 — Catalog test dependency digest refresh
+
+The deterministic backend manifest now pins the updated catalog truth test.
+Runtime membership, bridge bindings and schema remain unchanged. Independent
+review validated all 1,494 source digests and renewed the 39 known checksum
+metadata bindings for this exact snapshot. All 4,909 prior approvals and every
+scanner rule, ignore policy, history boundary and required check are retained.

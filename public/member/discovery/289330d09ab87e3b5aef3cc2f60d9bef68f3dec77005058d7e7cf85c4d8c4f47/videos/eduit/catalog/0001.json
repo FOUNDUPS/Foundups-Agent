@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 276,
+      "embed_url": "https://www.youtube.com/embed/pY4ZWArX4g8",
+      "source_url": "https://www.youtube.com/watch?v=pY4ZWArX4g8",
+      "thumbnail_url": "https://i.ytimg.com/vi/pY4ZWArX4g8/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:33:57Z",
+      "title": "The Blood for Esingularity",
+      "video_id": "pY4ZWArX4g8"
+    },
+    {
+      "duration_seconds": 490,
+      "embed_url": "https://www.youtube.com/embed/pXXlbAqDJOI",
+      "source_url": "https://www.youtube.com/watch?v=pXXlbAqDJOI",
+      "thumbnail_url": "https://i.ytimg.com/vi/pXXlbAqDJOI/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:20:12Z",
+      "title": "Impact of E-Singularity on Higher Education",
+      "video_id": "pXXlbAqDJOI"
+    },
+    {
+      "duration_seconds": 189,
+      "embed_url": "https://www.youtube.com/embed/NUh28WcX404",
+      "source_url": "https://www.youtube.com/watch?v=NUh28WcX404",
+      "thumbnail_url": "https://i.ytimg.com/vi/NUh28WcX404/hqdefault.jpg",
+      "timestamp": "2026-01-12T20:11:28Z",
+      "title": "Three Stages of eSingularity",
+      "video_id": "NUh28WcX404"
+    },
+    {
+      "duration_seconds": 352,
+      "embed_url": "https://www.youtube.com/embed/mSam-JyF7qQ",
+      "source_url": "https://www.youtube.com/watch?v=mSam-JyF7qQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/mSam-JyF7qQ/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:49:59Z",
+      "title": "The eSingularity Prize for Global Education",
+      "video_id": "mSam-JyF7qQ"
+    },
+    {
+      "duration_seconds": 176,
+      "embed_url": "https://www.youtube.com/embed/Lz08gejqSUw",
+      "source_url": "https://www.youtube.com/watch?v=Lz08gejqSUw",
+      "thumbnail_url": "https://i.ytimg.com/vi/Lz08gejqSUw/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:06:15Z",
+      "title": "ESINGULARITY Commercial Ad Strategy by Michael Trout",
+      "video_id": "Lz08gejqSUw"
+    },
+    {
+      "duration_seconds": 488,
+      "embed_url": "https://www.youtube.com/embed/KXt1DtmE3XA",
+      "source_url": "https://www.youtube.com/watch?v=KXt1DtmE3XA",
+      "thumbnail_url": "https://i.ytimg.com/vi/KXt1DtmE3XA/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:31:27Z",
+      "title": "The eSingularity",
+      "video_id": "KXt1DtmE3XA"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/eduit/catalog/0002.json",
+  "order": "catalog",
+  "page": 1,
+  "page_size": 6,
+  "record_id": "eduit",
+  "schema_version": 1,
+  "total": 21
+}

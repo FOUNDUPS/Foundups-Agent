@@ -1,3 +1,16 @@
+## 2026-11-21 - Nested attribution fixture and default-path regression
+
+- Windows focused baseline: 45 passed. Candidate: 58 passed, including 13
+  attribution tests; no failures or skips. The default scenario's four
+  baseline/candidate frame digests match with fixed `PYTHONHASHSEED=0`:
+  `94355f26bc7a8065895ca0da3e6e04e31b2bd3d78316d072695cee0430460d87`.
+- Existing cross-process Python salted hashes made an unpinned baseline
+  comparison inconclusive; no default calculation, seed policy or existing
+  assertion was changed. Default runner tests execute the existing model;
+  the opt-in path asserts zero model runs and no created output directory.
+- Direct CLI returned the synthetic report on stdout. This is not full CI,
+  actual adoption evidence, a financial policy or chain-parity testing.
+
 ## 2026-11-18 — Opt-in Lego topology fixture adapter tests
 - Added `modules/foundups/simulator/tests/test_lego_topology_fixture_adapter.py` (`5 passed, 0 skipped`) covering disabled-by-default `load_bundle("baseline")` / `SimulatorConfig()` invariance, 3-block typed `FOUNDUP_TO_MODULE` / `BLOCK_IMPORTS_BLOCK` dependency gating across upstream `STALE_PROVENANCE_MISMATCH` and `UNKNOWN_DYNAMIC_OR_EXTERNAL_CONSUMER`, `SIMULATED_TRANSITION_ONLY` / `runtime_verification_eligible=False` hard promotion guards and preserved input `verified_capabilities` separation, cycle + missing/duplicate block fail-closed handling, and JSON round-trip `simulation_trace_sha256` determinism; re-verified `test_fam_lifecycle_flow.py` (`2 passed, 0 skipped`).
 

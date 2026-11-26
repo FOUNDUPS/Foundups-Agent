@@ -1,3 +1,41 @@
+## 2026-11-24 — Layer-2A QA-B hardening (`WRE-L2A-INDEPENDENT-QA-20261124-B`)
+
+- **PatternMemory (`src/pattern_memory.py`)**: Replaced `assumed_utc` with conservative `excluded_ambiguous_timezone` policy (`_parse_iso_utc_with_meta()` excludes zone-less strings rather than guessing UTC; rejects zone-less `since` and naive `now` with `ValueError`); updated telemetry writers (`record_retrieval()`, `store_variation()`, `increment_counter()`, `get_retrieval_stats()`) to emit explicit UTC ISO-8601 timestamps.
+- **Dashboard Alerts (`src/dashboard_alerts.py`)**: Aligned `DashboardAlertMonitor.unknown_metrics()`, `check_all()`, and `run_check()` with active `current_window` scope when `current_since` is configured while retaining `check_lifetime_all()` for `historical_alerts` / `historical_critical_count`; classified zone-less exclusions as `UNKNOWN` (`naive_timestamp_excluded`); validated `now`/`current_since` in missing-DB fallback.
+- **Manifest Pin (`scripts/reddog_backend_manifest.json`, `extensions/reddog/backend_compatibility_constants.js`, `scripts/tests/test_generate_reddog_backend_manifest.py`)**: Regenerated manifest (`required_runtime_files=1494`, SHA-256 `8eadf0820e0ea2fd30ee40d08990d08238b77b74876e755a389f17c50a961d30`). WSP 00, 22, 50, 71, 91, and 97.
+
+## 2026-11-24 — Layer-2A QA hardening (`WRE-L2A-INDEPENDENT-QA-20261124-A`)
+
+- **PatternMemory (`src/pattern_memory.py`)**: Bounded `current_window` evaluation above by `evaluated_at` (`upper_bound`), rejected `since > evaluated_at` (`ValueError`), excluded future timestamps (`row_dt > evaluated_at`), and surfaced `future_rows`, `invalid_timestamp_rows`, `naive_timestamp_rows`, and `naive_timestamp_policy="assumed_utc"`.
+- **Dashboard Alerts (`src/dashboard_alerts.py`)**: Classified future-dated exclusions as `UNKNOWN` (`future_timestamp_excluded`) and added optional `now` threading in `get_dashboard()` / `check_dashboard_health()` while preserving zero-arg compatibility.
+- **Preflight (`src/dae_preflight.py`)**: Kept `unattended_work_allowed=False` and `admission_authority_verified=False` across telemetry-only evaluations (defaulting omitted admission gates to `("protected_admission_unverified",)`).
+- **Manifest Pin (`scripts/reddog_backend_manifest.json`, `extensions/reddog/backend_compatibility_constants.js`, `scripts/tests/test_generate_reddog_backend_manifest.py`)**: Regenerated manifest (`required_runtime_files=1494`, SHA-256 `49e697ef9779b5c3d25c869e21ef4f83817c415639497cab156d09fb69e715db`). WSP 00, 22, 50, 71, 91, and 97.
+
+## 2026-11-24 — Layer-2A offline readiness evidence & Connect-WRE metric separation
+
+- **PatternMemory (`src/pattern_memory.py`)**: Added `_parse_iso_utc()` and keyword-only `since` / `collection_id` / `now` options to `get_telemetry_dashboard()`, preserving 0-arg `database_lifetime` compatibility while adding `collection_scope` and read-only `current_metric_evidence` (windowed `retrieval_coverage` / `variation_win_rate` and `window_bounded=False` `telemetry_counters`).
+- **Dashboard Alerts (`src/dashboard_alerts.py`)**: Extended `DashboardAlertMonitor` (`current_since`, `collection_id`, `WRE_DASHBOARD_CURRENT_SINCE` / `WRE_DASHBOARD_COLLECTION_ID`, `evaluate_metric_statuses()`), `check_dashboard_health()` (retaining `historical_alerts`, `historical_critical_count`, `STALE_UNKNOWN`, and fail-closed unwindowed counter evaluation), and `print_dashboard_evidence()`.
+- **Preflight & CLI (`src/dae_preflight.py`, `main.py`, `modules/infrastructure/cli/src/main_menu.py`)**: Extended `dashboard_readiness()` with `current_readiness`, `historical_critical`, `unresolved_admission_gates`, `unattended_work_allowed`, `worker_admission_granted=False`, and `model_admission_granted=False`; updated `run_connect_wre`, `--connect-wre`, and `_run_connect_wre` to report `total_executions`, `metric_samples`, `telemetry_scope`, `historical_critical`, and `unattended_work_allowed`.
+- **Manifest Pin (`scripts/reddog_backend_manifest.json`, `extensions/reddog/backend_compatibility_constants.js`, `scripts/tests/test_generate_reddog_backend_manifest.py`)**: Regenerated manifest (`required_runtime_files=1494`, SHA-256 `0d44673229847b6195d9697f74dca13389ba7b94e296f0ce68db519a4ba61ec2`). WSP 00, 11, 22, 50, 62, 71, 91, and 97.
+
+## 2026-11-24 — Layer-1 WRE worker WSP_00 0.2A / WSP_97 contract & CodeAct envelope hook
+
+- **Worker WSP_97 Contract (`src/wre_worker_wsp97_contract.py`)**: Added pure-evaluation (zero shell/Git/filesystem mutation) `validate_worker_wsp00_envelope()`, `build_worker_wsp97_prompt_contract()`, and `validate_worker_wsp97_receipt()` delegating canonical receipt validation to `tools.wsp97_execution_validator` without duplicating validator logic (WSP 84) and keeping `<= 240` lines (WSP 62).
+- **CodeAct Envelope Hook (`src/codeact_executor.py`)**: Added additive backwards-compatible `enforce_wsp00_envelope: bool = False` option and pre-action `_check_wsp00_envelope()` gate failing closed before shell/LLM/read actions when enforced or `"wsp00_envelope"` is supplied in `input_context`. Kept `scripts/reddog_backend_manifest.json` (`1,494 / 1,494`) and 19/P0 custody gates untouched.
+- **Tests & Registry (`tests/test_wre_worker_wsp97_contract.py`, `tests/test_codeact_executor_hardening.py`, `WSP_knowledge/WSP_Test_Registry.json`)**: Added unit, repository-bound v1.1 receipt, AST-purity, and CodeAct gate tests and updated the canonical test registry (`1,852 -> 1,853`). WSP 00, 11, 22, 50, 62, 84, and 97.
+
+## 2026-11-19 — Fractal census and researcher boundary documentation
+
+Link WRE responsibilities to the existing dispatch owner's single census and
+bounded comparison contract. Distinguish WRE admission, OpenClaw/Hermes
+scaffolding, ROC Auto Researcher, AI Gateway model AutoResearch and unresolved
+Open Researcher naming. Qualify the repair canary's embedded research sample,
+callback defaults, identity-string policy and staged-name field separately from
+native execution evidence. Preserve its real baseline/scratch/outcome effects
+and historical qualification records. Validation: source/doc review and Markdown
+diff/link checks. No code, researcher/canary run or runtime claim was added.
+WSP 15/22/50/84/97/110.
+
 ## 2026-11-18 — Offline WRE Lego block compiler, catalog reconciler, and conservative triage projection
 
 - **Lego Block Projection (`src/wre_lego_block_projection.py`)**: Added offline static AST block compiler (`project_lego_blocks`, `compute_exact_byte_provenance`, `resolve_block_identity`, `admit_verified_capability_receipt`, `to_canonical_json`, `to_m2m_compact`) reusing `wre_test_registry_ast` without executing target code. Enforces distinct Git blob SHA-1 OID vs Git blob SHA-256 vs checkout SHA-256 (`EOL_CRLF_DRIFT` preserved), rename-stable `BlockIdentity` (`RenameAliasRecord` + recursive `parent_block_id`), typed 1:N / M:N catalog relations and orphan/dual-manifest/external-FoundUp diagnostics, capability-scoped runtime receipt verification rejecting `SIMULATED_TRANSITION_ONLY`, conservative `CANDIDATE_ZERO_STATIC_CALLERS` / `UNKNOWN_DYNAMIC_OR_EXTERNAL_CONSUMER` triage (`deletion_authorized=False`), and `AGI_SCAFFOLDING_HYPOTHESIS = "HYPOTHESIS_UNDER_TEST"`.

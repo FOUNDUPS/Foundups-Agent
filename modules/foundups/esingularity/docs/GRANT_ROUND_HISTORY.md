@@ -58,10 +58,13 @@ Dates are ISO calendar dates. Times are JST. A dash means not established in thi
 | F-16B-2026-R1 | Fukui SME equipment efficiency, energy-price-shock track / subsidy | FY2026 / special | 2026-08-07 | ≥5% historical energy-cost increase; cannot combine regular track | 2026-11-30; hour unverified, first-come | OPEN BY WINDOW; actual budget unverified; no new Nov06 notice evidenced | VERIFIED PROGRAM; historic existing program, no YUMORI eligibility/application | 2026-11-08 | S18 |
 | P-01-2026-P1 | Fukui large-DC feasibility study / procurement, NOT subsidy | FY2026 / Phase 1 | 2026-10-14 (notice) | Bidder qualification 2026-10-23 17:00 | 2026-11-04 17:00; qualified bidders only | CLOSED BY PUBLISHED DEADLINE 2026-11-04 17:00; result not established | VERIFIED PROGRAM/PROCUREMENT; no YUMORI contract or selection | 2026-11-05 | S13 |
 | P-02-2026-R2 | MLIT FY2026 second national PPP/PFI sounding / PUBLIC-BODY market dialogue (NOT grant) | FY2026 / 2nd online session | 2026-11-13 14:00 JST | City/public-facility manager authorization; MLIT online registration PLUS official case-registration template | 2026-12-04 17:00 JST | OPEN; dialogue scheduled 2027-01-28; case selection later | VERIFIED PROGRAM only; no City submission, YUMORI eligibility/participation, subsidy or award | 2026-11-16 (internal) | S19 |
+| F-17-2026-R1 | MOE digital-infrastructure decarbonization R&D / demonstration; subsidy or commissioned research | FY2026 / May call | 2026-05-11 | Qualifying R&D lead, genuine development + real-equipment demo; no FS/PoC-only proposals | 2026-06-11 15:00 JST (receipt) | CLOSED; four other projects selected 2026-08-28 | VERIFIED PROGRAM only; no YUMORI inquiry/eligibility/application/selection/award established | 2027-01-15 (internal) | S20 |
 
 The separate F-10 ZEB diagnosis/planning track remains recorded in the canonical registry as closed 2026-10-16 17:00. Its exact opening and separate source must be reverified before adding a fully verified calendar row. Do not confuse it with ZEB construction rounds.
 
 ## Next-cycle preparation queue — internal dates only
+
+F-17: internal review 2027-01-15; prepare a distinct novel cooling/thermal-reuse R&D work package and qualified technical partner by 2027-02-01. FY2027 dates/continuation UNANNOUNCED / NOT VERIFIED; no prior-year deadline is carried forward as official.
 
 No FY2027 call date or continuation is asserted by this queue.
 
@@ -82,6 +85,8 @@ No FY2027 call date or continuation is asserted by this queue.
 | P-01 procurement intelligence | 2026-11-05 | Qualification closed 10/23; qualified-bidder proposals 11/04 | Check official procurement outcome/policy implications; never treat the study budget as a subsidy or assume annual recurrence. |
 
 ## Official sources
+
+- S20: https://www.env.go.jp/press/press_04394.html ; https://www.env.go.jp/content/000397410.pdf ; https://www.env.go.jp/press/press_05461.html (historical May 11–June 11 call, August 28 selection; catch-up verified 2026-11-25, not a new official change).
 
  - S19: https://www.mlit.go.jp/report/press/sogo21_hh_000314.html ; https://www.mlit.go.jp/sogoseisaku/kanminrenkei/sosei_kanminrenkei_fr1_000175.html (national 2nd PPP/PFI sounding; Nov13 opening, Dec04 17:00 close; no subsidy).
 

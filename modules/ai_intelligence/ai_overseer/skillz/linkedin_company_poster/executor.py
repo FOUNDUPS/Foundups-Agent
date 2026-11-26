@@ -514,8 +514,8 @@ def write_article(
         logger.info(f"[SCREENSHOT] {screenshot_path}")
 
         author_info = f" as {author}" if author else ""
-        logger.info(f"[SUCCESS] Article content entered{author_info}. Review and click Publish.")
-        return True, f"Article ready{author_info} - review and publish. Screenshot: {screenshot_path}"
+        logger.info(f"[PREPARED] Article content entered{author_info}. Review exact copy/assets and schedule through linkedin_publishing; not scheduled or live.")
+        return True, f"Article content entered{author_info} - review exact copy/assets and schedule through linkedin_publishing; not scheduled or live. Screenshot: {screenshot_path}"
 
     except Exception as e:
         logger.error(f"[ERROR] Article write failed: {e}")

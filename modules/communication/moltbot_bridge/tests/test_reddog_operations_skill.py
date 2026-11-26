@@ -80,6 +80,31 @@ def test_role_discovery_is_separate_from_legacy_agent_discovery() -> None:
     assert SKILL_NAME not in loader.list_skills(agent_type="qwen")
 
 
+@pytest.mark.parametrize(
+    "terms",
+    (
+        ("15-minute fallback", "events are the first", "third consecutive unchanged due check",
+         "no fourth unchanged poll", "duplicate wake", "cannot reset the count",
+         "exact restart event", "no wake 4 poll"),
+        ("Reviewed head A changes to B", "current head", "requalification",
+         "retain existing holds"),
+        ("Same head with retained decision hold", "named decision owner **once**",
+         "responsible session", "never self-approve", "time/green CI cannot clear the hold"),
+    ),
+    ids=("unchanged-and-duplicate-wakes", "changed-head", "retained-hold"),
+)
+def test_checkpoint_guidance_is_bound_without_claiming_runtime_enforcement(terms) -> None:
+    """Verify scenario guidance reaches the real prompt, not a simulated scheduler."""
+    skill = load_reddog_operations_skill(REPO_ROOT)
+    prompt = skill.prompt_for("Resume the existing work record.")
+    for term in terms:
+        assert term in prompt
+    assert "not proof of runtime timer" in prompt
+    assert "do not install a timer" in prompt
+    assert "shared Drive log" in prompt
+    assert skill.receipt["grants_authority"] is False
+
+
 def test_prompt_binds_skill_receipt_without_granting_authority() -> None:
     skill = load_reddog_operations_skill(REPO_ROOT)
 

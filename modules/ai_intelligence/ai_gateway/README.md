@@ -510,6 +510,30 @@ commands, promote champions, write PatternMemory, or bind RedDog runtime model
 defaults. Panel benchmark evidence remains panel evidence; a later promotion
 gate must decide how, or whether, panel combinations become production choices.
 
+### Fractal auditor comparison boundary
+
+The [Fractal census and bounded comparison contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#fractal-census-and-bounded-comparison--2026-11-19)
+owns the single census, up to three preselected packets, independently checked
+Carbon reference and parallel job admission. The harness itself sorts candidate
+IDs and runs samples serially. An incumbent-first comparison therefore uses a
+separate incumbent invocation; scheduling independent admitted jobs afterwards
+does not change that API or prove native runtime availability.
+
+Keep the common packet digest separate from each actual input digest: the
+[configured runner](src/model_autoresearch_configured_gateway_runner.py) adds
+task/candidate/role wrappers. Its reserved cost estimate and the
+[configured callers'](src/model_autoresearch_configured_gateway_callers.py)
+whitespace-based token estimates are not measured provider cost/token usage.
+Report unavailable actual usage as `UNKNOWN`. Record evidence delivery and
+truncation, not just a source manifest. The current term/digest verifiers do not
+score source-anchor accuracy, recovered links, unsupported claims and missed
+links; a qualified source-aware verifier/adapter remains a separate requirement.
+The [repair verifier](src/independent_repair_verifier.py) supplies evidence
+projection and model-identity policy, not that scoring adapter or proof of a
+model call. See the [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+for source pins and outstanding runtime evidence. No campaign, promotion or
+model-default change is performed by this documentation reconciliation.
+
 ## Champion/Challenger Promotion Gate
 
 `src/model_promotion_gate.py` validates benchmark-run evidence against an

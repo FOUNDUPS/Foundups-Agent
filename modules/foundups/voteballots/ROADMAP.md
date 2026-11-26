@@ -1,5 +1,21 @@
 # Vote/Ballots FoundUp - Roadmap
 
+## Shared two-card collection — 2026-11-25
+
+**IMPLEMENTED_CANDIDATE; shared release and physical-device acceptance open.**
+Dependencies: current B26 Mall owners, the reviewed two-record catalog and six
+approved local derivatives. Acceptance: two default tiles on phone/desktop,
+clear names/office/action labels and Pending values, shared player/dock/search,
+44px artwork-corner expansion, return/cleanup, decoded MP4 or truthful approved
+image fallback, and initial/live reduced-motion stills. Six focused engine rows
+passed in the integrated source; Windows WebKit's image path is not an iPhone
+video pass. Exact final head, independent review and live evidence are separate.
+
+Next: qualify shared preview and main/release without replacing newer HPC
+owners, then the VOTE Sites owner may publish its fixed handoff while preserving
+Dispatch, guide, contact/skin and staff routes. Wider Congress data, computed
+funding scores, calling, models and governance remain outside this slice.
+
 **Status**: Public Vote, Oversight and Coalition pages live. Candidate/evidence PoC remains internal.
 
 **Current module version**: 0.6.0  
@@ -24,6 +40,15 @@ retrieval limits. General community-ballot research in Phase 4 is not an
 implemented Poly Vote office-verification or anonymity system.
 
 ## Current State
+
+### Contact skin micro-slice — 2026-11-22
+
+Browser-local HPC presentation and editable script templates reuse the existing
+manual contact page. No paid model, new caller backend or independent RSI runtime
+is claimed. Reuse [vote-skin](skillz/vote_skin/SKILL.md) for later skins; preserve
+core facts across tone/regeneration. Tests and release status belong to
+`tests/TestModLog.md` and `docs/RELEASE_ACCOUNTING.md`.
+
 
 ### MAGA/Oversight Phase One
 

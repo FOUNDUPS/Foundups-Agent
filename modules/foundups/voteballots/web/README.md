@@ -1,5 +1,38 @@
 # Vote public landing
 
+## HPC contact skin and local script composer
+
+Open `/contact#hpc` for the independent HPC skin; `/contact` starts with Vote
+Classic. The selector switches the presentation without forking the directory.
+Originating FoundUps select the skin in their outbound link: HPC's existing
+Voice action carries `#hpc`. This works with its `no-referrer` policy and adds
+no cookies or source tracking. Other sources need a registered preset before
+their link selects it; missing/unknown presets use Vote Classic. A skin tag is
+presentation context, never proof of origin, identity or permission.
+The supplied HPC poster sets the cream/navy/red palette. Its satire is not a
+source of policy facts; the supplied seat-count screenshot is not published.
+
+`contact-script.mjs` owns fixed presets and nine tone/wording combinations.
+`contact-script.js` binds the editable introduction, callback, request and reason
+to the existing `contact-notes` textarea. Calm, Frustrated and Furious change
+phrasing; Regenerate cycles three versions while retaining those core fields.
+Copy has a manual selection fallback. Scripts work without a directory response,
+stay in page memory, and clear with the call list. Normal anchors preserve drafts.
+Switching skins resets fields; regeneration replaces direct output-box edits.
+No inference service, storage, tracking or automated calling is added.
+
+HPC defaults to a supporter introduction. The supplied director/2,000+ streamer
+draft and callback require an explicit role/claim confirmation in the details
+panel; that confirmation is not independent verification or account authority.
+The page states its independent, non-endorsed status. Tone never derives from
+state, office, personal traits or election predictions.
+
+Reusable workflow: [Vote skin skill](../skillz/vote_skin/SKILL.md).
+The v11 offline shell adds both script modules and `comics/hpc-campaign.jpg`.
+Deployment reconciliation preserves the current Contact header destinations
+(`hasan4speaker.com` brand and HPC dog return link) alongside the existing
+GitHub HPC/Mall banner. Other deployed pages remain untouched.
+
 This directory owns the six-panel independent satire cover at `/` and Vote's
 existing evidence-first civic guide at `/guide`. **Enter Vote** opens the
 original guide and **Voice your opinion** opens the existing manual contact

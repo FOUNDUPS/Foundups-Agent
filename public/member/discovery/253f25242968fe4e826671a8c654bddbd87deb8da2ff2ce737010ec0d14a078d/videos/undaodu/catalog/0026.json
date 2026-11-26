@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 667,
+      "embed_url": "https://www.youtube.com/embed/Rj0lVy0e30c",
+      "source_url": "https://www.youtube.com/watch?v=Rj0lVy0e30c",
+      "thumbnail_url": "https://i.ytimg.com/vi/Rj0lVy0e30c/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:02:04Z",
+      "title": "Killing the Startup: Turning startups on their head",
+      "video_id": "Rj0lVy0e30c"
+    },
+    {
+      "duration_seconds": 55,
+      "embed_url": "https://www.youtube.com/embed/rIlsp9txBvQ",
+      "source_url": "https://www.youtube.com/watch?v=rIlsp9txBvQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/rIlsp9txBvQ/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:48:52Z",
+      "title": "Tomatoes and Nutella",
+      "video_id": "rIlsp9txBvQ"
+    },
+    {
+      "duration_seconds": 306,
+      "embed_url": "https://www.youtube.com/embed/Rhvuc5FrdkQ",
+      "source_url": "https://www.youtube.com/watch?v=Rhvuc5FrdkQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/Rhvuc5FrdkQ/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:32:08Z",
+      "title": "Education and E-Singularity - Middle School and High School",
+      "video_id": "Rhvuc5FrdkQ"
+    },
+    {
+      "duration_seconds": 534,
+      "embed_url": "https://www.youtube.com/embed/RhkkxtfAbpo",
+      "source_url": "https://www.youtube.com/watch?v=RhkkxtfAbpo",
+      "thumbnail_url": "https://i.ytimg.com/vi/RhkkxtfAbpo/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:04:35Z",
+      "title": "Coastal Community, Japan",
+      "video_id": "RhkkxtfAbpo"
+    },
+    {
+      "duration_seconds": 490,
+      "embed_url": "https://www.youtube.com/embed/rEGZqDaI86Y",
+      "source_url": "https://www.youtube.com/watch?v=rEGZqDaI86Y",
+      "thumbnail_url": "https://i.ytimg.com/vi/rEGZqDaI86Y/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:57:06Z",
+      "title": "What is Found-Up Scrum?",
+      "video_id": "rEGZqDaI86Y"
+    },
+    {
+      "duration_seconds": 1131,
+      "embed_url": "https://www.youtube.com/embed/RaoxvRigN5c",
+      "source_url": "https://www.youtube.com/watch?v=RaoxvRigN5c",
+      "thumbnail_url": "https://i.ytimg.com/vi/RaoxvRigN5c/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:42:05Z",
+      "title": "Participate in Open Incubator Framework? What is a Foundup Startup?",
+      "video_id": "RaoxvRigN5c"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/undaodu/catalog/0027.json",
+  "order": "catalog",
+  "page": 26,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

@@ -1,5 +1,23 @@
 # Video Mall Catalog Schema
 
+## 2026-11-25 — Optional local member-card records
+
+The VOTE-owned `modules/foundups/voteballots/web/congressional-cards.json` is
+an optional projection input, not a replacement for the generated Mall/HPC
+catalogs. It contains exactly two reviewed `voteballots.lane.videos` records.
+Hosting staging maps that JSON plus six approved `web/comics/*-card-*` assets
+to `/member/vote/` from the same source revision. Generated catalogs remain
+owned by their existing refresh pipeline; no video files are duplicated there.
+
+`member_card` is optional. The current shared admission requires bounded
+`name`, `chamber`, `constituency`, an `#...OUT` hashtag, matching local
+`still_url`/`animation_url`, and null `udp_score`/`cu_score`. Its `source_url`
+must match `/member/vote/comics/<slug>-card-loop.mp4` without an embed URL.
+`official_url` is rendered only for credential-free HTTPS congressional
+House/Senate subdomains. Unknown scores display Pending; animation is not
+evidence, a preference result or an economic value. Other video records and
+YouTube guards retain their existing schema and behavior.
+
 **Status**: Active runtime schema
 **Version**: 1.0.0
 **Date**: 2026-04-03

@@ -1,3 +1,34 @@
+## 2026-11-25 — Shared current-owner member-card candidate
+
+Import reviewed donor220206d9's exact two-record catalog, six approved media
+derivatives and unpublished fixed-entry template. Port only optional typed
+presentation into current B26 field/player/dock; exclude the donor's older
+index/host aliases/worker and unrelated gate projections. Final labels are
+#SchumerOUT/#JeffriesOUT with official identities and null/Pending scores.
+Preserve Dispatch/guide/contact and protected VOTE application entry.
+Minimal native controls reproduce Windows WebKit error4; approved animated
+WebP/still fallback exposes image identity and null time. Six integrated
+native/image/motion browser rows pass; physical iPhone, exact-head review and
+release remain separate. No Sites/DNS/Auth/model/calling release. WSP5/10/15/22/50/71/91/97.
+
+## 2026-11-22 — HPC skin and local editable call scripts
+
+- Reuse the manual contact page, directory and service worker; add an opt-in
+  cream/navy/red HPC skin from 012's supplied poster and a local script composer.
+- Preserve caller core wording across three tones and three wording variants;
+  allow direct editing, copying and clearing. Keep unsupported director/coalition
+  assertions out of defaults; provide the supplied spokesperson draft explicitly.
+- Add the canonical `skillz/vote_skin/SKILL.md`. No existing skin skill was found.
+- WSP 00/50/84/97 grounding: current remote main f71dc2477 was selected in an
+  isolated O-drive worktree. Lexical Holo results had UNKNOWN freshness and an
+  index gap; direct source/module docs resolved noisy retrieval without reindexing.
+- Deterministic templates need no model worker or provider calls. Browser review
+  caught fragment navigation resetting a draft; the owner now ignores page anchors.
+- Reconcile deployed Contact header links from Sites source 459f25ba5610 instead
+  of overwriting them with stale GitHub links. Keep other public pages unchanged.
+- Tests and deployment observations are recorded separately in TestModLog and
+  RELEASE_ACCOUNTING. No phone calls, membership verification or RSI promotion.
+
 ## 2026-11-16 — Whole HPC return banners on existing Vote and Contact pages
 
 - Continue existing draft PR #2411 under 012's functional-navigation direction.

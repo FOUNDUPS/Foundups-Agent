@@ -1,6 +1,49 @@
 # TestModLog — Vote/Ballots FoundUp
 
+## [2026-11-25] — Shared current-owner collection
+
+Extend canonical catalog and existing public-worker tests for the two approved
+records/assets and fixed entry/bookmark preservation. Existing shared browser
+fixtures exercise 320/390px/desktop, actual MP4 time or explicit image-animation
+fallback, motion/pause/hidden cleanup, search and return. Native/image outcomes
+remain separate; physical iPhone and Sites release are not established by these
+tests. Integrated exact-head results are recorded with the shared release.
+
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
+
+## [2026-11-22] — Source-selected HPC handoff
+
+- 136 passed across existing contact, coalition and public-worker suites.
+  Added one cross-owner contract: canonical HPC entry equals public projection,
+  selects the registered `hpc` preset without query data, and unknown presets
+  fall back to Classic. Canonical projection generator equality also passed.
+- Real Chrome at 390px: live HPC v25 Voice anchor carried `contact#hpc`; clicking
+  it loaded Vote's HPC dataset, selected preset and heading without selector
+  interaction. Initial HTML briefly showed Classic before modules loaded; final
+  initialized state was verified. Source retains explicit no-referrer.
+- Media requests were blocked only in the test tab while inspecting HPC and
+  restored before navigation. Viewport reset and test tab closed afterward.
+  This is entry verification, not media/player or physical-phone qualification.
+
+## [2026-11-22] — Local script composer and HPC skin
+
+- Existing contact, coalition and public-worker suites: **135 passed, 0 failed**.
+  Six added contact cases exercise all nine wording/tone combinations, core-fact
+  preservation, bounds, unknown skins, defaults without invented role/size/phone,
+  actual controller events without a directory, skip-link draft retention,
+  explicit spokesperson template selection, skin/clear privacy and copy fallback.
+- Public-worker fixture now verifies 32 exact assets, v11 retirement and JPEG
+  MIME validation. No new test framework, model or provider dependency.
+- Real Chrome via CUA: desktop poster render; 390px control layout; 320px
+  width check (document 306px within 320px viewport); Furious + Regenerate,
+  editable draft surviving keyboard skip-link navigation, both skin selections,
+  disabled director button before explicit confirmation, supplied template after
+  confirmation, and clearing script/callback/confirmation verified. No calls made.
+- A Playwright role locator did not match native details/summary; fresh AX state
+  and its exposed button opened it. This was a locator failure, not a page defect.
+- Local Python preview serves literal HTML paths; canonical clean-route offline
+  installation is covered by the worker fixture, not claimed from that preview.
+  No physical-phone, Safari or independent model verification is claimed.
 
 ## [2026-11-16] — Whole HPC banner return and distinct Play Mall link
 

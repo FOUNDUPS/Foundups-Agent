@@ -15,6 +15,9 @@
 modules/foundups/kosei/frontend/** text eol=lf
 public/kosei/**                    text eol=lf
 
+# The Mall serves this exact extension-owned module on every host.
+public/js/reddog-fractal-focus.js text eol=lf
+
 # Canonical generated registry is byte-compared on every platform.
 WSP_knowledge/WSP_Test_Registry.json text eol=lf
 

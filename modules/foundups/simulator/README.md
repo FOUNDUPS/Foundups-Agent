@@ -1,5 +1,22 @@
 # FoundUps Simulator
 
+## Nested attribution audit (synthetic, opt-in)
+
+    python -m modules.foundups.simulator.scenario_runner --nested-attribution-audit
+
+This prints a standalone report and returns before simulator startup or
+artifact writers. It uses the existing static `hpc → voteballots` registry
+edge, not testimony about live adoption or enrollment. The separate caption
+tool, people, outcomes and point values are synthetic fixture inputs.
+
+Direct points are disjoint: VoteBallots 30, HPC 50, tool 20, ecosystem 100.
+Inclusive project reports (100, 70, 20) overlap and are not additive. An
+ordinary content element is not a FoundUp; only its registered owner can get
+a direct point in this model. Views, qualified use and verified outcome points
+are distinct. One shared actor counts once ecosystem-wide in the same window.
+No event here determines a release, staking, payment, revenue or entitlement.
+FUC and LAB are hypotheses, not accepted units or conversions.
+
 ## Observable Swarm Orchestration read-only telemetry — 2026-11-15
 
 Read-only telemetry adapter (`adapters/work_telemetry_provider.py`), `WorkUnitFrame` lineage/lease fields (`parent_work_id`, `work_order_id`, `swarm_lane`, `lease_active`), deduplicated redacted dependency edges (`depends_on`, `parent_task`, `origin_continuity`, `independent_assurance`), GET-only `/api/work-telemetry`, and `FoundupCube` HUD/ticker summary (`DEPS`, `LEASES`, `LANES`, `VERIF`). Strictly `observation_only=True` and `authority="none"`; focused suite passes `11/11` with `0 skipped` across clean checkouts and live artifacts. See [contract](INTERFACE.md#observable-swarm-orchestration-telemetry-interface--2026-11-15).

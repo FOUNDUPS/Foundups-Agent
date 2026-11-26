@@ -1,3 +1,95 @@
+## 2026-11-23 — Shared Mall clean gesture continuation
+
+The existing v26 #2439 lane supplies configurable mode-specific right swipes,
+clean app video surfaces, full-height external grips and a bounded opt-in local
+DAEmon projection. Shared queue, preference, provider, attribution, membership
+and return owners remain authoritative. Exact-source browser/static/VM evidence
+and independent product review are recorded in the existing member TestModLog
+and shared media incident. Physical phone/provider and production acceptance
+remain open; no Voice/model/backend service or hidden YouTube audio is claimed.
+WSP00/10/15/22/30/50/71/91/97 apply. No Moshpit or Google Drive content is changed.
+
+## 2026-11-22 — Shared Mall floating control continuation
+
+Extend the existing v26 lane under WSP 00/10/15/22/30/97, with shared ownership,
+preserved provider controls and public/protected boundaries. HPC qualifies
+bounded drag, persistent frame gestures, full-height restore, independent Video
+settings, canonical camera handoff and in-page Red Dog availability. The external
+AutoPost owner supplies its separately reviewed capture-safe footer. Existing
+roadmaps/interfaces/intake and one canonical incident retain implementation,
+test, preview, backend/model/speech and physical-device distinctions. Production
+and formal lifecycle promotion remain separate acceptance gates.
+
+## 2026-11-21 — Shared Search Dock and player behavior requirements
+
+PFDOCK-20261121 records 012's correction across all FoundUps/fractal views,
+including Play, with HPC as first qualification surface. The existing
+[navigation contract](modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+owns AI-first/Video menu order, Floating as default tile-tap destination,
+independent expansion/pinch/swipe settings, orientation restoration, right
+tuck/restore and provider/state boundaries. Rotation lock and new return
+defaults remain undecided. Reconcile HPC/Mall/member roadmaps, master
+architecture, player contract and member interface; preserve dated runtime
+history and explicitly supersede conflicting next-iteration instructions.
+
+Documentation lane: `docs/shared-foundups-dock-behavior-20261121`, owner 0102
+documentation coordinator, intended destination MERGE_TO_MAIN, base
+`9f2b785b4045ca4d8975910d95a2e0467006db71`. WSP 15 allocation C2/I4/D4/Impact4
+= 14/P1. Preserve active runtime PR #2439 at observed head
+`5be6f3b7bd9eb3c24c39210e74fada8e773a97c7`; its 41-byte WASM fixture is not
+a model and its current settings/gestures are only partial implementation.
+No runtime branch takeover, production deployment, model install or auth change.
+
+WSP 00 V2 was attempted in the isolated checkout and failed because torch is
+unavailable. The documented section 3.3.1 tracker fallback opened the gate with
+`execution_method=mathematical_formulas`; detector witness remains absent.
+The lexical Holo bridge failed on missing `holo_index.query_receipt` in this
+sparse checkout. Direct exact-source/rg reads were used; semantic freshness
+is UNKNOWN and no reindex or WRE runtime dispatch was performed. Retrieval
+was narrowed from repeated historical plans to current contracts plus pinned
+v26 source; public source links retain provider evidence separately.
+
+Validation is a scoped documentation diff, changed-link/anchor checks and
+independent review. Hosted checks and merge are recorded on the resulting PR;
+rollback is a scoped documentation revert. Runtime implementation and physical
+Safari/PWA acceptance remain in the existing owner and are not closed here.
+
+## 2026-11-19 — Reconcile Play FoundUps fractal documentation
+
+Recover the copied Tertia specification and distinguish it from Carbon's
+reported local graph at `121c50666`. Extend existing PR #2427 and its canonical
+vision, architecture, navigation, module/member contracts and roadmaps.
+The census now retains unfinished candidates and separates functionality from
+integration; bounded model/scaffold comparisons are planned alongside it through
+research adapters whose compatibility must first be verified. Stable identity, pinned source/graph revisions, caller Back,
+public/architect scope and independent reference review are explicit.
+
+Attach the [documentation audit](docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+through existing indexes and owner ModLogs. Preserve historical evidence and
+unresolved tile-count differences. This is documentation reconciliation, not
+execution of Carbon's census, a new graph engine, runtime activation or merge.
+WSP 10/15/22/50/71/80/83/84/97/99/108 apply; WSP 110 is draft guidance.
+
+## 2026-11-16 - v23 root cache ownership and optional gateway opener
+
+Confirmed against clean `1b2551b69babd6e5d0eadcccaf033087c4f1520d` after the
+read-only PR #2196 reuse audit. Root-worker activation could delete Mall and
+other owners' caches, and the absent legacy sign-in opener stopped subsequent
+listener initialization. This is a focused repair, not a merge of #2196.
+
+`public/sw.js` now uses root generation v2 and retires only obsolete numeric
+`foundups-root-vN` entries. Foreign cache names and sentinel bytes survive.
+The gateway guards only the optional opener; existing Close, Back, Google and
+LinkedIn handlers remain. Routes, admission policy, user storage and member
+worker/player sources are unchanged.
+
+Regression controls reproduced foreign-cache deletion first, then the actual
+missing-button TypeError after the SW repair. Final VM: 29 passed; affected
+existing gateway/PWA/state pytest: 201 passed (includes the VM wrapper).
+Independent source review accepted the narrow repair. These are local controlled
+checks, not live authentication, physical PWA or production verification.
+No #2196 security disposition, merge, preview or production publication follows.
+
 ## 2026-11-14 — Reconcile the nested Claude instruction pointer
 
 Complete the bounded PR #729 instruction consolidation using the existing

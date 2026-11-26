@@ -1,3 +1,24 @@
+## 2026-11-21 - Nested attribution reporting fixture
+
+- Added an opt-in, stdout-only scenario-runner diagnostic using the existing
+  static HPC → VoteBallots ancestry plus synthetic outcomes, observations and
+  an independently registered-in-fixture tool.
+- Clarified direct versus inclusive points, idempotent receipts and distinct
+  exposure/qualified counts. No changes to default simulation or its economics,
+  token terms, CABR, PoB, issuance, treasury, authority or deployment.
+
+## 2026-11-19 — Fractal work-navigation roadmap reconciliation
+
+- Linked the work-to-component target to the census-first Mall roadmap and
+  [documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md).
+  Kept component identity, graph/source revisions, functionality/integration and
+  missing mappings distinct from aggregate telemetry and source presence.
+- Preserved observation-only/no-authority behavior and separate historical and
+  financial owners. No equations, simulation parameters, settlement gates or
+  previous evidence were changed.
+- Documentation-only diff/link review. Reported local graph work does not prove
+  live Simulator wiring; no telemetry, economic or PC-runtime test was run here.
+
 ## 2026-11-18 — Opt-in Lego topology fixture adapter (Audit Correction #9)
 - Created `modules/foundups/simulator/adapters/lego_topology_fixture_adapter.py` integrating standalone and `wre_lego_block_projection`-compatible Lego dependency fixtures onto `SimState`, `FoundUpState`, `STAGE_TO_INT`, `step_pure.step`, and `load_bundle` / `SimulatorConfig` (`enabled: bool = False` default no-op; baseline simulator parameters and RedDog backend manifest unchanged).
 - Implemented deterministic Kahn topological readiness evaluation (`BLOCKED_MISSING_BLOCK`, `BLOCKED_DEPENDENCY_CYCLE`, `BLOCKED_UPSTREAM_DEPENDENCY`, `STALE_PROVENANCE_MISMATCH`, `UNKNOWN_DYNAMIC_OR_EXTERNAL_CONSUMER`), `Idea`/`PoC`/`Proto`/`MVP` stage-cap projection, canonical JSON trace + `simulation_trace_sha256`, and hard simulated-vs-real barriers (`SIMULATED_TRANSITION_ONLY`, `runtime_verification_eligible=False`, `HYPOTHESIS_UNDER_TEST`, `export_for_runtime_verification` `ValueError` guard).

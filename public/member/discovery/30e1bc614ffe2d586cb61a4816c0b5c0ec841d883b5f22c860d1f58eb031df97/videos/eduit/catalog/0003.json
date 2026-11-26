@@ -1,0 +1,43 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97",
+  "items": [
+    {
+      "duration_seconds": 568,
+      "embed_url": "https://www.youtube.com/embed/9W4O4c3CVwo",
+      "source_url": "https://www.youtube.com/watch?v=9W4O4c3CVwo",
+      "thumbnail_url": "https://i.ytimg.com/vi/9W4O4c3CVwo/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:43:18Z",
+      "title": "Using Nintendo 3DS as Alpha eSingularity Platform",
+      "video_id": "9W4O4c3CVwo"
+    },
+    {
+      "duration_seconds": 511,
+      "embed_url": "https://www.youtube.com/embed/6ut-dfG3fpg",
+      "source_url": "https://www.youtube.com/watch?v=6ut-dfG3fpg",
+      "thumbnail_url": "https://i.ytimg.com/vi/6ut-dfG3fpg/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:58:37Z",
+      "title": "e-Singularity Prize",
+      "video_id": "6ut-dfG3fpg"
+    },
+    {
+      "duration_seconds": 54,
+      "embed_url": "https://www.youtube.com/embed/36gnsogfqYI",
+      "source_url": "https://www.youtube.com/watch?v=36gnsogfqYI",
+      "thumbnail_url": "https://i.ytimg.com/vi/36gnsogfqYI/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:12:16Z",
+      "title": "EduIT CEO Michael Trout",
+      "video_id": "36gnsogfqYI"
+    }
+  ],
+  "kind": "videos",
+  "next": null,
+  "order": "catalog",
+  "page": 3,
+  "page_size": 6,
+  "record_id": "eduit",
+  "schema_version": 1,
+  "total": 21
+}

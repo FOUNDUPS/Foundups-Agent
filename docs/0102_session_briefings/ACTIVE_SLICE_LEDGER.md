@@ -1,3 +1,74 @@
+## RedDog extension front / first Mall adapter — 2026-11-20
+
+012 redirected development to the existing RedDog extension as the owner of
+the front end. EXTEND its panel; REUSE the Mall guest transport delivered by
+[#2435](https://github.com/FOUNDUPS/Foundups-Agent/pull/2435). Source:
+`193f4fe4a`. The smallest shared piece is the current FoundUp breadcrumb and
+an explicit action to stage a question. The VSIX and HPC guest dialog supply
+their own independently qualified focus. Neither host imports the other's
+credentials, conversations, code execution capability, or graph data.
+
+Native WSP 00 tracker passed. The Holo owner returned an index gap/UNKNOWN
+freshness; the lexical bundle identified the checked-out head but did not
+cover the newly merged guest flow. Directly compared the panel, grounding
+owner, published catalog, guest client, previous receipt and navigation
+contract. No independent popup, registry, graph branch, or public deployment.
+The graph team's local source drawer is not a released adapter. The next
+graph increment needs a permitted tile/revision from that owner, plus
+caller restoration; a FoundUp ID alone cannot stand in for those.
+
+## RedDog guest conversation in the HPC Mall — 2026-11-20
+
+012 requested an OpenRouter-backed RedDog, quiet voice intake, and a public
+guest-to-account path tested with HPC. The existing named Work handoff is
+[PR #2429](https://github.com/FOUNDUPS/Foundups-Agent/pull/2429).
+The product owner is the [member digital twin contract](../../public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md#hpc-prototype-and-hosting-evidence-2026-11-20).
+
+RECONCILE on main `06d0d8133`. The July 0.4.42 trace records a superseded
+Codex route. Current VSIX source is 0.4.141. Its advisory provider, resident
+read-only audit jobs and signed worker publication have distinct completion
+receipts. A signed queue entry alone does not show code changes or a passing
+test. Guest turns use the Python public boundary and the public catalog.
+The existing member account flow retains admission. Durable personal memory
+and code execution require authenticated principal-scoped contracts.
+
+[PR #1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) supplies
+prior client and provider work. Keep its D1, private Moshpit and other website
+changes in their existing lane. [PR #2431](https://github.com/FOUNDUPS/Foundups-Agent/pull/2431)
+owns voice arbitration design. The Fractal Mall projection and benchmark
+remain with their separate local owner, pending independent adjudication.
+The public and architect projections must remain distinct across the chat boundary.
+
+WSP 00 native bootstrap and strict tracker passed in the isolated worktree.
+Semantic Holo retrieval reported an index gap. The lexical fallback bound
+the module bundle to the workspace head with UNKNOWN freshness. Direct
+inspection supplied the missing November PR state, live landing-page route
+and host/client contracts. The earlier graph audit and July trace are
+historical evidence, not runtime verification for this release.
+
+## PR #2427 fractal documentation reconciliation — 2026-11-19
+
+Owner: 0102 documentation lane; principal 012; origin external_principal.
+Resume existing `docs/pfmall-fractal-work-navigation-20261119`, observed open
+head `b90a1b01f4caa478f8f1d8f7dc154c67a26fcdd4` on main
+`7432d31e5a68544d2bbab6715f02f64b0b5b6f85`. Preserve the prior five-document
+navigation changes and extend the existing owners with recovered Tertia
+provenance, inclusive census, separate functionality/integration, bounded
+parallel comparisons and explicit source/reported-local/target labels.
+The [documentation audit](../audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+owns coverage, corrections and unresolved evidence; no competing Carbon run.
+
+Current authorization is documentation update/review only. No merge, deployment,
+production routing or financial change is claimed or authorized by this entry.
+Validate the resulting exact head, read hosted checks, and retain the open PR as
+the reviewable handoff. Main and PC convergence remain separate later gates.
+Recheck this entry against the live PR before a subsequent mutation.
+
+Next evidence dependency: the existing Carbon/PC owner supplies the inaccessible
+local `121c5066687c5ab7571ef52382e5d9c68494cc36` graph, schemas and receipt
+bindings; reconcile 430/431 and 209/211 by ID. Proposed bounded WSP_15 next
+slice C2/I4/D4/Impact3 = 13/P1. Protected native-admission gates are unchanged.
+
 ## PR #2403 convergence and qualified merge - 2026-11-16
 
 012 now authorizes reconciliation of the existing PR, independent exact-head

@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1854,
+  "total_tests": 1859,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -14284,6 +14284,19 @@
       "description": "Tests for YouTube Channel Refresh Scheduler.\n\nTests:\n- RefreshResult structure\n- Scheduler configuration\n- Dry-run behavior verification"
     },
     {
+      "id": "test::modules::communication::youtube_channel_pull::tests::test_scoped_refresh",
+      "path": "modules/communication/youtube_channel_pull/tests/test_scoped_refresh.py",
+      "owner": "modules/communication/youtube_channel_pull",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-channel-pull-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Behavioral coverage for HPC's bounded public-source admission path."
+    },
+    {
       "id": "test::modules::communication::youtube_channel_pull::tests::test_status_summary",
       "path": "modules/communication/youtube_channel_pull/tests/test_status_summary.py",
       "owner": "modules/communication/youtube_channel_pull",
@@ -15609,6 +15622,19 @@
       "description": "Desired persistence-only verification acceptance; synthetic disposable fixtures."
     },
     {
+      "id": "test::modules::foundups::entity_management::tests::test_corp_mgmt",
+      "path": "modules/foundups/entity_management/tests/test_corp_mgmt.py",
+      "owner": "modules/foundups/entity_management",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-entity-management-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
       "id": "test::modules::foundups::esingularity::jhr::tests::test_jhr_agent",
       "path": "modules/foundups/esingularity/jhr/tests/test_jhr_agent.py",
       "owner": "modules/foundups/esingularity",
@@ -15979,7 +16005,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Catalog FoundUp Truth Gate \u2014 WSP 97 Validation\n\nEvery entry in mall-video-catalog.json is a FoundUp.\nSome FoundUps also have bound tenant manifests (foundup_manifest.json).\nThe catalog needs its own validator and must join against manifests when present.\n\nTruth labels:\n  BOUND_TENANT:       Has catalog entry + foundup_manifest.json + routing_prefix + data_namespace\n  DISCOVERABLE_ONLY:  Has catalog entry, no manifest binding required\n\nThis test module enforces:\n  - All catalog entries are valid "
+      "description": "Catalog FoundUp Truth Gate \u2014 WSP 97 Validation\n\nCatalog records include FoundUps plus explicitly approved, unregistered project-discovery cards.\nSome FoundUps also have bound tenant manifests (foundup_manifest.json).\nThe catalog needs its own validator and must join against manifests when present.\n\nTruth labels:\n  BOUND_TENANT:       Has catalog entry + foundup_manifest.json + routing_prefix + data_namespace\n  DISCOVERABLE_ONLY:  Has catalog entry, no manifest binding required\n\nThis test module "
     },
     {
       "id": "test::modules::foundups::pfmall::tests::test_clerk_proposal_intake",
@@ -16547,6 +16573,19 @@
       "description": "Unit tests for market stress and scenario confidence modeling."
     },
     {
+      "id": "test::modules::foundups::simulator::tests::test_nested_attribution_audit",
+      "path": "modules/foundups/simulator/tests/test_nested_attribution_audit.py",
+      "owner": "modules/foundups/simulator",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Frozen, synthetic-only attribution acceptance under the scenario CLI."
+    },
+    {
       "id": "test::modules::foundups::simulator::tests::test_observable_swarm_telemetry",
       "path": "modules/foundups/simulator/tests/test_observable_swarm_telemetry.py",
       "owner": "modules/foundups/simulator",
@@ -16618,7 +16657,7 @@
       "path": "modules/foundups/simulator/tests/test_smartdao_runtime_events.py",
       "owner": "modules/foundups/simulator",
       "suite_class": "unit",
-      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "shard_id": "modules-foundups-simulator-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21804,6 +21843,21 @@
       "description": "Tests for WRE worker git cwd guard."
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_worker_wsp97_contract",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_worker_wsp97_contract.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for WRE worker WSP_00 0.2A and WSP_97 pure-evaluation contract."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::wre_gateway::tests::test_dae_gateway_policyflags_guards",
       "path": "modules/infrastructure/wre_core/wre_gateway/tests/test_dae_gateway_policyflags_guards.py",
       "owner": "modules/infrastructure/wre_core",
@@ -25074,7 +25128,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Behavioral storage and worker-cache boundaries for a product in the Mall shell."
+      "description": "Private selective union of existing main policy and head runtime cases."
     },
     {
       "id": "test::public::member::tests::test_mall_tile_field",
@@ -25121,7 +25175,10 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network",
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -25196,6 +25253,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for Red Dog context briefing phase 4.\n\nValidates:\n  1. briefing surface exists (JS-injected, CSS present)\n  2. gatherContext reads all expected shell signals\n  3. renderBriefing produces truthful output\n  4. window.redDog context API exists\n  5. no fake AI, no backend, no network dependency\n  6. existing behaviors unaffected"
+    },
+    {
+      "id": "test::public::member::tests::test_reddog_conversation_entry",
+      "path": "public/member/tests/test_reddog_conversation_entry.py",
+      "owner": "public",
+      "suite_class": "unit",
+      "shard_id": "public-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Regression contract for the quiet Red Dog conversation entry.\n\nThe account shell owns context, admission presentation and availability only.\nThe separate conversation client owns consent, transport and session state."
     },
     {
       "id": "test::public::member::tests::test_reddog_foundup_entry_alignment_phase7",
@@ -25294,7 +25364,9 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -25365,7 +25437,9 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

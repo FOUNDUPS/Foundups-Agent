@@ -4,7 +4,7 @@
   "documents": [
     {
       "doc_type": "other",
-      "hash_sha256": "78dc1848f9c9792f65c794ed488486f58ff79593159285552c4aa7c04fec9ada",
+      "hash_sha256": "a2e4d89b0b87c96bc098a86ab0e86b930f07ce9afc4607fc461741f35827a64b",
       "links": {
         "automation": [
           "doc_dae"
@@ -26,19 +26,24 @@
       },
       "module_hint": "docs_root",
       "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
-      "size_bytes": 84396,
+      "size_bytes": 96555,
       "status": "active",
       "wsp_refs": [
         "WSP 00",
-        "WSP 10",
-        "WSP 11",
-        "WSP 27",
         "WSP 3",
         "WSP 6",
+        "WSP 10",
+        "WSP 11",
+        "WSP 15",
+        "WSP 22",
+        "WSP 27",
+        "WSP 50",
+        "WSP 60",
         "WSP 62",
+        "WSP 71",
         "WSP 80",
-        "WSP 81",
-        "WSP 85",
+        "WSP 84",
+        "WSP 87",
         "WSP 97"
       ]
     },
@@ -1723,7 +1728,7 @@
     },
     {
       "doc_type": "readme",
-      "hash_sha256": "3cfdafa4b8d3a7d89facb1179298299f176684f4da433af26d8c4074e030cdde",
+      "hash_sha256": "6e4ddf20f6166fbf3261796802cb5fdd442a79fa07ecb78d02ba42c4936dd56c",
       "links": {
         "automation": [
           "doc_dae"
@@ -1745,16 +1750,16 @@
       },
       "module_hint": "docs_root",
       "path": "docs/README.md",
-      "size_bytes": 16847,
+      "size_bytes": 18227,
       "status": "active",
       "wsp_refs": [
-        "WSP 0",
+        "WSP 00",
         "WSP 1",
+        "WSP 3",
         "WSP 13",
         "WSP 15",
         "WSP 22",
         "WSP 25",
-        "WSP 3",
         "WSP 32",
         "WSP 44",
         "WSP 47",
@@ -1778,7 +1783,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "93d86495915a082fdeb4c7caa667b0740d3a4003daa23012c0cae4ae9a85429f",
+      "hash_sha256": "f853ed1f9556fb7d92e12d79cfcc2991baac428cbadc77277524c0097777ad8f",
       "links": {
         "automation": [
           "doc_dae"
@@ -1792,9 +1797,12 @@
       },
       "module_hint": "docs_root",
       "path": "docs/REDDOG_DOCUMENTATION_MAP.md",
-      "size_bytes": 6512,
+      "size_bytes": 8514,
       "status": "active",
       "wsp_refs": [
+        "WSP 15",
+        "WSP 71",
+        "WSP 73",
         "WSP 97"
       ]
     },
@@ -4716,6 +4724,45 @@
       "wsp_refs": [
         "WSP 109",
         "WSP 97"
+      ]
+    },
+    {
+      "doc_type": "analysis",
+      "hash_sha256": "e3b639753de6deb7b69f9a5b20703e9ab1043c6a21f6b7db13aa91c0ec5ebfa2",
+      "links": {
+        "automation": [
+          "doc_dae"
+        ],
+        "entry_points": [
+          "ModLog.md",
+          "README.md",
+          "ROADMAP.md",
+          "docs/README.md",
+          "docs/REDDOG_DOCUMENTATION_MAP.md",
+          "docs/foundups_vision.md",
+          "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+          "modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md",
+          "modules/foundups/pfmall/ModLog.md"
+        ]
+      },
+      "module_hint": "pfmall",
+      "path": "docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md",
+      "size_bytes": 20863,
+      "status": "active",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 10",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 71",
+        "WSP 80",
+        "WSP 83",
+        "WSP 84",
+        "WSP 87",
+        "WSP 97",
+        "WSP 99",
+        "WSP 110"
       ]
     },
     {
@@ -11078,7 +11125,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "76a6e5346e2f2e4415de6d2a2212d6622991d823abbdcf6ebff8238c0b42bd86",
+      "hash_sha256": "027171894b76444f0039d4e05c296f905e5aee660fd9f6ab5e86303f427da9af",
       "links": {
         "automation": [
           "doc_dae"
@@ -11093,9 +11140,12 @@
       },
       "module_hint": "docs_root",
       "path": "docs/foundups_vision.md",
-      "size_bytes": 22904,
+      "size_bytes": 28622,
       "status": "active",
       "wsp_refs": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 97",
         "WSP 98"
       ]
     },
@@ -11601,7 +11651,7 @@
     },
     {
       "doc_type": "other",
-      "hash_sha256": "2ebe7f879aa87306d8e5ed64fbd1aff211ecdb81ad1c3cdf59d06e1ad4ef598a",
+      "hash_sha256": "aaa5c7cdfa33a82ae438ad4b5d556bc7066e021abf5cfde1bc142af178d84cf9",
       "links": {
         "automation": [
           "doc_dae"
@@ -11617,9 +11667,26 @@
       },
       "module_hint": "docs_root",
       "path": "docs/operations/RSI_SWARM_DISPATCH.md",
-      "size_bytes": 164992,
+      "size_bytes": 536852,
       "status": "active",
-      "wsp_refs": []
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 5",
+        "WSP 6",
+        "WSP 10",
+        "WSP 11",
+        "WSP 15",
+        "WSP 22",
+        "WSP 48",
+        "WSP 49",
+        "WSP 50",
+        "WSP 62",
+        "WSP 71",
+        "WSP 84",
+        "WSP 95",
+        "WSP 97",
+        "WSP 110"
+      ]
     },
     {
       "doc_type": "analysis",

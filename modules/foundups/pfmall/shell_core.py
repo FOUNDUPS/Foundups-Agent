@@ -69,8 +69,8 @@ VALID_CATEGORIES = frozenset({
     # Catalog-emergent categories (from mall-video-catalog.json)
     "travel", "music", "startup",
     "thought-leadership", "ai-education", "ai-research",
-    # Civic/democracy category (voteballots FoundUp) and core infra (holoindex)
-    "civic", "infrastructure",
+    # Civic/democracy category (voteballots FoundUp), trading (trade FoundUp), and core infra (holoindex)
+    "civic", "trading", "infrastructure",
 })
 
 SHELL_ROUTES = frozenset({

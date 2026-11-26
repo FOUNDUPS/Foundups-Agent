@@ -473,11 +473,20 @@
     tools.append(mallCompareLink);
     syncMallSelectionUi();
 
-    const anchor = menu.querySelector('form[method="dialog"]');
-    if (anchor) {
-      anchor.before(tools);
-    } else {
-      menu.append(tools);
+    const diagnostics = menu.querySelector('[data-mall-daemon-diagnostics]');
+    if (diagnostics) {
+      diagnostics.append(tools);
+      const group = menu.querySelector('[data-preview-diagnostics]');
+      if (group) group.hidden = false;
+    }
+    else {
+      // Compatibility with older preview shells: technical selectors are still
+      // explicitly collapsed rather than crowding the ordinary control menu.
+      const group = document.createElement('details');
+      const summary = document.createElement('summary');
+      summary.textContent = 'Playback diagnostics';
+      group.append(summary, tools);
+      menu.append(group);
     }
     return true;
   }

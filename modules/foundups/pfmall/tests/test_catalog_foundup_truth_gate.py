@@ -1,7 +1,7 @@
 """
 Catalog FoundUp Truth Gate — WSP 97 Validation
 
-Every entry in mall-video-catalog.json is a FoundUp.
+Catalog records include FoundUps plus explicitly approved, unregistered project-discovery cards.
 Some FoundUps also have bound tenant manifests (foundup_manifest.json).
 The catalog needs its own validator and must join against manifests when present.
 
@@ -10,7 +10,8 @@ Truth labels:
   DISCOVERABLE_ONLY:  Has catalog entry, no manifest binding required
 
 This test module enforces:
-  - All catalog entries are valid FoundUps with required fields
+  - All catalog records retain unique identities and required discovery fields
+  - FoundUp records keep tenant enums; approved project candidates get a strict non-tenant contract
   - Category values match VALID_CATEGORIES (shell_core.py)
   - Lifecycle stages match VALID_STAGES (shell_core.py)
   - Launch readiness matches VALID_READINESS (shell_core.py)
@@ -78,12 +79,53 @@ def _discoverable_entries(catalog: list[dict]) -> list[dict]:
     return [e for e in catalog if not e.get("routing_prefix") or not e.get("data_namespace")]
 
 
+# Approved project-discovery cards are not registered FoundUp tenants. Keep
+# this source-bound exception fail closed rather than assigning a fictional DAO
+# tier, expanding tenant enums, or silently bypassing all catalog validation.
+APPROVED_PROJECT_CANDIDATES = {
+    "foundups_house_project": "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md",
+}
+
+
+def _is_project_candidate(entry):
+    return entry.get("source_type") == "project_candidate" or entry.get("discovery_kind") == "candidate"
+
+
+def _assert_project_candidate(entry):
+    fid = entry.get("foundup_id")
+    assert fid in APPROVED_PROJECT_CANDIDATES, "Unreviewed project candidate"
+    assert entry.get("source_type") == "project_candidate"
+    assert entry.get("discovery_kind") == "candidate"
+    assert entry.get("canonical_foundup_id") is None
+    assert entry.get("public_plan_url") == APPROVED_PROJECT_CANDIDATES[fid]
+    assert entry.get("source_id") == "modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md"
+    assert entry.get("category") == "housing"
+    assert entry.get("status") == "specified"
+    assert entry.get("lifecycle_stage") == "Specified"
+    assert entry.get("launch_readiness") == "planning_only"
+    assert not entry.get("tier"), "Unregistered candidate must not claim a DAO tier"
+    for field in ("routing_prefix", "data_namespace", "entry_url"):
+        assert not entry.get(field), "Candidate must not claim tenant binding or entry"
+    assert entry.get("videos") == [] and entry.get("video_count") == 0
+    private_or_unverified_details = {"address", "street_address", "exact_location", "latitude", "longitude",
+        "phone", "email", "owner_contact", "availability", "price", "first_house"}
+    assert not private_or_unverified_details.intersection(entry), "Unapproved house detail"
+
+
+def _foundup_entries(catalog):
+    for entry in catalog:
+        if _is_project_candidate(entry):
+            _assert_project_candidate(entry)
+        else:
+            yield entry
+
+
 # ---------------------------------------------------------------------------
-# Every catalog entry is a FoundUp
+# Common catalog record identity
 # ---------------------------------------------------------------------------
 
 class TestEveryEntryIsAFoundUp:
-    """Every catalog entry must have the fields that make it a FoundUp."""
+    """All records have discovery identity; only FoundUps claim DAO tiers."""
 
     def test_all_entries_have_foundup_id(self, catalog):
         for entry in catalog:
@@ -115,7 +157,7 @@ class TestEveryEntryIsAFoundUp:
             )
 
     def test_all_entries_have_tier(self, catalog):
-        for entry in catalog:
+        for entry in _foundup_entries(catalog):
             assert "tier" in entry and entry["tier"], (
                 f"{entry['foundup_id']}: missing tier"
             )
@@ -130,7 +172,7 @@ class TestCategoryEnum:
 
     def test_all_categories_are_valid(self, catalog):
         violations = []
-        for entry in catalog:
+        for entry in _foundup_entries(catalog):
             cat = entry.get("category", "")
             if cat not in VALID_CATEGORIES:
                 violations.append(f"{entry['foundup_id']}: '{cat}'")
@@ -141,7 +183,7 @@ class TestCategoryEnum:
 
     def test_catalog_does_not_use_unknown_categories(self, catalog):
         """Catch new categories that haven't been added to VALID_CATEGORIES."""
-        catalog_cats = {e.get("category") for e in catalog}
+        catalog_cats = {e.get("category") for e in _foundup_entries(catalog)}
         unknown = catalog_cats - VALID_CATEGORIES
         assert not unknown, (
             f"Catalog uses categories not in VALID_CATEGORIES: {unknown}. "
@@ -158,7 +200,7 @@ class TestLifecycleStageEnum:
 
     def test_all_lifecycle_stages_are_valid(self, catalog):
         violations = []
-        for entry in catalog:
+        for entry in _foundup_entries(catalog):
             stage = entry.get("lifecycle_stage", "")
             if stage not in VALID_STAGES:
                 violations.append(f"{entry['foundup_id']}: '{stage}'")
@@ -177,7 +219,7 @@ class TestLaunchReadinessEnum:
 
     def test_all_launch_readiness_are_valid(self, catalog):
         violations = []
-        for entry in catalog:
+        for entry in _foundup_entries(catalog):
             lr = entry.get("launch_readiness", "")
             if lr not in VALID_READINESS:
                 violations.append(f"{entry['foundup_id']}: '{lr}'")
@@ -196,7 +238,7 @@ class TestTierEnum:
 
     def test_all_tiers_are_valid(self, catalog):
         violations = []
-        for entry in catalog:
+        for entry in _foundup_entries(catalog):
             tier = entry.get("tier", "")
             if tier not in VALID_TIERS:
                 violations.append(f"{entry['foundup_id']}: '{tier}'")
@@ -282,6 +324,9 @@ class TestDiscoverableOnly:
         """Discoverable-only entries must NOT fail for lacking a manifest."""
         for entry in _discoverable_entries(catalog):
             fid = entry["foundup_id"]
+            if _is_project_candidate(entry):
+                _assert_project_candidate(entry)
+                continue
             # This test PASSES regardless of whether manifest exists.
             # The point is: no manifest is OK for discoverable-only.
             assert entry.get("launch_readiness") == "discoverable_only" or fid in manifests, (
@@ -334,6 +379,35 @@ class TestTruthLabels:
         assert len(disc) >= total // 2, (
             f"Expected majority discoverable-only, got {len(disc)}/{total}"
         )
+
+
+class TestApprovedProjectCandidates:
+    """Planning cards remain discoverable without becoming fake FoundUp tenants."""
+
+    def test_project_candidates_satisfy_source_bound_non_tenant_contract(self, catalog):
+        candidates = [entry for entry in catalog if _is_project_candidate(entry)]
+        assert {entry["foundup_id"] for entry in candidates} == set(APPROVED_PROJECT_CANDIDATES)
+        for entry in candidates:
+            _assert_project_candidate(entry)
+
+    @pytest.mark.parametrize("patch", [
+        {"foundup_id": "unapproved_candidate"},
+        {"canonical_foundup_id": "foundups_house_project"},
+        {"source_type": "internal_app"}, {"discovery_kind": "source"},
+        {"public_plan_url": "https://example.invalid/unreviewed"},
+        {"source_id": "unreviewed/planning.md"},
+        {"tier": "F0_DAE"}, {"status": "active"},
+        {"lifecycle_stage": "launch"}, {"launch_readiness": "ready"},
+        {"routing_prefix": "/f/foundups_house_project"},
+        {"data_namespace": "idb_unapproved_house"},
+        {"entry_url": "/member/?enter=foundups_house_project"},
+        {"videos": [{"video_id": "synthetic"}]}, {"video_count": 1},
+        {"address": "synthetic unapproved detail"},
+    ])
+    def test_candidate_marker_cannot_bypass_tenant_or_publication_gates(self, catalog, patch):
+        house = next(entry for entry in catalog if entry["foundup_id"] == "foundups_house_project")
+        with pytest.raises(AssertionError):
+            _assert_project_candidate(dict(house, **patch))
 
 
 # ---------------------------------------------------------------------------

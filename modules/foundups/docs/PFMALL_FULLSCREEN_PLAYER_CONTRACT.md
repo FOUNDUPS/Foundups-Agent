@@ -1,8 +1,8 @@
 # p.fMALL Fullscreen Player Contract
 
-**Version**: 2.1.0
-**Date**: 2026-04-05
-**Status**: Phase 2 landed (save/share/history/resume)
+**Version**: 2.2.0
+**Date**: 2026-11-21
+**Status**: Phase 2 runtime baseline; shared preference changes specified, not implemented
 **Owner**: Worker F (0102)
 
 ---
@@ -72,6 +72,10 @@ This is NOT a global feed or discovery surface. It is a focused playback layer f
 
 ## 5. Fullscreen Entry
 
+The following entry/close API describes the earlier runtime. Next-iteration
+video selection and reversible presentation changes follow section 20;
+do not infer a fixed fullscreen tile-tap default from this baseline.
+
 Entry point: `mallVideoPlayer.open(foundupId, queue, startIndex, resumeOpts?)`
 
 | Parameter | Type | Description |
@@ -125,6 +129,9 @@ Exit methods:
 ---
 
 ## 7. Gesture Semantics
+
+**Earlier runtime baseline.** Section 20 supersedes these fixed video gesture
+bindings for next-iteration acceptance. It does not claim a source change.
 
 | Gesture | Action |
 |---------|--------|
@@ -365,11 +372,34 @@ These are explicitly deferred:
 
 1. **Queue constraint**: Player never shows videos from a different FoundUp than `currentFoundUpId`
 2. **No auto-drift**: Reaching end of queue does NOT auto-play another FoundUp
-3. **Exit always works**: Swipe-down, pinch-in, Escape, and back button always close
+3. **Exit always works**: Preserve explicit Close and Escape recovery. Planned pinch-in and video-swipe-up returns follow section 20 rather than unconditionally destroying the player.
 4. **Safe-area respected**: Top and bottom controls clear notched device areas
 5. **Chrome auto-hides**: UI fades after inactivity to maximize video view
-6. **Gesture priority**: Player gestures override page scroll when open
+6. **Gesture priority**: Scope application gestures to the active owned surface; preserve page zoom, provider controls, modal input and ordinary scrolling. Section 20 defines the planned video-return exception.
 
 ---
 
-*This contract locks the fullscreen player behavior for p.fMALL phase 2. Changes require 0102 review.*
+## 20. Shared configurable presentation — PFDOCK-20261121
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.** The
+[navigation contract, section 14](PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+is the authoritative shared settings and gesture matrix for all FoundUps,
+Play and fractal views. The existing player remains the implementation owner.
+
+Deliberate tile tap defaults to **Floating**, with WikiTube and Fullscreen
+choices. Pinch-out can go directly to Fullscreen; pinch-in and swipe-up on the
+video each have their own WikiTube/Mall return choice. They must not also
+advance the queue or dismiss an outer overlay. Preserve explicit queue
+navigation. Rotate Floating to landscape fullscreen and restore Floating
+on portrait only if rotation still owns that transition. Rotation lock is
+undecided. Right-swipe parking and accessible restore retain media context;
+fully hidden YouTube playback pauses.
+
+Presentation changes preserve the active provider instance, clip/time, queue,
+captions, zoom and caller state; the destructive final-close behavior in
+section 6 is not a presentation-transition implementation. Keep app Full Video,
+DOM fullscreen and provider-native fullscreen evidence separate. Native
+fullscreen may hide the dock; restore its state on observable exit without
+overlaying provider controls. Do not claim iframe-interior gestures from
+surround-only tests. Physical Safari/PWA and cross-FoundUp acceptance remain
+open; use the existing runtime lane, not a second player.

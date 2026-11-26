@@ -1,9 +1,68 @@
 # FoundUPS Member Mall
 
+## Optional VOTE collection — 2026-11-25 candidate
+
+`https://play.foundups.com/member/?foundup=voteballots` selects the VOTE-owned
+two-card collection through this shared shell. It starts in tiles, reuses the
+same player/dock and does not grant member application access. The
+[typed-media contract](INTERFACE.md#2026-11-25--optional-vote-member-cards)
+separates native MP4 playback from the approved image-animation fallback,
+reduced-motion stills, Pending scores and separate Sites release. Controlled
+browser acceptance is not deployment or physical-iPhone evidence.
+
+## 2026-11-25 — Home and shared bottom controls candidate
+
+Fresh desktop HPC opens TV. Select its artwork/Home for HPC tiles; this tab
+remembers the choice on reload/resize. TV uses the same grid search/actions dock,
+below its app thumbnail queue. The single HPC dock plus opens Available actions;
+the grid Add Video tile keeps the existing contribution gate. Right-swipe on a
+tucked player now defaults to Next while staying tucked; tap restores the
+selected clip paused, then use visible Play. Saved next/reveal remains available.
+See the [interface](INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)
+and [tests](tests/README.md). This candidate is not a production/device receipt.
+
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE.** The [interaction contract](INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate)
+specifies app-only chrome removal, mode-specific configurable right-swipes,
+full-height external grips and opt-in bounded local activity. Shared player,
+queue and preference owners are reused; preview diagnostics are nested.
+Exact-source tests, independent review and physical iPhone/PWA evidence remain
+required. Existing source62/livev25 previews are retained as rollback references.
+
+Phone control candidate: move the floating video using its permanent top grip
+or frame edges; swipe the frame right to tuck it, then tap anywhere on its
+video-height edge rail to restore. YouTube pauses while fully hidden. Use
+`+` → Video for independent gesture choices and accessible playback actions.
+The camera opens AutoPost with a bounded return destination. Red Dog stays in
+the current view and reports unavailable conversation truthfully until its
+canonical backend is qualified. Device/provider evidence remains separate from
+the controlled [test inventory](tests/README.md).
+
 **Status**: Shared p.fMALL shell; ordinary Mall admission plus registered public product discovery
 **Location**: `public/member/`
 
 ## Overview
+
+### Fractal work navigation target — 2026-11-19
+
+The intended member experience uses this shared shell as one view of the
+FoundUps component graph. Select a FoundUp or permitted builder association,
+open the component and its revision-bound evidence, then return to the same
+caller, lens and selection. The same component keeps one ID when reached from
+another FoundUp, Tools or 0102. Public discovery exposes approved fields;
+authorized architect views may also expose private source and receipt links.
+The [master architecture](../../modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md#fractal-views-of-the-same-work)
+and [navigation contract](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#13-fractal-work-navigation)
+own this target; the [Mall roadmap](../../modules/foundups/pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation)
+starts with census discovery and parallel bounded auditor samples.
+
+The full graph, Tools → Benchmark branch and builder-to-source bridge are not
+established by the current catalog or browser dispatcher. The
+[documentation audit](../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+separates inspected source, the reported local graph and outstanding runtime
+evidence. Local search dictation below remains its existing browser capability;
+it does not establish a resident voice conversation or PC-thread relay.
 
 ### Public scoped video
 

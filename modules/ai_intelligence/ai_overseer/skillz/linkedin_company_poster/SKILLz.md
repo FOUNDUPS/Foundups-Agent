@@ -19,6 +19,15 @@ trigger:
 Follow the [LinkedIn master](../../../../platform_integration/linkedin_agent/docs/LINKEDIN_ACTIVITY_ROUTING.md) and its publishing child. This is a legacy execution helper, not standing approval for daily or commit-triggered posts. Verify current author/page/series and exact approved copy before mutation; verify native mentions by entity identity and read back the published result. Do not run git hooks or posting commands as tests. Work uses its advertised browser skill. Static names, URLs and selectors below require live verification.
 
 ## Purpose
+For this workflow use the [scheduled release contract](../../../../platform_integration/linkedin_agent/skillz/linkedin_publishing/SKILLz.md#scheduled-release-review-and-ownership).
+The legacy `post_update` helper posts immediately and has no qualified scheduling
+path, so it is excluded here. The article helper only enters editor content;
+its Boolean/screenshot proves neither exact-copy review nor a saved/scheduled item.
+Do not follow a legacy immediate-publication prompt. Preserve the exact approved
+copy/assets instead of adding the default signature/hashtags. One actual publisher
+owns the verified future schedule and later live read-back; this skill starts no
+daily job, Git hook or external scheduler.
+
 Post updates and articles to FoundUps LinkedIn company page (1263645) with 0102ðŸ¦ž signature.
 
 ## Trigger
@@ -27,7 +36,7 @@ Post updates and articles to FoundUps LinkedIn company page (1263645) with 0102ð
 - CLI: `python -m modules.ai_intelligence.ai_overseer.skillz.linkedin_company_poster --test-format`
 - CLI: `python -m modules.ai_intelligence.ai_overseer.skillz.linkedin_company_poster --switch-author "FOUNDUPS"`
 - OpenClaw: `linkedin_post("content")` or `linkedin_article("title", "body")`
-- Git hook: Automatic on commit (existing post-commit hook)
+- Historical Git hook: not an authorized trigger for this workflow
 
 ## Parameters
 | Param | Type | Required | Description |

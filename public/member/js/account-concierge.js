@@ -27,7 +27,11 @@
     initializePublicDiscovery();
     return;
   }
-  var productDiscovery = plane.getAttribute('data-reddog-mode') === 'product-discovery';
+  var publicVideoScope = window.mallVideoProjection &&
+    typeof window.mallVideoProjection.hostScope === 'function'
+      ? window.mallVideoProjection.hostScope(window.location) : null;
+  if (publicVideoScope) plane.setAttribute('data-reddog-mode', 'public-video');
+  var productDiscovery = plane.getAttribute('data-reddog-mode') === 'product-discovery' || !!publicVideoScope;
   var discoveryAdmitted = !productDiscovery;
   var productDiscoveryController = null;
   var productProfileBound = false;
@@ -149,13 +153,13 @@
   function startListening() {
     if (productDiscovery && !discoveryAdmitted) return false;
     if (productDiscovery && isOpen) closePlane();
-    if (!listeningEl) return;
+    // Only the bound search owner can establish real dictation. Without it,
+    // do not animate or claim that a microphone is listening.
+    if (!searchDictation || typeof searchDictation.start !== 'function') return false;
     isHolding = true;
-    listeningVisible = true;
-    listeningEl.hidden = false;
     dismissSummary();
-    setAnchorState('listening');
-    if (redDogTrigger) redDogTrigger.classList.add('red-dog-btn-listening');
+    searchDictation.start(false);
+    return true;
   }
 
   function bindSearchDictation(dictation) {
@@ -164,12 +168,16 @@
   }
 
   function stopListening() {
-    if (!listeningEl) return;
+    var wasHolding = isHolding;
+    if (wasHolding && searchDictation && typeof searchDictation.stop === 'function') {
+      searchDictation.stop();
+    }
     isHolding = false;
     listeningVisible = false;
-    listeningEl.hidden = true;
+    if (listeningEl) listeningEl.hidden = true;
     if (redDogTrigger) redDogTrigger.classList.remove('red-dog-btn-listening');
     if (!isOpen) setAnchorState('idle');
+    return wasHolding;
   }
 
   // ---- Red Dog trigger (primary entry point) ----
@@ -181,10 +189,10 @@
       e.stopPropagation();
       // Start hold timer
       holdTimer = setTimeout(function () {
-        if (searchDictation) {
-          isHolding = true;
-          searchDictation.start(true);
-        } else startListening();
+          if (searchDictation) {
+            isHolding = true;
+            searchDictation.start(true);
+          } else isHolding = true; // consume the hold without claiming capture
       }, HOLD_THRESHOLD);
     });
 
@@ -196,7 +204,6 @@
 
       // If we were holding, stop listening — don't fire tap
       if (isHolding) {
-        searchDictation?.stop();
         stopListening();
         return;
       }
@@ -222,7 +229,7 @@
       clearTimeout(holdTimer);
       if (isHolding) {
         searchDictation?.cancel();
-        stopListening();
+        isHolding = false;
       }
     });
 
@@ -230,7 +237,7 @@
       clearTimeout(holdTimer);
       if (isHolding) {
         searchDictation?.cancel();
-        stopListening();
+        isHolding = false;
       }
     });
 
@@ -258,6 +265,7 @@
   var currentMode = 'idle';
 
   var MODE_ACTIONS = [
+    { id: 'conversation', label: 'Conversation', icon: '\u25CB' },
     { id: 'summary',   label: 'Summary',     icon: '\u2139' },
     { id: 'listen',    label: 'Listen',       icon: '\uD83C\uDFA4' },
     { id: 'tools',     label: 'AI Tools',     icon: '\uD83D\uDD27' },
@@ -306,12 +314,17 @@
     closeModes();
 
     switch (mode) {
+      case 'conversation':
+        openPlane();
+        injectConversationSurface();
+        renderConversationSurface();
+        if (conversationEl) conversationEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        break;
       case 'summary':
         showSummary();
         break;
       case 'listen':
-        if (searchDictation) searchDictation.start();
-        else startListening();
+        startListening();
         break;
       case 'tools':
         openPlane();
@@ -384,6 +397,249 @@
   function toggleModes() {
     if (modesVisible) closeModes();
     else openModes();
+  }
+
+  // ---- quiet conversation entry ----
+  // The transport/client is a separate owner. This shell only exposes real
+  // route/admission context and remains explicitly unavailable until a client
+  // registers and reports that it is ready.
+  var conversationEl = null;
+  var conversationAdapter = null;
+  var conversationAdapterLoading = false;
+  var conversationAdapterPromise = null;
+  var conversationBindingRevision = 0;
+  var conversationSelectionBinding = '';
+  var conversationAccountBinding = '';
+  var conversationAccessBinding = '';
+  var memberPresentationAdmitted = false;
+
+  function updateConversationAccountBinding(clerkUser) {
+    var next = clerkUser && typeof clerkUser.id === 'string' ? clerkUser.id : '';
+    if (next === conversationAccountBinding) return;
+    conversationAccountBinding = next;
+    conversationBindingRevision++;
+  }
+
+  function getConversationContext() {
+    var foundupId = null;
+    var publicScope = null;
+    if (window.mallVideoProjection) {
+      if (typeof window.mallVideoProjection.hostScope === 'function') {
+        publicScope = window.mallVideoProjection.hostScope(window.location);
+      }
+      if (!publicScope && typeof window.mallVideoProjection.resolveMember === 'function') {
+        publicScope = window.mallVideoProjection.resolveMember(window.location);
+      }
+    }
+    // Product selection is accepted only from the route owner after its strict
+    // selection check; never reflect arbitrary query text as public context.
+    var productScope = productDiscovery ? document.body.getAttribute('data-foundup-id') : null;
+    var candidate = publicScope || productScope;
+    var routeSelected = !!publicScope || productDiscovery;
+    var selectionState = routeSelected ? 'invalid' : 'none';
+    if (typeof candidate === 'string' && /^[a-z0-9][a-z0-9_-]{0,79}$/.test(candidate)) {
+      foundupId = candidate;
+      selectionState = 'bound';
+    }
+    // Keep the raw owner result only as an in-memory change detector so an
+    // invalid A -> invalid B route still clears any prior guest session.
+    var nextSelection = typeof candidate === 'string' ? candidate : '';
+    if (nextSelection !== conversationSelectionBinding) {
+      conversationSelectionBinding = nextSelection;
+      conversationBindingRevision++;
+    }
+    var access = publicScope || (productDiscovery && !discoveryAdmitted) ? 'public'
+      : (productDiscovery || memberPresentationAdmitted ? 'member' : 'unknown');
+    if (access !== conversationAccessBinding) {
+      conversationAccessBinding = access;
+      conversationBindingRevision++;
+    }
+    return {
+      surface: publicScope ? 'public-video' : (productDiscovery ? 'product-discovery' : 'mall'),
+      access: access,
+      foundupId: access === 'public' ? foundupId : null,
+      selectionState: selectionState,
+      bindingRevision: conversationBindingRevision
+    };
+  }
+
+  function getConversationAvailability(context) {
+    if (context.selectionState === 'invalid') {
+      return { available: false, reason: 'Conversation is unavailable for this FoundUp route.' };
+    }
+    if (context.access === 'unknown') {
+      return { available: false, reason: 'Account admission is not established.' };
+    }
+    if (!conversationAdapter || typeof conversationAdapter.getAvailability !== 'function') {
+      return { available: false, reason: 'Conversation is not available on this page.' };
+    }
+    try {
+      var result = conversationAdapter.getAvailability(context);
+      if (!result || result.available !== true) {
+        return {
+          available: false,
+          reason: result && typeof result.reason === 'string' && result.reason.trim()
+            ? result.reason.trim() : 'Conversation is not available on this page.'
+        };
+      }
+      return { available: true, reason: '' };
+    } catch (error) {
+      return { available: false, reason: 'Conversation is not available on this page.' };
+    }
+  }
+
+  function renderConversationSurface() {
+    var context = getConversationContext();
+    conversationAdapter?.syncContext?.(context);
+    if (!conversationEl) return;
+    var availability = getConversationAvailability(context);
+    var contextEl = conversationEl.querySelector('[data-reddog-conversation-context]');
+    var availabilityEl = conversationEl.querySelector('[data-reddog-conversation-availability]');
+    var openButton = conversationEl.querySelector('[data-reddog-conversation-open]');
+    var accessLabel = context.access === 'member' ? 'Member shell context'
+      : (context.access === 'public' ? 'Public context only' : 'Account admission not established');
+    if (contextEl) {
+      contextEl.textContent = context.selectionState === 'invalid'
+        ? 'Unrecognized FoundUp route'
+        : accessLabel + (context.foundupId ? ' \u00b7 ' + context.foundupId : ' \u00b7 p.fMALL');
+    }
+    if (availabilityEl) {
+      availabilityEl.textContent = availability.available
+        ? 'Text conversation is available.' : availability.reason;
+    }
+    if (openButton) openButton.disabled = !availability.available;
+  }
+
+  function getConfiguredConversationApiRoot() {
+    var config = document.querySelector('meta[name="reddog-public-api-root"]');
+    var raw = config ? (config.getAttribute('content') || '').trim() : '';
+    if (!raw) return '';
+    try {
+      var url = new URL(raw, window.location.origin);
+      var path = url.pathname.replace(/\/+$/, '');
+      if (url.origin !== window.location.origin || path !== '/api/reddog/public' ||
+          url.username || url.password || url.search || url.hash) return '';
+      return url.origin + path;
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function loadConversationAdapter() {
+    if (conversationAdapter) return Promise.resolve(conversationAdapter);
+    if (conversationAdapterLoading) return conversationAdapterPromise;
+    var apiRoot = getConfiguredConversationApiRoot();
+    // Deployment admission is explicit. An absent endpoint keeps the static,
+    // unavailable state and does not load a client or invoke a public API.
+    if (!apiRoot) return Promise.resolve(null);
+    conversationAdapterLoading = true;
+    conversationAdapterPromise = import('/js/reddog-public-client.js').then(function (client) {
+      if (!client || typeof client.createMemberConversationAdapter !== 'function') return;
+      var adapter = client.createMemberConversationAdapter({
+        apiRoot: apiRoot,
+        origin: window.location.origin,
+        fetchImpl: typeof window.fetch === 'function' ? window.fetch.bind(window) : null,
+        document: document
+      });
+      return registerConversationAdapter(adapter) ? adapter : null;
+    }).catch(function () {
+      // The existing unavailable copy remains accurate; no synthetic error or
+      // processing state is surfaced by the shell.
+    }).finally(function () {
+      conversationAdapterLoading = false;
+      renderConversationSurface();
+    });
+    return conversationAdapterPromise;
+  }
+
+  function injectConversationSurface() {
+    if (conversationEl) return;
+    var host = productDiscovery
+      ? plane.querySelector('[data-reddog-discovery]')
+      : plane.querySelector('[data-reddog-concierge]');
+    if (!host) return;
+    conversationEl = document.createElement('section');
+    conversationEl.className = 'reddog-conversation-entry';
+    conversationEl.setAttribute('data-reddog-conversation-entry', '');
+    conversationEl.setAttribute('aria-label', 'Red Dog conversation');
+    conversationEl.innerHTML = '<div class="reddog-conversation-heading">Conversation</div>'
+      + '<p class="reddog-conversation-context" data-reddog-conversation-context></p>'
+      + '<p class="reddog-conversation-availability" data-reddog-conversation-availability></p>'
+      + '<button class="reddog-conversation-open" data-reddog-conversation-open type="button" disabled>Open text conversation</button>';
+    var heading = productDiscovery && host.querySelector('.m2j-search-heading');
+    if (heading && heading.nextSibling) host.insertBefore(conversationEl, heading.nextSibling);
+    else if (heading) host.appendChild(conversationEl);
+    else host.insertBefore(conversationEl, host.firstChild);
+    conversationEl.querySelector('[data-reddog-conversation-open]').addEventListener('click', openConversation);
+    renderConversationSurface();
+    loadConversationAdapter();
+  }
+
+  function registerConversationAdapter(adapter) {
+    if (!adapter || typeof adapter.open !== 'function' || typeof adapter.getAvailability !== 'function') {
+      return false;
+    }
+    conversationAdapter = adapter;
+    injectConversationSurface();
+    renderConversationSurface();
+    return true;
+  }
+
+  var unavailableConversationDialog = null;
+  function showUnavailableConversation() {
+    if (unavailableConversationDialog?.open) return;
+    var returnFocus = document.activeElement;
+    var dialog = document.createElement('dialog');
+    dialog.className = 'reddog-unavailable-dialog';
+    dialog.setAttribute('aria-label', 'Red Dog conversation');
+    var heading = document.createElement('h2');
+    heading.textContent = 'Red Dog';
+    var message = document.createElement('p');
+    message.textContent = 'Conversation is not connected on this build. No microphone is recording.';
+    var back = document.createElement('button');
+    back.type = 'button';
+    back.textContent = 'Back to browsing';
+    back.addEventListener('click', function () { dialog.close(); });
+    dialog.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') event.stopPropagation();
+    });
+    dialog.addEventListener('close', function () {
+      dialog.remove();
+      unavailableConversationDialog = null;
+      if (returnFocus?.isConnected && !returnFocus.closest('[inert]')) returnFocus.focus({ preventScroll: true });
+    }, { once: true });
+    dialog.appendChild(heading);
+    dialog.appendChild(message);
+    dialog.appendChild(back);
+    document.body.appendChild(dialog);
+    unavailableConversationDialog = dialog;
+    if (typeof dialog.showModal === 'function') dialog.showModal();
+    else dialog.setAttribute('open', '');
+    back.focus();
+  }
+
+  function openConversation() {
+    var context = getConversationContext();
+    if (context.access === 'unknown' || context.selectionState === 'invalid') return false;
+    if (conversationAdapter && getConversationAvailability(context).available) {
+      conversationAdapter.open(context);
+      return true;
+    }
+    if (!getConfiguredConversationApiRoot()) {
+      showUnavailableConversation();
+      return false;
+    }
+    var requestedRevision = context.bindingRevision;
+    loadConversationAdapter().then(function (adapter) {
+      var latest = getConversationContext();
+      if (latest.bindingRevision !== requestedRevision) return;
+      if (!adapter || !getConversationAvailability(latest).available) {
+        showUnavailableConversation();
+        return;
+      }
+      adapter.open(latest);
+    });
+    return false;
   }
 
   // ---- local swipe-up on anchor to open mode sheet ----
@@ -515,6 +771,8 @@
   if (signOutBtn) {
     signOutBtn.addEventListener('click', async function () {
       if (productDiscovery && !discoveryAdmitted) return;
+      memberPresentationAdmitted = false;
+      updateConversationAccountBinding(null);
       try {
         if (window.Clerk) await window.Clerk.signOut();
       } finally {
@@ -1469,6 +1727,20 @@
     return 'Continue at ' + m + ':' + (s < 10 ? '0' : '') + s;
   }
 
+  function historyThumbnailUrl(raw) {
+    if (typeof raw !== 'string' || !raw.trim() || raw.length > 2048) return '';
+    try {
+      var url = new URL(raw, window.location.href);
+      if (url.username || url.password) return '';
+      if (url.protocol === 'https:') return url.href;
+      // Local HTTP fixtures/dev retain relative images; public mixed content,
+      // data/javascript/blob/file and credential-bearing URLs get a placeholder.
+      if (url.protocol === 'http:' && url.origin === window.location.origin &&
+          ['localhost', '127.0.0.1', '[::1]'].indexOf(url.hostname) !== -1) return url.href;
+    } catch (error) {}
+    return '';
+  }
+
   function renderWatchHistory() {
     if (productDiscovery && !discoveryAdmitted) return;
     if (!historyEl) return;
@@ -1477,48 +1749,87 @@
     var entries = (player && typeof player.getHistory === 'function') ? player.getHistory() : [];
     var count = entries.length;
 
-    var html = '<div class="reddog-history-header">';
-    html += '<span class="reddog-section-label">Recently Watched</span>';
-    html += '<span class="reddog-history-count">' + count + '</span>';
+    var content = document.createDocumentFragment();
+    var header = document.createElement('div');
+    header.className = 'reddog-history-header';
+    var label = document.createElement('span');
+    label.className = 'reddog-section-label';
+    label.textContent = 'Recently Watched';
+    var counter = document.createElement('span');
+    counter.className = 'reddog-history-count';
+    counter.textContent = String(count);
+    header.appendChild(label);
+    header.appendChild(counter);
     if (count > 0) {
-      html += '<button class="reddog-history-clear" data-reddog-history-clear type="button">Clear</button>';
+      var clearButton = document.createElement('button');
+      clearButton.className = 'reddog-history-clear';
+      clearButton.setAttribute('data-reddog-history-clear', '');
+      clearButton.type = 'button';
+      clearButton.textContent = 'Clear';
+      header.appendChild(clearButton);
     }
-    html += '</div>';
+    content.appendChild(header);
 
     if (count === 0) {
-      html += '<p class="reddog-history-empty">No watch history yet. Videos you play will appear here.</p>';
-      historyEl.innerHTML = html;
+      var empty = document.createElement('p');
+      empty.className = 'reddog-history-empty';
+      empty.textContent = 'No watch history yet. Videos you play will appear here.';
+      content.appendChild(empty);
+      historyEl.replaceChildren(content);
       return;
     }
 
-    html += '<div class="reddog-history-list">';
+    var list = document.createElement('div');
+    list.className = 'reddog-history-list';
     entries.forEach(function (entry) {
-      var thumb = esc(entry.thumbnail || '');
-      var title = esc(entry.title || 'Untitled');
-      var foundupId = esc(entry.foundupId || '');
-      var videoId = esc(entry.videoId || '');
+      var thumb = historyThumbnailUrl(entry.thumbnail);
+      var title = entry.title || 'Untitled';
+      var foundupId = entry.foundupId || '';
+      var videoId = entry.videoId || '';
       var videoIndex = entry.videoIndex != null ? entry.videoIndex : 0;
       var watchDate = entry.timestamp ? new Date(entry.timestamp).toLocaleDateString() : '';
 
-      html += '<button class="reddog-history-card" data-history-foundup="' + foundupId + '" data-history-video="' + videoId + '" data-history-index="' + videoIndex + '" type="button">';
+      var card = document.createElement('button');
+      card.className = 'reddog-history-card';
+      card.dataset.historyFoundup = foundupId;
+      card.dataset.historyVideo = videoId;
+      card.dataset.historyIndex = videoIndex;
+      card.type = 'button';
       if (thumb) {
-        html += '<img class="reddog-history-thumb" src="' + thumb + '" alt="" loading="lazy">';
+        var image = document.createElement('img');
+        image.className = 'reddog-history-thumb';
+        image.src = thumb;
+        image.alt = '';
+        image.loading = 'lazy';
+        card.appendChild(image);
       } else {
-        html += '<div class="reddog-history-thumb reddog-history-thumb-empty"></div>';
+        var placeholder = document.createElement('div');
+        placeholder.className = 'reddog-history-thumb reddog-history-thumb-empty';
+        card.appendChild(placeholder);
       }
-      html += '<div class="reddog-history-info">';
-      html += '<span class="reddog-history-title">' + title + '</span>';
-      html += '<span class="reddog-history-meta">' + foundupId + (watchDate ? ' \u00b7 ' + watchDate : '') + '</span>';
+      var info = document.createElement('div');
+      info.className = 'reddog-history-info';
+      var titleLabel = document.createElement('span');
+      titleLabel.className = 'reddog-history-title';
+      titleLabel.textContent = title;
+      var meta = document.createElement('span');
+      meta.className = 'reddog-history-meta';
+      meta.textContent = foundupId + (watchDate ? ' \u00b7 ' + watchDate : '');
+      info.appendChild(titleLabel);
+      info.appendChild(meta);
       var contLabel = formatContinueAt(entry.playbackPosition);
       if (contLabel) {
-        html += '<span class="reddog-history-continue-badge">' + esc(contLabel) + '</span>';
+        var badge = document.createElement('span');
+        badge.className = 'reddog-history-continue-badge';
+        badge.textContent = contLabel;
+        info.appendChild(badge);
       }
-      html += '</div>';
-      html += '</button>';
+      card.appendChild(info);
+      list.appendChild(card);
     });
-    html += '</div>';
+    content.appendChild(list);
 
-    historyEl.innerHTML = html;
+    historyEl.replaceChildren(content);
 
     // Wire click handlers for re-entry
     historyEl.querySelectorAll('[data-history-foundup]').forEach(function (card) {
@@ -1605,6 +1916,8 @@
   var _origOpenPlane = openPlane;
   openPlane = function (event) {
     _origOpenPlane(event);
+    injectConversationSurface();
+    renderConversationSurface();
     if (productDiscovery && !discoveryAdmitted) return;
     injectBriefing();
     renderBriefing();
@@ -1639,6 +1952,16 @@
     getRecommendations: getRecommendations,
     runRecommendation: runRecommendation,
     refreshRecommendations: function () { injectRecommendations(); renderRecommendations(); },
+    getConversationContext: getConversationContext,
+    setMemberAdmission: function (admitted) {
+      memberPresentationAdmitted = admitted === true;
+      if (!memberPresentationAdmitted) updateConversationAccountBinding(null);
+      renderConversationSurface();
+      return memberPresentationAdmitted;
+    },
+    hasConversationEndpoint: function () { return !!getConfiguredConversationApiRoot(); },
+    registerConversationAdapter: registerConversationAdapter,
+    openConversation: openConversation,
 
     // AI Tools: projection, density, motion mode
     openTools: function () { injectAITools(); executeMode('tools'); },
@@ -1699,6 +2022,8 @@
       var avatarPlaceholder = plane.querySelector('[data-account-avatar-placeholder]');
       var nameEl = plane.querySelector('[data-account-name]');
       var handleEl = plane.querySelector('[data-account-handle]');
+      updateConversationAccountBinding(clerkUser);
+      renderConversationSurface();
 
       // Avatar: use Clerk profile image if available
       var imageUrl = clerkUser && clerkUser.imageUrl;
@@ -1904,6 +2229,7 @@
 
   // Backward compat alias (will be removed in future)
   window.accountConcierge = api;
+  if (publicVideoScope) loadConversationAdapter();
 
   // ---- verification alert event listener (PFM9) ----
   // WSP 97: AI agents dispatch 'reddog:verification_alert' to surface anomalies.
@@ -1928,6 +2254,11 @@
     var presentation = [];
     var host = plane.querySelector('[data-reddog-discovery]');
     var accountAction = plane.querySelector('[data-reddog-discovery-account]');
+    if (publicVideoScope && host) {
+      host.setAttribute('data-reddog-public-video', '');
+      var productHeading = host.querySelector('.m2j-search-heading');
+      if (productHeading) productHeading.hidden = true;
+    }
 
     function applyPresentation() {
       plane.setAttribute('data-reddog-admitted', discoveryAdmitted ? 'true' : 'false');
@@ -1956,6 +2287,7 @@
       attachedChannels = {};
       verificationAlerts = {};
       verificationAlertCount = 0;
+      updateConversationAccountBinding(null);
       currentMode = 'idle';
       clearTimeout(tapTimer);
       clearTimeout(holdTimer);
@@ -1994,7 +2326,8 @@
 
     // Guard the existing API dynamically, including references captured before
     // revocation. Guest rendering never establishes an admitted account.
-    var discoveryMethods = ['open', 'close', 'toggle', 'isOpen', 'anchorState'];
+    var discoveryMethods = ['open', 'close', 'toggle', 'isOpen', 'anchorState',
+      'getConversationContext', 'hasConversationEndpoint', 'registerConversationAdapter', 'openConversation'];
     var globalFieldMethods = ['setCategory', 'populateMyMall', 'openPersonalMall', 'searchCatalog', 'searchByCreator', 'clearSearch', 'toggleChannel'];
     Object.keys(memberApi).forEach(function (name) {
       if (discoveryMethods.indexOf(name) !== -1) return;

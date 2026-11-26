@@ -10,7 +10,7 @@ const origin = 'https://vote.test';
 const MIME = {
   css: 'text/css', js: 'text/javascript', mjs: 'text/javascript',
   json: 'application/json', webmanifest: 'application/manifest+json',
-  svg: 'image/svg+xml', png: 'image/png', webp: 'image/webp',
+  svg: 'image/svg+xml', png: 'image/png', webp: 'image/webp', jpg: 'image/jpeg',
 };
 
 function worker() {
@@ -60,10 +60,11 @@ function worker() {
 test('canonical and prior HTML navigation use the same cached document offline', async () => {
   const sw = worker();
   await sw.event('install', '/');
-  assert.equal(sw.contents.size, 29);
+  assert.equal(sw.contents.size, 32);
   assert.ok(sw.requests.every(({options}) => options.redirect === 'error'));
   await sw.event('activate', '/');
-  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9']);
+  assert.deepEqual(sw.deleted, ['vote-public-guide-v2', 'vote-public-guide-v3', 'vote-public-guide-v4', 'vote-public-guide-v5', 'vote-public-guide-v6', 'vote-public-guide-v7', 'vote-public-guide-v8', 'vote-public-guide-v9', 'vote-public-guide-v10']);
+  for (const asset of ['contact-script.js', 'contact-script.mjs']) assert.ok(sw.contents.has(origin + '/' + asset));
   sw.changeResponse(() => { throw new TypeError('offline'); });
   for (const path of ['/guide', '/contact', '/evidence', '/coalition']) {
     assert.equal(await sw.event('fetch', path), sw.contents.get(origin + path));
@@ -110,6 +111,28 @@ test('the cover hands every original guide fragment back to the guide', () => {
     hashChanged();
   }
   assert.deepEqual(redirects, []);
+});
+
+test('the deck entry uses a fixed shared-PWA destination and preserves every original guide bookmark', () => {
+  const entryCode = readFileSync(new URL('../web/deck-entry.js', import.meta.url), 'utf8');
+  function enter(fragment, search = '?next=https%3A%2F%2Foutside.test') {
+    const location = new URL(origin + '/' + search + '#' + fragment);
+    const redirects = [];
+    location.replace = (destination) => redirects.push(String(destination));
+    vm.runInNewContext(entryCode, { URL, location });
+    assert.equal(redirects.length, 1);
+    return redirects[0];
+  }
+  for (const [, id] of guideMarkup.matchAll(/\bid="([^"]+)"/g)) {
+    assert.equal(enter(id, '?from=bookmark'), origin + '/guide?from=bookmark#' + id);
+  }
+  for (const fragment of ['', 'comic-cover', '%E0%A4', '//outside.test/path']) {
+    assert.equal(enter(fragment), 'https://play.foundups.com/member/?foundup=voteballots');
+  }
+  const markup = readFileSync(new URL('../web/deck-entry.html', import.meta.url), 'utf8');
+  for (const destination of ['dispatch', 'guide', 'contact']) {
+    assert.ok(markup.includes(`href="${destination}"`));
+  }
 });
 
 test('Oversight serves the scoped maps, roadmap and manual contact offline', async () => {

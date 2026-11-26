@@ -1,3 +1,14 @@
+## 2026-11-20 - Bounded work-check guidance
+
+- Reused the existing Operations test owner and loader fixtures after retrieving
+  this inventory and tests/README. Added three parameterized prompt-binding cases:
+  unchanged/duplicate due wakes, changed head and retained decision hold.
+- Operations, adjacent Start Operations controls and LinkedIn targeting selection
+  passes 49 cases. Independent read-only scenario review confirms check three
+  action/park, no fourth poll, current-head requalification and once-only owner ask.
+- Guidance and content-receipt validation only: no scheduler, timer, work dispatch,
+  live hold change or proof of automation enforcement. WSP 22/50/84/97.
+
 ## 2026-11-18 - Reconcile pre-build guidance onto refreshed main
 
 - Rebased the owned local slice onto `c8978bb8ba8772bb193cd07b494f8cb32a0ce52f`

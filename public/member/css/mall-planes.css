@@ -175,6 +175,33 @@
 }
 
 /* Secondary actions container */
+.fv-osp {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0 auto 1.1rem;
+  max-width: 30rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: left;
+}
+.fv-osp-item p {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: rgba(243, 241, 248, 0.84);
+}
+.fv-osp-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.fv-osp-outcome { color: #00e5d0; }
+.fv-osp-solution { color: #a78bfa; }
+.fv-osp-pain { color: #ff8c5a; }
+
 .fv-secondary-actions {
   text-align: center;
   margin-bottom: 1rem;

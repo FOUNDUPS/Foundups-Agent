@@ -3,7 +3,7 @@
   "files": [
     {
       "path": "foundups-wsp/SKILL.md",
-      "sha256": "2b97ddd98cbe15722e0adda333d19b30e2a089326b8f5ee7a3b80b0df1c5425e"
+      "sha256": "0c56075a96be381fbee7265a42bc2a2f3dda18c176fdd66d45bf283846ffc7ac"
     },
     {
       "path": "holo-search/SKILL.md",
@@ -40,6 +40,10 @@
     {
       "path": "launch-petition/SKILL.md",
       "sha256": "4b8b67b30258866cce7b1a1c7dbf7f373441b90664fc9d2bb4b667f2dc85974d"
+    },
+    {
+      "path": "organize-foundups-drive/SKILL.md",
+      "sha256": "0875b03f5d9b70eacc467971016afefc25155dcb162d84fafa3b88a488a5890f"
     }
   ]
 }

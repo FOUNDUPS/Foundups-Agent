@@ -2,7 +2,7 @@
 // Safe static-asset caching only. No aggressive offline behavior.
 // Does NOT cache auth flows, Clerk SDK, Firebase SDK, or dynamic API calls.
 
-const CACHE_NAME = 'foundups-root-v1';
+const CACHE_NAME = 'foundups-root-v2';
 
 const STATIC_ASSETS = [
   '/',
@@ -40,12 +40,13 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: retire only older root-shell generations; preserve other owners.
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.filter((key) => /^foundups-root-v\d+$/.test(key) && key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       );
     })
   );
