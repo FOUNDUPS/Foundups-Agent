@@ -7,6 +7,8 @@ package initialization. Existing source/auth/HTTP assertions and server profile
 remain unchanged. Compose the workflow from current main, preserve checksum trust
 bootstrap and its triggers, and bootstrap the new test-side job before ordinary
 downloads. Every archive input triggers both PR and main qualification.
+The image job checks out the exact PR head or main push SHA; the unchanged
+nomination job continues to validate the proposed merge composition.
 Native WSP00 strict gate passed. Holo authority HEAD mismatch remains UNKNOWN;
 use the recovered exact-source audit, without reindexing or route changes.
 Local verification and hosted/image-security acceptance remain distinct. The
