@@ -48,6 +48,27 @@ and monitor initialization, and unchanged triage plans with actual fallback
 analysis for idle, self-audit, maintenance and signed-task claims. No daemon or
 provider runs; these are five offline cases, not live operational acceptance.
 
+## Langfuse lookup privacy and coverage
+
+`scripts/tests/test_reddog_langfuse_env_source.py` adds sixteen synthetic source
+cases: Viewer preference, partial-pair rejection, legacy fallback, authoritative
+explicit file selection, interpolation/discovery/mutation exclusion, static
+parse/path failures and credential-free help. It never reads a machine `.env`.
+
+`test_reddog_langfuse_telemetry.py` loads the standalone source without the daemon
+initializer. Its 40 offline cases cover hostile content/metadata and error bodies,
+static CLI failures, origin/window/trace/timeout bounds, missing and nonfinite
+metrics, response byte/row limits, cursor encoding/repetition/truncation, row
+deduplication and time exclusion, redirect refusal and validator-based receipt
+correlation. Injected transports and synthetic credentials avoid live egress.
+
+```powershell
+python -B -m pytest -o addopts= --noconftest --import-mode=importlib -p no:cacheprovider modules/communication/moltbot_bridge/tests/test_reddog_langfuse_telemetry.py -q
+```
+
+Disable bytecode and pytest plugin autoload. This validates the local boundary,
+not a Langfuse subscription, key scopes, Broadcast settings or an observed trace.
+
 ## Preserved identity assertion and call-safety education
 
 `TestEndToEndProcess.test_conversation_returns_response` checks nonempty identity

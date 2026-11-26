@@ -914,6 +914,61 @@ unavailable evidence, authorization and next action in the existing work record.
 The workspace `foundups-wsp` skill points to this same owner. Prompt/receipt
 binding does not automatically enforce that audit or admit execution.
 
+### Langfuse diagnostic pilot
+
+The [0102 telemetry runbook](../../infrastructure/monitoring/RUNBOOK.md) owns the
+operating sequence and links this reader to Sentry and the scheduled RSI review.
+
+`src/reddog_langfuse_telemetry.py` and the standalone root script
+`scripts/reddog_langfuse_review.py` retrieve a content-free diagnostic packet
+through Langfuse's current v2 Observations API. Use a project **Viewer** key,
+separate from OpenRouter's **Ingestion** key. Credentials are supplied at runtime
+as a complete `LANGFUSE_VIEWER_PUBLIC_KEY`/`LANGFUSE_VIEWER_SECRET_KEY` pair,
+with the legacy `LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` pair accepted only
+when neither Viewer name is present. An incomplete Viewer pair fails closed.
+The core reader never reads credential files, ingests traces, or activates a daemon.
+The CLI's optional `--env-file` explicitly selects one file through the root
+`python-dotenv` dependency; there is no discovery, process-environment update,
+interpolation, or mixing file and environment pairs. Parse errors are static.
+Without this flag, credentials come only from the process environment.
+
+```powershell
+python -B scripts/reddog_langfuse_review.py --from-time 2026-11-01T00:00:00Z --to-time 2026-11-02T00:00:00Z
+# Add --env-file <explicit-private-path> only when selecting that credential source.
+```
+
+The default origin is `https://jp.cloud.langfuse.com`; only the official Japan,
+EU and US origins are accepted. Reads require a UTC window of at most seven days,
+with at most five pages of 100 rows and 1 MiB per response. `--trace-id` limits
+the lookup to one OTel trace ID. Redirects and automatic retries are disabled.
+The socket timeout defaults to ten seconds (maximum fifteen) **per blocking
+socket operation**, not a total wall-clock deadline. Normal project API limits
+still apply. No schema or transport change is made to governed model calls.
+
+The response projects only validated hex trace IDs, bounded model identifiers,
+enums and numeric measurements. Prompts, outputs, status messages, names,
+session/user identifiers, model parameters and custom metadata are discarded.
+Token/cost aggregates cover generation observations only; missing values remain
+null with explicit coverage counts. `complete=false` means pagination was
+truncated or rows were dropped; totals are partial evidence. An ended generation
+is provider telemetry, and `verified_task_success_count` remains null.
+`project_provider_evidence(..., validator=validate_provider_call_evidence)`
+derives a stable, domain-separated trace ID after the existing canonical receipt
+validator succeeds. It does not change the strict v1 receipt, make a receipt
+authoritative externally, or automatically add trace fields to live requests.
+The returned compatibility `trace_id` is explicitly a `derived_local_candidate`,
+not an observed Langfuse/Sentry ID. Correlation remains `unconfirmed` (or
+`not_applicable` for an unattempted pre-call record); `external_trace_id` remains
+null. Provider/output-validation stages are separate from task acceptance.
+Never hash a legacy OpenRouter generation/run ID into a purported canonical
+provider-call ID. The canonical validator rejects those receipt families.
+
+This first layer creates no scores, datasets, improvements, messages or scheduled
+jobs. Diagnostic packets are untrusted evidence for 0102 review. Live connection,
+Broadcast privacy/key scoping and end-to-end trace verification are separate
+operational checks. API contract:
+[Langfuse Public API](https://langfuse.com/docs/api-and-data-platform/features/public-api).
+
 Governed read-only audit and backend-architect FoundUps Fusion calls now use
 `reddog_provider_call_evidence.v1`. The content-free receipt binds task/work
 lineage, the validated runtime-model binding, requested identity, a

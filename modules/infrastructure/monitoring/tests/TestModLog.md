@@ -1,5 +1,31 @@
 # Monitoring TestModLog
 
+## [2026-11-02] Actual pinned Sentry SDK qualification
+
+`test_sentry_real_sdk_qualification.py` passes four tests on isolated
+Sentry2.73.0/urllib3 2.8.0/certifi2026.10.23 (Python3.12.10). Actual SDK
+serialization/transport use synthetic values and fake pools; real socket
+connections are denied. Envelopes exclude ambient content, headers are fixed,
+TLS verification stays enabled, and Spotlight/redirects/retries/remote-error
+body reads/logs are absent. Ordinary discovery skips these tests when SDK
+dependencies are unavailable. No real credentials or server event were accessed
+by the qualification lane. The exact standalone command is in the module README.
+
+Parent attempts with default combined import mode and isolated `-m pytest`
+failed from namespace collision and missing runner respectively. Corrected
+verification uses importlib discovery for source suites and standalone unittest
+for the actual SDK; those harness failures are not application failures.
+
+## [2026-11-02] Sentry opt-in manual-error boundary
+
+Added 27 offline cases in `test_sentry_error_telemetry.py`; all pass. The combined
+Langfuse reader40/source18/Sentry27 selection passes 85 with bytecode/plugins
+disabled. Tests cover no-op before DSN/import, static failures, DSN validation,
+fresh allowlisted events, private-field stripping, empty Scope, disabled automatic
+features/Spotlight, closure and non-authoritative SDK acceptance. Probe help and
+invalid arguments cannot send an event. No credentials, real SDK or live event
+were accessed by this implementation slice.
+
 ## [2026-06-10] WSP_00 State Bridge Contract Coverage
 
 **WSP Protocols**: WSP 5 (Testing), WSP 6 (Audit), WSP 22 (Documentation), WSP_00 (State Bridge Contract)

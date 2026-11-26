@@ -53,6 +53,73 @@ Security boundary:
 
 ## Tool Specifications
 
+### Explicit Windows telemetry pilot CLI
+
+Invoke `python -B modules/infrastructure/secrets_mcp/src/windows_pilot_credentials.py`.
+`store --type langfuse-viewer|openrouter-pilot|sentry-errors` requires a real Windows TTY and
+hidden credential entry. Writes use only `FOUNDUPS/telemetry-pilot/langfuse-jp-viewer/v1`
+or `FOUNDUPS/telemetry-pilot/openrouter/v1` or
+`FOUNDUPS/telemetry-pilot/sentry-errors/v1`, with `CRED_TYPE_GENERIC` and
+`CRED_PERSIST_LOCAL_MACHINE` (same account, same computer).
+
+`run --type langfuse-viewer -- <review args>` launches only
+`scripts/reddog_langfuse_review.py` with Japan fixed. Forwardable name/value pairs:
+`--from-time`, `--to-time`, `--trace-id`, `--max-pages`, `--timeout`; duplicate,
+unknown or incomplete pairs reject before credential access. The reader owns
+value validation. `run --type openrouter-pilot` accepts no forwarded arguments
+and launches only `scripts/reddog_openrouter_telemetry_probe.py` for one fixed
+synthetic free-model request.
+
+`run --type sentry-errors` takes no forwarded arguments and launches only
+`scripts/reddog_sentry_probe.py`. Its fixed isolated runtime is
+`~/.codex/telemetry-runtimes/sentry-pilot/Scripts/python.exe`, checked before a
+vault read. The stored `{dsn}` must satisfy the monitoring owner's strict HTTPS
+ingest grammar. Only this child receives DSN and enable variables.
+`run --type langfuse-viewer --with-sentry-errors -- <review args>` explicitly
+reads both credentials and uses that same runtime for the fixed Langfuse CLI.
+Other credential types reject this flag. Without it the Viewer receiver and
+credential-access behavior are unchanged and ambient Sentry configuration is
+dropped. No caller-selected runtime path or arbitrary process is accepted.
+
+No dump/list/delete or arbitrary subprocess CLI exists. Secrets are injected only
+into the selected child environment; unrelated inherited credentials/hooks are
+dropped. CLI status failures are static JSON, exit2; receiver exit codes propagate.
+Successful vault-read audit metadata goes to stderr, not raw values. Process
+timeout is120 seconds. These utilities require explicit principal authorization;
+they are not registered as runtime MCP tools or WRE secret grants.
+
+### One-use browser provisioning transport
+
+`python -B scripts/reddog_langfuse_provision.py` explicitly creates one temporary
+loopback form. Its only selection is `--type langfuse-viewer|sentry-errors`, with
+Viewer as default; no credential values are accepted as CLI parameters. A random port and
+256-bit path identify the form; `public_key` and `secret_key` are password inputs
+with autocomplete disabled. Successful POST calls only
+`store_credentials("langfuse-viewer", values)` and consumes the form.
+Explicit Sentry mode exposes only `dsn` and calls
+`store_credentials("sentry-errors", {"dsn": value})`; the shared monitoring
+validator rejects nonofficial/HTTP/password/port/query/fragment DSNs before storage.
+
+The helper rejects foreign/duplicate Host or Origin headers, wrong paths,
+duplicate/framing headers, transfer encoding, non-form content, bodies over4,096
+bytes and missing/duplicate/extra fields. Origin may be absent; if present it
+must exactly equal the bound loopback origin. CSP is `default-src 'none'` with
+same-origin form action and forbidden framing; responses are not cacheable.
+Referrer policy is `same-origin` so same-origin POSTs preserve their Origin
+header while cross-origin referrers are omitted; null Origin remains rejected.
+POST failures return fixed diagnostic stage/code values, not submitted data or
+exception text. Admission failure details contain only boolean used/expiry/path/
+Host/Origin/missing/duplicate/null checks, never header values or the nonce.
+Console output contains only the private local entrypoint URL
+and static status. No read/list/delete operation is exposed.
+
+The listener closes on success or after299 seconds; socket timeout is0.25s and
+pre-store admission is rechecked. An expiry timer closes the active connection
+and listening socket. This is authorized setup transport to the existing vault,
+not a new secret store, general credential server, runtime grant or persistent
+service. Python erasure and isolation from other same-account programs are not
+claimed.
+
 ### `SystemdCredentialBinding` / `SystemdCredentialSecretResolver`
 
 The immutable binding contains `credential_directory`, positive nonroot

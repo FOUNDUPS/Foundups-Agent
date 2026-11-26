@@ -1,0 +1,4 @@
+# Optional isolated diagnostic runtime only; do not install in the Holo runtime.
+sentry-sdk==2.73.0
+urllib3==2.8.0
+certifi==2026.10.23

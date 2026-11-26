@@ -306,6 +306,156 @@ Exact-type findings/repairs stay visible. See central record for separate delive
 Next: canonical denomination/rounding/rights before general durable funded settlement.
 No global unit/F_i policy, external backing, custody or chain activation follows.
 
+## 2026-11-02 — Telemetry skill installed and attached
+
+WSP 22/50/71/83/87/91/97. Created
+[foundups-telemetry-review](.claude/skills/foundups-telemetry-review/SKILL.md) as a
+small discoverable entrypoint to the existing monitoring runbook. Generated its
+Codex project projection and installed an identical current-account skill copy.
+CLAUDE/AGENTS, NAVIGATION and the existing daily review now reference the skill;
+the automation's schedule, notification preference and authority remain unchanged.
+No duplicate implementation, new service, credential or Seer access was added.
+
+Independent simulated-case review, skill validation, copy equality and full
+projection checks pass. The skill handles non-repository invocation by selecting
+a verified Foundups checkout; automatic future selection is not proved by file
+installation. Repository changes remain in the retained pilot lane; its receiver
+and runbook supply both the installed skill and scheduled review.
+
+## 2026-11-02 — Telemetry operating knowledge attached to session startup
+
+WSP 22/50/71/83/87/91/97. Consolidated the installed pilot's operating sequence
+in [the monitoring runbook](modules/infrastructure/monitoring/RUNBOOK.md), linked
+from canonical CLAUDE.md, generated AGENTS.md, session briefing index, module
+README owners and NAVIGATION.py. Future sessions in this revision are instructed
+to retrieve available evidence directly before asking 012 to inspect logs.
+The retained pilot checkout remains distinct from primary/main deployment.
+The existing daily review prompt now reads this same runbook first; its schedule,
+notification preference and authorization boundaries are preserved.
+
+Research recommends leaving Seer automatic fixes off. A future manually triggered
+Root Cause/Plan experiment would need a real reproducible failure, reviewed data
+and repository access, verified account terms and independent local tests.
+Current read-only access and content-free error-code coverage remain unchanged;
+no Seer/repository permission, subscription or automatic remediation was enabled.
+The runbook links current official API, project controls, privacy and pricing
+sources and preserves the plan-stop versus repository-permission distinction.
+
+Independent documentation verification passes: the full Codex projection is
+current, 12 local links/anchors and four navigation mappings resolve, NAVIGATION
+parses, and the documented command matches the fixed receiver without credential
+access or execution. No runtime code changed or runtime test rerun was needed.
+
+## 2026-11-02 — Telemetry destinations verified; read-only feedback enabled
+
+WSP 10/22/50/71/91/97. 012 explicitly authorized completing Sentry installation,
+project creation, OpenRouter forwarding and read-only agent access. Sentry's
+Python project now exists in the foundups organization. OpenRouter shows both
+Langfuse and Sentry enabled, connection checks passed, both selected FOUNDUPS
+keys included, sampling 100%, Privacy Mode on and no headers/rules/exclusions.
+Input & Output Logging remains off. Sentry's built-in synthetic generation is
+visible in Explore Traces; this is delivery evidence, not a billed provider call
+or verified application task outcome.
+
+The existing approved Langfuse Viewer pair was delivered privately from the
+one-time browser dialog through a one-use loopback form to the fixed Windows
+Credential Manager target. The listener exited after storage. The fixed receiver
+then retrieved one sanitized observation successfully through the Japan v2 API.
+The dialog was closed and transient key variables cleared. No plaintext key file,
+credential enumeration, ingestion-key permission expansion or new OpenRouter key
+was needed. This supersedes the older missing-environment-file handoff below.
+
+Codex CLI 0.144.1 failed OAuth issuer validation even though the callback included
+an issuer. Updating the official npm CLI to 0.166.0 resolved that failure: the
+login process exited successfully and `codex mcp list` reports `o_auth`. Only
+Inspect Issues & Events was selected; Seer, triage and project/team management
+were unchecked. Sentry plugin 1.4.6 is installed/enabled. The current running
+harness has not exposed its new tools yet; authenticated tool execution is not
+inferred from installation or CLI login.
+
+Created the active same-thread `0102-daily-rsi-telemetry-review` heartbeat for
+09:00 Asia/Tokyo. It uses bounded UTC windows and the fixed Viewer receiver,
+preserves unknown coverage and canonical evidence authority, and prepares work
+packets without deployment or permission changes. Local execution requires the
+PC and app running. The Langfuse setup trace
+`f571fd48ae987683ee2187ca0825fa76` and Sentry setup trace
+`2e0f0be40caec97a7adb148fae006a87` are synthetic; their example model/token/cost
+values must not be counted as actual workload or independently verified success.
+
+The application-error adapter is a separate bounded layer under the existing
+monitoring owner. SDK 2.73.0, urllib3 2.8.0 and certifi 2026.10.23 are installed in
+the isolated `C:/Users/user/.codex/telemetry-runtimes/sentry-pilot` runtime. Four
+retained real-SDK tests with blocked sockets verify the serialized envelope and
+transport boundaries. The primary Holo runtime dependencies remain untouched.
+
+The Sentry DSN was privately stored in a third fixed vault target through the
+same one-use form. The fixed probe then emitted event
+`5c5ff3ff689c4c2facd5e388055ac609`, independently matched in Sentry PYTHON-1
+([issue 7823430088](https://foundups.sentry.io/issues/7823430088/)). A controlled
+reversed time window exercised the actual reader error hook: event
+`8c71a6e7fe1d46b0b9e709cbce4c3eba`, reason `invalid_time_window`, appeared in
+PYTHON-2 ([issue 7823430415](https://foundups.sentry.io/issues/7823430415/)). A
+subsequent valid lookup succeeded with both fixed child credential deliveries.
+The heartbeat now opts into `--with-sentry-errors` and excludes these known
+setup occurrences from workload comparisons. These prove the bounded error-code
+path, not broad RedDog crash coverage or remote stack traces; raw stacks, locals,
+messages and request content remain excluded.
+
+Repository publication and broad application instrumentation are separate from
+these account settings and live pilot checks. The retained task checkout supplies
+the fixed local receivers; the primary checkout and unrelated untracked
+directories remain untouched.
+
+Final focused validation: 163 tests pass with `--import-mode=importlib`, plus
+four standalone real-SDK qualification tests in the isolated runtime. The initial
+combined default-mode run hit a pre-existing `tests` package namespace collision;
+the initial isolated `-m pytest` attempt lacked that runner and was replaced with
+the retained standalone unittest entrypoint. The Windows expired-body fixture
+accepts either HTTP refusal or an aborted connection while proving no storage and
+joined shutdown. Independent credential/form/CLI and SDK held-outs found no
+remaining material issue. These counts do not turn synthetic setup evidence into
+production task-success measurements. Diff checks pass; the owned checkout is
+retained because the scheduled review executes its fixed receivers.
+
+## 2026-11-01 — Sentry tooling installed; project and access approval pending
+
+WSP 10/22/50/71/91/97. The official registry installer 0.4.1 installed and enabled
+Sentry's Codex plugin 1.4.6 from the vendor marketplace; local plugin readback
+confirms it. The initial interactive OAuth attempt did not complete. A separate
+read-only authorization request has only Inspect Issues & Events selected;
+Seer, triage and project/team write groups are unchecked. Authorization remains
+pending explicit approval, so no authenticated Sentry tool access is claimed.
+
+The existing Sentry account is at first-project setup. Python is prepared for
+the RedDog runtime. Project creation and OpenRouter forwarding are awaiting
+the requested approval. The OpenRouter Sentry form is prepared with Privacy
+Mode, both selected keys, sampling 1 and empty headers/rules/exclusions; OTLP
+endpoint and DSN remain missing until the project exists. No destination save,
+Sentry trace delivery, SDK instrumentation, source deployment or new GitHub
+repository grant occurred. The existing Langfuse connection is separate.
+
+## 2026-11-01 — Langfuse destination active; reader credential handoff
+
+WSP 10/22/50/71/91/97. OpenRouter's saved destination passes its connection
+check, routes both explicitly approved FOUNDUPS keys at 100% sampling, and keeps
+Privacy Mode enabled, headers/rules/exclusions empty and Input & Output Logging
+off. The built-in synthetic test generation is visible in Langfuse v4 with empty
+input/output cells. This proves diagnostic delivery, not a real provider-call
+path, verified task outcome or retained improvement.
+
+012 replaced the first ingestion key; its original row is absent. The supplied
+ingestion pair returns HTTP 403 for the bounded reader. The separate approved
+Viewer pair has a 30-day expiry; its one-time dialog is retained. 012 reported
+the pair saved, but both Viewer names remain absent from the primary environment
+file and no task-worktree file exists; the saved file location is requested.
+No vault write, read-only API success, daily
+review activation, repository publication or production source deployment is
+claimed at this handoff. The CLI now supports an explicit bounded environment
+file and prefers the complete Viewer pair without mixing credential sources.
+The combined offline selection passes 90 cases, with independent parser-state
+held-outs. Source remains a local checkpoint while credential location blocks
+the live read/review stage; no new service or recurring automation is activated.
+
 ## 2026-11-01 — Four-site native pool-credit refusal candidate
 
 WSP15/22/26/48/50/62/97; class B, 17/P0. Existing pool preparation refuses positive
@@ -63753,3 +63903,24 @@ freshness false and protected workflow ownership unestablished. No settings were
 changed. Python narrowing remains held without authenticated dependency closure.
 WSP 6/10/15/22/34/50/71/87/91/95/97/99/110. Validation and exact-head/main receipts
 are recorded in the focused PR and existing active slice ledger.
+
+## 2026-11-01 — Langfuse pilot local candidate; live activation pending
+
+WSP 10/22/50/71/91/97. Extend the existing RedDog evidence owner with a bounded,
+content-free Langfuse v2 reader and separate receipt correlation; preserve the
+canonical receipt and governed transport. The existing secrets owner gains two
+fixed Windows Credential Manager targets and fixed diagnostic receivers.
+Combined offline validation passes 72 tests; independent review also verifies
+canonical receipt correlation and hostile-provider omission. Live configuration
+is separate. No source publication,
+daily review, credential provisioning or first-trace success is claimed.
+
+Browser setup created one 30-day ingestion-only Langfuse project key. Its encoded
+authorization header escaped the initial redaction; revocation/replacement awaits
+the explicit action-time confirmation already requested. No telemetry was sent.
+Further credential creation paused after 012 questioned the separate OpenRouter
+key. Live key-list inspection shows an unused pilot key capped at $5 plus the
+original key; this differs from the approved $30 cap and remains unchanged.
+Next: resolve the pending key disposition/scope, provision credentials without
+credential-dialog dumps, test a synthetic trace, then qualify lookup and schedule.
+Holo semantic freshness remains UNKNOWN/gaptrue after authority/HEAD mismatch.
