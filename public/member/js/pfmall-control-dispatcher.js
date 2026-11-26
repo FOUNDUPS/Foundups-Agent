@@ -123,7 +123,9 @@
         if (typeof tf.getCatalog !== 'function') return null;
         var c = tf.getCatalog();
         return (c && typeof c.length === 'number') ? c.length : null;
-      })
+      }),
+      fractal: safeCall(function() { return typeof tf.getFractalState === 'function' ? tf.getFractalState() : null; }),
+      wikitube: safeCall(function() { return typeof tf.getWikiTubeState === 'function' ? tf.getWikiTubeState() : null; })
     };
   }
 
@@ -634,6 +636,132 @@
     return { status: 'ok', result: { scope: 'local_catalog', state: state } };
   }
 
+  // Fractal Tile Graph commands (§9.5 & §9.6)
+  function cmdNavigateFractal(payload) {
+    payload = payload || {};
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf) {
+      return { status: 'error', error: { code: 'api_unavailable', message: 'mallTileField not available' } };
+    }
+
+    if (payload.action === 'back') {
+      if (typeof tf.navigateBack !== 'function') {
+        return { status: 'error', error: { code: 'api_unavailable', message: 'mallTileField.navigateBack not available' } };
+      }
+      var backOutcome = safeCall(function() { return tf.navigateBack(); });
+      if (!backOutcome || backOutcome.ok !== true) {
+        return {
+          status: 'error',
+          error: { code: (backOutcome && backOutcome.reason) || 'navigate_failed', message: 'navigateBack could not pop stack' }
+        };
+      }
+      var backState = safeCall(function() { return typeof tf.getFractalState === 'function' ? tf.getFractalState() : null; });
+      emitEvent('state_changed', { change: 'fractal_navigate_back', state: backState });
+      return { status: 'ok', result: { applied: true, action: 'back', state: backState } };
+    }
+
+    var tileId = payload.tile_id;
+    if (typeof tileId !== 'string' || !tileId) {
+      return {
+        status: 'error',
+        error: { code: 'invalid_payload', message: 'navigate_fractal requires payload.tile_id or payload.action="back"' }
+      };
+    }
+    if (typeof tf.explodeTile !== 'function') {
+      return { status: 'error', error: { code: 'api_unavailable', message: 'mallTileField.explodeTile not available' } };
+    }
+    var outcome = safeCall(function() { return tf.explodeTile(tileId); });
+    if (!outcome || outcome.ok !== true) {
+      return {
+        status: 'error',
+        error: { code: (outcome && outcome.reason) || 'tile_not_found', message: 'Could not navigate to ' + tileId }
+      };
+    }
+    var state = safeCall(function() { return typeof tf.getFractalState === 'function' ? tf.getFractalState() : null; });
+    emitEvent('state_changed', { change: 'fractal_navigate', tile_id: tileId, state: state });
+    return { status: 'ok', result: { applied: true, tile_id: tileId, state: state } };
+  }
+
+  function cmdSetFractalLens(payload) {
+    payload = payload || {};
+    var lens = payload.lens;
+    var sortOrder = payload.sort_order;
+    if (typeof lens !== 'string' || !lens) {
+      return { status: 'error', error: { code: 'invalid_payload', message: 'set_fractal_lens requires payload.lens' } };
+    }
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf || typeof tf.setFractalLens !== 'function') {
+      return { status: 'error', error: { code: 'api_unavailable', message: 'mallTileField.setFractalLens not available' } };
+    }
+    var applied = safeCall(function() { return tf.setFractalLens(lens); });
+    if (applied !== true) {
+      return { status: 'error', error: { code: 'invalid_lens', message: 'Lens not accepted: ' + lens } };
+    }
+    if (typeof sortOrder === 'string' && sortOrder && typeof tf.setFractalSort === 'function') {
+      var sortOk = safeCall(function() { return tf.setFractalSort(sortOrder); });
+      if (sortOk !== true) {
+        return { status: 'error', error: { code: 'sort_denied', message: 'Sort order rejected: ' + sortOrder } };
+      }
+    }
+    var state = safeCall(function() { return typeof tf.getFractalState === 'function' ? tf.getFractalState() : null; });
+    emitEvent('state_changed', { change: 'fractal_lens', lens: lens, state: state });
+    return { status: 'ok', result: { applied: true, lens: lens, state: state } };
+  }
+
+  function cmdVoiceOrTextIntent(payload) {
+    payload = payload || {};
+    var input = payload.input;
+    var channel = payload.channel === 'voice' ? 'voice' : 'text';
+    if (typeof input !== 'string' || input.length > 300) {
+      return {
+        status: 'error',
+        error: { code: 'invalid_payload', message: 'voice_or_text_intent requires payload.input string <= 300 chars' }
+      };
+    }
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf || typeof tf.applyVoiceOrTextIntent !== 'function') {
+      return { status: 'error', error: { code: 'api_unavailable', message: 'mallTileField.applyVoiceOrTextIntent not available' } };
+    }
+    var intent = safeCall(function() { return tf.applyVoiceOrTextIntent(input, channel); });
+    if (!intent || typeof intent !== 'object') {
+      return { status: 'error', error: { code: 'runtime_failure', message: 'applyVoiceOrTextIntent returned no valid outcome' } };
+    }
+    var state = safeCall(function() { return typeof tf.getFractalState === 'function' ? tf.getFractalState() : null; });
+    emitEvent('state_changed', { change: 'fractal_intent', channel: channel, intent: intent, state: state });
+    return { status: 'ok', result: { applied: !!intent.navigated, intent: intent, state: state } };
+  }
+
+  function cmdStartWikiTube(payload) {
+    payload = payload || {};
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf) {
+      return { status: 'error', error: { code: 'api_unavailable', message: 'mallTileField not available' } };
+    }
+    if (payload.recover === true) {
+      if (typeof tf.recoverWikiTubePlayback !== 'function') {
+        return { status: 'error', error: { code: 'api_unavailable', message: 'mallTileField.recoverWikiTubePlayback not available' } };
+      }
+      safeCall(function() { return tf.recoverWikiTubePlayback(); });
+      var recState = safeCall(function() { return typeof tf.getWikiTubeState === 'function' ? tf.getWikiTubeState() : null; });
+      emitEvent('state_changed', { change: 'wikitube_recover', wikitube: recState });
+      return { status: 'ok', result: { applied: true, wikitube: recState } };
+    }
+    if (typeof tf.startWikiTubePlaylist !== 'function') {
+      return { status: 'error', error: { code: 'api_unavailable', message: 'mallTileField.startWikiTubePlaylist not available' } };
+    }
+    var targetPayload = payload.playlist || null;
+    if (!targetPayload && typeof payload.tile_id === 'string' && payload.tile_id) {
+      targetPayload = payload;
+    }
+    if (!targetPayload) {
+      return { status: 'error', error: { code: 'invalid_payload', message: 'start_wikitube requires payload.playlist or payload.recover=true' } };
+    }
+    safeCall(function() { return tf.startWikiTubePlaylist(targetPayload); });
+    var wtState = safeCall(function() { return typeof tf.getWikiTubeState === 'function' ? tf.getWikiTubeState() : null; });
+    emitEvent('state_changed', { change: 'wikitube_started', wikitube: wtState });
+    return { status: 'ok', result: { applied: true, wikitube: wtState } };
+  }
+
   var HANDLERS = {
     search_catalog: cmdSearchCatalog,
     inspect_state: cmdInspectState,
@@ -642,7 +770,11 @@
     play_tile: cmdPlayTile,
     expand_tile: cmdExpandTile,
     collapse_tile: cmdCollapseTile,
-    reset_session: cmdResetSession
+    reset_session: cmdResetSession,
+    navigate_fractal: cmdNavigateFractal,
+    set_fractal_lens: cmdSetFractalLens,
+    voice_or_text_intent: cmdVoiceOrTextIntent,
+    start_wikitube: cmdStartWikiTube
   };
 
   function executeCommand(command, payload) {

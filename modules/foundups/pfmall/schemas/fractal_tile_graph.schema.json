@@ -1,0 +1,331 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foundups.org/schemas/fractal_tile_graph.v1.json",
+  "title": "PlayFoundups Mall Fractal Tile Graph v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "scope",
+    "graph_etag",
+    "public_graph_etag",
+    "root_tile_id",
+    "tiles"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "const": "fractal_tile_graph.v1"
+    },
+    "generated_at_utc": {
+      "type": "string"
+    },
+    "git_revision": {
+      "type": "string"
+    },
+    "graph_etag": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "public_graph_etag": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["012_architect", "public_mall"]
+    },
+    "root_tile_id": {
+      "type": "string",
+      "pattern": "^tile:[a-z0-9_]+:[A-Za-z0-9._-]+$"
+    },
+    "counts": {
+      "type": "object",
+      "required": ["total_tiles", "by_state", "by_kind"],
+      "properties": {
+        "total_tiles": { "type": "integer", "minimum": 1 },
+        "by_state": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "by_kind": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "by_visibility": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "containment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "target", "order_index"],
+            "properties": {
+              "source": { "type": "string" },
+              "target": { "type": "string" },
+              "order_index": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "dag": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["source", "target", "edge_type"],
+            "properties": {
+              "source": { "type": "string" },
+              "target": { "type": "string" },
+              "edge_type": { "type": "string" }
+            }
+          }
+        },
+        "action_urls": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "search_index": {
+      "type": "object",
+      "required": ["aliases", "entries"],
+      "properties": {
+        "aliases": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["tile_id", "display_name", "tile_kind", "state"],
+            "properties": {
+              "tile_id": { "type": "string" },
+              "display_name": { "type": "string" },
+              "tile_kind": { "type": "string" },
+              "parent_tile_id": { "type": ["string", "null"] },
+              "state": { "type": "string" },
+              "keywords": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "author_aliases": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "tiles": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^tile:[a-z0-9_]+:[A-Za-z0-9._-]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/tile"
+      }
+    }
+  },
+  "$defs": {
+    "tile": {
+      "type": "object",
+      "required": [
+        "tile_id",
+        "display_name",
+        "tile_kind",
+        "visibility_scope",
+        "owner_namespace",
+        "parent_tile_id",
+        "children_tile_ids",
+        "dag_edges",
+        "lifecycle",
+        "wsp15_canonical"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "tile_id": {
+          "type": "string",
+          "pattern": "^tile:[a-z0-9_]+:[A-Za-z0-9._-]+$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rename_history": {
+          "type": "array"
+        },
+        "tile_kind": {
+          "type": "string",
+          "enum": [
+            "system_cube",
+            "opus_series",
+            "opus_item",
+            "community_fractal",
+            "foundup_venture",
+            "market_override",
+            "wikitube_stream",
+            "mockup_cube",
+            "code_module",
+            "socket_slot",
+            "licensable_engine"
+          ]
+        },
+        "visibility_scope": {
+          "type": "string",
+          "enum": ["public", "principal_only"]
+        },
+        "owner_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parent_tile_id": {
+          "type": ["string", "null"]
+        },
+        "children_tile_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^tile:[a-z0-9_]+:[A-Za-z0-9._-]+$"
+          }
+        },
+        "dag_edges": {
+          "type": "object",
+          "required": [
+            "imports_tiles",
+            "used_by_foundups",
+            "reusable_candidates",
+            "oss_candidates",
+            "cross_links",
+            "collection_refs"
+          ],
+          "properties": {
+            "imports_tiles": { "type": "array", "items": { "type": "string" } },
+            "used_by_foundups": { "type": "array", "items": { "type": "string" } },
+            "reusable_candidates": { "type": "array", "items": { "type": "string" } },
+            "oss_candidates": { "type": "array" },
+            "cross_links": { "type": "array", "items": { "type": "string" } },
+            "collection_refs": { "type": "array", "items": { "type": "string" } },
+            "calls": { "type": "array", "items": { "type": "string" } },
+            "reads_from": { "type": "array", "items": { "type": "string" } },
+            "evaluates": { "type": "array", "items": { "type": "string" } },
+            "runs_through": { "type": "array", "items": { "type": "string" } },
+            "produces_receipt": { "type": "array", "items": { "type": "string" } },
+            "verified_by": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "lifecycle": {
+          "type": "object",
+          "required": [
+            "state",
+            "state_label",
+            "inbound_ast_imports",
+            "has_entrypoint",
+            "contracts_present",
+            "drift_flags"
+          ],
+          "properties": {
+            "state": {
+              "type": "string",
+              "enum": ["GREEN", "AMBER", "BLUE", "GRAY", "RED"]
+            },
+            "state_label": { "type": "string", "minLength": 1 },
+            "inbound_ast_imports": { "type": "integer", "minimum": 0 },
+            "has_entrypoint": { "type": "boolean" },
+            "contracts_present": { "type": "array", "items": { "type": "string" } },
+            "drift_flags": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "wsp15_canonical": {
+          "type": "object",
+          "properties": {
+            "applicable": { "type": "boolean" },
+            "complexity": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "importance": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "deferability": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "impact": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "mps": { "type": ["integer", "null"], "minimum": 4, "maximum": 20 },
+            "priority_band": {
+              "type": "string",
+              "enum": ["P0", "P1", "P2", "P3", "P4", "N/A"]
+            },
+            "evidence": { "type": "array", "items": { "type": "string" } },
+            "reason": { "type": "string" }
+          }
+        },
+        "mall_rescue_score": {
+          "type": ["integer", "null"],
+          "minimum": 20,
+          "maximum": 100
+        },
+        "rescue_axes": {
+          "type": ["object", "null"],
+          "properties": {
+            "completeness": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "impact": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "reusability": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "effort_to_green": { "type": "integer", "minimum": 1, "maximum": 5 },
+            "mall_rescue_score": { "type": "integer", "minimum": 20, "maximum": 100 },
+            "next_action": { "type": "string" },
+            "axis_rationale": { "type": "string" }
+          }
+        },
+        "commercial_lens": {
+          "type": "object",
+          "properties": {
+            "monetization_class": { "type": "string" },
+            "licensable_standalone": { "type": "boolean" },
+            "investor_summary": { "type": "string" }
+          }
+        },
+        "action_target": {
+          "type": "object"
+        },
+        "domain_override_manifest": {
+          "type": "object",
+          "required": ["override_type", "payload"],
+          "properties": {
+            "override_type": {
+              "type": "string",
+              "enum": [
+                "none",
+                "hpc_community",
+                "autopost_license",
+                "akiya_property",
+                "wikitube_playlist"
+              ]
+            },
+            "payload": { "type": "object" }
+          }
+        },
+        "evidence_status": {
+          "type": ["string", "null"]
+        },
+        "search_keywords": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "author_aliases": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "private_notes": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,9 @@
 # p.fMALL Test ModLog
 
+## 2026-11-26 — Fractal Tile Graph backend & API test port onto post-HPC main
+
+- Ported `test_fractal_tile_graph.py`, `test_tile_graph_patch_api.py`, `test_member_catalog_export.py` additions, and `test_http_api.py` routes onto post-`#2459` `main` while aligning `schumerout` child count dynamically with `modules/foundups/hpc/mall_projection.json` and post-census tracked paths cleanly.
+
 ## 2026-11-25 — Current admission contract assertion
 
 Broader player/media contracts found one inherited BuildV20 static test still
