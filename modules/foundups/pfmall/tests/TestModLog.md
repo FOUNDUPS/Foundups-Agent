@@ -1,9 +1,28 @@
 # p.fMALL Test ModLog
 
+## 2026-11-27 — Candidate product transaction follows the frozen OS acceptance
+
+Independent review accepted bd2fe9911 before this Dockerfile amendment. Preserve
+all frozen six-version/installed-state/complete87-map assertions and every prior
+Python/package/source/user/HTTP/resource oracle. Product layer requests only six
+signed, exact-version existing-package upgrades; retries0,30-second fetch timeouts,
+no recommends/removal/new packages, and fail-on-index-error remain explicit.
+Static command/pin preservation checks do not prove APT resolution or Linux image
+execution. Any extra name/version delta must fail the existing map guard and stop
+for scope review. Fresh exact-head hosted build/inventory/three image HTTP cases,
+nomination replay, saved-image scan and independent artifact review are pending.
+The original259 scan findings and security hold are retained; no waiver or new
+scanner is introduced. Historical823 nomination cases used provider merge3be;
+the previous3 image HTTP cases used literal e28, not this product candidate.
+Local static parsing PASS:exact six signed pins and guarded flags/timeouts;
+removing the added layer restores the prior Dockerfile byte-for-byte. All declared
+dependency names exist in the baseline map; APT resolution remains unexecuted.
+
 ## 2026-11-27 — Freeze exact OS inventory delta after the actual held scan
 
 WSP15 C2/I5/D5/Impact4=16/P0. Saved actual e28ee52de image has259 scan findings,
-57HIGH/15UNKNOWN and zero critical; functional823+3 PASS does not clear security.
+57HIGH/15UNKNOWN and zero critical;823 nomination cases ran on provider merge3be,
+while3 image cases ran at literal e28. Neither clears security acceptance.
 Before any Dockerfile repair, assert the six signed-Trixie fixed package versions
 and canonical JSON SHA256 of the complete87-package installed name/version map.
 Expected bf479675a8a15f6e3d6e31bc581df1d0ae2afff1532226bbdd81758a36b600e6 is derived by

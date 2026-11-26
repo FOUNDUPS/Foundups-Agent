@@ -1,7 +1,25 @@
+## 2026-11-27 — Apply the independently accepted six-package repair candidate
+
+WSP15 C2/I5/D5/Impact4=16/P0; acceptance freeze bd2fe9911 independently accepted
+before product change. Add one signed APT update/install layer, exact six existing
+package versions, --only-upgrade/--no-install-recommends/--no-remove, retries0 and
+30-second HTTP/HTTPS timeouts; fail on any index-update error. Clear transient APT
+lists/archives. FROM/Python3.12.15,18 runtime wheels, all existing install/runtime
+flags and frozen87-package map assertions remain unchanged. Further package
+resolution changes must fail the map guard and return for scope review.
+Prior literal-head e28 image passes3 HTTP cases;823 nomination cases belong to
+provider merge3be and do not qualify this new head. Fresh exact-head hosted build,
+inventory, HTTP replay, saved-image current-DB scan and independent artifact review
+remain pending. The original259-findings/57HIGH/15UNKNOWN security hold stays;
+this targeted partial repair cannot clear the53HIGH/13UNKNOWN without Trixie fixes.
+No host APT/Docker, provider, live service, production or registry action occurs.
+Static command/pin/scope checks PASS:one exact six-pin transaction,31-line
+Dockerfile and byte-identical frozen helper, wheel/server profiles and HTTP tests.
+
 ## 2026-11-27 — Freeze six-package security repair acceptance before product change
 
-WSP15 C2/I5/D5/Impact4=16/P0. Actual head e28ee52de hosted image passes823 normal
-cases plus3 image HTTP cases; Trivy0.76.1/current DB reports259 findings:
+WSP15 C2/I5/D5/Impact4=16/P0. Actual literal-head e28ee52de image passes3 HTTP cases;
+823 nomination cases passed on provider merge3be (different checkout); Trivy0.76.1/current DB reports259 findings:
 57HIGH/107MEDIUM/80LOW/15UNKNOWN, zero critical and zero reported secrets.
 Keep PR #2482 draft and its image-security hold.57HIGH are package/issue records,
 including repeated source-package findings; this is not57 proven HTTP exploits.
