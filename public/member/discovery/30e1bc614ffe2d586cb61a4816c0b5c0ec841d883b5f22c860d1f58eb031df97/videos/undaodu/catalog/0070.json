@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97",
+  "items": [
+    {
+      "duration_seconds": 267,
+      "embed_url": "https://www.youtube.com/embed/AB8P9O-FOPA",
+      "source_url": "https://www.youtube.com/watch?v=AB8P9O-FOPA",
+      "thumbnail_url": "https://i.ytimg.com/vi/AB8P9O-FOPA/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:26:57Z",
+      "title": "Platform",
+      "video_id": "AB8P9O-FOPA"
+    },
+    {
+      "duration_seconds": 234,
+      "embed_url": "https://www.youtube.com/embed/aa4XVR6GrgY",
+      "source_url": "https://www.youtube.com/watch?v=aa4XVR6GrgY",
+      "thumbnail_url": "https://i.ytimg.com/vi/aa4XVR6GrgY/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:10:41Z",
+      "title": "Help Japan",
+      "video_id": "aa4XVR6GrgY"
+    },
+    {
+      "duration_seconds": 554,
+      "embed_url": "https://www.youtube.com/embed/A3ninzLbFDA",
+      "source_url": "https://www.youtube.com/watch?v=A3ninzLbFDA",
+      "thumbnail_url": "https://i.ytimg.com/vi/A3ninzLbFDA/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:26:15Z",
+      "title": "The Urgency for Global Education in the Next 5 Years",
+      "video_id": "A3ninzLbFDA"
+    },
+    {
+      "duration_seconds": 130,
+      "embed_url": "https://www.youtube.com/embed/A0gSOWN4leQ",
+      "source_url": "https://www.youtube.com/watch?v=A0gSOWN4leQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/A0gSOWN4leQ/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:23:57Z",
+      "title": "Why Global Education Needs To Be Flattened And Made Accessible To All",
+      "video_id": "A0gSOWN4leQ"
+    },
+    {
+      "duration_seconds": 301,
+      "embed_url": "https://www.youtube.com/embed/a-a-U9O6Fdg",
+      "source_url": "https://www.youtube.com/watch?v=a-a-U9O6Fdg",
+      "thumbnail_url": "https://i.ytimg.com/vi/a-a-U9O6Fdg/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:59:06Z",
+      "title": "Intro on Mike Trout",
+      "video_id": "a-a-U9O6Fdg"
+    },
+    {
+      "duration_seconds": 568,
+      "embed_url": "https://www.youtube.com/embed/9W4O4c3CVwo",
+      "source_url": "https://www.youtube.com/watch?v=9W4O4c3CVwo",
+      "thumbnail_url": "https://i.ytimg.com/vi/9W4O4c3CVwo/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:43:18Z",
+      "title": "Using Nintendo 3DS as Alpha eSingularity Platform",
+      "video_id": "9W4O4c3CVwo"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97/videos/undaodu/catalog/0071.json",
+  "order": "catalog",
+  "page": 70,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="/member/js/mall-video-projection.js?v=26"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Signing in... | Foundups</title>
   <meta name="robots" content="noindex, nofollow">
@@ -87,14 +88,14 @@
         // Check if user session is now established
         if (window.Clerk.user) {
           // Success - go to member area
-          window.location.href = '/member/';
+          window.location.href = window.mallVideoProjection?.authCompletionPath(window.location) || '/member/';
         } else {
           // Try handleRedirectCallback for any pending OAuth
           try {
             await window.Clerk.handleRedirectCallback();
             // Check again after handling callback
             if (window.Clerk.user) {
-              window.location.href = '/member/';
+              window.location.href = window.mallVideoProjection?.authCompletionPath(window.location) || '/member/';
               return;
             }
           } catch (e) {

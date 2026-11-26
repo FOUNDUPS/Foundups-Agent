@@ -4,6 +4,80 @@
 **Date**: 2026-11-21
 **Status**: Runtime baseline with explicitly pending shared dock, player and fractal acceptance changes
 
+## 2026-11-21 — v26 phone candidate (unreleased)
+
+This dated phone-lane record is retained from source `2a65e7983acb489084cecf1229fcfd582f68f19b`.
+Its controlled results do not qualify the subsequent main reconciliation.
+Sections 13–14 below remain the broader canonical contract; the qualified
+phone subset does not implement that full matrix or finalize held defaults.
+
+Build v25 remains the frozen comparison at its existing preview. Build v26 uses a
+separate source receipt and preview channel; no production redirect or release is
+part of this change. Phone-layout browser fixtures are separate from physical
+Safari and installed-PWA evidence. The principal has opened v25 on an iPhone 11;
+v26 physical playback, audio and uninterrupted three-clip transitions are NOT_RUN.
+
+The shared pre-Fractal shell keeps one provider and one actionable bottom Search
+Dock while entering/leaving WikiTube or app Full Video. A fully hidden parked
+player pauses. Native YouTube controls and native fullscreen are not intercepted.
+The leading + retains discovery controls, AutoPost and Video Options; the trailing
++ is Add FoundUp on Play and Add Video in the HPC pilot. Video preferences affect
+app controls and qualified visible playback, never promise provider autoplay.
+
+Play public browsing and static FoundUp details correspond to the currently
+available public discovery surfaces. The requested future levels 1–2 public /
+level 3+ member policy is not a deployed graph ACL. The separate Fractal runtime
+`22374b161570b2cd0e265e1c2b8c1009fb599394` is not imported. Contributions remain
+unavailable until an authoritative service verifies current identity, membership
+and per-FoundUp editor permission (012 initially for HPC). A successful existing
+invite check only restores a manual review; it does not publish or grant editor
+permission. No six-month checkout is activated. Cross-origin HPC-to-Play
+contribution return is not connected and fails closed.
+
+The existing same-origin Play `/?signin=required` gate and `/sso-callback/` are
+preserved. Valid legacy `enter` links resolve public metadata rather than being
+silently intercepted as a Mall view. Auth/callback, deep links and existing invite
+flows are excluded from public landing normalization. Apex-to-Play routing is a
+pure tested plan only; no live apex redirect is installed.
+
+The full HPC banner opens <https://hasan4speaker.com/>. The distinct Mall return
+opens Play; Voice Your Opinion / Contact Congress retains
+<https://vote.mtrout.com/contact>. Vote/Contact whole-banner return links to HPC
+remain a different navigation contract.
+
+Browse AI is a separate compatibility pilot: no model is preloaded, no automatic
+cloud fallback, and no model capability is claimed. The explicit, checksum-bound
+41-byte WASM addition fixture is not an AI model. Actual model selection/download
+and WebGPU qualification remain later work, including same-runtime Safari/PWA
+checks. This dependency does not block the phone UI candidate.
+
+
+## 2026-11-16 acceptance update on native v21 (candidate, unreleased)
+
+The latest 012 acceptance supersedes selected-row phone placement below:
+one visible top-anchored player with independently scrolling grid beneath;
+preserve selection, close/Back and single-instance queue transitions.
+Pause when fully hidden/dismissed. Native v21's fully offscreen audio and
+tucked visibility bypass are release blockers, not accepted navigation.
+Retain YouTube minimum dimensions, unobscured controls and qualified
+visible-player autoplay. See [HPC roadmap](../hpc/ROADMAP.md).
+
+Public Play uses the same shell and the existing member-entry gate. Its
+candidate top-level portrait grid has centered real FoundUp names and
+six-item observer/manual incremental append. Current catalog: 16 records;
+144 is the product target, not current inventory or a video classification.
+Retain quick view, FoundUp entry, query/reset and scroll/expanded return.
+Ordinary member category rows, grouped products and expanded video fields
+retain their existing contracts. Incremental append is not virtualization
+or server metadata pagination. See [Mall roadmap](../pfmall/ROADMAP.md).
+
+The whole HPC left banner with build above remains separate from the right
+Voice CTA. Vote and Contact Congress each have one whole-banner return link
+to HPC and a distinct Red Dog Mall link in draft PR #2411; no deployed state
+is implied. That historical shared-dock deferral is superseded by section 14;
+other source, provider and device gates remain separate.
+
+
 ---
 
 ## 1. Purpose
@@ -490,11 +564,47 @@ not implement it or promote its evidence status.
 Keep public and architect projections separate through navigation, search,
 history and agent context. The [Mall roadmap](../pfmall/ROADMAP.md#fractal-tile-graph-and-agent-work-navigation)
 owns the bounded acceptance sequence. The
-[documentation audit](../../../docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
+[documentation audit](https://github.com/FOUNDUPS/Foundups-Agent/blob/dc7c34aa6444aa1fc37de1217f99f0e75e4d2f0b/docs/audits/architecture/PFMALL_FRACTAL_DOCUMENTATION_AUDIT_20261119.md)
 records the reported local navigation test and its unproven live-media,
 voice and Simulator boundaries.
 
 ## 14. Shared Search Dock and video preferences
+
+### 14.0a Scoped desktop dock and hidden Next — 2026-11-25
+
+**IMPLEMENTED_CANDIDATE / acceptance open.** The current
+[shared contract](../../../public/member/INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)
+supersedes conflicting earlier candidate descriptions. HPC fresh desktop keeps
+theater; explicit scoped Home remembers grid in the existing per-scope tab state.
+The order is main video, app queue, then the same shared dock used on the grid.
+Leave provider recommendations and controls intact. On HPC the dock's single
+plus opens Available actions; Add Video is a separate gated grid action. Other
+FoundUps retain their own contribution intent and admission rules.
+
+Tucked right swipe defaults to `next-hidden`; `next-reveal`, `restore` and `none`
+remain explicit settings. Hidden Next changes only the selected catalog record,
+never starts/cues/loads a provider, and restores paused on tap. A delayed page is
+accepted only by its unchanged scope, queue, selection and intent. Existing saved
+choices are preserved. This does not authorize hidden YouTube audio or imply
+physical iPhone/PWA acceptance. The November 23 record remains dated history.
+
+### 14.0 Clean video gesture candidate — 2026-11-23
+
+**IMPLEMENTED_CANDIDATE.** The [shared interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate)
+records app-only chrome removal, the external full-height grip, independently
+configurable Full Video next and tucked next/reveal, and bounded opt-in local
+DAEmon activity. The table below records confirmed defaults. Native provider
+controls and ordinary theater remain unchanged; exact-source preview and
+physical-device evidence are separate acceptance gates.
+
+2026-11-22 candidate update: the shared #2439 continuation implements clamped
+floating drag/frame targets, a video-height tuck/restore rail, independent
+validated options and menu-based accessible actions. Outward pinch now defaults
+to WikiTube by 012's clarification. Return defaults remain open; an unselected
+return choice preserves its existing behavior. Dock camera delegates to AutoPost
+with a bounded caller return. Dock Red Dog stays in-page when unavailable; no
+public backend, STT or language model is thereby activated. Final source/preview
+and physical-device qualification remain separate from this candidate.
 
 **PFDOCK-20261121 / CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.**
 012's 2026-11-21 correction applies to **all FoundUps and every fractal view**,
@@ -551,10 +661,12 @@ requested immersive destination, subject to the mechanism boundary in 14.4.
 | Interaction / Video setting | Required choices and behavior | Decision boundary |
 | --- | --- | --- |
 | Deliberate video-tile activation from the Mall/FoundUp field (tap or Enter/Space) | **Floating / WikiTube / Fullscreen**. Selection loads/plays the chosen clip in that presentation without a compulsory WikiTube stop. | **Floating is the confirmed default.** Field selection is distinct from queue thumbnails, an app-frame action and taps inside provider controls. |
-| Pinch outward to expand the active video | WikiTube or direct Fullscreen, allowing Floating to skip WikiTube. WikiTube can expand to Fullscreen. | Configurable expansion is required; an initial preference value has not been finalized. |
+| Pinch outward to expand the active video | WikiTube or direct Fullscreen, allowing Floating to skip WikiTube. WikiTube can expand to Fullscreen. | WikiTube is the default confirmed by 012 on 2026-11-22; direct Fullscreen remains selectable. |
 | Pinch inward from Fullscreen | Return to **WikiTube / Mall tiles** according to its own preference. | Do not bind this to the swipe-up preference; initial return default is unresolved. |
 | Swipe up on the active video | Return to **WikiTube / Mall tiles** according to a separate preference. | This changes the older video swipe-up-to-next acceptance. It must not also advance the queue or trigger grid/type navigation. Initial return default is unresolved. |
 | Rotate an active Floating video portrait to landscape | Enter the supported fullscreen presentation; portrait rotation restores the prior Floating presentation. | Required behavior. Track whether rotation caused expansion; a later deliberate view selection takes precedence over automatic restoration. |
+| Swipe right in app Full Video | Next permitted clip and a deliberate playback request; configurable to Previous or no action. | Confirmed default Next on2026-11-23. Natural autoplay preference does not gate deliberate selection. |
+| Swipe right on the tucked right-edge rail | Next permitted clip and reveal, configurable to Restore/no action. | Explicit012 answer2026-11-23. Tap/left swipe still restore; hidden YouTube stays paused. |
 | Swipe right on the Floating player | Park/hide it with a visible restore action and supported leftward restore gesture; preserve the selected clip and browse context. | Fully hidden YouTube playback pauses. Do not restart a deliberate pause on restoration. |
 | Autoplay and parked-player selection | Retain autoplay/next-clip and reveal-versus-keep-parked preferences in Video. | Preserve their existing qualified behavior; this decision does not guarantee audible startup or change their defaults. |
 | Rotation lock | Possible opt-in lock / stay-landscape behavior. | **OPEN IDEA**, not an approved control, default, or implemented capability. |
@@ -633,7 +745,7 @@ and keyboard/viewport resizing must not be mistaken for physical rotation.
 
 ### 14.5 Qualification and existing implementation lane
 
-At inspection, [v26 PR #2439](https://github.com/FOUNDUPS/Foundups-Agent/pull/2439)
+Historical inspection of an earlier [v26 PR #2439](https://github.com/FOUNDUPS/Foundups-Agent/pull/2439)
 head `5be6f3b7bd9eb3c24c39210e74fada8e773a97c7` is an unmerged draft.
 Its menu places AI last; `frameDestination` allows WikiTube/app Full Video,
 tile selection does not read that setting, pinch-out opens WikiTube, and

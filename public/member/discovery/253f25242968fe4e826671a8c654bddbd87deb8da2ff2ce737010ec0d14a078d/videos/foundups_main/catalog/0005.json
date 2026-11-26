@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/I2vYJHO06WQ",
+      "source_url": "https://www.youtube.com/watch?v=I2vYJHO06WQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/I2vYJHO06WQ/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:07:47Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "I2vYJHO06WQ"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/qkdCWiiB878",
+      "source_url": "https://www.youtube.com/watch?v=qkdCWiiB878",
+      "thumbnail_url": "https://i.ytimg.com/vi/qkdCWiiB878/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:06:10Z",
+      "title": "⚡ OpenClaw: Where AI Meets Entrepreneurship #FoundUps",
+      "video_id": "qkdCWiiB878"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/LlGQ3zvrOQI",
+      "source_url": "https://www.youtube.com/watch?v=LlGQ3zvrOQI",
+      "thumbnail_url": "https://i.ytimg.com/vi/LlGQ3zvrOQI/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:04:33Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "LlGQ3zvrOQI"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/UNahKiCFeN4",
+      "source_url": "https://www.youtube.com/watch?v=UNahKiCFeN4",
+      "thumbnail_url": "https://i.ytimg.com/vi/UNahKiCFeN4/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:02:56Z",
+      "title": "🧠 AI + Humans = Better Startups #FoundUps #OpenClaw",
+      "video_id": "UNahKiCFeN4"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/9_7e9eOMD84",
+      "source_url": "https://www.youtube.com/watch?v=9_7e9eOMD84",
+      "thumbnail_url": "https://i.ytimg.com/vi/9_7e9eOMD84/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:01:20Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "9_7e9eOMD84"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/TXbr3McePIk",
+      "source_url": "https://www.youtube.com/watch?v=TXbr3McePIk",
+      "thumbnail_url": "https://i.ytimg.com/vi/TXbr3McePIk/hqdefault.jpg",
+      "timestamp": "2026-03-20T09:59:45Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "TXbr3McePIk"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/foundups_main/catalog/0006.json",
+  "order": "catalog",
+  "page": 5,
+  "page_size": 6,
+  "record_id": "foundups_main",
+  "schema_version": 1,
+  "total": 44
+}

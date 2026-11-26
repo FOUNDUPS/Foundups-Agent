@@ -5,6 +5,8 @@ Refresh Mall Video Catalog - Update channel avatars and video counts.
 SAFETY: Dry-run by default. Use --apply to actually write changes.
 
 Usage:
+    python scripts/refresh_mall_catalog.py --public-pages-only        # Preview bounded public assets offline
+    python scripts/refresh_mall_catalog.py --public-pages-only --apply # Write only derived discovery pages
     python scripts/refresh_mall_catalog.py --scoped-only --apply # Build reviewed public video projections offline
     python scripts/refresh_mall_catalog.py --audit-scoped-source hpc # Read-only candidate reconciliation
     python scripts/refresh_mall_catalog.py --info-only          # Preview: avatars + counts (13 units)
@@ -21,16 +23,17 @@ Recommended workflow:
 """
 
 import json
+import hashlib
 import logging
 import os
 import re
 import sys
-import hashlib
 import tempfile
 from copy import deepcopy
 from collections import Counter
 from pathlib import Path
 from datetime import datetime
+from urllib.parse import parse_qsl, urlsplit
 
 # Add repo root to path
 REPO_ROOT = Path(__file__).parent.parent
@@ -44,6 +47,197 @@ SCOPED_CATALOG_PATH = CATALOG_PATH.with_name("mall-public-video-catalog.json")
 SCOPED_PROJECTIONS = ("modules/foundups/hpc/mall_projection.json",)
 HPC_REFRESH_RECEIPT = REPO_ROOT / "docs/audits/pfmall_youtube_ingest/hpc_refresh.json"
 SCHUMER_OUT = re.compile(r"\bschumer[\s_-]*out\b", re.IGNORECASE)
+PUBLIC_DISCOVERY_PAGE_SIZE = 6
+PUBLIC_DISCOVERY_PREFIX = "/member/discovery/"
+PUBLIC_DISCOVERY_METADATA_FIELDS = (
+    "foundup_id", "canonical_foundup_id", "name", "title", "creator",
+    "creator_display", "entity", "source_type", "source_id", "source_handle",
+    "category", "tags", "geo", "status", "display_order", "poster_url",
+    "channel_avatar_url", "theme", "tagline", "hero_label", "one_sentence_pitch", "description",
+    "tier", "lifecycle_stage", "launch_readiness", "entry_copy", "discovery_kind",
+    "public_plan_url", "public_poc_url", "external_url", "routing_prefix",
+    "topic_family", "related_lanes", "parent_channels", "derivation_method",
+    "outcome", "solution", "pain", "linkedin_url",
+)
+PUBLIC_DISCOVERY_VIDEO_FIELDS = (
+    "video_id", "title", "thumbnail_url", "embed_url", "source_url", "timestamp",
+    "duration_seconds", "editorial_label", "source_label",
+)
+_DISCOVERY_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,63}\Z")
+_DISCOVERY_RESERVED_IDS = {"__proto__", "constructor", "prototype"}
+_DISCOVERY_URL_FIELDS = {
+    "poster_url", "channel_avatar_url", "public_plan_url", "public_poc_url",
+    "external_url", "routing_prefix", "thumbnail_url", "embed_url", "source_url",
+    "linkedin_url",
+}
+_DISCOVERY_LIST_FIELDS = {"tags", "related_lanes", "parent_channels"}
+_DISCOVERY_ASSET_PATH = re.compile(
+    r"(?:catalog\.json|[0-9a-f]{64}/(?:catalog/[0-9]{4,}\.json|"
+    r"videos/[A-Za-z0-9][A-Za-z0-9_-]{0,63}/catalog/[0-9]{4,}\.json))\Z"
+)
+
+
+def _discovery_id(value):
+    if (not isinstance(value, str) or not _DISCOVERY_ID.fullmatch(value)
+            or value.lower() in _DISCOVERY_RESERVED_IDS):
+        raise ValueError("Invalid public discovery record identity")
+    return value
+
+
+def _discovery_value(field, value):
+    """Copy only declared public values, rejecting nested/runtime payloads."""
+    if value is None:
+        return None
+    if field in _DISCOVERY_LIST_FIELDS:
+        if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
+            raise ValueError("Invalid public discovery list")
+        return list(value)
+    if field in {"display_order", "duration_seconds"}:
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+            raise ValueError("Invalid public discovery numeric value")
+        # Reject NaN/Infinity before these values enter a digest or JSON asset.
+        if not float("-inf") < value < float("inf"):
+            raise ValueError("Non-finite public discovery numeric value")
+        return value
+    if not isinstance(value, str):
+        raise ValueError("Invalid public discovery text")
+    if field in _DISCOVERY_URL_FIELDS and value:
+        if any(ord(char) < 32 for char in value) or "\\" in value:
+            raise ValueError("Invalid public discovery URL")
+        parsed = urlsplit(value)
+        if parsed.username or parsed.password or (
+            (parsed.scheme == "https" and not parsed.hostname) or
+            parsed.scheme != "https" and not (
+                not parsed.scheme and not parsed.netloc and value.startswith("/")
+                and not value.startswith("//")
+            )
+        ):
+            raise ValueError("Public discovery URL must be HTTPS or same-origin")
+        if any(re.search(r"token|password|secret|credential|signature|api.?key", key, re.I)
+               for key, _ in parse_qsl(parsed.query, keep_blank_values=True)):
+            raise ValueError("Credential-bearing public discovery URL rejected")
+    return value
+
+
+def _discovery_json_bytes(value):
+    return (json.dumps(value, ensure_ascii=False, sort_keys=True, indent=2,
+                       allow_nan=False) + "\n").encode("utf-8")
+
+
+def build_public_discovery_pages(catalog):
+    """Pure, deterministic six-item assets from the reviewed source catalog.
+
+    Public card metadata never embeds videos or member/runtime fields. Video
+    pages contain only one selected record in its existing catalog order. No
+    popularity order is advertised without actual per-video metrics.
+    """
+    if not isinstance(catalog, list):
+        raise ValueError("Public discovery source must be a list")
+    records, seen = [], set()
+    for source in catalog:
+        if not isinstance(source, dict):
+            raise ValueError("Invalid public discovery source record")
+        record_id = _discovery_id(source.get("foundup_id"))
+        if record_id.casefold() in seen:
+            raise ValueError("Duplicate public discovery record identity")
+        seen.add(record_id.casefold())
+        metadata = {
+            field: _discovery_value(field, source[field])
+            for field in PUBLIC_DISCOVERY_METADATA_FIELDS if field in source
+        }
+        canonical = source.get("canonical_foundup_id")
+        metadata["canonical_foundup_id"] = _discovery_id(canonical) if canonical is not None else None
+        source_videos = source.get("videos", [])
+        if not isinstance(source_videos, list):
+            raise ValueError("Public discovery videos must be a list")
+        videos, video_ids = [], set()
+        for source_video in source_videos:
+            if not isinstance(source_video, dict):
+                raise ValueError("Invalid public discovery video")
+            video_id = source_video.get("video_id")
+            if not isinstance(video_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
+                raise ValueError("Invalid public discovery video identity")
+            if video_id in video_ids:
+                raise ValueError("Duplicate video identity within public discovery record")
+            video_ids.add(video_id)
+            videos.append({
+                field: _discovery_value(field, source_video[field])
+                for field in PUBLIC_DISCOVERY_VIDEO_FIELDS if field in source_video
+            })
+        metadata["video_count"] = len(videos)
+        metadata["available_orders"] = ["catalog"]
+        records.append({"metadata": metadata, "videos": videos})
+
+    generation = hashlib.sha256(_discovery_json_bytes({
+        "schema_version": 1, "page_size": PUBLIC_DISCOVERY_PAGE_SIZE, "records": records,
+    })).hexdigest()
+    assets, metadata_records = {}, []
+
+    def add_pages(items, kind, record_id=None):
+        count = max(1, (len(items) + PUBLIC_DISCOVERY_PAGE_SIZE - 1) // PUBLIC_DISCOVERY_PAGE_SIZE)
+        folder = f"{generation}/catalog" if kind == "catalog" else f"{generation}/videos/{record_id}/catalog"
+        for page in range(count):
+            payload = {
+                "schema_version": 1, "generation": generation, "kind": kind,
+                "record_id": record_id, "order": "catalog", "page": page,
+                "page_size": PUBLIC_DISCOVERY_PAGE_SIZE, "total": len(items),
+                "items": items[page * PUBLIC_DISCOVERY_PAGE_SIZE:(page + 1) * PUBLIC_DISCOVERY_PAGE_SIZE],
+                "next": PUBLIC_DISCOVERY_PREFIX + f"{folder}/{page + 1:04d}.json" if page + 1 < count else None,
+            }
+            if kind == "videos":
+                payload["available_orders"] = ["catalog"]
+            relative = "catalog.json" if kind == "catalog" and page == 0 else f"{folder}/{page:04d}.json"
+            assets[relative] = payload
+
+    for record in records:
+        metadata, videos = record["metadata"], record["videos"]
+        record_id = metadata["foundup_id"]
+        metadata_records.append({**metadata, "video_pages": {"catalog": (
+            PUBLIC_DISCOVERY_PREFIX + f"{generation}/videos/{record_id}/catalog/0000.json"
+            if videos else None
+        )}})
+        if videos:
+            add_pages(videos, "videos", record_id)
+    add_pages(metadata_records, "catalog")
+    return assets
+
+
+def write_public_discovery_pages(assets, repo_root=REPO_ROOT, dry_run=True):
+    """Write known generated paths only, with the root catalog published last.
+
+    Old generations are deliberately retained; release maintenance owns cleanup
+    after confirming no deployed page references them. This exporter never
+    recursively deletes files or changes the source/legacy catalog.
+    """
+    repo_root = Path(repo_root).resolve()
+    output_root = repo_root / "public" / "member" / "discovery"
+    if output_root.resolve() != output_root:
+        raise ValueError("Public discovery generated directory must not be redirected")
+    prepared = []
+    for relative, payload in assets.items():
+        if not isinstance(relative, str) or not _DISCOVERY_ASSET_PATH.fullmatch(relative):
+            raise ValueError("Invalid generated public discovery path")
+        target = output_root / relative
+        if target.resolve() != target:
+            raise ValueError("Public discovery output escaped generated directory")
+        prepared.append((target, _discovery_json_bytes(payload)))
+    if dry_run:
+        logger.info("[DRY-RUN] Would write %d public discovery assets", len(prepared))
+        return len(prepared)
+    # Publish all immutable generation pages before changing the root pointer.
+    for target, content in sorted(prepared, key=lambda item: item[0].name == "catalog.json"):
+        target.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=target.parent, prefix=".discovery-", delete=False) as handle:
+                temporary = Path(handle.name)
+                handle.write(content)
+            os.replace(temporary, target)
+        finally:
+            if temporary is not None and temporary.exists():
+                temporary.unlink()
+    logger.info("Wrote %d public discovery assets; obsolete generations retained", len(prepared))
+    return len(prepared)
 
 
 def load_catalog() -> list:
@@ -134,6 +328,7 @@ def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT, *, pr
         previous = lanes.get(foundup_id)
         lane = {
             "foundup_id": foundup_id,
+            "canonical_foundup_id": entry["foundup_id"],
             "title": manifest["name"],
             "creator": source["creator"],
             "creator_id": source["creator_id"],
@@ -163,9 +358,18 @@ def project_public_video_lanes(catalog: list, repo_root: Path = REPO_ROOT, *, pr
             "videos": videos,
         }
         # The global Mall offers discovery. Playback belongs to the fixed public field.
+        narrative_fields = {
+            k: previous[k]
+            for k in ("outcome", "solution", "pain")
+            if previous and k in previous
+        }
         lanes[foundup_id] = {
-            **lane, "derivation_method": previous["derivation_method"] if previous else "manual_curation",
-            "videos": [], "video_count": 0, "public_poc_url": entry["poc_url"],
+            **lane,
+            "derivation_method": previous["derivation_method"] if previous else "manual_curation",
+            "videos": [],
+            "video_count": 0,
+            "public_poc_url": entry["poc_url"],
+            **narrative_fields,
         }
         scoped[foundup_id] = {
             "lane": lane,
@@ -476,6 +680,7 @@ def refresh_catalog(
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Refresh Mall Video Catalog")
+    parser.add_argument("--public-pages-only", action="store_true", help="Build six-item public discovery pages offline, without YouTube credentials")
     parser.add_argument("--scoped-only", action="store_true", help="Project reviewed public lanes without YouTube credentials")
     parser.add_argument("--audit-scoped-source", choices=("hpc",), help="Read-only official YouTube candidate audit")
     parser.add_argument("--refresh-scoped-source", choices=("hpc",), help="Refresh approved HPC uploads and public eligibility")
@@ -492,7 +697,15 @@ def main():
 
     if (args.seed_live or args.discover) and not args.refresh_scoped_source:
         parser.error("--seed-live and --discover require --refresh-scoped-source")
-    if args.refresh_scoped_source:
+    if args.public_pages_only:
+        if args.scoped_only or args.audit_scoped_source or args.refresh_scoped_source or args.info_only or args.delta or args.full:
+            parser.error("--public-pages-only must not be combined with source refresh modes")
+        if not CATALOG_PATH.is_file():
+            parser.error("Public discovery source catalog is missing")
+        assets = build_public_discovery_pages(load_catalog())
+        write_public_discovery_pages(assets, repo_root=REPO_ROOT, dry_run=dry_run)
+        logger.info("Public discovery generation: %s%s", assets["catalog.json"]["generation"], mode_suffix)
+    elif args.refresh_scoped_source:
         if args.scoped_only or args.audit_scoped_source or args.info_only or args.delta or args.full:
             parser.error("--refresh-scoped-source cannot be combined with another refresh mode")
         api_key = os.environ.get("YOUTUBE_API_KEY")

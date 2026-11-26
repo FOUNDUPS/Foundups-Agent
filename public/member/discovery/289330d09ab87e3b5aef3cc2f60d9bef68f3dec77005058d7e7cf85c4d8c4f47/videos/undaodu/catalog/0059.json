@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 267,
+      "embed_url": "https://www.youtube.com/embed/EKCIENi3tpM",
+      "source_url": "https://www.youtube.com/watch?v=EKCIENi3tpM",
+      "thumbnail_url": "https://i.ytimg.com/vi/EKCIENi3tpM/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:24:58Z",
+      "title": "Global Education",
+      "video_id": "EKCIENi3tpM"
+    },
+    {
+      "duration_seconds": 329,
+      "embed_url": "https://www.youtube.com/embed/eFXncDfUWP8",
+      "source_url": "https://www.youtube.com/watch?v=eFXncDfUWP8",
+      "thumbnail_url": "https://i.ytimg.com/vi/eFXncDfUWP8/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:39:32Z",
+      "title": "Smart.fm Talk Opportunities",
+      "video_id": "eFXncDfUWP8"
+    },
+    {
+      "duration_seconds": 256,
+      "embed_url": "https://www.youtube.com/embed/Efw6tV25jKI",
+      "source_url": "https://www.youtube.com/watch?v=Efw6tV25jKI",
+      "thumbnail_url": "https://i.ytimg.com/vi/Efw6tV25jKI/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:11:29Z",
+      "title": "E singularity",
+      "video_id": "Efw6tV25jKI"
+    },
+    {
+      "duration_seconds": 468,
+      "embed_url": "https://www.youtube.com/embed/EfMZVAm6NPE",
+      "source_url": "https://www.youtube.com/watch?v=EfMZVAm6NPE",
+      "thumbnail_url": "https://i.ytimg.com/vi/EfMZVAm6NPE/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:21:59Z",
+      "title": "Why is Flattening Global Education Important? #TheSingularityInitiative #MichaelTrout",
+      "video_id": "EfMZVAm6NPE"
+    },
+    {
+      "duration_seconds": 338,
+      "embed_url": "https://www.youtube.com/embed/eepZb0ccRlk",
+      "source_url": "https://www.youtube.com/watch?v=eepZb0ccRlk",
+      "thumbnail_url": "https://i.ytimg.com/vi/eepZb0ccRlk/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:17:01Z",
+      "title": "Edgewit PowerPoint Presentation 1",
+      "video_id": "eepZb0ccRlk"
+    },
+    {
+      "duration_seconds": 360,
+      "embed_url": "https://www.youtube.com/embed/eDmY-Tb41wA",
+      "source_url": "https://www.youtube.com/watch?v=eDmY-Tb41wA",
+      "thumbnail_url": "https://i.ytimg.com/vi/eDmY-Tb41wA/hqdefault.jpg",
+      "timestamp": "2026-01-14T16:18:30Z",
+      "title": "Level 1- Setting up your Social Networks to Validate your Idea",
+      "video_id": "eDmY-Tb41wA"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0060.json",
+  "order": "catalog",
+  "page": 59,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/ybI27Ev2brQ",
+      "source_url": "https://www.youtube.com/watch?v=ybI27Ev2brQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/ybI27Ev2brQ/hqdefault.jpg",
+      "timestamp": "2026-03-18T14:11:15Z",
+      "title": "💫 The Path to Inner Balance #UnDaoDu #Zen",
+      "video_id": "ybI27Ev2brQ"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/yz87sYMF81Q",
+      "source_url": "https://www.youtube.com/watch?v=yz87sYMF81Q",
+      "thumbnail_url": "https://i.ytimg.com/vi/yz87sYMF81Q/hqdefault.jpg",
+      "timestamp": "2026-03-18T14:09:34Z",
+      "title": "☮️ Finding Calm in Chaos #UnDaoDu #Mindfulness",
+      "video_id": "yz87sYMF81Q"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/f9zUQFNdlpc",
+      "source_url": "https://www.youtube.com/watch?v=f9zUQFNdlpc",
+      "thumbnail_url": "https://i.ytimg.com/vi/f9zUQFNdlpc/hqdefault.jpg",
+      "timestamp": "2026-03-18T14:07:57Z",
+      "title": "💫 The Path to Inner Balance #UnDaoDu #Zen",
+      "video_id": "f9zUQFNdlpc"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/elbYmu8ahwg",
+      "source_url": "https://www.youtube.com/watch?v=elbYmu8ahwg",
+      "thumbnail_url": "https://i.ytimg.com/vi/elbYmu8ahwg/hqdefault.jpg",
+      "timestamp": "2026-03-18T14:06:20Z",
+      "title": "🙏 Ancient Wisdom for Modern Times #UnDaoDu",
+      "video_id": "elbYmu8ahwg"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/u6RwrM2W4J4",
+      "source_url": "https://www.youtube.com/watch?v=u6RwrM2W4J4",
+      "thumbnail_url": "https://i.ytimg.com/vi/u6RwrM2W4J4/hqdefault.jpg",
+      "timestamp": "2026-03-18T14:04:42Z",
+      "title": "☯️ Wu Wei: The Art of Non-Doing #UnDaoDu #Zen",
+      "video_id": "u6RwrM2W4J4"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/V9aFUgFDs6M",
+      "source_url": "https://www.youtube.com/watch?v=V9aFUgFDs6M",
+      "thumbnail_url": "https://i.ytimg.com/vi/V9aFUgFDs6M/hqdefault.jpg",
+      "timestamp": "2026-03-18T14:03:06Z",
+      "title": "🙏 Ancient Wisdom for Modern Times #UnDaoDu",
+      "video_id": "V9aFUgFDs6M"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d/videos/undaodu/catalog/0003.json",
+  "order": "catalog",
+  "page": 2,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

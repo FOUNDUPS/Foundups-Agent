@@ -1,3 +1,16 @@
+## 2026-11-25 — Shared current-owner member-card candidate
+
+Import reviewed donor220206d9's exact two-record catalog, six approved media
+derivatives and unpublished fixed-entry template. Port only optional typed
+presentation into current B26 field/player/dock; exclude the donor's older
+index/host aliases/worker and unrelated gate projections. Final labels are
+#SchumerOUT/#JeffriesOUT with official identities and null/Pending scores.
+Preserve Dispatch/guide/contact and protected VOTE application entry.
+Minimal native controls reproduce Windows WebKit error4; approved animated
+WebP/still fallback exposes image identity and null time. Six integrated
+native/image/motion browser rows pass; physical iPhone, exact-head review and
+release remain separate. No Sites/DNS/Auth/model/calling release. WSP5/10/15/22/50/71/91/97.
+
 ## 2026-11-22 — HPC skin and local editable call scripts
 
 - Reuse the manual contact page, directory and service worker; add an opt-in

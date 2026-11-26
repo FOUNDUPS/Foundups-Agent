@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/5Ymfv9dOjvQ",
+      "source_url": "https://www.youtube.com/watch?v=5Ymfv9dOjvQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/5Ymfv9dOjvQ/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:39:07Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "5Ymfv9dOjvQ"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/EWyneJcXuQk",
+      "source_url": "https://www.youtube.com/watch?v=EWyneJcXuQk",
+      "thumbnail_url": "https://i.ytimg.com/vi/EWyneJcXuQk/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:38:31Z",
+      "title": "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
+      "video_id": "EWyneJcXuQk"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/07HYSCa564A",
+      "source_url": "https://www.youtube.com/watch?v=07HYSCa564A",
+      "thumbnail_url": "https://i.ytimg.com/vi/07HYSCa564A/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:37:53Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "07HYSCa564A"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/rfkCdxPYS50",
+      "source_url": "https://www.youtube.com/watch?v=rfkCdxPYS50",
+      "thumbnail_url": "https://i.ytimg.com/vi/rfkCdxPYS50/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:37:17Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "rfkCdxPYS50"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/OpGv4lP_99s",
+      "source_url": "https://www.youtube.com/watch?v=OpGv4lP_99s",
+      "thumbnail_url": "https://i.ytimg.com/vi/OpGv4lP_99s/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:36:40Z",
+      "title": "🧠 AI + Humans = Better Startups #FoundUps #OpenClaw",
+      "video_id": "OpGv4lP_99s"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/1X-SN_N2pqA",
+      "source_url": "https://www.youtube.com/watch?v=1X-SN_N2pqA",
+      "thumbnail_url": "https://i.ytimg.com/vi/1X-SN_N2pqA/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:36:04Z",
+      "title": "🚀 Building the Future with AI Agents #FoundUps #pAVS",
+      "video_id": "1X-SN_N2pqA"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97/videos/foundups_main/catalog/0001.json",
+  "order": "catalog",
+  "page": 0,
+  "page_size": 6,
+  "record_id": "foundups_main",
+  "schema_version": 1,
+  "total": 44
+}

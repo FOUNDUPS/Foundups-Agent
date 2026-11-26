@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/BtwP-7mWsJc",
+      "source_url": "https://www.youtube.com/watch?v=BtwP-7mWsJc",
+      "thumbnail_url": "https://i.ytimg.com/vi/BtwP-7mWsJc/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:35:27Z",
+      "title": "🚀 Building the Future with AI Agents #FoundUps #pAVS",
+      "video_id": "BtwP-7mWsJc"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/d_4KPkYT6m4",
+      "source_url": "https://www.youtube.com/watch?v=d_4KPkYT6m4",
+      "thumbnail_url": "https://i.ytimg.com/vi/d_4KPkYT6m4/hqdefault.jpg",
+      "timestamp": "2026-02-23T21:58:20Z",
+      "title": "🚨 #MAGA WON'T Like This! #FFCPLN 🎵",
+      "video_id": "d_4KPkYT6m4"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/wSa38j1c3Dc",
+      "source_url": "https://www.youtube.com/watch?v=wSa38j1c3Dc",
+      "thumbnail_url": "https://i.ytimg.com/vi/wSa38j1c3Dc/hqdefault.jpg",
+      "timestamp": "2026-02-24T05:23:23Z",
+      "title": "0:50 #FoundUps #pAVS",
+      "video_id": "wSa38j1c3Dc"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/0IU4JaTwBHg",
+      "source_url": "https://www.youtube.com/watch?v=0IU4JaTwBHg",
+      "thumbnail_url": "https://i.ytimg.com/vi/0IU4JaTwBHg/hqdefault.jpg",
+      "timestamp": "2026-02-24T05:21:03Z",
+      "title": "0:51 #FoundUps #pAVS",
+      "video_id": "0IU4JaTwBHg"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/8bjRwBYtYgI",
+      "source_url": "https://www.youtube.com/watch?v=8bjRwBYtYgI",
+      "thumbnail_url": "https://i.ytimg.com/vi/8bjRwBYtYgI/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:32:59Z",
+      "title": "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
+      "video_id": "8bjRwBYtYgI"
+    },
+    {
+      "duration_seconds": 60,
+      "embed_url": "https://www.youtube.com/embed/6x4UhFnrTYY",
+      "source_url": "https://www.youtube.com/watch?v=6x4UhFnrTYY",
+      "thumbnail_url": "https://i.ytimg.com/vi/6x4UhFnrTYY/hqdefault.jpg",
+      "timestamp": "2026-03-20T10:32:22Z",
+      "title": "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
+      "video_id": "6x4UhFnrTYY"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/foundups_main/catalog/0002.json",
+  "order": "catalog",
+  "page": 1,
+  "page_size": 6,
+  "record_id": "foundups_main",
+  "schema_version": 1,
+  "total": 44
+}

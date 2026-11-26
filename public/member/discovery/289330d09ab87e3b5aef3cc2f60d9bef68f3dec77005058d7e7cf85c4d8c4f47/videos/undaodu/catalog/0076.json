@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47",
+  "items": [
+    {
+      "duration_seconds": 117,
+      "embed_url": "https://www.youtube.com/embed/5DZSssacS2U",
+      "source_url": "https://www.youtube.com/watch?v=5DZSssacS2U",
+      "thumbnail_url": "https://i.ytimg.com/vi/5DZSssacS2U/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:28:02Z",
+      "title": "Little toddler exploring the hospital in Japan",
+      "video_id": "5DZSssacS2U"
+    },
+    {
+      "duration_seconds": 220,
+      "embed_url": "https://www.youtube.com/embed/5Bq3t2OZIXk",
+      "source_url": "https://www.youtube.com/watch?v=5Bq3t2OZIXk",
+      "thumbnail_url": "https://i.ytimg.com/vi/5Bq3t2OZIXk/hqdefault.jpg",
+      "timestamp": "2026-01-12T19:41:59Z",
+      "title": "Can education save humanity? #singularity",
+      "video_id": "5Bq3t2OZIXk"
+    },
+    {
+      "duration_seconds": 328,
+      "embed_url": "https://www.youtube.com/embed/4x0U6C7ub5k",
+      "source_url": "https://www.youtube.com/watch?v=4x0U6C7ub5k",
+      "thumbnail_url": "https://i.ytimg.com/vi/4x0U6C7ub5k/hqdefault.jpg",
+      "timestamp": "2026-01-13T02:08:52Z",
+      "title": "The power of FOUNDUPs",
+      "video_id": "4x0U6C7ub5k"
+    },
+    {
+      "duration_seconds": 479,
+      "embed_url": "https://www.youtube.com/embed/4WghybW33Ys",
+      "source_url": "https://www.youtube.com/watch?v=4WghybW33Ys",
+      "thumbnail_url": "https://i.ytimg.com/vi/4WghybW33Ys/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:40:06Z",
+      "title": "Flattening Global Education",
+      "video_id": "4WghybW33Ys"
+    },
+    {
+      "duration_seconds": 69,
+      "embed_url": "https://www.youtube.com/embed/4MSRkBAJOeE",
+      "source_url": "https://www.youtube.com/watch?v=4MSRkBAJOeE",
+      "thumbnail_url": "https://i.ytimg.com/vi/4MSRkBAJOeE/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:04:56Z",
+      "title": "Museum in Japan",
+      "video_id": "4MSRkBAJOeE"
+    },
+    {
+      "duration_seconds": 960,
+      "embed_url": "https://www.youtube.com/embed/4m5guecvgrk",
+      "source_url": "https://www.youtube.com/watch?v=4m5guecvgrk",
+      "thumbnail_url": "https://i.ytimg.com/vi/4m5guecvgrk/hqdefault.jpg",
+      "timestamp": "2026-01-13T01:06:34Z",
+      "title": "What is a FOUNDUP?",
+      "video_id": "4m5guecvgrk"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/289330d09ab87e3b5aef3cc2f60d9bef68f3dec77005058d7e7cf85c4d8c4f47/videos/undaodu/catalog/0077.json",
+  "order": "catalog",
+  "page": 76,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

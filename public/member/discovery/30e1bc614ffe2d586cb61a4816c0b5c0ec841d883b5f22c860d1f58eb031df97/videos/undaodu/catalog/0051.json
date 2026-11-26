@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97",
+  "items": [
+    {
+      "duration_seconds": 272,
+      "embed_url": "https://www.youtube.com/embed/H3gZy9jN2Uo",
+      "source_url": "https://www.youtube.com/watch?v=H3gZy9jN2Uo",
+      "thumbnail_url": "https://i.ytimg.com/vi/H3gZy9jN2Uo/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:22:41Z",
+      "title": "Japanese News Report on Post-Earthquake Concerns",
+      "video_id": "H3gZy9jN2Uo"
+    },
+    {
+      "duration_seconds": 305,
+      "embed_url": "https://www.youtube.com/embed/GYbvyygOSh8",
+      "source_url": "https://www.youtube.com/watch?v=GYbvyygOSh8",
+      "thumbnail_url": "https://i.ytimg.com/vi/GYbvyygOSh8/hqdefault.jpg",
+      "timestamp": "2026-01-13T00:04:01Z",
+      "title": "Tsunami Aftermath - Japan Coast 2011",
+      "video_id": "GYbvyygOSh8"
+    },
+    {
+      "duration_seconds": 107,
+      "embed_url": "https://www.youtube.com/embed/GxBMeB4hriQ",
+      "source_url": "https://www.youtube.com/watch?v=GxBMeB4hriQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/GxBMeB4hriQ/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:27:04Z",
+      "title": "Can a gaijin create successful startups in Japan?",
+      "video_id": "GxBMeB4hriQ"
+    },
+    {
+      "duration_seconds": 510,
+      "embed_url": "https://www.youtube.com/embed/gWsxqkDEkjs",
+      "source_url": "https://www.youtube.com/watch?v=gWsxqkDEkjs",
+      "thumbnail_url": "https://i.ytimg.com/vi/gWsxqkDEkjs/hqdefault.jpg",
+      "timestamp": "2026-01-14T13:30:20Z",
+      "title": "What is a Found Up and OIF?",
+      "video_id": "gWsxqkDEkjs"
+    },
+    {
+      "duration_seconds": 109,
+      "embed_url": "https://www.youtube.com/embed/GtRmRhRrn3k",
+      "source_url": "https://www.youtube.com/watch?v=GtRmRhRrn3k",
+      "thumbnail_url": "https://i.ytimg.com/vi/GtRmRhRrn3k/hqdefault.jpg",
+      "timestamp": "2026-01-13T02:05:41Z",
+      "title": "Honesty",
+      "video_id": "GtRmRhRrn3k"
+    },
+    {
+      "duration_seconds": 360,
+      "embed_url": "https://www.youtube.com/embed/gTEsL6V-JIo",
+      "source_url": "https://www.youtube.com/watch?v=gTEsL6V-JIo",
+      "thumbnail_url": "https://i.ytimg.com/vi/gTEsL6V-JIo/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:25:31Z",
+      "title": "Starting a Business",
+      "video_id": "gTEsL6V-JIo"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97/videos/undaodu/catalog/0052.json",
+  "order": "catalog",
+  "page": 51,
+  "page_size": 6,
+  "record_id": "undaodu",
+  "schema_version": 1,
+  "total": 512
+}

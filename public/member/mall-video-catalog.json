@@ -5376,7 +5376,6 @@
     "topic_family": "life",
     "related_lanes": [
       "undaodu",
-      "linkedin_012",
       "hpc"
     ],
     "display_order": 1,
@@ -5387,7 +5386,11 @@
     "launch_readiness": "discoverable_only",
     "channel_avatar_url": "https://yt3.ggpht.com/AoHPQuFo-j-2isTEcEBNrSvzFTUkW59JFmcutvJe9PW4-faopoLNpVki7JfPousHObJNc2m7iw=s800-c-k-c0x00ffffff-no-rj",
     "true_video_count": 3416,
-    "subscriber_count": 10200
+    "subscriber_count": 10200,
+    "outcome": "Families and independent builders relocate to rural Japan with transparent house data and community grounding.",
+    "solution": "PoC -> Proto: English property discovery in Fukui + 594 field videos; MVP expands verified regional intake.",
+    "pain": "Language barriers, opaque akiya listings, and fragmented municipal onboarding block relocation.",
+    "canonical_foundup_id": "move2japan"
   },
   {
     "foundup_id": "undaodu",
@@ -10028,8 +10031,7 @@
     "topic_family": "consciousness",
     "related_lanes": [
       "move2japan",
-      "linkedin_012",
-      "linkedin_esingularity",
+      "esingularity_001",
       "eduit"
     ],
     "display_order": 2,
@@ -10040,7 +10042,12 @@
     "launch_readiness": "discoverable_only",
     "channel_avatar_url": "https://yt3.ggpht.com/H1V5ZWWpU2WOAlEUzhYGtYBW77BRW9sgORhjNkltbwYRRilk4oegh0g8TZ96wY0cK5riBl1fIQ=s800-c-k-c0x00ffffff-no-rj",
     "true_video_count": 4208,
-    "subscriber_count": 3640
+    "subscriber_count": 3640,
+    "linkedin_url": "https://www.linkedin.com/in/openstartup/",
+    "outcome": "Conscious creative expression, resistance music, and 0102 mindfulness stay open and creator-owned.",
+    "solution": "Active media lane: 512 original music and commentary sessions feeding FoundUps cultural discovery.",
+    "pain": "Algorithmic silos bury long-horizon independent art and philosophical experimentation.",
+    "canonical_foundup_id": null
   },
   {
     "foundup_id": "foundups_main",
@@ -10468,8 +10475,7 @@
     "creator_display": "UnDaoDu (012)",
     "topic_family": "startup",
     "related_lanes": [
-      "linkedin_foundups",
-      "linkedin_esingularity"
+      "esingularity_001"
     ],
     "display_order": 3,
     "tagline": "The FoundUPS project channel",
@@ -10479,7 +10485,12 @@
     "launch_readiness": "discoverable_only",
     "channel_avatar_url": "https://yt3.ggpht.com/iTgFX0cdfkYbRq7w900ZUg_6aHIYtdgFDDLq9HqCXPtJx564HDjPyzKDSSkCr44KxL6aFJSAtA=s800-c-k-c0x00ffffff-no-rj",
     "true_video_count": 1588,
-    "subscriber_count": 4500
+    "subscriber_count": 4500,
+    "outcome": "Anyone with a validated idea launches an autonomous FoundUp where contributors earn Return on Compute.",
+    "solution": "PoC -> Proto: p.fMALL open discovery + WRE agent orchestration + Member Portal; MVP wires CABR/pAVS.",
+    "pain": "Closed venture capital gates 99% of builders out while founders and VCs capture all upside.",
+    "linkedin_url": "https://www.linkedin.com/company/foundups/",
+    "canonical_foundup_id": null
   },
   {
     "foundup_id": "antifafm",
@@ -10828,161 +10839,11 @@
     "launch_readiness": "discoverable_only",
     "channel_avatar_url": "https://yt3.ggpht.com/yOwK3KmYnGNJn1Z8xB5QLVk9wKfcgXR0rWFKJ_-5mvcbZ89Oc06FZDykUXDkWTtfF7XI5_Sjtg=s800-c-k-c0x00ffffff-no-rj",
     "true_video_count": 105,
-    "subscriber_count": 71
-  },
-  {
-    "foundup_id": "linkedin_012",
-    "title": "012 LinkedIn",
-    "creator": "012",
-    "entity": "UnDaoDu Michael J Trout",
-    "source_type": "linkedin_profile",
-    "source_id": "urn:li:person:openstartup",
-    "source_handle": "@openstartup",
-    "category": "thought-leadership",
-    "tags": [
-      "0102",
-      "012-lane",
-      "articles",
-      "founder",
-      "linkedin",
-      "quantum",
-      "thought-leadership"
-    ],
-    "geo": "Fukui, Japan",
-    "status": "active",
-    "video_count": 0,
-    "poster_url": "/media/posters/linkedin-012.jpg",
-    "videos": [],
-    "creator_id": "012",
-    "creator_display": "UnDaoDu (012)",
-    "topic_family": "consciousness",
-    "related_lanes": [
-      "undaodu",
-      "move2japan",
-      "linkedin_esingularity",
-      "linkedin_tsingularity"
-    ],
-    "display_order": 5,
-    "tagline": "Professional profile and thought leadership",
-    "lifecycle_stage": "staging",
-    "tier": "F0_DAE",
-    "description": "012 LinkedIn professional presence. No video content yet — lane reserved for future cross-platform content bridging.",
-    "launch_readiness": "discoverable_only"
-  },
-  {
-    "foundup_id": "linkedin_esingularity",
-    "title": "eSingularity",
-    "creator": "012",
-    "entity": "eSingularity",
-    "source_type": "linkedin_profile",
-    "source_id": "2199715",
-    "source_handle": "esingularity",
-    "category": "ai-education",
-    "tags": [
-      "0102",
-      "0102-epoch",
-      "012-lane",
-      "ai",
-      "dae",
-      "education",
-      "learning",
-      "singularity"
-    ],
-    "geo": "Global",
-    "status": "active",
-    "video_count": 0,
-    "poster_url": "/media/posters/esingularity.jpg",
-    "videos": [],
-    "creator_id": "012",
-    "creator_display": "UnDaoDu (012)",
-    "topic_family": "consciousness",
-    "related_lanes": [
-      "linkedin_012",
-      "linkedin_tsingularity",
-      "undaodu"
-    ],
-    "display_order": 6,
-    "tagline": "AI education and singularity research",
-    "lifecycle_stage": "staging",
-    "tier": "F0_DAE",
-    "description": "eSingularity LinkedIn page focused on AI education. No video content yet — lane reserved for future content.",
-    "launch_readiness": "discoverable_only"
-  },
-  {
-    "foundup_id": "linkedin_tsingularity",
-    "title": "tSingularity",
-    "creator": "012",
-    "entity": "tSingularity",
-    "source_type": "linkedin_profile",
-    "source_id": "65471449",
-    "source_handle": "tsingularity",
-    "category": "ai-research",
-    "tags": [
-      "012-lane",
-      "0201",
-      "0201-oracle",
-      "nonlocal",
-      "oracle",
-      "post-singularity",
-      "singularity",
-      "technological-singularity"
-    ],
-    "geo": "Global",
-    "status": "active",
-    "video_count": 0,
-    "poster_url": "/media/posters/tsingularity.jpg",
-    "videos": [],
-    "creator_id": "012",
-    "creator_display": "UnDaoDu (012)",
-    "topic_family": "consciousness",
-    "related_lanes": [
-      "linkedin_012",
-      "linkedin_esingularity"
-    ],
-    "display_order": 7,
-    "tagline": "Technological singularity research",
-    "lifecycle_stage": "staging",
-    "tier": "F0_DAE",
-    "description": "tSingularity LinkedIn page focused on technological singularity research. No video content yet — lane reserved.",
-    "launch_readiness": "discoverable_only"
-  },
-  {
-    "foundup_id": "linkedin_foundups",
-    "title": "FoundUps LinkedIn",
-    "creator": "012",
-    "entity": "FoundUps",
-    "source_type": "linkedin_profile",
-    "source_id": "1263645",
-    "source_handle": "foundups",
-    "category": "startup",
-    "tags": [
-      "012-lane",
-      "ai-coding",
-      "company-page",
-      "foundups",
-      "lego",
-      "software",
-      "solo-founder",
-      "wsp"
-    ],
-    "geo": "Global",
-    "status": "active",
-    "video_count": 0,
-    "poster_url": "/media/posters/foundups-ln.jpg",
-    "videos": [],
-    "creator_id": "012",
-    "creator_display": "UnDaoDu (012)",
-    "topic_family": "startup",
-    "related_lanes": [
-      "foundups_main",
-      "linkedin_esingularity"
-    ],
-    "display_order": 8,
-    "tagline": "FoundUPS company presence on LinkedIn",
-    "lifecycle_stage": "staging",
-    "tier": "F0_DAE",
-    "description": "Official FoundUPS LinkedIn company page. No video content yet — lane reserved for corporate and ecosystem updates.",
-    "launch_readiness": "discoverable_only"
+    "subscriber_count": 71,
+    "outcome": "24/7 independent resistance radio and community commentary run resiliently without corporate gatekeepers.",
+    "solution": "Proto stream: automated Icecast-to-video broadcast pipeline + curated Mall replay queue.",
+    "pain": "Independent civic audio lacks persistent visual discovery and sustainable listener coordination.",
+    "canonical_foundup_id": "antifafm_001"
   },
   {
     "foundup_id": "eduit",
@@ -11009,7 +10870,7 @@
     "display_order": 9,
     "related_lanes": [
       "undaodu",
-      "linkedin_esingularity"
+      "esingularity_001"
     ],
     "tagline": "FoundUP for autonomous learning on any device",
     "description": "EDUIT (eSingularity) — autonomous learning platform. Content derived from 012 UnDaoDu channel covering the eSingularity educational initiative.",
@@ -11212,7 +11073,11 @@
     "parent_channels": [
       "undaodu"
     ],
-    "derivation_method": "manual_curation"
+    "derivation_method": "manual_curation",
+    "outcome": "Learners master real skills autonomously through browser-first play and adaptive micro-challenges.",
+    "solution": "Incubating PoC: Play EDUIT storytime/phonics interactive scenes + 21 foundational learning clips.",
+    "pain": "Passive, one-size-fits-all instruction disengages early learners and hides actual comprehension.",
+    "canonical_foundup_id": "eduit"
   },
   {
     "foundup_id": "science_swarm",
@@ -11240,7 +11105,7 @@
     "display_order": 10,
     "related_lanes": [
       "foundups_main",
-      "linkedin_esingularity"
+      "esingularity_001"
     ],
     "tagline": "Multi-agent research coordination",
     "description": "Science Swarm Hub — multi-agent research coordination platform for PQN alignment and scientific inquiry.",
@@ -11249,7 +11114,11 @@
     "launch_readiness": "discoverable_only",
     "poster_url": "/media/posters/science_swarm.jpg",
     "video_count": 0,
-    "videos": []
+    "videos": [],
+    "outcome": "Decentralized AI agents collaborate openly to reproduce, audit, and accelerate scientific discovery.",
+    "solution": "PoC -> Proto: open-source Science Swarm Hub package + multi-agent research verification workflows.",
+    "pain": "Paywalled journals, isolated lab compute, and unverified claims slow scientific replication.",
+    "canonical_foundup_id": "science_swarm_hub"
   },
   {
     "foundup_id": "autopost",
@@ -11286,7 +11155,11 @@
     "launch_readiness": "discoverable_only",
     "poster_url": "/media/posters/autopost.jpg",
     "video_count": 0,
-    "videos": []
+    "videos": [],
+    "outcome": "Field creators capture once on mobile and publish verified updates across channels without manual toil.",
+    "solution": "PoC camera & intake service live on Cloud Run; Prototype completes multi-channel connector auth.",
+    "pain": "Repetitive formatting, captioning, and cross-posting drain time away from real-world action.",
+    "canonical_foundup_id": "autopost"
   },
   {
     "foundup_id": "kosei",
@@ -11321,14 +11194,18 @@
     "description": "Kosei AI Systems — AI content automation service for businesses. Internal service FoundUp with planned production domain.",
     "tier": "F0_DAE",
     "lifecycle_stage": "incubating",
-    "launch_readiness": "ready",
+    "launch_readiness": "conditional",
     "routing_prefix": "/f/kosei",
     "data_namespace": "idb_kosei",
     "token_symbol": "KOSEI",
     "poster_url": "/media/posters/kosei.jpg",
     "video_count": 0,
     "videos": [],
-    "entry_url": "https://foundupscom.web.app/kosei/app/"
+    "entry_url": "https://foundupscom.web.app/kosei/app/",
+    "outcome": "Small teams run multilingual AI content workflows with full human editorial control and auditability.",
+    "solution": "Proto workspace (`/kosei`): bilingual intake + app shell; MVP connects automated production queues.",
+    "pain": "Generic AI content tools strip brand voice, mishandle Japanese/English nuance, and leak context.",
+    "canonical_foundup_id": "kosei"
   },
   {
     "foundup_id": "gotjunk_001",
@@ -11343,6 +11220,7 @@
       "marketplace",
       "peer-to-peer",
       "selling",
+      "shop",
       "local"
     ],
     "topic_family": "commerce",
@@ -11352,7 +11230,8 @@
     "related_lanes": [
       "foundups_main"
     ],
-    "tagline": "Turn your junk into someone's treasure",
+    "hero_label": "SHOP",
+    "tagline": "Shop local peer-to-peer reuse.",
     "description": "Peer-to-peer marketplace for selling unwanted items. List it, price it, move it.",
     "tier": "F0_DAE",
     "lifecycle_stage": "proto",
@@ -11365,7 +11244,11 @@
     "videos": [],
     "creator_id": "012",
     "creator_display": "UnDaoDu (012)",
-    "external_url": "https://gotjunk-56566376153.us-west1.run.app/"
+    "external_url": "https://gotjunk-56566376153.us-west1.run.app/",
+    "outcome": "Neighbors turn unused household items into local value in seconds instead of sending goods to landfill.",
+    "solution": "Proto app on Cloud Run: photo capture, AI listing assist, and local pickup coordination.",
+    "pain": "High listing friction and flaky classifieds make giving or selling everyday items harder than trashing them.",
+    "canonical_foundup_id": "gotjunk_001"
   },
   {
     "foundup_id": "holoindex_prod_01",
@@ -11394,7 +11277,8 @@
     "related_lanes": [
       "foundups_main"
     ],
-    "tagline": "System Knowledge Retrieval",
+    "hero_label": "INTELLIGENCE",
+    "tagline": "Intelligence search",
     "description": "Enterprise-grade artifact and memory retrieval system for the p.fMALL shell.",
     "tier": "F3_INFRA",
     "lifecycle_stage": "incubating",
@@ -11406,7 +11290,11 @@
     "video_count": 0,
     "videos": [],
     "entry_url": "",
-    "entry_copy": "HoloIndex connective retrieval surface is bound in conditional mode while live backend relay conditions clear."
+    "entry_copy": "HoloIndex connective retrieval surface is bound in conditional mode while live backend relay conditions clear.",
+    "outcome": "Human and 0102 agents retrieve exact architectural truth in milliseconds before writing a single line of code.",
+    "solution": "Incubating F3_INFRA: governed semantic + lexical codebase memory bundle; MVP opens tenant relay.",
+    "pain": "Context loss and blind vibecoding create duplicate modules, stale assumptions, and regressions.",
+    "canonical_foundup_id": "holoindex_prod_01"
   },
   {
     "foundup_id": "esingularity_001",
@@ -11415,7 +11303,7 @@
     "creator": "012",
     "creator_id": "012",
     "creator_display": "UnDaoDu (012)",
-    "entity": "eSingularity",
+    "entity": "AI Koban",
     "source_type": "external_app",
     "source_id": "modules/foundups/esingularity",
     "source_handle": "esingularity",
@@ -11424,6 +11312,7 @@
     "tags": [
       "012-lane",
       "ai-infrastructure",
+      "ai-koban",
       "community",
       "esingularity",
       "fukui",
@@ -11436,22 +11325,29 @@
     "display_order": 14,
     "related_lanes": [
       "eduit",
-      "linkedin_esingularity",
       "move2japan"
     ],
-    "tagline": "温泉を守る。福井のAIの未来をつくる。",
+    "hero_label": "AI KOBAN",
+    "tagline": "AI Koban / Compute for FoundUps",
+    "one_sentence_pitch": "AI Koban / Compute for FoundUps — regional Japan onsen & clean AI infrastructure.",
     "description": "Regional AI infrastructure FoundUp for Fukui: AI Koban, three-site feasibility, Japan Hyperscaler Report research, and the YUMORI public-asset/community-reuse program.",
     "tier": "F0_DAE",
     "lifecycle_stage": "proto",
-    "launch_readiness": "ready",
+    "launch_readiness": "conditional",
     "routing_prefix": "/f/esingularity_001",
     "data_namespace": "idb_esingularity_001",
     "poster_url": "/media/posters/esingularity.jpg",
     "video_count": 0,
-    "videos": []
+    "videos": [],
+    "outcome": "Regional Japan revitalizes heritage onsen and public assets paired with clean local AI infrastructure.",
+    "solution": "Proto (`esingularity.ai` & `YUMORI.me`): Fukui civicPPP/PFI research, AI Koban, and community stewardship.",
+    "pain": "Aging municipal facilities face closure while hyperscale AI compute concentrates away from local communities.",
+    "linkedin_url": "https://www.linkedin.com/company/esingularity/",
+    "canonical_foundup_id": "esingularity_001"
   },
   {
     "foundup_id": "hpc",
+    "canonical_foundup_id": "hpc",
     "title": "Hasan Piker Coalition",
     "creator": "012",
     "creator_id": "012",
@@ -11485,6 +11381,207 @@
     "poster_url": "https://i.ytimg.com/vi/iJuguXpbRR4/oardefault.jpg",
     "video_count": 0,
     "videos": [],
-    "public_poc_url": "https://hpc.foundups.com/"
+    "public_poc_url": "https://hpc.foundups.com/",
+    "outcome": "Open political-media community traces clips to primary sources and connects directly to civic action.",
+    "solution": "PoC (`hpc.foundups.com`): curated Shorts floating player, WikiTube queue, and Contact Congress bridge.",
+    "pain": "Out-of-context clips and bot-gated feeds sever political commentary from verifiable civic follow-through."
+  },
+  {
+    "foundup_id": "voteballots",
+    "title": "Vote/Ballots",
+    "name": "Vote/Ballots",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "entity": "Vote/Ballots",
+    "source_type": "external_app",
+    "external_url": "https://vote.mtrout.com/",
+    "category": "civic",
+    "tags": [
+      "012-lane",
+      "civic",
+      "elections",
+      "transparency",
+      "governance",
+      "vote"
+    ],
+    "topic_family": "resistance",
+    "geo": "United States",
+    "status": "active",
+    "display_order": 50,
+    "related_lanes": [
+      "hpc",
+      "antifafm"
+    ],
+    "tagline": "Follow the money. Know your candidates.",
+    "description": "Transparent civic intelligence separating identity, primary evidence, preference signaling, and future SmartDAO governance.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "token_symbol": "VOTE",
+    "video_count": 0,
+    "videos": [],
+    "outcome": "Voters inspect primary candidate funding and factual-claim evidence before choosing how to signal mandates.",
+    "solution": "Incubating PoC: funding/oversight maps + planned claim-verification rubric; Proto adds auditable preference signals.",
+    "pain": "Opaque PAC money and unverified campaign rhetoric collapse evidence, persuasion, and identity together.",
+    "canonical_foundup_id": "voteballots",
+    "entry_copy": "Public informational Vote pages exist. The candidate and funding application remains an unfinished internal PoC. Enter uses the existing Member Portal.",
+    "entry_url": ""
+  },
+  {
+    "foundup_id": "trade",
+    "title": "Trade",
+    "name": "Trade",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "entity": "Trade",
+    "source_type": "github_repo",
+    "external_url": "https://github.com/FOUNDUPS/Foundups-Agent/tree/main/modules/foundups/trade",
+    "category": "trading",
+    "tags": [
+      "012-lane",
+      "trading",
+      "compute",
+      "market-intelligence",
+      "agents"
+    ],
+    "topic_family": "commerce",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 51,
+    "related_lanes": [
+      "foundups_main",
+      "holoindex_prod_01"
+    ],
+    "tagline": "Compute into market intelligence",
+    "description": "Agentic market research and structured signal evaluation discipline built on FoundUps compute.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "token_symbol": "TRADE",
+    "video_count": 0,
+    "videos": [],
+    "outcome": "Independent participants convert verifiable agent compute into disciplined, transparent market intelligence.",
+    "solution": "Incubating spec & module scaffold: risk-bounded research agents and backtested signal evaluation.",
+    "pain": "Retail participants face institutional information asymmetry and unverified hype signals.",
+    "canonical_foundup_id": "trade",
+    "entry_copy": "Incubating Phase 0: simulation and dry-run only. No launched trading app, live trades or capital execution is claimed.",
+    "entry_url": ""
+  },
+  {
+    "foundup_id": "magadoom_001",
+    "title": "MAGADOOM",
+    "name": "MAGADOOM",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "entity": "MAGADOOM",
+    "source_type": "github_repo",
+    "external_url": "https://github.com/FOUNDUPS/Foundups-Agent/tree/main/modules/gamification/whack_a_magat",
+    "category": "games",
+    "tags": [
+      "012-lane",
+      "games",
+      "moderation",
+      "livestream",
+      "gamification"
+    ],
+    "topic_family": "media",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 52,
+    "related_lanes": [
+      "move2japan",
+      "antifafm"
+    ],
+    "tagline": "Gamified moderation for live streams",
+    "description": "Quake-style gamified stream moderation turning live-chat spam defense into community XP.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "token_symbol": "DOOM",
+    "hero_label": "FRAG",
+    "theme": "magadoom",
+    "video_count": 0,
+    "videos": [],
+    "outcome": "Live-stream communities turn toxic chat moderation into fast, transparent, collaborative play.",
+    "solution": "Incubating engine: YouTube Live moderation events mapped to Quake-style XP and leaderboards.",
+    "pain": "Volunteer stream moderators burn out fighting coordinated spam and harassment invisibly.",
+    "canonical_foundup_id": "magadoom_001",
+    "entry_copy": "MAGADOOM remains in shell discovery mode while its public-facing test expectations are brought back into line.",
+    "entry_url": ""
+  },
+  {
+    "foundup_id": "kids_episodes",
+    "title": "Kids Episodes",
+    "name": "Kids Episodes",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "entity": "Kids Episodes",
+    "source_type": "github_repo",
+    "external_url": "https://github.com/FOUNDUPS/Foundups-Agent/tree/main/modules/foundups/kids_episodes",
+    "category": "ai-education",
+    "tags": [
+      "012-lane",
+      "ai-education",
+      "stories",
+      "music",
+      "episodes",
+      "eduit"
+    ],
+    "topic_family": "ai-education",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 53,
+    "related_lanes": [
+      "eduit",
+      "undaodu"
+    ],
+    "tagline": "Stories become short learning episodes",
+    "description": "Linked 15-second educational story, music, and caption episodes paired with EDUIT play-based learning.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "video_count": 0,
+    "videos": [],
+    "outcome": "Educators and parents turn a teaching prompt into coherent 15-second musical story episodes with synced captions.",
+    "solution": "Incubating PoC: local episode/caption renderer + story continuity contract linked to EDUIT games.",
+    "pain": "Short-form kids media optimizes for noisy watch-time loops rather than verified learning progression.",
+    "canonical_foundup_id": "kids_episodes"
+  },
+  {
+    "foundup_id": "foundups_house_project",
+    "canonical_foundup_id": null,
+    "discovery_kind": "candidate",
+    "title": "FoundUps House",
+    "entity": "FoundUps House",
+    "creator": "012",
+    "source_type": "project_candidate",
+    "source_id": "modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md",
+    "category": "housing",
+    "tags": [
+      "012-lane",
+      "public-discovery",
+      "project-candidate"
+    ],
+    "status": "specified",
+    "lifecycle_stage": "Specified",
+    "launch_readiness": "planning_only",
+    "tagline": "Explore a shared house project and future house opportunities.",
+    "description": "Project candidate described in the public opportunity-instance plan. Canonical registration and the first public house record are unverified. This card is not a property listing.",
+    "entry_copy": "Join and add-a-house publishing are planned; their integration is not available. No working Join or Member Portal entry is claimed.",
+    "public_plan_url": "https://github.com/FOUNDUPS/Foundups-Agent/blob/72a3182c70974f0523be91d5ce4bd32808d824bc/modules/foundups/docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md",
+    "entry_url": "",
+    "poster_url": "",
+    "video_count": 0,
+    "videos": [],
+    "creator_id": "012",
+    "creator_display": "012",
+    "topic_family": "life",
+    "geo": "Not specified",
+    "display_order": 105,
+    "related_lanes": []
   }
 ]

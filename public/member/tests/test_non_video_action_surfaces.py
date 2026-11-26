@@ -12,6 +12,7 @@ Slice: PFMALL_NON_VIDEO_ACTION_SURFACE_PHASE1
 import json
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import pytest
 
@@ -151,9 +152,15 @@ class TestConciergeRecommendations:
         assert "source_type_action" in html
 
     def test_recommendation_opens_external_url(self):
-        """Source type recommendation opens external_url."""
-        html = _html()
-        assert "window.open(currentItem.external_url" in html
+        """Execute actual ready/information-only recommendation actions safely."""
+        import subprocess
+
+        result = subprocess.run(
+            ["node", str(Path(__file__).with_name("legacy_navigation_runtime_vm.mjs")), "recommendations"],
+            text=True, encoding="utf-8", capture_output=True, timeout=20, check=False,
+        )
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert "Legacy navigation source VM: 4 recommendations checks passed." in result.stdout
 
 
 # ---------------------------------------------------------------------------
@@ -209,7 +216,10 @@ class TestCatalogNonVideoTruth:
         catalog = _catalog()
         entry = next(e for e in catalog if e["foundup_id"] == "science_swarm")
         assert entry["source_type"] == "github_repo"
-        assert "github.com" in entry["external_url"]
+        external_url = urlsplit(entry["external_url"])
+        assert external_url.scheme == "https"
+        assert external_url.hostname == "github.com"
+        assert external_url.username is None and external_url.password is None
 
     def test_autopost_is_external_app(self):
         """autopost is source_type external_app."""

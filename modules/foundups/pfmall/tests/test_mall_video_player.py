@@ -237,7 +237,7 @@ class TestQueueConstraint:
             elif in_open_func and 'function ' in line:
                 in_open_func = False
 
-            if 'currentFoundUpId =' in line:
+            if re.search(r'\bcurrentFoundUpId\s*=(?!=)', line):
                 foundup_assignments.append((in_open_func, line.strip()))
 
         # All foundupId assignments should be in open() or close()
@@ -464,3 +464,77 @@ class TestWatchHistory:
         """History entry includes timestamp."""
         assert "timestamp:" in js_content
         assert "toISOString" in js_content
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Floating Player, Edge Tuck/Restore, Pinch & WikiTube Recovery (Build v20)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestFloatingAndWikiTubeBuildV20:
+    """Top-anchored floating player, edge tuck/restore, pinch gestures, and bounded WikiTube recovery."""
+
+    def test_floating_and_tuck_css_classes(self, css_content):
+        """CSS defines top-anchored floating player, tucked state, edge handle, and WikiTube layout."""
+        assert ".video-player-floating" in css_content
+        assert ".is-tucked" in css_content
+        assert ".video-player-tuck-handle" in css_content
+        assert ".video-player-wikitube" in css_content
+        assert "--floating-player-clearance" in css_content or "--floating-top" in css_content
+
+    def test_public_api_floating_tuck_wikitube(self, js_content):
+        """Public API exposes selectVideo, openWikiTube, collapseToFloating, tuck, untuck, and mode queries."""
+        for method in (
+            "selectVideo:",
+            "openWikiTube:",
+            "collapseToFloating:",
+            "tuck:",
+            "untuck:",
+            "isTucked:",
+            "isFloating:",
+            "isWikiTube:",
+            "syncFloatingGeometry:",
+        ):
+            assert method in js_content, f"Missing public API method {method}"
+
+    def test_accessible_controls_for_every_gesture(self, js_content):
+        """Accessible buttons exist for tuck, restore, WikiTube expand, floating minimize, prev/next, and close."""
+        assert 'data-action="tuck"' in js_content
+        assert 'data-action="expand"' in js_content
+        assert 'data-action="float"' in js_content
+        assert 'data-action="prev"' in js_content
+        assert 'data-action="next"' in js_content
+        assert "Restore player" in js_content
+        assert "Open WikiTube" in js_content
+        assert "Tuck player" in js_content
+
+    def test_youtube_instance_reuse_and_truthful_autoplay_guard(self, js_content):
+        """YouTube switches reuse loadVideoById/cueVideoById and surface manual Play button when blocked."""
+        assert "function reuseYouTubeInstance" in js_content
+        assert "loadVideoById" in js_content
+        assert "cueVideoById" in js_content
+        assert "onAutoplayBlocked" in js_content
+        assert "PLAY_START_GUARD_MS" in js_content
+
+    def test_bounded_wikitube_error_recovery(self, js_content):
+        """WikiTube sequential error recovery tracks failed indices and halts after bounded skips."""
+        assert "MAX_CONSECUTIVE_AUTO_SKIPS" in js_content
+        assert "failedQueueIndices" in js_content
+        assert "queueHalted" in js_content
+        assert "function scheduleWikiTubeRecovery" in js_content
+
+    def test_open_mall_foundup_entry_routes_through_member_portal(self, js_content):
+        """Player Enter FoundUp routes through memberPortalUrl on open Mall host."""
+        assert "isOpenMallHost" in js_content
+        assert "memberPortalUrl" in js_content
+
+    def test_projection_defines_play_open_mall_and_member_portal_handoff(self):
+        """Play discovery retains registered, same-host admission helpers."""
+        proj = (MEMBER_DIR / "js" / "mall-video-projection.js").read_text(encoding="utf-8")
+        assert "['play.foundups.com', 'mall']" in proj
+        assert "const OPEN_MALL_ORIGIN = 'https://play.foundups.com';" in proj
+        assert "function portalOrigin" in proj
+        assert "return isOpenMallHost(location) && location.origin ? location.origin : OPEN_MALL_ORIGIN;" in proj
+        assert "function isAdmissionRequest" in proj
+        assert "function isOpenMallHost" in proj
+        assert "function resolveMemberEntry" in proj
+        assert "function memberPortalUrl" in proj

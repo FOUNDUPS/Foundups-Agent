@@ -1,5 +1,14 @@
 # p.fMALL Platform Layer
 
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,
+configurable right-swipe queue/reveal actions, full-height external gesture grip
+and opt-in bounded current-tab DAEmon. See the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate) and
+[canonical media incident](MEDIA_PLAYBACK_INCIDENT_HPC.md).
+Native provider controls and ordinary desktop theater remain; physical phone
+and production acceptance are open. No model, mic or backend service is added.
+
 **Status**: Implemented platform shell with bounded read surfaces; resident RedDog integration is not implemented here.
 **Entity type**: Platform layer, not a FoundUp and not an OpenClaw instance.
 
@@ -65,8 +74,13 @@ unverified runtime claims.
   not load content.
 - `verification_gap_guard.py` allows advisory anomaly surfacing and blocks AI
   finality for protected decisions.
-- `public/member/` is the Clerk-admitted member PWA. Its detailed
-  browser contract remains in `public/member/INTERFACE.md`.
+- `public/member/` powers both the Clerk-admitted member PWA on `foundups.com/member/`
+  and the open guest p.fMALL landing on `play.foundups.com` (plus dedicated
+  single-FoundUp guest Shorts on `hpc.foundups.com`). Visitors browse and play
+  catalog media openly on `play.foundups.com`, while entering any FoundUp
+  requires membership and passes through the `foundups.com` Member Portal
+  (`https://foundups.com/member/?enter={foundup_id}`). Detailed browser
+  contracts remain in `public/member/INTERFACE.md`.
 
 ## Optional real HTTP serving profile
 

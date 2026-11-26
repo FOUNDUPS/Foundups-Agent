@@ -1,0 +1,14 @@
+{
+  "source_sha": null,
+  "app_source_sha": null,
+  "base_source_sha": "dba56a6f20efd932971683ece710cba7e1921488",
+  "recovered_app_base_sha": "75c838b6eab19807487ee02c4b2f9367e580547e",
+  "repair_source_sha": "3f6dc9f550181864b6fdb6aaa7a9ca9a6f765128",
+  "recovered_v24_overlay_patch_sha256": "92e1e9338a8256328520546c89cc816563aee25f81b88214ade2fd8c87b67946",
+  "discovery_generation": "253f25242968fe4e826671a8c654bddbd87deb8da2ff2ce737010ec0d14a078d",
+  "probe_source_sha": "313d8168205178cf5387e1912bd5e462d1dafaa9",
+  "channel_id": "play-v25-iphone",
+  "mall_build": "v25",
+  "hosting_version": "unpublished",
+  "stage_status": "UNPUBLISHED_INTEGRATION_CANDIDATE"
+}

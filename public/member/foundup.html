@@ -2,6 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script src="js/mall-video-projection.js?v=26"></script>
+  <script>
+    // This static card is a public metadata/read-only surface (level 2), not
+    // admission into a private graph or authority to contribute. Its owning
+    // applications retain their own account and write boundaries.
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>FoundUps Mall | Entry</title>
   <meta name="description" content="FoundUp entry view in the FoundUps Mall shell.">
@@ -538,7 +544,10 @@
     const READINESS_LABELS = {
       ready: 'Ready',
       conditional: 'Conditional',
-      discoverable_only: 'Discoverable Only'
+      discoverable_only: 'Discoverable Only',
+      incubating: 'Discovery stage',
+      specified: 'Planning',
+      planning_only: 'Planning'
     };
     const WHAT_NEXT = {
       ready: 'This FoundUp is ready for direct shell handoff. When tenant embedding is wired, you will enter its live surface from here.',
@@ -558,7 +567,7 @@
     fetch(MALL_CATALOG_URL, { cache: 'no-store' })
       .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(catalog => {
-        const item = catalog.find(e => e.foundup_id === foundupId);
+        const item = catalog.find(e => e.foundup_id === foundupId || e.canonical_foundup_id === foundupId);
         if (!item) {
           renderNotFound('FoundUp not found: ' + esc(foundupId));
           return;
@@ -579,7 +588,8 @@
       var displayCategory = item.category || item.source_type || '';
       var displayLifecycle = item.lifecycle_stage || (item.source_type ? item.source_type.replace(/_/g, ' ') : '');
       var displayTier = item.tier || '';
-      var displayRoute = item.routing_prefix || ('/f/' + item.foundup_id);
+      var displayRoute = item.canonical_foundup_id === null ? 'Not assigned' :
+        item.routing_prefix || ('/f/' + (item.canonical_foundup_id || item.foundup_id));
       var displayDesc = item.description || (item.video_count ? item.video_count + ' videos \u00b7 ' + (item.source_type || '').replace(/_/g, ' ') : '');
       var displayCreator = item.creator_display || item.creator || '';
       var readinessClass = 'readiness-' + displayStatus;
@@ -662,15 +672,30 @@
       `;
     }
 
-    function renderSourceTypeCTA(item) {
+    function sourceAction(item) {
       var cta = SOURCE_TYPE_CTA[item.source_type];
+      var informationOnly = item.discovery_kind === 'candidate' ||
+        (['internal_app', 'external_app', 'internal_service'].includes(item.source_type) &&
+          ['discoverable_only', 'incubating', 'specified', 'planning_only'].includes(item.launch_readiness));
+      var url = (informationOnly && item.public_plan_url) || (cta && item[cta.urlField]);
+      if (!url) return null;
+      if (informationOnly) {
+        try {
+          var target = new URL(url, window.location.origin);
+          if (target.protocol !== 'https:' || !target.hostname || target.username || target.password) return null;
+          return { label: 'View project information', icon: '\u2197', url: target.href };
+        } catch (e) { return null; }
+      }
+      return { label: cta.label, icon: cta.icon, url: url };
+    }
+
+    function renderSourceTypeCTA(item) {
+      var cta = sourceAction(item);
       if (!cta) return '';
-      var url = item[cta.urlField];
-      if (!url) return '';
       var sourceLabel = (item.source_type || '').replace(/_/g, ' ');
       return `
         <div class="entry-cta-block" data-source-type="${esc(item.source_type)}">
-          <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="entry-cta-btn">
+          <a href="${esc(cta.url)}" target="_blank" rel="noopener noreferrer" class="entry-cta-btn">
             ${esc(cta.label)} ${cta.icon}
           </a>
           <div class="entry-source-type-label">${esc(sourceLabel)}</div>
@@ -800,12 +825,13 @@
       if (!el) return;
       var recs = ENTRY_RECOMMENDATIONS.slice();
       // Add source-type-aware CTA as first recommendation
-      if (currentItem && SOURCE_TYPE_CTA[currentItem.source_type] && currentItem.external_url) {
-        var cta = SOURCE_TYPE_CTA[currentItem.source_type];
+      var sourceCta = currentItem && sourceAction(currentItem);
+      if (sourceCta) {
+        var cta = sourceCta;
         recs.unshift({
           id: 'source_type_action',
           label: cta.label + ' ' + cta.icon,
-          run: function() { window.open(currentItem.external_url, '_blank', 'noopener'); }
+          run: function() { window.open(sourceCta.url, '_blank', 'noopener'); }
         });
       }
       var html = '<div class="entry-recs-row">';

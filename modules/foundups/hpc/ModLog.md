@@ -1,3 +1,46 @@
+## 2026-11-25 — Home/dock and tucked Next correction
+
+Shared owners implement the latest scoped Home, same-dock TV placement and
+selection-only next-hidden requirement. Keep fresh desktop TV, phone grid,
+separate Play/campaign links, attribution, manual civic resource and protected
+admission. Preserve the earlier next/reveal choice as configurable dated history.
+The shared media incident and H1H acceptance track verification/release. No
+HPC engine copy, unrelated FoundUp changes or lifecycle promotion. WSP22/50/97.
+
+## 2026-11-23 — Clean video gestures and local DAEmon candidate
+
+**IMPLEMENTED_CANDIDATE.** Shared owners now supply clean app video surfaces,
+configurable right-swipe queue/reveal actions, full-height external gesture grip
+and opt-in bounded current-tab DAEmon. See the [shared member interaction contract](../../../public/member/INTERFACE.md#2026-11-23--clean-video-gestures-and-local-daemon-candidate) and
+[canonical media incident](../pfmall/MEDIA_PLAYBACK_INCIDENT_HPC.md).
+Native provider controls and ordinary desktop theater remain; physical phone
+and production acceptance are open. No model, mic or backend service is added.
+
+## 2026-11-22 — Shared floating controls and camera follow-through
+
+012 reports v25 working on iPhone 16 and requests movable/tuckable video,
+minimal app chrome, configurable pinch/return, full-view autoplay, camera and
+conversational Red Dog. Extend the existing #2439 shared owners and contracts;
+retain the report as USER_REPORTED, with OS/PWA/source details unknown.
+
+Candidate adds persistent external frame targets, bounded drag, full-height
+restore/inert tuck, independent preferences, Video menu alternatives and
+canonical AutoPost caller return. Dock dog stays in-page and reports unavailable
+AI truthfully. Preserve native controls and hidden-YouTube pause policy. The
+incident/roadmap record backend, local-model, speech and physical-device gaps.
+Local/independent controlled results do not establish production or phone passes.
+
+## 2026-11-22 - source reconciliation with current main
+
+Reconcile existing phone head `2a65e7983` with main `dc7c34aa6`, preserving
+history and the existing #2439 draft. Main admission/conversation corrections
+already present in the tested phone owner remain single and unchanged. Preserve
+both security approval sets and independently renew only source-bound metadata.
+Retain main's preview-only probe policy through existing fixtures and additive
+tests; no second player, graph runtime, gesture defaults, PR landing or Hosting
+publication. See [roadmap](ROADMAP.md) and member test log for the pending
+exact-composition gates; old source/device receipts retain their original scope.
+
 ## 2026-11-22 — Source-selected Vote skin handoff
 
 - 012 clarified that the originating FoundUp should select Vote's skin. Set the
@@ -34,6 +77,71 @@ certify its preview or production. Root ModLog records validation and limits.
 - Validation: exact-source reconciliation, relevant asset inspection, static diff/link review and independent documentation review. Hosted exact-head checks and owner acceptance remain separate. Stopped native UI was not resumed; no Antigravity delivery or receipt is inferred from saved GitHub documentation.
 
 # HPC ModLog
+
+## 2026-11-21 - v26 phone scope reconciliation
+
+Documented the working v26 continuation of `9b85e9cbb874b3720e453d3e3d3a3974dca53504`,
+with v25 frozen for comparison. Source reuses the dock's leading `+` for Video
+Options/Browse AI and trailing `+` for contribution review, with compact Play
+chrome and distinct Hasan-banner/Play Mall destinations. One visible dock,
+shared player and hidden-playback safety remain required runtime checks.
+
+Browse AI is the pinned 41-byte WASM addition test; no approved model/runtime,
+preload or cloud fallback. WebGPU and physical Safari/PWA are unqualified.
+Graph `22374b` is not integrated; depth-specific access and backend writes
+remain unavailable. Review/sign-in does not submit a contribution or grant
+editor authority. Paid access remains proposed.
+
+Source/documentation/link checks only in this slice. Combined exact-head tests,
+deployed bytes/worker, real YouTube playback and physical Wi-Fi/cellular gates
+remain separate. See [roadmap](ROADMAP.md). Prior history is preserved.
+
+## 2026-11-16 - Build v22 direct continuation and policy qualification
+
+012 explicitly authorized the existing v21 continuation through tests, push,
+draft PR and isolated preview. WSP 110 section 2.1 principal handoff records
+previous owner `pfmall-truth-author`, accepting direct Codex continuation,
+expected native head `1b5b77323325b855faf25d4a04ba3e671462084e`, and preserved
+header/entity commits `fe9e9afe4fd94e23ce027e7ae125ced075b53ba6` and
+`bfcd7d0de721288260fafcadc9fd71bcc1bb0485`. No exclusive lease or native-agent
+ACK is invented. Recheck head and all working state before ff-only native
+integration and use a guarded same-branch push. No production deploy or merge.
+
+The v21 hidden-player release defect described below is repaired in the v22
+source candidate: tuck/dismiss/document hide pause playback and cancel loading,
+start and recovery timers. Closed/tucked/hidden/offscreen stages cannot start;
+late READY/PLAYING/ENDED/error/recovery callbacks enforce that boundary. Untuck
+keeps the same iframe paused for explicit visible Play. Scripted playback
+retains the 200 x 200 stage and more-than-half-visible gate; continuous partial
+visibility is not redefined as a universal 50-percent pause rule. One stage
+observer reuses the central pause helper; chrome timers remain separate.
+Generic third-party iframe and opacity-only hiding are outside this YouTube fix.
+
+Build label, shell cache and versioned assets move together to v22. Existing
+browser fixtures now reject hidden audio rather than certifying it. Controlled
+Chromium/WebKit player-policy and header/entity runners pass, including pending
+WikiTube recovery cancellation, same-frame manual return, provider error
+taxonomy, rotation and exact far-scroll restoration. Targeted pytest: 209 pass;
+direct Node state/cache VM: 24 pass (overlaps its pytest wrapper). These are
+source/fixture results, not real YouTube or physical iPhone acceptance.
+
+See [before/after regression matrix](../docs/PFMALL_V22_REGRESSION_MATRIX.md)
+for preserved routes, actions, gestures and explicit acceptance changes.
+Native integration, remote push/PR/checks and fresh preview parity are separate
+receipts. Physical Safari/PWA on Wi-Fi/cellular remains unexecuted as a structured
+matrix. Principal-reported VPN-off playback is retained without invented numeric
+telemetry. WSP 22, 50, 71, 91, 97 and 110 apply.
+
+## 2026-11-16 - Whole left banner candidate and changed player acceptance
+
+Reconciled H1 with 012's top-anchored visible-player acceptance and small
+sprint sequence. Existing v21 left identity now reuses the whole wide
+Hasan satire artwork with the build label above it; Voice CTA unchanged.
+Source, test and release states are recorded in the shared
+[Mall ModLog](../pfmall/ModLog.md) and [roadmap](ROADMAP.md).
+Vote return-navigation implementation remains draft PR #2411, not deployed.
+Native player hidden playback remains a separately owned release blocker;
+this header change does not repair or qualify it. WSP 22, 50 and 97 apply.
 
 ## 2026-11-19 · iPhone 12 preview feedback and shared-shell follow-up
 

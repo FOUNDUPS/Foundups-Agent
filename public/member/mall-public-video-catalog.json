@@ -2,6 +2,7 @@
   "hpc": {
     "lane": {
       "foundup_id": "hpc",
+      "canonical_foundup_id": "hpc",
       "title": "Hasan Piker Coalition",
       "creator": "012",
       "creator_id": "012",

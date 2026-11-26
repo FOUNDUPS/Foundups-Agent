@@ -1,0 +1,70 @@
+{
+  "available_orders": [
+    "catalog"
+  ],
+  "generation": "30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97",
+  "items": [
+    {
+      "duration_seconds": 379,
+      "embed_url": "https://www.youtube.com/embed/xmddOFcp__o",
+      "source_url": "https://www.youtube.com/watch?v=xmddOFcp__o",
+      "thumbnail_url": "https://i.ytimg.com/vi/xmddOFcp__o/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:20:37Z",
+      "title": "Why this book is important, E-Singularity.",
+      "video_id": "xmddOFcp__o"
+    },
+    {
+      "duration_seconds": 445,
+      "embed_url": "https://www.youtube.com/embed/xbuqnDLKoH8",
+      "source_url": "https://www.youtube.com/watch?v=xbuqnDLKoH8",
+      "thumbnail_url": "https://i.ytimg.com/vi/xbuqnDLKoH8/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:18:08Z",
+      "title": "Part 3: The eSingularity (The Solution)",
+      "video_id": "xbuqnDLKoH8"
+    },
+    {
+      "duration_seconds": 450,
+      "embed_url": "https://www.youtube.com/embed/W5TakB17F14",
+      "source_url": "https://www.youtube.com/watch?v=W5TakB17F14",
+      "thumbnail_url": "https://i.ytimg.com/vi/W5TakB17F14/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:16:20Z",
+      "title": "eSingularity Educational Initiative",
+      "video_id": "W5TakB17F14"
+    },
+    {
+      "duration_seconds": 227,
+      "embed_url": "https://www.youtube.com/embed/uWr8rS8y9NE",
+      "source_url": "https://www.youtube.com/watch?v=uWr8rS8y9NE",
+      "thumbnail_url": "https://i.ytimg.com/vi/uWr8rS8y9NE/hqdefault.jpg",
+      "timestamp": "2026-01-12T18:21:03Z",
+      "title": "Michael Trout: eSingularity Will Collapse Certification Industry",
+      "video_id": "uWr8rS8y9NE"
+    },
+    {
+      "duration_seconds": 482,
+      "embed_url": "https://www.youtube.com/embed/UrlE9HLh6L8",
+      "source_url": "https://www.youtube.com/watch?v=UrlE9HLh6L8",
+      "thumbnail_url": "https://i.ytimg.com/vi/UrlE9HLh6L8/hqdefault.jpg",
+      "timestamp": "2026-01-12T23:50:29Z",
+      "title": "Education ESingularity Prize, Global Education Prize",
+      "video_id": "UrlE9HLh6L8"
+    },
+    {
+      "duration_seconds": 306,
+      "embed_url": "https://www.youtube.com/embed/Rhvuc5FrdkQ",
+      "source_url": "https://www.youtube.com/watch?v=Rhvuc5FrdkQ",
+      "thumbnail_url": "https://i.ytimg.com/vi/Rhvuc5FrdkQ/hqdefault.jpg",
+      "timestamp": "2026-01-12T17:32:08Z",
+      "title": "Education and E-Singularity - Middle School and High School",
+      "video_id": "Rhvuc5FrdkQ"
+    }
+  ],
+  "kind": "videos",
+  "next": "/member/discovery/30e1bc614ffe2d586cb61a4816c0b5c0ec841d883b5f22c860d1f58eb031df97/videos/eduit/catalog/0001.json",
+  "order": "catalog",
+  "page": 0,
+  "page_size": 6,
+  "record_id": "eduit",
+  "schema_version": 1,
+  "total": 21
+}

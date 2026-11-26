@@ -1,10 +1,32 @@
 # p.fMALL Test ModLog
 
+## 2026-11-25 — Current admission contract assertion
+
+Broader player/media contracts found one inherited BuildV20 static test still
+expecting the retired apex portal constant; it is also absent at prior B26
+source187c79a5. Reconcile that assertion to the current registered Play origin,
+same-host portal selection and admission-request helper. Keep the existing
+entry helper checks and independently executed routing/boot boundary VMs.
+The broader selection had307 passes/one stale expectation; successor replay
+is required. This changes no admission behavior, scanner or CI enforcement.
+
 ## 2026-11-25 — Growing HPC collection with retained review holds
 
 Hosted broad test at `82466032895dedaa0b7f017b2be9204ff14a1489` found a fixed eight-video assertion in the isolated playback-probe fixture (1 failed, 1,856 passed; dependent evidence upload then lacked its skipped output). The same fixture also protects four diagnostic-only exclusions; one authentic hashtag match had crossed its prior editorial disposition. Preserve all nine unique recorded content/diagnostic holds in the curation input, and replace only the obsolete fixed size with exact original-eight prefix/order, unique IDs and the requested regular-video identity. Retain all four diagnostic exclusion assertions. No production player, probe allowlist or authorization gate is weakened.
 
 Corrected overlay: isolated probe VM six passed; complete matching Mall/member/simulator/stream-resolver Python contract selection 1,857 passed (one inherited OAuth-manager deprecation warning). Focused ingestion/discovery/projection 115 passed and publisher 18 passed are overlapping/separate scopes, not an aggregate coverage total.
+
+## 2026-11-22 - existing probe fixture admitted into phone composition
+
+The current-main six-case `hpc_iphone_playback_probe_vm.mjs` stays with its
+existing canonical JS/reference owners. Public `/member/playback-probe/` source
+copies are removed from the candidate; an exact stale metadata JSON is retained
+only as a regression fixture. The member wrapper preserves the phone owner's
+29 cases and executes these six existing probe cases, with explicit CI source
+hashes. The metadata factory's ten groups keep all original validation checks.
+This is reuse of existing diagnostics, not a new provider or graph pipeline.
+Fresh exact-head qualification, preview assembly/route parity and actual
+iPhone Safari/PWA playback remain separate gates; no publication here.
 
 ## 2026-11-22 — HPC source-selected Vote skin
 
@@ -33,6 +55,179 @@ Corrected overlay: isolated probe VM six passed; complete matching Mall/member/s
 ## 2026-11-16 — Isolated HPC iPhone playback probe VM and delivery gates
 
 - Added `tests/fixtures/hpc_iphone_playback_probe_vm.mjs` (`6 passed`) wired into `public/member/tests/test_mall_product_state.py` verifying `public/member/playback-probe/` non-presence in git, strict `?v=` / `?host=` allowlists, 4 diagnostic-only Shorts isolation, controls outside `#hpc-probe-embed`, bidirectional `Mall <-> official embed` selection retention, `SW controller` vs cache provenance, and `101/150` vs `LOGIN_REQUIRED` error classification.
+
+## 2026-11-16 - Build v23 bounded public TV continuation
+
+Preserved native v22 commit `155a89c281c06d84776a7f5f6ea718bd382f0395`
+and the tested continuation through `773e9a23deb7ea9400fa0e2450f0dcd390e4092e`
+in feature-integration checkpoint `a12414e0b478aa40de7e7c8ad64561fd2b3c78b8`.
+This is not a main/PR merge. Native logo/LinkedIn/OSP and Kids metadata remain;
+whole left HPC banner, build above, Voice CTA and hidden-player pause remain.
+
+Public browse now requests six allowlisted metadata records (11,449 bytes),
+then six-item pages on demand. Selecting a video-backed card enters only that
+source's videos through the existing tile, shared player and WikiTube owners.
+The offline refresh owner produces 206 derived pages for 17 metadata cards and
+1,205 existing video records; no ingestion/API, registry visibility, sign-in
+policy or public-directory projection changed. Four LinkedIn pseudo-cards
+remain retired; 14 canonical mappings, two sources and one House candidate are
+not a finalized entity count. 144 is capacity. House Join and first-house public
+record remain unverified; no private property details or functional Join claim.
+
+Shared queue continuation appends one page at the loaded boundary; Pause,
+hide/tuck, close, query and selection changes invalidate delayed playback.
+Fully hidden YouTube playback pauses; native controls and browser zoom outside
+explicit app gesture targets remain available. Portrait floats above the grid;
+compact landscape preserves the player with a clear left browsing/header region.
+Selected logo/Back return to Mall and restore ordinary Member Portal semantics.
+Only Catalog order is offered; actual popularity statistics are unavailable.
+
+Current controlled evidence: 278 targeted pytest passed, one native-junction test
+skipped (simulated redirect guard passes); pager 15 Node scenarios; cache/state 26
+Node scenarios; 18 delayed-queue/gesture cases across Chromium/WebKit; scoped HPC
+policy 4 groups across both engines. These suites overlap and are not a unique
+aggregate total. The public TV/network suite passes 92 assertions in Chromium/WebKit; retained
+card/entity/OSP and 144-capacity restoration pass four groups, entry passes two
+groups, with controlled accounts/providers. Final commit/push/preview parity and
+hosted CI are separate release receipts. Physical Safari/PWA Wi-Fi and
+cellular remain unexecuted as a structured matrix; prior VPN-off playback is
+principal-reported, not independently captured time telemetry. No production
+publication, account/security change, merge or stopped native UI resumption.
+
+See `modules/foundups/docs/PFMALL_V22_REGRESSION_MATRIX.md` and the current
+Mall roadmap for source ownership, retained actions and deferred artifact audit.
+
+## 2026-11-16 - Discovery cards and explicit canonical/source separation
+
+Implemented the three explicitly requested already-public registry projects:
+Vote/Ballots (`voteballots`), Trade (`trade`) and MAGADOOM (`magadoom_001`).
+Their declared unfinished/internal-PoC status remains visible; entry uses the
+existing canonical Member Portal/sign-in/invite-code doorway. No new gate,
+registry visibility promotion, launched-product claim or private namespace.
+
+The supplied catalog now has 20 CARD RECORDS: 13 map to existing canonical
+IDs, six are creator/source channels, and FoundUps House is one project
+candidate with null canonical identity. This is not a finalized count of
+FoundUps. Personal LinkedIn channels remain sources; aliases `antifafm` and
+`science_swarm` retain stable lane/video IDs while entry maps to
+`antifafm_001` and `science_swarm_hub`. The source and candidate views do not
+offer a fabricated FoundUp entry. The 144 target remains capacity only.
+
+Existing portrait cards now have accessible About/Back faces, escaped pitch
+metadata, stage and truthful participation links, with keyboard/touch/Escape
+focus restoration. Catalog metadata required by existing filters is preserved.
+The refresh projection retains HPC's validated canonical ID and the derived
+scoped catalog was regenerated; strict rebuild equality was not waived.
+
+FoundUps House is explicitly a discoverable PROJECT CANDIDATE, not a registered
+House entity or listing. Public planning provenance is the pinned existing
+[opportunity model](../../docs/PFMALL_OPPORTUNITY_INSTANCE_MODEL.md). No first-house
+record ID, address, location, availability or public disclosure permission was
+verified. Do not alias it to Move2Japan or a Fukui source listing. The intended
+find-houses/Join-to-add-House flow is described, with Join/submission integration
+unavailable. Existing generic admission does not create a house. Recover 012's
+first-House owner record and approved public projection before offering it.
+
+Validation: independent controlled Chromium/WebKit discovery-card and shared
+header/entity groups pass; 127 catalog/tile pytest cases and 24 Node state/cache
+checks pass. The new offline page exporter has 28 passed / one native junction
+test skipped; deterministic redirect-resolution rejection passes. It extends
+the existing refresh owner without API/auth calls. Network paging assets and
+scoped TV/pinch integration are the NEXT slice, not qualified by these results.
+See [before/after matrix](../../docs/PFMALL_V22_REGRESSION_MATRIX.md).
+
+No production deployment or merge; physical Safari/PWA remains unexecuted as
+a structured feature matrix. Exact-source push/preview/CI receipts are separate.
+
+## 2026-11-16 - Build v22 direct continuation and policy qualification
+
+012 explicitly authorized the existing v21 continuation through tests, push,
+draft PR and isolated preview. WSP 110 section 2.1 principal handoff records
+previous owner `pfmall-truth-author`, accepting direct Codex continuation,
+expected native head `1b5b77323325b855faf25d4a04ba3e671462084e`, and preserved
+header/entity commits `fe9e9afe4fd94e23ce027e7ae125ced075b53ba6` and
+`bfcd7d0de721288260fafcadc9fd71bcc1bb0485`. No exclusive lease or native-agent
+ACK is invented. Recheck head and all working state before ff-only native
+integration and use a guarded same-branch push. No production deploy or merge.
+
+The v21 hidden-player release defect described below is repaired in the v22
+source candidate: tuck/dismiss/document hide pause playback and cancel loading,
+start and recovery timers. Closed/tucked/hidden/offscreen stages cannot start;
+late READY/PLAYING/ENDED/error/recovery callbacks enforce that boundary. Untuck
+keeps the same iframe paused for explicit visible Play. Scripted playback
+retains the 200 x 200 stage and more-than-half-visible gate; continuous partial
+visibility is not redefined as a universal 50-percent pause rule. One stage
+observer reuses the central pause helper; chrome timers remain separate.
+Generic third-party iframe and opacity-only hiding are outside this YouTube fix.
+
+Build label, shell cache and versioned assets move together to v22. Existing
+browser fixtures now reject hidden audio rather than certifying it. Controlled
+Chromium/WebKit player-policy and header/entity runners pass, including pending
+WikiTube recovery cancellation, same-frame manual return, provider error
+taxonomy, rotation and exact far-scroll restoration. Targeted pytest: 209 pass;
+direct Node state/cache VM: 24 pass (overlaps its pytest wrapper). These are
+source/fixture results, not real YouTube or physical iPhone acceptance.
+
+See [before/after regression matrix](../../docs/PFMALL_V22_REGRESSION_MATRIX.md)
+for preserved routes, actions, gestures and explicit acceptance changes.
+Native integration, remote push/PR/checks and fresh preview parity are separate
+receipts. Physical Safari/PWA on Wi-Fi/cellular remains unexecuted as a structured
+matrix. Principal-reported VPN-off playback is retained without invented numeric
+telemetry. WSP 22, 50, 71, 91, 97 and 110 apply.
+
+## 2026-11-16 - Bounded header and public entity-grid candidates
+
+Base: native Build v21 `1b5b77323325b855faf25d4a04ba3e671462084e`.
+Executed against isolated continuation source; native branch untouched.
+
+- `python -m pytest -q -p no:cacheprovider` on `test_mall_tile_field.py`,
+  `test_tile_keyboard_a11y.py`, `test_mall_product_state.py`,
+  `test_public_discovery_concierge.py`, `test_refresh_catalog_safety.py`
+  and `pfmall/tests/test_mall_video_player.py`: **209 passed**.
+- Direct `node public/member/tests/mall_product_state_vm.mjs`: **24 passed**.
+  This overlaps the pytest wrapper; do not sum it as 24 additional unique cases.
+- Independent controlled Chromium/WebKit: **93 header checks, 51 entity
+  checks, zero failures**. Header evidence includes 320/390/844/1366 layouts,
+  actual whole-art aspect ratio, build above, Voice navigation, player/header
+  clearance and rotation. Entity evidence includes native observer loading,
+  manual six-item fallback, actual 16 IDs/names, portrait geometry, search/reset,
+  modeled entry gate, same iframe while appending, deferred local image requests,
+  saved scroll above 1000px and far-index return under both motion preferences.
+- Existing `mall_scoped_video_browser.py --header-entities` is the permanent
+  focused runner; it retains the exact restoration oracle and excludes the
+  legacy full tuck/audio acceptance. The default legacy invocation does not
+  run the new entity function.
+- Independent source review: `/root/reuse_hpc_assets`; production bindings and
+  controlled QA receipts are retained with the coordinator's candidate receipt.
+
+All 144-record inputs are synthetic local test fixtures; production metadata
+remains 16 records. Request counts and render timings are fixture measurements,
+not live performance or adaptive-capacity guarantees. This is incremental
+append, not virtualization or server metadata pagination. Network/provider,
+account and destination routes are controlled; service workers are blocked in
+browser contexts. The separate Node worker checks do not prove an installed
+iPhone PWA. Physical Safari/PWA Wi-Fi/cellular receipts remain incomplete.
+
+Historical v20/v21 tests below are not approval of fully hidden YouTube audio.
+The current player's full-offscreen tuck and tucked visibility bypass remain
+unfixed release blockers. Native owner acceptance/integration, build/cache
+generation, independent exact-head release checks and deployment are separate.
+No new production release or hosted preview is claimed here. WSP 22/50/97 apply.
+
+<!-- Native 155a89c historical record; reconciled acceptance and fresh checks supersede conflicting counts, ticker and hidden-playback claims. -->
+## 2026-11-16 — Build v22 catalog truth gate, OSP narrative, and phone patch-load verification
+
+- Verified reconciled 16-entry `mall-video-catalog.json` (`voteballots`, `trade`, `magadoom_001`, `kids_episodes` + WSP 109 `outcome`/`solution`/`pain` + `"trading"` in `VALID_CATEGORIES` + idempotent `project_public_video_lanes`) across `test_mall_video_catalog.py`, `test_catalog_foundup_truth_gate.py`, and `test_projector.py`, plus full `pytest` (`2,290 passed, 0 failed`), all 6 Node VM suites, and Chromium + WebKit `mall_scoped_video_browser.py` (`Build v22`).
+
+## 2026-11-16 — Build v21 open Mall (`play.foundups.com`) & `foundups.com` Member Portal handoff tests
+
+- Extended `test_mall_video_player.py` (`+2` tests) verifying `['play.foundups.com', 'mall']`, `MEMBER_PORTAL_ORIGIN = 'https://foundups.com'`, `isOpenMallHost`, `resolveMemberEntry`, and `memberPortalUrl` contracts across `mall-video-projection.js` and `mall-video-player.js`, alongside gateway checks in `test_gateway_roc_shell.py` and `test_gateway_terms_gate.py`.
+- Verification: combined `pytest -q -p no:cacheprovider public/member/tests modules/foundups/pfmall/tests` -> `2,290 passed, 0 failed`, all 6 Node VM suites (`EXIT=0`), and Chromium + WebKit `mall_scoped_video_browser.py` (`EXIT=0`).
+
+## 2026-11-16 — Build v20 floating player, tuck/restore, pinch gestures, and bounded WikiTube recovery tests
+
+- Added `TestFloatingAndWikiTubeBuildV20` (`5` tests) to `test_mall_video_player.py` verifying `.video-player-floating` / `.is-tucked` / `.video-player-tuck-handle` / `.video-player-wikitube` CSS contracts, public API methods (`selectVideo`, `openWikiTube`, `collapseToFloating`, `tuck`, `untuck`, `isTucked`, `isFloating`, `isWikiTube`, `syncFloatingGeometry`), accessible gesture alternatives, `reuseYouTubeInstance` (`loadVideoById` / `cueVideoById`) + `PLAY_START_GUARD_MS`, and bounded WikiTube sequential recovery (`MAX_CONSECUTIVE_AUTO_SKIPS`, `failedQueueIndices`, `queueHalted`).
+- Verification: combined `pytest -q -p no:cacheprovider public/member/tests modules/foundups/pfmall/tests` -> `2,288 passed, 0 failed`, plus Chromium + WebKit `mall_scoped_video_browser.py` (`EXIT=0`).
 
 ## 2026-11-16 — Manifest boot, catalog truth gate, and PWA hardening test reconciliation
 
@@ -217,3 +412,30 @@ browser layout, deployment, authentication-provider, asset or market evidence.
 - Safety: catalog truth gates and VerificationGapGuard protected-action rules.
 
 See `README.md` in this directory for the file-level inventory and commands.
+
+## 2026-11-16 - Combined card/player and admitted-entry preservation
+
+Independent source review identified two interactions absent from isolated new-card
+checks: filtered-out retained players lost null/canonical entry identity, and the
+player's document Escape capture displaced the inner About dismissal. The source
+now caches explicit entry identity for the active lane and yields to active card
+backs. Raw video/lane identity remains stable; unknown public entry fails closed.
+
+The admitted entry page resolves canonical aliases and displays their canonical
+fallback route. Explicit-null records do not invent a namespace. Unfinished app
+information links and concierge actions no longer claim Open App; existing View
+Repo behavior is preserved. Entry/root/router projection asset queries align with
+v22. The synthetic gateway growth counter is retired in favor of neutral discovery
+copy; no actual FoundUp count is chosen while classification continues.
+
+Controlled Chromium/WebKit combined regressions pass through both alias admission
+fixtures and real entry HTML, retained source/alias mode changes, About-first Escape
+and second-Escape player dismissal. Post-fix player-policy runs pass on both engines;
+84 entry/Red Dog static checks pass. Authentication/provider/device behavior remains
+fixture-qualified only. The existing test registry was regenerated for the refresh
+safety test's process capability, with no quarantine increase (1845 files/260
+quarantined). Backend manifest check passes for 1487 runtime files.
+
+These corrections preserve the current source checkpoint before scoped TV/network
+paging, rather than asserting that pending work is complete. No merge or production
+deployment is authorized. See PFMALL_V22_REGRESSION_MATRIX.md and coordinator receipts.
