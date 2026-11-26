@@ -1,5 +1,67 @@
 # WSP Module ModLog: Shared Utilities
 
+## 2026-11-14 — Exact activity polling policy; shared route blocked
+
+WSP00/10/11/15/22/34/50/84/97/99. Owner: 0102/Codex bounded worker,
+adaptive-checker handoff `6af7b1ac-3064-8191-a316-5fad69ebe035`.
+Source: `14ae40ae204b447a2ea0cce5264568c62d39dbb4`; isolated branch
+`codex/m2m-adaptive-checker-20261114`. Intended destination: STANDALONE local
+review checkpoint under the explicit no-publication/no-activation scope.
+C2/I4/D2/Impact3=11/P2: small deterministic policy, useful continuity primitive,
+but transport/runtime qualification remains independently blocked.
+
+Extended the existing YouTube-extracted DelayUtils owner with a pure opt-in
+activity policy: 1,2,4,8,16,32,60 minutes, capped60, reset1 on accepted new
+activity. Unknown observations preserve the interval. Strict input validation
+prevents silently treating malformed checkpoint state or truthy values as valid.
+Legacy delay/smoothing/jitter methods and all operational callers are unchanged.
+No provider calls, background loop, message store, cursor or checkpoint added.
+Manual implementation uses deterministic arithmetic and offline tests; invoking
+Qwen/Gemma/model services adds no validation value for this bounded change.
+WRE execution-plane admission is not applicable to this pure local utility;
+it remains required for a future autonomous routed caller.
+
+Retrieval: source-bound lexical bundle was OK with freshness UNKNOWN and index
+gap true, on the exact clean base above. Initial broad results were noisy and
+omitted useful delay owners; narrowed lexical search and direct source/docs
+reads resolved ownership. NAVIGATION had no matching delay entry. Module README,
+INTERFACE, embedded roadmap, tests README/TestModLog and closest utility tests
+were inspected. No existing delay test was found. These are local observations,
+not semantic freshness or current GitHub equality.
+
+32 focused tests passed locally with two pytest configuration warnings for
+asyncio options while plugin autoload was disabled. `git diff --check` passed.
+Independent verifier `poll_policy_verifier` inspected the final source/docs and
+independently ran the same32 tests successfully; no blocking findings. Accepted
+source SHA256: `4f680646cb64ce01bbe8d23506957fc362a3b7982f04240b9ed03f8bf8f31800`;
+test SHA256: `60e29f14339927e3e9ccd10da06893ae152821846b439dd48fa5b459b1a98460`.
+The final local checkpoint is reported at closeout. No broader CI, deployment
+or runtime acceptance is claimed.
+
+### Retained work and next gate
+
+Status: ACTIVE_OWNED_WORK / BLOCKED_SHARED_CONTAINER_ADMISSION.
+Recent app task listing and collaboration inventory showed no competing active
+worker in the returned scope; this is not an exhaustive ownership/lease proof.
+
+The existing cross-platform AgentCoordination uses process-local asyncio queues;
+it does not establish shared access or restart durability. The resident RedDog
+chain-results store atomically records admitted queue stages; the live enqueue
+seam requires signed work-order/receipt-chain and execution-valve admission.
+Neither is evidence of a shared voice-to-local-Codex message container. WSP99
+supplies message schema/compiler rules, not transport admission. No Moshpit may
+be used as transport. Prior native ACK/logical replay is not exactly-once or
+managed-process restart evidence.
+
+Next owner action: establish an exact authorized container and provider route
+accessible to both hosts, bind it through the existing admitted intake/resident
+owner, then persist source/cursor/dedup/interval/deadline under that owner's
+atomic recovery contract. Verify duplicate/replay handling and a real process
+restart before enabling a scheduled caller. Do not repurpose the stage store or
+create a parallel transport to conceal the missing route. Until then durable
+checkpoint/cursor recovery, shared access and activation remain unimplemented
+or unverified. Retain this isolated lane for review; primary checkout untouched.
+
 ## 2026-11-10 — Preserve explicit YouTube audience policy
 
 Registry normalization now retains `shorts.made_for_kids` through save/load.

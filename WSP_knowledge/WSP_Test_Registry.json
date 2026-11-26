@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1862,
+  "total_tests": 1864,
   "quarantined_tests": 261,
   "tests": [
     {
@@ -11038,6 +11038,21 @@
       "description": "Security regressions for backend registered-FoundUp target verification."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_relay_watcher",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_relay_watcher.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline watcher acceptance and real-process checkpoint/crash controls."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_repair_evidence_guard",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_repair_evidence_guard.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -11174,7 +11189,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [
         "network"
       ],
@@ -11802,7 +11817,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_activation_lease.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12236,7 +12251,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_key_provider_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12773,7 +12788,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13266,7 +13281,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_consumer_dryrun.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -20116,6 +20131,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for the shared training corpus resolver."
+    },
+    {
+      "id": "test::modules::infrastructure::shared_utilities::tests::test_delay_utils",
+      "path": "modules/infrastructure/shared_utilities/tests/test_delay_utils.py",
+      "owner": "modules/infrastructure/shared_utilities",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-shared-utilities-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline acceptance tests for the exact activity polling policy."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::tests::test_env_managed",

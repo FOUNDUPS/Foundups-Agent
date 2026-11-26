@@ -57,6 +57,33 @@
 - Updated `test_reddog_signer_system_service_wsp71_resolver_supply.py::test_executable_gate_accepts_root_owned_linux_binary`
   to resolve `Path("/usr/bin/env").resolve()` so the positive root-owned executable control handles Ubuntu 26.04's `/usr/bin/env` coreutils symlink without weakening symlink rejection in `reddog_signer_system_service_wsp71_resolver_supply.py`.
 
+## 2026-11-14 — Adaptive relay watcher and crash recovery
+
+`test_reddog_relay_watcher.py` extends the bridge's coverage with a distinct relay
+checkpoint/effect state machine. Existing correspondence tests concern asks and
+stakeholder state; resident queue tests concern signed queue stages. Those owners
+are not substituted for this mailbox ledger. Reuse ModuleDB, runtime lock and
+shared DelayUtils rather than duplicate their implementations.
+
+The focused suite covers interval/cursor durability, ID/content conflicts,
+duplicates and own ACKs, atomic rollback, provider failure timestamps, admission,
+bound proofs and numbered attempts, ambiguous recovery, body-free persistence,
+Docs read validation, storage identity, and backwards clocks. Real child-process
+tests exercise both crash windows and mutual exclusion against synthetic provider
+state; they are not managed service restart or live delivery tests. The independent
+review's hard-link alias finding is retained in a regression before provider reads.
+
+Local qualification on 2026-11-14 passed 33 watcher cases plus 32 shared policy
+cases (65 total, 5.83 seconds), with two known asyncio-option configuration
+warnings under disabled plugin autoload. Command: the combined invocation in
+tests/README.md, `-B`, `--import-mode=importlib`, cache provider disabled and a
+unique outside-repository basetemp. No skipped or failed cases. Validation is
+local/offline. Independent verifier `poll_policy_verifier` reran all 33 watcher
+cases successfully and accepted the final source/test bytes and documented
+boundaries with no remaining blocking findings. This overlaps the combined run;
+do not sum the counts. Host connector admission, runtime startup and real
+receiver ACK remain separate evidence.
+
 ## 2026-10-23 — Resident memory reuse and FoundUp Memex configuration
 
 - Reused `test_reddog_resident_architect_client.py` to cover the resident infrastructure
