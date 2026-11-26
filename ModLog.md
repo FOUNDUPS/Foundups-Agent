@@ -4685,6 +4685,13 @@ WSP 00/11/22/50/84/95/97.
 - A changed-bundle reentrant execution failed before repair; unchanged control passed. Final: 172 connected tests/four existing link skips, including 71/one skip across three focused files; 8 manifest tests and 15 fast groups pass. Six cases extend existing tests. Duplicate test helper classes are reused; private-contract mocks and two assertions are updated without removing test definitions.
 - Admission source 197→214; coordinator file/class 1165→1149 and 1047→1032; execution method remains 250. Tests 574/581/436 stay within existing limits. Two runtime hashes and both existing pins change; 1,400 members and registry 1,650/269 remain. Fresh selection: OpenClaw cache content/policy ownership 16/P0. Evidence: `execution_admission_ownership_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97. Independent runtime admission and complete RSI remain open.
 
+## 2026-09-15: Add work continuity admission and closure gate
+
+- Added the `foundups-work` project skill and a read-only Git worktree preflight so task starts, switches, resumes, and closures reconcile current dirt, visible unfinished lanes, ownership, relevance, blockers, and next steps before mutation.
+- Extended WSP 97 to v1.10 with a lane continuity gate that reuses the existing work ledger and WSP 15 rather than creating another scheduler. It forbids reset/stash/clean/delete/history mutation as a shortcut and routes ambiguous or destructive disposition to one evidence-backed 012 decision.
+- Bound the canonical chain explicitly: WSP 00 identity lock → WSP 97 continuity policy → canonical `foundups-work` skill → read-only scanner/existing ledger → WSP 15 selection → owned execution and closure. WSP 00 remains bootstrap-only; WSP 97 is normative if the skill drifts.
+- Focused validation passed 70 tests with one capability-only skip; Ruff and both skill validators pass, and WSP framework/knowledge mirrors remain byte-identical. The live read-only inventory exposed and then closed a Windows CP932 JSON-output failure caused by a Unicode worktree entry; UTF-8 output now preserves the evidence. The full tooling projection remains blocked by pre-existing tracked `.agents/skills/japan_hyperscaler_report` drift from `origin/main`; the new skill pair is byte-identical. WSP 00/10/15/22/50/81/97.
+
 ## 2026-09-15: Isolate scanner report ownership
 
 - Extended the existing bridge guard with per-invocation report/TMP directories. Verdicts read private evidence before atomic publication of the existing latest diagnostic. Normal returns/errors/cancellation clean only owned temporary files; allocation/publication failures cannot admit. No immutable report or crash-scavenging claim.

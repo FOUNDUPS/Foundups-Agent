@@ -28,6 +28,7 @@
 - **2025-10-06 13:28:04**: WSP Documentation Guardian performed ASCII remediation on 6 files
 - **2025-10-06 13:28:03**: WSP Documentation Guardian performed ASCII remediation on 7 files
 - **2025-10-06 13:27:26**: WSP Documentation Guardian performed ASCII remediation on 162 files
+- **2026-09-15**: **WSP 97 v1.10 Work Continuity / Lane Admission Gate** - Mirrored the canonical protocol change requiring repository-lane reconciliation before task start, switch, resume, and closure. The gate binds read-only Git/worktree evidence, existing work-ledger continuity, WSP 15 selection, conservative lifecycle classification, explicit closure receipts, and 012 escalation for ambiguous or destructive disposition. It creates no scheduler or cleanup authority and forbids reset/stash/clean/delete/history mutation as a shortcut. Approval class: APPROVAL_REQUIRED; approval satisfied by 012's explicit request to hard-think and apply WSP 97 to this recurring workflow defect. Recovery: focused Git revert. (WSP 00/10/15/22/50/81/97)
 # WSP Framework ModLog
 
 ## Module-Specific Change Log (WSP 22 Compliance)

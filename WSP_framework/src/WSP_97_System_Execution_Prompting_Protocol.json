@@ -1,7 +1,7 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.9",
+    "version": "1.10",
     "status": "active",
     "mantra_stage_count": 7,
     "operator_action_count": 9,
@@ -25,6 +25,51 @@
       ],
       "verification_authority": "WSP_6",
       "differential_rule": "exact test identifiers; aggregate counts are telemetry only"
+    },
+    "work_continuity_lane_admission_gate": {
+      "required_when": ["start", "switch", "resume", "close"],
+      "authorities": ["WSP_10", "WSP_15", "WSP_22", "WSP_50", "WSP_81", "WSP_97"],
+      "canonical_skill": ".claude/skills/foundups-work/SKILL.md",
+      "codex_skill_projection": ".agents/skills/foundups-work/SKILL.md",
+      "concatenation": "WSP_00_identity_lock -> WSP_97_continuity_gate -> foundups_work_skill -> read_only_preflight_and_existing_ledger -> WSP_15_selection -> owned_execution_and_closure",
+      "policy_precedence": "WSP 97 is normative; the skill operationalizes this gate and must not independently redefine it",
+      "read_only_inventory": "scripts/foundups_work_preflight.py",
+      "durable_continuity_surface": "existing work ledger; do not create a second scheduler or ledger",
+      "required_evidence": [
+        "exact repository, worktree, branch, HEAD, default reference, divergence, and dirt state",
+        "visible linked worktrees and relevant ledger, roadmap, ModLog, TestModLog, PR/CI, deployment, and briefing evidence",
+        "file-level ownership and relevance classification",
+        "selected WSP 15 receipt bound to an owned branch/worktree"
+      ],
+      "classifications": [
+        "CURRENT",
+        "RELATED_CONTINUE",
+        "PARK",
+        "CLOSE",
+        "SUPERSEDED",
+        "SALVAGE",
+        "BLOCKED",
+        "EXTERNALLY_OWNED",
+        "EVIDENCE_UNAVAILABLE",
+        "NEEDS_012_DECISION"
+      ],
+      "destructive_boundary": "never reset, stash, clean, switch, delete, merge, commit, or rewrite another lane to manufacture cleanliness",
+      "escalation_rule": "ask 012 one concrete evidence-backed question for ambiguous ownership, potentially unique work, destructive disposition, or strategic scope conflict",
+      "closure_receipt": [
+        "final lifecycle state",
+        "exact branch, worktree, and HEAD",
+        "final dirt state",
+        "tests actually run",
+        "external state actually observed",
+        "blocker and next executable step"
+      ],
+      "failure_conditions": [
+        "new task mutates a dirty shared checkout without ownership reconciliation",
+        "relevant dirty or ahead worktree is ignored",
+        "clean worktree is treated as proof of safe retirement",
+        "work is closed without exact source and validation evidence",
+        "cleanup or history mutation precedes ownership and content review"
+      ]
     },
     "test_inventory_reuse_gate": {
       "required_before_test_authoring": true,
