@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-10-23T00:00:00+00:00",
-  "total_skills": 39,
+  "last_updated": "2026-11-19T00:00:00+00:00",
+  "total_skills": 40,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -681,6 +681,22 @@
         "WSP 95",
         "WSP 97",
         "WSP 109"
+      ]
+    },
+    "reddog_adsense": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_adsense",
+      "agents": [
+        "0102"
+      ],
+      "intent_type": "GENERAL",
+      "version": "1.0.0",
+      "promotion_state": "prototype",
+      "category": "workflow",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
       ]
     }
   }
