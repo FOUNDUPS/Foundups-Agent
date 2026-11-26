@@ -378,6 +378,16 @@ SII first-party October 30 notices confirm F-11 (equipment track) and F-14 (whol
 - Internal preparation (not official deadline): review 2027-01-15; prepare candidate scope/partners by 2027-02-01; verify any new fiscal-year guide before use.
 - Official call: https://www.env.go.jp/press/press_04394.html ; May guide: https://www.env.go.jp/content/000397410.pdf ; selection notice: https://www.env.go.jp/press/press_05461.html . Historic application was by email with receipt confirmation (guide §6); administrative inquiries via guide §7, not a current eligibility inquiry.
 
+## F-18 — 地域脱炭素実現に向けた具体施策実装支援事業（第1号：公共施設等への太陽光発電設備等の導入計画策定支援事業）
+
+- Verified 2026-11-27 JST. Material official result dated 2026-11-25: FY2025 supplementary fourth call, second intake (2026-09-02 through 10-13), selected Universal Ecology in Kammaki, Nara and Nose/Toyono Machizukuri in Nose, Osaka; two applications, two selections. No YUMORI.me or Fukui City selection evidenced by that list. Selection is not award. Historical catch-up of call dates/terms is not a fresh opening.
+- Agency: 環境省 / 一般社団法人地域循環共生社会連携協会 (RCESPA). FY2025 supplementary R4 and parallel FY2026 call both opened 2026-07-13; inquiry cutoff 2026-11-17 12:00 JST; phased deadlines 09-01, 10-13 and 11-20, each 17:00 JST receipt. Both CLOSED by published deadline; final-period results not established. FY2026 first-period selection 2026-10-16 was Oga City, Akita (track 2, not track 1).
+- Track 1 funds survey/planning of public-facility PV deployment: structural/grid assessment, economics, procurement approach and practical implementation plan, not equipment procurement, GPU, heat-reuse installation or general campus construction. Both controlling guides p7: 1/2 of eligible study costs, cap ¥10M for up to 20 facilities, ¥15M for 21+; R4 permits one or more sites (previous R3 minimum ten). R4 single-year; FY2026 may propose multi-year plan under conditions. Historic 2026-08-24 R3 result: AOI Energy Solution in Sakai City, Fukui; not YUMORI affiliation.
+- Qualified private lead with domestic status, personnel, financial capability, continued solar-related business and municipal joint application; City building department agreement, at least 20 years remaining useful life, adequate seismic/load documentation for building installations, sufficient space, and no unmitigated closure/consolidation/renovation obstacle to PV retention. City reports implementation progress; absence of progress may trigger review/repayment. Prior-award orders generally ineligible; segregate costs from other national aid. Historic application via J-Grants/G-Biz ID (email exception); inquiry periods ended.
+- Project boundary: **VERIFIED PROGRAM only**. Future public-facility solar planning for Hanyu/Shimousaka or Sukatto only if municipal joint applicant, facility retention/use rights and site/engineering conditions established; no assumption that the closed site meets remaining-life or disposition tests. Separate from City asset proposal and PPP/PFI route. F-01 inquiry unchanged. No application, selection, award, City consent or committed funding established.
+- Internal review 2026-12-01; preparation target 2027-01-15 to investigate municipality/qualified study partner, public-asset retention, prior subsidy coverage and structural/grid feasibility. FY2027 dates UNANNOUNCED / NOT VERIFIED. Earlier rounds require separate terms inventory; do not carry forward rates automatically.
+- Official sources: https://rcespa.jp/r08-jisso/r08-jisso-no4 ; https://rcespa.jp/r08-jisso/r08-jisso-no4/r08-jisso-no4-adopt ; https://rcespa.jp/wordpress/wp-content/uploads/R07hosei-4_jisso_kouboyouryou_20260713.pdf ; https://rcespa.jp/r08-jisso/r08-jisso-no5 ; https://rcespa.jp/wordpress/wp-content/uploads/R08_jisso_kouboyouryou_20260817.pdf ; https://rcespa.jp/r08-jisso/r08-jisso-no5/r08-jisso-no5-adopt ; https://rcespa.jp/r08-jisso/r08-jisso-no3/r08-jisso-no3-adopt ; https://www.env.go.jp/policy/post_169_00001.html .
+
 ## Other tracked programs
 
 - METI GX regional-co-creation / decarbonized-power-region investment programs: monitor for scale, regional and applicant fit; potentially relevant to later DC expansion, not assumed for Phase 1.
@@ -451,6 +461,11 @@ Grant reimbursement timing, bridging finance and actual award allocation must be
 reconciled with the delivery schedule before a deployment gate can pass.
 
 ## Change log
+
+### 2026-11-27 — F-18 official November 25 selection results and retained public-PV planning coverage
+
+Record closed parallel calls and conditional public-facility survey support; no project-status or funding promotion.
+
 
 ### 2026-11-25 — F-17 historical coverage catch-up
 Retain the May 11–June 11 MOE data-center R&D demonstration round and August 28 selections for future-year preparation. No fresh official program change, eligibility promotion, outreach, or committed funding. See F-17 above.
