@@ -1,5 +1,36 @@
 # Vote public landing
 
+## Congressional deck handoff — 2026-11-25
+
+The requested new entry is the actual shared Play FoundUps Mall collection,
+`https://play.foundups.com/member/?foundup=voteballots`. `deck-entry.html` and its
+small stylesheet/script provide a fixed handoff, plus accessible Dispatch, guide
+and contact fallbacks. They are not another grid, viewer or PWA. Earlier root
+guide fragments retain their existing destination. Release is held until the
+shared collection and real tile → viewer → return flow are qualified.
+
+`congressional-cards.json` supplies exactly two typed media records to the shared
+tile/player owners. Its release path is `/member/vote/congressional-cards.json`;
+the six supplied-art derivatives map to `/member/vote/comics/`. Schumer is labeled
+U.S. Senate / New York and Jeffries U.S. House / New York District 8, with official
+congressional profile links. The action labels are `#SchumerOUT` and
+`#JeffriesOUT`, with OUT distinguished in separate HTML. UDP and CU remain
+Pending, never numeric scores. Names, office and captions remain outside the art.
+
+The existing four-second Muse/Wan loops are reused without generation. Animated
+WebPs retain 50 frames at 80ms; the shared viewer uses silent H.264 MP4 equivalents,
+50 frames/four seconds, 480 × 562 including one bottom padding row. Together the
+MP4s are 87.4% smaller than the supplied GIFs. Native picture media selects stills
+for reduced motion; the viewer starts on its still poster without autoplay.
+
+Keep the current deployed Dispatch, its crying Schumer, Hasan campaign art,
+song/radio, guide and contact/script/skin flow. At release, preserve the live
+Dispatch as `/dispatch` and use the fixed shared-PWA handoff at `/`. Do not ship
+the superseded portrait section or statically copy the HPC shell into this Site.
+The active HPC release owner must admit the shared changes against its current
+source; older main assets must not overwrite newer B25/B26 work. See
+[release accounting](../docs/RELEASE_ACCOUNTING.md#2026-11-25-shared-congressional-deck).
+
 ## HPC contact skin and local script composer
 
 Open `/contact#hpc` for the independent HPC skin; `/contact` starts with Vote
