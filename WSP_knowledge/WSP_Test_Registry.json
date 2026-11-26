@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1867,
-  "quarantined_tests": 261,
+  "total_tests": 1874,
+  "quarantined_tests": 263,
   "tests": [
     {
       "id": "test::.github::scripts::tests::test_ci_merge_policy",
@@ -10134,6 +10134,24 @@
       "description": "Tests for RedDog lane-state reconciler dry-run."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_langfuse_telemetry",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_langfuse_telemetry.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-moltbot-bridge-operational",
+      "capabilities": [
+        "network",
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Offline privacy/coverage checks for the lookup boundary, without daemon imports."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_live_lease_composition",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_live_lease_composition.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -19952,6 +19970,37 @@
       "description": "MCPA5 surface discovery tests.\n\nVerifies that `MCPServerManager.discover_all_surfaces()` truthfully exposes\nthe S1/S2/S3 triad anchored in WSP 96 Annex A.1 without starting any servers\nand without overclaiming runtime capability.\n\nAnchored to:\n  - WSP 97 (truth distinction)\n  - WSP 96 Annex A (canonical holo_search contract + surface ownership)\n  - MCPA1 audit findings (S2 + S3 omitted from prior gateway reports)\n\nThese tests do NOT require any live transport or backend."
     },
     {
+      "id": "test::modules::infrastructure::monitoring::tests::test_sentry_error_telemetry",
+      "path": "modules/infrastructure/monitoring/tests/test_sentry_error_telemetry.py",
+      "owner": "modules/infrastructure/monitoring",
+      "suite_class": "operational",
+      "shard_id": "modules-infrastructure-monitoring-operational",
+      "capabilities": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_file_write",
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Offline manual-error privacy checks; no Sentry SDK, credentials or egress."
+    },
+    {
+      "id": "test::modules::infrastructure::monitoring::tests::test_sentry_real_sdk_qualification",
+      "path": "modules/infrastructure/monitoring/tests/test_sentry_real_sdk_qualification.py",
+      "owner": "modules/infrastructure/monitoring",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-monitoring-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Pinned real-SDK serialization/transport tests with synthetic pools only.\n\nRun with the isolated sentry-pilot Python; no real DSN or network is used."
+    },
+    {
       "id": "test::modules::infrastructure::monitoring::tests::test_wsp_00_zen_state_tracker",
       "path": "modules/infrastructure/monitoring/tests/test_wsp_00_zen_state_tracker.py",
       "owner": "modules/infrastructure/monitoring",
@@ -20030,6 +20079,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for Mock Vault Resolver.\n\nContract: FOUNDUPS_CREDENTIAL_ACCESS_LAYER_POC_PHASE1\nPer WSP_71 Annex A specification.\n\nWSP_97 Labels:\n  - CREDENTIAL_ACCESS_POC_ONLY\n  - MOCK_VAULT_ONLY\n  - NO_REAL_SECRET_ACCESS\n  - SECRET_VALUE_NEVER_LOGGED\n  - AUDIT_HASH_ONLY\n  - FAIL_CLOSED_REQUIRED\n\nTest Coverage:\n  T1: Valid test reference resolves through mock\n  T2: Unknown reference fails closed\n  T3: Resolver unavailable fails closed\n  T4: Plaintext secret not present in logs/output\n  T5: Audit event us"
+    },
+    {
+      "id": "test::modules::infrastructure::secrets_mcp::tests::test_windows_pilot_credentials",
+      "path": "modules/infrastructure/secrets_mcp/tests/test_windows_pilot_credentials.py",
+      "owner": "modules/infrastructure/secrets_mcp",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-secrets-mcp-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline tests: synthetic secrets and fake Win32 APIs only."
     },
     {
       "id": "test::modules::infrastructure::security_scanner::tests::test_security_scanner",
@@ -25740,6 +25802,51 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for the extension's one-shot generation-bound HoloIndex bridge."
+    },
+    {
+      "id": "test::scripts::tests::test_reddog_langfuse_env_source",
+      "path": "scripts/tests/test_reddog_langfuse_env_source.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic explicit credential-source checks; never read a machine .env file."
+    },
+    {
+      "id": "test::scripts::tests::test_reddog_langfuse_provision",
+      "path": "scripts/tests/test_reddog_langfuse_provision.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic loopback HTTP tests; no actual vault or credential access."
+    },
+    {
+      "id": "test::scripts::tests::test_reddog_openrouter_telemetry_probe",
+      "path": "scripts/tests/test_reddog_openrouter_telemetry_probe.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline fixed synthetic Broadcast probe contracts."
     },
     {
       "id": "test::tests::contracts::test_token_efficiency_contract",

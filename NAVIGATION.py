@@ -28,6 +28,11 @@ ACHIEVEMENTS:
 NEED_TO = {
     "RedDog AdSense website ownership verification": "modules/communication/moltbot_bridge/skillz/reddog_adsense/SKILLz.md",
     "AdSense Add site meta tag ads.txt": "modules/communication/moltbot_bridge/skillz/reddog_adsense/SKILLz.md",
+    "FOUNDUPS telemetry review skill": ".claude/skills/foundups-telemetry-review/SKILL.md",
+    "investigate Langfuse OpenRouter AI failures": "modules/infrastructure/monitoring/RUNBOOK.md",
+    "Sentry application errors and Seer fixes": "modules/infrastructure/monitoring/RUNBOOK.md#seer-decision",
+    "daily 0102 RSI telemetry review": "modules/infrastructure/monitoring/RUNBOOK.md#daily-review",
+    "private Windows telemetry credential receiver": "modules/infrastructure/secrets_mcp/README.md#windows-telemetry-pilot-custody",
     "Soro social media DAE gap audit": "modules/platform_integration/social_media_orchestrator/docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md",
     "source backed brand content calendar": "modules/platform_integration/social_media_orchestrator/src/content/content_orchestrator.py:prepare_campaign()",
     # AutoPost owns capture; shared Mall handoff is specified, not a live upload API.

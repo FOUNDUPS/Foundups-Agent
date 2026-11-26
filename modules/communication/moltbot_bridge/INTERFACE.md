@@ -57,6 +57,47 @@ unattended local invoker, write permission, forward eligibility or receiver ACK.
 Admitted host invocation, provider receipt verification and managed runtime
 restart acceptance remain separate activation gates.
 
+## Langfuse diagnostic lookup — 2026-11-01
+
+`src/reddog_langfuse_telemetry.py` exposes `read_review(public_key=...,
+secret_key=..., from_time=..., to_time=..., base_url=..., trace_id=None,
+max_pages=5, timeout=10) -> dict`. It performs GET requests only to official
+JP/EU/US Langfuse origins, using v2 observations with selective field groups.
+Windows credential custody and browser provisioning are outside this reader.
+No daemon package imports are required by the standalone
+`scripts/reddog_langfuse_review.py` entrypoint. CLI credentials prefer a complete
+`LANGFUSE_VIEWER_PUBLIC_KEY`/`LANGFUSE_VIEWER_SECRET_KEY` pair. Any incomplete
+Viewer pair rejects; absent Viewer names permit the complete legacy
+`LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` pair. Optional `--env-file` selects
+one authoritative file (up to 65,536 characters) with `python-dotenv`, without
+discovery, interpolation, process-environment updates or file/environment mixing.
+Without the flag, only process variables are used. Static JSON failures exit 2.
+
+Bounds: UTC `[from_time,to_time)` at most seven days, 1–5 pages, 100 rows/page,
+1 MiB/page, finite positive socket timeout up to fifteen seconds. No redirects
+or retries. `complete` requires exhausted pagination and no dropped rows;
+`pagination_exhausted` separately describes the backend cursor. Duplicate
+observations do not inflate sums. Unknown usage, cost, level and completion
+remain explicit. `verified_task_success_count` is always null: provider telemetry
+cannot supply independent task acceptance or effect authority.
+
+`trace_id_for_provider_call(call_id)` accepts the canonical call-ID grammar and
+derives a 32-hex correlation identifier; it alone does not validate a receipt.
+`project_provider_evidence(mapping, validator=validate_provider_call_evidence)`
+requires the caller's existing canonical receipt validator, then emits only
+trace ID, provider outcome and null task success. The compatibility `trace_id`
+field is a **candidate**, with `trace_id_source=derived_local_candidate`.
+`correlation_status` is `not_applicable` for BLOCKED_PRECALL, otherwise
+`unconfirmed`; `external_trace_id` stays null. The projector performs no lookup
+and cannot establish that any transport submitted this identifier.
+`diagnostic_stage` separates `precall`, `provider_failure`, `output_validation`,
+`provider_completion` and `unknown` using validated outcome/reason enums. Missing
+reason evidence stays unknown. Local grounding/redaction/subprocess diagnostics
+remain in their existing local owners and require no inference trace.
+No receipt schema changes,
+live request instrumentation, external writes or runtime admissions are added.
+See [the pilot usage and evidence limits](README.md#langfuse-diagnostic-pilot).
+
 ## Ollama fallback configuration contract — 2026-10-29
 
 `initialize_control_plane_state` assigns `_ollama_model` from

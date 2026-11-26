@@ -160,6 +160,52 @@ Correct display-escaping diagnoses through actual decoding. Production runtime,
 source, skills, authority and version pins remain unchanged; no RSI gate closes.
 Private replay evidence is preserved on O:; no Codex subagent authored the work.
 
+## 2026-11-02 — Qualify local telemetry correlation candidates
+
+WSP 5/11/22/50/91/97. The existing projection preserved a deterministic ID but
+did not expose whether transport submission or external observation was proved.
+Add explicit candidate provenance, unconfirmed/not-applicable correlation,
+null external trace identity, and bounded diagnostic-stage classification.
+Preserve the existing ID algorithm, receipt validator and null task success.
+No transport, credential receiver, extension package or promotion was changed.
+Regression checks cover real canonical receipt validation, legacy rejection,
+tampered IDs, all provider outcomes, and hostile caller-supplied trace/success
+claims. See tests/TestModLog.md and monitoring/RUNBOOK.md for evidence and gates.
+
+## 2026-11-01 — Explicit Viewer credential source
+
+The CLI now prefers a complete Viewer pair and rejects partial Viewer values.
+Optional `--env-file` uses the existing root `python-dotenv` dependency for an
+explicit, bounded source, with interpolation/discovery and environment mutation
+disabled. File and process credentials never mix. Explicit parser errors become
+static failures independently of logging. Review exposed a logging-disabled
+bypass in the initial warning guard; parser binding errors now close that gap.
+Core stdlib lookup and vault wrapper remain unchanged.
+Eighteen synthetic source tests and forty reader tests pass; no actual credential
+file or live API was read by this implementation slice. Root owns operational
+Viewer provisioning and v2 verification; live read acceptance remains pending.
+
+## 2026-11-01 — Bounded Langfuse diagnostic reader
+
+WSP 5/11/22/50/71/84/91/97. Added a stdlib-only, lookup-only v2 observations
+projection and CLI under the existing bridge owner. Separate Viewer credentials,
+fixed official regional origins, no redirects/retries, bounded UTC windows,
+pages, bytes and socket timeouts keep the first layer small. Content and arbitrary
+metadata never enter the diagnostic output. Unknown measurements keep coverage
+counts; provider completion cannot become task success. A separate correlation
+projection reuses the canonical provider-call validator and preserves v1 bytes.
+No governed transport, runtime authority, scheduler, external writes or live
+connection claim is introduced. Holo semantic retrieval retained its authority
+HEAD mismatch; lexical bundle freshness remains UNKNOWN with an index gap.
+Direct owner reads resolved noisy retrieval; absent requirements/memory README
+were recorded rather than fabricated. Manual implementation followed existing
+contracts because this new external privacy boundary required source inspection
+and offline tests; local Qwen/Gemma activation was unnecessary. Independent
+synthetic review checked privacy, cursor encoding, deduplication and bounds.
+Focused validation: 40 offline tests pass; no model/provider call was made.
+The initial test invocation produced two fixture setup errors from oversized
+pytest parameter IDs on Windows; explicit short IDs corrected the harness.
+
 ## 2026-11-01 — Native Hermes handler qualification
 
 ## 2026-11-01 — Reuse model binding verification without webhook startup

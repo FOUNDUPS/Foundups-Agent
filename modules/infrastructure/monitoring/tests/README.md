@@ -90,3 +90,17 @@ See TestModLog.md for detailed test development history.
 ---
 
 **WSP 13 Testing Compliance:** Structure Complete, Implementation Pending
+
+
+## Sentry manual-error privacy
+
+`test_sentry_error_telemetry.py` contains 27 offline cases for opt-in ordering,
+official DSN bounds, strict event reconstruction, missing/unavailable SDK behavior,
+empty Scope and disabled automatic features, fixed SDK errors and non-authoritative
+submission results. Langfuse CLI hook and probe help/argument paths are included.
+Synthetic SDK objects and credentials avoid live egress.
+
+Run with bytecode/plugins disabled:
+`python -B -m pytest -o addopts= --noconftest --import-mode=importlib -p no:cacheprovider modules/infrastructure/monitoring/tests/test_sentry_error_telemetry.py -q`
+
+Actual selected-SDK envelope and live event verification are separate gates.
