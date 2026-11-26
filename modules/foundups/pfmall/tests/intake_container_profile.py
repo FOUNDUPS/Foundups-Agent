@@ -49,6 +49,31 @@ FILES = (
 )
 
 
+_OS_SECURITY_VERSIONS = {
+    "apt": "3.0.4",
+    "libapt-pkg7.0": "3.0.4",
+    "libzstd1": "1.5.7+dfsg-1+deb13u1",
+    "zlib1g": "1:1.3.dfsg+really1.3.1-1+deb13u1",
+    "login.defs": "1:4.17.4-2+deb13u1",
+    "passwd": "1:4.17.4-2+deb13u1",
+}
+# Saved e28ee52de image's 87 installed packages, with only these six versions replaced.
+_OS_PACKAGE_MAP_SHA256 = "bf479675a8a15f6e3d6e31bc581df1d0ae2afff1532226bbdd81758a36b600e6"
+
+
+def _assert_os_package_versions(status):
+    packages = {}
+    for block in status.split("\n\n"):
+        fields = dict(line.split(": ", 1) for line in block.splitlines()
+                      if ": " in line and not line.startswith(" "))
+        if fields.get("Status") == "install ok installed":
+            assert fields["Package"] not in packages, "duplicate_os_package"
+            packages[fields["Package"]] = fields["Version"]
+    assert all(packages.get(k) == v for k, v in _OS_SECURITY_VERSIONS.items()), "os_security_versions_mismatch"
+    canonical = json.dumps(packages, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    assert hashlib.sha256(canonical).hexdigest() == _OS_PACKAGE_MAP_SHA256, "unapproved_os_package_delta"
+
+
 def _env(directory):
     result = {k: os.environ[k] for k in ("PATH", "SystemRoot", "WINDIR", "COMSPEC") if k in os.environ}
     result.update(HOME=str(directory), USERPROFILE=str(directory), DOCKER_CONFIG=str(directory / "docker-config"),
@@ -144,6 +169,7 @@ def build_image(directory):
     assert audit["packages"] == context["locked_packages"]
     assert audit["installer_absent"] is True
     assert 'VERSION_ID="13"' in audit["os_release"].splitlines()
+    _assert_os_package_versions(audit["os_packages"])
     audit["image"] = image
     (directory / "image-audit.json").write_text(json.dumps(audit, indent=2) + "\n")
     return image

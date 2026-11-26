@@ -1,5 +1,24 @@
 # p.fMALL Test ModLog
 
+## 2026-11-27 — Freeze exact OS inventory delta after the actual held scan
+
+WSP15 C2/I5/D5/Impact4=16/P0. Saved actual e28ee52de image has259 scan findings,
+57HIGH/15UNKNOWN and zero critical; functional823+3 PASS does not clear security.
+Before any Dockerfile repair, assert the six signed-Trixie fixed package versions
+and canonical JSON SHA256 of the complete87-package installed name/version map.
+Expected bf479675a8a15f6e3d6e31bc581df1d0ae2afff1532226bbdd81758a36b600e6 is derived by
+replacing only apt,libapt-pkg7.0,libzstd1,zlib1g,login.defs and passwd versions in
+the saved actual image inventory. Extra upgrades, new/removal packages or changes
+to the other81 versions reject acceptance. Keep Python3.12.15,18 wheel pins and
+all HTTP/image assertions fixed; preserve the original scan and security hold.
+Old-image RED and mutation-boundary results are retained externally; synthetic
+acceptance evidence is not Docker execution. Independent review must accept this
+freeze before a separately authorized exact6-package product transaction.
+Saved actual image rejects with os_security_versions_mismatch; the synthetic
+only-six-version map passes, while six wrong pins, other-version/removal/addition
+and duplicate-package mutations reject. Helper260 lines, maximum function66;
+all prior helper function ASTs remain except the additive OS assertion call.
+
 ## 2026-11-27 — Freeze recovered image acceptance against current main
 
 Reuse PR #2227's archive/blob, pin agreement, immutable image inventory and

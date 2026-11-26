@@ -1,3 +1,25 @@
+## 2026-11-27 — Freeze six-package security repair acceptance before product change
+
+WSP15 C2/I5/D5/Impact4=16/P0. Actual head e28ee52de hosted image passes823 normal
+cases plus3 image HTTP cases; Trivy0.76.1/current DB reports259 findings:
+57HIGH/107MEDIUM/80LOW/15UNKNOWN, zero critical and zero reported secrets.
+Keep PR #2482 draft and its image-security hold.57HIGH are package/issue records,
+including repeated source-package findings; this is not57 proven HTTP exploits.
+Signed Trixie/Trixie-security Release and Packages metadata confirm exact existing
+package fixes:apt/libapt-pkg7.0=3.0.4,libzstd1=1.5.7+dfsg-1+deb13u1,
+zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1,login.defs/passwd=1:4.17.4-2+deb13u1.
+Freeze their six inventory versions in the existing image helper. Bind the full
+87-package name/version map to canonical SHA256 bf479675a8a15f6e3d6e31bc581df1d0ae2afff1532226bbdd81758a36b600e6;
+only those six versions may differ from the saved actual image. Extra upgrades,
+new/removal packages or unresolved dependency closure must stop for scope review.
+Saved old image must fail this stronger acceptance before any Dockerfile amendment.
+Python3.12.15,18 wheel pins, application/auth/HTTP oracles and scanner policy stay
+fixed. Targeted product repair awaits independent acceptance review; no APT/Docker
+execution or Dockerfile change occurs in this freeze.53HIGH/13UNKNOWN have no
+recorded fixed Trixie version; partial repair cannot clear the security hold.
+Acceptance-only replay:actual old image RED; synthetic six-only map PASS and12
+boundary mutations reject, including residual-configuration package states. No image rebuild or security-clearance claim follows.
+
 ## 2026-11-27 — Recover current-main intake image closure
 
 WSP15 C3/I4/D4/Impact4=15/P1; RECONCILE PR #2227 a7109ba09 against main1e7d6992.
