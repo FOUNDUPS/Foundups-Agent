@@ -680,7 +680,17 @@ def test_canonical_contract_declares_repository_evidence_validator() -> None:
     contract = load_contract(DEFAULT_CONTRACT_PATH)
     validator = contract["wsp_97"]["validator"]
 
-    assert contract["wsp_97"]["version"] == "1.9"
+    assert contract["wsp_97"]["version"] == "1.10"
+    continuity_gate = contract["wsp_97"]["work_continuity_lane_admission_gate"]
+    assert continuity_gate["required_when"] == ["start", "switch", "resume", "close"]
+    assert continuity_gate["canonical_skill"] == ".claude/skills/foundups-work/SKILL.md"
+    assert continuity_gate["codex_skill_projection"] == ".agents/skills/foundups-work/SKILL.md"
+    assert continuity_gate["concatenation"].startswith("WSP_00_identity_lock -> WSP_97")
+    assert continuity_gate["policy_precedence"].startswith("WSP 97 is normative")
+    assert continuity_gate["read_only_inventory"] == "scripts/foundups_work_preflight.py"
+    assert "NEEDS_012_DECISION" in continuity_gate["classifications"]
+    assert "never reset, stash, clean" in continuity_gate["destructive_boundary"]
+    assert "tests actually run" in continuity_gate["closure_receipt"]
     reuse_gate = contract["wsp_97"]["test_inventory_reuse_gate"]
     assert reuse_gate["required_before_test_authoring"] is True
     assert reuse_gate["applies_when"] == ["create", "modify", "replace", "expand"]

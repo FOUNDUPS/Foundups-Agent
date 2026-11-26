@@ -249,6 +249,46 @@ Required rules:
 
 This gate governs convergence, not authorization. It never bypasses review requirements, branch protection, CI, security, ownership, or a narrower WSP.
 
+### 1.2A.1 Work Continuity / Lane Admission Gate
+
+Before starting, switching, resuming, or closing repository work, WSP 97 MUST reconcile the current Git lane and visible unfinished work. A new instruction does not erase the prior lane's state.
+
+**Required evidence**:
+1. Resolve the exact repository, current worktree, branch, HEAD, default reference, upstream divergence, and staged/tracked/untracked/conflicted state.
+2. Inspect visible linked worktrees and relevant work-ledger, roadmap, ModLog, TestModLog, PR/CI, deployment, and session-briefing evidence.
+3. Classify relevant work as `CURRENT`, `RELATED_CONTINUE`, `PARK`, `CLOSE`, `SUPERSEDED`, `SALVAGE`, `BLOCKED`, `EXTERNALLY_OWNED`, `EVIDENCE_UNAVAILABLE`, or `NEEDS_012_DECISION`.
+4. Bind the selected WSP 15 receipt and execution scope to an owned branch/worktree before mutation.
+
+The canonical operator entrypoint is `.claude/skills/foundups-work/SKILL.md`; `.agents/skills/foundups-work/SKILL.md` is its exact Codex projection. The skill operationalizes this gate and MUST defer to WSP 97 when they drift; it does not create separate policy. Use `scripts/foundups_work_preflight.py` as the repository's read-only Git inventory when available. Its output is evidence, not ownership proof or cleanup authorization. The existing work-ledger lifecycle is the durable continuity surface; do not create a second scheduler or ledger merely to record a task switch.
+
+Canonical concatenation:
+
+```text
+WSP 00 identity/role/origin lock
+  -> WSP 97 work continuity gate
+  -> foundups-work operator skill
+  -> read-only preflight + existing work ledger
+  -> WSP 15 eligible-slice selection
+  -> owned execution + closure receipt
+```
+
+WSP 00 remains the identity bootstrap. It hands execution to WSP 97 after the lock; it does not own Git-lane policy, work prioritization, or cleanup decisions.
+
+Current-lane dirt may remain only when file-level evidence shows it belongs to the admitted slice and ownership is explicit. Otherwise the prior work MUST be closed, parked, blocked, or escalated with its exact branch/worktree, HEAD, dirty state, evidence, blocker, and next executable step before changing lanes.
+
+**Destructive boundary**: never reset, stash, clean, switch, delete, merge, commit, or rewrite another lane to manufacture cleanliness. Ambiguous ownership, potentially unique work, destructive disposition, or strategic scope conflict requires one concrete 012 decision with evidence, options, consequence, and recommendation. Facts recoverable from repository evidence do not require 012 escalation.
+
+**Closure receipt**: before leaving a slice, record the final lifecycle state, exact source, tests actually run, external state actually observed, remaining dirt, blocker, and next step; then re-run the lane inventory. A slice is not cleanly handed off when unique work survives only as unexplained dirt or when recovery depends on conversational memory.
+
+**Failure conditions**:
+- a new task mutates a dirty shared checkout without ownership reconciliation;
+- relevant dirty or ahead worktrees are ignored because they are not the current directory;
+- a clean worktree is treated as proof that its branch is merged, obsolete, or safe to remove;
+- work is described as closed without exact source and validation evidence;
+- cleanup or history mutation occurs before required ownership/content review.
+
+**Relationships**: WSP 10 owns recoverable state save; WSP 15 owns priority; WSP 22 owns ModLog/TestModLog history; WSP 50 owns pre-action verification; WSP 81 governs protocol changes. WSP 97 binds these into task admission, transition, and closure.
+
 ### 1.2B Test Inventory / Reuse Gate
 
 When a task may create, modify, replace, or expand tests, WSP 97 MUST apply the WSP 22 TestModLog pattern before test authoring.

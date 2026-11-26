@@ -219,7 +219,7 @@ def test_protocols_bind_wsp15_economics_test_reuse_and_truth_boundary() -> None:
     for phrase in ("Do I need it?", "Can I afford it?", "Can I live without it now?", "SPECIFIED_NOT_IMPLEMENTED"):
         assert phrase in wsp97
     assert "Test Inventory / Reuse Gate" in wsp97
-    assert contract["version"] == "1.9"
+    assert contract["version"] == "1.10"
     reuse_gate = contract["test_inventory_reuse_gate"]
     assert reuse_gate["required_before_test_authoring"] is True
     assert reuse_gate["applies_when"] == ["create", "modify", "replace", "expand"]
