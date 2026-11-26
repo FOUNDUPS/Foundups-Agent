@@ -1746,6 +1746,40 @@ promotion, external account action, reward or production RSI gain is claimed.
   escalation, supervisor, or feedback use.
 - Rejected escaping log globs and serialized concurrent scan cycles.
 
+### [2026-07-18] - WRE_WORKTREE_REGISTRY_AND_CWD_HAZARD_GUARD_PHASE1
+
+**WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15
+(Priority), WSP 22 (ModLog), WSP 34 (Git Operations), WSP 50 (Pre-Action),
+WSP 85 (Root Hygiene), WSP 97 (Truth Boundary)
+
+**Type**: Read-only worktree registry evidence and mutation admission guard.
+
+**Deliverable**:
+- Added `src/wre_worktree_registry_guard.py`: runs five allowlisted read-only
+  Git argv commands through an injected runner, parses bounded worktree
+  porcelain, proves cwd/common-dir/owner/head binding, classifies detached,
+  locked, missing, prunable, and dead-PID lock state, and emits a sealed typed
+  receipt. Dirty path names are never persisted; only a digest is exposed.
+- Added a separate mutation admission check that rejects stale or tampered
+  receipts, shared-primary checkout ownership, detached/locked/stale owners,
+  intended-owner mismatch, expired proof, symlink/junction ambiguity, and
+  Windows device prefixes.
+- Added focused and adversarial tests for the repeated shared-root cwd hazard,
+  dead/live lock classification, detached worktrees, dirty-state privacy,
+  malformed porcelain, head mismatch, receipt tampering/expiry, argv
+  confinement, and no cleanup/write primitives.
+
+**Boundary**: Audit is read-only by default. This slice does not remove, prune,
+unlock, move, create, or edit worktrees; execute worker commands; wire startup;
+mutate HoloIndex; publish a PR; push; or merge. Stale lock paths are bounded
+remediation candidates only. The receipt digest provides deterministic
+integrity, not cryptographic authentication or execution authority.
+
+**HoloIndex**: Read-only semantic preflight surfaced both existing command-cwd
+guards. No re-index was performed.
+
+**WSP_15**: 3 + 5 + 5 + 5 = 18 (P0).
+
 ### [2026-07-18] - WRE_HOLO_SEMANTIC_PREFLIGHT_PHASE1
 
 **WSP Protocol References**: WSP 00 (Operational Grounding), WSP 15

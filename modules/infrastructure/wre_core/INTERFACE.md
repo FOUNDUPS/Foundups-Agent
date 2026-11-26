@@ -744,6 +744,37 @@ authority, establish real economic outcomes or serve as a generic code judge.
 
 ## WREMasterOrchestrator
 
+### Worktree Registry and CWD Hazard Guard
+
+```python
+from modules.infrastructure.wre_core.src.wre_worktree_registry_guard import (
+    audit_worktree_registry,
+    validate_worktree_mutation_admission,
+)
+
+receipt = audit_worktree_registry(cwd=worker_cwd)
+admission = validate_worktree_mutation_admission(
+    receipt=receipt,
+    intended_worktree_path=assigned_worktree,
+)
+```
+
+`audit_worktree_registry()` executes only allowlisted read-only Git argv through
+an injectable runner. It emits cwd/common-dir/owner/head proof, registry counts,
+bounded stale-lock remediation candidates, and a digest of dirty state. It
+never exposes the dirty path list in the receipt and never mutates worktrees.
+
+`validate_worktree_mutation_admission()` is the mutation-mode gate. It requires
+a fresh, untampered receipt and exact ownership of an isolated, branch-bound,
+unlocked worktree. Shared-primary checkout, detached, stale, locked, ambiguous,
+or mismatched paths fail closed. Passing this gate proves only cwd/worktree
+isolation; it does not grant write, shell, Git, worker, PR, or merge authority.
+The receipt ID is a deterministic integrity digest, not a signature or an
+authenticated authority receipt. A downstream authority gate must bind its own
+signed request and rerun this admission check immediately before mutation.
+
+### Data Structures
+
 ```python
 from modules.infrastructure.wre_core.wre_master_orchestrator import (
     WREMasterOrchestrator,
