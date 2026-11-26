@@ -165,6 +165,69 @@ Material external replies and procedural outcomes stay in YUMORI.me Moshpit beca
 - Mark monk-reported activity as `REPORTED_BY_012` unless independently verified.
 - Distinguish verified facts from pending/unknown details.
 
+## Scoped correspondence receipts — GMAIL_RECEIPT_REQUIRED
+
+Apply this manual reconciliation policy only to an explicitly authorized FoundUp
+correspondence scope. Fix the project, mailbox coverage, event-date window,
+project timezone and as-of boundary first. Retrieve relevant messages within
+that scope; do not crawl unrelated mail or import a whole mailbox.
+
+Materiality determines the top-level campaign story, not whether a scoped email
+retains evidence. Every scoped sent or received message must remain recoverable
+exactly once as a private evidence child, including when several messages are
+grouped under one material event. Keep full correspondence in Gmail and the
+existing private Email Log; retain only compact, audience-permitted activity
+receipts in the Moshpit. Do not create another mailbox or activity ledger.
+
+### Message identity, date and state
+
+- `message_id` identifies one email event; `thread_id` records its conversation
+  lineage. A subject, draft ID or thread ID cannot substitute for a message ID.
+  Replies, forwards, corrections and supplements are distinct message events,
+  even when their subjects match. A later correction links the original receipt
+  and its supersession without duplicating the original event.
+- Retain stable message URLs and MID/TID evidence only in an authorized private
+  Email Log or private evidence child. Public projections redact those
+  identifiers and exclude private envelopes, bodies, BCC lists, contact fields
+  and attachments. Check the destination audience before retaining any link.
+- Derive the event day from its own offset-aware sent/received timestamp in the
+  project's timezone. Preserve date-only precision; missing or conflicting time
+  remains UNKNOWN. Never substitute the audit day, thread's latest date, device
+  timezone or draft-creation date. A sent message later moved to Trash remains
+  a sent event on its actual source day.
+- Keep `DRAFT`, `SENT`, `RECEIVED`, `AUTO-REPLY`, `BOUNCE` and `TECHNICAL_SEND`
+  distinct. Drafting does not increase the sent count. Technical self-tests and
+  accidental diagnostic sends remain auditable without counting as substantive
+  outreach. An automatic acknowledgment is not a human reply; absence of a
+  bounce does not establish delivery or the named person's receipt.
+
+### Bounded reconciliation and readback
+
+1. Inventory relevant primary Gmail message IDs in the fixed scope, including
+   applicable archived and trashed sent mail. Exhaust the relevant pagination;
+   a snippet-only search is not complete coverage. Read disputed messages and
+   their full threads without importing unrelated correspondence.
+2. Reconcile the union of scoped recipient, subject and distinctive-body
+   searches with existing Email Log IDs and Moshpit evidence children. Report
+   missing IDs, duplicate canonical entries, incorrect local dates, unresolved
+   lineage and state conflicts. State coverage totals and exclusions explicitly.
+3. Compare surviving drafts with actual provider-Sent envelopes, recipient
+   coverage and substantive content. Reuse the existing
+   [Sent-first contact preflight](../yumori_contact_ledger/SKILLz.md#sent-first-reconciliation)
+   before any separately authorized send-capable action. Ambiguous send results
+   require provider reconciliation; a surviving draft proves neither sent nor
+   unsent. Missing log evidence never authorizes a resend.
+4. When a separately authorized correspondence action has occurred, verify its
+   actual provider state and metadata before reconciling one existing Email Log
+   event and one Moshpit evidence receipt. Use the native Docs revision/readback
+   guards above. Backfill beneath the actual event day, preserving historical
+   narratives, source links and explicit supersession. Read back the destination
+   to verify the receipt appears once with the correct date, lineage and state.
+5. Close the manual audit with its checked scope, coverage totals and unresolved
+   exclusions. An ID reconciliation is not fresh verification of every claim in
+   each historical message. This policy implements no automatic Gmail capture,
+   scheduled writer, provider operation, membership grant or send authority.
+
 ## Write procedure
 
 Before editing:

@@ -1,3 +1,26 @@
+## 2026-11-27 — Recover scoped correspondence receipt policy
+
+- Reconcile the `GMAIL_RECEIPT_REQUIRED` obligation retained by
+  [PR #1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590)
+  from the existing #1645 source `4b316c976aa3cdba21b901191159716f3d58631d`
+  into `skillz/yumori_moshpit/SKILLz.md`. Keep material top-level activity
+  separate from complete, private per-message evidence within the authorized
+  project/mailbox/date/as-of scope. Preserve event-date precision, state classes,
+  primary-ID reconciliation, destination readback and the no-resend boundary.
+- Extend the canonical skill only; preserve existing brand, chronology, native
+  Docs, privacy and contact-preflight contracts. No duplicate skill, registry,
+  manifest, sender or activity ledger. The original #1648 runtime/reader work
+  remains open; this recovers only its manual receipt-policy obligation.
+- WSP 15 C2/I3/D3/Impact3 = 11/P2; docs plane. Source-bound lexical retrieval
+  identifies base `1e7d6992f2cfa472cea5cdcf586aa95a8fcc20b0` with UNKNOWN semantic
+  freshness and an index gap. Direct source/skill/test comparison supplies the
+  scoped evidence; no index repair or runtime admission is claimed.
+- Existing `tests/test_contracts.py`: 25 passed, with two inactive asyncio
+  configuration warnings. Provider credentials were excluded and dotenv/plugin
+  autoload disabled. No tests were authored. Independent review, hosted checks
+  and merge/main verification remain separate gates. No live Gmail/Docs action,
+  automated capture, production deployment or new send authority. WSP 10/22/50/97.
+
 ## 2026-11-19 — Reconcile PR #1762 residual lint dependencies
 
 - Preserve current Next 16.4.6, React 19.3.1, sharp 0.35.5 and Cloudflare peer versions. Apply only the missing eslint-config-next/@next/eslint-plugin-next 16.3.4 graph, including two required nested utility packages; every unrelated lock entry is unchanged. The Clerk companion keeps its newer runtime and adds the proposed fastq 1.20.3 plus a standard home-link lint repair.
