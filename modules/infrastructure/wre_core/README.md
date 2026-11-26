@@ -1,3 +1,47 @@
+## Layer-2A current-window readiness evidence — 2026-11-24
+
+WRE Core distinguishes `database_lifetime` history from bounded `current_window`
+readiness evidence without modifying SQLite storage or weakening 19/P0 custody
+gates:
+
+- `PatternMemory.get_telemetry_dashboard(*, since=None, collection_id=None, now=None)`
+  preserves 0-arg `database_lifetime` metrics and `metric_evidence`, adds
+  `collection_scope` (with `upper_bound` and
+  `naive_timestamp_policy="excluded_ambiguous_timezone"`), rejects zone-less or
+  invalid `since`/`now` and `since > evaluated_at`, excludes zone-less rows
+  (`naive_timestamp_excluded`) and future timestamps (`row_dt > evaluated_at`),
+  and computes read-only `current_metric_evidence` when `since` is supplied.
+  Dashboard writers (`record_retrieval`, `store_variation`, `increment_counter`)
+  emit explicit UTC ISO-8601 timestamps.
+- `DashboardAlertMonitor.evaluate_metric_statuses()`, `check_all()`,
+  `unknown_metrics()`, `run_check()`, and `check_dashboard_health()` honor
+  active `current_window` scope when `current_since` is configured while
+  retaining lifetime history via `check_lifetime_all()` / `historical_alerts` /
+  `historical_critical_count`; classify historical-only metrics as
+  `STALE_UNKNOWN` / `stale_historical_only`, future exclusions as `UNKNOWN` /
+  `future_timestamp_excluded`, and zone-less exclusions as `UNKNOWN` /
+  `naive_timestamp_excluded`; never promote unwindowed cumulative counters to
+  `PASS`; and surface `current_readiness` plus `metric_samples`.
+- `dae_preflight.dashboard_readiness()` retains `unattended_work_allowed=False`,
+  `admission_authority_verified=False`, `worker_admission_granted=False`, and
+  `model_admission_granted=False` across telemetry-only evaluations (defaulting
+  absent admission proof to `unresolved_admission_gates=("protected_admission_unverified",)`). See
+  [INTERFACE.md](INTERFACE.md#layer-2a-current-window-readiness-evidence--2026-11-24).
+
+## Worker WSP_00 0.2A & WSP_97 operation contract — 2026-11-24
+
+WRE Core provides a pure-evaluation worker contract (`src/wre_worker_wsp97_contract.py`)
+and an additive backwards-compatible pre-execution envelope hook in
+`src/codeact_executor.py` (`CodeActExecutor(..., enforce_wsp00_envelope=False)`).
+`validate_worker_wsp00_envelope()` enforces `self == "0102"`, locked `role`,
+`origin`, non-empty `principal_ref`, implicit role-escalation rejection, and
+distinct `worker_id` / `verifier_id`; `build_worker_wsp97_prompt_contract()`
+renders canonical CoT/CoR prompt contracts from
+`WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.json`;
+`validate_worker_wsp97_receipt()` delegates repository-bound v1.1 receipt
+validation to `tools.wsp97_execution_validator`. No manifest-pinned files or
+19/P0 custody gates are modified. See [INTERFACE.md](INTERFACE.md#worker-wsp_00-02a--wsp_97-contract--2026-11-24).
+
 ## Scientific self-healing & fail-closed measured RSI — 2026-11-16
 
 WRE Core integrates the scientific repair state machine (`src/repair_operation_contract.py`

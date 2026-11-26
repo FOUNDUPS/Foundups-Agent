@@ -62,3 +62,28 @@ def test_invalid_minimum_does_not_crash_diagnostics(monkeypatch, capsys):
     monkeypatch.setattr(dae_preflight, "run_dae_preflight", lambda *a, **k: False)
     assert command()() is False
     assert "readiness=UNKNOWN" in capsys.readouterr().out
+
+
+def test_menu_connect_wre_separates_total_executions_from_metric_samples(monkeypatch, capsys):
+    monkeypatch.setenv("WRE_DASHBOARD_PREFLIGHT", "1")
+    monkeypatch.setenv("WRE_DASHBOARD_AUTO_ENFORCE", "1")
+    monkeypatch.setattr(dae_preflight, "run_dae_preflight", lambda *a, **k: True)
+    monkeypatch.setattr(dashboard_alerts.DashboardAlertMonitor, "is_in_watch_period", lambda self: False)
+    monkeypatch.setattr(dashboard_alerts, "check_dashboard_health", lambda: {
+        "healthy": False,
+        "alerts": [],
+        "insufficient_data": True,
+        "total_executions": 45,
+        "min_samples": 25,
+        "metric_samples": {"retrieval_coverage": 0, "variation_win_rate": 0},
+        "telemetry_scope": "current_window",
+        "historical_critical_count": 1,
+        "current_readiness": "STALE_UNKNOWN",
+    })
+    assert command()() is False
+    output = capsys.readouterr().out
+    assert "connection=CHECKED readiness=UNKNOWN" in output
+    assert "total_executions=45 min_samples=25" in output
+    assert "samples=45/25" not in output
+    assert "[CONNECT-WRE] metric_samples=retrieval_coverage=0,variation_win_rate=0" in output
+    assert "scope=current_window historical_critical=1 unattended_work_allowed=False" in output

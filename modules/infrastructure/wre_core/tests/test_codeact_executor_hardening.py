@@ -306,3 +306,72 @@ def test_denied_read_stops_later_action_and_retains_earlier_capture(tmp_path):
     assert result.outputs == {"seed": "preserved", "before": "earlier content"}
     assert read.call_count == 1
     assert read.call_args.args[0] == repo / "before.txt"
+
+
+def test_codeact_without_wsp00_envelope_preserves_backwards_compatibility(tmp_path: Path):
+    executor = CodeActExecutor(repo_root=tmp_path)
+    skill = _exit_truth_skill({"main_action": {"type": "shell", "command": "python --version", "capture": "out"}})
+    with patch("modules.infrastructure.wre_core.src.codeact_executor.subprocess.run") as mock_run:
+        mock_run.return_value = CompletedProcess([], 0, "Python 3.x", "")
+        result = executor.execute(skill, {"seed": "ok"})
+    assert result.success is True
+    assert result.actions_executed == 1
+    assert result.outputs == {"seed": "ok", "out": "Python 3.x"}
+
+
+def test_codeact_rejects_self_012_wsp00_envelope_before_actions(tmp_path: Path):
+    llm_calls = []
+    executor = CodeActExecutor(repo_root=tmp_path, llm_callback=llm_calls.append)
+    skill = _exit_truth_skill({
+        "pre_actions": [{"type": "shell", "command": "python --version", "capture": "out"}],
+        "main_action": {"type": "llm_generate", "prompt_template": "hello"},
+    })
+    context = {
+        "wsp00_envelope": {
+            "self": "012",
+            "role": "worker",
+            "origin": "internal_handoff",
+            "principal_ref": "012",
+        }
+    }
+    with patch("modules.infrastructure.wre_core.src.codeact_executor.subprocess.run") as mock_run:
+        result = executor.execute(skill, context)
+    assert result.success is False
+    assert result.actions_executed == 0
+    assert result.gates_triggered == ["wsp00_envelope:FAIL_SELF_IS_012"]
+    assert "FAIL_SELF_IS_012" in (result.error or "")
+    assert mock_run.call_count == 0
+    assert llm_calls == []
+
+
+def test_codeact_rejects_missing_envelope_when_enforce_flag_enabled(tmp_path: Path):
+    executor = CodeActExecutor(repo_root=tmp_path, enforce_wsp00_envelope=True)
+    skill = _exit_truth_skill({"main_action": {"type": "shell", "command": "python --version", "capture": "out"}})
+    with patch("modules.infrastructure.wre_core.src.codeact_executor.subprocess.run") as mock_run:
+        result = executor.execute(skill, {})
+    assert result.success is False
+    assert result.actions_executed == 0
+    assert result.gates_triggered == ["wsp00_envelope:FAIL_ENVELOPE_TYPE"]
+    assert mock_run.call_count == 0
+
+
+def test_codeact_accepts_valid_wsp00_worker_envelope(tmp_path: Path):
+    executor = CodeActExecutor(repo_root=tmp_path, enforce_wsp00_envelope=True)
+    skill = _exit_truth_skill({"main_action": {"type": "shell", "command": "python --version", "capture": "out"}})
+    context = {
+        "expected_wsp00_role": "worker",
+        "wsp00_envelope": {
+            "self": "0102",
+            "role": "worker",
+            "origin": "internal_handoff",
+            "principal_ref": "012",
+            "worker_id": "worker-1",
+            "verifier_id": "verifier-1",
+        },
+    }
+    with patch("modules.infrastructure.wre_core.src.codeact_executor.subprocess.run") as mock_run:
+        mock_run.return_value = CompletedProcess([], 0, "Python 3.x", "")
+        result = executor.execute(skill, context)
+    assert result.success is True
+    assert result.actions_executed == 1
+    assert result.outputs["out"] == "Python 3.x"
