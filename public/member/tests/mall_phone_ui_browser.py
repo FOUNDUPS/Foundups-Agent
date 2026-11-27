@@ -15,6 +15,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--root', type=Path, default=Path.cwd())
 parser.add_argument('--out', type=Path)
 parser.add_argument('--case', action='append', default=[])
+parser.add_argument('--phone-size', choices=['414x896', '402x874'], default='414x896',
+                    help='Explicit CSS mobile/touch fixture; not physical Safari viewport qualification')
 parser.add_argument('--include-defensive', action='store_true',
                     help='Run separately reviewed history literal-rendering checks after its defensive source patch is adopted')
 args = parser.parse_args()
@@ -41,7 +43,8 @@ REPORT = {
         'status': 'SELECTED_REQUIRES_REVIEWED_SOURCE' if args.include_defensive or 'history-literal-rendering' in args.case
                   else 'PENDING_SEPARATE_DEFENSIVE_REVIEW',
         'engines': ['chromium', 'webkit']},
-    'viewport': {'width': 414, 'height': 896},
+    'viewport': dict(zip(('width', 'height'), map(int, args.phone_size.split('x')))),
+    'device_qualification': 'Explicit CSS mobile/touch fixture; physical Safari, safe area and keyboard UNEXECUTED',
     'playwright': importlib.metadata.version('playwright'),
     'root': str(ROOT), 'cases': [], 'started_epoch': time.time(),
 }
@@ -67,7 +70,7 @@ def assert_true(condition, detail):
 def make_page(browser, block=False, block_storage=False, silent_start=False, desktop=False, hold_ready=False):
     context = browser.new_context(viewport={'width': 1440, 'height': 900} if desktop else REPORT['viewport'], is_mobile=not desktop,
                                   has_touch=not desktop, service_workers='block',
-                                  reduced_motion='reduce')
+                                  reduced_motion='reduce', offline=True)
     init = fixture.provider + ('\nif(window.fixturePlayback)window.fixturePlayback.block=true;' if block else '')
     if block_storage:
         init += """\n(() => {const original=Storage.prototype.setItem;
@@ -212,14 +215,17 @@ def checkpoint(page, name):
       const docks=[...document.querySelectorAll('.mall-member-search-dock')].filter(visible);
       const dock=docks[0],input=dock?.querySelector('textarea'),r=input?.getBoundingClientRect();
       const scopedActions=document.documentElement.dataset.mallVideoScope==='hpc';
-      const add=dock?.querySelector(scopedActions?'.mall-search-plus':'.mall-search-add'),ar=add?.getBoundingClientRect();
+      const guest=!!window.mallVideoProjection?.isOpenMallHost(location)&&!window.mallVideoProjection.isAdmissionRequest(location);
+      const contribution=dock?.querySelector('.mall-search-add');
+      const add=dock?.querySelector(scopedActions||guest?'.mall-search-plus':'.mall-search-add'),ar=add?.getBoundingClientRect();
       return {count:docks.length,same:!window.independentDock||dock===window.independentDock,
         inert:!!dock?.closest('[inert]'),inputRect:r?.toJSON(),
         inputHit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===input:false,
         sameFrame:!window.independentFrame||document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame,
         created:window.fixturePlayback.created,state:window.mallVideoPlayer?.getPlaybackSnapshot?.(),
         addRect:ar?.toJSON(),addPosition:add?getComputedStyle(add).position:null,
-        addKind:scopedActions?'actions':'contribution',
+        guest,contributionHidden:!!contribution?.hidden,contributionDisabled:!!contribution?.disabled,
+        addKind:scopedActions||guest?'actions':'contribution',
         addHit:ar?add.contains(document.elementFromPoint(ar.left+ar.width/2,ar.top+ar.height/2)):false,
         modalDock:!!dock?.closest('.video-player-shared-dock-host'),
         scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
@@ -234,6 +240,9 @@ def checkpoint(page, name):
     assert_true(value['addRect']['width'] >= 44 and value['addRect']['height'] >= 44,
                 {'checkpoint': name, 'small_add_target': value})
     assert_true(value['addHit'], {'checkpoint': name, 'action_obscured': value})
+    if value['guest']:
+        assert_true(value['contributionHidden'] and value['contributionDisabled'],
+                    {'checkpoint': name, 'guest_contribution_exposed': value})
     assert_true(not value['modalDock'] or value['addPosition'] != 'absolute',
                 {'checkpoint': name, 'modal_add_left_absolute': value})
     return value
@@ -246,17 +255,38 @@ def public_action_layout(page, name):
         dog=anchor.querySelector(':scope > .red-dog-btn'),add=dock.querySelector('.mall-search-add'),
         input=dock.querySelector('.mall-member-search-bar textarea');
       const d=dog.getBoundingClientRect(),a=add.getBoundingClientRect(),i=input.getBoundingClientRect();
+      const guest=!!window.mallVideoProjection?.isOpenMallHost(location)&&!window.mallVideoProjection.isAdmissionRequest(location);
       const hit=(e,r)=>e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));
       return {dog:d.toJSON(),add:a.toJSON(),input:i.toJSON(),dogHit:hit(dog,d),addHit:hit(add,a),
+        guest,addHidden:add.hidden,addDisabled:add.disabled,
+        controls:[...dock.querySelectorAll('button:not([hidden]),a:not([hidden])')].filter(e=>e.getClientRects().length).map(e=>{
+          const r=e.getBoundingClientRect();return {name:e.getAttribute('aria-label')||e.textContent.trim(),rect:r.toJSON(),hit:hit(e,r)};}),
         inputHit:hit(input,i),expanded:dock.querySelector('form').hasAttribute('data-expanded'),
         viewportWidth:innerWidth,scrollWidth:document.documentElement.scrollWidth};
     }""")
-    assert_true(value['dog']['width'] >= 44 and value['dog']['height'] >= 44 and
-                value['add']['width'] >= 44 and value['add']['height'] >= 44,
+    assert_true(value['dog']['width'] >= 44 and value['dog']['height'] >= 44,
                 {'layout': name, 'small_touch_target': value})
-    assert_true(value['dog']['x'] + value['dog']['width'] <= value['add']['x'] + 1,
-                {'layout': name, 'dog_not_before_add': value})
-    assert_true(value['dogHit'] and value['addHit'] and value['inputHit'],
+    if value['guest']:
+        assert_true(value['addHidden'] and value['addDisabled'] and value['add']['width'] == 0 and value['add']['height'] == 0,
+                    {'layout': name, 'guest_contribution_exposed_or_reserved': value})
+        requests=[]
+        listener=lambda request:requests.append(request.url)
+        page.on('request',listener)
+        before=page.evaluate('JSON.stringify(window.mallStateRestore.peekAdmissionIntent())')
+        original_url=page.url
+        page.locator('.mall-search-add').evaluate("e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+        page.wait_for_timeout(30)
+        page.remove_listener('request',listener)
+        assert_true(not requests and page.url==original_url and page.evaluate('JSON.stringify(window.mallStateRestore.peekAdmissionIntent())')==before and page.locator('#mallContributionReview').count()==0,
+                    {'layout':name,'guest_synthetic_add_effect':requests})
+    else:
+        assert_true(value['add']['width'] >= 44 and value['add']['height'] >= 44 and value['addHit'],
+                    {'layout': name, 'contribution_target': value})
+        assert_true(value['dog']['x'] + value['dog']['width'] <= value['add']['x'] + 1,
+                    {'layout': name, 'dog_not_before_add': value})
+    assert_true(all(c['rect']['width']>=44 and c['rect']['height']>=44 and c['hit'] for c in value['controls']),
+                {'layout':name,'remaining_control_target':value})
+    assert_true(value['dogHit'] and value['inputHit'],
                 {'layout': name, 'controls_obscured': value})
     assert_true(value['scrollWidth'] <= value['viewportWidth'] + 1,
                 {'layout': name, 'overflow': value})
@@ -274,13 +304,13 @@ def public_header(page):
     expect(page.locator('#redDogListening')).not_to_be_visible()
     b, a = brand.bounding_box(), account.bounding_box()
     assert_true(abs(b['y'] + b['height']/2 - a['y'] - a['height']/2) <= 12,
-                {'header_not_compact_one_row_at414': {'brand': b, 'account': a}})
+                {'header_not_compact_one_row': {'viewport':REPORT['viewport'],'brand': b, 'account': a}})
     page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-public-header.png')))
-    layouts = [public_action_layout(page, 'default-414')]
+    layouts = [public_action_layout(page, 'default-'+args.phone_size)]
     search = page.locator('.mall-member-search-dock:visible .mall-member-search-bar textarea')
     search.fill('A viewport-sized Mall query for checking wrapped input and both trailing actions. ' * 3)
     expect(page.locator('.mall-member-search-dock:visible .mall-member-search-bar')).to_have_attribute('data-expanded', '')
-    layouts.append(public_action_layout(page, 'expanded-query-414'))
+    layouts.append(public_action_layout(page, 'expanded-query-'+args.phone_size))
     search.fill('')
     expect(page.locator('#mallProjection')).to_have_count(1)
     expect(page.locator('#mallProjection')).not_to_be_visible()

@@ -146,7 +146,8 @@ def route_local(route):
     u = urlsplit(route.request.url)
     if u.hostname in {"hpc.foundups.com", "foundups.com", "play.foundups.com",
                       "foundupscom--play-v26-iphone-jxbn78ue.web.app",
-                      "foundupscom--play-wave5-20261127-fixture.web.app"}:
+                      "foundupscom--play-wave5-20261127-fixture.web.app",
+                      "foundupscom--play-wave5-phone-20261127-fixture.web.app"}:
         if u.path == "/member/mall-public-video-catalog.json":
             route.fulfill(status=200, json=catalog)
             return
@@ -1987,8 +1988,9 @@ def verify_public_entry(browser_type):
     browser=browser_type.launch()
     observed=[]
     try:
-        for width,height in [(390,844),(1366,900)]:
+        for width,height in [(390,844),(414,896),(402,874),(1366,900)]:
             context=browser.new_context(viewport={'width':width,'height':height},
+                is_mobile=width<760,has_touch=width<760,offline=True,
                 service_workers='block',reduced_motion='reduce')
             requested=[]
             def routes(route):
@@ -2025,7 +2027,7 @@ def verify_public_entry(browser_type):
                 assert page.evaluate('window.mallStateRestore.peekAdmissionIntent()') is None
                 assert requested==before,requested
                 assert page.url=='https://play.foundups.com/member/'
-                if width==390:
+                if width<760:
                     guest_start=len(requested)
                     page.goto('https://play.foundups.com/member/?foundup=hpc',wait_until='domcontentloaded')
                     expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
@@ -2052,16 +2054,20 @@ def verify_public_entry(browser_type):
                     expect(page.locator('#mallTileField .mall-tile')).to_have_count(0)
                     assert page.url=='https://play.foundups.com/member/?admission=resume'
                     guest_start=len(requested)
-                    page.goto('https://foundupscom--play-wave5-20261127-fixture.web.app/',wait_until='domcontentloaded')
-                    expect(page).to_have_url('https://foundupscom--play-wave5-20261127-fixture.web.app/member/')
+                    preview='https://foundupscom--play-wave5-phone-20261127-fixture.web.app'
+                    # A fulfilled redirect can bypass route interception. Stay hard
+                    # offline and render the exact member document directly.
+                    page.goto(preview+'/member/',wait_until='domcontentloaded')
+                    expect(page).to_have_url(preview+'/member/')
                     expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
                     expect(page.locator('.mall-search-add')).to_be_hidden()
                     expect(page.locator('.mall-search-add')).to_be_disabled()
                     assert private_requests(guest_start)==[],private_requests(guest_start)
                 observed.append({'viewport':[width,height],'cta_box':box,
+                    'mobile_touch':width<760,'hard_offline':True,
                     'keyboard_to_public_guest':True,'guest_auth_requests':0,
                     'guest_add_hidden_disabled_no_synthetic_effect':True,
-                    'scoped_hpc_dedicated_hpc_detail_admission_preview':width==390})
+                    'scoped_hpc_dedicated_hpc_detail_admission_preview':width<760})
             finally:
                 context.close()
     finally:

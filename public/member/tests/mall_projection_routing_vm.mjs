@@ -509,17 +509,31 @@ await check('isolated v26 controls, gestures and home previews are read-only whi
 });
 
 await check('only the dated Wave 5 preview family receives public guest boot', () => {
+ for (const family of ['play-wave5-20261127', 'play-wave5-phone-20261127']) {
   for (const domain of ['web.app', 'firebaseapp.com']) {
-    const h = runtime('https://foundupscom--play-wave5-20261127-abc123.' + domain + '/');
+    const h = runtime('https://foundupscom--' + family + '-abc123.' + domain + '/');
     assert.equal(h.api.hostScope(h.win.location), 'mall');
     assert.equal(h.api.shouldLoadMemberAuth(h.win.location), false);
     h.run(landingBoot, 'root.html#landing');
     assert.deepEqual(h.calls.replace, ['/member/']);
+    const guest = runtime('https://foundupscom--' + family + '-abc123.' + domain + '/member/');
+    guest.api.mount = scope => guest.calls.mounts.push(scope);
+    guest.run(memberSdkBoot, 'member.html#sdk'); guest.run(productBoot, 'member.html#productDiscoveryBoot');
+    assert.deepEqual(guest.calls.mounts, ['mall']);
+    assert.deepEqual(guest.calls.sdk, []); assert.deepEqual(guest.calls.fetches, []);
+    const admission = runtime('https://foundupscom--' + family + '-abc123.' + domain + '/member/?signin=required');
+    assert.equal(admission.api.shouldLoadMemberAuth(admission.win.location), true);
   }
-  for (const family of ['play-wave5-20261126', 'play-wave5-202611270', 'play-wave5-20261127-extra', 'play-wave5']) {
+ }
+  for (const family of ['play-wave5-20261126', 'play-wave5-202611270', 'play-wave5-20261127-extra', 'play-wave5',
+    'play-wave5-phone-20261126', 'play-wave5-phone-202611270', 'play-wave5-phone-20261127-extra', 'play-wave5-phone']) {
     const h = runtime('https://foundupscom--' + family + '-abc123.web.app/member/');
     assert.equal(h.api.hostScope(h.win.location), null, family);
     assert.equal(h.api.shouldLoadMemberAuth(h.win.location), true, family);
+  }
+  for (const suffix of ['abc_123.web.app', 'abc123.web.app.evil.example', '.web.app']) {
+    const h = runtime('https://foundupscom--play-wave5-phone-20261127-' + suffix + '/member/');
+    assert.equal(h.api.hostScope(h.win.location), null, suffix);
   }
 });
 
