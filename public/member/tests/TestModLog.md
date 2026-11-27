@@ -1,3 +1,37 @@
+## 2026-11-28 — Desktop WikiTube selection and reachable controls
+
+Extend the existing preference VM with actual capability combinations, legacy
+v1 records, each explicit saved destination and blocked storage. The desktop
+default requires >=900px, hover and a fine pointer; passive reads never persist
+it. Preference25, worker/state30, routing21, static160, guest-entry and player
+policy checks passed on the candidate's bound source snapshot.
+
+Add existing-runner cases `desktop-default-wikitube`,
+`desktop-native-wikitube` and `phone-default-floating`. Measure desktop1440x900,
+1280x720,900x720 and1280x500, plus the899px boundary, saved choices after reload,
+scoped queue/selection and actual return action/focus/positive scroll. Phone
+414x896 and402x874 retain coarse/touch Floating. Native portrait assets are a
+private fixture; an approved animation fallback is not a native-decode pass.
+
+Retain the failed first run: the bounded desktop stage fit, but the queue
+intercepted the overlay Dock's input and actions. Give the existing Dock host
+its own layer above the queue. Separately correct the test oracle to use the
+visible Return to Mall owner rather than a hidden top-bar Back or assuming
+Escape Close has the same caller semantics. Exact final interaction and staged
+preview results remain in the existing Wave5 receipt; no physical Safari,
+universal canvas, module graph or AutoPost consumer acceptance follows from
+these cases. CI runs these cases behind the existing security job.
+
+The strong deep-entry case then reproduced an offscreen active queue tile.
+Preserve its active-item hit test and repair the existing player presentation
+owner to center the selected tile after its initial render/filter frame. Keep
+guards for closed/hidden/changed presentation. A genuinely overflowing900x500
+caller at clip30 replaces the earlier non-overflowing1440x900 setup; the positive
+scroll assertion remains mandatory. The final working-snapshot run passed all
+eight selected engine/viewport rows with stable public bytes, including exact
+positive-scroll/focus return for all three saved destinations. Committed source,
+generic staged media and any hosted test preview require their own bindings.
+
 ## 2026-11-27 — Explicit phone sizes, poster geometry and overlay dock
 
 The existing phone runner accepts `--phone-size 414x896` and `402x874` as

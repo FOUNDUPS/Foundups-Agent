@@ -226,6 +226,15 @@ availability, token deployment, liquidity or trading.
 
 ## v26 phone qualification
 
+The existing `mall_phone_ui_browser.py` also owns the desktop-default checks.
+Select `--case desktop-default-wikitube --case desktop-native-wikitube
+--case phone-default-floating --phone-size 414x896`, then the phone case alone
+at `--phone-size 402x874`, through the existing finite qualification runner.
+Desktop cases measure actual stage/queue/Dock bounds and hit testing through
+the500px-height case, the899/900px boundary, explicit saved destinations and
+caller return. Controlled YouTube and private native/fallback results remain
+separate from physical-device, provider and public-preview acceptance.
+
 The v26 candidate freezes v25 as a comparison. `mall_product_state_vm.mjs`
 executes the actual v26 worker, including direct v18/v25 cache retirement while
 preserving unrelated cache bytes. `mall_admission_preferences_vm.mjs` tests typed,

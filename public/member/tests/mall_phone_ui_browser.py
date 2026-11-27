@@ -695,13 +695,13 @@ def desktop_default_wikitube(page):
                 '899px fine-pointer boundary did not retain Floating')
     # A real scrolled caller in the existing shared HPC field checks all saved
     # tile destinations independently of automatic desktop-theater startup.
-    page.set_viewport_size({'width': 1440, 'height': 900})
+    page.set_viewport_size({'width': 900, 'height': 500})
     page.goto('https://hpc.foundups.com/member/', wait_until='domcontentloaded')
     page.wait_for_function('mallVideoPlayer.isTheater()')
     page.get_by_role('link', name='Home: HPC video tiles', exact=True).click()
     page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'")
     for _ in range(8):
-        if page.locator('.mall-tile[data-video-id="HPC00000020"]').count(): break
+        if page.locator('.mall-tile[data-video-id="HPC00000030"]').count(): break
         page.get_by_role('button', name='Load more videos', exact=True).evaluate('(e)=>e.click()')
         page.wait_for_timeout(30)
     choices = []
@@ -709,7 +709,7 @@ def desktop_default_wikitube(page):
         page.evaluate('(destination)=>mallStateRestore.setVideoOptions({tileTapDestination:destination})', destination)
         page.reload(wait_until='domcontentloaded')
         page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'")
-        tile = page.locator('.mall-tile[data-video-id="HPC00000020"]')
+        tile = page.locator('.mall-tile[data-video-id="HPC00000030"]')
         for _ in range(8):
             if tile.count(): break
             page.get_by_role('button', name='Load more videos', exact=True).evaluate('(e)=>e.click()')
@@ -721,12 +721,12 @@ def desktop_default_wikitube(page):
         player = page.locator('#videoPlayerFullscreen')
         expect(player).to_have_attribute('aria-label', mode)
         page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
-        assert_true(page.evaluate("mallVideoPlayer.getFoundUpId()==='hpc'&&mallVideoPlayer.getCurrentIndex()===20"), 'Saved presentation changed scoped selection')
+        assert_true(page.evaluate("mallVideoPlayer.getFoundUpId()==='hpc'&&mallVideoPlayer.getCurrentIndex()===30"), 'Saved presentation changed scoped selection')
         if destination == 'wikitube': desktop_wikitube_geometry(page)
         video_action(page, 'collapse')
         expect(player).not_to_be_visible()
         after = retained_snapshot(page)
-        assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'HPC00000020', {'before': before, 'after': after})
+        assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'HPC00000030', {'before': before, 'after': after})
         choices.append({'saved_destination': destination, 'mode': mode, 'scroll_before': before['scroll'], 'scroll_after': after['scroll'], 'focus': after['focus']})
     return {'fresh_public_geometry': measured, 'saved_choices_after_reload': choices,
             'provider': 'CONTROLLED_YT_API_FIXTURE', 'physical_desktop': 'UNEXECUTED'}

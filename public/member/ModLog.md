@@ -1,5 +1,35 @@
 # Member Area Module Change Log
 
+## 2026-11-28 — Wave 5 desktop WikiTube and shared navigation acceptance
+
+Use the existing preference owner to select WikiTube for fresh >=900px desktop
+entry with hover and a fine pointer. Keep phone/coarse Floating and all valid
+saved destinations, including older v1 records, without passive storage writes.
+Bound desktop WikiTube's media flex area so portrait native content cannot move
+its queue and Dock below the window. Its compact Dock overlays the queue rather
+than reserving a block; keep it above the queue for real input hit testing.
+
+Deep entry also exposed an initially offscreen selected queue tile. After the
+initial render/filter work, reuse the existing selection-centering owner on the
+first frame, guarded against closing, hiding or changing presentation. Preserve
+the media instance, scoped queue, native/provider inputs and caller restoration.
+
+Eight focused Chromium/WebKit rows passed the four desktop sizes through
+1280x500,899/900px boundary, all saved destinations after reload, genuine positive
+caller scroll and phone414x896/402x874 Floating. Chromium decoded the private
+native fixture; Windows WebKit's approved animation fallback remains distinct
+from native decoding. Preference25, worker/state30, routing21, static160,
+guest-entry and player-policy checks passed separately. Retain earlier layout,
+Dock-interception and queue-selection failures and corrected setup/action
+oracles in the existing Wave5 record. Source/preview qualification and physical
+Safari remain separate.
+
+Extend existing navigation/BYOF acceptance for shared gestures, flip/Fullscreen,
+evidenced module composition and AutoPost's caller-scoped Search Dock with its
+Camera action returning to the validated caller, separate from capture. Those
+features retain their existing owners and pending status. No unmerged HPC code,
+protected graph, production deployment, auth/DNS change or old-preview update.
+
 ## 2026-11-27 — Wave 5 public Play entry and guest controls
 
 Added the native Play FoundUps CTA immediately after the gateway hero. Reused
