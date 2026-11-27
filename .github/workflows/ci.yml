@@ -1337,6 +1337,111 @@ jobs:
           -o pythonpath=. -p no:cacheprovider
           modules/foundups/gotjunk/tests/test_backend_security.py
 
+  public-play-entry:
+    needs: [security, merge-scope-pilot]
+    if: needs.merge-scope-pilot.outputs.fast_path != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.62.0-noble@sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d
+      options: --init --shm-size=1g
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+      PUBLIC_PLAY_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Bind public browser evidence to exact source
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PUBLIC_PLAY_EVIDENCE_DIR="$RUNNER_TEMP/public-play-entry"
+          printf 'PUBLIC_PLAY_EVIDENCE_DIR=%s\n' "$PUBLIC_PLAY_EVIDENCE_DIR" >> "$GITHUB_ENV"
+          mkdir -p "$PUBLIC_PLAY_EVIDENCE_DIR"
+          python -B - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess
+          git = ['git', '-c', 'safe.directory=' + os.environ['GITHUB_WORKSPACE']]
+          head = subprocess.check_output(git + ['rev-parse', 'HEAD'], text=True).strip()
+          assert re.fullmatch(r'[0-9a-f]{40}', os.environ['PUBLIC_PLAY_SOURCE_SHA'])
+          assert head == os.environ['PUBLIC_PLAY_SOURCE_SHA']
+          entries = subprocess.check_output(git + ['ls-tree', '-r', '-z', head, '--',
+              'public', 'requirements-trust-bootstrap.txt', '.github/workflows/ci.yml'])
+          files = {}
+          for row in entries.split(b'\0'):
+              if not row:
+                  continue
+              metadata, raw_path = row.split(b'\t', 1)
+              mode, kind, blob = metadata.decode().split()
+              assert mode in {'100644', '100755'} and kind == 'blob'
+              path = raw_path.decode()
+              files[path] = {'git_blob': blob, 'sha256': hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()}
+          assert 'public/member/tests/mall_scoped_video_browser.py' in files
+          receipt = {'source_sha': head,
+              'source_tree': subprocess.check_output(git + ['rev-parse', 'HEAD^{tree}'], text=True).strip(),
+              'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': os.environ['GITHUB_RUN_ATTEMPT'],
+              'browser_image': 'sha256:aa81288e738725378becba5b3e06cb0f3a7f012a610e87e8d767a090ea3f740d',
+              'files': files, 'scope': 'Public entry and routing with local network/provider fixtures only.',
+              'real_auth': 'UNEXECUTED', 'physical_phone': 'UNEXECUTED', 'deployment': 'NONE'}
+          pathlib.Path(os.environ['PUBLIC_PLAY_EVIDENCE_DIR'], 'source.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install the matching browser qualification profile
+        timeout-minutes: 3
+        run: |
+          python -m pip --isolated install --only-binary=:all: playwright==1.62.0 pytest==9.2.0
+          python -m pip freeze > "$PUBLIC_PLAY_EVIDENCE_DIR/dependencies.txt"
+          python --version >> "$PUBLIC_PLAY_EVIDENCE_DIR/dependencies.txt"
+          node --version >> "$PUBLIC_PLAY_EVIDENCE_DIR/dependencies.txt"
+      - name: Verify public guest entry and preserved routing gates
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=5s 180s env -u GITHUB_TOKEN -u GH_TOKEN \
+            python -B public/member/tests/mall_scoped_video_browser.py --public-entry \
+            2>&1 | tee "$PUBLIC_PLAY_EVIDENCE_DIR/public-entry.log"
+          timeout --signal=TERM --kill-after=5s 30s env -u GITHUB_TOKEN -u GH_TOKEN \
+            node public/member/tests/mall_projection_routing_vm.mjs \
+            2>&1 | tee "$PUBLIC_PLAY_EVIDENCE_DIR/routing.log"
+      - name: Verify source remained unchanged
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          directory = pathlib.Path(os.environ['PUBLIC_PLAY_EVIDENCE_DIR'])
+          receipt = json.loads((directory / 'source.json').read_text())
+          head = subprocess.check_output(['git', '-c', 'safe.directory=' + os.environ['GITHUB_WORKSPACE'],
+              'rev-parse', 'HEAD'], text=True).strip()
+          assert head == receipt['source_sha'] == os.environ['PUBLIC_PLAY_SOURCE_SHA']
+          assert all(hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest() == binding['sha256']
+              for path, binding in receipt['files'].items())
+          (directory / 'source-stable.json').write_text(json.dumps({'source_sha': head, 'unchanged': True}) + '\n')
+          PY
+      - name: Retain exact-source browser qualification
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-play-entry-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/public-play-entry
+          if-no-files-found: error
+          retention-days: 7
+
   test:
     needs: [merge-scope-pilot, ci-pipeline-regressions]
     if: always()

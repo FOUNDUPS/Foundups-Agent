@@ -16,6 +16,19 @@ canvas/video same-footprint swaps, dock-origin content selection, Podcast,
 physical Safari/Home Screen and production remain unimplemented or unqualified;
 do not substitute these entry tests for those acceptance gates.
 
+Added an independent `public-play-entry` job to the existing shared CI workflow,
+after its security gate, using the existing pinned Playwright1.62 profile.
+Exact source, logs, runtime versions and stable file hashes are retained. Local
+workflow parsing and40 existing pipeline contracts passed; hosted execution is
+separate from the local Playwright1.57 results. The HPC branch workflow is untouched.
+
+The broader `--entry-regressions` selection fails on both unchanged mainf67 and
+this candidate at the same old VOTE quick-view expectation (apex admission versus
+the existing Browse Shorts link). Its assertion is preserved. Later cases in that
+selection remain unexecuted; the focused new entry, six player-policy and six
+shared-stage rows passed separately. Existing controlled gestures verify the
+app-owned YouTube surround, not full-surface canvas or native embed gestures.
+
 ## 2026-11-25 — Tucked tap without compatibility click
 
 The29a full hosted run caught both floating-frame-controls and the hidden-policy
