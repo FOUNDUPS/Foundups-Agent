@@ -643,6 +643,142 @@ def retained_snapshot(page):
       width:innerWidth,touch:matchMedia('(pointer:coarse)').matches})""")
 
 
+def desktop_wikitube_geometry(page):
+    geometry = page.evaluate("""() => {
+      const box=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
+      const player=document.querySelector('#videoPlayerFullscreen');
+      const dock=player.querySelector('.mall-member-search-dock:not([hidden])');
+      const item=player.querySelector('.video-player-queue-item.active');
+      const itemBox=item?.getBoundingClientRect();
+      const input=dock?.querySelector('textarea');const inputBox=input?.getBoundingClientRect();
+      return {viewport:{width:innerWidth,height:innerHeight},
+        fine:matchMedia('(pointer:fine)').matches,hover:matchMedia('(hover:hover)').matches,
+        player:box(player),stage:box(player.querySelector('.video-player-stage')),
+        queue:box(player.querySelector('.video-player-queue-panel')),dock:dock&&box(dock),
+        queueEdgeHit:!!itemBox&&item.contains(document.elementFromPoint(itemBox.left+12,itemBox.top+12)),
+        dockInputHit:!!inputBox&&input===document.elementFromPoint(inputBox.left+inputBox.width/2,inputBox.top+inputBox.height/2)};
+    }""")
+    for name in ['player', 'stage', 'queue', 'dock']:
+        box = geometry[name]
+        assert_true(box and box['width'] > 0 and box['height'] > 0 and box['x'] >= -1 and box['y'] >= -1 and
+                    box['right'] <= geometry['viewport']['width']+1 and box['bottom'] <= geometry['viewport']['height']+1,
+                    {'offscreen_wikitube_surface': name, 'geometry': geometry})
+    assert_true(geometry['fine'] and geometry['hover'] and geometry['queueEdgeHit'] and geometry['dockInputHit'], geometry)
+    return geometry
+
+
+def desktop_default_wikitube(page):
+    modes = {'floating': 'Floating video player', 'wikitube': 'WikiTube video player', 'full-video': 'Full Video in app'}
+    measured = []
+    for width, height in [(1440, 900), (1280, 720), (900, 720), (1280, 500)]:
+        page.set_viewport_size({'width': width, 'height': height})
+        boot(page)
+        assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null&&mallStateRestore.getVideoOptions().tileTapDestination==='wikitube'"),
+                    'Fresh wide fine-pointer desktop did not default to WikiTube')
+        tile = page.locator('#mallTileField [data-foundup-id="move2japan"]')
+        before = retained_snapshot(page)
+        activate_visible_tile(page, tile, True)
+        player = page.locator('#videoPlayerFullscreen')
+        expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+        page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+        assert_true(page.evaluate("mallVideoPlayer.getFoundUpId()==='move2japan'&&mallVideoPlayer.getQueueLength()>1"), 'Public queue lost its FoundUp scope')
+        measured.append(desktop_wikitube_geometry(page))
+        video_action(page, 'collapse')
+        expect(player).not_to_be_visible()
+        after = retained_snapshot(page)
+        assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'move2japan', {'before': before, 'after': after})
+        assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null"), 'Passive desktop default wrote preferences')
+
+    page.set_viewport_size({'width': 899, 'height': 720})
+    boot(page)
+    assert_true(page.evaluate("matchMedia('(hover:hover)').matches&&matchMedia('(pointer:fine)').matches&&mallStateRestore.getVideoOptions().tileTapDestination==='floating'"),
+                '899px fine-pointer boundary did not retain Floating')
+    # A real scrolled caller in the existing shared HPC field checks all saved
+    # tile destinations independently of automatic desktop-theater startup.
+    page.set_viewport_size({'width': 1440, 'height': 900})
+    page.goto('https://hpc.foundups.com/member/', wait_until='domcontentloaded')
+    page.wait_for_function('mallVideoPlayer.isTheater()')
+    page.get_by_role('link', name='Home: HPC video tiles', exact=True).click()
+    page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'")
+    for _ in range(8):
+        if page.locator('.mall-tile[data-video-id="HPC00000020"]').count(): break
+        page.get_by_role('button', name='Load more videos', exact=True).evaluate('(e)=>e.click()')
+        page.wait_for_timeout(30)
+    choices = []
+    for destination, mode in modes.items():
+        page.evaluate('(destination)=>mallStateRestore.setVideoOptions({tileTapDestination:destination})', destination)
+        page.reload(wait_until='domcontentloaded')
+        page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'")
+        tile = page.locator('.mall-tile[data-video-id="HPC00000020"]')
+        for _ in range(8):
+            if tile.count(): break
+            page.get_by_role('button', name='Load more videos', exact=True).evaluate('(e)=>e.click()')
+            page.wait_for_timeout(30)
+        tile.scroll_into_view_if_needed()
+        before = retained_snapshot(page)
+        assert_true(before['scroll'] > 0, {'nonzero_caller_required': before})
+        activate_visible_tile(page, tile, True)
+        player = page.locator('#videoPlayerFullscreen')
+        expect(player).to_have_attribute('aria-label', mode)
+        page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+        assert_true(page.evaluate("mallVideoPlayer.getFoundUpId()==='hpc'&&mallVideoPlayer.getCurrentIndex()===20"), 'Saved presentation changed scoped selection')
+        if destination == 'wikitube': desktop_wikitube_geometry(page)
+        video_action(page, 'collapse')
+        expect(player).not_to_be_visible()
+        after = retained_snapshot(page)
+        assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'HPC00000020', {'before': before, 'after': after})
+        choices.append({'saved_destination': destination, 'mode': mode, 'scroll_before': before['scroll'], 'scroll_after': after['scroll'], 'focus': after['focus']})
+    return {'fresh_public_geometry': measured, 'saved_choices_after_reload': choices,
+            'provider': 'CONTROLLED_YT_API_FIXTURE', 'physical_desktop': 'UNEXECUTED'}
+
+
+def desktop_native_wikitube(page):
+    # Private fixture only: exercise existing approved portrait MP4/fallback bytes,
+    # not mocked HTMLMediaElement playback or publication of these source cards.
+    page.emulate_media(reduced_motion='no-preference')
+    measured = []
+    media = None
+    for width, height in [(1440, 900), (1280, 720), (900, 720), (1280, 500)]:
+        page.set_viewport_size({'width': width, 'height': height})
+        page.goto('https://play.foundups.com/member/?foundup=voteballots', wait_until='domcontentloaded')
+        tile = page.locator('#mallTileField .mall-member-card').first
+        expect(tile).to_be_visible()
+        assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null&&mallStateRestore.getVideoOptions().tileTapDestination==='wikitube'"), 'Native fixture did not use fresh desktop default')
+        activate_visible_tile(page, tile, True)
+        player = page.locator('#videoPlayerFullscreen')
+        expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+        observed = observe_member_media(page)
+        if media is None: media = observed
+        expect(player.locator('iframe')).to_have_count(0)
+        assert_true(page.evaluate('fixturePlayback.created===0&&fixturePlayback.plays===0'), 'Native fixture used controlled YouTube playback')
+        measured.append(desktop_wikitube_geometry(page))
+        video_action(page, 'collapse')
+        expect(player).not_to_be_visible()
+        expect(tile).to_be_focused()
+    return {'geometry': measured, 'observed_media': media, 'fixture': 'PRIVATE_EXISTING_VOTE_PORTRAIT_ASSETS',
+            'native_decoder_overrides': False, 'publication': False, 'physical_device': 'UNEXECUTED'}
+
+
+def phone_default_floating(page):
+    boot(page)
+    capability = page.evaluate("({width:innerWidth,height:innerHeight,coarse:matchMedia('(pointer:coarse)').matches,hover:matchMedia('(hover:hover)').matches})")
+    assert_true(capability['width'] == REPORT['viewport']['width'] and capability['height'] == REPORT['viewport']['height'] and
+                capability['coarse'] and not capability['hover'], capability)
+    assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null&&mallStateRestore.getVideoOptions().tileTapDestination==='floating'"), 'Fresh phone default changed')
+    tile = page.locator('#mallTileField [data-foundup-id="move2japan"]')
+    before = retained_snapshot(page)
+    activate_visible_tile(page, tile, False)
+    player = page.locator('#videoPlayerFullscreen')
+    expect(player).to_have_attribute('aria-label', 'Floating video player')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    video_action(page, 'collapse')
+    expect(player).not_to_be_visible()
+    after = retained_snapshot(page)
+    assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'move2japan', {'before': before, 'after': after})
+    assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null"), 'Passive phone default wrote preferences')
+    return {'capability': capability, 'default': 'floating', 'origin_return': True, 'provider': 'CONTROLLED_YT_API_FIXTURE'}
+
+
 def activate_visible_tile(page, tile, desktop):
     # Coordinate activation avoids an automation-driven scroll changing the
     # caller we are verifying. It still sends real pointer input to the app tile.
@@ -1451,6 +1587,9 @@ def hpc_home_shared_desktop_dock(page):
         page.set_viewport_size(size)
         expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
         assert_true(page.evaluate('!mallVideoPlayer.isOpen()'), 'Resize re-opened automatic TV')
+    # Keep this existing Floating -> WikiTube dock-loan regression explicit;
+    # fresh desktop WikiTube is qualified by desktop-default-wikitube instead.
+    page.evaluate("mallStateRestore.setVideoOptions({tileTapDestination:'floating'})")
     tile = page.locator('#mallTileField .mall-tile[data-video-id]').first
     tile.focus(); page.keyboard.press('Enter')
     page.wait_for_function("mallVideoPlayer.isFloating()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
@@ -1604,6 +1743,10 @@ def vote_native_cards(page, desktop=False):
     if not desktop:
         page.set_viewport_size({'width': 390, 'height': 844})
     page.goto('https://play.foundups.com/member/?foundup=voteballots', wait_until='domcontentloaded')
+    if desktop:
+        # This existing case qualifies Floating media cleanup, not the fresh
+        # desktop default (covered independently by desktop-native-wikitube).
+        page.evaluate("mallStateRestore.setVideoOptions({tileTapDestination:'floating'})")
     tiles = page.locator('#mallTileField .mall-member-card')
     expect(tiles).to_have_count(2)
     expect(page.locator('#videoScopeTitle')).to_have_text('VOTE')
@@ -1784,6 +1927,9 @@ try:
                 run_case(browser, 'play-desktop-reversible-return', lambda page: reversible_mall_return(page, False, True), desktop=True)
                 run_case(browser, 'play-lane-reversible-return', lambda page: reversible_mall_return(page, False, lane=True))
                 run_case(browser, 'play-desktop-lane-reversible-return', lambda page: reversible_mall_return(page, False, True, True), desktop=True)
+                run_case(browser, 'desktop-default-wikitube', desktop_default_wikitube, desktop=True)
+                run_case(browser, 'desktop-native-wikitube', desktop_native_wikitube, desktop=True)
+                run_case(browser, 'phone-default-floating', phone_default_floating)
                 run_case(browser, 'hpc-early-repeated-selection', lambda page: early_repeated_selection(page, True))
                 run_case(browser, 'play-early-repeated-selection', lambda page: early_repeated_selection(page, False))
                 run_case(browser, 'retained-history-reentry', retained_history_reentry)
@@ -1812,7 +1958,7 @@ finally:
     REPORT['source_sha256_after'] = hashes()
     REPORT['source_stable'] = REPORT['source_sha256_before'] == REPORT['source_sha256_after']
     REPORT['elapsed_seconds'] = round(time.time() - REPORT['started_epoch'], 3)
-    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (72 if args.include_defensive else 70)) and
+    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (78 if args.include_defensive else 76)) and
         all(row['passed'] for row in REPORT['cases']) and REPORT['source_stable']) else 'FAIL'
     save()
 sys.exit(0 if REPORT['status'] == 'PASS' else 1)

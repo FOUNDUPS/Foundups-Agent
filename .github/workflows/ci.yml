@@ -1417,6 +1417,20 @@ jobs:
           timeout --signal=TERM --kill-after=5s 30s env -u GITHUB_TOKEN -u GH_TOKEN \
             node public/member/tests/mall_projection_routing_vm.mjs \
             2>&1 | tee "$PUBLIC_PLAY_EVIDENCE_DIR/routing.log"
+          timeout --signal=TERM --kill-after=5s 30s env -u GITHUB_TOKEN -u GH_TOKEN \
+            node public/member/tests/mall_admission_preferences_vm.mjs \
+            2>&1 | tee "$PUBLIC_PLAY_EVIDENCE_DIR/preferences.log"
+          timeout --signal=TERM --kill-after=5s 180s env -u GITHUB_TOKEN -u GH_TOKEN \
+            python -B public/member/tests/mall_phone_ui_browser.py \
+            --out "$PUBLIC_PLAY_EVIDENCE_DIR/desktop-and-phone-414.json" \
+            --case desktop-default-wikitube --case desktop-native-wikitube \
+            --case phone-default-floating --phone-size 414x896 \
+            2>&1 | tee "$PUBLIC_PLAY_EVIDENCE_DIR/desktop-and-phone-414.log"
+          timeout --signal=TERM --kill-after=5s 60s env -u GITHUB_TOKEN -u GH_TOKEN \
+            python -B public/member/tests/mall_phone_ui_browser.py \
+            --out "$PUBLIC_PLAY_EVIDENCE_DIR/phone-402.json" \
+            --case phone-default-floating --phone-size 402x874 \
+            2>&1 | tee "$PUBLIC_PLAY_EVIDENCE_DIR/phone-402.log"
       - name: Verify source remained unchanged
         if: always()
         shell: bash

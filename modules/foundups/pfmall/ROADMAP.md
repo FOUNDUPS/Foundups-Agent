@@ -19,6 +19,24 @@ open until measured. No production, DNS, new access or advocacy publication
 follows from this planning update. Preserve the existing private BYOF brief and
 all dated owner/source/provider evidence.
 
+**2026-11-28 continuation:** fresh deliberate video selection on a wide
+desktop with hover and a fine pointer now targets WikiTube; phone/coarse input
+continues to target Floating and explicit saved choices take precedence. The
+Wave 5 candidate changes the existing preference owner and bounds desktop
+WikiTube's portrait media area, keeping its queue and compact overlay Dock
+reachable. Exact-source browser qualification and any new test delivery remain
+separate from the unchanged earlier phone preview.
+
+The same existing acceptance now requires actual permitted component navigation
+within a FoundUp and AutoPost's shared Dock Camera action to return to the
+validated caller, separate from its capture shutter. Shared gestures, card flip,
+Fullscreen, module composition and camera return must be qualified through their
+existing owners. The graph client remains unmounted; cross-links are not proof
+of component ownership, and the admitted graph/source-file API cannot be exposed
+anonymously. AutoPost's existing draft owner must supply the shared search and
+caller adapter. These are pending implementation/verification, not new stages or
+results inferred from the desktop preference change.
+
 Phone-test comparison uses the full Mall merged by #2459 on 2026-11-26 (core UI
 at main f67), separately from the three-card entry smoke and the private floating
 prototype. The representative Wave 5 fixture uses public posters and labeled

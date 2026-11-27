@@ -508,8 +508,8 @@ await check('isolated v26 controls, gestures and home previews are read-only whi
   }
 });
 
-await check('only the dated Wave 5 preview family receives public guest boot', () => {
- for (const family of ['play-wave5-20261127', 'play-wave5-phone-20261127']) {
+await check('only the dated Wave 5 preview families receive public guest boot', () => {
+ for (const family of ['play-wave5-20261127', 'play-wave5-phone-20261127', 'play-wave5-pc-20261128']) {
   for (const domain of ['web.app', 'firebaseapp.com']) {
     const h = runtime('https://foundupscom--' + family + '-abc123.' + domain + '/');
     assert.equal(h.api.hostScope(h.win.location), 'mall');
@@ -526,14 +526,17 @@ await check('only the dated Wave 5 preview family receives public guest boot', (
   }
  }
   for (const family of ['play-wave5-20261126', 'play-wave5-202611270', 'play-wave5-20261127-extra', 'play-wave5',
-    'play-wave5-phone-20261126', 'play-wave5-phone-202611270', 'play-wave5-phone-20261127-extra', 'play-wave5-phone']) {
+    'play-wave5-phone-20261126', 'play-wave5-phone-202611270', 'play-wave5-phone-20261127-extra', 'play-wave5-phone',
+    'play-wave5-pc-20261127', 'play-wave5-pc-202611280', 'play-wave5-pc-20261128-extra', 'play-wave5-pc']) {
     const h = runtime('https://foundupscom--' + family + '-abc123.web.app/member/');
     assert.equal(h.api.hostScope(h.win.location), null, family);
     assert.equal(h.api.shouldLoadMemberAuth(h.win.location), true, family);
   }
-  for (const suffix of ['abc_123.web.app', 'abc123.web.app.evil.example', '.web.app']) {
-    const h = runtime('https://foundupscom--play-wave5-phone-20261127-' + suffix + '/member/');
-    assert.equal(h.api.hostScope(h.win.location), null, suffix);
+  for (const family of ['play-wave5-phone-20261127', 'play-wave5-pc-20261128']) {
+   for (const suffix of ['abc_123.web.app', 'abc123.web.app.evil.example', '.web.app']) {
+    const h = runtime('https://foundupscom--' + family + '-' + suffix + '/member/');
+    assert.equal(h.api.hostScope(h.win.location), null, family + suffix);
+   }
   }
 });
 

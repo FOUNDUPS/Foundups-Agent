@@ -1,3 +1,21 @@
+## 2026-11-28 — Continue Wave 5 desktop and caller navigation
+
+Reconcile the existing navigation/BYOF acceptance with desktop WikiTube as the
+fresh wide/fine-pointer default, explicit saved choices and phone Floating.
+The existing shared state/player stylesheet own the bounded candidate; no
+unmerged HPC runtime is imported. Actual portrait media in the earlier phone
+preview overflowed a desktop window and moved the queue/Dock below its viewport.
+Candidate/source/delivery and physical-device evidence remain distinct.
+
+Retain shared gesture, card flip, Fullscreen and app-owned universal canvas
+acceptance. Require evidenced FoundUp component navigation rather than treating
+graph cross-links as containment. The graph client is unmounted and its admitted
+API/public-root exclusions remain intact. Extend the existing AutoPost owner
+acceptance with shared scoped Search Dock and Camera-as-return to the actual
+validated caller, preserving the separate capture shutter and pending/recording
+guards. Existing HPC/AutoPost drafts own that work; these records do not certify
+its implementation or change production, auth, DNS or existing preview channels.
+
 ## 2026-11-27 — Reconcile Wave 5 public Play and BYOF stage acceptance
 
 Updated existing navigation section 14 and the Mall roadmap with 012's compact
