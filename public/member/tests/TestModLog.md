@@ -32,6 +32,28 @@ eight selected engine/viewport rows with stable public bytes, including exact
 positive-scroll/focus return for all three saved destinations. Committed source,
 generic staged media and any hosted test preview require their own bindings.
 
+The exact LF-stage replay preserved two additional findings. Its desktop Pause
+oracle referenced a nonexistent menu action; qualify the existing native Pause
+control using the observed UI and advancing/stopped media time instead of
+inventing an app action. Its strict overlay check correctly found the inherited
+desktop block-navigator rule reserving132px outside the field. Extend the same
+desktop-default case with full17-card root geometry at all four sizes:16px
+shell gutter, content behind the Dock, real maximum scroll, last-card reach
+above both overlays and hit testing. Preserve all strong deep-entry and phone
+assertions. The public-only stylesheet repair moves clearance inside the tail;
+private/member and dedicated HPC layouts retain their existing rules.
+
+The revised desktop root checks passed both engines at all four sizes with
+stable source. Natural paging observes actual append before retrying a pager
+that the observer removed; a remaining manual pager still requires a real hit
+and pointer activation. Record requested maximum, actual positive scroll and
+computed native proximity snapping. Require the last card to be reachable and
+hit-testable above both overlays, without forcing the browser to an exact snap
+offset. The final desktop2 plus unchanged native/phone6 focus rows pass;
+four existing app-grip gesture rows also pass at414/402. Preserve the current
+main gesture grammar and13 transitions per row; this is neither the unmerged
+HPC grammar nor full-surface canvas/native-provider/device qualification.
+
 ## 2026-11-27 — Explicit phone sizes, poster geometry and overlay dock
 
 The existing phone runner accepts `--phone-size 414x896` and `402x874` as

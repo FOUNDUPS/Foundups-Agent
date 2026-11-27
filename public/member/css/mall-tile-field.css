@@ -1977,6 +1977,20 @@
     padding-bottom: calc(8.25rem + var(--safe-bottom, 0px));
   }
 
+  /* Public Mall navigation floats over the field on desktop too. Keep the
+     final cards clear of both overlays inside the scroll tail, not the shell. */
+  [data-mall-open-landing="play"] body:not([data-mall-video-scope]) .mall-shell:has(> .mall-desktop-block-nav:not([hidden])) {
+    padding-bottom: max(1rem, var(--safe-bottom, 0px));
+  }
+
+  [data-mall-open-landing="play"] .mall-main > .mall-tile-field-wrapper {
+    scroll-padding-bottom: calc(8.25rem + var(--safe-bottom, 0px));
+  }
+
+  [data-mall-open-landing="play"] .mall-entity-portrait-grid {
+    padding-bottom: calc(8.25rem + var(--safe-bottom, 0px));
+  }
+
   body:not([data-mall-video-scope]) .mall-desktop-block-nav:not([hidden]) {
     position: fixed;
     left: 50%;

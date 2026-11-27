@@ -27,7 +27,7 @@ OUT.parent.mkdir(parents=True, exist_ok=True)
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT / 'public/member/tests'))
 import mall_scoped_video_browser as fixture
-from playwright.sync_api import expect, sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError, expect, sync_playwright
 
 REPORT = {
     'provider': 'Controlled YT API fixture; VOTE uses real source-bound local MP4 bytes. All requests intercepted.',
@@ -670,12 +670,70 @@ def desktop_wikitube_geometry(page):
 def desktop_default_wikitube(page):
     modes = {'floating': 'Floating video player', 'wikitube': 'WikiTube video player', 'full-video': 'Full Video in app'}
     measured = []
+    root_geometry = []
     for width, height in [(1440, 900), (1280, 720), (900, 720), (1280, 500)]:
         page.set_viewport_size({'width': width, 'height': height})
         boot(page)
+        total = len(json.loads((ROOT/'public/member/mall-video-catalog.json').read_text(encoding='utf-8')))
+        wrapper = page.locator('.mall-tile-field-wrapper')
+        paging = []
+        for _ in range((total+5)//6+1):
+            count = page.locator('#mallTileField .mall-tile').count()
+            assert_true(count <= total, {'unexpected_root_card_count': count, 'expected': total})
+            if count == total: break
+            wrapper.evaluate('e=>e.scrollTo({top:e.scrollHeight,behavior:"instant"})')
+            try:
+                page.wait_for_function('n=>document.querySelectorAll("#mallTileField .mall-tile").length>n', arg=count, timeout=700)
+                paging.append({'before': count, 'after': page.locator('#mallTileField .mall-tile').count(), 'via': 'observer_after_actual_scroll'})
+                continue
+            except PlaywrightTimeoutError:
+                pass
+            button = page.get_by_role('button', name='Load more cards', exact=True)
+            try:
+                probe = button.evaluate("""e=>{const r=e.getBoundingClientRect();return {
+                  count:document.querySelectorAll('#mallTileField .mall-tile').length,rect:r.toJSON(),
+                  hit:e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))};}""")
+                if probe['count'] <= count:
+                    assert_true(probe['hit'], {'live_root_pager_not_hit_testable': probe})
+                    button.click()
+                page.wait_for_function('n=>document.querySelectorAll("#mallTileField .mall-tile").length>n', arg=count)
+                paging.append({'before': count, 'after': page.locator('#mallTileField .mall-tile').count(), 'via': 'live_pointer_or_concurrent_observer', 'probe': probe})
+            except PlaywrightTimeoutError:
+                appended = page.locator('#mallTileField .mall-tile').count()
+                assert_true(appended > count, {'root_paging_did_not_advance': count})
+                paging.append({'before': count, 'after': appended, 'via': 'observer_replaced_pointer_target'})
+        assert_true(page.locator('#mallTileField .mall-tile').count() == total, {'incomplete_root_catalog': paging})
+        requested_maximum = wrapper.evaluate('e=>{const maximum=e.scrollHeight-e.clientHeight;e.scrollTo({top:maximum,behavior:"instant"});return maximum;}')
+        page.evaluate('() => new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+        root_view = page.evaluate("""() => {
+          const shell=document.querySelector('.mall-shell'),field=document.querySelector('.mall-tile-field-wrapper'),
+            grid=document.querySelector('#mallTileField'),dock=document.querySelector('#redDogAnchor'),
+            nav=document.querySelector('.mall-desktop-block-nav:not([hidden])'),last=grid.querySelector('.mall-tile:last-of-type');
+          const box=e=>e.getBoundingClientRect().toJSON();
+          const d=box(dock),n=nav&&box(nav),l=box(last),f=box(field);
+          const limit=Math.min(d.top,n?.top??d.top),x=l.left+l.width/2,y=Math.min(l.bottom-12,limit-12);
+          return {viewport:{width:innerWidth,height:innerHeight},shellPaddingBottom:parseFloat(getComputedStyle(shell).paddingBottom),
+            field:f,dock:d,nav:n,last:l,scrollTop:field.scrollTop,scrollMaximum:field.scrollHeight-field.clientHeight,
+            gridPaddingBottom:parseFloat(getComputedStyle(grid).paddingBottom),scrollPaddingBottom:parseFloat(getComputedStyle(field).scrollPaddingBottom),
+            scrollSnapType:getComputedStyle(field).scrollSnapType,
+            pageScrollWidth:document.documentElement.scrollWidth,fieldScrollWidth:field.scrollWidth,fieldClientWidth:field.clientWidth,
+            lastHit:y>=f.top&&last.contains(document.elementFromPoint(x,y))};
+        }""")
+        assert_true(root_view['shellPaddingBottom'] <= 16.1 and root_view['field']['bottom'] > root_view['dock']['top']+1,
+                    {'desktop_root_reserved_dock_block': root_view})
+        assert_true(root_view['pageScrollWidth'] <= width+1 and root_view['fieldScrollWidth'] <= root_view['fieldClientWidth']+1,
+                    {'desktop_root_horizontal_overflow': root_view})
+        cutoff = min(root_view['dock']['top'], root_view['nav']['top'] if root_view['nav'] else root_view['dock']['top'])
+        assert_true(root_view['last']['bottom'] <= cutoff+1 and root_view['lastHit'] and
+                    (root_view['scrollMaximum'] <= 1 or root_view['scrollTop'] > 1),
+                    {'desktop_root_last_card_or_scroll_tail_unreachable': root_view})
+        root_view['requestedMaximum'] = requested_maximum
+        root_view['paging'] = paging
+        root_geometry.append(root_view)
         assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null&&mallStateRestore.getVideoOptions().tileTapDestination==='wikitube'"),
                     'Fresh wide fine-pointer desktop did not default to WikiTube')
         tile = page.locator('#mallTileField [data-foundup-id="move2japan"]')
+        tile.scroll_into_view_if_needed()
         before = retained_snapshot(page)
         activate_visible_tile(page, tile, True)
         player = page.locator('#videoPlayerFullscreen')
@@ -728,7 +786,7 @@ def desktop_default_wikitube(page):
         after = retained_snapshot(page)
         assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'HPC00000030', {'before': before, 'after': after})
         choices.append({'saved_destination': destination, 'mode': mode, 'scroll_before': before['scroll'], 'scroll_after': after['scroll'], 'focus': after['focus']})
-    return {'fresh_public_geometry': measured, 'saved_choices_after_reload': choices,
+    return {'fresh_root_overlay_geometry': root_geometry, 'fresh_public_geometry': measured, 'saved_choices_after_reload': choices,
             'provider': 'CONTROLLED_YT_API_FIXTURE', 'physical_desktop': 'UNEXECUTED'}
 
 

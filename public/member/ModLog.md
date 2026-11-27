@@ -14,6 +14,16 @@ initial render/filter work, reuse the existing selection-centering owner on the
 first frame, guarded against closing, hiding or changing presentation. Preserve
 the media instance, scoped queue, native/provider inputs and caller restoration.
 
+The exact representative-stage check also exposed an inherited desktop-only
+132px shell reservation for the fixed block navigator above the Dock. Public
+Play now keeps its normal16px shell gutter and places both controls' clearance
+inside the scrolling field's tail. The field flows behind the overlays on
+desktop as on phone. Keep scoped HPC and private/member shell rules intact.
+Both-engine root checks passed all four desktop sizes with actual paging,
+native snap readback and the last card reachable above both overlays. Four
+existing app-grip gesture rows passed separately; full-surface canvas, the
+unmerged HPC gesture grammar and native/provider/device gestures remain open.
+
 Eight focused Chromium/WebKit rows passed the four desktop sizes through
 1280x500,899/900px boundary, all saved destinations after reload, genuine positive
 caller scroll and phone414x896/402x874 Floating. Chromium decoded the private
