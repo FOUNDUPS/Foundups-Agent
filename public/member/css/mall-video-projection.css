@@ -189,7 +189,8 @@
 
 .mall-hpc-banner-art { position: relative; width: 100%; min-height: 44px; }
 .mall-hpc-banner-art .mall-hpc-banner-link { min-height: 44px; }
-.mall-hpc-banner-art .mall-hpc-mall-return { padding: 0; width: 44px; height: 44px; }
+.mall-hpc-banner-art .mall-hpc-mall-return { padding: 0; width: 44px; height: 44px; background: #171121; border-color: #cbb9ee69; }
+.mall-hpc-banner-art .mall-hpc-mall-return:hover { background: #251b35; }
 .mall-hpc-banner-art .mall-hpc-mall-return img { width: 30px; height: 30px; flex-basis: 30px; }
 
 .mall-hpc-mall-return :is(img, svg) {

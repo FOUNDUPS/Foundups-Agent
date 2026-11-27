@@ -4,6 +4,9 @@
   restore the original shared callback outside HPC and add cross-projection cases.
   The new settings matrix has a finite240s budget; original gates are unchanged.
 - Reconciled current main without replacing shared Mall/player/auth owners.
+- Visual readback found the small red dog painted but blending into campaign art.
+  Use an opaque app-owned badge, preserve geometry/hit areas, and verify actual
+  logo-pixel contrast. Retain full-phone/settings CI JSON under distinct names.
 - Candidate: Dock + only settings/touch handling, preserved grouped preferences,
   global visible Autoplay, Full Video LEFT and independent parked gestures;
   compact phone dock/typing, First/Last Add Video, dock type picker and inset dog.

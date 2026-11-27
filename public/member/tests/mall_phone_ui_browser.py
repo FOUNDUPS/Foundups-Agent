@@ -1312,6 +1312,24 @@ def dock_refinement(page):
         a, d = art.bounding_box(), dog.bounding_box()
         assert_true(d['x']>=a['x'] and d['y']>=a['y'] and d['x']+d['width']<=a['x']+a['width']+1 and d['y']+d['height']<=a['y']+a['height']+1, {'art':a,'dog':d})
         assert_true(dog.evaluate('(e)=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'), 'Banner covers the dog hit area')
+        dog.locator('img').evaluate('img=>img.decode()')
+        contrast = dog.evaluate("""e=>{
+          const img=e.querySelector('img'),c=document.createElement('canvas');
+          c.width=img.naturalWidth;c.height=img.naturalHeight;
+          const ctx=c.getContext('2d');ctx.drawImage(img,0,0);
+          const pixels=ctx.getImageData(0,0,c.width,c.height).data,red=[];
+          const luminance=rgb=>rgb.map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4})
+            .reduce((n,v,i)=>n+v*[.2126,.7152,.0722][i],0);
+          for(let i=0;i<pixels.length;i+=64)if(pixels[i]>160&&pixels[i+1]<80&&pixels[i+2]<80&&pixels[i+3]>240)
+            red.push(luminance([pixels[i],pixels[i+1],pixels[i+2]]));
+          red.sort((a,b)=>a-b);
+          const bg=getComputedStyle(e).backgroundColor.match(/[\\d.]+/g).map(Number);
+          const a=red[Math.floor(red.length/2)],b=luminance(bg.slice(0,3));
+          return {opaque:bg.length===3||bg[3]>=.95,redSamples:red.length,
+            ratio:(Math.max(a,b)+.05)/(Math.min(a,b)+.05)};
+        }""")
+        assert_true(contrast['opaque'] and contrast['redSamples']>50 and contrast['ratio']>=3,
+                    {'dog_not_identifiable_over_banner':contrast})
         expect(banner).to_have_attribute('href','https://hasan4speaker.com/')
         expect(dog).to_have_attribute('href','/member/')
         search.tap(); expect(search).to_be_focused()
@@ -1366,7 +1384,7 @@ def dock_refinement(page):
         assert_true(page.url == route, 'Campaign action navigated the browsing page')
         dog.tap(); page.wait_for_url('https://foundupscom--play-v26-home2-78o69r5x.web.app/member/')
         rows.append({'viewport':name,'resting':resting,'focused':focused,'WikiTube_dock':tv_dock,
-          'banner':a,'dog':d,'gesture_input':gesture,'independent_links':True})
+          'banner':a,'dog':d,'dog_contrast':contrast,'gesture_input':gesture,'independent_links':True})
     return {'viewports':rows,'Image_Podcast':'SPECIFIED_NOT_IMPLEMENTED; disabled, no fabricated results',
       'physical_iPhone':'UNEXECUTED','routes':'controlled local fixtures, not a deployed candidate'}
 

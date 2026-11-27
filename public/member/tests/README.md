@@ -11,6 +11,8 @@ non-hpc-plus-swipe preserves the existing ordinary Mall/VOTE + upward gesture
 and separate tap; HPC opens only the type picker. The additional matrix budget
 is bounded240s; all original gate deadlines and case assertions remain intact.
 
+CI retains the full-phone and settings JSON reports under distinct filenames.
+
 settings-close-recovery covers320/414/390/402 widths, changed/no-change Close,
 Dock + reopen, side tap exclusion, native modal/inert/scroll/pointer state,
 post-Close taps, scrolling, focus and reload persistence. Keyboard selection is
@@ -20,7 +22,7 @@ The old side-entry baseline is preserved as incident evidence, not a surviving
 settings route. A one-time physical freeze is not asserted repeatable.
 
 dock-refinement checks resting/focused/expanded dock and iframe non-overlap,
-44px targets, dock swipe vs tap, First/Last persistence, independent dog/campaign
+44px targets, an opaque badge with sampled logo contrast, dock swipe vs tap, First/Last persistence, independent dog/campaign
 hit areas and navigation. Image/Podcast are asserted disabled, not faked.
 global-autoplay tests visible automatic continuation in three presentations,
 intentional Next when off and hidden pause. desktop-autoplay-startup also checks
