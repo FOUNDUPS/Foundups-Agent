@@ -37,7 +37,7 @@ REPORT = {
         {'case': 'public-nonvideo-retained-face', 'engines': ['chromium', 'webkit'],
          'status': 'NOT_APPLICABLE', 'reason': 'Guest card-face loan prototype excluded'},
     ],
-    'separate_settings_cases': ['settings-close-recovery','dock-refinement','global-autoplay','desktop-autoplay-startup'],
+    'separate_settings_cases': ['settings-close-recovery','dock-refinement','global-autoplay','desktop-autoplay-startup','non-hpc-plus-swipe'],
     'separate_defensive_cases': {'case': 'history-literal-rendering',
         'status': 'SELECTED_REQUIRES_REVIEWED_SOURCE' if args.include_defensive or 'history-literal-rendering' in args.case
                   else 'PENDING_SEPARATE_DEFENSIVE_REVIEW',
@@ -1323,6 +1323,7 @@ def dock_refinement(page):
         gesture = app_touch(page, search, dy=-90)
         picker = page.get_by_role('dialog',name='Tile types',exact=True)
         expect(picker).to_be_visible()
+        expect(page.locator('dialog[open]')).to_have_count(1)
         expect(picker.get_by_role('button',name='Image',exact=True)).to_be_disabled()
         expect(picker.get_by_role('button',name='Podcast',exact=True)).to_be_disabled()
         picker.get_by_role('button',name='Video',exact=True).click()
@@ -1523,6 +1524,21 @@ def desktop_autoplay_startup(page):
     page.reload(wait_until='domcontentloaded')
     page.wait_for_function("mallVideoPlayer.isTheater()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3")
     return {'stored_off_prevents_startup':True,'explicit_play_when_off':True,'stored_on_reloads_playing':True,'provider':'CONTROLLED_FIXTURE'}
+
+
+def non_hpc_plus_swipe(page):
+    rows = []
+    for scope in ['', '?foundup=voteballots']:
+        page.goto('https://play.foundups.com/member/'+scope,wait_until='domcontentloaded')
+        plus = page.locator('.mall-member-search-dock:visible .mall-search-plus')
+        gesture = app_touch(page,plus,dy=-90)
+        menu = page.locator('.mall-member-search-options[open]:not(.mall-tile-type-picker)')
+        expect(menu).to_be_visible()
+        expect(page.locator('.mall-tile-type-picker[open]')).to_have_count(0)
+        close_video_menu(page,menu)
+        plus.tap(); expect(menu).to_be_visible(); close_video_menu(page,menu)
+        rows.append({'scope':scope or 'ordinary','swipe_and_tap_open_options':True,'gesture':gesture})
+    return {'projections':rows,'physical_iPhone':'UNEXECUTED'}
 
 
 def hpc_home_shared_desktop_dock(page):
@@ -1853,7 +1869,7 @@ def run_case(browser, name, fn, block=False, block_storage=False, silent_start=F
     if args.case and name not in args.case:return
     # The full settings matrix has its own bounded CI gate. Retain every
     # pre-existing full-suite case and run these explicitly in the adjacent gate.
-    if not args.case and name in ['settings-close-recovery','dock-refinement','global-autoplay','desktop-autoplay-startup']:return
+    if not args.case and name in ['settings-close-recovery','dock-refinement','global-autoplay','desktop-autoplay-startup','non-hpc-plus-swipe']:return
     REPORT['active_case'] = name
     context, page = make_page(browser, block, block_storage, silent_start, desktop, hold_ready)
     row = {'engine': REPORT['engine'], 'case': name, 'passed': False}
@@ -1938,6 +1954,7 @@ try:
                 run_case(browser, 'dock-refinement', dock_refinement)
                 run_case(browser, 'global-autoplay', global_autoplay)
                 run_case(browser, 'desktop-autoplay-startup', desktop_autoplay_startup, desktop=True)
+                run_case(browser, 'non-hpc-plus-swipe', non_hpc_plus_swipe)
                 run_case(browser, 'clean-video-gestures', clean_video_gestures)
                 run_case(browser, 'tucked-next-stays-hidden', tucked_next_stays_hidden)
                 run_case(browser, 'hpc-home-shared-desktop-dock', hpc_home_shared_desktop_dock, desktop=True)

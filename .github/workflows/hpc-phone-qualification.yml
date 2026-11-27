@@ -123,8 +123,12 @@ jobs:
           run_gate() {
             local gate_name="$1"
             local gate_status=0
+            local gate_seconds=180
+            # Additional settings viewport/Close coverage has its own finite
+            # budget; preserve every original gate's deadline and assertions.
+            if [ "$gate_name" = "settings-ui" ]; then gate_seconds=240; fi
             shift
-            timeout --signal=TERM --kill-after=5s 180s "$@" 2>&1 | tee "$HPC_EVIDENCE_DIR/$gate_name.log" || gate_status=$?
+            timeout --signal=TERM --kill-after=5s "${gate_seconds}s" "$@" 2>&1 | tee "$HPC_EVIDENCE_DIR/$gate_name.log" || gate_status=$?
             printf '%s_exit=%s\n' "$gate_name" "$gate_status" >> "$HPC_EVIDENCE_DIR/outcomes.txt"
             if [ "$gate_status" -ne 0 ]; then combined_status=1; fi
           }
@@ -132,7 +136,7 @@ jobs:
           run_gate queue-callbacks python -B public/member/tests/mall_queue_callbacks_browser.py
           run_gate public-tv python -B public/member/tests/mall_public_tv_browser.py --worker
           run_gate phone-ui python -B public/member/tests/mall_phone_ui_browser.py --include-defensive
-          run_gate settings-ui python -B public/member/tests/mall_phone_ui_browser.py --case settings-close-recovery --case dock-refinement --case global-autoplay --case desktop-autoplay-startup
+          run_gate settings-ui python -B public/member/tests/mall_phone_ui_browser.py --case settings-close-recovery --case dock-refinement --case global-autoplay --case desktop-autoplay-startup --case non-hpc-plus-swipe
           run_gate probe-release-metadata node scripts/tests/hpc_preview_metadata_vm.cjs
           run_gate worker-state node public/member/tests/mall_product_state_vm.mjs
           run_gate admission-preferences node public/member/tests/mall_admission_preferences_vm.mjs

@@ -3,9 +3,13 @@
 ## v26 settings continuation — 2026-11-27
 
 Keep the original72-row defensive phone suite intact. The additional settings
-matrix runs in its own180-second CI gate, through the same existing --case API:
+matrix runs in its own240-second CI gate, through the same existing --case API:
 
-    python -B public/member/tests/mall_phone_ui_browser.py --case settings-close-recovery --case dock-refinement --case global-autoplay --case desktop-autoplay-startup
+    python -B public/member/tests/mall_phone_ui_browser.py --case settings-close-recovery --case dock-refinement --case global-autoplay --case desktop-autoplay-startup --case non-hpc-plus-swipe
+
+non-hpc-plus-swipe preserves the existing ordinary Mall/VOTE + upward gesture
+and separate tap; HPC opens only the type picker. The additional matrix budget
+is bounded240s; all original gate deadlines and case assertions remain intact.
 
 settings-close-recovery covers320/414/390/402 widths, changed/no-change Close,
 Dock + reopen, side tap exclusion, native modal/inert/scroll/pointer state,

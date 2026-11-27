@@ -23,6 +23,7 @@ parking is not an Autoplay setting. The phone WikiTube dock floats over the app
 queue with safe-area clearance, never over the embed; focused/expanded typing
 reserves layout space using the existing keyboard offset once.
 
+Ordinary Mall and VOTE retain their existing + upward swipe to options.
 A deliberate upward swipe starting on the resting HPC dock opens Tile types;
 a tap edits search. Focused typing, page scroll, buttons and player gestures
 keep separate owners. Video is connected; Image and Podcast are visibly disabled

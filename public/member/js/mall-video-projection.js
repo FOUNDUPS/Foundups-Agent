@@ -393,6 +393,13 @@
       echoUntil = performance.now() + 400;
       open();
     }, { passive: false });
+    window.gestureZone?.(trigger, {
+      onSwipe(direction) {
+        // Preserve ordinary Mall/other projections. HPC's dock capture owns
+        // its distinct Tile types swipe and never opens both dialogs.
+        if (direction === 'up' && document.documentElement.dataset.mallVideoScope !== 'hpc') open();
+      }
+    });
   }
 
   function bindDictationHold(trigger, dictation) {

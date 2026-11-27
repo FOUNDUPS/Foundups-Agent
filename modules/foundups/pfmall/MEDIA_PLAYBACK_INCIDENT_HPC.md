@@ -33,6 +33,18 @@
   generic auth as a playback fix, and weakening security/CI. Official reference:
   https://developers.google.com/youtube/terms/required-minimum-functionality#overlays_and_frames
   (accessed2026-11-27). YouTube-native center touch is a boundary, not an app swipe.
+- **new provider observation2026-11-27:** an independent anonymous Windows
+  Chromium context using immutable candidatee39 source on the authorized test
+  origin displayed YouTube's Japanese sign-in/bot-confirmation prompt. API error150
+  accompanied it for iJuguXpbRR4 and sSzWdw7MNjs; legitimate origin Referer and
+  HTTP200 do not establish playback. No advancing media time was observed in that
+  run. The actual right-side grip selected the next ID on LEFT, pinch out/in
+  changed app presentations, and native input beginning inside the iframe stayed
+  inside YouTube. These interaction observations are separate from real playback.
+  API code150 alone is not proof of the creator's settings in this context;
+  the existing cautious refusal message remains. Physical affected-device
+  equivalence and successful provider playback remain unverified. No bypass,
+  header spoofing, OAuth/session transfer or provider-control overlay is proposed.
 - **remaining / next action:** exact candidate verification and independent
   review; retain physical Safari/Home Screen freeze and gesture checks OPEN.
   Baseline preview and local source tests must not be relabeled as a new release.

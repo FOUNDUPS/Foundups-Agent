@@ -1,5 +1,8 @@
 ## 2026-11-27 — Continue #2439 shared dock/settings qualification
 
+- Independent review caught the ordinary/VOTE + upward-swipe regression;
+  restore the original shared callback outside HPC and add cross-projection cases.
+  The new settings matrix has a finite240s budget; original gates are unchanged.
 - Reconciled current main without replacing shared Mall/player/auth owners.
 - Candidate: Dock + only settings/touch handling, preserved grouped preferences,
   global visible Autoplay, Full Video LEFT and independent parked gestures;
