@@ -1,5 +1,24 @@
 # p.fMALL Roadmap
 
+## 2026-11-27 — Wave 5 public Play and shared BYOF stage acceptance
+
+**SPECIFIED_NOT_IMPLEMENTED.** The existing
+[navigation contract section 14](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#140b-wave-5-public-play-and-byof-stage-acceptance--2026-11-27)
+now records the compact overlay dock, dock-origin scoped Mall/Canvas–Video–Podcast
+picker, same-footprint app-owned canvas/video swap, full-surface canvas gestures
+and caller/queue/scroll restoration. Reuse the existing shared owners, with HPC
+as the testbed. Keep the public homepage/guest-routing patch independent of
+unmerged #2439 and the full stage; no HPC branch or acceptance claim is imported.
+
+Qualify public Play discovery and apex protected-FoundUp admission separately
+from universal-stage delivery. Extend existing geometry, gesture, scope, return
+and admission fixtures, record actual stage/queue/dock rectangles at the shared
+breakpoints, then qualify the exact signed-out isolated expiring preview.
+Canvas parity, Podcast behavior and physical Safari/Home Screen acceptance remain
+open until measured. No production, DNS, new access or advocacy publication
+follows from this planning update. Preserve the existing private BYOF brief and
+all dated owner/source/provider evidence.
+
 ## 2026-11-25 — VOTE typed-media integration
 
 **IMPLEMENTED_CANDIDATE / combined release open.** Port the reviewed two-card

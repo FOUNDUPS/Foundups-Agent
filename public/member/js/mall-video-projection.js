@@ -11,7 +11,7 @@
     ['hpc.foundups.com', 'hpc'],
     ['play.foundups.com', 'mall']
   ]);
-  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-(?:controls|gestures|home|home2))-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
+  if (/^foundupscom--(?:play-open-v2[34]|play-v24-(?:iphone|phone|mobile)|play-v2[56]-iphone|play-v26-(?:controls|gestures|home|home2)|play-wave5-20261127)-[a-z0-9]+\.(?:web\.app|firebaseapp\.com)$/.test(window.location.hostname)) {
     dedicatedHosts.set(window.location.hostname, 'mall');
   }
   const publicScopes = new Set(['hpc', 'voteballots']);
@@ -528,7 +528,11 @@
     dialog.prepend(dialog.querySelector('[data-action="browse-ai"]'),
       dialog.querySelector('[data-browse-ai-pilot]'), dialog.querySelector('.mall-video-options'));
     const add = form.querySelector('.mall-search-add');
+    const publicBrowseOnly = isOpenMallHost(window.location) && !isAdmissionRequest(window.location);
+    add.hidden = publicBrowseOnly;
+    add.disabled = publicBrowseOnly;
     add.addEventListener('click', () => {
+      if (publicBrowseOnly) return;
       const scope = document.documentElement.dataset.mallVideoScope;
       const intent = { action: scope === 'hpc' ? 'add-video' : 'add-foundup' };
       if (scope === 'hpc') {
@@ -736,7 +740,7 @@
         autoPost.hidden = false;
         const hpc = document.documentElement.dataset.mallVideoScope === 'hpc';
         const scopedActions = scoped && (hpc || document.documentElement.dataset.mallVideoScope === 'voteballots');
-        add.hidden = scopedActions;
+        add.hidden = publicBrowseOnly || scopedActions;
         if (scopedActions) {
           options.setAttribute('aria-label', 'Available actions');
           options.title = 'Available actions';

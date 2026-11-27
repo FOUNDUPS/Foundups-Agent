@@ -1,5 +1,28 @@
 # Member Area Interface
 
+## 2026-11-27 — Independent Wave 5 public-entry candidate
+
+The apex gateway has a prominent native **Play FoundUps** link directly after
+its hero, pointing to `https://play.foundups.com/`. Public Play reuses the
+existing dedicated-host guest boot, catalogue pager, tiles, player and Search
+Dock. Production's older sign-in redirect is served-source drift; this source
+change does not introduce a second guest runtime or relax member admission.
+
+On public Play and its exact dated `play-wave5-20261127` preview family, the
+contribution Add control is hidden, disabled and inert to synthetic clicks.
+Scoped HPC browsing on Play also omits Add Video. The settings `+`, dedicated
+HPC behavior and explicit sign-in/callback/invite/member flows are preserved.
+Public detail cards remain metadata, not admission to an application interior.
+The newer apex-admission direction and universal-stage acceptance in
+[navigation §14](../../modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#14-shared-search-dock-and-video-preferences)
+remain distinct from unchanged origin-local account/return handling.
+
+This candidate is independent of unmerged HPC #2439. A fresh preview origin is
+not evidence that installed service workers migrate correctly. Any isolated
+neutral-sample preview must identify its source, data/build transformations,
+expiry and omitted functionality. Canvas/video parity, the dock content picker,
+Podcast and physical-phone acceptance are not delivered by this entry patch.
+
 ## 2026-11-25 — Optional VOTE member cards
 
 The public Play selector `?foundup=voteballots` mounts exactly two reviewed

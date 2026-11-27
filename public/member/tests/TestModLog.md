@@ -1,3 +1,21 @@
+## 2026-11-27 — Independent public entry and guest boundaries
+
+Extended the existing routing VM and scoped-browser fixture with
+`mall_scoped_video_browser.py --public-entry`. Existing legacy cases remain.
+Checks cover the CTA's exact destination and placement, actual44px-minimum
+target/keyboard navigation at390 ×844 and1366 ×900, guest boot without account
+requests, hidden/disabled contribution controls, synthetic-click no effects,
+Play-scoped versus dedicated HPC, public detail deep links, explicit admission
+fail-closed behavior and the exact dated preview family. Browser routes/provider
+events are controlled; no live identity or backend authorization is certified.
+
+Local source-bound results: routing21, member boot35, preferences21, targeted
+static contracts160 and four engine/viewport public-entry rows passed. Actual
+CTA dimensions are196.45 ×57.59px in Chromium and196.45 ×57px in WebKit. Full
+canvas/video same-footprint swaps, dock-origin content selection, Podcast,
+physical Safari/Home Screen and production remain unimplemented or unqualified;
+do not substitute these entry tests for those acceptance gates.
+
 ## 2026-11-25 — Tucked tap without compatibility click
 
 The29a full hosted run caught both floating-frame-controls and the hidden-policy

@@ -1,3 +1,16 @@
+## 2026-11-27 — Reconcile Wave 5 public Play and BYOF stage acceptance
+
+Updated existing navigation section 14 and the Mall roadmap with 012's compact
+overlay/no-reserved-block dock, dock-origin scoped content picker, identical
+canvas/video footprint, app-owned canvas gestures and state-preserving return.
+HPC remains the shared testbed; its unmerged #2439 lane is preserved. The public
+homepage/guest-route slice is independent of full canvas/Podcast delivery.
+Record measured rectangles, source/served-preview identity and signed-out gates;
+no runtime, provider, physical-phone or production result is claimed by this
+documentation change. Internal HPC wording stays in the existing private BYOF
+record. Validation: scoped diff review and whitespace check; no new tests or
+runtime execution for this acceptance-only edit. WSP00/10/15/22/50/71/97.
+
 ## 2026-11-26 — Port Fractal Tile Graph backend, patch API, schemas, projections, client & paper onto post-HPC main
 
 - Ported `fractal_tile_graph.py`, `tile_graph_context.py`, `tile_graph_store.py`, `http_api.py` (`GET /pfmall/tile-graph`, `POST /pfmall/tile-graph/patches`), `member_catalog_export.py` (`export_fractal_tile_graph`), schemas, public projections, `sprint1_registry_benchmark_manifest.json`, `public/member/js/mall-tile-graph-client.js`, `public/member/js/pfmall-control-dispatcher.js`, and [PFMALL_Fractal_Tile_Elements_Architecture.md](../../../WSP_knowledge/docs/Papers/PFMALL_Fractal_Tile_Elements_Architecture.md) onto post-`#2459` `main`, keeping `#2459`'s `public/member` UI owners intact (`?fractal=1` UI shell reconciliation stays separate).

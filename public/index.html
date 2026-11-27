@@ -413,6 +413,33 @@
       max-width: 720px;
     }
 
+    .play-entry {
+      padding: 2rem 1.25rem;
+      text-align: center;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      scroll-margin-top: 5rem;
+    }
+
+    .play-entry a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 1rem 2.5rem;
+      text-decoration: none;
+    }
+
+    .play-entry p {
+      margin-top: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .play-entry a:focus-visible {
+      outline: 3px solid var(--cyan);
+      outline-offset: 5px;
+    }
+
     .hero-badge {
       display: inline-flex;
       align-items: center;
@@ -1468,6 +1495,11 @@
       <p style="color:var(--text-dim);font-size:0.72rem;margin:0 0 1rem;letter-spacing:1px;">closed alpha</p>
       <p style="color:var(--text-muted);font-size:0.78rem;margin:0;"><em>FoundUps for the 99% eating the Startups of the 1%</em></p>
     </div>
+  </section>
+
+  <section class="play-entry" aria-label="Explore the public Mall">
+    <a id="playFoundupsCta" class="btn-primary" href="https://play.foundups.com/">Play FoundUps</a>
+    <p>Browse the public Mall. No sign-in needed.</p>
   </section>
 
   <!-- HOW IT WORKS — snap section -->

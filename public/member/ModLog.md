@@ -1,5 +1,21 @@
 # Member Area Module Change Log
 
+## 2026-11-27 — Wave 5 public Play entry and guest controls
+
+Added the native Play FoundUps CTA immediately after the gateway hero. Reused
+the existing public boot rather than reproducing production's old credential
+redirect. Public Play hides/disables contribution controls and prevents their
+synthetic activation; dedicated HPC and explicit admission keep existing gates.
+The one dated preview family is matched exactly, including near-miss denials.
+No unmerged HPC code, protected endpoint, permission, DNS or production change.
+
+Focused local results: routing21, member boot35, preferences21, static contracts160,
+and public-entry browser cases at390 ×844 and1366 ×900 in Chromium/WebKit passed.
+The CTA measured196.45 ×57.59px (Chromium),196.45 ×57px (WebKit) after scrolling
+into view. Provider, physical phone, installed-client update and universal-stage
+results remain separate; preview/CI identity belongs in the existing Wave 5 record.
+WSP00/5/10/15/22/50/71/91/97.
+
 ## 2026-11-25 — Tucked rail touch restoration
 
 The29a hosted phone suite caught immediate Video-menu suppression after restore:

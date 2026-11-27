@@ -201,6 +201,17 @@ function forbidHtmlWrites(node) {
   return () => writes;
 }
 
+await check('public Play CTA follows the gateway hero before How without an auth hook', () => {
+  const hero = rootHtml.indexOf('<section class="hero snap-section">');
+  const heroEnd = rootHtml.indexOf('</section>', hero);
+  const how = rootHtml.indexOf('<section class="snap-section" id="how">');
+  const match = rootHtml.match(/<a\b[^>]*\bid="playFoundupsCta"[^>]*>Play FoundUps<\/a>/);
+  assert.ok(match && hero >= 0 && heroEnd > hero && match.index > heroEnd && match.index < how);
+  assert.match(match[0], /\bhref="https:\/\/play\.foundups\.com\/"/);
+  assert.ok(!/\bon[a-z]+\s*=|javascript:/i.test(match[0]));
+  assert.equal(rootHtml.match(/\bid="playFoundupsCta"/g).length, 1);
+});
+
 await check('actual dev harness catch renders hostile error text without parent HTML writes', async () => {
   const h = runtime(preview + '/member/', { autoNodes: true });
   const parent = h.document.getElementById('loadingState');
@@ -393,13 +404,15 @@ await check('same-host contribution review saves typed context only after explic
   }
 });
 
-await check('actual dock Add action distinguishes Mall creation from HPC selected-video context', () => {
+await check('permitted dock Add callback distinguishes Mall creation from HPC selected-video context', () => {
   for (const [scope, videoId] of [[undefined, 'abcDEF_12-3'], ['hpc', 'abcDEF_12-3'], ['hpc', 'invalid']]) {
     const h = runtime(preview + '/member/', { actualState: true });
     h.document.documentElement.dataset.mallVideoScope = scope;
     h.win.mallVideoPlayer = { getCurrentVideoId: () => videoId };
     const add = h.caller();
-    h.run('var add = document.activeElement; var showContributionReview = window.mallVideoProjection.showContributionReview;\n' + dockAddHandler,
+    // This fixture permits the callback; --public-entry checks the rendered
+    // host policy, including hidden/disabled controls and synthetic clicks.
+    h.run('var publicBrowseOnly = false; var add = document.activeElement; var showContributionReview = window.mallVideoProjection.showContributionReview;\n' + dockAddHandler,
       'mall-video-projection.js#actual-dock-add-handler');
     add.dispatch('click');
     const dialog = h.dialog();
@@ -492,6 +505,21 @@ await check('isolated v26 controls, gestures and home previews are read-only whi
   for (const family of ['home22', 'home2-extra']) {
     const rejected = 'https://foundupscom--play-v26-' + family + '-abc123.web.app/member/';
     assert.equal(runtime(rejected).api.hostScope(new URL(rejected)), null);
+  }
+});
+
+await check('only the dated Wave 5 preview family receives public guest boot', () => {
+  for (const domain of ['web.app', 'firebaseapp.com']) {
+    const h = runtime('https://foundupscom--play-wave5-20261127-abc123.' + domain + '/');
+    assert.equal(h.api.hostScope(h.win.location), 'mall');
+    assert.equal(h.api.shouldLoadMemberAuth(h.win.location), false);
+    h.run(landingBoot, 'root.html#landing');
+    assert.deepEqual(h.calls.replace, ['/member/']);
+  }
+  for (const family of ['play-wave5-20261126', 'play-wave5-202611270', 'play-wave5-20261127-extra', 'play-wave5']) {
+    const h = runtime('https://foundupscom--' + family + '-abc123.web.app/member/');
+    assert.equal(h.api.hostScope(h.win.location), null, family);
+    assert.equal(h.api.shouldLoadMemberAuth(h.win.location), true, family);
   }
 });
 
