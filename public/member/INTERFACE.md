@@ -1,5 +1,19 @@
 # Member Area Interface
 
+## v26 shared controls — 2026-11-27 candidate
+
+Video Options is reached through the floating Search Dock + only. The existing
+small external sidebar handles gestures/movement, never settings. Full Video's
+LEFT queue gesture uses that grip on the right; Floating keeps RIGHT tuck.
+Saved v1 options retain their values, including the historically named
+fullVideoSwipeRight key. addVideoPosition accepts first/last, default last.
+
+Autoplay controls automatic visible queue continuation and scoped TV startup;
+intentional Play/Next remains available when off. Hidden media remains paused.
+HPC dock-origin upward swipe opens the bounded Tile types dialog; tap focuses
+search, with keyboard Tile types under Interface. Image/Podcast are disabled.
+Native YouTube and video controls keep their input ownership. No embed overlays.
+
 ## 2026-11-25 — Optional VOTE member cards
 
 The public Play selector `?foundup=voteballots` mounts exactly two reviewed

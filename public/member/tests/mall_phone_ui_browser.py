@@ -37,6 +37,7 @@ REPORT = {
         {'case': 'public-nonvideo-retained-face', 'engines': ['chromium', 'webkit'],
          'status': 'NOT_APPLICABLE', 'reason': 'Guest card-face loan prototype excluded'},
     ],
+    'separate_settings_cases': ['settings-close-recovery','dock-refinement','global-autoplay'],
     'separate_defensive_cases': {'case': 'history-literal-rendering',
         'status': 'SELECTED_REQUIRES_REVIEWED_SOURCE' if args.include_defensive or 'history-literal-rendering' in args.case
                   else 'PENDING_SEPARATE_DEFENSIVE_REVIEW',
@@ -102,12 +103,7 @@ def boot(page, hpc=False):
 
 
 def open_video_menu(page, settings=False):
-    if page.evaluate('window.mallVideoPlayer?.isFloating?.()&&!window.mallVideoPlayer?.isTucked?.()'):
-        page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
-    elif page.locator('.mall-member-search-dock:visible .mall-search-plus').count():
-        page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
-    else:
-        page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
+    page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
     menu = page.locator('.mall-member-search-options[open]')
     expect(menu).to_be_visible()
     details = menu.locator('[data-video-settings]' if settings else '[data-video-commands]')
@@ -323,13 +319,13 @@ def hpc_branding(page):
     boot(page, True)
     banner = page.locator('.mall-hpc-banner-link')
     expect(banner).to_have_attribute('href', '/member/')
-    expect(banner).to_have_attribute('aria-label', 'Home: HPC video tiles')
+    expect(banner).to_have_attribute('aria-label', 'Hasan for Speaker campaign')
     expect(page.locator('#videoScopeDisclosure a[href="https://hasan4speaker.com/"]')).to_have_count(1)
     image = banner.locator('.mall-hpc-banner-image')
     expect(image).to_be_visible()
     expect(image).to_have_attribute('src', '/member/hpc-banner.webp')
     expect(page.locator('.mall-hpc-mall-return')).to_have_attribute('href', 'https://play.foundups.com/')
-    expect(page.locator('.mall-hpc-mall-return')).to_contain_text('Play Mall')
+    expect(page.locator('.mall-hpc-mall-return')).to_have_text('')
     assert_true(page.locator('.mall-hpc-mall-return a, .mall-hpc-banner-link a').count() == 0,
                 'Nested conflicting header links')
     build = page.locator('.mall-hpc-banner > .mall-build-label').bounding_box()
@@ -354,7 +350,8 @@ def hpc_branding(page):
     dog.tap()
     expect(page.get_by_role('dialog', name='Red Dog conversation', exact=True)).to_be_visible()
     page.get_by_role('button', name='Back to browsing', exact=True).click()
-    banner.tap()
+    page.locator('#videoScopePhoneDock .mall-search-plus').tap()
+    page.get_by_role('button', name='Home', exact=True).click()
     assert_true(page.url == 'https://hpc.foundups.com/member/', 'HPC Home left the scope')
     assert_true(page.evaluate("mallStateRestore.getScopedPresentation()==='grid'"), 'Home intent was not saved')
     page.locator('.mall-hpc-mall-return').tap()
@@ -1161,11 +1158,12 @@ def clean_video_gestures(page):
     assert_true(not page.evaluate('!!document.fullscreenElement'), 'App Full Video entered native provider fullscreen')
     frame = player.locator('iframe').bounding_box()
     edge = grip.bounding_box()
-    assert_true(frame['width'] >= 200 and frame['height'] >= 200 and edge['x'] + edge['width'] <= frame['x'] + 1,
+    assert_true(frame['width'] >= 200 and frame['height'] >= 200 and frame['x'] + frame['width'] <= edge['x'] + 1,
                 {'provider_or_edge_geometry': {'frame': frame, 'edge': edge}})
     assert_true(abs(frame['height'] - edge['height']) <= 1, 'Grip is not the provider-height side edge')
     before = page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length,plays:fixturePlayback.plays})')
-    transitions.append(app_touch(page, grip, dx=110))
+    full_swipe = grip
+    transitions.append(app_touch(page, full_swipe, dx=-110))
     page.wait_for_function("mallVideoPlayer.getCurrentVideoId()==='HPC00000001'&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
     page.wait_for_function('mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3')
     after = page.evaluate('({id:mallVideoPlayer.getCurrentVideoId(),loads:fixturePlayback.loadedIds.length,plays:fixturePlayback.plays,events:cleanEvents})')
@@ -1200,11 +1198,11 @@ def clean_video_gestures(page):
     query.fill('')
     set_video_choices(page, fullVideoSwipeRight='previous')
     index = page.evaluate('mallVideoPlayer.getCurrentIndex()')
-    transitions.append(app_touch(page, grip, dx=110))
+    transitions.append(app_touch(page, full_swipe, dx=-110))
     assert_true(page.evaluate('mallVideoPlayer.getCurrentIndex()') == index - 1, 'Configured reverse swipe did not select exactly one previous clip')
     set_video_choices(page, fullVideoSwipeRight='none')
     index = page.evaluate('mallVideoPlayer.getCurrentIndex()')
-    transitions.append(app_touch(page, grip, dx=110))
+    transitions.append(app_touch(page, full_swipe, dx=-110))
     assert_true(page.evaluate('mallVideoPlayer.getCurrentIndex()') == index, 'No-action swipe changed video')
     set_video_choices(page, fullVideoSwipeRight='next')
 
@@ -1290,6 +1288,228 @@ def clean_video_gestures(page):
             'cross_origin_provider_gestures': 'NOT_CAPTURED', 'physical_iPhone': 'UNEXECUTED'}
 
 
+def dock_refinement(page):
+    """v26 entry: dock ownership, small-phone geometry and distinct links."""
+    route = 'https://foundupscom--play-v26-home2-78o69r5x.web.app/member/?foundup=hpc'
+    rows = []
+    for name, width, height in [('compact',320,690),('iPhone11',414,896),('iPhone12',390,844),('iPhone16Pro',402,874)]:
+        page.set_viewport_size({'width':width,'height':height})
+        if page.url.startswith('https://foundupscom--play-v26-home2-'):
+            page.evaluate("() => {for(const k of Object.keys(sessionStorage))if(k.startsWith('pfmall_'))sessionStorage.removeItem(k)}")
+        page.goto(route, wait_until='domcontentloaded')
+        dock = page.locator('#videoScopePhoneDock')
+        search = dock.locator('textarea')
+        expect(dock).to_be_visible()
+        resting = dock.locator('form[role="search"]').bounding_box()
+        assert_true(resting['height'] <= 72 and resting['x'] >= 0 and resting['x']+resting['width'] <= width+1, resting)
+        for control in ['.mall-search-plus','.mall-search-camera','.mall-search-dog']:
+            box = dock.locator(control).bounding_box()
+            assert_true(box['width'] >= 44 and box['height'] >= 44, {control:box})
+        art = page.locator('.mall-hpc-banner-art')
+        dog = art.locator('.mall-hpc-mall-return')
+        banner = art.locator('.mall-hpc-banner-link')
+        expect(dog).to_be_visible(); expect(dog).to_have_text('')
+        a, d = art.bounding_box(), dog.bounding_box()
+        assert_true(d['x']>=a['x'] and d['y']>=a['y'] and d['x']+d['width']<=a['x']+a['width']+1 and d['y']+d['height']<=a['y']+a['height']+1, {'art':a,'dog':d})
+        assert_true(dog.evaluate('(e)=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'), 'Banner covers the dog hit area')
+        expect(banner).to_have_attribute('href','https://hasan4speaker.com/')
+        expect(dog).to_have_attribute('href','/member/')
+        search.tap(); expect(search).to_be_focused()
+        expect(page.locator('dialog[open]')).to_have_count(0)
+        search.fill('A deliberately long search across more than one row ' * 3)
+        focused = dock.locator('form[role="search"]').bounding_box()
+        assert_true(focused['width']<=width and focused['height']<=180, focused)
+        search.fill(''); search.press('Tab')
+        gesture = app_touch(page, search, dy=-90)
+        picker = page.get_by_role('dialog',name='Tile types',exact=True)
+        expect(picker).to_be_visible()
+        expect(picker.get_by_role('button',name='Image',exact=True)).to_be_disabled()
+        expect(picker.get_by_role('button',name='Podcast',exact=True)).to_be_disabled()
+        picker.get_by_role('button',name='Video',exact=True).click()
+        expect(picker).not_to_be_visible()
+        # A tap/keyboard edit is distinct from the resting-dock swipe.
+        search.tap(); search.fill('Schumer'); expect(search).to_be_focused()
+        expect(picker).not_to_be_visible(); search.fill(''); search.press('Tab')
+        menu = open_video_menu(page, settings=True)
+        for group in ['Interface','Gestures','Playback']:
+            expect(menu.get_by_role('group',name=group,exact=True)).to_be_visible()
+        expect(menu.locator('[data-video-option="fullVideoSwipeRight"]')).to_have_accessible_name('Full Video swipe left')
+        placement = menu.locator('[data-video-option="addVideoPosition"]')
+        placement.select_option('first')
+        assert_true(page.locator('#mallTileField').evaluate("e=>e.firstElementChild.matches('.mall-grid-add-video')"), 'First placement not applied')
+        placement.select_option('last')
+        assert_true(page.locator('#mallTileField').evaluate("e=>e.lastElementChild.previousElementSibling.matches('.mall-grid-add-video')"), 'End Add Video tile lost')
+        close_video_menu(page,menu)
+        page.locator('#mallTileField .mall-tile[data-video-id]').first.focus(); page.keyboard.press('Enter')
+        page.wait_for_function('mallVideoPlayer.isFloating()')
+        grip = page.locator('.video-player-gesture-grip')
+        grip.tap(); expect(page.locator('.mall-member-search-options[open]')).to_have_count(0)
+        video_action(page,'expand')
+        expect(page.locator('#videoPlayerFullscreen')).to_have_attribute('aria-label','WikiTube video player')
+        tv_dock = dock.locator('form[role="search"]').bounding_box()
+        frame = page.locator('#videoPlayerFullscreen iframe').bounding_box()
+        assert_true(tv_dock['height']<=72 and frame['width']>=200 and frame['height']>=200, {'dock':tv_dock,'frame':frame})
+        assert_true(tv_dock['y'] >= frame['y']+frame['height']-1, {'dock_over_embed':tv_dock,'frame':frame})
+        search.tap(); search.fill('A long focused WikiTube query ' * 5)
+        focused_tv = dock.bounding_box()
+        focused_frame = page.locator('#videoPlayerFullscreen iframe').bounding_box()
+        assert_true(focused_tv['y']>=focused_frame['y']+focused_frame['height']-1, {'focused_dock_over_embed':focused_tv,'frame':focused_frame})
+        search.fill(''); search.press('Tab')
+        page.screenshot(path=str(OUT.with_name(OUT.stem+'-'+REPORT['engine']+'-'+name+'-dock.png')))
+        video_action(page,'return')
+        # Independent hit areas: locally controlled campaign destination and Mall.
+        page.context.route('https://hasan4speaker.com/**', lambda r:r.fulfill(status=200,content_type='text/html',body='<title>Campaign fixture</title>'))
+        with page.expect_popup() as pop:
+            banner.click(position={'x':a['width']-20,'y':a['height']/2})
+        popup = pop.value; popup.wait_for_url('https://hasan4speaker.com/'); popup.close()
+        assert_true(page.url == route, 'Campaign action navigated the browsing page')
+        dog.tap(); page.wait_for_url('https://foundupscom--play-v26-home2-78o69r5x.web.app/member/')
+        rows.append({'viewport':name,'resting':resting,'focused':focused,'WikiTube_dock':tv_dock,
+          'banner':a,'dog':d,'gesture_input':gesture,'independent_links':True})
+    return {'viewports':rows,'Image_Podcast':'SPECIFIED_NOT_IMPLEMENTED; disabled, no fabricated results',
+      'physical_iPhone':'UNEXECUTED','routes':'controlled local fixtures, not a deployed candidate'}
+
+
+def settings_close_recovery(page):
+    """Exact reported settings path; real native dialogs, controlled YT only."""
+    evidence = []
+    route = 'https://foundupscom--play-v26-home2-78o69r5x.web.app/member/?foundup=hpc'
+    snapshot = """() => ({
+      modals:[...document.querySelectorAll(':modal')].map(e=>e.id||e.className),
+      inert:[...document.querySelectorAll('[inert]')].map(e=>e.id||e.className),
+      overflow:document.body.style.overflow,
+      pointerEvents:getComputedStyle(document.body).pointerEvents,
+      scroll:document.querySelector('#mallTileField').parentElement.scrollTop,
+      focus:document.activeElement?.className
+    })"""
+    for name, width, height in [('compact',320,690),('iPhone11',414,896),('iPhone12',390,844),('iPhone16Pro',402,874)]:
+        page.set_viewport_size({'width':width,'height':height})
+        for mode in ['grid','wikitube'] + (['floating'] if name == 'iPhone11' else []):
+            for change in [False, True]:
+                REPORT['active_settings_path']={'viewport':name,'mode':mode,'changed':change}
+                save()
+                if page.url.startswith('https://foundupscom--play-v26-home2-'):
+                    page.evaluate("""() => {for(const key of Object.keys(sessionStorage))
+                      if(key.startsWith('pfmall_'))sessionStorage.removeItem(key)}""")
+                page.goto(route, wait_until='domcontentloaded')
+                page.evaluate("""() => {
+                  window.settingsInputTrace=[];
+                  for(const type of ['touchstart','touchend','click','close'])
+                    document.addEventListener(type,e=>{
+                      if(e.target.closest?.('.mall-member-search-dock,.video-player-gesture-grip'))
+                        settingsInputTrace.push({type,target:e.target.className,trusted:e.isTrusted,
+                          prevented:e.defaultPrevented,open:!!document.querySelector('dialog[open]')});
+                    },{capture:true,passive:true});
+                }""")
+                dock = page.locator('#videoScopePhoneDock')
+                expect(dock).to_be_visible()
+                page.wait_for_function('!!window.mallStateRestore&&!!window.mallVideoPlayer')
+                if mode != 'grid':
+                    page.locator('#mallTileField .mall-tile[data-video-id]').first.focus()
+                    page.keyboard.press('Enter')
+                    page.wait_for_function("mallVideoPlayer.isOpen()&&!mallVideoPlayer.isMallHidden()&&mallVideoPlayer.getPlaybackSnapshot()?.state!=='loading'")
+                    if mode == 'wikitube':
+                        video_action(page, 'expand')
+                        expect(page.locator('#videoPlayerFullscreen')).to_have_attribute('aria-label','WikiTube video player')
+                before = page.evaluate(snapshot)
+                saved = page.evaluate('mallStateRestore.getVideoOptions().autoplayNext')
+                dialog = page.locator('.mall-member-search-options[open]')
+                entry = 'dock-plus'
+                if mode == 'floating':
+                    grip = page.locator('.video-player-gesture-grip')
+                    legacy = (grip.get_attribute('aria-label') or '').startswith('Video controls;')
+                    grip.tap()
+                    if legacy:
+                        entry = 'legacy-video-side-first'
+                    else:
+                        expect(dialog).not_to_be_visible()
+                        dock.locator('.mall-search-plus').tap()
+                        entry = 'side-ignored-then-dock-plus'
+                else:
+                    dock.locator('.mall-search-plus').tap()
+                expect(dialog).to_be_visible()
+                settings = dialog.locator('[data-video-settings]')
+                if settings.get_attribute('open') is None:
+                    settings.locator(':scope > summary').tap()
+                checkbox = dialog.locator('[data-video-option="autoplayNext"]')
+                expect(checkbox).to_be_visible()
+                if change: checkbox.tap()
+                expected = not saved if change else saved
+                assert_true(checkbox.is_checked() == expected, 'Checkbox disagrees with requested preference')
+                dialog.get_by_role('button',name='Close',exact=True).tap()
+                expect(dialog).not_to_be_visible()
+                page.wait_for_function("document.querySelectorAll(':modal').length===0")
+                after = page.evaluate(snapshot)
+                for key in ['modals','inert','overflow','pointerEvents']:
+                    assert_true(after[key] == before[key], {'viewport':name,'mode':mode,'change':change,'before':before,'after':after})
+                assert_true(abs(after['scroll']-before['scroll'])<=1, {'unexpected_scroll_jump':after,'before':before})
+                assert_true(page.evaluate('mallStateRestore.getVideoOptions().autoplayNext') == expected, 'Preference did not persist')
+                # Reopen by the actual dock +, not the separate blue frame grip.
+                dock.locator('.mall-search-plus').tap()
+                expect(dialog).to_be_visible()
+                dialog.get_by_role('button',name='Close',exact=True).tap()
+                expect(dialog).not_to_be_visible()
+                if mode != 'grid':
+                    video_action(page, 'return')
+                    page.wait_for_function('mallVideoPlayer.isMallHidden()')
+                field = page.locator('#mallTileField')
+                first = field.locator('.mall-tile[data-video-id]').first
+                first.scroll_into_view_if_needed()
+                first.tap(position={'x':25,'y':75})
+                page.wait_for_function('mallVideoPlayer.isOpen()&&!mallVideoPlayer.isMallHidden()')
+                video_action(page, 'return')
+                search = dock.locator('textarea')
+                search.tap(); search.fill('Schumer'); expect(search).to_have_value('Schumer')
+                search.fill(''); search.press('Escape')
+                if REPORT['engine'] == 'chromium':
+                    app_touch(page, first, dy=-110)
+                    scroll_input = 'Chromium hit-tested touch'
+                else:
+                    # Synthetic WebKit touch has no native scroll default; test
+                    # DOM scrollability separately, without claiming finger input.
+                    page.evaluate('document.querySelector("#mallTileField").parentElement.scrollBy(0,180)')
+                    scroll_input = 'WebKit DOM scroll, physical touch UNEXECUTED'
+                page.wait_for_timeout(80)
+                assert_true(page.evaluate('document.querySelector("#mallTileField").parentElement.scrollTop')>0, 'Field stopped scrolling')
+                page.reload(wait_until='domcontentloaded')
+                page.wait_for_function('!!window.mallStateRestore')
+                assert_true(page.evaluate('mallStateRestore.getVideoOptions().autoplayNext') == expected, 'Reload lost preference')
+                evidence.append({'viewport':name,'width':width,'height':height,'mode':mode,'changed':change,
+                    'entry':entry,'post_close':after,'autoplay_saved':expected,'tap_scroll_navigation_reload':True,'scroll_input':scroll_input})
+                REPORT['settings_close_paths']=evidence
+                save()
+    return {'controlled_paths':evidence,'setup_input':'Keyboard selection isolates the modal Close paths; post-Close tile and dock tests use taps',
+            'physical_iPhone':'UNEXECUTED','real_provider':'UNEXECUTED'}
+
+
+def global_autoplay(page):
+    boot(page, True)
+    page.locator('#mallTileField .mall-tile[data-video-id]').first.focus(); page.keyboard.press('Enter')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    modes = []
+    for mode in ['floating','wikitube','full-video']:
+        if mode == 'wikitube': video_action(page,'expand')
+        if mode == 'full-video': app_touch(page,page.locator('.video-player-gesture-grip'),pinch='out')
+        set_video_choices(page,autoplayNext=False)
+        before = page.evaluate('mallVideoPlayer.getCurrentVideoId()')
+        page.evaluate('fixturePlayback.finishCurrent()'); page.wait_for_timeout(150)
+        assert_true(page.evaluate('mallVideoPlayer.getCurrentVideoId()') == before, 'Autoplay off advanced '+mode)
+        video_action(page,'next')
+        page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3")
+        set_video_choices(page,autoplayNext=True)
+        manual = page.evaluate('mallVideoPlayer.getCurrentVideoId()')
+        page.evaluate('fixturePlayback.finishCurrent()')
+        page.wait_for_function("id=>mallVideoPlayer.getCurrentVideoId()!==id&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3",arg=manual)
+        modes.append({'mode':mode,'off_retained_id':before,'deliberate_next':manual,'on_advanced':page.evaluate('mallVideoPlayer.getCurrentVideoId()')})
+    video_action(page,'return')
+    page.locator('#mallTileField .mall-tile[data-video-id]').first.focus(); page.keyboard.press('Enter')
+    video_action(page,'hide')
+    parked = page.evaluate('mallVideoPlayer.getCurrentVideoId()')
+    page.evaluate('fixturePlayback.finishCurrent()'); page.wait_for_timeout(150)
+    assert_true(page.evaluate('mallVideoPlayer.isTucked()&&mallVideoPlayer.getPlaybackSnapshot()?.state!=="playing"') and page.evaluate('mallVideoPlayer.getCurrentVideoId()')==parked, 'Autoplay bypassed hidden-player pause')
+    return {'controlled_presentations':modes,'hidden_paused_independent_of_Autoplay':True,'real_provider':'UNEXECUTED'}
+
+
 def hpc_home_shared_desktop_dock(page):
     page.goto('https://hpc.foundups.com/member/', wait_until='domcontentloaded')
     page.wait_for_function("mallVideoPlayer.isTheater()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
@@ -1325,7 +1545,8 @@ def hpc_home_shared_desktop_dock(page):
     page.evaluate("window.homeDock=document.querySelector('#videoScopePhoneDock');window.homeFrame=document.querySelector('#videoPlayerFullscreen iframe')")
     page.screenshot(path=str(OUT.with_name(OUT.stem+'-'+REPORT['engine']+'-hpc-desktop-dock.png')))
 
-    page.get_by_role('link', name='Home: HPC video tiles', exact=True).click()
+    dock.locator('.mall-search-plus').click()
+    page.locator('.mall-member-search-options[open]').get_by_role('button', name='Home', exact=True).click()
     page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'&&mallVideoPlayer.isMallHidden()")
     expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
     expect(dock).to_be_visible()
@@ -1558,7 +1779,8 @@ def vote_native_cards(page, desktop=False):
     page.goto('https://hpc.foundups.com/member/', wait_until='domcontentloaded')
     expect(page.locator('#mallTileField .mall-tile').first).to_be_attached()
     if desktop:
-        page.get_by_role('link', name='Home: HPC video tiles', exact=True).click()
+        page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
+        page.locator('.mall-member-search-options[open]').get_by_role('button', name='Home', exact=True).click()
         page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'")
     page.locator('#mallTileField .mall-tile[data-video-id]').first.focus(); page.keyboard.press('Enter')
     page.wait_for_function("mallVideoPlayer.isFloating()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
@@ -1614,6 +1836,9 @@ def vote_reduced_motion(page):
 
 def run_case(browser, name, fn, block=False, block_storage=False, silent_start=False, desktop=False, hold_ready=False):
     if args.case and name not in args.case:return
+    # The full settings matrix has its own bounded CI gate. Retain every
+    # pre-existing full-suite case and run these explicitly in the adjacent gate.
+    if not args.case and name in ['settings-close-recovery','dock-refinement','global-autoplay']:return
     REPORT['active_case'] = name
     context, page = make_page(browser, block, block_storage, silent_start, desktop, hold_ready)
     row = {'engine': REPORT['engine'], 'case': name, 'passed': False}
@@ -1638,9 +1863,11 @@ def run_case(browser, name, fn, block=False, block_storage=False, silent_start=F
               dialogs:[...document.querySelectorAll('dialog[open]')].map(x=>x.getAttribute('aria-label')),
               accountPlane:document.querySelector('#accountPlane')?.className,
               focused:document.activeElement?.outerHTML?.slice(0,400),
+              settingsPath:window.settingsInputTrace?%s:null,
+              settingsInputTrace:window.settingsInputTrace,
               native:[...document.querySelectorAll('#videoPlayerFullscreen video')].map(e=>({
                 src:e.getAttribute('src'),error:e.error?{code:e.error.code,message:e.error.message}:null,
-                ready:e.readyState,network:e.networkState,paused:e.paused,time:e.currentTime}))})""")
+                 ready:e.readyState,network:e.networkState,paused:e.paused,time:e.currentTime}))})""" % json.dumps(REPORT.get('active_settings_path')))
         except Exception:
             pass
         try:
@@ -1692,6 +1919,9 @@ try:
                 run_case(browser, 'hpc-one-dock-player', lambda page: dock_flow(page, True))
                 run_case(browser, 'public-one-dock-player', lambda page: dock_flow(page, False))
                 run_case(browser, 'floating-frame-controls', floating_frame_controls)
+                run_case(browser, 'settings-close-recovery', settings_close_recovery)
+                run_case(browser, 'dock-refinement', dock_refinement)
+                run_case(browser, 'global-autoplay', global_autoplay)
                 run_case(browser, 'clean-video-gestures', clean_video_gestures)
                 run_case(browser, 'tucked-next-stays-hidden', tucked_next_stays_hidden)
                 run_case(browser, 'hpc-home-shared-desktop-dock', hpc_home_shared_desktop_dock, desktop=True)

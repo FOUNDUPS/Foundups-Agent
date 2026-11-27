@@ -1,5 +1,18 @@
 # p.fMALL Roadmap
 
+## 2026-11-27 — Shared dock/settings continuation (#2439)
+
+IMPLEMENTED_CANDIDATE: see the current navigation contract and shared incident.
+Keep options on Dock +, validated preferences, leftward Full Video queue gesture,
+separate floating/tucked behavior and provider input boundaries. Add settings
+regressions as a separate bounded CI gate; retain every existing full-suite case.
+Phone overlay/typing geometry and HPC app-artwork links extend shared owners.
+
+Exit evidence: exact-head full + settings matrix, independent review, required
+checks, resulting main SHA/CI. Physical iPhone remains separate. No deployment
+or unapproved preview follows from merge. Add Video editor/eligibility and real
+Image/Podcast collections require their owning feature contracts, not player code.
+
 ## 2026-11-25 — VOTE typed-media integration
 
 **IMPLEMENTED_CANDIDATE / combined release open.** Port the reviewed two-card

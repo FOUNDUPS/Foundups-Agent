@@ -288,12 +288,12 @@
   function defaultVideoOptions() {
     return { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true,
       tileTapDestination: 'floating', pinchOutDestination: 'wikitube',
-      fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-hidden' };
+      fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-hidden', addVideoPosition: 'last' };
   }
 
   function validVideoOptions(options, partial) {
     var legacyKeys = ['autoplayNext', 'frameDestination', 'collapseDestination', 'revealSelectedPlayer'];
-    if (!ownDataRecord(options, legacyKeys.concat(['tileTapDestination', 'pinchOutDestination', 'pinchInDestination', 'swipeUpDestination', 'fullVideoSwipeRight', 'tuckedSwipeRight']))) return false;
+    if (!ownDataRecord(options, legacyKeys.concat(['tileTapDestination', 'pinchOutDestination', 'pinchInDestination', 'swipeUpDestination', 'fullVideoSwipeRight', 'tuckedSwipeRight', 'addVideoPosition']))) return false;
     if (!partial && !legacyKeys.every(function(key) { return Object.prototype.hasOwnProperty.call(options, key); })) return false;
     return Object.keys(options).every(function(key) {
       if (key === 'autoplayNext' || key === 'revealSelectedPlayer') return typeof options[key] === 'boolean';
@@ -301,6 +301,7 @@
       if (key === 'pinchOutDestination') return ['wikitube', 'full-video'].indexOf(options[key]) !== -1;
       if (key === 'pinchInDestination' || key === 'swipeUpDestination') return ['wikitube', 'mall'].indexOf(options[key]) !== -1;
       if (key === 'fullVideoSwipeRight') return ['next', 'previous', 'none'].indexOf(options[key]) !== -1;
+      if (key === 'addVideoPosition') return ['first', 'last'].indexOf(options[key]) !== -1;
       if (key === 'tuckedSwipeRight') return ['next-hidden', 'next-reveal', 'restore', 'none'].indexOf(options[key]) !== -1;
       return (key === 'frameDestination' ? ['wikitube', 'full-video'] : ['wikitube', 'mall']).indexOf(options[key]) !== -1;
     });
@@ -311,7 +312,7 @@
     try {
       var record = JSON.parse(raw);
       if (!ownDataRecord(record, ['version', 'options']) || Object.keys(record).length !== 2 || record.version !== 1 ||
-          !ownDataRecord(record.options, ['autoplayNext', 'frameDestination', 'collapseDestination', 'revealSelectedPlayer', 'tileTapDestination', 'pinchOutDestination', 'pinchInDestination', 'swipeUpDestination', 'fullVideoSwipeRight', 'tuckedSwipeRight'])) return null;
+          !ownDataRecord(record.options, ['autoplayNext', 'frameDestination', 'collapseDestination', 'revealSelectedPlayer', 'tileTapDestination', 'pinchOutDestination', 'pinchInDestination', 'swipeUpDestination', 'fullVideoSwipeRight', 'tuckedSwipeRight', 'addVideoPosition'])) return null;
       var options = Object.assign({}, record.options);
       // Old frame/collapse settings describe different actions. Reading a v1
       // record supplies only the confirmed tile default, without writing it.
@@ -321,6 +322,7 @@
       if (!Object.prototype.hasOwnProperty.call(options, 'pinchOutDestination')) options.pinchOutDestination = 'wikitube';
       if (!Object.prototype.hasOwnProperty.call(options, 'fullVideoSwipeRight')) options.fullVideoSwipeRight = 'next';
       if (!Object.prototype.hasOwnProperty.call(options, 'tuckedSwipeRight')) options.tuckedSwipeRight = 'next-hidden';
+      if (!Object.prototype.hasOwnProperty.call(options, 'addVideoPosition')) options.addVideoPosition = 'last';
       return validVideoOptions(options, false) ? options : null;
     } catch (error) { return null; }
   }

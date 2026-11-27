@@ -1,5 +1,14 @@
 # FoundUPS Member Mall
 
+## v26 continuation qualification — 2026-11-27
+
+The shared dock now groups Interface, Gestures and Playback settings. Dock + is
+the options entry; the video-side grip only moves/gestures. Full Video LEFT is
+Next by default. The compact phone WikiTube dock floats over its app queue;
+focused typing reserves space outside the provider. HPC banner artwork and its
+inset dog have independent destinations. See INTERFACE and the canonical shared
+navigation contract for current behavior; older dated observations remain history.
+
 ## Optional VOTE collection — 2026-11-25 candidate
 
 `https://play.foundups.com/member/?foundup=voteballots` selects the VOTE-owned

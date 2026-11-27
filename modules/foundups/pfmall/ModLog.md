@@ -1,3 +1,14 @@
+## 2026-11-27 — Continue #2439 shared dock/settings qualification
+
+- Reconciled current main without replacing shared Mall/player/auth owners.
+- Candidate: Dock + only settings/touch handling, preserved grouped preferences,
+  global visible Autoplay, Full Video LEFT and independent parked gestures;
+  compact phone dock/typing, First/Last Add Video, dock type picker and inset dog.
+- One-time physical Close freeze remains unconfirmed. Controlled baseline and
+  successor tests, independent review, exact-head CI/main and delivery are separate.
+- Add Video feature/eligibility service and Image/Podcast integration remain open;
+  no speculative auth/provider/permissions or publication. WSP00/15/22/50/71/91/97.
+
 ## 2026-11-26 — Port Fractal Tile Graph backend, patch API, schemas, projections, client & paper onto post-HPC main
 
 - Ported `fractal_tile_graph.py`, `tile_graph_context.py`, `tile_graph_store.py`, `http_api.py` (`GET /pfmall/tile-graph`, `POST /pfmall/tile-graph/patches`), `member_catalog_export.py` (`export_fractal_tile_graph`), schemas, public projections, `sprint1_registry_benchmark_manifest.json`, `public/member/js/mall-tile-graph-client.js`, `public/member/js/pfmall-control-dispatcher.js`, and [PFMALL_Fractal_Tile_Elements_Architecture.md](../../../WSP_knowledge/docs/Papers/PFMALL_Fractal_Tile_Elements_Architecture.md) onto post-`#2459` `main`, keeping `#2459`'s `public/member` UI owners intact (`?fractal=1` UI shell reconciliation stays separate).

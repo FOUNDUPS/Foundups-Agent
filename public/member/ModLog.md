@@ -1,5 +1,16 @@
 # Member Area Module Change Log
 
+## 2026-11-27 — Continue #2439 shared dock/settings qualification
+
+- Reconciled current main without replacing shared Mall/player/auth owners.
+- Candidate: Dock + only settings/touch handling, preserved grouped preferences,
+  global visible Autoplay, Full Video LEFT and independent parked gestures;
+  compact phone dock/typing, First/Last Add Video, dock type picker and inset dog.
+- One-time physical Close freeze remains unconfirmed. Controlled baseline and
+  successor tests, independent review, exact-head CI/main and delivery are separate.
+- Add Video feature/eligibility service and Image/Podcast integration remain open;
+  no speculative auth/provider/permissions or publication. WSP00/15/22/50/71/91/97.
+
 ## 2026-11-25 — Tucked rail touch restoration
 
 The29a hosted phone suite caught immediate Video-menu suppression after restore:

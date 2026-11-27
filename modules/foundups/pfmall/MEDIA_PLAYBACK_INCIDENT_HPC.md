@@ -1,5 +1,37 @@
 # Shared Mall media incident · HPC-P01–P08
 
+## 2026-11-27 — Settings Close report and Dock + touch boundary
+
+- **incident_id / affected_owner:** PFMALL-MEDIA-20261111-HPC; shared dock,
+  modal and player input owners, HPC v26 acceptance surface, existing PR #2439.
+- **USER_REPORTED:** one unresponsive Mall after first changing Autoplay through
+  the video-side entry and Close. Restart recovered it. Exact device/browser
+  mode remains unknown. Later tap/WikiTube playback worked. Repeatability and
+  cause are unconfirmed; this report is not a reproduced provider failure.
+- **baseline/environment:** source1ebeca2aa (tree matches mainf67b82 at merge),
+  controlled Windows Chromium/WebKit, 320/414/390/402 CSS widths. Old WebKit
+  Close matrix passed18 paths, including side-entry first, changed/no-change,
+  modal/inert/overflow/pointer state, focus/scroll, taps/navigation and reload.
+  Chromium separately delivered trusted Dock + touchstart/end without a click,
+  leaving options closed. No leftover-modal diagnosis follows from that.
+- **bounded repair:** Dock + handles a deliberate short touch directly and fences
+  only its touch-generated click echo; keyboard/mouse and other controls remain
+  available. Remove the side's settings action, retaining its gesture role.
+  Preserve native dialog close/focus ownership; do not clear unrelated inert,
+  overflow, backdrops or caches globally.
+- **regression:** settings-close-recovery exercises changed/no-change Close and
+  repeat Dock + entry; dock-refinement covers resting/focused geometry, type
+  swipe vs tap, saved First/Last and separate banner/dog navigation;
+  global-autoplay distinguishes deliberate playback, automatic queue continuation
+  and hidden pause. Controlled media events are not real provider evidence.
+- **rejected:** center interception overlays over YouTube, hidden YouTube audio,
+  generic auth as a playback fix, and weakening security/CI. Official reference:
+  https://developers.google.com/youtube/terms/required-minimum-functionality#overlays_and_frames
+  (accessed2026-11-27). YouTube-native center touch is a boundary, not an app swipe.
+- **remaining / next action:** exact candidate verification and independent
+  review; retain physical Safari/Home Screen freeze and gesture checks OPEN.
+  Baseline preview and local source tests must not be relabeled as a new release.
+
 ## 2026-11-25 — Tucked rail touch tap without click
 
 - **incident_id / owner:** PFMALL-MEDIA-20261111-HPC; shared member player rail,

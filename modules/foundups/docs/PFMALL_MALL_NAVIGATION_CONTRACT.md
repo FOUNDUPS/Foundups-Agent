@@ -1,5 +1,40 @@
 # p.fMALL Navigation Contract
 
+## v26 continuation — 2026-11-27 (supersedes older direction labels)
+
+The shared floating Search Dock `+` is the sole Video Options entry. The player
+sidebar remains a small non-overlapping gesture/move surface; tapping it does
+not open settings. Interface, Gestures and Playback groups retain validated
+preferences and accessible commands. HPC Add Video stays in the collection;
+Last is the backward-compatible default, with an explicit First choice.
+
+App Full Video uses **swipe LEFT → next clip + deliberate playback** by default.
+Floating RIGHT tucks; the tucked-tab right action is unchanged. The historical
+`fullVideoSwipeRight` v1 storage key retains saved next/previous/none choices but
+now configures the left gesture. The same visible grip sits right in Full Video
+so leftward travel is possible, and left in Floating so rightward travel fits.
+No app overlay intercepts YouTube. Touches beginning inside its cross-origin
+iframe belong to YouTube. Native video controls also retain their input owner;
+app-owned image/stage surfaces can use shared gestures where appropriate.
+
+One **Autoplay** preference governs automatic startup/continuation of visible
+queues. Deliberate tile/Play/Next is separate. Fully hidden YouTube stays paused;
+parking is not an Autoplay setting. The phone WikiTube dock floats over the app
+queue with safe-area clearance, never over the embed; focused/expanded typing
+reserves layout space using the existing keyboard offset once.
+
+A deliberate upward swipe starting on the resting HPC dock opens Tile types;
+a tap edits search. Focused typing, page scroll, buttons and player gestures
+keep separate owners. Video is connected; Image and Podcast are visibly disabled
+until a real collection contract is implemented. Keyboard access is in Interface.
+
+HPC banner artwork opens the campaign destination; a separate, accessible,
+dog-only 44px overlay inside the artwork returns to the Mall. Scoped Home remains
+in Dock +. No extra Mall-label row is reserved. This is app-owned artwork.
+
+Status: IMPLEMENTED_CANDIDATE; exact-head CI, independent review and delivery
+are separate evidence. Physical iPhone behavior is not established by emulation.
+
 **Version**: 2.3.0
 **Date**: 2026-11-21
 **Status**: Runtime baseline with explicitly pending shared dock, player and fractal acceptance changes

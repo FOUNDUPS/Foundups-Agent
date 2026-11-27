@@ -608,9 +608,39 @@
 }
 
 .video-player-shared-dock-host .mall-member-search-bar { max-width: 100%; }
+
+/* Same small external grip, on the reachable side for Full Video's LEFT
+   gesture. Floating keeps its left grip for RIGHT tuck. No provider overlay. */
+.video-player-full-video .video-player-gesture-side { order: 0; }
+.video-player-full-video .video-player-stage { order: 1; }
+.video-player-full-video .video-player-gesture-grip { order: 2; }
 .video-player-shared-dock-host .mall-member-search-dock {
   width: min(36.5rem, 100%);
   margin-inline: auto;
+}
+
+/* The phone WikiTube dock floats above its app queue, outside the embed. Its
+   safe-area reserve belongs to the queue, never to hidden provider controls. */
+@media (max-width: 899px), (pointer: coarse) {
+  .video-player-queue-docked:not(.video-player-full-video):has(> .video-player-shared-dock-host) .video-player-shared-dock-host {
+    position: absolute;
+    z-index: 5;
+    left: max(.5rem, var(--safe-left));
+    right: max(.5rem, var(--safe-right));
+    bottom: calc(.5rem + var(--safe-bottom));
+    margin: 0;
+  }
+  .video-player-queue-docked:not(.video-player-full-video):has(> .video-player-shared-dock-host) .video-player-queue-panel {
+    padding-bottom: calc(5rem + var(--safe-bottom));
+  }
+  /* Expanded typing reserves real layout space. The player's existing bottom
+     offset already accounts for the keyboard; never apply that offset twice. */
+  .video-player-queue-docked:not(.video-player-full-video):is(:has(textarea:focus), :has(.mall-member-search-bar[data-expanded])) .video-player-shared-dock-host {
+    position: relative;
+    inset: auto;
+    margin: .25rem max(.5rem, var(--safe-right)) calc(.5rem + var(--safe-bottom)) max(.5rem, var(--safe-left));
+  }
+  .video-player-queue-docked:not(.video-player-full-video):is(:has(textarea:focus), :has(.mall-member-search-bar[data-expanded])) .video-player-queue-panel { padding-bottom: 0; }
 }
 
 /* On short viewports, scroll the queue rather than clipping native player controls. */

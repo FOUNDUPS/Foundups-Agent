@@ -1,5 +1,30 @@
 # HPC roadmap
 
+## H1I · v26 settings and compact dock continuation — 2026-11-27
+
+**FITS_POC / IMPLEMENTED_CANDIDATE; acceptance open.** Existing PR #2439 owns
+this layer: reliable Dock + only options, Interface/Gestures/Playback, global
+Autoplay, Full Video LEFT next, existing separate park gestures, preserved
+preferences, configurable First/Last Add Video, dock-origin tile-type picker,
+compact phone WikiTube dock and in-banner dog-only Mall return. No new player,
+authentication or shell. Campaign artwork and scoped Home are distinct actions.
+Image/Podcast browsing is SPECIFIED_NOT_IMPLEMENTED and disabled in the picker.
+
+Dependencies: shared field/player/state/dock owners. Acceptance: unchanged full
+phone suite plus separate settings matrix, real-provider boundary/time evidence,
+independent review, exact-head protected checks and main CI. The one-time
+physical Close freeze is USER_REPORTED, not confirmed repeatable. Record browser
+emulation separately from physical iPhone11/12/16Pro. Production and new preview
+publication are not authorized by this continuation's merge permission.
+
+**Add Video feature BLOCKED:** shared Clerk gateway can reuse an existing session,
+but the current contribution resume still leads to a review placeholder. No
+verified video submission feature or server member + HPC-editor eligibility
+contract was found. Google/LinkedIn handlers exist; actual configured provider
+availability is unverified. Reuse the owning shared intake/auth boundaries in a
+future qualified slice; do not repurpose DRAFT_ONLY FoundUp genesis proposals,
+grant editor permissions, or create another sign-in path. H1/Prototype is not closed.
+
 ## H3 · Automatic collection refresh — 2026-11-25
 
 **CHANGES_POC_ACCEPTANCE:** regular videos join reviewed Shorts in the existing WikiTube queue. Implemented and locally validated: approved Move2Japan uploads, actual-field hashtag matching, public/embedding filters, stable queue IDs/editorial labels, duplicate-free reruns, preserved review holds, new-source review proposals, six-hour product workflow and reversible collection-only publisher. Initial official scan: 4,345 uploads, 73 metadata matches beyond the original eight; restoring nine unique prior content/diagnostic holds yields 67 publishable additions and 75 eligible videos. Repeat run: zero additions. Native read-only release planning preserves all 178 live files except the two admitted catalog replacements. Source merge, hosted recurrence and live readback are separate gates recorded in ModLog. Preserve #2439's player/navigation ownership and #2453's Vote cards; this slice changes neither UI.

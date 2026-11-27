@@ -1,5 +1,18 @@
 # HPC interface
 
+## Current v26 acceptance delta — 2026-11-27
+
+Follow the shared navigation contract's v26 continuation: Dock + only settings,
+Full Video LEFT next; Floating RIGHT hide and tucked actions unchanged. The dog
+inside the banner returns to the Mall, the artwork opens the campaign, and Home
+in Dock + restores HPC tiles. Preserve source attribution/disclosure and the
+manual civic-resource link. Autoplay never permits hidden YouTube playback.
+
+The Tile types picker connects Video only; Image/Podcast remain disabled pending
+real collection integration. Add Video remains gated by the existing shared
+admission boundary; its unavailable review is not an operational editor or
+proof of current server-side membership/editor eligibility.
+
 ## 2026-11-25 — Home, bottom dock and tucked selection
 
 The [shared interaction contract](../../../public/member/INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)
