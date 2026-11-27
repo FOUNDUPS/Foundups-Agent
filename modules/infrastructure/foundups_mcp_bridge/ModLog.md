@@ -2150,6 +2150,19 @@ replacement qualification remains pending; the first failure is not erased.
 - Owner queries now accept an expected root digest and reject a configured service rooted at a different worktree before semantic retrieval.
 - No owner indexing or repository mutation authority was added.
 
+## 2026-07-24 - HoloIndex neutral freshness authority compatibility
+
+**WSP Protocol**: WSP 00, 15, 22, 50, 62, 97
+**Phase**: Dependency inversion
+**Agent**: 0102 worker
+
+- Replaced the bridge-owned freshness implementation with an exact
+  compatibility re-export from `holo_index.query_freshness_gate`.
+- Preserved owner imports and public behavior while removing the lower-level
+  HoloIndex admission dependency on this infrastructure module.
+- No transport, lifecycle, store, receipt, model/provider, or timeout behavior
+  changed.
+
 ## 2026-07-19 - RedDog HoloIndex owner binding probe
 
 - OBSERVED: a canonical seven-collection HoloIndex receipt and owner health

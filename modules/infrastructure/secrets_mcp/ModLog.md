@@ -1,5 +1,74 @@
 # Secrets MCP Server Module Modification Log
 
+## 2026-11-02: Fixed Sentry custody and explicit review-error opt-in
+
+WSP22/50/71/91/97. Extend the existing custody targets with one Sentry error DSN,
+validated through the monitoring owner's existing official-ingest grammar. The
+one-use form gains only `--type sentry-errors` and a single password field; its
+default Viewer flow, nonce/Origin/body/expiry rules are preserved. No new key,
+secret store or general export command is introduced.
+
+The fixed Sentry probe runs in the current account's isolated `sentry-pilot`
+runtime. Explicit Viewer-only `--with-sentry-errors` reads both credentials and
+uses that runtime for the same fixed Langfuse CLI; default Viewer runs do not
+read or inherit Sentry configuration. Missing runtime and unsupported routes
+reject before credential access. All injection remains child-only.
+
+The expanded provisioning/vault/probe selection passes78 synthetic cases. Actual
+SDK2.73.0 qualification passes four separate tests with outbound sockets blocked;
+runtime evidence belongs to the monitoring module. No real DSN or vault operation
+was accessed by this implementation lane. Root owns live provisioning and arrival
+verification separately from these tests. An independent test initially required
+404 for an already expired Windows socket; the equally fail-closed Win10053
+closure is now accepted with thread-join and no-store assertions.
+
+## 2026-11-02: One-use browser-to-vault Viewer provisioning
+
+WSP00/22/50/71/91/97. Reuse the fixed Windows Viewer custody adapter through
+`scripts/reddog_langfuse_provision.py` when the authorized browser has the generated
+pair and terminal entry is unavailable. The helper binds only a random loopback
+port/path, accepts one exact bounded form, disables caching/external content,
+and closes after successful storage or299 seconds. No keys, bodies or raw errors
+are logged or written to files; no generic target, read or runtime tool is added.
+
+An adversarial pass reproduced Windows buffered-body shutdown waiting for the
+old five-second socket timeout. A0.25-second socket timeout, shutdown margin and
+pre-store recheck preserve bounded cleanup. Extreme numeric Content-Length is
+rejected before integer conversion. Top-level failures now emit static status
+instead of paths/tracebacks. Fixed rejection stages and allowlisted storage codes
+make setup failures diagnosable without exposing credential text.
+
+Combined provisioning/vault/probe validation passes63 synthetic cases, including
+actual adapter import with invalid input stopped before any vault API access.
+Admission diagnostics add only boolean cause checks; foreign headers and private
+paths remain absent from responses. The actual Origin allowlist is unchanged.
+Live boolean diagnostics isolated a browser null Origin caused by the original
+`no-referrer` header. Change that policy to `same-origin` and assert it in tests;
+cross-origin referrers stay omitted and null Origin admission remains rejected.
+Native DLL initialization and the80-byte CREDENTIAL layout were checked without
+CredRead/CredWrite. These are separate from live credential storage or vendor
+connectivity. Holo lexical context remains UNKNOWN/gaptrue; no authority repair
+or reindex occurred. Independent follow-up review is recorded by the parent.
+
+## 2026-11-01: Bounded Windows telemetry pilot credential custody
+
+WSP00/22/50/71/91/97. Add explicit Windows Credential Manager custody for only
+the dedicated Japan Langfuse Viewer pair and OpenRouter pilot key. Hidden TTY
+entry and fixed receiver invocation avoid plaintext files, persistent environment
+changes and general credential-dump tooling. No enumeration/deletion or runtime
+grant is added. The one-call synthetic `openrouter/free` probe retains only safe
+status/usage and a generated trace ID, with no retries or redirects. Independent
+review found model-slug grammar could admit secret-shaped remote text; remote
+model output is now omitted entirely and a hostile-provider regression is added.
+
+Offline synthetic/fake-Win32 validation passes32 tests across the credential
+adapter and probe suites. The first run had30 passes/two setup errors caused by
+an oversized automatic parameter ID; explicit short IDs correct the test harness.
+No real credential read/write, provider request or vault-protection claim follows
+from those tests. Vendor permissions/expiry and actual connectivity remain
+separate live verification. Semantic Holo freshness remained UNKNOWN/gaptrue
+after the parent authority/HEAD mismatch; exact source/docs were read directly.
+
 ## 2026-10-05: Explicit manager credential provider
 
 Added `SystemdCredentialSecretResolver` in the existing secrets owner, reusing

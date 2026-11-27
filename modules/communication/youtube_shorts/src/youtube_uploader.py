@@ -12,6 +12,7 @@ import hashlib
 import mimetypes
 import os
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -34,7 +35,13 @@ class YouTubeUploadOutcomeUnknown(YouTubeUploadError):
 
 @dataclass(frozen=True)
 class YouTubePublishResult:
-    """Authoritative identities returned by a completed YouTube write."""
+    """Authoritative identities returned by a completed YouTube write.
+
+    ``requested_publish_at`` echoes the normalized request parameter when
+    scheduled private upload was accepted; ``schedule_readback_verified``
+    remains ``False`` until an independent ``videos.list(part='status')``
+    readback confirms persisted privacy/publishAt on YouTube.
+    """
 
     video_id: str
     channel_id: str
@@ -43,6 +50,8 @@ class YouTubePublishResult:
     shorts_url: str
     playlist_id: Optional[str] = None
     playlist_item_id: Optional[str] = None
+    requested_publish_at: Optional[str] = None
+    schedule_readback_verified: bool = False
 
 
 @dataclass(frozen=True)
@@ -52,13 +61,24 @@ class ChannelPolicy:
     default_tags: tuple[str, ...]
     require_expected_channel: bool = False
     credential_set_env: Optional[str] = None
+    canonical_channel_id: Optional[str] = None
+
+
+ANTIFAFM_CANONICAL_CHANNEL_ID = "UCVSmg5aOhP4tnQ9KFUg97qA"
 
 
 CHANNEL_POLICIES = {
     "move2japan": ChannelPolicy(1, "YT_UPLOAD_CHANNEL_ID_MOVE2JAPAN", ("Shorts", "Japan", "Move2Japan")),
     "undaodu": ChannelPolicy(1, "YT_UPLOAD_CHANNEL_ID_UNDAODU", ("Shorts", "UnDaoDu")),
     "foundups": ChannelPolicy(10, "YT_UPLOAD_CHANNEL_ID_FOUNDUPS", ("Shorts", "FoundUps")),
-    "antifafm": ChannelPolicy(10, "YT_UPLOAD_CHANNEL_ID_ANTIFAFM", ("Shorts", "antifaFM")),
+    "antifafm": ChannelPolicy(
+        10,
+        "YT_UPLOAD_CHANNEL_ID_ANTIFAFM",
+        ("Shorts", "antifaFM"),
+        require_expected_channel=True,
+        credential_set_env="YT_UPLOAD_CREDENTIAL_SET_ANTIFAFM",
+        canonical_channel_id=ANTIFAFM_CANONICAL_CHANNEL_ID,
+    ),
     "us_story_time": ChannelPolicy(
         10,
         "YT_UPLOAD_CHANNEL_ID_US_STORY_TIME",
@@ -154,6 +174,15 @@ class YouTubeShortsUploader:
                 raise YouTubeUploadError(
                     f"{self.policy.expected_channel_env} must pin the {self.channel} channel before publishing"
                 )
+            if self.policy.canonical_channel_id:
+                if expected and expected != self.policy.canonical_channel_id:
+                    raise YouTubeUploadError(
+                        f"{self.policy.expected_channel_env} does not match canonical {self.channel} channel ID"
+                    )
+                if channel_id != self.policy.canonical_channel_id:
+                    raise YouTubeUploadError(
+                        f"Authorized channel mismatch for {self.channel}; canonical channel required"
+                    )
             if expected and channel_id != expected:
                 raise YouTubeUploadError(
                     f"Authorized channel mismatch for {self.channel}; refusing to publish"
@@ -201,6 +230,26 @@ class YouTubeShortsUploader:
             contains_synthetic_media=contains_synthetic_media,
         )
 
+    @staticmethod
+    def _normalize_publish_at(publish_at: str, privacy: str) -> str:
+        """Validate future RFC3339/ISO-8601 publishAt timestamp for private scheduled uploads."""
+        if privacy != "private":
+            raise YouTubeUploadError("Scheduled publish_at requires privacy='private'")
+        if not isinstance(publish_at, str) or not publish_at.strip():
+            raise YouTubeUploadError("publish_at must be a non-empty ISO-8601 UTC timestamp")
+        raw = publish_at.strip()
+        iso_candidate = raw[:-1] + "+00:00" if raw.endswith(("Z", "z")) else raw
+        try:
+            parsed = datetime.fromisoformat(iso_candidate)
+        except ValueError as exc:
+            raise YouTubeUploadError(f"Invalid publish_at timestamp: {publish_at}") from exc
+        if parsed.tzinfo is None or parsed.utcoffset() is None:
+            raise YouTubeUploadError("publish_at must include an explicit timezone offset or 'Z'")
+        utc_dt = parsed.astimezone(timezone.utc)
+        if utc_dt <= datetime.now(timezone.utc) + timedelta(minutes=5):
+            raise YouTubeUploadError("publish_at must be at least 5 minutes in the future")
+        return utc_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+
     def publish_video(
         self,
         video_path: str,
@@ -212,6 +261,7 @@ class YouTubeShortsUploader:
         playlist_id: Optional[str] = None,
         made_for_kids: bool = False,
         contains_synthetic_media: bool = False,
+        publish_at: Optional[str] = None,
         policy_surface: Optional[str] = None,
         policy_fingerprint: Optional[str] = None,
     ) -> YouTubePublishResult:
@@ -225,8 +275,29 @@ class YouTubeShortsUploader:
             raise YouTubeUploadError("YouTube title exceeds 100 characters")
         if privacy not in ALLOWED_PRIVACY:
             raise YouTubeUploadError(f"Unsupported YouTube privacy status: {privacy}")
+        normalized_publish_at = (
+            self._normalize_publish_at(publish_at, privacy)
+            if publish_at is not None
+            else None
+        )
+        if normalized_publish_at is not None:
+            if policy_surface != "shorts":
+                raise YouTubeUploadPolicyBlocked(
+                    "Scheduled publish_at requires policy_surface='shorts' for durable SHA256 claim and unknown-outcome tracking"
+                )
+            if os.getenv("YT_ALLOW_SCHEDULED_PUBLISH_AT", "").strip().lower() != "true":
+                raise YouTubeUploadPolicyBlocked(
+                    "Scheduled publish_at public-release gate is closed (YT_ALLOW_SCHEDULED_PUBLISH_AT!=true)"
+                )
 
         mime_type = self._media_type(video_path)
+        status_body: dict[str, Any] = {
+            "privacyStatus": privacy,
+            "selfDeclaredMadeForKids": made_for_kids,
+            "containsSyntheticMedia": contains_synthetic_media,
+        }
+        if normalized_publish_at is not None:
+            status_body["publishAt"] = normalized_publish_at
         body = {
             "snippet": {
                 "title": title,
@@ -234,11 +305,7 @@ class YouTubeShortsUploader:
                 "tags": tags if tags is not None else list(self.policy.default_tags),
                 "categoryId": "22",
             },
-            "status": {
-                "privacyStatus": privacy,
-                "selfDeclaredMadeForKids": made_for_kids,
-                "containsSyntheticMedia": contains_synthetic_media,
-            },
+            "status": status_body,
         }
         media = MediaFileUpload(
             video_path,
@@ -274,7 +341,12 @@ class YouTubeShortsUploader:
                 raise YouTubeUploadError("YouTube upload completed without a video ID")
 
             if policy is not None:
-                self._observe_upload_accepted(policy, artifact, video_id)
+                self._observe_upload_accepted(
+                    policy,
+                    artifact,
+                    video_id,
+                    requested_publish_at=normalized_publish_at,
+                )
 
             playlist_item_id = None
             if playlist_id:
@@ -297,6 +369,8 @@ class YouTubeShortsUploader:
                 shorts_url=f"https://youtube.com/shorts/{video_id}",
                 playlist_id=playlist_id,
                 playlist_item_id=playlist_item_id,
+                requested_publish_at=normalized_publish_at,
+                schedule_readback_verified=False,
             )
         except Exception as exc:
             logger.error("[UPLOAD-ERROR] Upload outcome unknown (%s)", type(exc).__name__)
@@ -351,12 +425,18 @@ class YouTubeShortsUploader:
             raise YouTubeUploadPolicyBlocked("Claimed upload stream changed; retain unknown claim")
         return policy, artifact
 
-    def _observe_upload_accepted(self, policy, artifact, video_id):
+    def _observe_upload_accepted(self, policy, artifact, video_id, *, requested_publish_at=None):
         from modules.communication.livechat.src.operator_command_queue import record_video_policy_observation
+        detail = {
+            "artifact_sha256": artifact,
+            "policy_fingerprint": policy["fingerprint"],
+            "reason": "upload_accepted_independent_readback_required",
+        }
+        if requested_publish_at is not None:
+            detail["requested_publish_at"] = requested_publish_at
         record_video_policy_observation(policy["matched_command_ids"], surface="shorts",
             channel_id=self.channel_info["id"], video_id=video_id, outcome="unknown",
-            detail={"artifact_sha256": artifact, "policy_fingerprint": policy["fingerprint"],
-                    "reason": "upload_accepted_independent_readback_required"})
+            detail=detail)
 
     def publish_foundups_media(
         self,
@@ -412,6 +492,30 @@ class YouTubeShortsUploader:
             policy_fingerprint=policy_fingerprint,
         )
         return result.shorts_url
+
+    def schedule_short(
+        self,
+        video_path: str,
+        title: str,
+        description: str,
+        *,
+        publish_at: str,
+        tags: Optional[list[str]] = None,
+        policy_fingerprint: Optional[str] = None,
+    ) -> YouTubePublishResult:
+        """Schedule a private Short for future public release via admitted shorts policy."""
+        if "#shorts" not in description.lower():
+            description = f"{description} #Shorts"
+        return self.publish_video(
+            video_path,
+            title,
+            description,
+            tags=tags,
+            privacy="private",
+            publish_at=publish_at,
+            policy_surface="shorts",
+            policy_fingerprint=policy_fingerprint,
+        )
 
     def get_channel_info(self) -> dict[str, str]:
         return dict(self.channel_info)

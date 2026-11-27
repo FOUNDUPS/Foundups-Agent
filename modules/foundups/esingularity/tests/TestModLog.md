@@ -1,3 +1,19 @@
+## 2026-11-27 — Scoped correspondence receipt policy recovery
+
+- Reused the existing `test_contracts.py` suite, including
+  `test_yumori_moshpit_skill_is_wre_registered_and_projected`; no test file,
+  registry row, manifest or assertion was added or changed.
+- Command: `python -B -m pytest -q -o addopts= -p no:cacheprovider --confcutdir=modules/foundups/esingularity/tests modules/foundups/esingularity/tests/test_contracts.py`.
+  The vetted Windows interpreter ran with only allowlisted OS environment
+  variables, provider credentials excluded, dotenv/plugin autoload disabled,
+  and bytecode/cache writes disabled: **25 passed**, two warnings for inactive
+  asyncio configuration options, zero failures/skips.
+- These existing tests protect registration, projection, privacy and ordering
+  contracts. They do not execute the added manual receipt workflow or prove
+  Gmail coverage, native Docs writes, automatic capture or sender authority.
+  Independent source-policy review and exact-head hosted checks remain required.
+  WSP 5/22/50/97.
+
 ## 2026-10-30 — Partner inquiry routing reconciliation
 
 - Reused `test_domain_routing.mjs`: 32 passing configuration cases cover the

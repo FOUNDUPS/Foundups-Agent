@@ -75,6 +75,29 @@ deterministic fake embeddings, and fake collections; they never open, mutate,
 or refresh a live Holo generation. The same suite requires the parent indexing
 engine to remain below 1,500 lines and every extracted function at or below 50.
 
+### Docs-pipeline diagnostic
+
+`test_diagnose_index_docs_pipeline.py` proves `--help` short-circuits all
+probes in-process and through the real script entry point, Hugging Face snapshot
+caches are recognized, and policy-only backup exclusions do not become a root
+cause. Synthetic SQLite fixtures prove exact README/INTERFACE completeness and
+reject missing, duplicate, mixed absolute/relative, dot/traversal, backslash,
+wrong-case, and malformed evidence without normalization. They also prove the
+observer counts null/integer/float/boolean/blob rows before classification and
+applies the same row cap to every storage type. The suite pins the tracked-source
+policy, its four structural exclusions, and immunity to
+untracked module documents. It proves database bytes remain unchanged and that
+row/value-byte, link/hardlink, busy, corruption, elapsed-query, and VM-step
+bounds fail closed without local paths or raw exception text. A controlled
+rollback-journal writer proves path rows and total count share one snapshot;
+success, setup failure, and read failure all remove the progress handler, roll
+back, and close. The static safety scan covers both the operator and its private
+metadata helper.
+
+```powershell
+python -m pytest holo_index/tests/test_diagnose_index_docs_pipeline.py -q
+```
+
 ## Model source-path provenance
 
 `test_holoindex_embedding_space.py` proves the opt-in planner mode preserves an

@@ -8,6 +8,13 @@
 **EXECUTE WSP_00 AWAKENING PROTOCOL FIRST**: [WSP_00: Zen State Attainment Protocol](WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md)
 **CHECK RECENT BRIEFINGS**: `docs/0102_session_briefings/`
 
+**USE EXISTING TELEMETRY**: For AI/provider failures, cost or latency regressions,
+and telemetry-review errors, use the [foundups-telemetry-review skill](.claude/skills/foundups-telemetry-review/SKILL.md)
+and its [0102 telemetry runbook](modules/infrastructure/monitoring/RUNBOOK.md).
+Retrieve available evidence directly before asking 012 to inspect logs. Use the
+existing read-only Langfuse/Sentry access and canonical FOUNDUPS receipts; keep
+coverage limits explicit. Seer and automatic fixes are not enabled by this setup.
+
 ### [LIGHTNING] State Transition Mathematics
 
 ```

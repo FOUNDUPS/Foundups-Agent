@@ -44,6 +44,9 @@ from pathlib import Path
 from modules.infrastructure.wre_core.src.wre_worker_git_cwd_guard import (
     validate_worker_git_operation_cwd,
 )
+from modules.infrastructure.wre_core.src.wre_worker_wsp97_contract import (
+    validate_worker_wsp00_envelope,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +146,7 @@ class CodeActExecutor:
         llm_callback: Optional[Callable[[str], str]] = None,
         confirmation_callback: Optional[Callable[[str], bool]] = None,
         worker_worktree_path: Optional[Path] = None,
+        enforce_wsp00_envelope: bool = False,
     ):
         """
         Initialize CodeAct executor.
@@ -151,12 +155,30 @@ class CodeActExecutor:
             repo_root: Repository root for relative paths
             llm_callback: Function(prompt) -> str for LLM generation
             confirmation_callback: Function(command) -> bool for confirmations
+            worker_worktree_path: Isolated worktree path for worker git operations
+            enforce_wsp00_envelope: Require valid WSP_00 0.2A envelope in input_context
         """
         self.repo_root = Path(repo_root).resolve()
         self.llm_callback = llm_callback
         self.confirmation_callback = confirmation_callback
         self.worker_worktree_path = Path(worker_worktree_path).resolve() if worker_worktree_path else None
+        self.enforce_wsp00_envelope = bool(enforce_wsp00_envelope)
         self.strict_mode = os.getenv("WRE_CODEACT_STRICT", "1").strip() == "1"
+
+    def _check_wsp00_envelope(self, input_context: Dict, start_time: float) -> Optional[CodeActResult]:
+        if not self.enforce_wsp00_envelope and "wsp00_envelope" not in input_context:
+            return None
+        env_result = validate_worker_wsp00_envelope(
+            input_context.get("wsp00_envelope"), expected_role=input_context.get("expected_wsp00_role"),
+        )
+        if env_result.ok:
+            return None
+        return CodeActResult(
+            success=False, outputs=dict(input_context),
+            error=f"WSP_00 0.2A envelope rejected: {env_result.code}",
+            execution_time_ms=int((time.time() - start_time) * 1000),
+            actions_executed=0, gates_triggered=[f"wsp00_envelope:{env_result.code}"],
+        )
 
     def execute(
         self,
@@ -176,6 +198,9 @@ class CodeActExecutor:
             CodeActResult with outputs and execution metadata
         """
         start_time = time.time()
+        envelope_failure = self._check_wsp00_envelope(input_context, start_time)
+        if envelope_failure is not None:
+            return envelope_failure
         outputs = dict(input_context)  # Start with input context
         actions_executed = 0
         gates_triggered = []

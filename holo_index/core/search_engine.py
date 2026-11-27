@@ -17,7 +17,7 @@ import re
 import shutil
 import subprocess
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Mapping, Optional, TYPE_CHECKING
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .holo_index import HoloIndex
@@ -527,6 +527,75 @@ def _resolve_alias_wsp_numbers(query: str) -> List[str]:
     return matched_wsps
 
 
+# ---------------------------------------------------------------------------
+# HIA Phase 3: FoundUp-scoped query filtering
+# ---------------------------------------------------------------------------
+
+
+def _build_foundup_where_filter(
+    foundup_id: Optional[str],
+    include_shared: bool,
+) -> Optional[Dict[str, Any]]:
+    """Build ChromaDB where filter for FoundUp-scoped queries.
+
+    Args:
+        foundup_id: If set, filter to this FoundUp's documents.
+        include_shared: If True and foundup_id is set, also include 'core' docs.
+
+    Returns:
+        ChromaDB where clause dict, or None for no filtering.
+    """
+    if foundup_id is None:
+        return None
+
+    if include_shared:
+        # Include both the specified FoundUp and core/shared content
+        return {"$or": [{"foundup_id": foundup_id}, {"foundup_id": "core"}]}
+    else:
+        # Strict: only the specified FoundUp
+        return {"foundup_id": foundup_id}
+
+
+def _resolve_foundup_scope(
+    holo: "HoloIndex",
+    explicit_foundup_id: Optional[str],
+) -> Tuple[Optional[str], str]:
+    """Resolve effective FoundUp scope with precedence.
+
+    HIA Phase 4: Automatic scope resolution for tenant context binding.
+
+    Precedence (highest to lowest):
+        1. explicit_foundup_id (caller passed it directly)
+        2. holo._foundup_context (instance-bound via set_foundup_context())
+        3. HOLO_FOUNDUP_ID environment variable
+        4. None (legacy global behavior)
+
+    Args:
+        holo: HoloIndex instance (for context binding)
+        explicit_foundup_id: Caller-provided foundup_id argument
+
+    Returns:
+        Tuple of (effective_foundup_id, scope_source)
+        scope_source is one of: "explicit", "context", "env", "none"
+    """
+    # 1. Explicit argument takes precedence
+    if explicit_foundup_id is not None:
+        return (explicit_foundup_id, "explicit")
+
+    # 2. Instance-bound context
+    context_foundup = getattr(holo, "_foundup_context", None)
+    if context_foundup is not None:
+        return (context_foundup, "context")
+
+    # 3. Environment variable fallback
+    env_foundup = os.getenv("HOLO_FOUNDUP_ID")
+    if env_foundup:
+        return (env_foundup, "env")
+
+    # 4. No scope (legacy global behavior)
+    return (None, "none")
+
+
 def _wsp_alias_match_boost(query: str, path: str, title: str) -> float:
     """Return boost if query matches a known WSP alias phrase.
 
@@ -879,11 +948,23 @@ def _vector_result(
     )
 
 
-def _vector_search_ops() -> CollectionSearchOps:
+def _vector_search_ops(
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
+) -> CollectionSearchOps:
     """Bind search-engine policy callbacks without a circular import."""
+    lexical = (
+        _lexical_search_collection
+        if foundup_id is None
+        else lambda h, col, q, lim, k, dtf="all": _lexical_search_collection(
+            h, col, q, lim, k, dtf,
+            foundup_id=foundup_id,
+            include_shared=include_shared,
+        )
+    )
     return CollectionSearchOps(
         strict_owner=_strict_semantic_owner,
-        lexical_search=_lexical_search_collection,
+        lexical_search=lexical,
         run_with_timeout=_run_with_timeout,
         resolve_alias_wsps=_resolve_alias_wsp_numbers,
         extract_wsp_numbers=_extract_wsp_numbers,
@@ -898,14 +979,24 @@ def _search_collection(
     module_context_hits: Iterable[Mapping[str, object]] = (),
     module_registry_hits: Iterable[Mapping[str, object]] | None = None,
     metadata_where: Mapping[str, object] | None = None,
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
 ) -> List[Dict[str, Any]]:
     """Search a collection through the bounded vector-search pipeline."""
+    foundup_where = _build_foundup_where_filter(foundup_id, include_shared)
+    if metadata_where is not None and foundup_where is not None:
+        effective_where: Mapping[str, object] | None = {
+            "$and": [dict(metadata_where), foundup_where]
+        }
+    elif metadata_where is not None:
+        effective_where = metadata_where
+    else:
+        effective_where = foundup_where
     return search_collection(
         holo, collection, query, limit, kind, doc_type_filter,
-        module_path_hint, _vector_search_ops(), module_context_hits,
-        module_registry_hits, metadata_where,
+        module_path_hint, _vector_search_ops(foundup_id, include_shared),
+        module_context_hits, module_registry_hits, effective_where,
     )
-
 
 def _module_intent(
     holo: "HoloIndex", query: str,
@@ -933,6 +1024,8 @@ def _docs_search(
     context_hits: Iterable[Mapping[str, object]],
     module_target: str | None,
     registry_hits: Iterable[Mapping[str, object]] | None,
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
 ) -> List[Dict[str, Any]]:
     """Search docs with generation-stable module intent policy."""
     try:
@@ -947,6 +1040,8 @@ def _docs_search(
             module_path_hint=module_target,
             module_context_hits=context_hits,
             module_registry_hits=registry_hits,
+            foundup_id=foundup_id,
+            include_shared=include_shared,
         )
         if query_requests_current_truth(query):
             summaries = _search_collection(
@@ -955,6 +1050,8 @@ def _docs_search(
                 module_context_hits=context_hits,
                 module_registry_hits=registry_hits,
                 metadata_where={"record_kind": "document_summary"},
+                foundup_id=foundup_id,
+                include_shared=include_shared,
             )
             candidates.extend(summaries)
             candidates = sorted(
@@ -968,7 +1065,6 @@ def _docs_search(
             raise
         return []
 
-
 # ---------------------------------------------------------------------------
 # Lexical search fallback
 # ---------------------------------------------------------------------------
@@ -980,8 +1076,15 @@ def _lexical_search_collection(
     limit: int,
     kind: str,
     doc_type_filter: str = "all",
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
 ) -> List[Dict[str, Any]]:
-    """Keyword-based search used when embedding model is unavailable."""
+    """Keyword-based search used when embedding model is unavailable.
+
+    Args:
+        foundup_id: If set, filter results to this FoundUp's documents.
+        include_shared: If True and foundup_id is set, also include 'core' docs.
+    """
     tokens = _tokenize_query(query)
     if not tokens:
         return []
@@ -1024,6 +1127,16 @@ def _lexical_search_collection(
 
             if doc_type_filter != "all" and doc_type != doc_type_filter:
                 continue
+
+            # HIA Phase 3: FoundUp-scoped filtering
+            if foundup_id is not None:
+                meta_foundup = meta.get("foundup_id", "core")
+                if include_shared:
+                    if meta_foundup != foundup_id and meta_foundup != "core":
+                        continue
+                else:
+                    if meta_foundup != foundup_id:
+                        continue
 
             keyword_score = 0.0
             title = (meta.get("title") or "").lower()
@@ -1238,12 +1351,27 @@ def execute_search(
     query: str,
     limit: int = 10,
     doc_type_filter: str = "all",
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
 ) -> Dict[str, Any]:
     """Run a full HoloIndex search and return the canonical result payload.
 
     This is the extracted core of ``HoloIndex.search()``.
+
+    HIA Phase 4: Automatic scope resolution with precedence:
+        1. explicit foundup_id argument
+        2. holo._foundup_context (set via set_foundup_context())
+        3. HOLO_FOUNDUP_ID environment variable
+        4. None (legacy global behavior)
+
+    Args:
+        foundup_id: If set, filter results to this FoundUp's documents.
+        include_shared: If True and foundup_id is set, also include 'core' docs.
     """
     try:
+        # HIA Phase 4: Resolve effective scope with precedence
+        effective_foundup_id, scope_source = _resolve_foundup_scope(holo, foundup_id)
+
         # Fast path: check cache first (WSP 91 performance optimization)
         search_cache = getattr(holo, "search_cache", None)
         if search_cache is not None:
@@ -1252,7 +1380,8 @@ def execute_search(
                 holo._log_agent_action(f"[CACHE HIT] '{query}' (limit={limit})", "FAST")
                 return cached
 
-        holo._log_agent_action(f"Searching: '{query}' (limit={limit}, type={doc_type_filter})")
+        scope_log = f", scope={effective_foundup_id}({scope_source})" if effective_foundup_id else ""
+        holo._log_agent_action(f"Searching: '{query}' (limit={limit}, type={doc_type_filter}{scope_log})")
 
         code_hits: List[Dict[str, Any]] = []
         wsp_hits: List[Dict[str, Any]] = []
@@ -1287,25 +1416,25 @@ def execute_search(
 
         # Search code index
         if doc_type_filter in ["code", "all"] and code_collection is not None:
-            code_results = _search_collection(holo, code_collection, query, limit, kind="code")
+            code_results = _search_collection(holo, code_collection, query, limit, kind="code", foundup_id=effective_foundup_id, include_shared=include_shared)
             code_hits = holo._enhance_code_results_with_previews(code_results)
             if should_scan_symbols and symbol_collection is not None:
-                symbol_results = _search_collection(holo, symbol_collection, query, limit, kind="symbol")
+                symbol_results = _search_collection(holo, symbol_collection, query, limit, kind="symbol", foundup_id=effective_foundup_id, include_shared=include_shared)
             if symbol_results:
                 code_hits = _merge_hits(symbol_results, code_hits, limit)
 
         # Search WSP index
         if doc_type_filter not in ["code", "test"] and wsp_collection is not None:
-            wsp_hits = _search_collection(holo, wsp_collection, query, limit, kind="wsp", doc_type_filter=doc_type_filter)
+            wsp_hits = _search_collection(holo, wsp_collection, query, limit, kind="wsp", doc_type_filter=doc_type_filter, foundup_id=effective_foundup_id, include_shared=include_shared)
 
         # Search Test index
         if doc_type_filter in ["test", "all"] and test_collection is not None:
-            test_hits = _search_collection(holo, test_collection, query, limit, kind="test", doc_type_filter=doc_type_filter)
+            test_hits = _search_collection(holo, test_collection, query, limit, kind="test", doc_type_filter=doc_type_filter, foundup_id=effective_foundup_id, include_shared=include_shared)
 
         # Search Skillz index
         if doc_type_filter == "all" and skill_collection is not None:
             try:
-                skill_hits = _search_collection(holo, skill_collection, query, limit, kind="skill")
+                skill_hits = _search_collection(holo, skill_collection, query, limit, kind="skill", foundup_id=effective_foundup_id, include_shared=include_shared)
             except Exception:
                 if _strict_semantic_owner(holo):
                     raise
@@ -1318,12 +1447,14 @@ def execute_search(
                 (*code_hits, *test_hits, *symbol_results),
                 tier0_module_target,
                 module_registry_hits,
+                foundup_id=effective_foundup_id,
+                include_shared=include_shared,
             )
 
         # CFZ4: Search Knowledge index (papers/research)
         if doc_type_filter in ["knowledge", "all"] and knowledge_collection is not None:
             try:
-                knowledge_hits = _search_collection(holo, knowledge_collection, query, limit, kind="knowledge")
+                knowledge_hits = _search_collection(holo, knowledge_collection, query, limit, kind="knowledge", foundup_id=effective_foundup_id, include_shared=include_shared)
             except Exception:
                 if _strict_semantic_owner(holo):
                     raise
@@ -1348,14 +1479,14 @@ def execute_search(
         # Symbol-query fallback: lexical + rg for exact identifiers/paths
         if symbol_query and not _strict_semantic_owner(holo):
             if doc_type_filter in ["code", "all"] and code_collection is not None:
-                lexical_code = _lexical_search_collection(holo, code_collection, query, limit, kind="code")
+                lexical_code = _lexical_search_collection(holo, code_collection, query, limit, kind="code", foundup_id=effective_foundup_id, include_shared=include_shared)
                 if lexical_code:
                     code_hits = _merge_hits(code_hits, lexical_code, limit)
                 rg_hits = _rg_symbol_search(holo.project_root, query, limit)
                 if rg_hits:
                     code_hits = _merge_hits(rg_hits, code_hits, limit)
             if doc_type_filter in ["all"] and not wsp_hits and wsp_collection is not None:
-                lexical_wsp = _lexical_search_collection(holo, wsp_collection, query, limit, kind="wsp", doc_type_filter=doc_type_filter)
+                lexical_wsp = _lexical_search_collection(holo, wsp_collection, query, limit, kind="wsp", doc_type_filter=doc_type_filter, foundup_id=effective_foundup_id, include_shared=include_shared)
                 if lexical_wsp:
                     wsp_hits = _merge_hits(wsp_hits, lexical_wsp, limit)
 
@@ -1425,6 +1556,12 @@ def execute_search(
                 "collection_embedding_space_map": dict(
                     getattr(holo, "collection_embedding_space_map", {}) or {}
                 ),
+                # HIA Phase 3: FoundUp-scoped filtering params
+                "foundup_id": foundup_id,
+                "include_shared": include_shared,
+                # HIA Phase 4: Tenant context binding - effective scope
+                "effective_foundup_id": effective_foundup_id,
+                "scope_source": scope_source,
             },
         }
 

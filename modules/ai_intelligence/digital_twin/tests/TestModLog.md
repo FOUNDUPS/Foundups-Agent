@@ -1,5 +1,16 @@
 # Digital Twin Tests - TestModLog
 
+## 2026-11-16 — Offline VoiceLoRATrainer security, direct-loader admission, masking, and split suite
+
+- Command (focused): `PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -B -m pytest -q -p no:cacheprovider modules/ai_intelligence/digital_twin/tests/test_lora_trainer.py`
+  - Result: PASS (`105/105`); console evidence: `105 passed, 2 warnings in 10.62s`.
+- Command (module closure): `PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -B -m pytest -q -p no:cacheprovider modules/ai_intelligence/digital_twin/tests/`
+  - Result: PASS (`258/258`); console evidence: `258 passed, 2 warnings in 10.01s`.
+- Coverage: `trust_remote_code=False` and `local_files_only=True` enforcement on `VoiceTrainingConfig`, `AutoTokenizer.from_pretrained`, and `AutoModelForCausalLM.from_pretrained`; locked `require_verified_speaker=True` and `require_explicit_admission=True` invariants across config construction, post-init mutation, and all validator/loader entrypoints; CUDA/4-bit and CLI `--confirm-consent` fail-closed guards; direct-loader rejection of unlabeled and `NemoDataBuilder`/`lora_data_converter`-shaped first-person rows missing any of the 5 required explicit admission proofs (`training_eligible=True`, allowed verbatim provenance, positive boolean `consent=True`, verified principal speaker, non-placeholder `group_id`); removal of the `__row_{idx}__` ungrouped fallback in `_split_grouped_examples`; read-only `inspect_sft_record()` diagnostic preservation of `speaker=None, speaker_status="unknown"` and `t_start=None, timestamp_status="unknown"` without inventing `"012"` or `0.0`; line-numbered malformed and non-finite (`NaN`/`Infinity`) JSONL, empty-file, non-dict, blank-`assistant`, cross-container metadata contradictions, summaries mislabeled as verbatim transcripts (`gemini*` models, summary payloads, 3rd-person summary narration), missing/`"unknown"`/unverified/mixed/non-012 speaker rejection, invalid/colon-overflow (`"01:99"`)/inverted/dangling/nonmonotonic timestamp rejection plus `None`/`"unknown"` preservation on admitted timeless rows, `-100` prompt and padding masking under `pad_token_id == eos_token_id`, overlong prompt truncation fail-closed guard, deterministic `video_id`/`source_id` group-disjoint `train_dataset`/`eval_dataset` split and `Trainer` `eval_strategy="epoch"` wiring, and WSP 62 (`<= 500` file lines, `<= 50` function lines across `lora_trainer.py` and `lora_record_validator.py`).
+- Evidence scope & blockers: Strictly offline synthetic fixtures in `tmp_path` and stub tokenizers/trainers. Structural JSON metadata validation does not prove cryptographic/biometric speaker authenticity. Zero model downloads, zero network requests, and zero live QLoRA training runs were performed; live training remains blocked on host CUDA availability (`torch 2.11.0+cpu`), missing `.venv` packages (`peft`, `bitsandbytes`, `accelerate`), verbatim corpus verification, and explicit 012 authorization.
+
+**WSP Compliance**: WSP 34 (Test Documentation), WSP 22 (ModLog Updates), WSP 97 (Test Inventory / Reuse Gate)
+
 ## 2026-11-05 — Cross-owner ready-only regression controls
 
 Focused source-bound RED23: 18 failures/5 passes; GREEN23 + quality37: 60 passes,

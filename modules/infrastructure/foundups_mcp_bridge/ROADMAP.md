@@ -980,6 +980,11 @@ maintenance handshake, process-private bearer handoff, exact clean-HEAD and gene
 binding, semantic-only health, and complete canonical proof for all seven
 baseline collections.
 
+The freshness proof implementation is now owned by
+`holo_index.query_freshness_gate`; this bridge retains only a compatibility
+re-export. Storage namespaces, lifecycle recovery, semantic loader recovery,
+and post-merge store activation remain separate work.
+
 Acceptance included the focused HoloIndex, owner lifecycle, HTTP, RedDog
 boundary, startup-dispatch, and operational-consumer matrices plus static
 contract checks. The exact-main post-merge task, fresh/warm governed owner

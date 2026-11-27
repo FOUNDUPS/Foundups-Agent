@@ -11,6 +11,17 @@ tests. Integrated exact-head results are recorded with the shared release.
 
 <!-- WSP 22: anti-vibecoding test inventory. NEWEST entries at TOP. -->
 
+## [2026-11-25] — Fixed shared-deck handoff, publication held
+
+- Reuse the existing public worker/guide fixture for the proposed fixed PWA entry:
+  every original guide ID retains its destination; arbitrary query/fragment input
+  cannot select another destination; no-JS links retain Dispatch, guide and Contact.
+- The earlier Dispatch portrait-section test/implementation was superseded before
+  publication. Its screenshots are not evidence for the new shared tile/viewer flow.
+- Shared source verification: 2292 member/pfMALL tests, 23 state/route VM checks and
+  26 actual member boot checks passed. New real-browser deck acceptance is pending
+  because CUA timed out repeatedly. No physical-phone or new public release claim.
+
 ## [2026-11-22] — Source-selected HPC handoff
 
 - 136 passed across existing contact, coalition and public-worker suites.
@@ -108,6 +119,26 @@ Extend the public worker regression to cover the v4 exact-path precache,
 WebP MIME, old cache removal, offline comic assets and the legacy guide HTML
 alias. Exercise all original guide IDs through the cover's fragment handoff
 with query preservation, encoded fragments and an invalid-fragment control.
+
+## [2026-11-09] — Direct Oversight navigation and landing release gate
+
+Extended the existing `test_oversight_public_release.py` rather than creating
+another suite. Seventeen focused cases cover direct node/choice links, decorative
+connectors, one dotted state branch, preserved legacy fragments and exhibits,
+HTML escaping, graph validation, and the exact landing-only Vote-link exception.
+The existing full release test retains archive, mirror, route, source and
+fictional-evidence assertions while adopting the approved direct navigation.
+Subprocess stderr is now reported on failure; failed builds are not suppressed.
+The existing worker test tracks candidate cache `v0.11.0` and retains its legacy
+fragment/offline scope checks.
+
+Local focused comparison: prior source 16 failed/1 passed; repaired source
+17 passed. One full-archive integration case was deselected locally, not claimed
+as a pass. Hosted `wre-verification-contracts` succeeded for source `bc95cb3fec`
+in CI run 42557479077, including the full Vote suite, archive verifier and Node
+checks; later source heads require fresh checks. The [audit record](../oversight/docs/DIRECT_NAVIGATION_AUDIT_20261109.md)
+binds evidence and remaining gates. Four viewport component checks are not a
+full staged-site, Safari, independent-review or publication claim.
 
 ## [2026-11-07] — Interactive oversight maps
 

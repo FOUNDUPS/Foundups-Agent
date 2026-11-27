@@ -194,6 +194,8 @@ confinement. The imported development app still requires real tracked static fil
 | `GET /pfmall/catalog` | Catalog tiles; optional `category` query |
 | `GET /pfmall/foundups/{foundup_id}` | One tile or HTTP 404 |
 | `GET /pfmall/resolve-route?path=...` | Route result |
+| `GET /pfmall/tile-graph?scope=public_mall\|012_architect` | Public projection (with `ETag` / `304`) or 012-authenticated architect graph |
+| `POST /pfmall/tile-graph/patches` | Default 503; explicit server `ClerkIntakePolicy` + `TileGraphAuthPolicy` + `TileGraphStore` |
 | `GET /pfmall/ui/...` | Static shell UI |
 | `GET /pfmall/static/...` | Static assets |
 | `GET /f/{foundup_id...}` | HTTP 307 to the shell handoff UI |
@@ -273,6 +275,29 @@ does not persist drafts, establish project ownership or grant execution/tokens.
 `export_mall_catalog(output_path=..., shell=None) -> Path` is a separate,
 explicit generation command. It writes the projected member catalog and is not
 called by catalog reads or Holo queries.
+
+`export_fractal_tile_graph(output_path=..., store=None, repo_root=...) -> Path`
+writes the schema-validated `public_mall` projection to
+`public/member/fractal_tile_graph.public.json` (from live `TileGraphStore`
+state when supplied, or built directly from tracked repository files).
+
+### Fractal Tile Graph, Authenticated Atomic Patch API & Sprint 2 Benchmark Hierarchy
+
+- **Schemas**: `schemas/fractal_tile_graph.schema.json` (`fractal_tile_graph.v1`)
+  and `schemas/tile_graph_patch.schema.json` (`tile_graph_patch.v1`).
+- **Dual scoring & graph builder (`fractal_tile_graph.py`)**:
+  `compute_wsp15_canonical`, `compute_reusability`, `compute_mall_rescue_score`,
+  `validate_tile_graph`, `project_public_tile_graph`, `build_repo_fractal_tile_graph`,
+  and typed `dag_edges` (`calls`, `reads_from`, `evaluates`, `runs_through`,
+  `produces_receipt`, `verified_by`). Tracks post-census `HEAD` files cleanly as
+  `VERIFIED_AT_TRACKED_HEAD_REVISION` separately from feature-local files.
+- **Atomic SQLite WAL Store (`tile_graph_store.py`)**: `TileGraphAuthPolicy`,
+  `TileGraphStore`, optimistic `base_graph_etag` concurrency (`409`), idempotent
+  `patch_id` replay, tenant/architect scoping, WSP 71 leak checks, and
+  `regenerate_from_catalog` replay survival.
+- **Context Helpers (`tile_graph_context.py`)**: `get_breadcrumbs`,
+  `build_tile_context`, `search_tiles`, `get_rescue_queue`, `get_cobuilding_context`,
+  `build_reddog_tile_briefing`, `query_tools_benchmark_readback`, and `walk_fractal_path`.
 
 ## Browser/member interface
 

@@ -26,6 +26,24 @@ and withdrew its guest session. See the same contract for cloud staging gates.
   or live automation verification. 012's existing PC automation/Drive log are
   reported context, not newly observed runtime. WSP 10/15/22/50/71/91/95/97.
 
+## 2026-11-19 - Website AdSense operator procedure (prototype)
+
+- WSP 97 decision: CREATE a narrow procedure in the existing module Skillz
+  owner after source-bound lexical retrieval and tracked-tree search found no
+  AdSense owner at main `7432d31e5a68544d2bbab6715f02f64b0b5b6f85`.
+  Reuse WRE registry/discovery, NAVIGATION and thin Claude/Codex entrypoints;
+  no new Rolodex database, executor or account data store.
+- Check existing Search Console ownership and actual AdSense recognition before
+  any verification deployment; detection is not policy approval. No new property,
+  DNS record or access grant is authorized by this check (Google help 12176698).
+- Preserve ownership-only scope, actual offered meta/ads.txt choices, redirect
+  and crawler behavior, private records and the separate YouTube payment lane.
+- Local WSP 00 gate passed. Holo lexical bundle used the isolated source;
+  semantic freshness UNKNOWN with index gap retained, no reindex or promotion.
+- Validation: focused discovery/projection tests and independent procedure review
+  are recorded with exact candidate head in the PR. No merge, live site release,
+  account change, phone activation or production admission is claimed.
+
 ## 2026-11-18 - Audit existing work before work orders and builds
 
 - Decision: EXTEND the existing `foundups-wsp` entry and `reddog_operations`
@@ -89,6 +107,28 @@ and withdrew its guest session. See the same contract for cloud staging gates.
   only; next promotion requires exact-head review/security/CI under current
   ownership and separately authorized publication.
 
+## 2026-11-14 — Durable adaptive relay checker, not activated
+
+WSP00/22/50/78/97/99; issue #2385. Added a bounded `RelayWatcher` under the existing
+bridge owner using shared DelayUtils, ModuleDB transactions and the runtime
+operation lock. Persist revision/deadline, message digests and ACK/forward attempt
+proofs atomically; reconcile ambiguous effects before replay. New admitted
+activity resets the 60-second policy independently of downstream success.
+Provider failures preserve prior observation timestamps and idle intervals.
+
+Independent review reproduced hard-linked SQLite aliases bypassing path-based
+lock identity. The candidate now rejects hard links and validates backend, path
+and device/inode identity around transactions. Clock rollback during a provider
+read also blocks observation without fabricating a fresh timestamp. Added a
+Google Docs reader adapter using an injected existing native read capability and
+reviewed decoder; returned shape does not prove authenticated, complete retrieval.
+
+Tests cover actual SQLite transactions, fresh child-process crash recovery and
+same-host lock contention using synthetic providers. See tests/TestModLog.md for
+the scoped run. No live relay, connector binding, runtime admission, cross-host
+lease, credentials change, publication, deployment or Moshpit transport follows.
+Existing host read/effect/reconciliation bindings and decoder are still required.
+
 ## 2026-11-05 — Lightweight supervisor advisory analysis
 
 The background supervisor was acquiring a second native model owner while main
@@ -119,6 +159,52 @@ retry controls, the successful one-request probes and failed exact-URL probe.
 Correct display-escaping diagnoses through actual decoding. Production runtime,
 source, skills, authority and version pins remain unchanged; no RSI gate closes.
 Private replay evidence is preserved on O:; no Codex subagent authored the work.
+
+## 2026-11-02 — Qualify local telemetry correlation candidates
+
+WSP 5/11/22/50/91/97. The existing projection preserved a deterministic ID but
+did not expose whether transport submission or external observation was proved.
+Add explicit candidate provenance, unconfirmed/not-applicable correlation,
+null external trace identity, and bounded diagnostic-stage classification.
+Preserve the existing ID algorithm, receipt validator and null task success.
+No transport, credential receiver, extension package or promotion was changed.
+Regression checks cover real canonical receipt validation, legacy rejection,
+tampered IDs, all provider outcomes, and hostile caller-supplied trace/success
+claims. See tests/TestModLog.md and monitoring/RUNBOOK.md for evidence and gates.
+
+## 2026-11-01 — Explicit Viewer credential source
+
+The CLI now prefers a complete Viewer pair and rejects partial Viewer values.
+Optional `--env-file` uses the existing root `python-dotenv` dependency for an
+explicit, bounded source, with interpolation/discovery and environment mutation
+disabled. File and process credentials never mix. Explicit parser errors become
+static failures independently of logging. Review exposed a logging-disabled
+bypass in the initial warning guard; parser binding errors now close that gap.
+Core stdlib lookup and vault wrapper remain unchanged.
+Eighteen synthetic source tests and forty reader tests pass; no actual credential
+file or live API was read by this implementation slice. Root owns operational
+Viewer provisioning and v2 verification; live read acceptance remains pending.
+
+## 2026-11-01 — Bounded Langfuse diagnostic reader
+
+WSP 5/11/22/50/71/84/91/97. Added a stdlib-only, lookup-only v2 observations
+projection and CLI under the existing bridge owner. Separate Viewer credentials,
+fixed official regional origins, no redirects/retries, bounded UTC windows,
+pages, bytes and socket timeouts keep the first layer small. Content and arbitrary
+metadata never enter the diagnostic output. Unknown measurements keep coverage
+counts; provider completion cannot become task success. A separate correlation
+projection reuses the canonical provider-call validator and preserves v1 bytes.
+No governed transport, runtime authority, scheduler, external writes or live
+connection claim is introduced. Holo semantic retrieval retained its authority
+HEAD mismatch; lexical bundle freshness remains UNKNOWN with an index gap.
+Direct owner reads resolved noisy retrieval; absent requirements/memory README
+were recorded rather than fabricated. Manual implementation followed existing
+contracts because this new external privacy boundary required source inspection
+and offline tests; local Qwen/Gemma activation was unnecessary. Independent
+synthetic review checked privacy, cursor encoding, deduplication and bounds.
+Focused validation: 40 offline tests pass; no model/provider call was made.
+The initial test invocation produced two fixture setup errors from oversized
+pytest parameter IDs on Windows; explicit short IDs corrected the harness.
 
 ## 2026-11-01 — Native Hermes handler qualification
 
@@ -9530,6 +9616,38 @@ compliance claim is made.
 - ADD `tests/test_reddog_governed_work_order_dryrun.py` — 13 tests (accept + rejection paths).
 - WAE-L1 field mapping documented in module docstring (Addendum B); no WAE runtime changes.
 - No GitHub, branch, PR, write, shell, or merge.
+
+## 2026-06-20: Fusion receipt ledger -- append-only persistence + advisory WSP_97 scoring (W6)
+
+**Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)
+**WSP**: 11 (Interface), 50 (Pre-Action), 84 (Reuse evaluated), 97 (Truth Boundary)
+**Slice**: `HERMES_FUSION_RECEIPT_PERSISTENCE_PHASE1`
+**Predecessors**: #832 (contract), #842 (redaction gate), #862 (alias live, `fb9990c2b`)
+**Base**: `fb9990c2b` (origin/main; #862 landed)
+
+### Summary
+
+Durable evidence trail for Fusion: persist `ModelContributionReceipt`s + an advisory WSP_97 scoring seam.
+Egress-free (no live call, no key, no valve) -- safe to build before the first manual smoke. The first
+of the "next Fusion choices" (receipt persistence + scoring before SERVER_TOOL).
+
+- ADD `src/fusion_receipt_ledger.py` -- `persist_receipt` (append-only JSONL, digests only; fail-closed:
+  refuses non-advisory / unserializable / `scan_forbidden`-tripping records; `store_path` REQUIRED so no
+  ledger artifact is committed); `load_receipts` (skips malformed lines, never raises); `score_receipt`
+  (advisory WSP_97 verdict -> `ReceiptScore` with `wsp97_status`, `cabr_status` ALWAYS `NOT_SUBMITTED`,
+  `advisory_only=True`, low-cardinality reasons; fail-closed to `wsp97_fail` on any doubt). NEVER mutates
+  CABR/payout/source-authority; writes no authority. Mirrors the telemetry.py append-only JSONL idiom and
+  reuses `ModelContributionReceipt.to_dict()` / `is_valid_digest` (WSP 84; the FoundUpJob-coupled
+  proof_of_compute_receipt/receipt_emitter are NOT imported -- future HERMES_RECEIPT_LEDGER_CONSOLIDATION).
+- ADD `tests/test_fusion_receipt_ledger.py` -- 19 tests: persist/load roundtrip, append-only, non-advisory
+  refused, forbidden-content refused, digests-only, required store_path, load fail-closed (malformed/blank/
+  non-dict/missing/directory), advisory scoring (pass/blocked-ok/fail paths), CABR-never-asserted, tainted/
+  non-str timestamp refused, no-egress/no-dep AST guards. 160 pass (incl 33 alias + 65 gate + 40 adapter
+  regression). No skip/xfail. Internal SENTINEL found + fixed 2 ordering/fail-closed defects (scan-after-stamp,
+  directory-path load).
+- EDIT `INTERFACE.md` + module/root ModLog -- ledger surface + 16-row WSP_97 table (declared==actual==16).
+- Boundaries: no egress, no key, no dependency, no CABR/payout/authority mutation, no committed DB artifact.
+  ASCII-clean (0 non-ASCII, no mojibake). DRAFT; STOP at MERGE_READY (external 0102 gate).
 
 ## 2026-06-19: Fusion ALIAS live path -- valve-gated OFF, redaction-gated, advisory-only (W6)
 

@@ -10,7 +10,10 @@ import sys
 
 
 @pytest.fixture(autouse=True)
-def publisher_owner(monkeypatch):
+def publisher_owner(monkeypatch, tmp_path):
+    monkeypatch.setenv("YT_012_MANIFEST_FILE", str(tmp_path / "012_manifest.json"))
+    monkeypatch.setenv("YT_012_MANIFEST_ACK_FILE", str(tmp_path / "012_manifest_ack.json"))
+    monkeypatch.setenv("YT_012_MANIFEST_STATE_FILE", str(tmp_path / "012_manifest_state.json"))
     spec = importlib.util.spec_from_file_location(
         "story_publisher_under_test", Path(__file__).parents[1] / "src/youtube_uploader.py"
     )
@@ -19,6 +22,7 @@ def publisher_owner(monkeypatch):
     spec.loader.exec_module(owner)
     monkeypatch.setitem(globals(), "YouTubeShortsUploader", owner.YouTubeShortsUploader)
     monkeypatch.setitem(globals(), "YouTubeUploadError", owner.YouTubeUploadError)
+    monkeypatch.setitem(globals(), "YouTubeUploadPolicyBlocked", owner.YouTubeUploadPolicyBlocked)
 
 
 
@@ -229,3 +233,90 @@ def test_story_channel_reuses_foundups_oauth_by_default(monkeypatch, override):
         return FakeYouTube("UCfo9NxwyjAQvaVn3cEjXT4g")
     YouTubeShortsUploader("us_story_time", service_factory=factory)
     assert calls == [{"token_index": 10}]
+
+
+def test_antifafm_enforces_canonical_channel_against_missing_relabelled_or_mismatched_ids(monkeypatch):
+    # 1. Missing pin -> fails closed
+    monkeypatch.delenv("YT_UPLOAD_CHANNEL_ID_ANTIFAFM", raising=False)
+    with pytest.raises(YouTubeUploadError, match="must pin"):
+        YouTubeShortsUploader("antifafm", youtube_service=FakeYouTube("UCVSmg5aOhP4tnQ9KFUg97qA"))
+
+    # 2. Wrong pin configured to FoundUps WITH matching FoundUps service -> STILL fails closed!
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_ANTIFAFM", "UCSNTUXjAgpd4sgWYP0xoJgw")
+    with pytest.raises(YouTubeUploadError, match="canonical"):
+        YouTubeShortsUploader("antifafm", youtube_service=FakeYouTube("UCSNTUXjAgpd4sgWYP0xoJgw"))
+
+    # 3. Canonical pin configured, but observed OAuth set10 service is FoundUps -> fails closed!
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_ANTIFAFM", "UCVSmg5aOhP4tnQ9KFUg97qA")
+    with pytest.raises(YouTubeUploadError, match="canonical|mismatch"):
+        YouTubeShortsUploader("antifafm", youtube_service=FakeYouTube("UCSNTUXjAgpd4sgWYP0xoJgw"))
+
+    # 4. Genuine canonical pin + canonical Antifa FM service -> succeeds
+    uploader = YouTubeShortsUploader("antifafm", youtube_service=FakeYouTube("UCVSmg5aOhP4tnQ9KFUg97qA"))
+    assert uploader.get_channel_info()["id"] == "UCVSmg5aOhP4tnQ9KFUg97qA"
+
+
+def test_antifafm_scheduled_publish_at_requires_shorts_policy_surface_and_release_gate(tmp_path, monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    monkeypatch.setenv("YT_UPLOAD_CREDENTIAL_SET_ANTIFAFM", "9")
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_ANTIFAFM", "UCVSmg5aOhP4tnQ9KFUg97qA")
+    service = FakeYouTube("UCVSmg5aOhP4tnQ9KFUg97qA")
+    calls = []
+    uploader = YouTubeShortsUploader(
+        "antifafm",
+        service_factory=lambda **kw: (calls.append(kw), service)[1],
+    )
+    assert calls == [{"token_index": 9}]
+    future_slot = (datetime.now(timezone.utc) + timedelta(days=1)).replace(microsecond=0).isoformat()
+
+    # Raw publish_video(policy_surface=None) must NOT bypass durable shorts SHA256 claim
+    monkeypatch.setenv("YT_ALLOW_SCHEDULED_PUBLISH_AT", "true")
+    with pytest.raises(YouTubeUploadPolicyBlocked, match="policy_surface='shorts'"):
+        uploader.publish_video(
+            video_file(tmp_path),
+            "AntifaFM Staged Daily Cut",
+            "Bypass attempt",
+            privacy="private",
+            publish_at=future_slot,
+            policy_surface=None,
+        )
+    assert service._videos.insert_args is None
+
+    # Release gate closed by default -> refuses before insert even with policy_surface='shorts'
+    monkeypatch.delenv("YT_ALLOW_SCHEDULED_PUBLISH_AT", raising=False)
+    with pytest.raises(YouTubeUploadPolicyBlocked, match="YT_ALLOW_SCHEDULED_PUBLISH_AT"):
+        uploader.schedule_short(
+            video_file(tmp_path),
+            "AntifaFM Staged Daily Cut",
+            "Release gate closed",
+            publish_at=future_slot,
+        )
+    assert service._videos.insert_args is None
+
+
+@pytest.mark.parametrize(
+    ("privacy", "publish_at"),
+    [
+        ("public", "2099-01-01T12:00:00Z"),
+        ("unlisted", "2099-01-01T12:00:00Z"),
+        ("private", "2099-01-01T12:00:00"),
+        ("private", "2020-01-01T12:00:00Z"),
+        ("private", ""),
+    ],
+)
+def test_publish_at_rejects_non_private_naive_or_past_timestamps(tmp_path, monkeypatch, privacy, publish_at):
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_ANTIFAFM", "UCVSmg5aOhP4tnQ9KFUg97qA")
+    monkeypatch.setenv("YT_ALLOW_SCHEDULED_PUBLISH_AT", "true")
+    service = FakeYouTube("UCVSmg5aOhP4tnQ9KFUg97qA")
+    uploader = YouTubeShortsUploader("antifafm", youtube_service=service)
+    with pytest.raises(YouTubeUploadError):
+        uploader.publish_video(
+            video_file(tmp_path),
+            "AntifaFM Staged Daily Cut",
+            "Rejected schedule",
+            privacy=privacy,
+            publish_at=publish_at,
+            policy_surface="shorts",
+        )
+    assert service._videos.insert_args is None

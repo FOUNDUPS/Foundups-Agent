@@ -1,3 +1,103 @@
+## Adaptive relay watcher
+
+Entry points: `src/reddog_relay_watcher.py`, `src/reddog_relay_poll_store.py`
+and `src/reddog_relay_google_docs.py`. This is an unregistered library for the
+existing resident owner, not a daemon, delivery authority or new transport.
+
+| Contract | Requirement |
+| --- | --- |
+| `RelaySource(provider, account, container, receiver, destination)` | Immutable binding per account/container; changing receiver or destination rejects the existing checkpoint. |
+| `RelayPollStore(db, repo_root=..., allowed_root=...)` | Explicit existing DatabaseManager using an outside-repository private SQLite file. One fixed local disk/host; no network shares, hard links, symlink aliases or replaced DB identity. Backend, canonical path and file identity are rechecked around transactions. |
+| `RelayBindings(read, admit, perform, reconcile, timeout_seconds)` | All four callables required; positive timeout at most 60 seconds. No fallback credentials or connector. |
+| `read(source, watermark, timeout_seconds=...)` | Complete normalized `RelaySnapshot(source_key, watermark, messages, complete=True)` with at most 1000 messages; provider failures must remain errors, not empty snapshots. |
+| `admit(source, message)` | Literal boolean from host authentication/scope/current-authority checks; messages and their claimed sender are data, not authority. |
+| `perform(source, message, phase, operation_id, attempt, timeout_seconds=...)` | Existing host ACK or forward capability, including use-time authority. Called only after durable INFLIGHT; returns bound `EffectProof`. |
+| `reconcile(...)` | Same arguments; returns authenticated provider proof for the exact operation and attempt. A lookup miss or eventual-consistency gap is UNKNOWN. |
+| `EffectProof(operation_id, attempt, outcome, proof_id)` | APPLIED, TERMINAL_NOT_APPLIED or UNKNOWN. Applied/terminal-negative evidence requires a bounded opaque proof ID. Only final authoritative non-application allows another numbered attempt. |
+| `RelayWatcher.tick()` | One due read under the existing machine-wide lock; first invocation persists a 60-second deadline. Missing bindings returns BLOCKED_CONNECTOR_BINDINGS. |
+| `RelayWatcher.run(stop_event, max_checks=...)` | Runs on the caller's existing thread for 1–10000 checks; interruptible waits at most 60 seconds. No background thread or service creation. |
+
+`RelayMessage(message_id, sender, recipient, kind, payload)` is ephemeral; payload
+is at most 16 KiB. Operation IDs bind the full source/destination binding, message
+identity/content digest and phase. ACK must be confirmed before that message's
+forward. There is no guarantee of cross-message delivery order while an earlier
+operation is blocked. The 10000-message ledger cap blocks ingestion without
+evicting prior identities. Replaying an applied operation does not resend it.
+
+Message/operation insertion, source revision and next deadline share one SQLite
+transaction. `observed_at` changes only after a valid successful read. Provider
+errors update `last_attempt_at` and retry scheduling without changing observation
+time, revision or idle interval. Backwards clocks before/during a read block
+observation and effects. Pending bodies absent or changed on refetch remain
+blocked; metadata persistence is not a complete source archive.
+
+The process lock is the active **same-host** exclusion mechanism. Persisted
+owner/generation fields record history, not a distributed lease or authority.
+The host must use one designated private database for this mailbox and must
+prevent independently copied databases or other hosts from becoming writers.
+Path checks do not provide OS isolation against an actor mutating storage.
+Identity validation is per store lifetime. A fresh constructor after DB loss or
+replacement cannot establish continuity with the old ledger. Restart acceptance
+requires retaining the same database and its WAL, not provisioning an empty file.
+No provider-level exactly-once or managed-host restart guarantee is claimed.
+
+`GoogleDocsRelayReader(read_document, decode_messages)` invokes the supplied
+`read_document(document_id=..., timeout_seconds=...)` capability and checks the
+exact document ID, nonempty opaque revision and returned tab/body structure.
+It accepts the native normalized document mapping or its `structuredContent`
+wrapper. The host must authenticate the selected account and fetch **all tabs**
+without a partial-fields projection. Returned shape alone cannot prove those
+obligations. The reviewed decoder must return a tuple of `RelayMessage` objects.
+Even an unchanged revision is decoded again to recover unresolved bodies.
+
+Timeout arguments are contractual: the host bindings must enforce deadlines;
+`run()` does not interrupt a hanging callback. No live host bindings or registered
+caller are supplied here. Native read access in a chat does not establish an
+unattended local invoker, write permission, forward eligibility or receiver ACK.
+Admitted host invocation, provider receipt verification and managed runtime
+restart acceptance remain separate activation gates.
+
+## Langfuse diagnostic lookup — 2026-11-01
+
+`src/reddog_langfuse_telemetry.py` exposes `read_review(public_key=...,
+secret_key=..., from_time=..., to_time=..., base_url=..., trace_id=None,
+max_pages=5, timeout=10) -> dict`. It performs GET requests only to official
+JP/EU/US Langfuse origins, using v2 observations with selective field groups.
+Windows credential custody and browser provisioning are outside this reader.
+No daemon package imports are required by the standalone
+`scripts/reddog_langfuse_review.py` entrypoint. CLI credentials prefer a complete
+`LANGFUSE_VIEWER_PUBLIC_KEY`/`LANGFUSE_VIEWER_SECRET_KEY` pair. Any incomplete
+Viewer pair rejects; absent Viewer names permit the complete legacy
+`LANGFUSE_PUBLIC_KEY`/`LANGFUSE_SECRET_KEY` pair. Optional `--env-file` selects
+one authoritative file (up to 65,536 characters) with `python-dotenv`, without
+discovery, interpolation, process-environment updates or file/environment mixing.
+Without the flag, only process variables are used. Static JSON failures exit 2.
+
+Bounds: UTC `[from_time,to_time)` at most seven days, 1–5 pages, 100 rows/page,
+1 MiB/page, finite positive socket timeout up to fifteen seconds. No redirects
+or retries. `complete` requires exhausted pagination and no dropped rows;
+`pagination_exhausted` separately describes the backend cursor. Duplicate
+observations do not inflate sums. Unknown usage, cost, level and completion
+remain explicit. `verified_task_success_count` is always null: provider telemetry
+cannot supply independent task acceptance or effect authority.
+
+`trace_id_for_provider_call(call_id)` accepts the canonical call-ID grammar and
+derives a 32-hex correlation identifier; it alone does not validate a receipt.
+`project_provider_evidence(mapping, validator=validate_provider_call_evidence)`
+requires the caller's existing canonical receipt validator, then emits only
+trace ID, provider outcome and null task success. The compatibility `trace_id`
+field is a **candidate**, with `trace_id_source=derived_local_candidate`.
+`correlation_status` is `not_applicable` for BLOCKED_PRECALL, otherwise
+`unconfirmed`; `external_trace_id` stays null. The projector performs no lookup
+and cannot establish that any transport submitted this identifier.
+`diagnostic_stage` separates `precall`, `provider_failure`, `output_validation`,
+`provider_completion` and `unknown` using validated outcome/reason enums. Missing
+reason evidence stays unknown. Local grounding/redaction/subprocess diagnostics
+remain in their existing local owners and require no inference trace.
+No receipt schema changes,
+live request instrumentation, external writes or runtime admissions are added.
+See [the pilot usage and evidence limits](README.md#langfuse-diagnostic-pilot).
+
 ## Ollama fallback configuration contract — 2026-10-29
 
 `initialize_control_plane_state` assigns `_ollama_model` from
@@ -409,6 +509,48 @@ continue to resolve. Follow each contract link for its complete text.
 #### WSP_97 Truth Boundary Checklist (HERMES_FUSION_ALIAS_MODE_PHASE2)
 
 [Read this contract](docs/interfaces/PUBLIC_API.md#contract-093).
+
+### Fusion receipt ledger (durable append-only persistence + advisory scoring; egress-free)
+
+```python
+from modules.communication.moltbot_bridge.src.fusion_receipt_ledger import (
+    persist_receipt,   # (receipt, store_path, *, received_at_iso=None) -> bool  (append-only, fail-closed)
+    load_receipts,     # (store_path) -> list[dict]  (skips malformed lines, never raises)
+    score_receipt,     # (receipt) -> ReceiptScore  (advisory WSP_97 verdict; mutates nothing)
+    ReceiptScore,      # wsp97_status / cabr_status (always NOT_SUBMITTED) / advisory_only / reasons
+)
+```
+
+Stores `ModelContributionReceipt`s as append-only JSONL (one per line, **digests only** -- the receipt is
+already digest-only). `persist_receipt` is **fail-closed**: it refuses a non-advisory receipt, anything
+that cannot serialize, or any record whose serialized form trips `scan_forbidden`; `store_path` is a
+**required** caller-chosen runtime path (no repo-committed ledger). `load_receipts` skips malformed lines.
+`score_receipt` returns an **advisory** WSP_97 verdict (fail-closed to `wsp97_fail` on any doubt); it
+**never** mutates CABR/payout/source-authority and `cabr_status` is **always `NOT_SUBMITTED`** (no CABR
+engine exists). No network, no key, no new dependency.
+
+#### WSP_97 Truth Boundary Checklist (HERMES_FUSION_RECEIPT_PERSISTENCE_PHASE1)
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | RECEIPT_PERSISTED_APPEND_ONLY | YES | `persist_receipt` opens `"a"`; `test_append_only` (earlier line untouched) |
+| 2 | DIGESTS_ONLY_NO_RAW_PERSISTED | YES | `test_persisted_record_has_no_raw_secret` (digests present, no raw) |
+| 3 | NON_ADVISORY_RECEIPT_NOT_PERSISTED | YES | `test_non_advisory_receipt_not_persisted` / `test_dict_non_advisory_not_persisted` |
+| 4 | LOAD_FAIL_CLOSED_SKIPS_MALFORMED | YES | `test_load_skips_malformed_lines`, `test_load_missing_file_returns_empty` |
+| 5 | SCORING_ADVISORY_NOT_AUTHORITY | YES | `score_receipt` returns `ReceiptScore`; writes nothing |
+| 6 | NO_CABR_PAYOUT_MUTATION | YES | module imports no cabr/payout (`test_module_imports_no_egress_no_authority_no_new_dep`) |
+| 7 | CABR_STATUS_ALWAYS_NOT_SUBMITTED | YES | `test_score_never_asserts_cabr_readiness` |
+| 8 | WSP97_SCORE_FAIL_CLOSED_ON_DOUBT | YES | malformed/bad-digest/bad-status/forbidden -> `wsp97_fail` (5 score-fail tests) |
+| 9 | NO_LIVE_EGRESS_NO_KEY | YES | `test_module_makes_no_calls_to_os_or_network`; no requests/os import |
+| 10 | NO_NEW_DEPENDENCY | YES | stdlib only (`json`/`dataclasses`/`pathlib`/`typing`) + intra-package |
+| 11 | NO_DB_ARTIFACT_COMMITTED | YES | `store_path` required; tests use `tmp_path`; no ledger file in scope |
+| 12 | NO_SKIP_XFAIL | YES | none in the test file |
+| 13 | FILE_SCOPE_EXACT | YES | ledger module + test + INTERFACE + module ModLog + root ModLog |
+| 14 | HOLOINDEX_RESULTS_RATED | YES | Phase 0 reuse evaluated (module ModLog) |
+| 15 | INTERNAL_SENTINEL_READY | YES | adversarial SENTINEL ran |
+| 16 | ASCII_CLEAN | YES | byte-checked 0 non-ASCII, 0 mojibake |
+
+Declared == Actual == 16 / 16 YES.
 
 ### WebhookReceiver
 

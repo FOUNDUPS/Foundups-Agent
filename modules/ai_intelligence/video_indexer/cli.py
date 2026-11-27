@@ -83,6 +83,10 @@ Examples:
                         help='Force reindex (ignore existing)')
     parser.add_argument('--skip-holoindex', action='store_true',
                         help='Skip ChromaDB indexing (JSON only)')
+    parser.add_argument('--local-pilot-manifest', type=str,
+                        help='Read-only JSON manifest (<= 10 records) for bounded local archive retrieval pilot')
+    parser.add_argument('--local-pilot-query', action='append', default=[],
+                        help='Query string(s) for bounded local archive retrieval pilot (repeatable)')
     parser.add_argument('--verbose', action='store_true',
                         help='Enable verbose logging')
 
@@ -90,6 +94,20 @@ Examples:
 
     if args.verbose:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    # Bounded read-only local archive retrieval pilot mode
+    if args.local_pilot_manifest:
+        import json
+        from modules.ai_intelligence.video_indexer.src.local_archive_retrieval import (
+            LocalArchiveRetrievalPilot,
+        )
+        pilot = LocalArchiveRetrievalPilot()
+        summary = pilot.load_manifest(args.local_pilot_manifest)
+        queries = [
+            pilot.query(q).to_dict() for q in (args.local_pilot_query or [])
+        ]
+        print(json.dumps({"summary": summary, "query_results": queries}, indent=2, ensure_ascii=False))
+        return 0
 
     # Status mode
     if args.status:

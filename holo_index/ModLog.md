@@ -482,6 +482,40 @@ controller release remain pending; no upstream advisory or global-runtime cleara
 - No reindex, owner restart, exhaustive aggregate, or live owner acceptance was
   performed; committed exact-SHA maintenance/publication remains deferred.
 
+## [2026-08-16] Docs diagnostic truth-boundary hardening
+
+- Made `diagnose_index_docs_pipeline.py --help` exit before any diagnostic
+  probe and replaced its outdated flat-only model-cache mirror with the shared
+  flat/Hugging Face snapshot resolver.
+- Corrected source-filter diagnosis to evaluate paths relative to discovery
+  roots and to keep intentional `_backup` exclusions distinct from target
+  rejection. Removed the historical H6 reward-gap claim because current
+  `IndexResult` handling exposes zero counts and withholds refresh reward.
+- Replaced Chroma client construction with enforced SQLite `mode=ro` plus
+  `query_only` metadata observation. R2 now mirrors strict Tier-0 consumer
+  cardinality: exactly one raw case-sensitive POSIX README/INTERFACE row per
+  canonical module. Missing/duplicate, absolute/mixed, dot/traversal,
+  backslash, wrong-case, and malformed rows fail with stable classifications;
+  malformed comparison candidates never become healthy evidence. SQLite reads
+  now count every `path` row across all storage columns before typed extraction,
+  so null/non-string/blob values cannot bypass row or byte caps. The 164
+  canonical roots come from bounded read-only Git-tracked evidence with four
+  exact structural/archive/data exclusions; untracked files cannot alter the
+  target set. Reused the established artifact safety pattern to reject link
+  components and hard links, and added short connection, elapsed-query, and
+  SQLite VM-step budgets with redacted failure codes. R4 places the path-row
+  SELECT and collection COUNT inside one explicit read transaction so a
+  concurrent rollback-journal writer cannot produce mixed-snapshot evidence;
+  every path removes the progress handler, rolls back, and closes. The observer
+  remains in the private `_navigation_docs_metadata_probe.py` helper after the operator
+  crossed WSP_62's 800-line review threshold. The final operator/helper/test
+  files are 642/495/717 lines; their largest functions are 44/39/50 lines. No
+  indexer/core fix, reindex, repository mutation, or service control was added.
+  (WSP 15/22/50/62/87/97)
+- Reconciled the canonical registry to 1,517 test files; the RedDog backend
+  manifest remains unchanged because this operator diagnostic is outside its
+  runtime closure.
+
 ## [2026-08-16] Final maintenance publication clean-state proof
 
 - Added a clean exact-HEAD proof immediately before completed receipt write,
@@ -692,6 +726,19 @@ controller release remain pending; no upstream advisory or global-runtime cleara
 - Added a read-only authority-worktree selector for a configured or deterministic sibling linked worktree. It requires the same Git common directory, a clean authority, and exact workspace HEAD.
 - Added a public repository-root digest to generation-bound freshness snapshots and owner responses so a configured loopback owner cannot satisfy a query for a different same-HEAD worktree.
 - Kept maintenance ownership outside the query process: selection performs no worktree creation, Git mutation, collection write, or re-index.
+
+## [2026-07-24] HOLOINDEX_NEUTRAL_FRESHNESS_AUTHORITY_P1A
+
+- Moved the existing freshness snapshot, binding normalization, maintenance
+  reason, and stable error mapping implementation into the dependency-light
+  `holo_index.query_freshness_gate` authority.
+- Inverted `holo_index.query_admission` onto the HoloIndex-owned contract and
+  left the infrastructure bridge path as an exact compatibility re-export.
+- Preserved public objects, constants, error codes, reasons, and owner/raw
+  admission outcomes. Storage namespaces, owner lifecycle, semantic loading,
+  models, providers, timeouts, and P0 path behavior are unchanged.
+- Added import-boundary and re-export identity regressions plus focused
+  owner/raw/direct parity validation.
 
 ## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 
@@ -1570,6 +1617,194 @@ HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrie
 - NO_CABR_READY
 - NO_PAYOUT_READY
 - NO_DAO_ACTIVATION
+
+---
+
+## [2026-05-07] HIA_MCP_EXPOSURE_PHASE5
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 103, WSP 104
+**Status**: COMPLETE
+
+### Summary
+
+Exposed `foundup_id` and `include_shared` params through MCP search surfaces.
+Both foundups_mcp_bridge (real HoloIndex) and pavs_mcp (placeholder) now accept
+these params for tenant-scoped search.
+
+### Changes
+
+- `foundups_mcp_bridge/holo_tools.py`: Extended `holo_search()` signature with
+  `foundup_id` and `include_shared` params, passes through to HoloIndex.search()
+- `pavs_mcp/server.py`: Extended async `holo_search()` with same params, echoes
+  scope in response, maintains truthful placeholder behavior (WSP 97)
+- `foundups_mcp_bridge/tests/test_mcp_bridge.py`: Added 4 tests for new params
+- `pavs_mcp/tests/test_server_holo_search.py`: New test file (17 tests)
+
+### Signature Changes
+
+**foundups_mcp_bridge holo_search:**
+```python
+# Before
+def holo_search(repo_root, query, scope="all", top_k=10)
+
+# After
+def holo_search(repo_root, query, scope="all", top_k=10,
+                foundup_id=None, include_shared=True)
+```
+
+**pavs_mcp holo_search:**
+```python
+# Before
+async def holo_search(query, domain=None, limit=10)
+
+# After
+async def holo_search(query, domain=None, limit=10,
+                      foundup_id=None, include_shared=True)
+```
+
+### Test Results
+
+- foundups_mcp_bridge: 20/20 HoloTools tests pass
+- pavs_mcp: 17/17 tests pass (new file)
+- Regression query filtering: 19/19 pass
+- Regression tenant binding: 17/17 pass
+
+---
+
+## [2026-05-06] HIA_TENANT_CONTEXT_BINDING_PHASE4
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 87, WSP 15, WSP 104
+**Status**: COMPLETE
+
+### Summary
+
+Added automatic FoundUp scope resolution with explicit precedence. When
+`foundup_id` is omitted from search calls, the system now resolves scope
+from instance context or environment. This enables default-capable isolation
+without requiring explicit parameters at every call site.
+
+### Precedence (highest to lowest)
+
+1. **explicit**: Caller-provided `foundup_id` argument
+2. **context**: Instance-bound via `set_foundup_context()`
+3. **env**: `HOLO_FOUNDUP_ID` environment variable
+4. **none**: Legacy global behavior (no filtering)
+
+### Changes
+
+- `holo_index.py`: Added `_foundup_context` instance var, `set_foundup_context()`,
+  `clear_foundup_context()`, `get_foundup_context()` methods
+- `search_engine.py`: Added `_resolve_foundup_scope()` helper; updated
+  `execute_search()` to use resolved scope; added `effective_foundup_id` and
+  `scope_source` to metadata
+- `test_tenant_context_binding.py`: 17 unit tests (NEW)
+
+### API Added
+
+```python
+# Context binding (persists across searches)
+holo.set_foundup_context("trade")   # Bind scope
+holo.get_foundup_context()          # Returns "trade"
+holo.clear_foundup_context()        # Reset to None
+
+# Environment fallback
+HOLO_FOUNDUP_ID=kosei python script.py
+```
+
+### Metadata Fields Added
+
+```python
+result["metadata"]["effective_foundup_id"]  # Resolved scope (may differ from arg)
+result["metadata"]["scope_source"]          # "explicit" | "context" | "env" | "none"
+```
+
+### Test Results
+
+- New: 17/17 pass (test_tenant_context_binding.py)
+- Regression query filtering: 19/19 pass
+- Regression metadata tagging: 22/22 pass
+
+---
+
+## [2026-05-06] HIA_FEDERATION_QUERY_FILTERING_PHASE3
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 87, WSP 15
+**Status**: COMPLETE
+
+### Summary
+
+Added FoundUp-scoped query filtering to HoloIndex search API. When `foundup_id`
+is provided, results are restricted to that FoundUp's documents. When 
+`include_shared=True` (default), shared `core` documents are also included.
+Backward compatible: existing callers work unchanged.
+
+### Changes
+
+- `search_engine.py`: Added `_build_foundup_where_filter()` helper; extended
+  `_search_collection()`, `_lexical_search_collection()`, `execute_search()` 
+  with `foundup_id: Optional[str]` and `include_shared: bool` params
+- `holo_index.py`: Added `foundup_id` and `include_shared` params to 
+  `HoloIndex.search()` passthrough
+- `test_federation_query_filtering.py`: 19 unit tests (NEW)
+
+### API Signature Changes
+
+```python
+# Before
+def execute_search(holo, query, limit=10, doc_type_filter="all")
+def HoloIndex.search(query, limit=10, doc_type_filter="all")
+
+# After (backward compatible)
+def execute_search(holo, query, limit=10, doc_type_filter="all", 
+                   foundup_id=None, include_shared=True)
+def HoloIndex.search(query, limit=10, doc_type_filter="all",
+                     foundup_id=None, include_shared=True)
+```
+
+### Filter Logic
+
+- `foundup_id=None` → No filtering (all documents)
+- `foundup_id="trade", include_shared=False` → `where={"foundup_id": "trade"}`
+- `foundup_id="trade", include_shared=True` → `where={"$or": [{"foundup_id": "trade"}, {"foundup_id": "core"}]}`
+
+### Test Results
+
+- New: 19/19 pass (test_federation_query_filtering.py)
+- Regression metadata: 22/22 pass (test_federation_metadata_tagging.py)
+- Regression routing: 19/19 pass (test_backend_routing.py)
+
+---
+
+## [2026-05-06] HIA_FEDERATION_FOUNDUP_IDENTITY_COVERAGE_AUDIT_PHASE2B
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 103, WSP 104, WSP 15
+**Status**: COMPLETE - AUDIT ONLY
+
+### Summary
+
+Audited FoundUp identity coverage for federation query filtering readiness.
+Found 4 directories with manifests (trade, kosei, gotjunk, voteballots),
+5 FoundUp directories without manifests (move2japan needs one), 1 ID mismatch
+(pqn_swarm_hub dir vs science_swarm catalog ID), and 2 correctly externalized
+FoundUps (AutoPost, Science Swarm Hub).
+
+### Key Findings
+
+- 4/17 directories have `foundup_manifest.json`
+- `move2japan` active in catalog (573 videos) but no manifest
+- `pqn_swarm_hub/` directory vs `science_swarm` catalog ID mismatch
+- `antifafm` module under `platform_integration/`, not `foundups/`
+- AutoPost and Science Swarm Hub correctly blocked as external
+- Phase 3 filtering CAN proceed (fallback handles gaps)
+
+### Changes
+
+- `HIA_FEDERATION_FOUNDUP_IDENTITY_COVERAGE_AUDIT.md`: Audit document (NEW)
+- No code changes in this slice
 
 ---
 

@@ -91,7 +91,13 @@ def dashboard_auto_enforce_enabled(*, interactive_menu: bool = False) -> bool:
     return explicit != "0" if explicit is not None else not interactive_menu
 
 
-def dashboard_readiness(health: dict, *, in_watch: bool, interactive_menu: bool = False) -> dict:
+def dashboard_readiness(
+    health: dict,
+    *,
+    in_watch: bool,
+    interactive_menu: bool = False,
+    unresolved_admission_gates: tuple[str, ...] = (),
+) -> dict:
     """One policy for startup, DAE actions and the operator readiness display."""
     valid = isinstance(health, dict) and type(health.get("healthy")) is bool
     health = health if isinstance(health, dict) else {}
@@ -117,10 +123,37 @@ def dashboard_readiness(health: dict, *, in_watch: bool, interactive_menu: bool 
     status = "UNKNOWN" if not valid else "FAIL" if alerts else ("UNKNOWN" if unknown else "PASS")
     readiness = ("UNKNOWN" if not valid else "DISABLED" if not enabled else "BLOCKED" if blocked else
                  "DEGRADED" if alerts else "UNKNOWN" if unknown else "READY")
-    return dict(enabled=enabled, manual_enforced=manual, auto_enforce=auto,
-                auto_enforced=auto_now, enforced=manual or auto_now,
-                critical=critical, warnings=warnings, unknown=unknown,
-                status=status, readiness=readiness, allowed=not blocked, evidence_valid=valid)
+    raw_current = health.get("current_readiness")
+    current_readiness = (
+        "UNKNOWN" if not valid
+        else (raw_current if isinstance(raw_current, str) and raw_current else readiness)
+    )
+    raw_hist = health.get("historical_critical_count")
+    if type(raw_hist) is int and raw_hist >= 0:
+        historical_critical = raw_hist
+    elif isinstance(health.get("historical_alerts"), list):
+        historical_critical = sum(
+            1 for a in health["historical_alerts"]
+            if isinstance(a, dict) and a.get("severity") == "critical"
+        )
+    else:
+        historical_critical = critical
+    explicit_gates = tuple(str(g) for g in unresolved_admission_gates if str(g).strip())
+    unresolved_gates = explicit_gates if explicit_gates else ("protected_admission_unverified",)
+    # Telemetry readiness alone never grants unattended execution authority; only
+    # existing protected admission owners may certify execution/worker/model grants.
+    unattended_work_allowed = False
+    return dict(
+        enabled=enabled, manual_enforced=manual, auto_enforce=auto,
+        auto_enforced=auto_now, enforced=manual or auto_now,
+        critical=critical, warnings=warnings, unknown=unknown,
+        status=status, readiness=readiness, allowed=not blocked, evidence_valid=valid,
+        current_readiness=current_readiness, historical_critical=historical_critical,
+        unresolved_admission_gates=unresolved_gates,
+        admission_authority_verified=False,
+        unattended_work_allowed=unattended_work_allowed,
+        worker_admission_granted=False, model_admission_granted=False,
+    )
 
 
 def run_dae_preflight(dae_name: str, quiet: bool = False) -> bool:

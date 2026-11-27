@@ -1,5 +1,58 @@
 # Digital Twin Module
 
+## Offline VoiceLoRATrainer hardening (2026-11-16)
+
+`src/lora_trainer.py` (`VoiceTrainingConfig`, `VoiceLoRATrainer`, `VoiceDataset`,
+`load_and_validate_jsonl`) and `src/lora_record_validator.py` (`InspectedVoiceRecord`,
+`ValidatedVoiceRecord`, `inspect_sft_record`, `validate_sft_record`,
+`load_and_validate_records`) enforce offline, supply-chain, direct-loader admission,
+speaker, and timestamp gates for Phase 1 SFT preparation without running training
+or downloading models:
+
+- **Implementation**: `trust_remote_code=False` is a hard WSP 71 invariant (rejected
+  at config validation and forced on `AutoTokenizer`/`AutoModelForCausalLM`);
+  `local_files_only=True` by default; `require_verified_speaker=True` and
+  `require_explicit_admission=True` are locked invariants in `VoiceTrainingConfig`
+  and all training-boundary validators (`validate_sft_record`, `_validate_record`,
+  `load_and_validate_records`, `load_and_validate_jsonl`, `VoiceLoRATrainer.load_data()`).
+  Every training record must carry all 5 explicit proofs at the trainer boundary —
+  (1) `training_eligible is True`, (2) allowed verbatim provenance from
+  `VERBATIM_SOURCE_FAMILIES` with zero disallowed/summary/conflict signals,
+  (3) positive boolean consent (`consent`/`training_consent`/`voice_consent is True`),
+  (4) verified principal speaker (`speaker` in `PRINCIPAL_SPEAKER_IDS` plus
+  `speaker_verified is True` or `speaker_status == "verified"`), and (5) a
+  non-placeholder source/video `group_id` (`video_id`/`source_id`/`source_video`/`source`
+  not in `PLACEHOLDER_GROUP_IDS`, with no per-row fallback in `_split_grouped_examples`).
+  `load_data()` also fails closed with exact line numbers on malformed/non-finite
+  (`NaN`/`Infinity`) JSON, non-dict rows, empty `assistant` targets, contradictory
+  top-level/`metadata`/`provenance`/`audio` fields, restricted consent/music channels,
+  summaries mislabeled as verbatim transcripts (`gemini*` models, summary payload keys,
+  or 3rd-person summary narration), mixed/non-012 speakers, and invalid, boolean,
+  out-of-bounds colon (`MM:SS` `sec>=60`), inverted (`t_end < t_start`), dangling-end,
+  or nonmonotonic timestamps (while preserving `t_start=None, t_end=None, timestamp_status="unknown"`
+  on admitted rows without timestamps rather than fabricating `0.0`). Separate read-only
+  `inspect_sft_record()` preserves `speaker=None, speaker_status="unknown"` and
+  `t_start=None, timestamp_status="unknown"` without inventing `"012"` or `0.0`,
+  returning `admissible_for_training` and `rejection_reasons`. `labels` masks
+  system/user/header prompt tokens and `attention_mask == 0` padding to `-100`
+  (preserving the assistant's closing EOS token even when `pad_token_id == eos_token_id`),
+  fails closed when truncation leaves zero supervised assistant tokens, and builds
+  deterministic group-disjoint `train_dataset` and `eval_dataset` splits wired with
+  `eval_strategy="epoch"` into `Trainer`/`TrainingArguments`.
+- **Limitations**: JSON metadata gates validate structural provenance/consent/speaker
+  claims only (not cryptographic or biometric speaker authenticity). Legacy direct
+  producers (`video_indexer/src/nemo_data_builder.py` and `src/lora_data_converter.py`)
+  do not emit the 5 required admission fields and are deterministically rejected by
+  `VoiceLoRATrainer` until upgraded.
+- **Offline evaluation**: `105/105` deterministic unit tests in `tests/test_lora_trainer.py`
+  (`258/258` across `digital_twin/tests/`) pass offline using synthetic `tmp_path`
+  JSONL fixtures and stub tokenizers/trainers.
+- **Deployment / live training status**: **BLOCKED / NOT EXECUTED**. No model weights
+  were downloaded or fine-tuned. Live QLoRA training remains gated on explicit 012
+  consent (`--confirm-consent`), verified verbatim dataset curation, CUDA GPU
+  availability (`torch 2.11.0+cpu` currently installed), and missing `.venv`
+  training packages (`peft`, `bitsandbytes`, `accelerate`).
+
 ## Ready-only optional video memory (2026-11-05)
 
 `VoiceMemory.query(text, k=5, *, allow_cold_init=True, cancel_event=None)` keeps
@@ -166,6 +219,8 @@ Phase 3: Tool-Use Training
 | `station_reply_decision.py` | Bounded station reply decisions with no publication |
 | `decision_policy.py` | Comment/like/ignore heuristics |
 | `trajectory_logger.py` | JSONL training data collector |
+| `lora_record_validator.py` | Fail-closed JSONL provenance, speaker-attribution, mislabeled-summary, and timestamp validator (never invents `"012"` or `0.0`) |
+| `lora_trainer.py` | Offline-gated QLoRA trainer with fail-closed admission, `-100` prompt/pad masking, and group-disjoint held-out evaluation (training not executed) |
 | `conversation_plane.py` | Deterministic intent/depth/effect classification |
 | `resident_conversation_transport_contract.py` | Strict zero-authority turn/status/cancel envelope |
 

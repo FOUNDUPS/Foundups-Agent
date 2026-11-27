@@ -32,6 +32,31 @@ DIGEST_A = "sha256:" + "a" * 64
 DIGEST_B = "sha256:" + "b" * 64
 
 
+def test_telemetry_projection_does_not_upgrade_legacy_or_local_evidence():
+    from modules.communication.moltbot_bridge.src.reddog_langfuse_telemetry import (
+        TelemetryError, project_provider_evidence,
+    )
+    receipt = _precall()
+    original = receipt.to_dict()
+    projection = project_provider_evidence(original, validator=validate_provider_call_evidence)
+    assert projection["correlation_status"] == "not_applicable"
+    assert projection["external_trace_id"] is None
+    assert receipt.to_dict() == original
+    completed = terminalize_provider_call(
+        arm_provider_call(receipt), outcome=ProviderCallOutcome.COMPLETED,
+        reason=ProviderCallReason.PROVIDER_RETURNED, content="synthetic",
+        completed_at_ms=200,
+    )
+    result = project_provider_evidence(completed.to_dict(), validator=validate_provider_call_evidence)
+    assert result["correlation_status"] == "unconfirmed"
+    assert result["external_trace_id"] is None
+    assert result["verified_task_success"] is None
+    for legacy in ({"generation_id": "gen-test", "run_id": "run-1"},
+                   {**original, "call_id": "reddog_provider_call:" + "f" * 64}):
+        with pytest.raises(TelemetryError, match="^invalid_provider_evidence$"):
+            project_provider_evidence(legacy, validator=validate_provider_call_evidence)
+
+
 def _precall(
     *,
     started_at_ms: int = 100,

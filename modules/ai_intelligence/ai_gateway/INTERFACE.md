@@ -1,5 +1,36 @@
 # AI Gateway Module Interface Documentation
 
+## Lego scaffolding benchmark protocol (offline, mocks only)
+
+`lego_scaffolding_benchmark_protocol` composes `model_combination_benchmark_harness`
+across the four canonical Lego task families (`f1_dead_dup_triage`,
+`f2_manifest_contract`, `f3_bounded_repair`, `f4_lego_adapter`) without calling
+live models, external CLIs, network endpoints, or PatternMemory:
+
+- `StratifiedBenchmarkCorpus` + `build_lego_benchmark_task(...)`: enforces exact
+  balanced per-family stratification (`dev = 8 (2x4)`, `held_out_a = 12 (3x4)`,
+  `held_out_b = 12 (3x4)`) and rejects skewed splits or overlapping `task_id` /
+  `prompt_digest` entries.
+- `AuthorVisibleTaskSpec` + `adapt_author_runner(...)` / `adapt_sealed_author_and_budget(...)`:
+  seals `expected_output_digest` and `verifier_contract_digest` away from candidate
+  authors and enforces `MatchedAggregateBudget` (`max_aggregate_input_tokens`,
+  `max_aggregate_output_tokens`, `max_aggregate_wall_clock_ms`,
+  `max_member_invocations`) summed across all swarm member invocations (`REJECT`
+  with `aggregate_budget_exceeded`).
+- `BenchmarkExperimentArm` + `validate_controlled_ablation(arm_a, arm_b, varied_axis)`:
+  verifies only one declared axis (`topology` | `prompt_format` | `model_tier` |
+  `scaffolding_gate`) varies while `corpus_digest`, `verifier_digest`,
+  `context_bundle_digest`, and `aggregate_budget` stay identical.
+- `BenchmarkCostSummary` + `build_benchmark_cost_summary(...)`: separates
+  `provider_billed_usd` from `subscription_quota_delta_pct`, `local_compute_wall_ms`,
+  and `unmeasured_unknowns` (`cost_per_accepted_usd = None` when `accepted_count == 0`
+  or `provider_billed_usd is None`).
+- `run_stratified_lego_benchmark(...)`, `evaluate_fresh_session_transfer(...)`,
+  and `verify_rollback_restore(prior_artifact_sha256, restored_bytes)`: enforce
+  cold-session transfer without held-out leakage, non-regression on Held-Out A,
+  strict gain on Held-Out B, exact SHA-256 rollback restoration, and
+  `AGI_SCAFFOLDING_HYPOTHESIS_STATUS = "HYPOTHESIS_UNDER_TEST"`.
+
 ## YouTube task consumer
 
 `AIGateway.call_youtube_task(system_prompt=..., prompt=..., stage='assess'|'write'|'review',

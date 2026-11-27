@@ -321,6 +321,11 @@ catalog, not flattened top-K hits, establishes intent, rejects Unicode
 `Cc`/`Cf`/`Cs`, and compares duplicate identity as `NFC(path).casefold()`
 without rewriting visible Unicode.
 
+The owner imports freshness behavior through the compatibility module
+`src.holo_query_freshness_gate`, which re-exports the exact public authority
+from `holo_index.query_freshness_gate`. The bridge path adds no decision logic,
+transport dependency, provider import, or alternate error mapping.
+
 Exact producer errors are `HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE`
 (HTTP 503), `HOLOINDEX_TIER0_INCOMPLETE` (HTTP 409), and
 `HOLOINDEX_TIER0_LOOKUP_FAILED` (HTTP 503). Unknown/free-text metadata becomes

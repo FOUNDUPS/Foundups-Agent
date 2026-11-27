@@ -13,9 +13,18 @@ import pytest
 from pathlib import Path
 
 from modules.foundups.pfmall.api import reset_default_shell
+from modules.foundups.pfmall.fractal_tile_graph import (
+    ROOT_TILE_ID,
+    build_graph_indices,
+    compute_tiles_etag,
+    make_tile,
+)
 from modules.foundups.pfmall.member_catalog_export import (
+    _OWNER_NODE_TILE_FALLBACKS,
+    build_fractal_source_file_index,
     build_mall_catalog,
     export_mall_catalog,
+    validate_source_file_index,
 )
 from modules.foundups.pfmall.member_presentation import (
     MEMBER_PRESENTATION,
@@ -168,3 +177,87 @@ class TestExportMallCatalog:
             assert required_by_html.issubset(entry.keys()), (
                 f"{entry.get('foundup_id', '?')} missing: {required_by_html - entry.keys()}"
             )
+
+
+class TestFractalSourceFileIndexProvenance:
+    """Verify source-file index provenance headers, owner fallbacks, and validation."""
+
+    def test_owner_node_tile_fallbacks_cover_all_three_nodes(self):
+        assert _OWNER_NODE_TILE_FALLBACKS == {
+            "ext_repo:foundups.github.io": "tile:mockup:foundups_github_io",
+            "harness:ai_gateway_lego_benchmark_2c936f78c": "tile:harness:lego_scaffolding_protocol",
+            "harness:ai_gateway_model_benchmarks": "tile:harness:model_combination_benchmark",
+        }
+
+    def test_build_and_validate_source_file_index_provenance_headers(self):
+        census_rev = "7432d31e5a68544d2bbab6715f02f64b0b5b6f85"
+        head_rev = "b0ba2d7b41e4425f41ccb4a7f09ed2f7b1c667c8"
+        tiles = {
+            ROOT_TILE_ID: make_tile(
+                tile_id=ROOT_TILE_ID,
+                display_name="PlayFoundups Mall",
+                tile_kind="system_cube",
+                visibility_scope="public",
+                owner_namespace="foundups_core",
+                parent_tile_id=None,
+                state="AMBER",
+            ),
+            "tile:harness:model_combination_benchmark": make_tile(
+                tile_id="tile:harness:model_combination_benchmark",
+                display_name="Model Combination Benchmark",
+                tile_kind="system_cube",
+                visibility_scope="public",
+                owner_namespace="foundups_core",
+                parent_tile_id=ROOT_TILE_ID,
+                state="GREEN",
+                metadata={"registry_verification": {"registry_id": "harness:ai_gateway_model_benchmarks"}},
+            ),
+        }
+        tiles[ROOT_TILE_ID]["children_tile_ids"].append("tile:harness:model_combination_benchmark")
+        etag = compute_tiles_etag(tiles)
+        indices = build_graph_indices(tiles)
+        pub_graph = {
+            "schema_version": "fractal_tile_graph.v1",
+            "git_revision": head_rev,
+            "source_revisions": {
+                "census_source_revision": census_rev,
+                "mall_feature_code_revision": head_rev,
+                "scanner_projector_revision": head_rev,
+            },
+            "graph_etag": etag,
+            "public_graph_etag": etag,
+            "scope": "public_mall",
+            "root_tile_id": ROOT_TILE_ID,
+            "counts": indices["counts"],
+            "links": indices["links"],
+            "search_index": indices["search_index"],
+            "tiles": tiles,
+        }
+        acct = {
+            "repository_slug": "FOUNDUPS/Foundups-Agent",
+            "source_revision": census_rev,
+            "rows": [
+                {
+                    "path": "modules/ai_intelligence/ai_gateway/src/model_combination_benchmark_harness.py",
+                    "disposition": "MAPPED",
+                    "owner_node_id": "harness:ai_gateway_model_benchmarks",
+                    "git_mode": "100644",
+                    "git_object_type": "blob",
+                }
+            ],
+        }
+        idx = build_fractal_source_file_index(pub_graph, acct, scope="public_mall")
+        assert idx["source_revision"] == census_rev
+        assert idx["git_revision"] == head_rev
+        assert idx["source_revisions"]["census_source_revision"] == census_rev
+        assert idx["source_revisions"]["mall_feature_code_revision"] == head_rev
+        assert idx["source_revisions"]["scanner_projector_revision"] == head_rev
+        assert validate_source_file_index(idx, pub_graph) == []
+
+        bad_census = dict(idx)
+        bad_census["source_revisions"] = {"census_source_revision": "0" * 40}
+        assert any("census_source_revision" in err for err in validate_source_file_index(bad_census, pub_graph))
+
+        bad_git = dict(idx)
+        bad_git["git_revision"] = ""
+        assert any("git_revision" in err for err in validate_source_file_index(bad_git, pub_graph))

@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1855,
-  "quarantined_tests": 260,
+  "total_tests": 1885,
+  "quarantined_tests": 263,
   "tests": [
     {
       "id": "test::.github::scripts::tests::test_ci_merge_policy",
@@ -948,6 +948,21 @@
       "description": ""
     },
     {
+      "id": "test::holo_index::tests::test_diagnose_index_docs_pipeline",
+      "path": "holo_index/tests/test_diagnose_index_docs_pipeline.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Focused truth-boundary tests for the read-only docs diagnostic."
+    },
+    {
       "id": "test::holo_index::tests::test_doc_type_filtering",
       "path": "holo_index/tests/test_doc_type_filtering.py",
       "owner": "holo_index",
@@ -1015,6 +1030,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "HIA_FEDERATION_METADATA_TAGGING_PHASE2: Federation Metadata Tests\n\nTests that verify resolve_foundup_metadata() correctly tags files with\nfederation metadata (foundup_id, tenant_id, source_scope, external_repo).\n\nWSP 97: These tests verify metadata correctness at the unit level.\n        No ChromaDB, no live index, no LLM.\nWSP 87: Keep tests focused on resolve_foundup_metadata() behavior."
+    },
+    {
+      "id": "test::holo_index::tests::test_federation_query_filtering",
+      "path": "holo_index/tests/test_federation_query_filtering.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "HIA_FEDERATION_QUERY_FILTERING_PHASE3: Query Filtering Tests\n\nTests that verify FoundUp-scoped query filtering behavior:\n- Unfiltered search unchanged (backward compat)\n- Strict foundup_id filter\n- include_shared includes 'core' documents\n- Unknown foundup_id returns empty scoped hits\n\nWSP 97: These tests verify filtering correctness at the unit level.\nWSP 87: Keep tests focused on filter behavior."
     },
     {
       "id": "test::holo_index::tests::test_feedback_learner",
@@ -1366,7 +1394,7 @@
       "path": "holo_index/tests/test_holoindex_memex_evidence_bundle.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-02",
+      "shard_id": "holo-index-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1379,7 +1407,7 @@
       "path": "holo_index/tests/test_holoindex_memex_projection_adapter.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-02",
+      "shard_id": "holo-index-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1782,6 +1810,21 @@
       "description": ""
     },
     {
+      "id": "test::holo_index::tests::test_query_freshness_authority_boundary",
+      "path": "holo_index/tests/test_query_freshness_authority_boundary.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-03",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Dependency-inversion contract for the neutral query freshness authority."
+    },
+    {
       "id": "test::holo_index::tests::test_qwen_advisor_fmas",
       "path": "holo_index/tests/test_qwen_advisor_fmas.py",
       "owner": "holo_index",
@@ -1801,7 +1844,7 @@
       "path": "holo_index/tests/test_qwen_advisor_stub.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -1814,7 +1857,7 @@
       "path": "holo_index/tests/test_qwen_file_naming_trainer.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -1842,7 +1885,7 @@
       "path": "holo_index/tests/test_qwen_package_import.py",
       "owner": "holo_index",
       "suite_class": "unit",
-      "shard_id": "holo-index-unit-part-03",
+      "shard_id": "holo-index-unit-part-04",
       "capabilities": [
         "process"
       ],
@@ -1994,6 +2037,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Slice-ID metadata precedence \u2014 search-time ranking quality tests.\n\nSlice: HOLOINDEX_T1_RANKING_QUALITY_PHASE1\nWorker: W7\n\nThe rule under test is generic:\n\n    When a query carries a literal slice-ID token AND a document's\n    ``meta_slice_id`` is exactly that token, the document outranks any\n    other document on the same query \u2014 including a sibling that benefits\n    from the Trade module path / alias boosts \u2014 purely by composition of\n    keyword-score boosts (no reindex, no Chroma writes).\n\nThe"
+    },
+    {
+      "id": "test::holo_index::tests::test_tenant_context_binding",
+      "path": "holo_index/tests/test_tenant_context_binding.py",
+      "owner": "holo_index",
+      "suite_class": "unit",
+      "shard_id": "holo-index-unit-part-04",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "HIA_TENANT_CONTEXT_BINDING_PHASE4: Tenant Context Binding Tests\n\nTests that verify automatic FoundUp scope resolution with precedence:\n1. explicit foundup_id argument\n2. instance context (set_foundup_context)\n3. HOLO_FOUNDUP_ID environment variable\n4. none (legacy global behavior)\n\nWSP 97: These tests verify scope resolution correctness at the unit level.\nWSP 87: Keep tests focused on binding behavior."
     },
     {
       "id": "test::holo_index::tests::test_tier0_retrieval_hardening",
@@ -2395,6 +2451,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Request-truth contract tests for the exact OpenRouter Kimi K3 route."
+    },
+    {
+      "id": "test::modules::ai_intelligence::ai_gateway::tests::test_lego_scaffolding_benchmark_protocol",
+      "path": "modules/ai_intelligence/ai_gateway/tests/test_lego_scaffolding_benchmark_protocol.py",
+      "owner": "modules/ai_intelligence/ai_gateway",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline unit tests for Lego scaffolding benchmark protocol (mocks only)."
     },
     {
       "id": "test::modules::ai_intelligence::ai_gateway::tests::test_model_audio_timing_benchmark",
@@ -2827,7 +2896,7 @@
       "path": "modules/ai_intelligence/ai_gateway/tests/test_model_openrouter_scheduled_discovery.py",
       "owner": "modules/ai_intelligence/ai_gateway",
       "suite_class": "unit",
-      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-01",
+      "shard_id": "modules-ai-intelligence-ai-gateway-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -3783,6 +3852,19 @@
       "description": "Tests for DecisionPolicy."
     },
     {
+      "id": "test::modules::ai_intelligence::digital_twin::tests::test_lora_trainer",
+      "path": "modules/ai_intelligence/digital_twin/tests/test_lora_trainer.py",
+      "owner": "modules/ai_intelligence/digital_twin",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-digital-twin-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline deterministic unit tests for VoiceLoRATrainer and VoiceTrainingConfig.\n\nAll tests execute strictly offline with synthetic JSONL fixtures in tmp_path and\nin-memory stub tokenizers/models/trainers (zero downloads, zero GPU, zero real\ntraining runs)."
+    },
+    {
       "id": "test::modules::ai_intelligence::digital_twin::tests::test_principal_memex_projection",
       "path": "modules/ai_intelligence/digital_twin/tests/test_principal_memex_projection.py",
       "owner": "modules/ai_intelligence/digital_twin",
@@ -4616,6 +4698,21 @@
       "description": "Integration Test: Navigate to UnDaoDu's Oldest Video via YouTube Studio\n\nWSP Compliance:\n    - WSP 5: Test Coverage (E2E integration test)\n    - WSP 50: Pre-Action Verification (reuses existing Selenium patterns)\n    - WSP 84: Code Reuse (uses YouTubeStudioDOM from youtube_shorts_scheduler)\n\nWhat 012 Should See:\n    1. Chrome browser navigates to YouTube Studio\n    2. Video list sorted oldest-first (2009 video)\n    3. First video selected for indexing\n    4. Console output showing indexing progr"
     },
     {
+      "id": "test::modules::ai_intelligence::video_indexer::tests::test_local_archive_retrieval_and_dataset_builder",
+      "path": "modules/ai_intelligence/video_indexer/tests/test_local_archive_retrieval_and_dataset_builder.py",
+      "owner": "modules/ai_intelligence/video_indexer",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-video-indexer-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline unit tests for LocalArchiveRetrievalPilot and DatasetBuilder fail-closed gates.\n\nUses 100% synthetic temporary fixtures (zero private transcripts, zero private paths,\nzero network calls, zero model downloads, zero media decoding or ASR)."
+    },
+    {
       "id": "test::modules::ai_intelligence::video_indexer::tests::test_selenium_navigation",
       "path": "modules/ai_intelligence/video_indexer/tests/test_selenium_navigation.py",
       "owner": "modules/ai_intelligence/video_indexer",
@@ -4931,6 +5028,21 @@
         "unimplemented_test_scaffold"
       ],
       "description": "Test scaffold for consent_engine; SPECIFIED_NOT_IMPLEMENTED.\n\nNo behavioral coverage exists yet. Production code is not imported during\ncollection. Replace the placeholders with behavioral assertions before removing\nthe scaffold marker and skip. SOURCE_MODULE is the intended future test subject."
+    },
+    {
+      "id": "test::modules::communication::headless_video_orchestrator::tests::test_headless_video_orchestrator",
+      "path": "modules/communication/headless_video_orchestrator/tests/test_headless_video_orchestrator.py",
+      "owner": "modules/communication/headless_video_orchestrator",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-headless-video-orchestrator-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Deterministic offline tests for headless_video_orchestrator and Antifa FM staging."
     },
     {
       "id": "test::modules::communication::intent_manager::tests::test_intent_manager",
@@ -7583,6 +7695,19 @@
       "description": "Tests for the Fusion ALIAS live path (HERMES_FUSION_ALIAS_MODE_PHASE2).\n\nThe network is MOCKED -- there is NO real OpenRouter call in CI. All keys/secrets are SYNTHETIC,\nassembled from split fragments. No skip / no xfail. The MANUAL live smoke lives in the module's\n__main__ (run_manual_smoke) and is NOT collected here.\n\nSentinel lanes: valve-bypass, raw-egress, response-retention, manual-smoke, live-mode-scope."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_fusion_receipt_ledger",
+      "path": "modules/communication/moltbot_bridge/tests/test_fusion_receipt_ledger.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for the Fusion receipt ledger (HERMES_FUSION_RECEIPT_PERSISTENCE_PHASE1).\n\nEgress-free: no network, no key. Append-only persistence + advisory WSP_97 scoring. Synthetic secrets\nonly (split fragments). No skip / no xfail. No ledger artifact is committed -- tests use tmp_path."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_fusion_redaction_gate",
       "path": "modules/communication/moltbot_bridge/tests/test_fusion_redaction_gate.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -7939,7 +8064,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_openclaw_improvement_intent.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-02",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8211,6 +8336,19 @@
       "description": "Tests for Quorum Verification Engine Phase 1.\n\nValidates deterministic quorum enforcement for CABR scoring per WSP 29 and WSP 97.\n\nRequired coverage:\n  - Zero attestations -> QUORUM_NOT_MET\n  - One/two attestations -> QUORUM_NOT_MET\n  - Three unique attestations -> quorum met\n  - Duplicate verifier IDs rejected/not counted\n  - Missing verifier ID rejected\n  - Invalid signature unsupported/rejected\n  - Consensus score below 0.382 rejected\n  - Consensus score at 0.382 accepted for review\n  - Conse"
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_adsense_discovery",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_adsense_discovery.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline discovery contracts, not account actions or runtime admission."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_adversarial_verifier_panel",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_adversarial_verifier_panel.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -8371,7 +8509,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_authenticated_conversation_scope_state.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8384,7 +8522,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_adversarial.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8808,7 +8946,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_security_boundaries.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8821,7 +8959,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_signing.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9254,7 +9392,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_elevated_consensus_provider_independence.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9267,7 +9405,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_execution_valve_environment_supply.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9698,7 +9836,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_grounded_target_assignment_continuity.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9726,7 +9864,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_blocked_request_recovery.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10065,6 +10203,24 @@
       "description": "Tests for RedDog lane-state reconciler dry-run."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_langfuse_telemetry",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_langfuse_telemetry.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-moltbot-bridge-operational",
+      "capabilities": [
+        "network",
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Offline privacy/coverage checks for the lookup boundary, without daemon imports."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_live_lease_composition",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_live_lease_composition.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -10186,7 +10342,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_openclaw_claim_loop_extended.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [
         "network"
       ],
@@ -10218,7 +10374,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_readonly_operational_bootstrap.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10659,7 +10815,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_operator_loop_wardrobe_selection_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10672,7 +10828,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_composition.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10876,6 +11032,45 @@
       "description": "Focused backend integration tests for progressive execution stages."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_prompt_library_contract_phase1",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_prompt_library_contract_phase1.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Static contract test for REDDOG_PROMPT_LIBRARY_CONTRACT_PHASE1."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_prompt_library_examples",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_prompt_library_examples.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for REDDOG_PROMPT_EXAMPLES_FIXTURE_LIBRARY_PHASE1."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_prompt_library_m2m_registry_audit_phase1",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_prompt_library_m2m_registry_audit_phase1.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Static doc test for REDDOG_PROMPT_LIBRARY_AND_M2M_REGISTRY_AUDIT_PHASE1."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_provider_call_evidence",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_provider_call_evidence.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -11012,6 +11207,21 @@
       "description": "Security regressions for backend registered-FoundUp target verification."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_relay_watcher",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_relay_watcher.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline watcher acceptance and real-process checkpoint/crash controls."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_repair_evidence_guard",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_repair_evidence_guard.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -11081,7 +11291,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_control_loop_receipt_auth.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11094,7 +11304,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_control_loop_signing_context.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11122,7 +11332,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_first_turn_resolution.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11135,7 +11345,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_new_scope_admission.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11148,7 +11358,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [
         "network"
       ],
@@ -11163,7 +11373,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_conversation_request_journal_store.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11724,7 +11934,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_artifact.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11737,7 +11947,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_reviewer_principal_supply.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11750,7 +11960,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_reviewer_quorum_composition.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11763,7 +11973,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_reviewer_runtime_artifacts.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11776,7 +11986,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_activation_lease.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11789,7 +11999,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_confinement.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12158,7 +12368,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12171,7 +12381,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_initial_handshake_grant_backend.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12184,7 +12394,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_installed_policy.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12197,7 +12407,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_key_epoch_use_durable_authority.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12210,7 +12420,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_key_provider_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12238,7 +12448,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_low_grant_rpc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12695,7 +12905,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12708,7 +12918,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader_linux.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12721,7 +12931,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_startup_authority.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12734,7 +12944,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12747,7 +12957,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12760,7 +12970,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signing_key_isolation_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13173,7 +13383,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_pattern_memory_admission_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13186,7 +13396,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_slice_verifier_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13199,7 +13409,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_verified_draft_pr_publish_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13212,7 +13422,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_authorized_verified_outcome_ratchet_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13240,7 +13450,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_consumer_dryrun.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13253,7 +13463,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wre_queue_verified_authority_work_order_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -13381,6 +13591,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Execute the real supervisor startup method without services or model effects."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_training_adapter",
+      "path": "modules/communication/moltbot_bridge/tests/test_training_adapter.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for the OpenClaw training adapter.\n\nValidates deterministic command matching and status/batch responses."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_webhook_receiver_auth",
@@ -16010,6 +16233,19 @@
       "description": "Real RSA/HTTP draft-intake contracts; no live Clerk identity or deployment."
     },
     {
+      "id": "test::modules::foundups::pfmall::tests::test_fractal_tile_graph",
+      "path": "modules/foundups/pfmall/tests/test_fractal_tile_graph.py",
+      "owner": "modules/foundups/pfmall",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-pfmall-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for Fractal Tile Graph schema, dual scoring, validator, projector, context, and exporter."
+    },
+    {
       "id": "test::modules::foundups::pfmall::tests::test_gateway_roc_shell",
       "path": "modules/foundups/pfmall/tests/test_gateway_roc_shell.py",
       "owner": "modules/foundups/pfmall",
@@ -16041,7 +16277,9 @@
       "owner": "modules/foundups/pfmall",
       "suite_class": "unit",
       "shard_id": "modules-foundups-pfmall-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -16164,6 +16402,23 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for p.fMALL Shell UI Phase 1.\n\nLightweight response/content assertions via FastAPI TestClient.\nVerifies catalog, detail, handoff views load and contain expected content."
+    },
+    {
+      "id": "test::modules::foundups::pfmall::tests::test_tile_graph_patch_api",
+      "path": "modules/foundups/pfmall/tests/test_tile_graph_patch_api.py",
+      "owner": "modules/foundups/pfmall",
+      "suite_class": "operational",
+      "shard_id": "modules-foundups-pfmall-operational",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Tests for authenticated atomic Tile Graph PATCH/GET routes and durable SQLite WAL store."
     },
     {
       "id": "test::modules::foundups::pfmall::tests::test_verification_gap_guard",
@@ -16508,6 +16763,19 @@
       "description": "Runtime wiring tests for epoch ledger and Layer-D anchoring."
     },
     {
+      "id": "test::modules::foundups::simulator::tests::test_lego_topology_fixture_adapter",
+      "path": "modules/foundups/simulator/tests/test_lego_topology_fixture_adapter.py",
+      "owner": "modules/foundups/simulator",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline deterministic tests for `lego_topology_fixture_adapter`."
+    },
+    {
       "id": "test::modules::foundups::simulator::tests::test_lifecycle_stage_and_market",
       "path": "modules/foundups/simulator/tests/test_lifecycle_stage_and_market.py",
       "owner": "modules/foundups/simulator",
@@ -16631,7 +16899,7 @@
       "path": "modules/foundups/simulator/tests/test_smartdao_runtime_events.py",
       "owner": "modules/foundups/simulator",
       "suite_class": "unit",
-      "shard_id": "modules-foundups-simulator-unit-part-01",
+      "shard_id": "modules-foundups-simulator-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -19823,6 +20091,37 @@
       "description": "MCPA5 surface discovery tests.\n\nVerifies that `MCPServerManager.discover_all_surfaces()` truthfully exposes\nthe S1/S2/S3 triad anchored in WSP 96 Annex A.1 without starting any servers\nand without overclaiming runtime capability.\n\nAnchored to:\n  - WSP 97 (truth distinction)\n  - WSP 96 Annex A (canonical holo_search contract + surface ownership)\n  - MCPA1 audit findings (S2 + S3 omitted from prior gateway reports)\n\nThese tests do NOT require any live transport or backend."
     },
     {
+      "id": "test::modules::infrastructure::monitoring::tests::test_sentry_error_telemetry",
+      "path": "modules/infrastructure/monitoring/tests/test_sentry_error_telemetry.py",
+      "owner": "modules/infrastructure/monitoring",
+      "suite_class": "operational",
+      "shard_id": "modules-infrastructure-monitoring-operational",
+      "capabilities": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_file_write",
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Offline manual-error privacy checks; no Sentry SDK, credentials or egress."
+    },
+    {
+      "id": "test::modules::infrastructure::monitoring::tests::test_sentry_real_sdk_qualification",
+      "path": "modules/infrastructure/monitoring/tests/test_sentry_real_sdk_qualification.py",
+      "owner": "modules/infrastructure/monitoring",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-monitoring-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Pinned real-SDK serialization/transport tests with synthetic pools only.\n\nRun with the isolated sentry-pilot Python; no real DSN or network is used."
+    },
+    {
       "id": "test::modules::infrastructure::monitoring::tests::test_wsp_00_zen_state_tracker",
       "path": "modules/infrastructure/monitoring/tests/test_wsp_00_zen_state_tracker.py",
       "owner": "modules/infrastructure/monitoring",
@@ -19901,6 +20200,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for Mock Vault Resolver.\n\nContract: FOUNDUPS_CREDENTIAL_ACCESS_LAYER_POC_PHASE1\nPer WSP_71 Annex A specification.\n\nWSP_97 Labels:\n  - CREDENTIAL_ACCESS_POC_ONLY\n  - MOCK_VAULT_ONLY\n  - NO_REAL_SECRET_ACCESS\n  - SECRET_VALUE_NEVER_LOGGED\n  - AUDIT_HASH_ONLY\n  - FAIL_CLOSED_REQUIRED\n\nTest Coverage:\n  T1: Valid test reference resolves through mock\n  T2: Unknown reference fails closed\n  T3: Resolver unavailable fails closed\n  T4: Plaintext secret not present in logs/output\n  T5: Audit event us"
+    },
+    {
+      "id": "test::modules::infrastructure::secrets_mcp::tests::test_windows_pilot_credentials",
+      "path": "modules/infrastructure/secrets_mcp/tests/test_windows_pilot_credentials.py",
+      "owner": "modules/infrastructure/secrets_mcp",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-secrets-mcp-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline tests: synthetic secrets and fake Win32 APIs only."
     },
     {
       "id": "test::modules::infrastructure::security_scanner::tests::test_security_scanner",
@@ -20045,6 +20357,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for the shared training corpus resolver."
+    },
+    {
+      "id": "test::modules::infrastructure::shared_utilities::tests::test_delay_utils",
+      "path": "modules/infrastructure/shared_utilities/tests/test_delay_utils.py",
+      "owner": "modules/infrastructure/shared_utilities",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-shared-utilities-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline acceptance tests for the exact activity polling policy."
     },
     {
       "id": "test::modules::infrastructure::shared_utilities::tests::test_env_managed",
@@ -21547,6 +21872,21 @@
       "description": ""
     },
     {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_lego_block_projection",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_lego_block_projection.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline tests for WRE Lego block compiler, catalog reconciler, and conservative triage."
+    },
+    {
       "id": "test::modules::infrastructure::wre_core::tests::test_wre_pytest_exact_id_collector",
       "path": "modules/infrastructure/wre_core/tests/test_wre_pytest_exact_id_collector.py",
       "owner": "modules/infrastructure/wre_core",
@@ -21737,7 +22077,7 @@
       "path": "modules/infrastructure/wre_core/tests/test_wre_test_registry.py",
       "owner": "modules/infrastructure/wre_core",
       "suite_class": "unit",
-      "shard_id": "modules-infrastructure-wre-core-unit-part-03",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -21800,6 +22140,34 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for WRE worker git cwd guard."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_worker_wsp97_contract",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_worker_wsp97_contract.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for WRE worker WSP_00 0.2A and WSP_97 pure-evaluation contract."
+    },
+    {
+      "id": "test::modules::infrastructure::wre_core::tests::test_wre_worktree_registry_guard",
+      "path": "modules/infrastructure/wre_core/tests/test_wre_worktree_registry_guard.py",
+      "owner": "modules/infrastructure/wre_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wre-core-unit-part-04",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Focused and adversarial tests for the WRE worktree registry guard."
     },
     {
       "id": "test::modules::infrastructure::wre_core::wre_gateway::tests::test_dae_gateway_policyflags_guards",
@@ -25570,6 +25938,51 @@
       "description": "Tests for the extension's one-shot generation-bound HoloIndex bridge."
     },
     {
+      "id": "test::scripts::tests::test_reddog_langfuse_env_source",
+      "path": "scripts/tests/test_reddog_langfuse_env_source.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic explicit credential-source checks; never read a machine .env file."
+    },
+    {
+      "id": "test::scripts::tests::test_reddog_langfuse_provision",
+      "path": "scripts/tests/test_reddog_langfuse_provision.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Synthetic loopback HTTP tests; no actual vault or credential access."
+    },
+    {
+      "id": "test::scripts::tests::test_reddog_openrouter_telemetry_probe",
+      "path": "scripts/tests/test_reddog_openrouter_telemetry_probe.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline fixed synthetic Broadcast probe contracts."
+    },
+    {
       "id": "test::tests::contracts::test_token_efficiency_contract",
       "path": "tests/contracts/test_token_efficiency_contract.py",
       "owner": "repository",
@@ -25609,6 +26022,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": ""
+    },
+    {
+      "id": "test::tests::test_foundups_work_preflight",
+      "path": "tests/test_foundups_work_preflight.py",
+      "owner": "repository",
+      "suite_class": "unit",
+      "shard_id": "repository-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Tests for the read-only FoundUps work admission inventory."
     },
     {
       "id": "test::tests::test_human_behavior_randomness",

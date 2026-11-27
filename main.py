@@ -925,6 +925,12 @@ def run_connect_wre(repo_root: Path) -> dict:
         "manual_enforced": False,
         "auto_enforced_now": False,
         "sample_coverage": 0,
+        "total_executions": 0,
+        "metric_samples": {},
+        "telemetry_scope": "database_lifetime",
+        "current_readiness": "UNKNOWN",
+        "historical_critical_count": 0,
+        "unattended_work_allowed": False,
         "alert_counts": {"critical": 0, "warning": 0},
     }
 
@@ -950,6 +956,7 @@ def run_connect_wre(repo_root: Path) -> dict:
         critical_count = sum(1 for a in alerts if a.get("severity") == "critical")
         warning_count = sum(1 for a in alerts if a.get("severity") == "warning")
         healthy = bool(health.get("healthy", True))
+        metric_samples = health.get("metric_samples") if isinstance(health.get("metric_samples"), dict) else {}
 
         result["connection"] = "CHECKED"
         result["manual_enforced"] = policy["manual_enforced"]
@@ -957,6 +964,12 @@ def run_connect_wre(repo_root: Path) -> dict:
         result["admission_allowed"] = (policy["evidence_valid"] and policy["enabled"]
                                        and policy["readiness"] in {"READY", "UNKNOWN"})
         result["sample_coverage"] = total_executions
+        result["total_executions"] = total_executions
+        result["metric_samples"] = metric_samples
+        result["telemetry_scope"] = str(health.get("telemetry_scope", "database_lifetime"))
+        result["current_readiness"] = policy["current_readiness"]
+        result["historical_critical_count"] = policy["historical_critical"]
+        result["unattended_work_allowed"] = policy["unattended_work_allowed"]
         result["alert_counts"] = {"critical": critical_count, "warning": warning_count}
 
         result["readiness"] = policy["readiness"]
@@ -4733,13 +4746,20 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--connect-wre":
         repo_root = Path(__file__).resolve().parent
         status = run_connect_wre(repo_root)
+        metric_samples_text = ",".join(
+            f"{k}={v}" for k, v in status.get("metric_samples", {}).items()
+        ) or "none"
         print(
             f"coded={status['coded']} "
             f"connection={status['connection']} "
             f"readiness={status['readiness']} "
             f"manual_enforced={status['manual_enforced']} "
             f"auto_enforced_now={status['auto_enforced_now']} "
-            f"samples={status['sample_coverage']} "
+            f"total_executions={status['total_executions']} "
+            f"metric_samples={metric_samples_text} "
+            f"scope={status['telemetry_scope']} "
+            f"historical_critical={status['historical_critical_count']} "
+            f"unattended_work_allowed={status['unattended_work_allowed']} "
             f"critical={status['alert_counts']['critical']} "
             f"warnings={status['alert_counts']['warning']}"
         )

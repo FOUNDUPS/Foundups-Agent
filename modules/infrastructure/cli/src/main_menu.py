@@ -755,7 +755,8 @@ def _run_connect_wre(verbose: bool = False) -> bool:
     except Exception as exc:
         errors.append(f"readiness policy unavailable: {type(exc).__name__}")
         policy = dict(enabled=None, manual_enforced=None, auto_enforce=None,
-                      auto_enforced=None, readiness="UNKNOWN")
+                      auto_enforced=None, readiness="UNKNOWN",
+                      historical_critical=0, unattended_work_allowed=False)
     enabled = policy["enabled"]
     manual_enforced = policy["manual_enforced"]
     auto_enforce = policy["auto_enforce"]
@@ -765,6 +766,11 @@ def _run_connect_wre(verbose: bool = False) -> bool:
     alerts = health.get("alerts", []) if isinstance(health.get("alerts", []), list) else []
     critical = sum(1 for alert in alerts if alert.get("severity") == "critical")
     warnings = sum(1 for alert in alerts if alert.get("severity") == "warning")
+    metric_samples = health.get("metric_samples") if isinstance(health.get("metric_samples"), dict) else {}
+    metric_samples_text = ",".join(f"{k}={v}" for k, v in metric_samples.items()) or "none"
+    telemetry_scope = health.get("telemetry_scope", "database_lifetime")
+    historical_critical = policy.get("historical_critical", critical)
+    unattended_work_allowed = policy.get("unattended_work_allowed", False)
 
     auto_enforced = policy["auto_enforced"]
     readiness = "UNKNOWN" if errors else "BLOCKED" if not preflight_ok else policy["readiness"]
@@ -777,9 +783,14 @@ def _run_connect_wre(verbose: bool = False) -> bool:
     )
     if in_watch is not None:
         mode = "WATCH" if in_watch else "STABLE"
-        print(f"[CONNECT-WRE] mode={mode} samples={total_executions}/{min_samples}")
+        print(f"[CONNECT-WRE] mode={mode} total_executions={total_executions} min_samples={min_samples}")
     else:
-        print(f"[CONNECT-WRE] mode=UNKNOWN samples={total_executions}/{min_samples}")
+        print(f"[CONNECT-WRE] mode=UNKNOWN total_executions={total_executions} min_samples={min_samples}")
+    print(
+        f"[CONNECT-WRE] metric_samples={metric_samples_text} "
+        f"scope={telemetry_scope} historical_critical={historical_critical} "
+        f"unattended_work_allowed={unattended_work_allowed}"
+    )
     print(f"[CONNECT-WRE] alerts critical={critical} warnings={warnings}")
 
     if errors:

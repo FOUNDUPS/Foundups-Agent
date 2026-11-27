@@ -393,8 +393,85 @@ async def run_action(action_id: str, **kwargs) -> Any:
   persisted under two different video IDs in the same channel.
 - Gemini/Ask Studio segments are semantic retrieval data, not verified speech.
   They are marked `training_eligible: false` and rejected by `DatasetBuilder`.
-- Weight-training data must come from `youtube_transcript` or
-  `whisper_transcript` (or a compatible legacy verbatim source).
+- `DatasetBuilder(require_speaker_attribution=True, require_verified_speaker=False)`
+  and `src/transcript_admission_guard.py` enforce fail-closed validation in
+  `inspect_record_eligibility(data)` and `_extract_segments(data)`:
+  1. **Cross-layer consistency**: Contradictions across `data`, `metadata`,
+     `provenance`, and `audio` (`training_eligible`, `consent`, `video_id`,
+     `identity_verified=False`, `channel`, `transcript_source`, `indexer`,
+     `provider`, `extraction_method`, or verbatim claim paired with summary
+     provenance) fail closed as `"contradictory_metadata"`.
+  2. **Eligibility & provenance vetoes**: Explicit `training_eligible=False`,
+     `consent=False`, music-channel exclusions, and disallowed summary provenance
+     veto records **before** inspecting `youtube_transcript` or `whisper_transcript`;
+     raw lists and unlabeled legacy dicts fail closed (`"unlabeled_raw_list"`,
+     `"missing_verbatim_provenance"`).
+  3. **Mislabeled-summary rejection**: Verbatim claims carrying `gemini*` model
+     names, `gemini_summary` / `transcript_summary` payloads, summary-only segment
+     schemas (`{"time", "summary"}` without `"text"`), or 3rd-person narrator
+     framing fail closed as `"mislabeled_summary_as_transcript"`.
+  4. **Strict & monotonic timestamps**: `NaN`, `Inf`, `bool`, negative numbers,
+     out-of-range `MM:SS` / `HH:MM:SS` (`sec >= 60`, `min >= 60`), `t_end < t_start`,
+     and dangling `t_start=None, t_end!=None` reject as `"invalid_timestamps"`;
+     regressing timestamps reject as `"nonmonotonic_timestamps"`.
+  5. **Honest speaker attribution (zero `"012"` invention)**: Missing/blank/null
+     speakers remain `"unknown"` (`speaker_status="unknown"`), never defaulting to
+     `"012"`. Default `require_speaker_attribution=True` rejects unattributed
+     records (`"missing_speaker_attribution"`); guest and unknown-speaker turns
+     are excluded from target utterances and `VoiceClip`s while honest labels
+     (`"unknown"` when blank) remain in `input.context_speakers` and
+     `has_mixed_speakers` metadata. `process_folder()` returns explicit
+     `files_scanned`, `videos_processed`, `videos_rejected`, `videos_failed`,
+     `rejection_reasons`, and `errors` counters.
+
+### LocalArchiveRetrievalPilot (Bounded Offline Retrieval, `<= 10` Records)
+
+```python
+from modules.ai_intelligence.video_indexer.src.local_archive_retrieval import (
+    MAX_PILOT_RECORDS,           # Hard ceiling = 10
+    SPEAKER_VERIFIED,
+    SPEAKER_UNVERIFIED_LABEL,
+    SPEAKER_UNKNOWN,
+    TIMESTAMP_GENUINE,
+    TIMESTAMP_PARTIAL_START_ONLY,
+    TIMESTAMP_ABSENT,
+    TIMESTAMP_INVALID,
+    TIMESTAMP_NONMONOTONIC,
+    LocalArchiveRetrievalPilot,
+    PilotRecordStatus,
+    PilotSegment,
+    PilotQueryHit,
+    PilotQueryResponse,
+    run_local_archive_pilot,
+)
+
+pilot = LocalArchiveRetrievalPilot(
+    max_records=10,              # ValueError if < 1 or > 10
+    min_score=0.12,
+    include_semantic_summaries=True,
+)
+summary = pilot.load_records(paths, reject_over_cap=True)  # ValueError if len(paths) > max_records
+response = pilot.query("topic keywords", top_k=5, verbatim_only=False)
+```
+
+- **Read-only & offline**: Zero external API calls, zero model downloads, zero
+  ChromaDB/FAISS cold init, zero ffmpeg/Whisper/media decoding.
+- **Missing-transcript honesty**: Metadata-only `.info.json`, `scheduler_stub`
+  artifacts, empty caption files, and untranscribed media files are classified
+  as `status="BLOCKED_MISSING_TRANSCRIPT"` without fabricating text or invoking ASR.
+- **Provenance conflict & mislabeled-summary downgrading**: Cross-layer metadata
+  conflicts (`provenance_conflict=True, transcript_source="unknown_conflict"`)
+  and disguised summaries (`mislabeled_summary_suspected=True, transcript_source="mislabeled_summary"`)
+  automatically force `is_verbatim=False` and `training_eligible=False` so
+  `verbatim_only=True` never leaks non-verbatim text.
+- **Speaker & timestamp honesty**: Hits surface `speaker` (`None` when absent,
+  never invented `"012"`) and `speaker_status` (`"verified"`, `"unverified_label"`,
+  `"unknown"`), while `PilotRecordStatus` tracks `has_mixed_speakers` and
+  `has_unknown_speakers`. Genuine timestamps populate `t_start`/`t_end`;
+  untimed, placeholder `0..0`, malformed (`TIMESTAMP_INVALID`), or regressing
+  (`TIMESTAMP_NONMONOTONIC`) timestamps set `t_start=None, t_end=None, has_genuine_timestamps=False, deep_link=None`.
+- **CLI entry**:
+  `python -m modules.ai_intelligence.video_indexer.cli --local-pilot-manifest <manifest.json> --local-pilot-query "<query>"`
 
 ## Data Classes
 

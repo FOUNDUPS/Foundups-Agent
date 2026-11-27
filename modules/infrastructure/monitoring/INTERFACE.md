@@ -5,6 +5,35 @@
 - Primary component: `src/wsp_00_zen_state_tracker.py`
 - Scope: WSP_00 zen-state tracking, output drift detection, and compliance gate checks.
 
+## Optional Sentry error-code interface
+
+`src/sentry_error_telemetry.py` exports:
+
+- `report_application_error(component=..., reason=..., environ=None,
+  sdk_loader=None, transport_factory=None) -> dict`: disabled unless `FOUNDUPS_SENTRY_ENABLED=1`; only then
+  reads `SENTRY_DSN` and optionally imports `sentry_sdk`. Accepted components are
+  `langfuse_review` and `telemetry_probe`; reasons are a fixed code allowlist.
+- `bounded_event(event, hint=None) -> dict | None`: rebuilds approved manual events
+  from fixed fields and validated event ID; drops all raw exception/context data.
+
+The adapter creates a separate Client and empty Scope with automatic integrations,
+tracing, profiles, logs, sessions, client reports and Spotlight disabled. It does
+not bind a global client or install exception hooks. No arbitrary event attributes
+or message argument are supported. SDK failures return static status codes and do
+not escape into the caller. The client closes with a two-second shutdown timeout.
+The default `make_bounded_transport()` requires SDK 2.73.0: explicit certifi TLS
+trust, direct connections, five-second connect/read socket timeouts, no redirects,
+retries, inherited proxy/client-certificate/key-log settings or remote body logs.
+The injected loader/factory are for offline qualification, not runtime authority.
+Status values: `DISABLED`, `INVALID_EVENT`, `MISSING_DSN`, `INVALID_DSN`,
+`SDK_UNAVAILABLE`, `SDK_FAILED`, `DROPPED`, `SUBMITTED`. Only `SUBMITTED` includes
+an SDK-returned 32-hex event ID. Every result has `delivery_verified=false`.
+
+The standalone probe and Langfuse CLI error hook share this adapter. They read no
+Sentry credential files; process configuration and real event verification remain
+the operator's responsibility. This interface supplies diagnostic evidence and
+cannot establish verified task success, policy authority or deployed coverage.
+
 ## Public Python API
 
 ```python

@@ -8,10 +8,85 @@
 
 **Purpose:** Runtime monitoring utilities, currently centered on WSP_00 zen-state compliance and drift detection.
 
+## Content-free Sentry pilot
+
+Start with the [0102 telemetry runbook](RUNBOOK.md) for live evidence retrieval,
+the daily review, credential handling, coverage limits and the Seer decision.
+
+`src/sentry_error_telemetry.py` adds optional, manual application-error codes to
+the existing monitoring owner. It performs no SDK import or DSN read until the
+calling process explicitly sets `FOUNDUPS_SENTRY_ENABLED=1`. `SENTRY_DSN` must
+select an official HTTPS Sentry ingest host. Missing/invalid configuration or SDK
+availability returns a static status; errors never expose the DSN or exceptions.
+The SDK is optional and is not installed or added to the primary Holo runtime by
+this module. The dedicated transport requires SDK 2.73.0 and fails closed on other
+versions. Qualify the separately selected SDK before operational use.
+
+```python
+from modules.infrastructure.monitoring.src.sentry_error_telemetry import report_application_error
+
+result = report_application_error(component="langfuse_review", reason="lookup_failed")
+```
+
+The adapter uses a dedicated Sentry Client and an empty Scope, without global
+initialization. Only explicitly allowlisted component/reason codes are accepted.
+`before_send` rebuilds every accepted event from fixed fields; raw messages,
+exceptions, stacks, source, locals, requests, headers, users, breadcrumbs, logs,
+contexts and arbitrary metadata are dropped. Automatic integrations, AI spans,
+tracing, profiles, sessions, client reports and Spotlight forwarding are disabled.
+This avoids duplicating OpenRouter Broadcast tracing and preserves its separate
+privacy settings. There are no automatic exception hooks across the application.
+
+The dedicated HTTP transport uses explicit certifi trust and TLS verification,
+direct connections with no ambient proxy/client certificate/key-log settings,
+no redirects or retries, and five-second connect/read socket timeouts. It does
+not read or log response bodies. SDK shutdown has a two-second timeout and is
+not an end-to-end deadline or a server-arrival receipt.
+
+`scripts/reddog_langfuse_review.py` reports its fixed lookup/configuration failures
+through this adapter only when explicitly enabled. Sentry failure cannot change
+the original CLI result. `scripts/reddog_sentry_probe.py` submits one fixed
+`telemetry_probe`/`synthetic_probe` event through the same adapter. Help and invalid
+arguments never initialize the adapter. Root/operator configuration owns the DSN;
+neither command discovers a Sentry credential file.
+
+`SUBMITTED` and its returned event ID describe SDK acceptance, not server delivery.
+`delivery_verified` stays false. Confirm the exact event in Sentry independently;
+offline tests and transport flushes do not establish live arrival or application
+coverage. The initial pilot diagnoses static failures without a remote stack trace.
+Live verification, SDK/envelope qualification and broader callsite adoption are
+separate gates. See [Sentry Python filtering](https://docs.sentry.io/platforms/python/configuration/filtering/).
+
+The dedicated account-local runtime at
+`~/.codex/telemetry-runtimes/sentry-pilot` was created with vetted Python3.12.10
+and official PyPI wheels pinned in [requirements-sentry-pilot.txt](requirements-sentry-pilot.txt):
+Sentry2.73.0, urllib3 2.8.0 and certifi2026.10.23. Create it once and install only
+into that isolated environment; the primary Holo environment is unchanged:
+
+```powershell
+& 'O:/Foundups-Agent/.venv/Scripts/python.exe' -B -m venv "$env:USERPROFILE/.codex/telemetry-runtimes/sentry-pilot"
+& "$env:USERPROFILE/.codex/telemetry-runtimes/sentry-pilot/Scripts/python.exe" -B -m pip --isolated install --index-url https://pypi.org/simple -r modules/infrastructure/monitoring/requirements-sentry-pilot.txt
+```
+
+Four retained actual-SDK tests qualify the serialized envelope and HTTP transport
+using fake pools with real outbound sockets blocked:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+& "$env:USERPROFILE/.codex/telemetry-runtimes/sentry-pilot/Scripts/python.exe" -B modules/infrastructure/monitoring/tests/test_sentry_real_sdk_qualification.py -v
+```
+
+The standalone unittest selection passes four cases and skips during ordinary
+discovery when SDK dependencies are unavailable. It verifies no ambient scope/
+header/proxy/client-certificate/trust-path leakage, Spotlight disabled, TLS
+verification, no redirect/retry, and no response-body reads/logging. It does not
+use a real DSN or prove remote delivery. See [test history](tests/TestModLog.md).
+
 **Key Capabilities:**
 - WSP_00 compliance gate payload for orchestrators (`run_compliance_gate`)
 - Fallback phrase canary that flips compliance on drift (`report_output_signal`)
 - CLI entrypoint for check/awaken/reset with strict non-zero exit behavior
+- Optional manual, content-free Sentry error codes for the telemetry review CLI
 
 **Dependencies:**
 - [List key dependencies]

@@ -8,6 +8,7 @@ Purpose: session-start onboarding briefs for 0102 agents. These are read-once op
 - [ACTIVE_SLICE_LEDGER.md](ACTIVE_SLICE_LEDGER.md) — dated handoffs and the preserved April 21 snapshot. Historical rows do not establish current ownership.
   - Verify the selected source, open changes and current owner before mutation. Record evidence-backed dispositions instead of treating the old snapshot as live state.
 - [R02 enforcement map](../roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — requirement owners, test surfaces and missing operational proof for R00–R25.
+- [0102 telemetry runbook](../../modules/infrastructure/monitoring/RUNBOOK.md) — use existing Langfuse/Sentry evidence for provider failures, regressions and the daily RSI review; includes the current Seer decision and coverage limits.
 
 ## Other Canonical Files
 - `SESSION_BRIEFING_2026_02_07.md`

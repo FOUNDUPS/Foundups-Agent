@@ -1,5 +1,17 @@
 # AI Gateway TestModLog
 
+## 2026-11-18 — Lego scaffolding benchmark protocol offline controls
+
+Added `test_lego_scaffolding_benchmark_protocol.py` (7 passed) and verified
+neighbor `test_model_combination_benchmark_harness.py` (13 passed; 20 passed
+combined in 0.41s) using injected deterministic callables only. Exercises
+stratified `8/12/12` corpus invariants, sealed author task specs, matched
+aggregate swarm budgets, single-axis controlled ablations, honest USD vs
+subscription-quota cost summaries, cold fresh-session transfer leakage/regression
+rejection, exact SHA-256 rollback restore verification, and static AST import
+confinement. Zero live provider, local runtime, or network effects.
+WSP 11/22/48/50/62/97/110.
+
 ## 2026-11-16 - Audio observation identity collision regressions
 
 Freeze five added offline cases before the adapter fix: identical bytes across

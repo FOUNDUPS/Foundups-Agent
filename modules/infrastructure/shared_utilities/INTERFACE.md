@@ -1,5 +1,28 @@
 # shared_utilities Interface Specification
 
+### Exact activity polling policy (2026-11-14)
+
+`DelayUtils.calculate_activity_poll_delay(previous_delay_seconds=60, *, activity=None)`
+returns an integer number of seconds. Initial delay is 60. A successful complete
+read with no new accepted activity (`False`) advances 60, 120, 240, 480, 960,
+1920, 3600, then remains at 3600. New accepted activity (`True`) resets to 60.
+`None` means no successful observation and retains the interval; read errors,
+authentication failures and incomplete pages must not be classified as empty.
+Invalid intervals or non-boolean activity values raise `ValueError`.
+
+This additive, opt-in policy has no jitter, I/O, clock, sleep or implicit state.
+Existing YouTube delay methods and their callers retain their behavior. The
+caller must exclude duplicate/replayed messages and its own ACKs from activity.
+It must retain the returned interval between calls; using defaults repeatedly
+does not implement a checker.
+
+Integration remains blocked until a shared, authorized container and admitted
+runtime owner are established. That owner must atomically persist the source
+binding, cursor, accepted-message deduplication state, interval and next deadline,
+and define replay/side-effect recovery. A stored ACK or resumed conversation is
+not proof of process-restart recovery or exactly-once delivery. No such durable
+checkpoint or transport is implemented by this utility. No Moshpit is a transport.
+
 ### YouTube audience registry field (2026-11-10)
 
 `youtube_channel_registry` preserves `shorts.made_for_kids` in normalization,

@@ -1,3 +1,26 @@
+## 2026-11-24 — Layer-2A QA-B hardening (`WRE-L2A-INDEPENDENT-QA-20261124-B`)
+
+- Extended `tests/test_dashboard_evidence.py` with explicit zone-less rejection checks (`_parse_iso_utc` returning `None`, zone-less `since` and naive `now` raising `ValueError`), `test_monitor_run_check_and_check_all_honor_current_scope_and_preserve_lifetime_history`, `test_naive_rows_fail_closed_and_writers_emit_explicit_offsets_with_boundaries` (+09:00/-05:00/Z boundary inclusion/exclusion plus `record_retrieval`/`store_variation`/`increment_counter` UTC emission), and `test_standalone_env_current_since_drives_run_check` (`WRE_DASHBOARD_CURRENT_SINCE`).
+
+## 2026-11-24 — Layer-2A QA hardening (`future_not_fresh` + `absent_admission_not_resolved`)
+
+- Extended `tests/test_dashboard_evidence.py` with `test_future_timestamps_excluded_and_future_since_rejected` (25 `2027-01-01` rows excluded into `future_timestamp_excluded` / `UNKNOWN`, `since > now` rejection, `naive_timestamp_rows` / `invalid_timestamp_rows` counts) and `test_all_pass_lifetime_sqlite_fixture_never_unlocks_unattended_work` (`read_only=True` byte-unchanged all-pass SQLite fixture yields `READY` with `unattended_work_allowed=False`, `admission_authority_verified=False`, `unresolved_admission_gates=("protected_admission_unverified",)`).
+
+## 2026-11-24 — Layer-2A current-window readiness evidence & Connect-WRE separation
+
+- Extended `tests/test_dashboard_evidence.py` (6 new cases covering historical-only `STALE_UNKNOWN` with read-only DB byte preservation and `historical_critical_count == 1`, fresh healthy windowed metrics vs unwindowed counters, fresh failing `BLOCKED` retrieval, absent and `< 25` insufficient samples excluding `NULL` `relevance_score`, invalid `since` + unresolved admission gate blocking `unattended_work_allowed`, and `main.py` `run_connect_wre` `total_executions` vs `metric_samples` separation) and `modules/infrastructure/cli/tests/test_connect_wre_menu.py` (`_run_connect_wre` `total_executions` vs `metric_samples` separation).
+- Verified offline under `PYTHONDONTWRITEBYTECODE=1`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, `PYTHON_DOTENV_DISABLED=1`, `-B`, `-p no:cacheprovider` with `O:\pytest_tmp\wre_layer2a_work`: 6-suite run (`test_dashboard_evidence.py`, `test_connect_wre_menu.py`, `test_dashboard_snapshot_export.py`, `test_pattern_memory.py`, `test_dae_preflight_integration_guard.py`, `test_generate_reddog_backend_manifest.py`) passed **200 passed**, `generate_reddog_backend_manifest.py --check` (`0d44673229847b6195d9697f74dca13389ba7b94e296f0ce68db519a4ba61ec2`, `runtime_files=1494`), and `generate_test_registry.py --check` (`test_registry=current total=1853 quarantined=260`). WSP 22, 50, 62, and 97.
+
+## 2026-11-24 — Layer-1 WRE worker WSP_00 0.2A / WSP_97 contract & CodeAct envelope hook
+
+- `test_wre_worker_wsp97_contract.py` + `test_codeact_executor_hardening.py` + `test_wre_worker_git_cwd_guard.py` (55 passed in 1.92s): Verified `validate_worker_wsp00_envelope()` (`0102` lock, `012` rejection, role escalation & self-verification rejection), `build_worker_wsp97_prompt_contract()` against `WSP_97_System_Execution_Prompting_Protocol.json`, `validate_worker_wsp97_receipt()` repository-bound `v1.1` delegation to `tools.wsp97_execution_validator`, AST purity (no shell/Git/filesystem-mutation imports), and `CodeActExecutor(..., enforce_wsp00_envelope=...)` pre-action gate + backwards compatibility.
+- Combined 6-suite isolated verification (`test_wre_worker_wsp97_contract.py`, `test_codeact_executor_hardening.py`, `test_wre_worker_git_cwd_guard.py`, `tests/test_wsp97_execution_validator.py`, `test_wre_test_registry.py`, `scripts/tests/test_generate_reddog_backend_manifest.py` with `PYTHONDONTWRITEBYTECODE=1`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, `-B`, `-p no:cacheprovider`, and `TMP`/`TEMP`/`FOUNDUPS_DB_PATH`/`WRE_PATTERN_MEMORY_DB` under `O:\pytest_tmp\wre_audit_wsp97_phase1`): **169 passed, 1 skipped** in 178.16s.
+- Registry & manifest checks: `generate_test_registry.py --check` (`test_registry=current total=1853 quarantined=260`) and `generate_reddog_backend_manifest.py --check` (`6e14101ae1ee7296a1bcca00f641a45769e63a54a0565c5153f3de192a0116d2`, `runtime_files=1494`) passed. WSP 00, 11, 22, 50, 62, 84, and 97.
+
+## 2026-11-18 — Offline WRE Lego block projection and conservative triage regressions
+
+- `test_wre_lego_block_projection.py` (7 passed): Verified distinct Git SHA-1 OID vs Git blob SHA-256 vs checkout `EOL_CRLF_DRIFT`, rename-stable `BlockIdentity` (`RenameAliasRecord` lineage + recursive hierarchy), typed 1:N / M:N catalog reconciliation (`DUPLICATE_MANIFEST_FOUNDUP_ID`, `EXTERNAL_FOUNDUP_NO_LOCAL_MODULE`, multi-shard modules, `MODULE_WITHOUT_FOUNDUP`, `QUARANTINED_TEST_ENTRY`), static AST non-execution on poison `SystemExit` modules, conservative triage (`CANDIDATE_ZERO_STATIC_CALLERS` vs `UNKNOWN_DYNAMIC_OR_EXTERNAL_CONSUMER`, `deletion_authorized=False`), capability-scoped receipt admission rejecting `SIMULATED_TRANSITION_ONLY` and downgrading to `STALE_PROVENANCE_MISMATCH` on 1-byte checkout edits, and deterministic JSON/M2M serialization alongside `test_wre_test_registry.py`. WSP 5, 6, 11, 22, 50, 62, 84, 97, 99, and 110.
+
 ## 2026-11-16 — Scientific repair canary, `measurement_evidence`, and `COMPLETE` branch disposition regressions
 
 - `test_repair_operation_contract.py` (8 passed) & `test_scientific_repair_canary_e2e.py` (4 passed): Verified Issue #1522 `ScientificRepairOperation` (`state_history`), `attempt_failure_reproduction` (`shell=False`), `VerifierContextFirewall.project_evidence_packet` allowlist isolation, `ModelIndependencePolicy` anti-self-grading, and SQLite `PatternMemory.store_outcome` persistence without weakening 19/P0 custody gates (`test_pattern_memory.py` 51 passed, `test_wre_autonomous_slice_verifier_runtime.py` 46 passed, `test_wre_telemetry_truth.py` 17 passed, `test_reddog_direction.py` 9 passed, `test_reddog_verified_pattern_memory_sink.py` 21 passed).
@@ -1138,6 +1161,25 @@ comparison is retained as the initial scalar-repair evidence, not rewritten.
 
 - Added outside-repo output, secret redaction, log-glob confinement, and
   concurrent scan regression coverage.
+
+## 2026-07-18: WRE_WORKTREE_REGISTRY_AND_CWD_HAZARD_GUARD_PHASE1
+
+**New** `test_wre_worktree_registry_guard.py`:
+- Proves a clean isolated worktree receives mutation admission while the
+  primary shared checkout is rejected even when checked out on a feature
+  branch.
+- Proves dirty status is represented only by a digest and no dirty path names
+  reach the routine receipt.
+- Proves dead-PID locks become bounded remediation candidates, live locks are
+  retained, and no automatic prune/remove/unlock primitive exists.
+- Proves detached owners, owner mismatch, malformed porcelain, HEAD mismatch,
+  device prefixes, symlink aliases, tampered receipts, and expired receipts
+  fail closed.
+- Proves all runner calls are argv-only read operations and the production
+  runner rejects destructive argv before subprocess execution.
+
+**Adjacent regression run**: new registry guard, existing WRE git-cwd guard,
+RedDog WRE cwd guard, and CodeAct guard integration.
 
 ## 2026-07-18: WRE_HOLO_SEMANTIC_PREFLIGHT_PHASE1
 

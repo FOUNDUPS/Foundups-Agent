@@ -1,5 +1,21 @@
 # shared_utilities Test Suite
 
+## Exact activity polling policy
+
+`test_delay_utils.py` exercises the actual shared policy: initial one-minute wait,
+the exact empty-read sequence and sustained cap, reset from every interval,
+unknown observations, invalid state, and legacy YouTube delay compatibility.
+These deterministic tests do not sleep or contact a message provider. No existing
+delay test was found in the module inventory, so this distinct policy has its own
+test file. Run from repo root:
+
+```powershell
+python -B -m pytest -q --import-mode=importlib -p no:cacheprovider modules/infrastructure/shared_utilities/tests/test_delay_utils.py
+```
+
+These tests do not verify cursor persistence, message
+deduplication, shared access, managed-process restart or an active scheduler.
+
 ## 2026-11-05 — Startup role selection
 
 `test_local_model_startup_selection.py` executes actual role selection, resolver,

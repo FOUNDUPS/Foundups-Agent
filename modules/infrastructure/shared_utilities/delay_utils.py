@@ -21,7 +21,7 @@ Infrastructure utilities for intelligent delay calculation and throttling
 
 WSP 3: Infrastructure Domain - Shared delay/throttling utilities
 WSP 49: Module structure with clear responsibilities
-WSP 62: Focused functionality (<200 lines)
+WSP 62: Focused delay and throttling policies
 
 Extracted from stream_resolver.py vibecoded functionality
 """
@@ -48,6 +48,37 @@ class DelayUtils:
     JITTER_FACTOR = 0.1  # 10% jitter
     EXPONENTIAL_BACKOFF_BASE = 2.0
     MAX_BACKOFF_DELAY = 300.0  # 5 minutes
+
+    ACTIVITY_POLL_DELAYS_SECONDS = (60, 120, 240, 480, 960, 1920, 3600)
+
+    @staticmethod
+    def calculate_activity_poll_delay(
+        previous_delay_seconds: int = 60, *, activity: Optional[bool] = None
+    ) -> int:
+        """Return the next exact activity-poll delay, without sleeping or I/O.
+
+        The initial call returns 60 seconds. After a successful complete read,
+        False doubles the previous delay up to 3600 seconds; True resets to 60.
+        Only a new, accepted message is activity: replayed IDs and own ACKs are
+        excluded by the caller. None means no successful observation (including
+        read/auth failures) and preserves the delay, not an empty result.
+
+        This policy owns no cursor, deduplication, checkpoint or scheduler.
+        An admitted caller must persist those atomically with its next deadline
+        and restore the prior interval rather than defaulting on every poll.
+        """
+        if (
+            type(previous_delay_seconds) is not int
+            or previous_delay_seconds not in DelayUtils.ACTIVITY_POLL_DELAYS_SECONDS
+        ):
+            raise ValueError("invalid_activity_poll_delay_seconds")
+        if activity is not None and type(activity) is not bool:
+            raise ValueError("activity_must_be_bool_or_none")
+        if activity is None:
+            return previous_delay_seconds
+        if activity:
+            return 60
+        return min(previous_delay_seconds * 2, 3600)
 
     @staticmethod
     def calculate_enhanced_delay(

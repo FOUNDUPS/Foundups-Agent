@@ -67,10 +67,21 @@ def test_dataset_builder_rejects_gemini_summary_but_accepts_verbatim():
             "audio": {"segments": [{"text": "not a quote"}]},
         }
     ) == []
-    verbatim = [{"text": "actual words", "start": 0, "end": 1}]
+    verbatim = [{"text": "actual words", "start": 0, "end": 1, "speaker": "012"}]
+    unattributed = [{"text": "actual words", "start": 0, "end": 1}]
     assert builder._extract_segments({"youtube_transcript": verbatim}) == verbatim
+    assert builder._extract_segments({"whisper_transcript": verbatim}) == verbatim
+    assert builder._extract_segments({"youtube_transcript": unattributed}) == []
+    assert builder._extract_segments(
+        {"youtube_transcript": verbatim, "training_eligible": False}
+    ) == []
+    assert builder._extract_segments(
+        {"whisper_transcript": verbatim, "metadata": {"training_eligible": False}}
+    ) == []
     assert builder._extract_segments({"indexer": "gemini", "audio": {"segments": verbatim}}) == []
-    assert builder._extract_segments(verbatim) == verbatim
+    assert builder._extract_segments({"indexer": "gemini", "youtube_transcript": verbatim}) == []
+    assert builder._extract_segments({"segments": verbatim}) == []
+    assert builder._extract_segments(verbatim) == []
 
 
 def test_cycle_failure_reporting_includes_nested_passes():

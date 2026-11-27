@@ -1,5 +1,34 @@
 # Video Indexer Test Suite
 
+## Bounded local archive retrieval pilot & DatasetBuilder regressions — 2026-11-16
+
+`test_local_archive_retrieval_and_dataset_builder.py` (21 cases) and updated
+`test_index_integrity.py` (5 cases) validate offline using 100% synthetic
+`tmp_path` fixtures (**26 passed**):
+- `DatasetBuilder` & `transcript_admission_guard` fail-closed gates: cross-layer
+  metadata contradictions (`contradictory_metadata`), top-level and `metadata`
+  `training_eligible=False` / `consent=False` vetoing `youtube_transcript` and
+  `whisper_transcript`, Gemini/Studio Ask provenance rejection, raw list and
+  unlabeled legacy dict rejection, summaries disguised as verbatim transcripts
+  (`mislabeled_summary_as_transcript`), missing-speaker rejection with zero `"012"`
+  invention (`missing_speaker_attribution` and `"unknown"` preservation under
+  `require_speaker_attribution=False`), mixed-speaker & `require_verified_speaker`
+  separation, strict/monotonic timestamp validation (`invalid_timestamps`,
+  `nonmonotonic_timestamps`), and `process_folder` rejection/error accounting.
+- `LocalArchiveRetrievalPilot`: `max_records <= 10` hard-cap enforcement, known-answer
+  and adversarial not-found queries (including multi-term OOV queries sharing a single
+  generic word) across JSON/SRT/VTT/JSONL/JSON3/TXT, explicit
+  `BLOCKED_MISSING_TRANSCRIPT` classification without triggering ASR/subprocesses,
+  provenance-conflict and mislabeled-summary downgrading (`verbatim_only=True`
+  protection), honest speaker status, genuine vs partial vs `ABSENT` vs `INVALID` vs
+  `NONMONOTONIC` timestamp status (`deep_link=None` when untimed/invalid), and
+  lexical/CJK fallback.
+- Full offline module run (`pytest -p no:cacheprovider modules/ai_intelligence/video_indexer/tests/ -m "not integration" -q`)
+  passes **178 tests** (`13 deselected`), and the CI `youtube-selected-batch` selection
+  retains **32 passed**. Code-seam regressions are strictly offline synthetic unit
+  checks; merge/deployment (pending) and live archive transcription/weight training
+  (blocked) remain separate gates.
+
 ## Studio cycle paid-enrichment regression — 2026-11-07
 
 The offline selection `test_shorts_indexing_pass.py`, `test_action_surface.py`

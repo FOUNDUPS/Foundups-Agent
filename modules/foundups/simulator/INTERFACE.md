@@ -1,5 +1,13 @@
 # INTERFACE - FoundUps Simulator
 
+## Opt-in Lego topology fixture adapter — 2026-11-18
+
+**Simulated-only composition readiness projection (`enabled: bool = False` default; `SIMULATED_EVIDENCE_ORIGIN = "SIMULATED_TRANSITION_ONLY"`, `runtime_verification_eligible = False`, `AGI_SCAFFOLDING_HYPOTHESIS_STATUS = "HYPOTHESIS_UNDER_TEST"`).**
+`adapters/lego_topology_fixture_adapter.py` integrates opt-in Lego block topology fixtures and `wre_lego_block_projection`-compatible JSON mappings (`blocks`, `BLOCK_IMPORTS_BLOCK`, `FOUNDUP_TO_MODULE`) onto existing `SimState`, `FoundUpState`, `FrozenDict`, `STAGE_TO_INT`, `step_pure.step`, `load_bundle`, and `SimulatorConfig` without altering simulator defaults or creating a parallel simulation engine.
+When `enabled=False` (default), `run_lego_topology_simulation(...)` and `apply_stage_caps_to_sim_state(...)` return `None` with zero input or state mutation.
+When `enabled=True`, deterministic Kahn topological evaluation flags missing blocks (`BLOCKED_MISSING_BLOCK`), dependency cycles and downstream-of-cycle blocks (`BLOCKED_DEPENDENCY_CYCLE`), upstream readiness holds (`BLOCKED_UPSTREAM_DEPENDENCY`), `STALE_PROVENANCE_MISMATCH`, and `UNKNOWN_DYNAMIC_OR_EXTERNAL_CONSUMER`, projecting FoundUp stage caps (`Idea` / `PoC` / `Proto` / `MVP` via `STAGE_TO_INT`) and `simulation_trace_sha256`.
+Pre-existing input `verified_capabilities` are preserved read-only (`preserved_verified_capabilities`) and strictly separated from simulated ticket transitions (`simulated_only_capabilities`). `export_for_runtime_verification(...)` and `guard_no_simulated_runtime_promotion(...)` unconditionally raise `ValueError("simulated_transitions_never_create_runtime_verification_evidence")` on any runtime-promotion or relabeling attempt.
+
 ## Observable Swarm Orchestration telemetry interface — 2026-11-15
 
 **Read-only observation bridge (`observation_only=True`, `authority="none"`, `FRAME_SCHEMA_VERSION = "1.0.0"`).**

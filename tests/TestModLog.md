@@ -1,5 +1,14 @@
 # TestModLog - shared tests
 
+## 2026-09-15: FoundUps work continuity preflight and WSP 97 gate
+
+- Added `tests/test_foundups_work_preflight.py` with clean-current, dirty-current/linked, non-mutation, unreadable-linked-lane, and Windows CP932-to-UTF-8 JSON output cases against real disposable Git worktrees.
+- Extended `tests/test_wsp97_execution_validator.py` to require WSP 97 v1.10's machine-readable continuity trigger set, read-only scanner path, 012-decision classification, destructive boundary, and closure evidence.
+- Bound the canonical/projected skill paths, WSP 00 → WSP 97 concatenation, and WSP 97 policy precedence in the existing contract test.
+- Focused command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -B -m pytest tests/test_foundups_work_preflight.py tests/test_wsp97_execution_validator.py -q`.
+- Result: **70 passed, 1 capability-only skip**; two environment warnings report disabled pytest plugins.
+- Scope is local and read-only; no production worktree cleanup, ledger mutation, network call, PR/CI mutation, or deployment.
+
 ## 2026-08-26: WSP 97 v1.9 machine-contract declaration
 
 - Reused the existing canonical validator-contract test to bind protocol

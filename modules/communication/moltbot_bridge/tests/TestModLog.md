@@ -57,6 +57,33 @@
 - Updated `test_reddog_signer_system_service_wsp71_resolver_supply.py::test_executable_gate_accepts_root_owned_linux_binary`
   to resolve `Path("/usr/bin/env").resolve()` so the positive root-owned executable control handles Ubuntu 26.04's `/usr/bin/env` coreutils symlink without weakening symlink rejection in `reddog_signer_system_service_wsp71_resolver_supply.py`.
 
+## 2026-11-14 — Adaptive relay watcher and crash recovery
+
+`test_reddog_relay_watcher.py` extends the bridge's coverage with a distinct relay
+checkpoint/effect state machine. Existing correspondence tests concern asks and
+stakeholder state; resident queue tests concern signed queue stages. Those owners
+are not substituted for this mailbox ledger. Reuse ModuleDB, runtime lock and
+shared DelayUtils rather than duplicate their implementations.
+
+The focused suite covers interval/cursor durability, ID/content conflicts,
+duplicates and own ACKs, atomic rollback, provider failure timestamps, admission,
+bound proofs and numbered attempts, ambiguous recovery, body-free persistence,
+Docs read validation, storage identity, and backwards clocks. Real child-process
+tests exercise both crash windows and mutual exclusion against synthetic provider
+state; they are not managed service restart or live delivery tests. The independent
+review's hard-link alias finding is retained in a regression before provider reads.
+
+Local qualification on 2026-11-14 passed 33 watcher cases plus 32 shared policy
+cases (65 total, 5.83 seconds), with two known asyncio-option configuration
+warnings under disabled plugin autoload. Command: the combined invocation in
+tests/README.md, `-B`, `--import-mode=importlib`, cache provider disabled and a
+unique outside-repository basetemp. No skipped or failed cases. Validation is
+local/offline. Independent verifier `poll_policy_verifier` reran all 33 watcher
+cases successfully and accepted the final source/test bytes and documented
+boundaries with no remaining blocking findings. This overlaps the combined run;
+do not sum the counts. Host connector admission, runtime startup and real
+receiver ACK remain separate evidence.
+
 ## 2026-10-23 — Resident memory reuse and FoundUp Memex configuration
 
 - Reused `test_reddog_resident_architect_client.py` to cover the resident infrastructure
@@ -88,6 +115,33 @@ limit remain identical; only advisory ai_analysis is added. Combined CLI/bridge
 selection: nine pass, zero errors/skips/denied effects with credential-cleared
 startup EffectGuard. Native models/services and live console behavior were not
 executed. WSP5/6/22/50/77/97.
+
+## Telemetry correlation qualification — 2026-11-02
+
+Base a7c75cf71: reader plus credential-source suites pass 58 cases. Seven new
+correlation-provenance cases fail against the unchanged base projection.
+Candidate: those suites plus the canonical provider-call evidence suite pass
+125 cases, zero failures/skips (3.46 s). This includes real validator rejection
+of a legacy generation receipt and tampered call ID, unchanged original receipt
+bytes, and no upgrade from completed provider evidence to external correlation
+or verified task success. The first combined run was 124 pass/1 fail due to a
+new test using `response_text` instead of the existing `content` parameter;
+the test was corrected before the final run. Counts are not additive.
+
+Command: vetted Python `-B -m pytest -o addopts= --noconftest
+--import-mode=importlib -p no:cacheprovider`, selecting
+`test_reddog_langfuse_telemetry.py`,
+`scripts/tests/test_reddog_langfuse_env_source.py`, and
+`test_reddog_provider_call_evidence.py`, with an O-drive scratch basetemp.
+Disable bytecode and plugin autoload; two unknown asyncio-config warnings are
+expected with plugins disabled. These are offline regression results from the
+implementing coordinator, not independent outcome acceptance or installed-path
+qualification. A separate connected-regression selection of
+`scripts/tests/test_reddog_fusion_progress_bridge.py`,
+`test_reddog_fusion_progress_receipt.py`, and `test_fusion_alias_live.py` passes
+52 cases (1.85 s), using the same flags and a separate O-drive scratch basetemp.
+It covers existing legacy progress/alias contracts without live egress.
+No live provider request or skill promotion follows.
 
 ## PC recovery assertion qualification — 2026-10-31
 
@@ -5685,3 +5739,29 @@ entrypoint cases plus both atomic structural checks. Parent AST review independe
 confirms definitions preserved across old/new owners. The canonical generator
 reports current1,690test files,270quarantined unchanged. CI explicitly includes
 the extracted startup-authority owner; original driver helpers/NOW stay in place.
+
+## 2026-11-01 — Explicit Viewer source tests
+
+Added eighteen offline synthetic cases in
+`scripts/tests/test_reddog_langfuse_env_source.py`: complete Viewer preference,
+partial-pair refusal, legacy fallback, explicit source isolation, no discovery,
+interpolation or environment mutation, parser/path redaction and credential-free
+help. Two regressions reject malformed complete-pair files when global logging
+or a prior logger filter suppresses warnings. The original warning-based guard
+failed independent review; direct parser-error validation replaces it.
+Combined with the forty reader cases: 58 pass. No live credential file
+or API was read. The oversized synthetic fixture again required short explicit
+pytest IDs to stay within Windows environment limits; the initial two setup
+errors were harness failures, not lookup acceptance.
+
+## 2026-11-01 — Langfuse diagnostic reader boundaries
+
+WSP 5/6/22/50/71/91/97. Added 40 offline cases in
+`test_reddog_langfuse_telemetry.py`; all pass with bytecode/plugin autoload
+disabled, `--noconftest --import-mode=importlib -p no:cacheprovider`.
+Synthetic transports verify content exclusion, fixed failures, redirect refusal,
+UTC/origin/size/page/timeout bounds, opaque cursor handling, deduplication and
+coverage-aware metrics. Missing completion/level/task success remain unknown.
+Correlation invokes the supplied canonical receipt validator before projection.
+The first run had two Windows setup errors caused by oversized pytest parameter
+IDs; short explicit IDs repaired the fixture. No live provider or Langfuse calls.

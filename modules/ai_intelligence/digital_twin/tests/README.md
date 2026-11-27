@@ -1,5 +1,42 @@
 # Digital Twin Tests
 
+## Offline VoiceLoRATrainer security, masking, and split controls (2026-11-16)
+
+`test_lora_trainer.py` verifies `src/lora_trainer.py` strictly offline using synthetic
+JSONL files in `tmp_path` and deterministic in-memory stub tokenizers/models/trainers
+(zero model downloads, zero network calls, zero GPU/CUDA, zero training runs):
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+python -B -m pytest -q -p no:cacheprovider \
+modules/ai_intelligence/digital_twin/tests/test_lora_trainer.py
+```
+
+Coverage (`105 passed` in `test_lora_trainer.py`, `258 passed` across `digital_twin/tests/`):
+`trust_remote_code=False` and `local_files_only=True` enforcement (including config
+rejection and post-init mutation), locked `require_verified_speaker=True` and
+`require_explicit_admission=True` invariants across `VoiceTrainingConfig` and all
+validator/loader entrypoints, CUDA/4-bit and CLI `--confirm-consent` gates,
+line-numbered fail-closed JSONL parsing (including `NaN`/`Infinity` rejection),
+direct-loader rejection of unlabeled or `NemoDataBuilder`/`lora_data_converter`-shaped
+first-person rows lacking any of the 5 required explicit admission proofs
+(`training_eligible=True`, allowed verbatim provenance, boolean `consent=True`,
+verified principal speaker, and non-placeholder `group_id`), removal of the
+`__row_{idx}__` ungrouped fallback in `_split_grouped_examples`, read-only
+`inspect_sft_record()` diagnostic preservation of `speaker=None, speaker_status="unknown"`
+and `t_start=None, timestamp_status="unknown"` without inventing `"012"` or `0.0`,
+contradictory cross-container metadata, summaries mislabeled as verbatim transcripts
+(`gemini*` models, summary payloads, 3rd-person summary phrasing), missing/blank/
+`"unknown"`/unverified/mixed/non-012 speaker rejection, invalid/colon-overflow/
+inverted/dangling/nonmonotonic timestamp rejection, `-100` prompt and padding masking
+when `pad_token_id == eos_token_id` (both right and left padding), overlong-prompt
+truncation fail-closed guard against all-`-100` `NaN` loss, deterministic
+`video_id`/`source_id` group-disjoint train/eval splitting, `Trainer`
+`eval_dataset` + `eval_strategy="epoch"` wiring, and WSP 62 file/function bounds
+(`<= 500` lines, `<= 50` lines/function across both `lora_trainer.py` and
+`lora_record_validator.py`). Passing offline contract tests validate structural
+contracts only and do not execute or certify live QLoRA model training.
+
 ## Ready-only reply retrieval
 
 The bounded cross-owner selection is

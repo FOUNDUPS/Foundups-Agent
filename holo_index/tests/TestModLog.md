@@ -357,6 +357,30 @@ Eight fixed stdlib unittest controls failed against the eager baseline and passe
   No model, persistent store,
   reindex, resident owner, or network was used. (WSP 22/34/62/97)
 
+## [2026-08-16] Docs diagnostic truth-boundary regressions
+
+- Proved `--help` exits before any probe both in process and through the real
+  script entry point; the diagnostic recognizes the canonical Hugging Face
+  snapshot layout without loading a model or returning its local path.
+- Proved policy-only `_backup` exclusions do not outrank admitted targets, while
+  absolute stored metadata with zero repository-relative Tier-0 rows receives
+  the strict exact-lookup incompatibility classification.
+- Proved the strict raw Tier-0 pair contract for complete, missing, duplicate,
+  mixed, dot/traversal, backslash, wrong-case, and malformed metadata. Proved
+  SQLite observation is byte-preserving under `mode=ro`, uses bounded pages,
+  fails closed at row/path-byte caps or invalid databases, and retains stable
+  path-free errors. Pinned the two-file mutation scan and current zero-entry
+  observability contract.
+- R3 closed the independent verifier blockers: every `path` row now counts
+  before typed extraction across null/integer/float/boolean/blob storage; all
+  types obey the same row/value/aggregate caps. Added deadline and VM-step
+  interruption, busy/locked, corruption, link-component, and hardlink tests.
+  Pinned the authoritative Git-tracked module roots, exact four structural
+  exclusions, and immunity to untracked module docs. R4 adds a controlled
+  rollback-journal concurrent writer proving the row set and total count cannot
+  mix snapshots, plus explicit rollback/close checks for success, setup failure,
+  and read failure.
+
 ## [2026-08-16] Final publication dirty-worktree falsification
 
 - Injected clean/clean/dirty repository states across receipt construction,
@@ -502,6 +526,21 @@ Eight fixed stdlib unittest controls failed against the eager baseline and passe
 
 - Added authority selection coverage for configured and deterministic roots, dirty workspace overlays, unrelated repositories, dirty authorities, HEAD mismatch, invalid configuration, and workspace fallback.
 - Added owner request/response root-digest checks, forged-root rejection, post-query revalidation, and source guards against query-path mutation.
+
+## [2026-07-24] HOLOINDEX_NEUTRAL_FRESHNESS_AUTHORITY_P1A
+
+- RED proved the neutral module was absent, query admission still imported the
+  infrastructure owner, and the bridge still contained the decision logic:
+  5 focused failures.
+- Added AST import-boundary, cold-import provider/transport exclusion, exact
+  bridge re-export identity, and bridge-no-decision-implementation tests.
+- Focused GREEN combined those tests with canonical owner freshness,
+  raw-query admission, read-only guard, RedDog direct-query, and receipt
+  binding coverage: 108 passed and one optional platform symlink test skipped.
+- Wider no-instrumentation parity passed 214 tests with one optional symlink
+  skip. Focused branch coverage reached 92% (93 passed, one skip, one
+  deliberately deselected 20ms deadline test); that deadline regression passed
+  standalone without coverage overhead.
 
 ## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 
