@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 import json
 import mimetypes
 import re
+import socket
 from playwright.sync_api import expect, sync_playwright
 
 public = Path("public").resolve()
@@ -141,6 +142,42 @@ provider = """(() => {
     }
   };
 })();"""
+
+
+def offline_fixture_context(browser, **options):
+    """No internet delivery, including Windows WebKit's broken offline flag.
+
+    WebKit1.57 fails before route interception when offline=True. Its closed
+    loopback proxy is negatively probed before any application fixture loads.
+    Callers still abort every unmatched request; WebSockets are closed here.
+    """
+    assert 'offline' not in options and 'proxy' not in options
+    if browser.browser_type.name == 'webkit':
+        with socket.socket() as connection:
+            connection.settimeout(.5)
+            assert connection.connect_ex(('127.0.0.1', 9)) != 0, 'Required closed proxy port is listening'
+        context=browser.new_context(**options,proxy={'server':'http://127.0.0.1:9','bypass':''})
+        probe=context.new_page();failure=None
+        try:
+            probe.goto('https://offline-escape.invalid/',timeout=2500)
+        except Exception as error:
+            assert type(error).__name__!='TimeoutError', 'Proxy probe timed out without refusal'
+            failure=str(error)[:500]
+        finally:
+            probe.close()
+        if failure is None:
+            context.close()
+            raise AssertionError('Closed proxy allowed unfulfilled navigation')
+        transport={'mode':'closed-loopback-proxy','context_offline_flag':False,'negative_escape':failure}
+    else:
+        context=browser.new_context(**options,offline=True)
+        transport={'mode':'context-offline','context_offline_flag':True}
+    transport['websockets_blocked']=0
+    def close_socket(socket):
+        transport['websockets_blocked']+=1
+        socket.close()
+    context.route_web_socket('**/*',close_socket)
+    return context,transport
 
 def route_local(route):
     u = urlsplit(route.request.url)
@@ -1989,8 +2026,8 @@ def verify_public_entry(browser_type):
     observed=[]
     try:
         for width,height in [(390,844),(414,896),(402,874),(1366,900)]:
-            context=browser.new_context(viewport={'width':width,'height':height},
-                is_mobile=width<760,has_touch=width<760,offline=True,
+            context,transport=offline_fixture_context(browser,viewport={'width':width,'height':height},
+                is_mobile=width<760,has_touch=width<760,
                 service_workers='block',reduced_motion='reduce')
             requested=[]
             def routes(route):
@@ -2065,9 +2102,11 @@ def verify_public_entry(browser_type):
                     assert private_requests(guest_start)==[],private_requests(guest_start)
                 observed.append({'viewport':[width,height],'cta_box':box,
                     'mobile_touch':width<760,'hard_offline':True,
+                    'transport':transport,
                     'keyboard_to_public_guest':True,'guest_auth_requests':0,
                     'guest_add_hidden_disabled_no_synthetic_effect':True,
                     'scoped_hpc_dedicated_hpc_detail_admission_preview':width<760})
+                assert transport['websockets_blocked']==0,transport
             finally:
                 context.close()
     finally:

@@ -1,3 +1,44 @@
+## 2026-11-27 — Explicit phone sizes, poster geometry and overlay dock
+
+The existing phone runner accepts `--phone-size 414x896` and `402x874` as
+explicit CSS mobile/touch fixtures. The public-entry selection also retains
+390 ×844 and1366 ×900. Chromium uses context-offline; Windows WebKit1.57's
+offline flag fails before route interception, so its fixture uses a closed
+loopback proxy, a negative escape probe, unmatched-request aborts and WebSocket
+blocking. These are anonymous emulated contexts, not physical Safari evidence.
+
+Guest dock assertions require Add hidden, disabled and zero-sized, with no
+synthetic-click request, navigation or admission intent. Visible controls keep
+their 44px/hit-test checks; dedicated HPC contribution behavior remains covered.
+The existing public-header case now checks themed poster cover/center/no-repeat,
+the avatar-contain CSS state, no reserved shell dock block, field content behind
+the dock, and positive scrolling that exposes the final tile above its overlay.
+It exercises both full height and a500px reduced viewport without claiming a
+physical keyboard or safe-area test. All four engine/phone-size rows passed;
+the eight public-entry rows and160 existing static contracts passed separately.
+
+Private paired renders preserve the older missing-poster and notice-overlap
+findings and the first mistaken standalone-detail oracle. The actual expansion
+owner is the in-page `mallPlanes` detail; public entry HTML is tested separately.
+The full17-record Chromium plane-close scroll finding remains on HOLD with
+root cause unresolved; matching full17-record3B78 diagnosis is separate and
+the12-record sample does not qualify that path.
+The final representative navigation rows verify real positive scroll/focus
+return, decoded staged images, notice/header separation and the corrected dock
+geometry. The controlled sample remains one silent five-second clip repeated
+in six labeled queue slots, not six productions or a new canonical FoundUp.
+
+Actual Chromium native decoding, media time/frames, observed native Pause,
+Next cleanup and positive-scroll return are separate from mocked YouTube tests.
+The inherited unchanged player warms the public YouTube API script; private
+offline checks record and abort that exact request and the exact font CSS,
+while retaining the earlier overstrict zero-attempt failure. They still forbid
+actual YouTube API/iframe/mock, unexpected foreign media, auth and protected
+requests. Windows WebKit reports actual codec error4 with no decoded frames;
+it is unsupported, not a native playback pass. Physical Safari/Home Screen,
+audio, live provider gestures, canvas, dock type picker and Podcast remain
+unexecuted or unimplemented. No production or held HPC promotion is certified.
+
 ## 2026-11-27 — Independent public entry and guest boundaries
 
 Extended the existing routing VM and scoped-browser fixture with

@@ -68,9 +68,9 @@ def assert_true(condition, detail):
 
 
 def make_page(browser, block=False, block_storage=False, silent_start=False, desktop=False, hold_ready=False):
-    context = browser.new_context(viewport={'width': 1440, 'height': 900} if desktop else REPORT['viewport'], is_mobile=not desktop,
+    context, transport = fixture.offline_fixture_context(browser,viewport={'width': 1440, 'height': 900} if desktop else REPORT['viewport'], is_mobile=not desktop,
                                   has_touch=not desktop, service_workers='block',
-                                  reduced_motion='reduce', offline=True)
+                                  reduced_motion='reduce')
     init = fixture.provider + ('\nif(window.fixturePlayback)window.fixturePlayback.block=true;' if block else '')
     if block_storage:
         init += """\n(() => {const original=Storage.prototype.setItem;
@@ -94,7 +94,7 @@ def make_page(browser, block=False, block_storage=False, silent_start=False, des
     page = context.new_page()
     page.set_default_timeout(3500)
     page.set_default_navigation_timeout(8000)
-    return context, page
+    return context, page, transport
 
 
 def boot(page, hpc=False):
@@ -293,6 +293,45 @@ def public_action_layout(page, name):
     return value
 
 
+def public_poster_and_overlay(page):
+    """Actual shared CSS, poster/one avatar state, and no reserved dock block."""
+    total=len(json.loads((ROOT/'public/member/mall-video-catalog.json').read_text(encoding='utf-8')))
+    fixture.materialize_public_cards(page,total)
+    tile=page.locator('.mall-tile[data-foundup-id="science_swarm"]')
+    expect(tile).to_have_count(1)
+    poster=tile.evaluate("e=>{const s=getComputedStyle(e);return {size:s.backgroundSize,position:s.backgroundPosition,repeat:s.backgroundRepeat,type:e.dataset.tileType}}")
+    assert_true(poster['size']=='cover' and poster['position']=='50% 50%' and poster['repeat']=='no-repeat',
+                {'themed_poster_css_reset':poster})
+    avatar=tile.evaluate("""e=>{const original=e.dataset.tileType;e.dataset.tileType='avatar';
+      const s=getComputedStyle(e),result={size:s.backgroundSize,position:s.backgroundPosition,repeat:s.backgroundRepeat};
+      e.dataset.tileType=original;return result;}""")
+    assert_true(avatar=={'size':'contain','position':'50% 50%','repeat':'no-repeat'}, {'avatar_css_state':avatar})
+    measured=[]
+    for height in (REPORT['viewport']['height'],500):
+        page.set_viewport_size({'width':REPORT['viewport']['width'],'height':height})
+        wrapper=page.locator('.mall-tile-field-wrapper')
+        wrapper.evaluate('e=>e.scrollTo({top:e.scrollHeight,behavior:"instant"})')
+        page.wait_for_function("""()=>{const t=document.querySelector('#mallTileField .mall-tile:last-of-type'),d=document.querySelector('#redDogAnchor');
+          return t&&d&&t.getBoundingClientRect().bottom<=d.getBoundingClientRect().top+1;}""")
+        value=page.evaluate("""()=>{
+          const shell=document.querySelector('.mall-shell'),field=document.querySelector('.mall-tile-field-wrapper'),
+            grid=document.querySelector('#mallTileField'),dock=document.querySelector('#redDogAnchor'),last=grid.querySelector('.mall-tile:last-of-type');
+          const rect=e=>e.getBoundingClientRect().toJSON(),s=getComputedStyle(shell),f=getComputedStyle(field);
+          return {viewport:[innerWidth,innerHeight],shell:rect(shell),shellPaddingBottom:parseFloat(s.paddingBottom),shellRows:s.gridTemplateRows,
+            field:rect(field),fieldPaddingBottom:f.paddingBottom,grid:rect(grid),gridPaddingBottom:parseFloat(getComputedStyle(grid).paddingBottom),
+            dock:rect(dock),dockPosition:getComputedStyle(dock).position,last:rect(last),scrollTop:field.scrollTop,scrollMaximum:field.scrollHeight-field.clientHeight,
+            safeBottom:parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom'))||0};
+        }""")
+        assert_true(value['shellPaddingBottom']<=max(16,value['safeBottom'])+1 and value['field']['bottom']>value['dock']['top']+1,
+                    {'reserved_dock_layout_block':value})
+        assert_true(value['dockPosition']=='fixed' and value['gridPaddingBottom']>=value['dock']['height']+12 and
+                    value['last']['bottom']<=value['dock']['top']+1 and value['scrollTop']>1,
+                    {'dock_overlay_tail_or_positive_scroll':value})
+        measured.append(value)
+    page.set_viewport_size(REPORT['viewport'])
+    return {'poster':poster,'avatar_css_state':avatar,'overlay_and_scroll_tail':measured,'physical_keyboard_safe_area':'UNEXECUTED'}
+
+
 def public_header(page):
     boot(page)
     header = page.locator('.mall-header')
@@ -305,6 +344,7 @@ def public_header(page):
     b, a = brand.bounding_box(), account.bounding_box()
     assert_true(abs(b['y'] + b['height']/2 - a['y'] - a['height']/2) <= 12,
                 {'header_not_compact_one_row': {'viewport':REPORT['viewport'],'brand': b, 'account': a}})
+    poster_overlay=public_poster_and_overlay(page)
     page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-public-header.png')))
     layouts = [public_action_layout(page, 'default-'+args.phone_size)]
     search = page.locator('.mall-member-search-dock:visible .mall-member-search-bar textarea')
@@ -343,7 +383,7 @@ def public_header(page):
     page.set_viewport_size(REPORT['viewport'])
     page.locator('#mallAvatarTrigger').tap()
     page.wait_for_url('https://play.foundups.com/?signin=required')
-    return {'header': header.bounding_box() if page.locator('.mall-header').count() else None,
+    return {'poster_overlay':poster_overlay,'header': header.bounding_box() if page.locator('.mall-header').count() else None,
             'branding_account_initial': {'brand': b, 'account': a},
             'filters_moved_once_and_operable': True, 'account_destination': page.url,
             'idle_listening_hidden': True, 'action_layouts': layouts}
@@ -1645,8 +1685,8 @@ def vote_reduced_motion(page):
 def run_case(browser, name, fn, block=False, block_storage=False, silent_start=False, desktop=False, hold_ready=False):
     if args.case and name not in args.case:return
     REPORT['active_case'] = name
-    context, page = make_page(browser, block, block_storage, silent_start, desktop, hold_ready)
-    row = {'engine': REPORT['engine'], 'case': name, 'passed': False}
+    context, page, transport = make_page(browser, block, block_storage, silent_start, desktop, hold_ready)
+    row = {'engine': REPORT['engine'], 'case': name, 'passed': False, 'transport':transport}
     page_errors=[]
     page.on('pageerror',lambda error:page_errors.append(str(error)))
     graph_requests=[]
@@ -1655,6 +1695,7 @@ def run_case(browser, name, fn, block=False, block_storage=False, silent_start=F
         row['evidence'] = fn(page)
         assert_true(not page_errors, {'page_errors':page_errors})
         assert_true(not graph_requests, {'protected_graph_requests':graph_requests})
+        assert_true(transport['websockets_blocked']==0, {'unexpected_websockets':transport})
         row['passed'] = True
     except Exception as exc:
         row['error'] = str(exc)
