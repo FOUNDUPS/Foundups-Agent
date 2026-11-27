@@ -1,5 +1,11 @@
 # HPC interface
 
+HPC's gated Add Video collection tile remains available when the resolved HPC
+projection runs on an admitted Mall/preview host, as well as on its dedicated
+host. The shared `isPublicBrowseOnly` predicate controls presentation only;
+explicit admission, current server membership/editor eligibility and actual
+submission remain separate and unchanged. First/Last placement is preserved.
+
 ## Current v26 acceptance delta — 2026-11-27
 
 Follow the shared navigation contract's v26 continuation: Dock + only settings,

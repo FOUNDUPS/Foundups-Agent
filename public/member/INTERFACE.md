@@ -1,5 +1,17 @@
 # Member Area Interface
 
+## Projection-aware contribution entry — 2026-11-27 candidate
+
+`mallVideoProjection.isPublicBrowseOnly(location)` is a presentation predicate,
+not authorization. Public Mall browsing hides/disables dock contribution entry
+and rejects a stale Add event. A resolved HPC projection retains its existing
+gated Add Video tile on both the dedicated host and admitted Mall/preview hosts.
+First/Last placement and saved preferences remain owned by the existing field.
+Explicit admission and member routes retain their existing owners. Membership,
+editor eligibility and submission still require the unavailable owning service;
+this predicate creates none of them. Reconcile the separate public-homepage
+lane's broad host-only guards to this shared predicate when combining changes.
+
 ## v26 shared controls — 2026-11-27 candidate
 
 Video Options is reached through the floating Search Dock + only. The existing

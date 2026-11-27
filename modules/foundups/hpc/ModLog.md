@@ -1,3 +1,12 @@
+## 2026-11-27 — Contribution presentation seam (#2439)
+
+- Keep the existing gated HPC Add Video tile on dedicated and admitted Mall
+  projection hosts; distinguish public Mall root browsing in the shared owner.
+- Preserve member/editor authority, First/Last settings and all player gestures.
+  Actual editor/server eligibility remains unavailable; no provider activation.
+- WSP 15/50/97: scoped route/event regression, no duplicate shell/auth/stage;
+  source qualification and the existing immutable phone preview stay separate.
+
 ## 2026-11-27 — Continue #2439 shared dock/settings qualification
 
 - Reconciled current main without replacing shared Mall/player/auth owners.

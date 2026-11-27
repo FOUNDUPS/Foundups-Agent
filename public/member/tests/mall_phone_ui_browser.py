@@ -201,25 +201,47 @@ def app_touch(page, target, dx=0, dy=0, pinch=None, start_fraction=.5):
     return {'surface': box, 'start': start, 'end': end, 'delivery': mode}
 
 
+def public_contribution_denied(page):
+    # The public-root contract is independent of the presentation predicate.
+    assert_true(page.url == 'https://play.foundups.com/member/', page.url)
+    contribution = page.locator('.mall-member-search-dock:visible .mall-search-add')
+    expect(contribution).to_have_attribute('hidden', '')
+    expect(contribution).to_be_disabled()
+    expect(contribution).not_to_be_visible()
+    before = page.evaluate('mallStateRestore.peekAdmissionIntent()')
+    contribution.evaluate("e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}))")
+    expect(page.locator('#mallContributionReview[open]')).to_have_count(0)
+    assert_true(page.url == 'https://play.foundups.com/member/' and
+                page.evaluate('mallStateRestore.peekAdmissionIntent()') == before,
+                'Forged public contribution event changed admission or navigation')
+    return {'hidden': True, 'disabled': True, 'direct_event_denied': True}
+
+
 def checkpoint(page, name):
+    denied = public_contribution_denied(page) if page.url == 'https://play.foundups.com/member/' else None
     value = page.evaluate("""() => {
       const visible = e => { const s=getComputedStyle(e),r=e.getBoundingClientRect();
         return !e.hidden&&s.display!=='none'&&s.visibility!=='hidden'&&r.width>0&&r.height>0; };
       const docks=[...document.querySelectorAll('.mall-member-search-dock')].filter(visible);
       const dock=docks[0],input=dock?.querySelector('textarea'),r=input?.getBoundingClientRect();
       const scopedActions=document.documentElement.dataset.mallVideoScope==='hpc';
-      const add=dock?.querySelector(scopedActions?'.mall-search-plus':'.mall-search-add'),ar=add?.getBoundingClientRect();
+      const browseOnly=window.mallVideoProjection.isPublicBrowseOnly(location);
+      const add=dock?.querySelector(scopedActions||browseOnly?'.mall-search-plus':'.mall-search-add'),ar=add?.getBoundingClientRect();
       return {count:docks.length,same:!window.independentDock||dock===window.independentDock,
         inert:!!dock?.closest('[inert]'),inputRect:r?.toJSON(),
         inputHit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===input:false,
         sameFrame:!window.independentFrame||document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame,
         created:window.fixturePlayback.created,state:window.mallVideoPlayer?.getPlaybackSnapshot?.(),
         addRect:ar?.toJSON(),addPosition:add?getComputedStyle(add).position:null,
-        addKind:scopedActions?'actions':'contribution',
+        addKind:scopedActions||browseOnly?'actions':'contribution',browseOnly,
         addHit:ar?add.contains(document.elementFromPoint(ar.left+ar.width/2,ar.top+ar.height/2)):false,
         modalDock:!!dock?.closest('.video-player-shared-dock-host'),
         scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
     }""")
+    if denied:
+        assert_true(value['browseOnly'] and value['addKind'] == 'actions',
+                    {'public_root_not_browse_only': value})
+        value['publicContribution'] = denied
     REPORT.setdefault('checkpoints', []).append({'engine': REPORT['engine'],
         'case': REPORT.get('active_case'), 'name': name, 'value': value})
     assert_true(value['count'] == 1 and value['same'] and not value['inert'],
@@ -236,10 +258,11 @@ def checkpoint(page, name):
 
 
 def public_action_layout(page, name):
+    denied = public_contribution_denied(page)
     value = page.evaluate("""() => {
       const anchor=document.querySelector('#redDogAnchor'),
         dock=anchor.querySelector(':scope > .mall-member-search-dock'),
-        dog=anchor.querySelector(':scope > .red-dog-btn'),add=dock.querySelector('.mall-search-add'),
+        dog=anchor.querySelector(':scope > .red-dog-btn'),add=dock.querySelector('.mall-search-plus'),
         input=dock.querySelector('.mall-member-search-bar textarea');
       const d=dog.getBoundingClientRect(),a=add.getBoundingClientRect(),i=input.getBoundingClientRect();
       const hit=(e,r)=>e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));
@@ -247,11 +270,12 @@ def public_action_layout(page, name):
         inputHit:hit(input,i),expanded:dock.querySelector('form').hasAttribute('data-expanded'),
         viewportWidth:innerWidth,scrollWidth:document.documentElement.scrollWidth};
     }""")
+    value['publicContribution'] = denied
     assert_true(value['dog']['width'] >= 44 and value['dog']['height'] >= 44 and
                 value['add']['width'] >= 44 and value['add']['height'] >= 44,
                 {'layout': name, 'small_touch_target': value})
-    assert_true(value['dog']['x'] + value['dog']['width'] <= value['add']['x'] + 1,
-                {'layout': name, 'dog_not_before_add': value})
+    assert_true(value['add']['x'] + value['add']['width'] <= value['dog']['x'] + 1,
+                {'layout': name, 'actions_not_before_dog': value})
     assert_true(value['dogHit'] and value['addHit'] and value['inputHit'],
                 {'layout': name, 'controls_obscured': value})
     assert_true(value['scrollWidth'] <= value['viewportWidth'] + 1,

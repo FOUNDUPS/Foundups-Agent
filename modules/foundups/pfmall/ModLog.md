@@ -1,3 +1,11 @@
+## 2026-11-27 — Projection-aware contribution seam (#2439)
+
+- Shared dock/field use one route-derived browse-only predicate. Preserve gated
+  HPC Add Video on admitted projection aliases; no server or provider grant.
+- Route/event and preference VM checks pass; independent/hosted qualification
+  remains separate. Public-homepage/theme/scroll work stays with its existing lane.
+- WSP 15/50/97: one integration layer; Canvas/Podcast and device acceptance open.
+
 ## 2026-11-27 — Continue #2439 shared dock/settings qualification
 
 - Independent review caught the ordinary/VOTE + upward-swipe regression;

@@ -1,3 +1,12 @@
+## 2026-11-27 — Projection-aware Add entry continuation (#2439)
+
+- Preserve all existing fixture paths; public root Add now asserts denial while
+  both HPC selected-video review cases retain their explicit admission checks.
+- Add the root/HPC/Vote/invalid/admission/host matrix and stale or forged dock
+  event checks. Actual-source routing21 and preferences22 pass locally.
+- Independent browser review and exact-head hosted CI remain separate gates;
+  existing physical/provider holds are unchanged. No preview or production write.
+
 ## 2026-11-27 — Continue #2439 shared dock/settings qualification
 
 - Independent review caught the ordinary/VOTE + upward-swipe regression;

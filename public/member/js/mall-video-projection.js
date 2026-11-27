@@ -29,6 +29,12 @@
     return hostScope(location) === 'mall';
   }
 
+  // Presentation only: a guest HPC projection retains its existing gated Add
+  // entry even on a Mall/preview host. This never establishes editor eligibility.
+  function isPublicBrowseOnly(location) {
+    return isOpenMallHost(location) && !isAdmissionRequest(location) && resolve(location) !== 'hpc';
+  }
+
   function isAdmissionRequest(location) {
     if (!location) return false;
     if (/^\/sso-callback\/?$/.test(location.pathname || '')) return true;
@@ -558,7 +564,11 @@
     dialog.prepend(dialog.querySelector('[data-action="browse-ai"]'),
       dialog.querySelector('[data-browse-ai-pilot]'), dialog.querySelector('.mall-video-options'));
     const add = form.querySelector('.mall-search-add');
+    const publicBrowseOnly = isPublicBrowseOnly(window.location);
+    add.hidden = publicBrowseOnly;
+    add.disabled = publicBrowseOnly;
     add.addEventListener('click', () => {
+      if (isPublicBrowseOnly(window.location)) return;
       const scope = document.documentElement.dataset.mallVideoScope;
       const intent = { action: scope === 'hpc' ? 'add-video' : 'add-foundup' };
       if (scope === 'hpc') {
@@ -817,7 +827,7 @@
         dialog.querySelector('[data-video-option="addVideoPosition"]').closest('label').hidden = !hpc;
         dialog.querySelector('[data-tile-types]').hidden = !hpc;
         const scopedActions = scoped && (hpc || document.documentElement.dataset.mallVideoScope === 'voteballots');
-        add.hidden = scopedActions;
+        add.hidden = publicBrowseOnly || scopedActions;
         if (scopedActions) {
           options.setAttribute('aria-label', 'Available actions');
           options.title = 'Available actions';
@@ -1222,6 +1232,7 @@
     mallBuild,
     hostScope,
     isOpenMallHost,
+    isPublicBrowseOnly,
     isAdmissionRequest,
     shouldLoadMemberAuth,
     publicEntryPath,

@@ -1,5 +1,14 @@
 # Member Area Module Change Log
 
+## 2026-11-27 — Projection-aware contribution presentation (#2439)
+
+- Reuse one route-derived predicate for public Mall dock denial and HPC's gated
+  collection tile; preserve dedicated/preview HPC, First/Last and member owners.
+- Runtime routing fixture covers real routes and stale/forged dock events;
+  preference fixtures remain unchanged. No provider, playback or auth service change.
+- WSP 15/50/97: reconcile the separate public-homepage guard before integration;
+  Canvas/Podcast and actual editor/server eligibility remain open. No release.
+
 ## 2026-11-27 — Continue #2439 shared dock/settings qualification
 
 - Reconciled current main without replacing shared Mall/player/auth owners.

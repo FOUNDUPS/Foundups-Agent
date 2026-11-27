@@ -1,5 +1,10 @@
 # FoundUPS Member Mall
 
+The [projection-aware contribution contract](INTERFACE.md#projection-aware-contribution-entry--2026-11-27-candidate)
+keeps public Mall browsing read-only while preserving HPC's existing gated
+Add Video entry on its dedicated and approved projection routes. It does not
+implement an editor, verify membership or grant submission access.
+
 ## v26 continuation qualification — 2026-11-27
 
 The shared dock now groups Interface, Gestures and Playback settings. Dock + is

@@ -1,5 +1,17 @@
 # p.fMALL Roadmap
 
+## 2026-11-27 — Projection-aware contribution seam (#2439)
+
+IMPLEMENTED_CANDIDATE: a shared presentation predicate distinguishes public
+Mall browsing from a genuine HPC projection, including approved preview hosts.
+Keep the former read-only and the latter's existing gated Add Video entry.
+This layer changes no server authorization, player, catalog or stored preference.
+The separate public-homepage lane must reconcile its broad inline host guards
+to this predicate when integrated; do not absorb that unmerged branch wholesale.
+Exit gates: actual-source route/event tests, browser regression, independent
+review and exact-head checks. Canvas/About stage parity, Podcast, actual
+contribution service and current physical-phone playback remain open.
+
 ## 2026-11-27 — Shared dock/settings continuation (#2439)
 
 IMPLEMENTED_CANDIDATE: see the current navigation contract and shared incident.

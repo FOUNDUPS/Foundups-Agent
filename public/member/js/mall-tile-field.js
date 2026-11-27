@@ -2258,7 +2258,8 @@
       error.textContent = fieldError;
       tail.appendChild(error);
     }
-    if (fixedVideoField && mallCatalog[0]?.foundup_id === 'hpc') {
+    if (fixedVideoField && mallCatalog[0]?.foundup_id === 'hpc' &&
+        !window.mallVideoProjection?.isPublicBrowseOnly?.(window.location)) {
       var addVideo = document.createElement('button');
       addVideo.type = 'button';
       addVideo.className = 'mall-grid-add-video';

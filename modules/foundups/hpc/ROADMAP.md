@@ -1,5 +1,15 @@
 # HPC roadmap
 
+## H1J · Contribution presentation seam — 2026-11-27
+
+FITS_POC / IMPLEMENTED_CANDIDATE. Keep HPC's existing gated Add Video entry
+across dedicated and admitted projection hosts while public Mall roots remain
+read-only. Reuse the shared projection/field/admission owners; retain First/Last.
+Dependencies: reconcile the separate public-homepage lane's broad host-only
+guard during integration. Acceptance: route/event fixtures, browser regression,
+independent review and exact-head CI. This does not deliver an editor, a server
+eligibility contract, Canvas/Podcast, physical playback, merge or deployment.
+
 ## H1I · v26 settings and compact dock continuation — 2026-11-27
 
 **FITS_POC / IMPLEMENTED_CANDIDATE; acceptance open.** Existing PR #2439 owns

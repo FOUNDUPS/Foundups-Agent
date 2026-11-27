@@ -1,5 +1,12 @@
 # Member Mall tests
 
+`node public/member/tests/mall_projection_routing_vm.mjs` executes the shared
+contribution presentation predicate and actual dock handler. It covers public
+Mall roots, HPC dedicated/admitted preview routes, admission/member owners and
+forged DOM scope, preserving the existing no-submission/eligibility boundary.
+These controlled VM checks establish no real membership, browser layout or
+physical-phone playback result.
+
 ## v26 settings continuation — 2026-11-27
 
 Keep the original72-row defensive phone suite intact. The additional settings
