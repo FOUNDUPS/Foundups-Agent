@@ -1,3 +1,65 @@
+## 2026-11-27 — Apply the independently accepted six-package repair candidate
+
+WSP15 C2/I5/D5/Impact4=16/P0; acceptance freeze bd2fe9911 independently accepted
+before product change. Add one signed APT update/install layer, exact six existing
+package versions, --only-upgrade/--no-install-recommends/--no-remove, retries0 and
+30-second HTTP/HTTPS timeouts; fail on any index-update error. Clear transient APT
+lists/archives. FROM/Python3.12.15,18 runtime wheels, all existing install/runtime
+flags and frozen87-package map assertions remain unchanged. Further package
+resolution changes must fail the map guard and return for scope review.
+Prior literal-head e28 image passes3 HTTP cases;823 nomination cases belong to
+provider merge3be and do not qualify this new head. Fresh exact-head hosted build,
+inventory, HTTP replay, saved-image current-DB scan and independent artifact review
+remain pending. The original259-findings/57HIGH/15UNKNOWN security hold stays;
+this targeted partial repair cannot clear the53HIGH/13UNKNOWN without Trixie fixes.
+No host APT/Docker, provider, live service, production or registry action occurs.
+Static command/pin/scope checks PASS:one exact six-pin transaction,31-line
+Dockerfile and byte-identical frozen helper, wheel/server profiles and HTTP tests.
+
+## 2026-11-27 — Freeze six-package security repair acceptance before product change
+
+WSP15 C2/I5/D5/Impact4=16/P0. Actual literal-head e28ee52de image passes3 HTTP cases;
+823 nomination cases passed on provider merge3be (different checkout); Trivy0.76.1/current DB reports259 findings:
+57HIGH/107MEDIUM/80LOW/15UNKNOWN, zero critical and zero reported secrets.
+Keep PR #2482 draft and its image-security hold.57HIGH are package/issue records,
+including repeated source-package findings; this is not57 proven HTTP exploits.
+Signed Trixie/Trixie-security Release and Packages metadata confirm exact existing
+package fixes:apt/libapt-pkg7.0=3.0.4,libzstd1=1.5.7+dfsg-1+deb13u1,
+zlib1g=1:1.3.dfsg+really1.3.1-1+deb13u1,login.defs/passwd=1:4.17.4-2+deb13u1.
+Freeze their six inventory versions in the existing image helper. Bind the full
+87-package name/version map to canonical SHA256 bf479675a8a15f6e3d6e31bc581df1d0ae2afff1532226bbdd81758a36b600e6;
+only those six versions may differ from the saved actual image. Extra upgrades,
+new/removal packages or unresolved dependency closure must stop for scope review.
+Saved old image must fail this stronger acceptance before any Dockerfile amendment.
+Python3.12.15,18 wheel pins, application/auth/HTTP oracles and scanner policy stay
+fixed. Targeted product repair awaits independent acceptance review; no APT/Docker
+execution or Dockerfile change occurs in this freeze.53HIGH/13UNKNOWN have no
+recorded fixed Trixie version; partial repair cannot clear the security hold.
+Acceptance-only replay:actual old image RED; synthetic six-only map PASS and12
+boundary mutations reject, including residual-configuration package states. No image rebuild or security-clearance claim follows.
+
+## 2026-11-27 — Recover current-main intake image closure
+
+WSP15 C3/I4/D4/Impact4=15/P1; RECONCILE PR #2227 a7109ba09 against main1e7d6992.
+Retain its Dockerfile,18-wheel hash lock and test-only transport; expand24→31
+immutable context files for graph imports, bounded child/Windows guard and bridge
+package initialization. Existing source/auth/HTTP assertions and server profile
+remain unchanged. Compose the workflow from current main, preserve checksum trust
+bootstrap and its triggers, and bootstrap the new test-side job before ordinary
+downloads. Every archive input triggers both PR and main qualification.
+The image job checks out the exact PR head or main push SHA; the unchanged
+nomination job continues to validate the proposed merge composition.
+Native WSP00 strict gate passed. Holo authority HEAD mismatch remains UNKNOWN;
+use the recovered exact-source audit, without reindexing or route changes.
+Local verification and hosted/image-security acceptance remain distinct. The
+Windows engine is unavailable; retain the original image security hold pending
+fresh exact-head Linux evidence, exact saved-image scan and independent review.
+No cloud/provider/session, production deployment or runtime admission occurs.
+Local offline regression:820 passed/3 live-server cases deselected on the
+existing vetted interpreter; its older dependencies do not qualify pinned Linux
+execution. Frozen old test ASTs, lock bytes, nomination job and complete trigger
+coverage pass static review. Exact committed archive/import checks follow locally.
+
 ## 2026-11-26 — Port Fractal Tile Graph backend, patch API, schemas, projections, client & paper onto post-HPC main
 
 - Ported `fractal_tile_graph.py`, `tile_graph_context.py`, `tile_graph_store.py`, `http_api.py` (`GET /pfmall/tile-graph`, `POST /pfmall/tile-graph/patches`), `member_catalog_export.py` (`export_fractal_tile_graph`), schemas, public projections, `sprint1_registry_benchmark_manifest.json`, `public/member/js/mall-tile-graph-client.js`, `public/member/js/pfmall-control-dispatcher.js`, and [PFMALL_Fractal_Tile_Elements_Architecture.md](../../../WSP_knowledge/docs/Papers/PFMALL_Fractal_Tile_Elements_Architecture.md) onto post-`#2459` `main`, keeping `#2459`'s `public/member` UI owners intact (`?fractal=1` UI shell reconciliation stays separate).

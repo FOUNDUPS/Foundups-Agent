@@ -111,6 +111,29 @@ Limits are application/server settings, not OS confinement, abuse prevention or
 proof of graceful shutdown. Public hosting, current session/revocation policy,
 real member identity and durable repository-control admission remain unqualified.
 
+## Linux intake image recovery candidate — 2026-11-27
+
+The recovered `Dockerfile.intake` and `requirements-container.lock` retain
+PR #2227's pinned Python3.12.15/Trixie base, 18 hash-pinned runtime wheels,
+nonroot10001:10001 and fixed8080 Uvicorn factory command. The isolated factory
+exposes only draft proposals and minimal health; policy remains an explicitly
+administered readonly mount. Build-time pip/ensurepip are removed after `pip check`.
+
+The test helper validates31 immutable Git blobs:23 Python sources, four real
+static assets, two existing profiles, the lock and Dockerfile. This includes
+current-main graph imports and the bounded-child helper's regular-package
+initialization; graph routes stay outside the isolated app. The workflow
+preserves main's checksum trust bootstrap and builds without registry publication.
+It reuses the same three real HTTP cases through an explicit image-only opt-in,
+retaining source/package/OS inventories and the exact saved image for review.
+
+Local archive/import checks are distinct from Linux execution; the Windows Docker
+engine is unavailable. Fresh exact-head hosted build/inventory/HTTP evidence and
+an exact saved-image scan through the existing security-scanner owner still gate
+acceptance. The first historical image's Trivy0.76.1 scan reported2critical,
+65high and2unknown findings; its hold is retained. Cloud, real identity and
+production deployment remain separate, unqualified stages.
+
 ## RedDog, OpenClaw, and Hermes boundary
 
 The optional local HTTP/intake dependency profile is `requirements.txt`; it does

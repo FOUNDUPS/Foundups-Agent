@@ -1,5 +1,17 @@
 # p.fMALL Roadmap
 
+## Intake image convergence — 2026-11-27
+
+**RECOVERED_CANDIDATE / image security hold retained.** Reconcile PR #2227 on
+main1e7d6992 under WSP15 C3/I4/D4/Impact4=15/P1. Preserve the existing factory,
+18 runtime pins and three real HTTP oracles; expand the immutable context24→31
+for current graph imports and bounded-child package initialization. Preserve
+checksum trust bootstrap and cover every archive input in both workflow triggers.
+Local static/archive/import checks do not qualify Linux execution. Next require
+exact-head hosted build/inventory/three HTTP cases, the exact saved-image current-DB
+security scan using the existing security-scanner owner, and independent artifact
+review. Keep cloud configuration, real identity, browser and deployment gates open.
+
 ## 2026-11-25 — VOTE typed-media integration
 
 **IMPLEMENTED_CANDIDATE / combined release open.** Port the reviewed two-card

@@ -172,6 +172,20 @@ port0 listener, exercise HTTP draft/rejection/body limits, and reap the process.
 They establish neither container/cloud readiness, a real Clerk identity nor OS
 confinement. The imported development app still requires real tracked static files.
 
+## Linux intake image candidate — 2026-11-27
+
+`Dockerfile.intake` packages the unchanged `intake_host:create_app` factory for
+linux/amd64, nonroot10001:10001 and port8080. Require an independently administered
+readonly `PFMALL_CLERK_POLICY_FILE`; missing/invalid policy stops startup.
+`requirements-container.lock` retains18 runtime distribution pins and wheel
+hashes. The test helper validates31 source/context blobs and exact image inventory.
+`PFMALL_TEST_CONTAINER_IMAGE` is a test-only immutable-image transport selection;
+default `wire_server` behavior and HTTP assertions remain unchanged. The hosted
+transport uses readonly rootfs/policy, dropped capabilities, no-new-privileges,
+256MiB/one CPU/64pids and loopback host publication; bridge networking permits
+egress. Source recovery does not satisfy Linux image/security, cloud, real-session
+or deployment acceptance; retain the existing image hold.
+
 ## Shell-core invariants
 
 1. A manifest is static identity and remains authoritative for identity,

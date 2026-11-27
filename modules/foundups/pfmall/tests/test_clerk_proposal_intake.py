@@ -426,6 +426,10 @@ def test_host_accepts_exact_config_byte_cap(tmp_path, policy, key, monkeypatch):
 @pytest.fixture
 def wire_server(tmp_path):
     """Real child/loopback profile; no OS isolation or graceful-stop claim."""
+    if os.environ.get("PFMALL_TEST_CONTAINER_IMAGE"):
+        from modules.foundups.pfmall.tests.intake_container_profile import container_wire_server
+        yield from container_wire_server(tmp_path, os.environ["PFMALL_TEST_CONTAINER_IMAGE"])
+        return
     children = []
 
     def start(config):

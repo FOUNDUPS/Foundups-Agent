@@ -1,5 +1,61 @@
 # p.fMALL Test ModLog
 
+## 2026-11-27 — Candidate product transaction follows the frozen OS acceptance
+
+Independent review accepted bd2fe9911 before this Dockerfile amendment. Preserve
+all frozen six-version/installed-state/complete87-map assertions and every prior
+Python/package/source/user/HTTP/resource oracle. Product layer requests only six
+signed, exact-version existing-package upgrades; retries0,30-second fetch timeouts,
+no recommends/removal/new packages, and fail-on-index-error remain explicit.
+Static command/pin preservation checks do not prove APT resolution or Linux image
+execution. Any extra name/version delta must fail the existing map guard and stop
+for scope review. Fresh exact-head hosted build/inventory/three image HTTP cases,
+nomination replay, saved-image scan and independent artifact review are pending.
+The original259 scan findings and security hold are retained; no waiver or new
+scanner is introduced. Historical823 nomination cases used provider merge3be;
+the previous3 image HTTP cases used literal e28, not this product candidate.
+Local static parsing PASS:exact six signed pins and guarded flags/timeouts;
+removing the added layer restores the prior Dockerfile byte-for-byte. All declared
+dependency names exist in the baseline map; APT resolution remains unexecuted.
+
+## 2026-11-27 — Freeze exact OS inventory delta after the actual held scan
+
+WSP15 C2/I5/D5/Impact4=16/P0. Saved actual e28ee52de image has259 scan findings,
+57HIGH/15UNKNOWN and zero critical;823 nomination cases ran on provider merge3be,
+while3 image cases ran at literal e28. Neither clears security acceptance.
+Before any Dockerfile repair, assert the six signed-Trixie fixed package versions
+and canonical JSON SHA256 of the complete87-package installed name/version map.
+Expected bf479675a8a15f6e3d6e31bc581df1d0ae2afff1532226bbdd81758a36b600e6 is derived by
+replacing only apt,libapt-pkg7.0,libzstd1,zlib1g,login.defs and passwd versions in
+the saved actual image inventory. Extra upgrades, new/removal packages or changes
+to the other81 versions reject acceptance. Keep Python3.12.15,18 wheel pins and
+all HTTP/image assertions fixed; preserve the original scan and security hold.
+Old-image RED and mutation-boundary results are retained externally; synthetic
+acceptance evidence is not Docker execution. Independent review must accept this
+freeze before a separately authorized exact6-package product transaction.
+Saved actual image rejects with os_security_versions_mismatch; the synthetic
+only-six-version map passes, while six wrong pins, other-version/removal/addition
+and duplicate-package mutations reject. Helper260 lines, maximum function66;
+all prior helper function ASTs remain except the additive OS assertion call.
+
+## 2026-11-27 — Freeze recovered image acceptance against current main
+
+Reuse PR #2227's archive/blob, pin agreement, immutable image inventory and
+container ownership/resource assertions. Preserve all existing HTTP/auth oracles;
+only the explicit image transport opt-in is added to current main's wire fixture.
+Current-main closure requires31 context files, including four leaf imports and
+three bridge package-initialization dependencies. Keep the18 runtime wheel pins,
+main trust bootstrap and both complete input-trigger sets. Freeze this recovery
+before hosted execution. Local Docker engine access is unavailable; exact-head
+Linux build/inventory/three HTTP cases, exact saved-image current-DB scan and
+independent replacement acceptance remain required, with the security hold intact.
+
+Local seven-owner offline replay:820 passed/3 real_server deselected; no live
+listener starts. Primary vetted Python3.12.10 dependencies differ from the image
+pins, so this is regression evidence only. Static checks preserve every old
+test AST after removing the four-line opt-in, the complete main nomination job,
+18-wheel lock bytes, all31 trigger paths and exact27 copied-source/asset inventory.
+
 ## 2026-11-26 — Fractal Tile Graph backend & API test port onto post-HPC main
 
 - Ported `test_fractal_tile_graph.py`, `test_tile_graph_patch_api.py`, `test_member_catalog_export.py` additions, and `test_http_api.py` routes onto post-`#2459` `main` while aligning `schumerout` child count dynamically with `modules/foundups/hpc/mall_projection.json` and post-census tracked paths cleanly.

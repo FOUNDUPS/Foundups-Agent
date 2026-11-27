@@ -82,6 +82,22 @@ CIM metadata and taskkill with a verified-child fallback. This explicit subproce
 loopback profile is not zero-network, OS isolation or graceful-stop evidence.
 Retain every failed fixture/cleanup run and independently challenge cleanup.
 
+## Linux intake image recovery
+
+`intake_container_profile.py` validates31 regular immutable Git blobs before
+Docker receives its archive. Added current-main imports and regular bridge package
+initialization preserve the factory's closure; archive hashes and final copied
+source inventory must match exactly. The same three `real_server` IDs/assertions
+run through `PFMALL_TEST_CONTAINER_IMAGE` only when explicitly set to an immutable
+image ID. Ordinary tests retain their original process fixture. Both workflow
+trigger sets cover every archive file, and main's trust bootstrap is retained.
+Hosted Linux qualification must prove image identity/inventory, PID1/resources,
+loopback HTTP and owned-container cleanup. Windows offline context/import checks
+cannot replace that evidence. Retain the exact saved image for the existing
+security-scanner normalization/current-DB scan and independent review; the old
+image hold is unchanged. Report local dependency versions separately from the
+image's pinned profile.
+
 ## Original pre-rebase baseline
 
 At the original pre-rebase baseline
