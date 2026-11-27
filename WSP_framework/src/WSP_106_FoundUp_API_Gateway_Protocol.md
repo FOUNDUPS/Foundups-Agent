@@ -558,7 +558,8 @@ GET /api/v1/hermes/jobs/{job_id}
 
 ### Ed25519 Signature Scheme
 
-All API requests require Ed25519 signature authentication:
+All requests to the protected `/api/v1` gateway domains defined by this
+protocol require Ed25519 signature authentication:
 
 ```
 Authorization: Ed25519-Signature {pubkey}:{signature}
@@ -588,6 +589,16 @@ headers = {
 ```
 
 ---
+
+### Public conversation namespace
+
+The separate `/api/reddog/public/*` guest conversation contract is governed by
+WSP 73 and `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md`. Its
+bounded session admission grants no protected gateway access. Public dialogue,
+consent, origin headers, self-declared actor type, and Lick evidence cannot
+replace Ed25519 authentication or authorize onboarding, token, platform, build,
+or other protected effects. Public and protected routes must retain separate
+credentials, disclosure scopes, and admission policies.
 
 ## Rate Limiting
 
@@ -728,6 +739,10 @@ sequenceDiagram
 **Status**: ACTIVE
 **First Implementation**: API Gateway service in `modules/infrastructure/api_gateway/`
 **Dependencies**: All referenced WSPs must be implemented first
+
+Protocol status and the illustrative API/service mappings above are not evidence
+that an endpoint is deployed. Record actual source, tests, deployment and live
+verification separately under WSP 97 before claiming a gateway operational.
 
 ---
 

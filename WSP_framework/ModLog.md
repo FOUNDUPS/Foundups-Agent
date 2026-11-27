@@ -1,3 +1,16 @@
+## 2026-11-27 — Public delivery evidence gate & same-outcome WSP 15/73/97/106 convergence
+
+Cherry-ported non-conflicting protocol sections from `feat/reddog-public-openrouter`
+(`#1648`) onto `main`: WSP 15 §3.1 (Same-Outcome Implementation Choice), WSP 73 §6.1
+(Bounded public dialogue deployment), WSP 97 §1.2.2 (Public Delivery Evidence Gate),
+and WSP 106 (Public conversation namespace + operational evidence separation), along
+with byte-identical `WSP_knowledge/src/` mirrors and the remaining architecture docs
+(`extensions/reddog/docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md`,
+`modules/foundups/esingularity/docs/MOSH_PIT_GATEWAY.md`, and
+`modules/foundups/esingularity/docs/REDDOG_PUBLIC_RUNTIME.md`). Conflicting Next.js /
+OpenRouter runtime diffs remain deferred on `#1648`. See
+`extensions/reddog/docs/REDDOG_WEBSITE_DELIVERY_AUDIT_20260909.md`.
+
 ## 2026-11-12 — Host lifecycle and build security requirements
 
 Under 012's explicit directive after abandoned preview processes were stopped,
