@@ -966,6 +966,11 @@
 
     syncTopBarButtons();
     syncFloatingGeometry();
+    // Open may filter/render the rail again before the first frame. Reveal its
+    // selected clip after that work, using the existing navigation owner.
+    if (wikitube) requestAnimationFrame(function () {
+      if (isOpen && wikitube && !mallHidden) updateRailSelection();
+    });
     resetChromeTimer();
     playerFocusTarget()?.focus({ preventScroll: true });
 

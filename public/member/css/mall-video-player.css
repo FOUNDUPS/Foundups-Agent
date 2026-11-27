@@ -613,6 +613,48 @@
   margin-inline: auto;
 }
 
+/* A portrait video's intrinsic height must not push the desktop WikiTube
+   queue and its controls below the window. Size the media from the available
+   stage, retaining the same provider and the existing queue. */
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
+  .video-player-fullscreen.video-player-wikitube:not(.video-player-theater) {
+    overflow: hidden;
+  }
+
+  .video-player-fullscreen.video-player-wikitube:not(.video-player-theater) .video-player-media-panel {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .video-player-wikitube:not(.video-player-theater) .video-player-stage-frame {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .video-player-wikitube:not(.video-player-theater) .video-player-stage {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .video-player-wikitube:not(.video-player-theater) .video-player-queue-panel {
+    display: block;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: 35%;
+    overflow-y: auto;
+  }
+
+  .video-player-wikitube:not(.video-player-theater) > .video-player-shared-dock-host {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 9011;
+  }
+}
+
 /* On short viewports, scroll the queue rather than clipping native player controls. */
 .video-player-queue-docked:has(> .video-player-shared-dock-host) .video-player-media-panel {
   flex: 1 0 auto;

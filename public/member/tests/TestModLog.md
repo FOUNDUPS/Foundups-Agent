@@ -1,3 +1,139 @@
+## 2026-11-28 — Desktop WikiTube selection and reachable controls
+
+Extend the existing preference VM with actual capability combinations, legacy
+v1 records, each explicit saved destination and blocked storage. The desktop
+default requires >=900px, hover and a fine pointer; passive reads never persist
+it. Preference25, worker/state30, routing21, static160, guest-entry and player
+policy checks passed on the candidate's bound source snapshot.
+
+Add existing-runner cases `desktop-default-wikitube`,
+`desktop-native-wikitube` and `phone-default-floating`. Measure desktop1440x900,
+1280x720,900x720 and1280x500, plus the899px boundary, saved choices after reload,
+scoped queue/selection and actual return action/focus/positive scroll. Phone
+414x896 and402x874 retain coarse/touch Floating. Native portrait assets are a
+private fixture; an approved animation fallback is not a native-decode pass.
+
+Retain the failed first run: the bounded desktop stage fit, but the queue
+intercepted the overlay Dock's input and actions. Give the existing Dock host
+its own layer above the queue. Separately correct the test oracle to use the
+visible Return to Mall owner rather than a hidden top-bar Back or assuming
+Escape Close has the same caller semantics. Exact final interaction and staged
+preview results remain in the existing Wave5 receipt; no physical Safari,
+universal canvas, module graph or AutoPost consumer acceptance follows from
+these cases. CI runs these cases behind the existing security job.
+
+The strong deep-entry case then reproduced an offscreen active queue tile.
+Preserve its active-item hit test and repair the existing player presentation
+owner to center the selected tile after its initial render/filter frame. Keep
+guards for closed/hidden/changed presentation. A genuinely overflowing900x500
+caller at clip30 replaces the earlier non-overflowing1440x900 setup; the positive
+scroll assertion remains mandatory. The final working-snapshot run passed all
+eight selected engine/viewport rows with stable public bytes, including exact
+positive-scroll/focus return for all three saved destinations. Committed source,
+generic staged media and any hosted test preview require their own bindings.
+
+The exact LF-stage replay preserved two additional findings. Its desktop Pause
+oracle referenced a nonexistent menu action; qualify the existing native Pause
+control using the observed UI and advancing/stopped media time instead of
+inventing an app action. Its strict overlay check correctly found the inherited
+desktop block-navigator rule reserving132px outside the field. Extend the same
+desktop-default case with full17-card root geometry at all four sizes:16px
+shell gutter, content behind the Dock, real maximum scroll, last-card reach
+above both overlays and hit testing. Preserve all strong deep-entry and phone
+assertions. The public-only stylesheet repair moves clearance inside the tail;
+private/member and dedicated HPC layouts retain their existing rules.
+
+The revised desktop root checks passed both engines at all four sizes with
+stable source. Natural paging observes actual append before retrying a pager
+that the observer removed; a remaining manual pager still requires a real hit
+and pointer activation. Record requested maximum, actual positive scroll and
+computed native proximity snapping. Require the last card to be reachable and
+hit-testable above both overlays, without forcing the browser to an exact snap
+offset. The final desktop2 plus unchanged native/phone6 focus rows pass;
+four existing app-grip gesture rows also pass at414/402. Preserve the current
+main gesture grammar and13 transitions per row; this is neither the unmerged
+HPC grammar nor full-surface canvas/native-provider/device qualification.
+
+## 2026-11-27 — Explicit phone sizes, poster geometry and overlay dock
+
+The existing phone runner accepts `--phone-size 414x896` and `402x874` as
+explicit CSS mobile/touch fixtures. The public-entry selection also retains
+390 ×844 and1366 ×900. Chromium uses context-offline; Windows WebKit1.57's
+offline flag fails before route interception, so its fixture uses a closed
+loopback proxy, a negative escape probe, unmatched-request aborts and WebSocket
+blocking. These are anonymous emulated contexts, not physical Safari evidence.
+
+Guest dock assertions require Add hidden, disabled and zero-sized, with no
+synthetic-click request, navigation or admission intent. Visible controls keep
+their 44px/hit-test checks; dedicated HPC contribution behavior remains covered.
+The existing public-header case now checks themed poster cover/center/no-repeat,
+the avatar-contain CSS state, no reserved shell dock block, field content behind
+the dock, and positive scrolling that exposes the final tile above its overlay.
+It exercises both full height and a500px reduced viewport without claiming a
+physical keyboard or safe-area test. All four engine/phone-size rows passed;
+the eight public-entry rows and160 existing static contracts passed separately.
+
+Private paired renders preserve the older missing-poster and notice-overlap
+findings and the first mistaken standalone-detail oracle. The actual expansion
+owner is the in-page `mallPlanes` detail; public entry HTML is tested separately.
+The separate full17-record diagnosis preserved a real existing focus-scroll
+defect: plain tile focus on Close moved Chromium452→665 and437→644 on the
+baseline, and452→677 and437→656 after the layout correction. The12-record
+sample did not qualify that path. Extend this same public-header case with an
+actual partly visible `kids_episodes` card, in-page expansion and Close, stable
+wrapper geometry, article focus and scroll comparison after two animation
+frames, with no forced scroll after setup. The reviewed `preventScroll` focus
+fix passed all four engine/phone-size working-snapshot rows:452→452 at414 ×896
+and437→437 at402 ×874 in Chromium and WebKit. Both close deltas were zero;
+the original failing diagnosis remains retained. Final committed-source and
+immutable-preview readbacks remain separate from these working-snapshot tests.
+The final representative navigation rows verify real positive scroll/focus
+return, decoded staged images, notice/header separation and the corrected dock
+geometry. The controlled sample remains one silent five-second clip repeated
+in six labeled queue slots, not six productions or a new canonical FoundUp.
+
+Actual Chromium native decoding, media time/frames, observed native Pause,
+Next cleanup and positive-scroll return are separate from mocked YouTube tests.
+The inherited unchanged player warms the public YouTube API script; private
+offline checks record and abort that exact request and the exact font CSS,
+while retaining the earlier overstrict zero-attempt failure. They still forbid
+actual YouTube API/iframe/mock, unexpected foreign media, auth and protected
+requests. Windows WebKit reports actual codec error4 with no decoded frames;
+it is unsupported, not a native playback pass. Physical Safari/Home Screen,
+audio, live provider gestures, canvas, dock type picker and Podcast remain
+unexecuted or unimplemented. No production or held HPC promotion is certified.
+
+## 2026-11-27 — Independent public entry and guest boundaries
+
+Extended the existing routing VM and scoped-browser fixture with
+`mall_scoped_video_browser.py --public-entry`. Existing legacy cases remain.
+Checks cover the CTA's exact destination and placement, actual44px-minimum
+target/keyboard navigation at390 ×844 and1366 ×900, guest boot without account
+requests, hidden/disabled contribution controls, synthetic-click no effects,
+Play-scoped versus dedicated HPC, public detail deep links, explicit admission
+fail-closed behavior and the exact dated preview family. Browser routes/provider
+events are controlled; no live identity or backend authorization is certified.
+
+Local source-bound results: routing21, member boot35, preferences21, targeted
+static contracts160 and four engine/viewport public-entry rows passed. Actual
+CTA dimensions are196.45 ×57.59px in Chromium and196.45 ×57px in WebKit. Full
+canvas/video same-footprint swaps, dock-origin content selection, Podcast,
+physical Safari/Home Screen and production remain unimplemented or unqualified;
+do not substitute these entry tests for those acceptance gates.
+
+Added an independent `public-play-entry` job to the existing shared CI workflow,
+after its security gate, using the existing pinned Playwright1.62 profile.
+Exact source, logs, runtime versions and stable file hashes are retained. Local
+workflow parsing and40 existing pipeline contracts passed; hosted execution is
+separate from the local Playwright1.57 results. The HPC branch workflow is untouched.
+
+The broader `--entry-regressions` selection fails on both unchanged mainf67 and
+this candidate at the same old VOTE quick-view expectation (apex admission versus
+the existing Browse Shorts link). Its assertion is preserved. Later cases in that
+selection remain unexecuted; the focused new entry, six player-policy and six
+shared-stage rows passed separately. Existing controlled gestures verify the
+app-owned YouTube surround, not full-surface canvas or native embed gestures.
+
 ## 2026-11-25 — Tucked tap without compatibility click
 
 The29a full hosted run caught both floating-frame-controls and the hidden-policy

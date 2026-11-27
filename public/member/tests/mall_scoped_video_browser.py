@@ -12,6 +12,7 @@ from urllib.parse import urlsplit
 import json
 import mimetypes
 import re
+import socket
 from playwright.sync_api import expect, sync_playwright
 
 public = Path("public").resolve()
@@ -142,10 +143,48 @@ provider = """(() => {
   };
 })();"""
 
+
+def offline_fixture_context(browser, **options):
+    """No internet delivery, including Windows WebKit's broken offline flag.
+
+    WebKit1.57 fails before route interception when offline=True. Its closed
+    loopback proxy is negatively probed before any application fixture loads.
+    Callers still abort every unmatched request; WebSockets are closed here.
+    """
+    assert 'offline' not in options and 'proxy' not in options
+    if browser.browser_type.name == 'webkit':
+        with socket.socket() as connection:
+            connection.settimeout(.5)
+            assert connection.connect_ex(('127.0.0.1', 9)) != 0, 'Required closed proxy port is listening'
+        context=browser.new_context(**options,proxy={'server':'http://127.0.0.1:9','bypass':''})
+        probe=context.new_page();failure=None
+        try:
+            probe.goto('https://offline-escape.invalid/',timeout=2500)
+        except Exception as error:
+            assert type(error).__name__!='TimeoutError', 'Proxy probe timed out without refusal'
+            failure=str(error)[:500]
+        finally:
+            probe.close()
+        if failure is None:
+            context.close()
+            raise AssertionError('Closed proxy allowed unfulfilled navigation')
+        transport={'mode':'closed-loopback-proxy','context_offline_flag':False,'negative_escape':failure}
+    else:
+        context=browser.new_context(**options,offline=True)
+        transport={'mode':'context-offline','context_offline_flag':True}
+    transport['websockets_blocked']=0
+    def close_socket(socket):
+        transport['websockets_blocked']+=1
+        socket.close()
+    context.route_web_socket('**/*',close_socket)
+    return context,transport
+
 def route_local(route):
     u = urlsplit(route.request.url)
     if u.hostname in {"hpc.foundups.com", "foundups.com", "play.foundups.com",
-                      "foundupscom--play-v26-iphone-jxbn78ue.web.app"}:
+                      "foundupscom--play-v26-iphone-jxbn78ue.web.app",
+                      "foundupscom--play-wave5-20261127-fixture.web.app",
+                      "foundupscom--play-wave5-phone-20261127-fixture.web.app"}:
         if u.path == "/member/mall-public-video-catalog.json":
             route.fulfill(status=200, json=catalog)
             return
@@ -1981,6 +2020,102 @@ def verify_hidden_playback_policy(browser_type):
         "provider":"controlled YT API fixture","physical_iPhone":"UNEXECUTED"},sort_keys=True))
 
 
+def verify_public_entry(browser_type):
+    """Current public guest/CTA boundary; no live auth or provider requests."""
+    browser=browser_type.launch()
+    observed=[]
+    try:
+        for width,height in [(390,844),(414,896),(402,874),(1366,900)]:
+            context,transport=offline_fixture_context(browser,viewport={'width':width,'height':height},
+                is_mobile=width<760,has_touch=width<760,
+                service_workers='block',reduced_motion='reduce')
+            requested=[]
+            def routes(route):
+                requested.append(route.request.url)
+                route_local(route)
+            def private_requests(start):
+                return [url for url in requested[start:] if 'clerk' in url or 'firebase' in url]
+            try:
+                context.add_init_script(provider)
+                context.add_init_script('window.IntersectionObserver=undefined')
+                context.route('**/*',routes)
+                page=context.new_page();page.set_default_timeout(6000)
+                page.goto('https://foundups.com/',wait_until='domcontentloaded')
+                cta=page.locator('#playFoundupsCta')
+                cta.scroll_into_view_if_needed()
+                expect(cta).to_be_visible()
+                expect(cta).to_have_attribute('href','https://play.foundups.com/')
+                box=cta.bounding_box()
+                assert box and box['width']>=44 and box['height']>=44,box
+                assert 0<=box['x'] and box['x']+box['width']<=width,box
+                expect(page.locator('#enterBtn')).to_have_count(1)
+                guest_start=len(requested)
+                cta.press('Enter')
+                expect(page).to_have_url('https://play.foundups.com/member/')
+                expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
+                expect(page.get_by_role('textbox',name='Search the Mall',exact=True)).to_be_visible()
+                add=page.locator('.mall-search-add')
+                expect(add).to_be_hidden();expect(add).to_be_disabled()
+                expect(page.locator('.mall-grid-add-video')).to_have_count(0)
+                assert private_requests(guest_start)==[],private_requests(guest_start)
+                before=list(requested)
+                add.evaluate("el=>el.dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+                expect(page.locator('#mallContributionReview')).to_have_count(0)
+                assert page.evaluate('window.mallStateRestore.peekAdmissionIntent()') is None
+                assert requested==before,requested
+                assert page.url=='https://play.foundups.com/member/'
+                if width<760:
+                    guest_start=len(requested)
+                    page.goto('https://play.foundups.com/member/?foundup=hpc',wait_until='domcontentloaded')
+                    expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
+                    expect(page.locator('.mall-search-add')).to_be_hidden()
+                    expect(page.locator('.mall-search-add')).to_be_disabled()
+                    expect(page.locator('.mall-grid-add-video')).to_have_count(0)
+                    before=list(requested)
+                    page.locator('.mall-search-add').evaluate("el=>el.dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+                    expect(page.locator('#mallContributionReview')).to_have_count(0)
+                    assert page.evaluate('window.mallStateRestore.peekAdmissionIntent()') is None
+                    assert requested==before,requested
+                    assert private_requests(guest_start)==[],private_requests(guest_start)
+                    page.goto('https://hpc.foundups.com/member/',wait_until='domcontentloaded')
+                    expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
+                    expect(page.locator('.mall-search-add')).to_be_enabled()
+                    expect(page.get_by_role('button',name='Add Video to HPC',exact=True)).to_be_visible()
+                    guest_start=len(requested)
+                    page.goto('https://play.foundups.com/member/?enter=gotjunk_001',wait_until='domcontentloaded')
+                    expect(page).to_have_url('https://play.foundups.com/member/foundup.html?id=gotjunk_001')
+                    expect(page.locator('.entry-hero-name')).to_be_visible()
+                    assert private_requests(guest_start)==[],private_requests(guest_start)
+                    page.goto('https://play.foundups.com/member/?admission=resume',wait_until='domcontentloaded')
+                    expect(page.locator('#inviteGate')).to_be_visible()
+                    expect(page.locator('#mallTileField .mall-tile')).to_have_count(0)
+                    assert page.url=='https://play.foundups.com/member/?admission=resume'
+                    guest_start=len(requested)
+                    preview='https://foundupscom--play-wave5-phone-20261127-fixture.web.app'
+                    # A fulfilled redirect can bypass route interception. Stay hard
+                    # offline and render the exact member document directly.
+                    page.goto(preview+'/member/',wait_until='domcontentloaded')
+                    expect(page).to_have_url(preview+'/member/')
+                    expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
+                    expect(page.locator('.mall-search-add')).to_be_hidden()
+                    expect(page.locator('.mall-search-add')).to_be_disabled()
+                    assert private_requests(guest_start)==[],private_requests(guest_start)
+                observed.append({'viewport':[width,height],'cta_box':box,
+                    'mobile_touch':width<760,'hard_offline':True,
+                    'transport':transport,
+                    'keyboard_to_public_guest':True,'guest_auth_requests':0,
+                    'guest_add_hidden_disabled_no_synthetic_effect':True,
+                    'scoped_hpc_dedicated_hpc_detail_admission_preview':width<760})
+                assert transport['websockets_blocked']==0,transport
+            finally:
+                context.close()
+    finally:
+        browser.close()
+    print(json.dumps({'engine':browser_type.name,'public_entry':observed,
+        'network':'local route fixtures; unmatched requests aborted','real_auth':'UNEXECUTED',
+        'editor_authority':'UNEXECUTED','physical_iPhone':'UNEXECUTED'},sort_keys=True))
+
+
 def verify_public_discovery_cards(browser_type):
     """Card identity, accessible About, canonical entry and planning-only House.
 
@@ -2404,6 +2539,11 @@ def verify_public_entity_slice(browser_type):
 
 if __name__ == "__main__":
     import sys
+    if sys.argv[1:] == ["--public-entry"]:
+        with sync_playwright() as p:
+            for engine in (p.chromium,p.webkit):
+                verify_public_entry(engine)
+        raise SystemExit(0)
     if sys.argv[1:] == ["--header-entities"]:
         with sync_playwright() as p:
             for engine in (p.chromium,p.webkit):

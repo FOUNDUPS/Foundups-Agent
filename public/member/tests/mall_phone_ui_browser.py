@@ -15,6 +15,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--root', type=Path, default=Path.cwd())
 parser.add_argument('--out', type=Path)
 parser.add_argument('--case', action='append', default=[])
+parser.add_argument('--phone-size', choices=['414x896', '402x874'], default='414x896',
+                    help='Explicit CSS mobile/touch fixture; not physical Safari viewport qualification')
 parser.add_argument('--include-defensive', action='store_true',
                     help='Run separately reviewed history literal-rendering checks after its defensive source patch is adopted')
 args = parser.parse_args()
@@ -25,7 +27,7 @@ OUT.parent.mkdir(parents=True, exist_ok=True)
 os.chdir(ROOT)
 sys.path.insert(0, str(ROOT / 'public/member/tests'))
 import mall_scoped_video_browser as fixture
-from playwright.sync_api import expect, sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError, expect, sync_playwright
 
 REPORT = {
     'provider': 'Controlled YT API fixture; VOTE uses real source-bound local MP4 bytes. All requests intercepted.',
@@ -41,7 +43,8 @@ REPORT = {
         'status': 'SELECTED_REQUIRES_REVIEWED_SOURCE' if args.include_defensive or 'history-literal-rendering' in args.case
                   else 'PENDING_SEPARATE_DEFENSIVE_REVIEW',
         'engines': ['chromium', 'webkit']},
-    'viewport': {'width': 414, 'height': 896},
+    'viewport': dict(zip(('width', 'height'), map(int, args.phone_size.split('x')))),
+    'device_qualification': 'Explicit CSS mobile/touch fixture; physical Safari, safe area and keyboard UNEXECUTED',
     'playwright': importlib.metadata.version('playwright'),
     'root': str(ROOT), 'cases': [], 'started_epoch': time.time(),
 }
@@ -65,7 +68,7 @@ def assert_true(condition, detail):
 
 
 def make_page(browser, block=False, block_storage=False, silent_start=False, desktop=False, hold_ready=False):
-    context = browser.new_context(viewport={'width': 1440, 'height': 900} if desktop else REPORT['viewport'], is_mobile=not desktop,
+    context, transport = fixture.offline_fixture_context(browser,viewport={'width': 1440, 'height': 900} if desktop else REPORT['viewport'], is_mobile=not desktop,
                                   has_touch=not desktop, service_workers='block',
                                   reduced_motion='reduce')
     init = fixture.provider + ('\nif(window.fixturePlayback)window.fixturePlayback.block=true;' if block else '')
@@ -91,7 +94,7 @@ def make_page(browser, block=False, block_storage=False, silent_start=False, des
     page = context.new_page()
     page.set_default_timeout(3500)
     page.set_default_navigation_timeout(8000)
-    return context, page
+    return context, page, transport
 
 
 def boot(page, hpc=False):
@@ -212,14 +215,17 @@ def checkpoint(page, name):
       const docks=[...document.querySelectorAll('.mall-member-search-dock')].filter(visible);
       const dock=docks[0],input=dock?.querySelector('textarea'),r=input?.getBoundingClientRect();
       const scopedActions=document.documentElement.dataset.mallVideoScope==='hpc';
-      const add=dock?.querySelector(scopedActions?'.mall-search-plus':'.mall-search-add'),ar=add?.getBoundingClientRect();
+      const guest=!!window.mallVideoProjection?.isOpenMallHost(location)&&!window.mallVideoProjection.isAdmissionRequest(location);
+      const contribution=dock?.querySelector('.mall-search-add');
+      const add=dock?.querySelector(scopedActions||guest?'.mall-search-plus':'.mall-search-add'),ar=add?.getBoundingClientRect();
       return {count:docks.length,same:!window.independentDock||dock===window.independentDock,
         inert:!!dock?.closest('[inert]'),inputRect:r?.toJSON(),
         inputHit:r?document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===input:false,
         sameFrame:!window.independentFrame||document.querySelector('#videoPlayerFullscreen iframe')===window.independentFrame,
         created:window.fixturePlayback.created,state:window.mallVideoPlayer?.getPlaybackSnapshot?.(),
         addRect:ar?.toJSON(),addPosition:add?getComputedStyle(add).position:null,
-        addKind:scopedActions?'actions':'contribution',
+        guest,contributionHidden:!!contribution?.hidden,contributionDisabled:!!contribution?.disabled,
+        addKind:scopedActions||guest?'actions':'contribution',
         addHit:ar?add.contains(document.elementFromPoint(ar.left+ar.width/2,ar.top+ar.height/2)):false,
         modalDock:!!dock?.closest('.video-player-shared-dock-host'),
         scrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
@@ -234,6 +240,9 @@ def checkpoint(page, name):
     assert_true(value['addRect']['width'] >= 44 and value['addRect']['height'] >= 44,
                 {'checkpoint': name, 'small_add_target': value})
     assert_true(value['addHit'], {'checkpoint': name, 'action_obscured': value})
+    if value['guest']:
+        assert_true(value['contributionHidden'] and value['contributionDisabled'],
+                    {'checkpoint': name, 'guest_contribution_exposed': value})
     assert_true(not value['modalDock'] or value['addPosition'] != 'absolute',
                 {'checkpoint': name, 'modal_add_left_absolute': value})
     return value
@@ -246,21 +255,114 @@ def public_action_layout(page, name):
         dog=anchor.querySelector(':scope > .red-dog-btn'),add=dock.querySelector('.mall-search-add'),
         input=dock.querySelector('.mall-member-search-bar textarea');
       const d=dog.getBoundingClientRect(),a=add.getBoundingClientRect(),i=input.getBoundingClientRect();
+      const guest=!!window.mallVideoProjection?.isOpenMallHost(location)&&!window.mallVideoProjection.isAdmissionRequest(location);
       const hit=(e,r)=>e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2));
       return {dog:d.toJSON(),add:a.toJSON(),input:i.toJSON(),dogHit:hit(dog,d),addHit:hit(add,a),
+        guest,addHidden:add.hidden,addDisabled:add.disabled,
+        controls:[...dock.querySelectorAll('button:not([hidden]),a:not([hidden])')].filter(e=>e.getClientRects().length).map(e=>{
+          const r=e.getBoundingClientRect();return {name:e.getAttribute('aria-label')||e.textContent.trim(),rect:r.toJSON(),hit:hit(e,r)};}),
         inputHit:hit(input,i),expanded:dock.querySelector('form').hasAttribute('data-expanded'),
         viewportWidth:innerWidth,scrollWidth:document.documentElement.scrollWidth};
     }""")
-    assert_true(value['dog']['width'] >= 44 and value['dog']['height'] >= 44 and
-                value['add']['width'] >= 44 and value['add']['height'] >= 44,
+    assert_true(value['dog']['width'] >= 44 and value['dog']['height'] >= 44,
                 {'layout': name, 'small_touch_target': value})
-    assert_true(value['dog']['x'] + value['dog']['width'] <= value['add']['x'] + 1,
-                {'layout': name, 'dog_not_before_add': value})
-    assert_true(value['dogHit'] and value['addHit'] and value['inputHit'],
+    if value['guest']:
+        assert_true(value['addHidden'] and value['addDisabled'] and value['add']['width'] == 0 and value['add']['height'] == 0,
+                    {'layout': name, 'guest_contribution_exposed_or_reserved': value})
+        requests=[]
+        listener=lambda request:requests.append(request.url)
+        page.on('request',listener)
+        before=page.evaluate('JSON.stringify(window.mallStateRestore.peekAdmissionIntent())')
+        original_url=page.url
+        page.locator('.mall-search-add').evaluate("e=>e.dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+        page.wait_for_timeout(30)
+        page.remove_listener('request',listener)
+        assert_true(not requests and page.url==original_url and page.evaluate('JSON.stringify(window.mallStateRestore.peekAdmissionIntent())')==before and page.locator('#mallContributionReview').count()==0,
+                    {'layout':name,'guest_synthetic_add_effect':requests})
+    else:
+        assert_true(value['add']['width'] >= 44 and value['add']['height'] >= 44 and value['addHit'],
+                    {'layout': name, 'contribution_target': value})
+        assert_true(value['dog']['x'] + value['dog']['width'] <= value['add']['x'] + 1,
+                    {'layout': name, 'dog_not_before_add': value})
+    assert_true(all(c['rect']['width']>=44 and c['rect']['height']>=44 and c['hit'] for c in value['controls']),
+                {'layout':name,'remaining_control_target':value})
+    assert_true(value['dogHit'] and value['inputHit'],
                 {'layout': name, 'controls_obscured': value})
     assert_true(value['scrollWidth'] <= value['viewportWidth'] + 1,
                 {'layout': name, 'overflow': value})
     return value
+
+
+def public_detail_scroll_return(page):
+    """Close a real, partly visible full17 card without focus scrolling it."""
+    tile=page.locator('.mall-tile[data-foundup-id="kids_episodes"]')
+    button=tile.locator('.mall-card-front .mall-card-expand-detail')
+    expect(button).to_be_visible()
+    # Setup only: leave the real card partly below the dock, with its button
+    # exposed. No scroll or focus repair runs after opening or closing.
+    button.evaluate("""e=>{const w=e.closest('.mall-tile-field-wrapper'),d=document.querySelector('#redDogAnchor');
+      const bottom=Math.min(w.getBoundingClientRect().bottom,d.getBoundingClientRect().top);
+      w.scrollTo({top:w.scrollTop+e.getBoundingClientRect().top-(bottom-55),behavior:'instant'});} """)
+    def snapshot():
+        return page.evaluate("""()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          const w=document.querySelector('.mall-tile-field-wrapper');resolve({top:w.scrollTop,rect:w.getBoundingClientRect().toJSON(),focusId:document.activeElement?.dataset?.foundupId||null});
+        })))""")
+    before=snapshot()
+    assert_true(before['top']>1, {'plane_return_missing_positive_scroll_setup':before})
+    button.click()
+    plane=page.locator('#foundupViewPlane')
+    expect(plane).to_have_class(__import__('re').compile(r'\bopen\b'))
+    opened=snapshot()
+    page.locator('#foundupViewClose').click()
+    expect(plane).not_to_have_class(__import__('re').compile(r'\bopen\b'))
+    after=snapshot()
+    result={'id':'kids_episodes','before':before,'open':opened,'after_two_animation_frames':after,
+            'close_delta':after['top']-opened['top'],'no_forced_scroll_after_setup':True}
+    assert_true(abs(opened['top']-before['top'])<=2 and abs(result['close_delta'])<=2 and
+                after['focusId']=='kids_episodes' and after['rect']==before['rect'],
+                {'full17_plane_close_scroll_or_focus_regression':result})
+    return result
+
+
+def public_poster_and_overlay(page):
+    """Actual shared CSS, poster/one avatar state, and no reserved dock block."""
+    total=len(json.loads((ROOT/'public/member/mall-video-catalog.json').read_text(encoding='utf-8')))
+    fixture.materialize_public_cards(page,total)
+    tile=page.locator('.mall-tile[data-foundup-id="science_swarm"]')
+    expect(tile).to_have_count(1)
+    poster=tile.evaluate("e=>{const s=getComputedStyle(e);return {size:s.backgroundSize,position:s.backgroundPosition,repeat:s.backgroundRepeat,type:e.dataset.tileType}}")
+    assert_true(poster['size']=='cover' and poster['position']=='50% 50%' and poster['repeat']=='no-repeat',
+                {'themed_poster_css_reset':poster})
+    avatar=tile.evaluate("""e=>{const original=e.dataset.tileType;e.dataset.tileType='avatar';
+      const s=getComputedStyle(e),result={size:s.backgroundSize,position:s.backgroundPosition,repeat:s.backgroundRepeat};
+      e.dataset.tileType=original;return result;}""")
+    assert_true(avatar=={'size':'contain','position':'50% 50%','repeat':'no-repeat'}, {'avatar_css_state':avatar})
+    measured=[]
+    for height in (REPORT['viewport']['height'],500):
+        page.set_viewport_size({'width':REPORT['viewport']['width'],'height':height})
+        wrapper=page.locator('.mall-tile-field-wrapper')
+        wrapper.evaluate('e=>e.scrollTo({top:e.scrollHeight,behavior:"instant"})')
+        page.wait_for_function("""()=>{const t=document.querySelector('#mallTileField .mall-tile:last-of-type'),d=document.querySelector('#redDogAnchor');
+          return t&&d&&t.getBoundingClientRect().bottom<=d.getBoundingClientRect().top+1;}""")
+        value=page.evaluate("""()=>{
+          const shell=document.querySelector('.mall-shell'),field=document.querySelector('.mall-tile-field-wrapper'),
+            grid=document.querySelector('#mallTileField'),dock=document.querySelector('#redDogAnchor'),last=grid.querySelector('.mall-tile:last-of-type');
+          const rect=e=>e.getBoundingClientRect().toJSON(),s=getComputedStyle(shell),f=getComputedStyle(field);
+          return {viewport:[innerWidth,innerHeight],shell:rect(shell),shellPaddingBottom:parseFloat(s.paddingBottom),shellRows:s.gridTemplateRows,
+            field:rect(field),fieldPaddingBottom:f.paddingBottom,grid:rect(grid),gridPaddingBottom:parseFloat(getComputedStyle(grid).paddingBottom),
+            dock:rect(dock),dockPosition:getComputedStyle(dock).position,last:rect(last),scrollTop:field.scrollTop,scrollMaximum:field.scrollHeight-field.clientHeight,
+            safeBottom:parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom'))||0};
+        }""")
+        assert_true(value['shellPaddingBottom']<=max(16,value['safeBottom'])+1 and value['field']['bottom']>value['dock']['top']+1,
+                    {'reserved_dock_layout_block':value})
+        assert_true(value['dockPosition']=='fixed' and value['gridPaddingBottom']>=value['dock']['height']+12 and
+                    value['last']['bottom']<=value['dock']['top']+1 and value['scrollTop']>1,
+                    {'dock_overlay_tail_or_positive_scroll':value})
+        measured.append(value)
+    page.set_viewport_size(REPORT['viewport'])
+    detail_return=public_detail_scroll_return(page)
+    return {'poster':poster,'avatar_css_state':avatar,'overlay_and_scroll_tail':measured,
+            'full17_detail_return':detail_return,'physical_keyboard_safe_area':'UNEXECUTED'}
 
 
 def public_header(page):
@@ -274,13 +376,14 @@ def public_header(page):
     expect(page.locator('#redDogListening')).not_to_be_visible()
     b, a = brand.bounding_box(), account.bounding_box()
     assert_true(abs(b['y'] + b['height']/2 - a['y'] - a['height']/2) <= 12,
-                {'header_not_compact_one_row_at414': {'brand': b, 'account': a}})
+                {'header_not_compact_one_row': {'viewport':REPORT['viewport'],'brand': b, 'account': a}})
+    poster_overlay=public_poster_and_overlay(page)
     page.screenshot(path=str(OUT.with_name(OUT.stem + '-' + REPORT['engine'] + '-public-header.png')))
-    layouts = [public_action_layout(page, 'default-414')]
+    layouts = [public_action_layout(page, 'default-'+args.phone_size)]
     search = page.locator('.mall-member-search-dock:visible .mall-member-search-bar textarea')
     search.fill('A viewport-sized Mall query for checking wrapped input and both trailing actions. ' * 3)
     expect(page.locator('.mall-member-search-dock:visible .mall-member-search-bar')).to_have_attribute('data-expanded', '')
-    layouts.append(public_action_layout(page, 'expanded-query-414'))
+    layouts.append(public_action_layout(page, 'expanded-query-'+args.phone_size))
     search.fill('')
     expect(page.locator('#mallProjection')).to_have_count(1)
     expect(page.locator('#mallProjection')).not_to_be_visible()
@@ -313,7 +416,7 @@ def public_header(page):
     page.set_viewport_size(REPORT['viewport'])
     page.locator('#mallAvatarTrigger').tap()
     page.wait_for_url('https://play.foundups.com/?signin=required')
-    return {'header': header.bounding_box() if page.locator('.mall-header').count() else None,
+    return {'poster_overlay':poster_overlay,'header': header.bounding_box() if page.locator('.mall-header').count() else None,
             'branding_account_initial': {'brand': b, 'account': a},
             'filters_moved_once_and_operable': True, 'account_destination': page.url,
             'idle_listening_hidden': True, 'action_layouts': layouts}
@@ -538,6 +641,200 @@ def retained_snapshot(page):
       focus:document.activeElement?.dataset?.videoId||document.activeElement?.dataset?.foundupId,
       bodyOverflow:document.body.style.overflow,memberInert:document.querySelector('#memberArea').inert,
       width:innerWidth,touch:matchMedia('(pointer:coarse)').matches})""")
+
+
+def desktop_wikitube_geometry(page):
+    geometry = page.evaluate("""() => {
+      const box=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom}};
+      const player=document.querySelector('#videoPlayerFullscreen');
+      const dock=player.querySelector('.mall-member-search-dock:not([hidden])');
+      const item=player.querySelector('.video-player-queue-item.active');
+      const itemBox=item?.getBoundingClientRect();
+      const input=dock?.querySelector('textarea');const inputBox=input?.getBoundingClientRect();
+      return {viewport:{width:innerWidth,height:innerHeight},
+        fine:matchMedia('(pointer:fine)').matches,hover:matchMedia('(hover:hover)').matches,
+        player:box(player),stage:box(player.querySelector('.video-player-stage')),
+        queue:box(player.querySelector('.video-player-queue-panel')),dock:dock&&box(dock),
+        queueEdgeHit:!!itemBox&&item.contains(document.elementFromPoint(itemBox.left+12,itemBox.top+12)),
+        dockInputHit:!!inputBox&&input===document.elementFromPoint(inputBox.left+inputBox.width/2,inputBox.top+inputBox.height/2)};
+    }""")
+    for name in ['player', 'stage', 'queue', 'dock']:
+        box = geometry[name]
+        assert_true(box and box['width'] > 0 and box['height'] > 0 and box['x'] >= -1 and box['y'] >= -1 and
+                    box['right'] <= geometry['viewport']['width']+1 and box['bottom'] <= geometry['viewport']['height']+1,
+                    {'offscreen_wikitube_surface': name, 'geometry': geometry})
+    assert_true(geometry['fine'] and geometry['hover'] and geometry['queueEdgeHit'] and geometry['dockInputHit'], geometry)
+    return geometry
+
+
+def desktop_default_wikitube(page):
+    modes = {'floating': 'Floating video player', 'wikitube': 'WikiTube video player', 'full-video': 'Full Video in app'}
+    measured = []
+    root_geometry = []
+    for width, height in [(1440, 900), (1280, 720), (900, 720), (1280, 500)]:
+        page.set_viewport_size({'width': width, 'height': height})
+        boot(page)
+        total = len(json.loads((ROOT/'public/member/mall-video-catalog.json').read_text(encoding='utf-8')))
+        wrapper = page.locator('.mall-tile-field-wrapper')
+        paging = []
+        for _ in range((total+5)//6+1):
+            count = page.locator('#mallTileField .mall-tile').count()
+            assert_true(count <= total, {'unexpected_root_card_count': count, 'expected': total})
+            if count == total: break
+            wrapper.evaluate('e=>e.scrollTo({top:e.scrollHeight,behavior:"instant"})')
+            try:
+                page.wait_for_function('n=>document.querySelectorAll("#mallTileField .mall-tile").length>n', arg=count, timeout=700)
+                paging.append({'before': count, 'after': page.locator('#mallTileField .mall-tile').count(), 'via': 'observer_after_actual_scroll'})
+                continue
+            except PlaywrightTimeoutError:
+                pass
+            button = page.get_by_role('button', name='Load more cards', exact=True)
+            try:
+                probe = button.evaluate("""e=>{const r=e.getBoundingClientRect();return {
+                  count:document.querySelectorAll('#mallTileField .mall-tile').length,rect:r.toJSON(),
+                  hit:e.contains(document.elementFromPoint(r.left+r.width/2,r.top+r.height/2))};}""")
+                if probe['count'] <= count:
+                    assert_true(probe['hit'], {'live_root_pager_not_hit_testable': probe})
+                    button.click()
+                page.wait_for_function('n=>document.querySelectorAll("#mallTileField .mall-tile").length>n', arg=count)
+                paging.append({'before': count, 'after': page.locator('#mallTileField .mall-tile').count(), 'via': 'live_pointer_or_concurrent_observer', 'probe': probe})
+            except PlaywrightTimeoutError:
+                appended = page.locator('#mallTileField .mall-tile').count()
+                assert_true(appended > count, {'root_paging_did_not_advance': count})
+                paging.append({'before': count, 'after': appended, 'via': 'observer_replaced_pointer_target'})
+        assert_true(page.locator('#mallTileField .mall-tile').count() == total, {'incomplete_root_catalog': paging})
+        requested_maximum = wrapper.evaluate('e=>{const maximum=e.scrollHeight-e.clientHeight;e.scrollTo({top:maximum,behavior:"instant"});return maximum;}')
+        page.evaluate('() => new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+        root_view = page.evaluate("""() => {
+          const shell=document.querySelector('.mall-shell'),field=document.querySelector('.mall-tile-field-wrapper'),
+            grid=document.querySelector('#mallTileField'),dock=document.querySelector('#redDogAnchor'),
+            nav=document.querySelector('.mall-desktop-block-nav:not([hidden])'),last=grid.querySelector('.mall-tile:last-of-type');
+          const box=e=>e.getBoundingClientRect().toJSON();
+          const d=box(dock),n=nav&&box(nav),l=box(last),f=box(field);
+          const limit=Math.min(d.top,n?.top??d.top),x=l.left+l.width/2,y=Math.min(l.bottom-12,limit-12);
+          return {viewport:{width:innerWidth,height:innerHeight},shellPaddingBottom:parseFloat(getComputedStyle(shell).paddingBottom),
+            field:f,dock:d,nav:n,last:l,scrollTop:field.scrollTop,scrollMaximum:field.scrollHeight-field.clientHeight,
+            gridPaddingBottom:parseFloat(getComputedStyle(grid).paddingBottom),scrollPaddingBottom:parseFloat(getComputedStyle(field).scrollPaddingBottom),
+            scrollSnapType:getComputedStyle(field).scrollSnapType,
+            pageScrollWidth:document.documentElement.scrollWidth,fieldScrollWidth:field.scrollWidth,fieldClientWidth:field.clientWidth,
+            lastHit:y>=f.top&&last.contains(document.elementFromPoint(x,y))};
+        }""")
+        assert_true(root_view['shellPaddingBottom'] <= 16.1 and root_view['field']['bottom'] > root_view['dock']['top']+1,
+                    {'desktop_root_reserved_dock_block': root_view})
+        assert_true(root_view['pageScrollWidth'] <= width+1 and root_view['fieldScrollWidth'] <= root_view['fieldClientWidth']+1,
+                    {'desktop_root_horizontal_overflow': root_view})
+        cutoff = min(root_view['dock']['top'], root_view['nav']['top'] if root_view['nav'] else root_view['dock']['top'])
+        assert_true(root_view['last']['bottom'] <= cutoff+1 and root_view['lastHit'] and
+                    (root_view['scrollMaximum'] <= 1 or root_view['scrollTop'] > 1),
+                    {'desktop_root_last_card_or_scroll_tail_unreachable': root_view})
+        root_view['requestedMaximum'] = requested_maximum
+        root_view['paging'] = paging
+        root_geometry.append(root_view)
+        assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null&&mallStateRestore.getVideoOptions().tileTapDestination==='wikitube'"),
+                    'Fresh wide fine-pointer desktop did not default to WikiTube')
+        tile = page.locator('#mallTileField [data-foundup-id="move2japan"]')
+        tile.scroll_into_view_if_needed()
+        before = retained_snapshot(page)
+        activate_visible_tile(page, tile, True)
+        player = page.locator('#videoPlayerFullscreen')
+        expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+        page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+        assert_true(page.evaluate("mallVideoPlayer.getFoundUpId()==='move2japan'&&mallVideoPlayer.getQueueLength()>1"), 'Public queue lost its FoundUp scope')
+        measured.append(desktop_wikitube_geometry(page))
+        video_action(page, 'collapse')
+        expect(player).not_to_be_visible()
+        after = retained_snapshot(page)
+        assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'move2japan', {'before': before, 'after': after})
+        assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null"), 'Passive desktop default wrote preferences')
+
+    page.set_viewport_size({'width': 899, 'height': 720})
+    boot(page)
+    assert_true(page.evaluate("matchMedia('(hover:hover)').matches&&matchMedia('(pointer:fine)').matches&&mallStateRestore.getVideoOptions().tileTapDestination==='floating'"),
+                '899px fine-pointer boundary did not retain Floating')
+    # A real scrolled caller in the existing shared HPC field checks all saved
+    # tile destinations independently of automatic desktop-theater startup.
+    page.set_viewport_size({'width': 900, 'height': 500})
+    page.goto('https://hpc.foundups.com/member/', wait_until='domcontentloaded')
+    page.wait_for_function('mallVideoPlayer.isTheater()')
+    page.get_by_role('link', name='Home: HPC video tiles', exact=True).click()
+    page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'")
+    for _ in range(8):
+        if page.locator('.mall-tile[data-video-id="HPC00000030"]').count(): break
+        page.get_by_role('button', name='Load more videos', exact=True).evaluate('(e)=>e.click()')
+        page.wait_for_timeout(30)
+    choices = []
+    for destination, mode in modes.items():
+        page.evaluate('(destination)=>mallStateRestore.setVideoOptions({tileTapDestination:destination})', destination)
+        page.reload(wait_until='domcontentloaded')
+        page.wait_for_function("document.documentElement.dataset.mallVideoLayout==='grid'")
+        tile = page.locator('.mall-tile[data-video-id="HPC00000030"]')
+        for _ in range(8):
+            if tile.count(): break
+            page.get_by_role('button', name='Load more videos', exact=True).evaluate('(e)=>e.click()')
+            page.wait_for_timeout(30)
+        tile.scroll_into_view_if_needed()
+        before = retained_snapshot(page)
+        assert_true(before['scroll'] > 0, {'nonzero_caller_required': before})
+        activate_visible_tile(page, tile, True)
+        player = page.locator('#videoPlayerFullscreen')
+        expect(player).to_have_attribute('aria-label', mode)
+        page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+        assert_true(page.evaluate("mallVideoPlayer.getFoundUpId()==='hpc'&&mallVideoPlayer.getCurrentIndex()===30"), 'Saved presentation changed scoped selection')
+        if destination == 'wikitube': desktop_wikitube_geometry(page)
+        video_action(page, 'collapse')
+        expect(player).not_to_be_visible()
+        after = retained_snapshot(page)
+        assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'HPC00000030', {'before': before, 'after': after})
+        choices.append({'saved_destination': destination, 'mode': mode, 'scroll_before': before['scroll'], 'scroll_after': after['scroll'], 'focus': after['focus']})
+    return {'fresh_root_overlay_geometry': root_geometry, 'fresh_public_geometry': measured, 'saved_choices_after_reload': choices,
+            'provider': 'CONTROLLED_YT_API_FIXTURE', 'physical_desktop': 'UNEXECUTED'}
+
+
+def desktop_native_wikitube(page):
+    # Private fixture only: exercise existing approved portrait MP4/fallback bytes,
+    # not mocked HTMLMediaElement playback or publication of these source cards.
+    page.emulate_media(reduced_motion='no-preference')
+    measured = []
+    media = None
+    for width, height in [(1440, 900), (1280, 720), (900, 720), (1280, 500)]:
+        page.set_viewport_size({'width': width, 'height': height})
+        page.goto('https://play.foundups.com/member/?foundup=voteballots', wait_until='domcontentloaded')
+        tile = page.locator('#mallTileField .mall-member-card').first
+        expect(tile).to_be_visible()
+        assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null&&mallStateRestore.getVideoOptions().tileTapDestination==='wikitube'"), 'Native fixture did not use fresh desktop default')
+        activate_visible_tile(page, tile, True)
+        player = page.locator('#videoPlayerFullscreen')
+        expect(player).to_have_attribute('aria-label', 'WikiTube video player')
+        observed = observe_member_media(page)
+        if media is None: media = observed
+        expect(player.locator('iframe')).to_have_count(0)
+        assert_true(page.evaluate('fixturePlayback.created===0&&fixturePlayback.plays===0'), 'Native fixture used controlled YouTube playback')
+        measured.append(desktop_wikitube_geometry(page))
+        video_action(page, 'collapse')
+        expect(player).not_to_be_visible()
+        expect(tile).to_be_focused()
+    return {'geometry': measured, 'observed_media': media, 'fixture': 'PRIVATE_EXISTING_VOTE_PORTRAIT_ASSETS',
+            'native_decoder_overrides': False, 'publication': False, 'physical_device': 'UNEXECUTED'}
+
+
+def phone_default_floating(page):
+    boot(page)
+    capability = page.evaluate("({width:innerWidth,height:innerHeight,coarse:matchMedia('(pointer:coarse)').matches,hover:matchMedia('(hover:hover)').matches})")
+    assert_true(capability['width'] == REPORT['viewport']['width'] and capability['height'] == REPORT['viewport']['height'] and
+                capability['coarse'] and not capability['hover'], capability)
+    assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null&&mallStateRestore.getVideoOptions().tileTapDestination==='floating'"), 'Fresh phone default changed')
+    tile = page.locator('#mallTileField [data-foundup-id="move2japan"]')
+    before = retained_snapshot(page)
+    activate_visible_tile(page, tile, False)
+    player = page.locator('#videoPlayerFullscreen')
+    expect(player).to_have_attribute('aria-label', 'Floating video player')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
+    video_action(page, 'collapse')
+    expect(player).not_to_be_visible()
+    after = retained_snapshot(page)
+    assert_true(abs(after['scroll']-before['scroll']) <= 2 and after['focus'] == 'move2japan', {'before': before, 'after': after})
+    assert_true(page.evaluate("localStorage.getItem('pfmall_video_options_v1')===null"), 'Passive phone default wrote preferences')
+    return {'capability': capability, 'default': 'floating', 'origin_return': True, 'provider': 'CONTROLLED_YT_API_FIXTURE'}
 
 
 def activate_visible_tile(page, tile, desktop):
@@ -1348,6 +1645,9 @@ def hpc_home_shared_desktop_dock(page):
         page.set_viewport_size(size)
         expect(page.locator('#mallTileField .mall-tile').first).to_be_visible()
         assert_true(page.evaluate('!mallVideoPlayer.isOpen()'), 'Resize re-opened automatic TV')
+    # Keep this existing Floating -> WikiTube dock-loan regression explicit;
+    # fresh desktop WikiTube is qualified by desktop-default-wikitube instead.
+    page.evaluate("mallStateRestore.setVideoOptions({tileTapDestination:'floating'})")
     tile = page.locator('#mallTileField .mall-tile[data-video-id]').first
     tile.focus(); page.keyboard.press('Enter')
     page.wait_for_function("mallVideoPlayer.isFloating()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
@@ -1501,6 +1801,10 @@ def vote_native_cards(page, desktop=False):
     if not desktop:
         page.set_viewport_size({'width': 390, 'height': 844})
     page.goto('https://play.foundups.com/member/?foundup=voteballots', wait_until='domcontentloaded')
+    if desktop:
+        # This existing case qualifies Floating media cleanup, not the fresh
+        # desktop default (covered independently by desktop-native-wikitube).
+        page.evaluate("mallStateRestore.setVideoOptions({tileTapDestination:'floating'})")
     tiles = page.locator('#mallTileField .mall-member-card')
     expect(tiles).to_have_count(2)
     expect(page.locator('#videoScopeTitle')).to_have_text('VOTE')
@@ -1615,8 +1919,8 @@ def vote_reduced_motion(page):
 def run_case(browser, name, fn, block=False, block_storage=False, silent_start=False, desktop=False, hold_ready=False):
     if args.case and name not in args.case:return
     REPORT['active_case'] = name
-    context, page = make_page(browser, block, block_storage, silent_start, desktop, hold_ready)
-    row = {'engine': REPORT['engine'], 'case': name, 'passed': False}
+    context, page, transport = make_page(browser, block, block_storage, silent_start, desktop, hold_ready)
+    row = {'engine': REPORT['engine'], 'case': name, 'passed': False, 'transport':transport}
     page_errors=[]
     page.on('pageerror',lambda error:page_errors.append(str(error)))
     graph_requests=[]
@@ -1625,6 +1929,7 @@ def run_case(browser, name, fn, block=False, block_storage=False, silent_start=F
         row['evidence'] = fn(page)
         assert_true(not page_errors, {'page_errors':page_errors})
         assert_true(not graph_requests, {'protected_graph_requests':graph_requests})
+        assert_true(transport['websockets_blocked']==0, {'unexpected_websockets':transport})
         row['passed'] = True
     except Exception as exc:
         row['error'] = str(exc)
@@ -1680,6 +1985,9 @@ try:
                 run_case(browser, 'play-desktop-reversible-return', lambda page: reversible_mall_return(page, False, True), desktop=True)
                 run_case(browser, 'play-lane-reversible-return', lambda page: reversible_mall_return(page, False, lane=True))
                 run_case(browser, 'play-desktop-lane-reversible-return', lambda page: reversible_mall_return(page, False, True, True), desktop=True)
+                run_case(browser, 'desktop-default-wikitube', desktop_default_wikitube, desktop=True)
+                run_case(browser, 'desktop-native-wikitube', desktop_native_wikitube, desktop=True)
+                run_case(browser, 'phone-default-floating', phone_default_floating)
                 run_case(browser, 'hpc-early-repeated-selection', lambda page: early_repeated_selection(page, True))
                 run_case(browser, 'play-early-repeated-selection', lambda page: early_repeated_selection(page, False))
                 run_case(browser, 'retained-history-reentry', retained_history_reentry)
@@ -1708,7 +2016,7 @@ finally:
     REPORT['source_sha256_after'] = hashes()
     REPORT['source_stable'] = REPORT['source_sha256_before'] == REPORT['source_sha256_after']
     REPORT['elapsed_seconds'] = round(time.time() - REPORT['started_epoch'], 3)
-    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (72 if args.include_defensive else 70)) and
+    REPORT['status'] = 'PASS' if (len(REPORT['cases']) == (2*len(set(args.case)) if args.case else (78 if args.include_defensive else 76)) and
         all(row['passed'] for row in REPORT['cases']) and REPORT['source_stable']) else 'FAIL'
     save()
 sys.exit(0 if REPORT['status'] == 'PASS' else 1)

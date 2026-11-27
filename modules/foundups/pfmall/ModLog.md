@@ -1,3 +1,34 @@
+## 2026-11-28 — Continue Wave 5 desktop and caller navigation
+
+Reconcile the existing navigation/BYOF acceptance with desktop WikiTube as the
+fresh wide/fine-pointer default, explicit saved choices and phone Floating.
+The existing shared state/player stylesheet own the bounded candidate; no
+unmerged HPC runtime is imported. Actual portrait media in the earlier phone
+preview overflowed a desktop window and moved the queue/Dock below its viewport.
+Candidate/source/delivery and physical-device evidence remain distinct.
+
+Retain shared gesture, card flip, Fullscreen and app-owned universal canvas
+acceptance. Require evidenced FoundUp component navigation rather than treating
+graph cross-links as containment. The graph client is unmounted and its admitted
+API/public-root exclusions remain intact. Extend the existing AutoPost owner
+acceptance with shared scoped Search Dock and Camera-as-return to the actual
+validated caller, preserving the separate capture shutter and pending/recording
+guards. Existing HPC/AutoPost drafts own that work; these records do not certify
+its implementation or change production, auth, DNS or existing preview channels.
+
+## 2026-11-27 — Reconcile Wave 5 public Play and BYOF stage acceptance
+
+Updated existing navigation section 14 and the Mall roadmap with 012's compact
+overlay/no-reserved-block dock, dock-origin scoped content picker, identical
+canvas/video footprint, app-owned canvas gestures and state-preserving return.
+HPC remains the shared testbed; its unmerged #2439 lane is preserved. The public
+homepage/guest-route slice is independent of full canvas/Podcast delivery.
+Record measured rectangles, source/served-preview identity and signed-out gates;
+no runtime, provider, physical-phone or production result is claimed by this
+documentation change. Internal HPC wording stays in the existing private BYOF
+record. Validation: scoped diff review and whitespace check; no new tests or
+runtime execution for this acceptance-only edit. WSP00/10/15/22/50/71/97.
+
 ## 2026-11-26 — Port Fractal Tile Graph backend, patch API, schemas, projections, client & paper onto post-HPC main
 
 - Ported `fractal_tile_graph.py`, `tile_graph_context.py`, `tile_graph_store.py`, `http_api.py` (`GET /pfmall/tile-graph`, `POST /pfmall/tile-graph/patches`), `member_catalog_export.py` (`export_fractal_tile_graph`), schemas, public projections, `sprint1_registry_benchmark_manifest.json`, `public/member/js/mall-tile-graph-client.js`, `public/member/js/pfmall-control-dispatcher.js`, and [PFMALL_Fractal_Tile_Elements_Architecture.md](../../../WSP_knowledge/docs/Papers/PFMALL_Fractal_Tile_Elements_Architecture.md) onto post-`#2459` `main`, keeping `#2459`'s `public/member` UI owners intact (`?fractal=1` UI shell reconciliation stays separate).

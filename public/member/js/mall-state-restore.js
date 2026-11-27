@@ -286,8 +286,10 @@
   }
 
   function defaultVideoOptions() {
+    var desktop = typeof window.matchMedia === 'function' &&
+      window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)').matches === true;
     return { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true,
-      tileTapDestination: 'floating', pinchOutDestination: 'wikitube',
+      tileTapDestination: desktop ? 'wikitube' : 'floating', pinchOutDestination: 'wikitube',
       fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-hidden' };
   }
 
@@ -314,8 +316,8 @@
           !ownDataRecord(record.options, ['autoplayNext', 'frameDestination', 'collapseDestination', 'revealSelectedPlayer', 'tileTapDestination', 'pinchOutDestination', 'pinchInDestination', 'swipeUpDestination', 'fullVideoSwipeRight', 'tuckedSwipeRight'])) return null;
       var options = Object.assign({}, record.options);
       // Old frame/collapse settings describe different actions. Reading a v1
-      // record supplies only the confirmed tile default, without writing it.
-      if (['floating', 'wikitube', 'full-video'].indexOf(options.tileTapDestination) === -1) options.tileTapDestination = 'floating';
+      // record supplies the current capability default, without writing it.
+      if (['floating', 'wikitube', 'full-video'].indexOf(options.tileTapDestination) === -1) options.tileTapDestination = defaultVideoOptions().tileTapDestination;
       // 012 confirmed WikiTube for outward pinch. Unselected return gestures
       // retain their existing behavior until deliberately configured.
       if (!Object.prototype.hasOwnProperty.call(options, 'pinchOutDestination')) options.pinchOutDestination = 'wikitube';

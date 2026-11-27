@@ -516,6 +516,24 @@ Reuse existing search, state-restoration and media owners. A graph view must
 not silently replace the current catalog if its graph is unavailable or invalid.
 Qualify the existing fallback behavior when the graph client is recovered.
 
+**2026-11-28 acceptance clarification / SPECIFIED_NOT_IMPLEMENTED:** opening a
+FoundUp must allow inspection of the modules that make it up, then a module's
+permitted parts and artifacts through the same stable-ID navigation. Establish
+each composition edge from a pinned manifest or independently verified source
+mapping. A capability declaration, directory inventory, import/reuse edge or
+cross-link alone is not evidence of containment. Show unknown membership as a
+gap, and label related/reused components separately from contained children.
+Retain the actual caller when following any such relationship.
+
+The current `mall-tile-graph-client.js` contains data helpers but is not mounted
+by the public Mall. The saved graph projection and its source revisions are
+separate from the visible catalog. Its `public_mall` scope does not grant
+anonymous access to the admitted-member graph/source-file endpoints. A bounded
+public prototype first needs an explicitly cleared, source-pinned metadata
+subset and its public-field acceptance; do not move the existing index into the
+public web root, weaken admission, expose source-file bodies, or import a held
+Fractal runtime to make the UI appear complete.
+
 ### 13.2 Caller restoration
 
 Record the actual caller, lens, selected tile, query and recoverable viewport
@@ -570,6 +588,75 @@ voice and Simulator boundaries.
 
 ## 14. Shared Search Dock and video preferences
 
+### 14.0b Wave 5 public Play and BYOF stage acceptance — 2026-11-27
+
+**CHANGES_POC_ACCEPTANCE / SPECIFIED_NOT_IMPLEMENTED.** HPC is the testbed for
+the same shared stage and navigation used by public Play and other FoundUps.
+Extend the existing tile, player, Search Dock and state owners; do not create a
+second stage or port unmerged HPC #2439 code into the public-homepage change.
+The homepage/guest-routing slice can qualify independently and does not deliver
+the universal content stage described here.
+
+Play is the public browsing entrance; foundups.com retains admission for entering
+a selected protected FoundUp. The November 21 same-origin Play gate description
+above records its candidate, not this updated host direction. Preserve existing
+sign-in/callback, invite, protected deep-link and safe return handling. Public
+browsing confers no member-interior, contribution, editor or execution authority.
+Merged graph/backend helpers, a public catalog and a complete Fractal stage are
+distinct implementation claims.
+
+About and other non-video tiles open app-owned interactive content in the same
+shared stage footprint as Video at that breakpoint and presentation. The canvas
+supports full-surface app-owned swipe and pinch, with accessible alternatives
+and normal page zoom/scroll preserved outside the intended gesture. Selecting
+Video replaces that canvas in place, with identical measured stage rectangles
+and no layout jump; it uses the existing player and applicable playback and
+presentation preferences. Switching back or Back restores the actual origin,
+selected tile, navigation, query, focus and scroll container/anchor/offset. A
+FoundUp's bottom queue remains scoped to that FoundUp; the root Mall retains its
+own permitted scope. A type choice does not change scope or create missing
+Podcast or canvas functionality.
+
+Full-surface canvas acceptance does not transfer to a cross-origin video embed.
+When YouTube is active, retain its native input/controls and the existing
+app-owned gesture sidebar/surround outside the embed, with no intercepting
+overlay. Section 14.4 continues to distinguish app expansion, browser fullscreen
+and native provider fullscreen. Public descriptions require approved provenance;
+do not infer formal membership or endorsement from discovery or editorial text.
+
+| Acceptance slice | Required evidence |
+| --- | --- |
+| Geometry and in-place swap | At the same viewport, scope, settings and player/scrollbar state, record canvas and video stage `x`, `y`, `width`, `height`, queue and dock rectangles before/after each swap. Compare compact 320px, existing 390 × 844, 393 × 852 and 414 × 896 cases, desktop, and both sides of each actual shared CSS breakpoint. Do not substitute a fixed aspect ratio or art-master size for the player footprint. |
+| Dock and gestures | In resting, focused-input and open-picker states, measure the compact overlay and safe-area/keyboard clearance, confirm no reserved layout block, and test dock-origin swipe versus tap/typing/page scroll. Test full-surface canvas swipe/pinch separately from the app-owned YouTube surround and native embed input. |
+| Scope and return | Exercise root Mall and a current FoundUp, its scoped queue, About/non-video → Video → back, nested entry/Back, preferences and invalid/unavailable content. Record restored caller, selection, navigation and actual scroll/focus; preserve protected routes and contribution gates. |
+| Card and module navigation | Exercise click/tap and keyboard flip, explicit shared-stage expansion, permitted child versus related-component navigation, and Back from a reused module. Bind each visible composition edge to cleared evidence; record fullscreen mechanism, actual stage rectangle and caller/query/selection/focus/scroll restoration. Unmapped membership remains a visible gap. |
+| Desktop and camera return | Test fresh >=900px hover/fine desktop WikiTube, phone/touch Floating, explicit saved destinations and parked selection without preference loss. Separately exercise Dock camera → AutoPost → Dock camera → validated caller, caller-scoped search, invalid/absent return fallback and the independent shutter; record the actual consumer result before claiming return works. |
+| Delivery and device | Bind source, build, exact URL and served assets to an isolated expiring test preview. Verify signed-out entry in a clean session. Label controlled desktop/phone-width results separately from physical Safari/Home Screen, real provider playback/audio and production acceptance. |
+
+No canvas/video rectangle, full-surface interaction or physical-phone parity is
+verified by this acceptance edit. The existing Wave 5/BYOF record tracks the
+requested work and remaining gaps. Isolated test-preview authorization does not
+authorize production, DNS, new access, private-data exposure or admission bypass.
+
+**2026-11-28 shared interaction clarification / acceptance pending:** on a fresh
+desktop with `(min-width: 900px) and (hover: hover) and (pointer: fine)`, deliberate
+video-field activation defaults to **WikiTube**, with the selected scope's main
+video and queue. This means the existing WikiTube modal, not a claim that the
+distinct desktop-theater presentation is selected. Phone/touch entry retains
+Floating. Preserve an explicit valid saved destination and parked-player choice;
+changing the fresh desktop default must not rewrite either one.
+
+Cards, non-video content and nested module views share the existing navigation,
+preferences and gesture owners. Click/tap flips an available card face; explicit
+expand or its accessible equivalent opens that content in the shared Fullscreen
+stage, with flip and caller restoration still available. Fullscreen card/canvas
+delivery, module drill-down and identical canvas/video rectangles remain targets;
+the current grid flip and 88dvh quick-view plane do not establish them. Qualify
+mouse/keyboard, touch swipe/pinch and their accessible alternatives on each
+implemented app-owned surface, including WikiTube and Full Video. Keep the
+cross-origin provider-input boundary in section 14.4 and do not import unmerged
+HPC code as evidence that the public Mall implements its newer gestures.
+
 ### 14.0a Scoped desktop dock and hidden Next — 2026-11-25
 
 **IMPLEMENTED_CANDIDATE / acceptance open.** The current
@@ -622,9 +709,9 @@ modal/account recovery and the existing fractal caller/identity rules.
 
 ### 14.1 One shell-owned dock and menu order
 
-Keep one floating dock anchored to the visible app viewport bottom, below
-the scrolling tiles/queue, with safe-area and keyboard clearance. Retain
-query, selection, focus, preferences and caller when changing FoundUp, depth
+Keep one compact floating dock over the visible app viewport bottom, with
+content flowing behind it and no reserved layout block. Retain safe-area and
+keyboard clearance, query, selection, focus, preferences and caller when changing FoundUp, depth
 or media presentation. Focused input, dictation and an open menu pin the dock
 visible. No duplicate visible/focusable search bar or new dock per skin.
 
@@ -646,10 +733,22 @@ and installed PWA remains required before a model is qualified there.
 
 The dock `+` opens settings/tools. The grid's trailing `+` contributes the
 active element type (initially Video, under existing editor authorization).
-Swipe-up on the designated element-type selector changes element type;
-ordinary grid swipes retain their scrolling/navigation owner. Video-surface
-swipe-up uses the video-return setting below. Neither grants contribution, agent
-execution, member access or access to another FoundUp's protected context.
+A deliberate swipe up beginning on the dock/search bar opens the Mall/Canvas,
+Video or Podcast picker for the active root Mall or current FoundUp scope only.
+A normal tap focuses search; typing, ordinary page/grid scrolling and gestures
+originating outside the dock retain their existing owners. Video-surface
+swipe-up uses the separate video-return setting below. Neither choice grants
+contribution, agent execution, member access or another FoundUp's context.
+
+The Search Dock camera action and AutoPost's camera shutter have different
+owners. Opening AutoPost through the dock retains a validated actual caller;
+on AutoPost the dock camera returns to that caller rather than reopening the
+same camera. Its search stays scoped to that caller's permitted context. Keep
+the shutter's capture action separate and require the existing return validator
+and a safe permitted fallback for absent, invalid or expired caller state.
+Navigation does not grant capture, publishing or contribution permission. This
+is shared-return acceptance; an outgoing `return_to` parameter alone does not
+prove the AutoPost consumer restores the caller, query, selection and scroll.
 
 ### 14.2 Presentation and independently selectable behaviors
 
@@ -660,7 +759,7 @@ requested immersive destination, subject to the mechanism boundary in 14.4.
 
 | Interaction / Video setting | Required choices and behavior | Decision boundary |
 | --- | --- | --- |
-| Deliberate video-tile activation from the Mall/FoundUp field (tap or Enter/Space) | **Floating / WikiTube / Fullscreen**. Selection loads/plays the chosen clip in that presentation without a compulsory WikiTube stop. | **Floating is the confirmed default.** Field selection is distinct from queue thumbnails, an app-frame action and taps inside provider controls. |
+| Deliberate video-tile activation from the Mall/FoundUp field (tap or Enter/Space) | **Floating / WikiTube / Fullscreen**. Selection loads/plays the chosen clip in that presentation without a compulsory WikiTube stop. | Fresh desktop at >=900px with hover and a fine pointer defaults to **WikiTube** under the 2026-11-28 clarification; phone/touch defaults to **Floating**. Preserve explicit valid saved choices. Field selection is distinct from queue thumbnails, an app-frame action and taps inside provider controls. |
 | Pinch outward to expand the active video | WikiTube or direct Fullscreen, allowing Floating to skip WikiTube. WikiTube can expand to Fullscreen. | WikiTube is the default confirmed by 012 on 2026-11-22; direct Fullscreen remains selectable. |
 | Pinch inward from Fullscreen | Return to **WikiTube / Mall tiles** according to its own preference. | Do not bind this to the swipe-up preference; initial return default is unresolved. |
 | Swipe up on the active video | Return to **WikiTube / Mall tiles** according to a separate preference. | This changes the older video swipe-up-to-next acceptance. It must not also advance the queue or trigger grid/type navigation. Initial return default is unresolved. |
@@ -677,8 +776,9 @@ Floating. Preserve the separately selected parked-player reveal behavior.
 
 Use one validated preference owner and schema across consumers. Reuse the
 existing `mall-state-restore.js` path, extending/migrating its v26
-`pfmall_video_options_v1` data. A missing **tile-tap** preference initializes to
-Floating; the old `frameDestination: 'wikitube'` describes a frame action and
+`pfmall_video_options_v1` data. A missing **tile-tap** preference uses the current
+desktop WikiTube / phone Floating default above; the old
+`frameDestination: 'wikitube'` describes a frame action and
 must not silently become a tile preference. Validate independent choices,
 ignore invalid values, and preserve valid existing preferences. Do not turn
 unresolved return defaults or the rotation-lock idea into approved decisions.

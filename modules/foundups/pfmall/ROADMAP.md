@@ -1,5 +1,53 @@
 # p.fMALL Roadmap
 
+## 2026-11-27 — Wave 5 public Play and shared BYOF stage acceptance
+
+**SPECIFIED_NOT_IMPLEMENTED.** The existing
+[navigation contract section 14](../docs/PFMALL_MALL_NAVIGATION_CONTRACT.md#140b-wave-5-public-play-and-byof-stage-acceptance--2026-11-27)
+now records the compact overlay dock, dock-origin scoped Mall/Canvas–Video–Podcast
+picker, same-footprint app-owned canvas/video swap, full-surface canvas gestures
+and caller/queue/scroll restoration. Reuse the existing shared owners, with HPC
+as the testbed. Keep the public homepage/guest-routing patch independent of
+unmerged #2439 and the full stage; no HPC branch or acceptance claim is imported.
+
+Qualify public Play discovery and apex protected-FoundUp admission separately
+from universal-stage delivery. Extend existing geometry, gesture, scope, return
+and admission fixtures, record actual stage/queue/dock rectangles at the shared
+breakpoints, then qualify the exact signed-out isolated expiring preview.
+Canvas parity, Podcast behavior and physical Safari/Home Screen acceptance remain
+open until measured. No production, DNS, new access or advocacy publication
+follows from this planning update. Preserve the existing private BYOF brief and
+all dated owner/source/provider evidence.
+
+**2026-11-28 continuation:** fresh deliberate video selection on a wide
+desktop with hover and a fine pointer now targets WikiTube; phone/coarse input
+continues to target Floating and explicit saved choices take precedence. The
+Wave 5 candidate changes the existing preference owner and bounds desktop
+WikiTube's portrait media area, keeping its queue and compact overlay Dock
+reachable. Exact-source browser qualification and any new test delivery remain
+separate from the unchanged earlier phone preview.
+
+The same existing acceptance now requires actual permitted component navigation
+within a FoundUp and AutoPost's shared Dock Camera action to return to the
+validated caller, separate from its capture shutter. Shared gestures, card flip,
+Fullscreen, module composition and camera return must be qualified through their
+existing owners. The graph client remains unmounted; cross-links are not proof
+of component ownership, and the admitted graph/source-file API cannot be exposed
+anonymously. AutoPost's existing draft owner must supply the shared search and
+caller adapter. These are pending implementation/verification, not new stages or
+results inferred from the desktop preference change.
+
+Phone-test comparison uses the full Mall merged by #2459 on 2026-11-26 (core UI
+at main f67), separately from the three-card entry smoke and the private floating
+prototype. The representative Wave 5 fixture uses public posters and labeled
+controlled sample art/media, retaining source identity and guest admission.
+The entry candidate repairs inherited poster theme resets and the public Play
+phone field's reserved dock block in the existing shared stylesheet. These
+bounded fixes do not implement the universal canvas/player swap, dock type
+picker or Podcast. Keep exact baseline/candidate, viewport measurements, retained
+failures and physical-phone status in the existing Wave 5/BYOF record; do not
+promote prototype or emulated-browser evidence to a public/device acceptance.
+
 ## 2026-11-25 — VOTE typed-media integration
 
 **IMPLEMENTED_CANDIDATE / combined release open.** Port the reviewed two-card

@@ -17,7 +17,7 @@ const defaults = { ...legacyDefaults, tileTapDestination: 'floating', pinchOutDe
 let checks = 0;
 function check(name, fn) { fn(); checks++; console.log('PASS ' + name); }
 
-function runtime({ href = 'https://play.foundups.com/member/?foundup=hpc#account', local = new Map(), session = new Map() } = {}) {
+function runtime({ href = 'https://play.foundups.com/member/?foundup=hpc#account', local = new Map(), session = new Map(), media = null } = {}) {
   let now = 1000000;
   const writes = [], events = {};
   const blocked = { local: {}, session: {} };
@@ -39,6 +39,10 @@ function runtime({ href = 'https://play.foundups.com/member/?foundup=hpc#account
   const document = {
     querySelector(selector) { return selector === '#mallTileField' ? { parentElement: wrapper } : wrapper; },
     addEventListener() {}, visibilityState: 'visible'
+  };
+  if (media) window.matchMedia = query => {
+    assert.equal(query, '(min-width: 900px) and (hover: hover) and (pointer: fine)');
+    return { matches: media.width >= 900 && media.hover === true && media.fine === true };
   };
   runInNewContext(source, { window, document, URL, URLSearchParams, Date: { now: () => now },
     localStorage: storage(local, 'local'), sessionStorage: storage(session, 'session'),
@@ -162,6 +166,71 @@ check('video defaults preserve current WikiTube expansion and persist valid patc
   assert.deepEqual(copy(runtime({ local: h.local }).api.getVideoOptions()), options);
   const snapshot = h.api.getVideoOptions(); snapshot.collapseDestination = 'wikitube';
   assert.equal(h.api.getVideoOptions().collapseDestination, 'mall');
+});
+
+check('fresh tile defaults require wide, hovering fine-pointer capability', () => {
+  for (const [media, destination] of [
+    [{ width: 1440, hover: true, fine: true }, 'wikitube'],
+    [{ width: 900, hover: true, fine: true }, 'wikitube'],
+    [{ width: 899, hover: true, fine: true }, 'floating'],
+    [{ width: 1440, hover: false, fine: true }, 'floating'],
+    [{ width: 1440, hover: true, fine: false }, 'floating'],
+    [{ width: 1440, hover: false, fine: false }, 'floating'],
+    [{ width: 390, hover: false, fine: false }, 'floating'],
+    [null, 'floating']
+  ]) {
+    const h = runtime({ media });
+    assert.deepEqual(copy(h.api.getVideoOptions()), { ...defaults, tileTapDestination: destination });
+    assert.deepEqual(h.writes, [], 'reading defaults must not persist a choice');
+    assert.equal(h.local.has(OPTIONS), false);
+  }
+});
+
+check('legacy records without a tile choice use capability defaults without writes', () => {
+  const legacy = { ...legacyDefaults, autoplayNext: false, frameDestination: 'full-video',
+    collapseDestination: 'wikitube', revealSelectedPlayer: false };
+  for (const media of [{ width: 1440, hover: true, fine: true }, { width: 390, hover: false, fine: false }]) {
+    const tileTapDestination = media.fine ? 'wikitube' : 'floating';
+    for (const options of [legacy, { ...legacy, pinchOutDestination: 'full-video', tuckedSwipeRight: 'none' }]) {
+      const raw = JSON.stringify({ version: 1, options });
+      const h = runtime({ media, local: new Map([[OPTIONS, raw]]) });
+      assert.deepEqual(copy(h.api.getVideoOptions()), { ...defaults, ...options, tileTapDestination });
+      assert.deepEqual(h.writes, []);
+      assert.equal(h.local.get(OPTIONS), raw);
+      const snapshots = [];
+      h.api.subscribeVideoOptions(value => snapshots.push(copy(value)));
+      h.fire({ key: OPTIONS, newValue: raw });
+      assert.equal(snapshots[0].tileTapDestination, tileTapDestination);
+      assert.deepEqual(h.writes, []);
+    }
+  }
+});
+
+check('explicit v1 tile choices survive desktop and phone capability changes', () => {
+  for (const destination of ['floating', 'wikitube', 'full-video']) {
+    for (const options of [{ ...legacyDefaults, tileTapDestination: destination }, { ...defaults, tileTapDestination: destination }]) {
+      const raw = JSON.stringify({ version: 1, options });
+      const media = { width: 1440, hover: true, fine: true };
+      const local = new Map([[OPTIONS, raw]]);
+      const h = runtime({ media, local });
+      assert.equal(h.api.getVideoOptions().tileTapDestination, destination);
+      Object.assign(media, { width: 390, hover: false, fine: false });
+      assert.equal(h.api.getVideoOptions().tileTapDestination, destination);
+      assert.equal(runtime({ local, media }).api.getVideoOptions().tileTapDestination, destination);
+      assert.deepEqual(h.writes, []);
+      assert.equal(local.get(OPTIONS), raw);
+    }
+  }
+});
+
+check('blocked desktop storage retains its capability default and deliberate memory choice', () => {
+  const h = runtime({ media: { width: 1440, hover: true, fine: true } });
+  h.blocked.local.get = true;
+  assert.equal(h.api.getVideoOptions().tileTapDestination, 'wikitube');
+  h.blocked.local.set = true;
+  assert.equal(h.api.setVideoOptions({ tileTapDestination: 'floating' }), true);
+  assert.equal(h.api.getVideoOptions().tileTapDestination, 'floating');
+  assert.deepEqual(h.writes, []);
 });
 
 check('legacy v1 frame and collapse choices never become tile-tap defaults', () => {

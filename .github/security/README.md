@@ -1,3 +1,20 @@
+## Wave 5 representative preview SDK binding — 2026-11-27
+
+Independent exact-stage review of the 48-file representative sample found one
+`generic-api-key` match at `member/index.html:27`. The complete public frontend
+SDK element is byte-identical to the approved neutral preview and source;
+its SHA-256 is `3a6a4376ce75609ee13168f405fa9a825e4db536e6170cce049287fdf6846fe4`.
+The normal-flow sample notice changes only the enclosing document digest to
+`0c492e084109d3e273d643a7877fadde1c88f9a82a88c19594c0018dc3a1352b`.
+
+Append only fingerprint
+`0bb40ed6104e028ec9031c96e074aee8914ca61001e38c8a8aede828ca18cad0`, retaining
+all 5,274 prior approvals. Scanner rules, ignores, history coverage and admission
+remain unchanged. The generated payload and exact candidate still require their
+canonical scans; this metadata renewal does not qualify browser, phone or release
+behavior. The existing Wave 5 record retains source, manifest and independent
+review receipts. No HPC branch or production change is included.
+
 ## HPC v26 main reconciliation metadata renewal - 2026-11-22
 
 The normal main-into-feature reconciliation preserves all 4,822 main and

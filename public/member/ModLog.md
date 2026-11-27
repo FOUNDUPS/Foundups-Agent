@@ -1,5 +1,83 @@
 # Member Area Module Change Log
 
+## 2026-11-28 — Wave 5 desktop WikiTube and shared navigation acceptance
+
+Use the existing preference owner to select WikiTube for fresh >=900px desktop
+entry with hover and a fine pointer. Keep phone/coarse Floating and all valid
+saved destinations, including older v1 records, without passive storage writes.
+Bound desktop WikiTube's media flex area so portrait native content cannot move
+its queue and Dock below the window. Its compact Dock overlays the queue rather
+than reserving a block; keep it above the queue for real input hit testing.
+
+Deep entry also exposed an initially offscreen selected queue tile. After the
+initial render/filter work, reuse the existing selection-centering owner on the
+first frame, guarded against closing, hiding or changing presentation. Preserve
+the media instance, scoped queue, native/provider inputs and caller restoration.
+
+The exact representative-stage check also exposed an inherited desktop-only
+132px shell reservation for the fixed block navigator above the Dock. Public
+Play now keeps its normal16px shell gutter and places both controls' clearance
+inside the scrolling field's tail. The field flows behind the overlays on
+desktop as on phone. Keep scoped HPC and private/member shell rules intact.
+Both-engine root checks passed all four desktop sizes with actual paging,
+native snap readback and the last card reachable above both overlays. Four
+existing app-grip gesture rows passed separately; full-surface canvas, the
+unmerged HPC gesture grammar and native/provider/device gestures remain open.
+
+Eight focused Chromium/WebKit rows passed the four desktop sizes through
+1280x500,899/900px boundary, all saved destinations after reload, genuine positive
+caller scroll and phone414x896/402x874 Floating. Chromium decoded the private
+native fixture; Windows WebKit's approved animation fallback remains distinct
+from native decoding. Preference25, worker/state30, routing21, static160,
+guest-entry and player-policy checks passed separately. Retain earlier layout,
+Dock-interception and queue-selection failures and corrected setup/action
+oracles in the existing Wave5 record. Source/preview qualification and physical
+Safari remain separate.
+
+Extend existing navigation/BYOF acceptance for shared gestures, flip/Fullscreen,
+evidenced module composition and AutoPost's caller-scoped Search Dock with its
+Camera action returning to the validated caller, separate from capture. Those
+features retain their existing owners and pending status. No unmerged HPC code,
+protected graph, production deployment, auth/DNS change or old-preview update.
+
+## 2026-11-27 — Wave 5 public Play entry and guest controls
+
+Added the native Play FoundUps CTA immediately after the gateway hero. Reused
+the existing public boot rather than reproducing production's old credential
+redirect. Public Play hides/disables contribution controls and prevents their
+synthetic activation; dedicated HPC and explicit admission keep existing gates.
+The one dated preview family is matched exactly, including near-miss denials.
+No unmerged HPC code, protected endpoint, permission, DNS or production change.
+
+Phone comparison follow-up reuses the merged #2459 Mall (core UI unchanged at
+main f67) and the existing Wave 5 record. The three-card smoke sample obscured
+the header with its fixed notice and excluded posters, media and long scrolling;
+it was not representative Mall usability evidence. The isolated representative
+fixture restores distinct public/controlled imagery, pagination and one labeled
+silent sample clip. Its notice occupies normal flow below the header.
+
+Measured source defects were inherited from main: theme gradient shorthands
+reset poster sizing/position, and Play reserved 96px below the scrolling field
+despite the fixed dock. Theme image longhands preserve cover/center and avatar
+contain. Public Play moves dock clearance into the scroll tail, allowing content
+behind the existing overlay while keeping the final tile reachable. Add only the
+second exact dated phone-preview family; retain admission and guest boundaries.
+Exact dimensions, failed attempts, test revisions and any expiring test release
+belong to the existing Wave 5 receipt; this is not a physical-device qualification.
+
+The full 17-record comparison also reproduced a separate inherited Back defect:
+closing the public detail plane restored keyboard focus with a 207–225px
+Chromium scroll jump. The existing plane owner now restores that same tile with
+`preventScroll`, preserving the caller viewport. Keep the measured failing
+baseline and require patched full-catalog and representative return checks.
+
+Focused local results: routing21, member boot35, preferences21, static contracts160,
+and public-entry browser cases at390 ×844 and1366 ×900 in Chromium/WebKit passed.
+The CTA measured196.45 ×57.59px (Chromium),196.45 ×57px (WebKit) after scrolling
+into view. Provider, physical phone, installed-client update and universal-stage
+results remain separate; preview/CI identity belongs in the existing Wave 5 record.
+WSP00/5/10/15/22/50/71/91/97.
+
 ## 2026-11-25 — Tucked rail touch restoration
 
 The29a hosted phone suite caught immediate Video-menu suppression after restore:

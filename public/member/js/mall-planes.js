@@ -93,7 +93,7 @@
         } else {
           tile = tileField.querySelector('.mall-tile[data-foundup-id="' + returnFocusId + '"]');
         }
-        if (tile && typeof tile.focus === 'function') tile.focus();
+        if (tile && typeof tile.focus === 'function') tile.focus({ preventScroll: true });
       }
       returnFocusId = null;
       returnFocusListingId = null;
