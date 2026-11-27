@@ -162,7 +162,7 @@ class TestFocusReturn:
     def test_focus_returned_by_foundup_id(self, mall_planes_js):
         """Focus is returned by querying data-foundup-id (stable across projections)."""
         assert 'data-foundup-id="' in mall_planes_js
-        assert 'tile.focus()' in mall_planes_js
+        assert 'tile.focus({ preventScroll: true })' in mall_planes_js
 
     def test_close_button_focused_on_open(self, mall_planes_js):
         """Close button receives focus when plane opens."""

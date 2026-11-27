@@ -293,6 +293,37 @@ def public_action_layout(page, name):
     return value
 
 
+def public_detail_scroll_return(page):
+    """Close a real, partly visible full17 card without focus scrolling it."""
+    tile=page.locator('.mall-tile[data-foundup-id="kids_episodes"]')
+    button=tile.locator('.mall-card-front .mall-card-expand-detail')
+    expect(button).to_be_visible()
+    # Setup only: leave the real card partly below the dock, with its button
+    # exposed. No scroll or focus repair runs after opening or closing.
+    button.evaluate("""e=>{const w=e.closest('.mall-tile-field-wrapper'),d=document.querySelector('#redDogAnchor');
+      const bottom=Math.min(w.getBoundingClientRect().bottom,d.getBoundingClientRect().top);
+      w.scrollTo({top:w.scrollTop+e.getBoundingClientRect().top-(bottom-55),behavior:'instant'});} """)
+    def snapshot():
+        return page.evaluate("""()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          const w=document.querySelector('.mall-tile-field-wrapper');resolve({top:w.scrollTop,rect:w.getBoundingClientRect().toJSON(),focusId:document.activeElement?.dataset?.foundupId||null});
+        })))""")
+    before=snapshot()
+    assert_true(before['top']>1, {'plane_return_missing_positive_scroll_setup':before})
+    button.click()
+    plane=page.locator('#foundupViewPlane')
+    expect(plane).to_have_class(__import__('re').compile(r'\bopen\b'))
+    opened=snapshot()
+    page.locator('#foundupViewClose').click()
+    expect(plane).not_to_have_class(__import__('re').compile(r'\bopen\b'))
+    after=snapshot()
+    result={'id':'kids_episodes','before':before,'open':opened,'after_two_animation_frames':after,
+            'close_delta':after['top']-opened['top'],'no_forced_scroll_after_setup':True}
+    assert_true(abs(opened['top']-before['top'])<=2 and abs(result['close_delta'])<=2 and
+                after['focusId']=='kids_episodes' and after['rect']==before['rect'],
+                {'full17_plane_close_scroll_or_focus_regression':result})
+    return result
+
+
 def public_poster_and_overlay(page):
     """Actual shared CSS, poster/one avatar state, and no reserved dock block."""
     total=len(json.loads((ROOT/'public/member/mall-video-catalog.json').read_text(encoding='utf-8')))
@@ -329,7 +360,9 @@ def public_poster_and_overlay(page):
                     {'dock_overlay_tail_or_positive_scroll':value})
         measured.append(value)
     page.set_viewport_size(REPORT['viewport'])
-    return {'poster':poster,'avatar_css_state':avatar,'overlay_and_scroll_tail':measured,'physical_keyboard_safe_area':'UNEXECUTED'}
+    detail_return=public_detail_scroll_return(page)
+    return {'poster':poster,'avatar_css_state':avatar,'overlay_and_scroll_tail':measured,
+            'full17_detail_return':detail_return,'physical_keyboard_safe_area':'UNEXECUTED'}
 
 
 def public_header(page):

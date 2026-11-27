@@ -20,9 +20,17 @@ the eight public-entry rows and160 existing static contracts passed separately.
 Private paired renders preserve the older missing-poster and notice-overlap
 findings and the first mistaken standalone-detail oracle. The actual expansion
 owner is the in-page `mallPlanes` detail; public entry HTML is tested separately.
-The full17-record Chromium plane-close scroll finding remains on HOLD with
-root cause unresolved; matching full17-record3B78 diagnosis is separate and
-the12-record sample does not qualify that path.
+The separate full17-record diagnosis preserved a real existing focus-scroll
+defect: plain tile focus on Close moved Chromium452→665 and437→644 on the
+baseline, and452→677 and437→656 after the layout correction. The12-record
+sample did not qualify that path. Extend this same public-header case with an
+actual partly visible `kids_episodes` card, in-page expansion and Close, stable
+wrapper geometry, article focus and scroll comparison after two animation
+frames, with no forced scroll after setup. The reviewed `preventScroll` focus
+fix passed all four engine/phone-size working-snapshot rows:452→452 at414 ×896
+and437→437 at402 ×874 in Chromium and WebKit. Both close deltas were zero;
+the original failing diagnosis remains retained. Final committed-source and
+immutable-preview readbacks remain separate from these working-snapshot tests.
 The final representative navigation rows verify real positive scroll/focus
 return, decoded staged images, notice/header separation and the corrected dock
 geometry. The controlled sample remains one silent five-second clip repeated

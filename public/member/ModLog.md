@@ -25,6 +25,12 @@ second exact dated phone-preview family; retain admission and guest boundaries.
 Exact dimensions, failed attempts, test revisions and any expiring test release
 belong to the existing Wave 5 receipt; this is not a physical-device qualification.
 
+The full 17-record comparison also reproduced a separate inherited Back defect:
+closing the public detail plane restored keyboard focus with a 207–225px
+Chromium scroll jump. The existing plane owner now restores that same tile with
+`preventScroll`, preserving the caller viewport. Keep the measured failing
+baseline and require patched full-catalog and representative return checks.
+
 Focused local results: routing21, member boot35, preferences21, static contracts160,
 and public-entry browser cases at390 ×844 and1366 ×900 in Chromium/WebKit passed.
 The CTA measured196.45 ×57.59px (Chromium),196.45 ×57px (WebKit) after scrolling
