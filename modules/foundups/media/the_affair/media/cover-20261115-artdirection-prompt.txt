@@ -1,0 +1,22 @@
+Make a precise ART-DIRECTOR TYPOGRAPHY/LAYOUT CORRECTION to this existing wide film-pitch cover. Preserve the same artwork, identities, eyes, face expressions, portrait sizes, child, house, city, servers, lighting, wide format, gold center title, top fictional-series line, red dog at lower left, and footer pitch invitation. Do not regenerate the concept or alter the dramatic scene.
+
+The current flaw is poor proximity: the two narrative questions sit stranded near the far outside edges, visually detached from the characters. Correct this through proximity, hierarchy, optical balance, and scale.
+
+REMOVE the existing small side copy completely, leaving clean atmospheric scenery at the outer edges.
+
+Reposition the woman's question DIRECTLY BENEATH HER portrait, centered on her own vertical axis around 27% of the image width. Place it in the mist below her shoulder, around 63% of canvas height. Increase the letter size substantially, approximately 1.45 times the current side-copy cap height. It reads exactly, in two lines:
+A POLITICAL
+THRILLER?
+
+Reposition the man's question DIRECTLY BENEATH HIS portrait, centered on his own vertical axis around 73% of image width. Place it in the dark mist below his shoulder around 56% of canvas height. It reads exactly, in three balanced lines:
+A MODERN
+ROMEO &
+JULIET?
+Use the SAME LETTER SIZE and line spacing as the left block. Left and right blocks must NOT have a shared baseline: woman's is lower. Text must feel attached to the corresponding person's portrait, NOT to the edges of the canvas. Neither block may intrude into the central child or the central title. They should be two carefully composed substantial narrative captions: title first, faces second, captions third. Use slightly muted antique gold, not glowing yellow; excellent readability but subordinate to the main title. Create subtle natural darker haze immediately behind the letters if needed, never visible boxes, borders or black slabs. Do not obscure the child's head, cottage's warm window, or iconic city buildings. Optically balance the actual words, not a rigid equal-column template.
+
+Keep the center exactly: THE / HUANG / AFFAIR, and Love. Access. Compute.
+Keep top: A PROPOSED FICTIONAL SERIES.
+Keep bottom center: NETFLIX OR HBO? LET'S TALK.
+Keep canonical dog-only logo unchanged, not the word FOUNDUPS.
+Do not restore a bottom concept-art disclaimer. Do not claim Netflix/HBO distribution.
+This is an elegantly spaced agency-quality editorial cover, not an infographic. The child is a memory/aspiration metaphor, not an adult romantic partner. Preserve all source image emotions and positions; only reposition/enlarge the side typography and harmonize its immediate haze.
