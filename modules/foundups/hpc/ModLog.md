@@ -1,3 +1,16 @@
+## 2026-11-28 — Shared-stage / AutoPost owner continuation (#2439)
+
+- Kept shared player/state/CSS and saved preferences unchanged while the separate
+  Play draft qualifies desktop-default, geometry and rail-selection changes.
+- Existing AutoPost #15 now supplies the local-capture Dock/Camera-return slice;
+  composed controlled phone/desktop checks preserve admitted caller and positive
+  phone query/scroll. Focus/active-media and physical/provider gates stay open.
+- Documented concrete missing public composition adapter; owning and related
+  registry references do not establish constituent membership. Universal Canvas
+  and Podcast remain specified, not delivered. No gated graph/index exposure.
+- WSP 00/15/22/50/71/91/97: same accountable lanes and existing receipts; no
+  merge, production, hosted-preview, DNS/auth/access or advocacy-content change.
+
 ## 2026-11-27 — Contribution presentation seam (#2439)
 
 - Keep the existing gated HPC Add Video tile on dedicated and admitted Mall

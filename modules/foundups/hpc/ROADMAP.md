@@ -1,5 +1,31 @@
 # HPC roadmap
 
+## Shared-stage and AutoPost continuation — 2026-11-28
+
+**BOUNDED_SOURCE_LAYER / draft acceptance.** Extend existing AutoPost #15,
+paired with this HPC lane, rather than another capture/Dock/auth system. Its
+local-capture Search Dock and Camera-as-caller-return are implemented and
+controlled-tested; current hosted previews and production are separate.
+Dependencies: canonical capture locks, strict return validator, local post
+repository and the existing Mall state owner. Phone browse query and positive
+scroll round-trip passed in Chromium/WebKit emulation. Focus/active-media
+continuity, physical iPhone/Home Screen and real capture/playback remain open.
+
+The next universal Canvas layer remains **SPECIFIED_NOT_IMPLEMENTED**: reuse
+the shared stage/gesture/state owners, same-size About/Video swap, permitted
+scope/queue and caller/query/selection/scroll recovery. Do not infer this from
+the separate About plane, card flips or native-media renderer. Coordinate with
+the separate Play #2483 desktop-default/player-geometry/rail work before touching
+those shared files; this continuation imports none of that draft.
+
+Constituent drill-down has a concrete prerequisite: a source-pinned, cleared
+public composition subset through the existing public catalog projector and
+graph navigation helpers. The graph/source endpoint is admission-gated and
+exports reject public destinations. Registry ownership and related civic links
+are insufficient membership evidence. Keep that adapter gap explicit; do not
+mount a saved private graph or expand permissions. Podcast and editor gates
+remain unchanged. No merge, preview publication or production follows.
+
 ## H1J · Contribution presentation seam — 2026-11-27
 
 FITS_POC / IMPLEMENTED_CANDIDATE. Keep HPC's existing gated Add Video entry
