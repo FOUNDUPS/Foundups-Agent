@@ -128,7 +128,7 @@ AI活用、授業設計、評価、著作権、個人情報、セキュリティ
 
 ## 6. Founder / partner layer
 
-### 九頭龍 泰澄 / UnDaoDu / Michael James Trout
+### 九頭龍 泰澄 / UnDaoDu / Michael J. Trout
 
 - EDUIT founder; long-running Educational Singularity / eSingularity thesis
 - NCDS capital-campaign / feasibility experience
@@ -138,13 +138,15 @@ AI活用、授業設計、評価、著作権、個人情報、セキュリティ
 
 Founder history is context, not proof of technical or financial feasibility. Detailed profile remains in YUMORI document 04 / `monk.YUMORI.info`.
 
-### Jorge Sebastian
+### Jorge Sabastian
 
 Technical advisor / collaborating partner for feasibility and infrastructure translation.
 
-Public background references describe 30+ years in technology and innovation, former CTO of Huawei Technologies, technology leadership across multiple countries, Dubai-based work, and a DeCenter technology leadership role. For this project, the intended function is to help convert measured workloads and service requirements into capacity, architecture, networking, security, vendor and operating requirements.
+Direct project records and the draft MOU use **Jorge Sabastian**. The current DeCenter public profile spells the surname **Sebastian** and describes an MD of Technology role, former Huawei Technologies CTO experience, 30+ years in technology and innovation, and leadership across 12 countries. This repository uses the direct-project spelling while preserving the public-profile spelling difference as a verification note.
 
-Final contractual, investment and operating roles remain to be documented.
+For this project, the intended function is to help convert measured workloads and service requirements into initial capacity, architecture, redundancy, networking, security, vendor, equipment and operating requirements.
+
+This role does not itself constitute a DeCenter investment, financing, construction or operating commitment. Final contractual, investment and operating roles remain to be documented.
 
 ## 7. Diagram assets
 
@@ -161,7 +163,7 @@ The current Japanese concept diagrams are embedded in YUMORI document 03:
 - Community-owned means community-level governance and retained rights must be defined legally; the label alone is insufficient.
 - Education compute may be targeted as free / low-cost, but this is not guaranteed until funding and allocation rules are established.
 - Local data processing does not remove the need for privacy, cybersecurity, procurement and education-sector compliance.
-- Jorge Sebastian's exact legal/contractual role must be documented separately.
+- Jorge Sabastian's exact legal/contractual role must be documented separately; DeCenter's public profile uses the spelling Sebastian.
 - Network relationships are reach and access, not endorsements or financing commitments.
 - Fukui is the proposed pioneer node; other prefectural nodes are a future replication hypothesis.
 
