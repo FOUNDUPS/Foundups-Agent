@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#080b0d" />
+    <meta name="description" content="The Huang Affair — a fictionalized limited-series concept about love, access, and compute." />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>The Huang Affair | 黄乐</title>
+  </head>
+  <body>
+    <main class="experience" data-season="0" aria-live="polite">
+      <div class="world" aria-hidden="true">
+        <div class="frame frame--01 is-active"></div>
+        <div class="frame frame--02"></div>
+        <div class="frame frame--03"></div>
+        <div class="frame frame--04"></div>
+        <div class="frame frame--05"></div>
+        <div class="frame frame--06"></div>
+        <div class="frame frame--07"></div>
+      </div>
+      <div class="vignette" aria-hidden="true"></div>
+
+      <header class="masthead">
+        <p class="eyebrow">A proposed limited series</p>
+        <h1>The Huang Affair</h1>
+        <p class="hanzi">黄乐</p>
+        <p class="tagline">Love. Access. Compute.</p>
+      </header>
+
+      <section class="aperture" aria-labelledby="season-title">
+        <div class="aperture__glow" aria-hidden="true"></div>
+        <p class="season-count"><span id="season-number">01</span> / 07</p>
+        <p class="season-era" id="season-era">Origins</p>
+        <h2 id="season-title">The Selection</h2>
+        <p class="season-line" id="season-line">A child looks up. An adult looks back.</p>
+        <div class="evidence-row">
+          <span class="evidence evidence--record" id="evidence-record">Era documented</span>
+          <span class="evidence evidence--fiction" id="evidence-fiction">Story dramatized</span>
+        </div>
+        <div class="scene-mark" id="scene-mark" aria-hidden="true">I</div>
+      </section>
+
+      <nav class="chapter-nav" aria-label="Choose chapter">
+        <button class="chapter is-active" type="button" data-index="0" aria-label="Chapter 1: The Selection" aria-current="step">1</button>
+        <button class="chapter" type="button" data-index="1" aria-label="Chapter 2: The School">2</button>
+        <button class="chapter" type="button" data-index="2" aria-label="Chapter 3: University Burning">3</button>
+        <button class="chapter" type="button" data-index="3" aria-label="Chapter 4: The Credential">4</button>
+        <button class="chapter" type="button" data-index="4" aria-label="Chapter 5: Hexi">5</button>
+        <button class="chapter" type="button" data-index="5" aria-label="Chapter 6: The Compute Variable">6</button>
+        <button class="chapter" type="button" data-index="6" aria-label="Chapter 7: The Affair">7</button>
+      </nav>
+
+      <footer class="controls">
+        <button class="control" id="previous" type="button" aria-label="Previous chapter">←</button>
+        <p>Swipe <span aria-hidden="true">·</span> tap a number <span aria-hidden="true">·</span> use arrow keys</p>
+        <button class="control" id="next" type="button" aria-label="Next chapter">→</button>
+      </footer>
+
+      <p class="fiction-label">Fictionalized concept art</p>
+      <img class="foundups-mark" src="./assets/red-dog.png" alt="FoundUps" />
+    </main>
+    <noscript>This experience needs JavaScript to move through its seven chapters.</noscript>
+    <script src="./app.js" defer></script>
+  </body>
+</html>

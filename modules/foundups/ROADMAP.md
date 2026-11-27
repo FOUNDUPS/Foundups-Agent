@@ -26,6 +26,7 @@ implementation sources of truth:
   — external camera/publishing product and proposed Live mode.
 - `modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md`
 - `modules/foundups/social_twin/ROADMAP.md`
+- [Media FoundUps roadmap](media/the_affair/ROADMAP.md) — *The Huang Affair* seven-state phone-first living-poster prototype; private research and generated portrait plates remain outside the public monorepo.
 - `modules/foundups/detect_ai/ROADMAP.md` - AmIBot: registered, hidden and specified;
   autonomous-build G0 remains blocked on shared admission/runtime prerequisites.
 
