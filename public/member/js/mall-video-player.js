@@ -914,6 +914,10 @@
     container.setAttribute('aria-label', 'Floating video player');
     queueSearchForm.hidden = true;
     memberQueueDock?.hide();
+    // Returning desktop TV to Floating restores the browse dock too. Its old
+    // desktop-hidden flag must not remove the sole settings/accessible entry.
+    var browseDock = window.mallVideoProjection?.getScopedPhoneDock?.(currentFoundUpId, { includeDesktop: true });
+    if (browseDock) { browseDock.element.hidden = false; browseDock.fitInput?.(); }
     clearTimeout(chromeTimer);
     syncTopBarButtons();
     syncFloatingGeometry();

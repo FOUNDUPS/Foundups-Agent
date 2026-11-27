@@ -5,7 +5,7 @@
 Keep the original72-row defensive phone suite intact. The additional settings
 matrix runs in its own180-second CI gate, through the same existing --case API:
 
-    python -B public/member/tests/mall_phone_ui_browser.py --case settings-close-recovery --case dock-refinement --case global-autoplay
+    python -B public/member/tests/mall_phone_ui_browser.py --case settings-close-recovery --case dock-refinement --case global-autoplay --case desktop-autoplay-startup
 
 settings-close-recovery covers320/414/390/402 widths, changed/no-change Close,
 Dock + reopen, side tap exclusion, native modal/inert/scroll/pointer state,
@@ -19,7 +19,8 @@ dock-refinement checks resting/focused/expanded dock and iframe non-overlap,
 44px targets, dock swipe vs tap, First/Last persistence, independent dog/campaign
 hit areas and navigation. Image/Podcast are asserted disabled, not faked.
 global-autoplay tests visible automatic continuation in three presentations,
-intentional Next when off and hidden pause. All provider events here are fixtures.
+intentional Next when off and hidden pause. desktop-autoplay-startup also checks
+stored off/on startup and deliberate Play when off. All provider events here are fixtures.
 clean-video-gestures uses the reachable app sidebar for Full Video LEFT and
 pinch. It does not prove gestures originating inside a YouTube iframe or on a
 physical iPhone. Real provider time and physical tests require separate receipts.

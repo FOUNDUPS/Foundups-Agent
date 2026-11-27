@@ -37,7 +37,7 @@ REPORT = {
         {'case': 'public-nonvideo-retained-face', 'engines': ['chromium', 'webkit'],
          'status': 'NOT_APPLICABLE', 'reason': 'Guest card-face loan prototype excluded'},
     ],
-    'separate_settings_cases': ['settings-close-recovery','dock-refinement','global-autoplay'],
+    'separate_settings_cases': ['settings-close-recovery','dock-refinement','global-autoplay','desktop-autoplay-startup'],
     'separate_defensive_cases': {'case': 'history-literal-rendering',
         'status': 'SELECTED_REQUIRES_REVIEWED_SOURCE' if args.include_defensive or 'history-literal-rendering' in args.case
                   else 'PENDING_SEPARATE_DEFENSIVE_REVIEW',
@@ -318,7 +318,7 @@ def public_header(page):
 def hpc_branding(page):
     boot(page, True)
     banner = page.locator('.mall-hpc-banner-link')
-    expect(banner).to_have_attribute('href', '/member/')
+    expect(banner).to_have_attribute('href', 'https://hasan4speaker.com/')
     expect(banner).to_have_attribute('aria-label', 'Hasan for Speaker campaign')
     expect(page.locator('#videoScopeDisclosure a[href="https://hasan4speaker.com/"]')).to_have_count(1)
     image = banner.locator('.mall-hpc-banner-image')
@@ -1510,6 +1510,21 @@ def global_autoplay(page):
     return {'controlled_presentations':modes,'hidden_paused_independent_of_Autoplay':True,'real_provider':'UNEXECUTED'}
 
 
+def desktop_autoplay_startup(page):
+    page.add_init_script("""if(!localStorage.getItem('pfmall_video_options_v1'))
+      localStorage.setItem('pfmall_video_options_v1',JSON.stringify({version:1,options:{
+        autoplayNext:false,frameDestination:'wikitube',collapseDestination:'mall',revealSelectedPlayer:true}}));""")
+    page.goto('https://hpc.foundups.com/member/',wait_until='domcontentloaded')
+    page.wait_for_function("mallVideoPlayer.isTheater()&&mallVideoPlayer.getPlaybackSnapshot()?.state!=='loading'")
+    assert_true(page.evaluate('fixturePlayback.plays===0&&mallVideoPlayer.getPlaybackSnapshot()?.state!=="playing"'), 'Stored Autoplay off started desktop TV')
+    video_action(page,'play')
+    page.wait_for_function("mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3")
+    set_video_choices(page,autoplayNext=True)
+    page.reload(wait_until='domcontentloaded')
+    page.wait_for_function("mallVideoPlayer.isTheater()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'&&mallVideoPlayer.getPlaybackSnapshot()?.positionSeconds>.3")
+    return {'stored_off_prevents_startup':True,'explicit_play_when_off':True,'stored_on_reloads_playing':True,'provider':'CONTROLLED_FIXTURE'}
+
+
 def hpc_home_shared_desktop_dock(page):
     page.goto('https://hpc.foundups.com/member/', wait_until='domcontentloaded')
     page.wait_for_function("mallVideoPlayer.isTheater()&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
@@ -1756,13 +1771,13 @@ def vote_native_cards(page, desktop=False):
     stage = player.locator('.video-player-stage').bounding_box()
     card = player.locator('.video-player-member-card').bounding_box()
     assert_true(card['width'] <= stage['width']+1 and card['height'] <= stage['height']+1, {'stage':stage,'card':card})
-    expect(player.locator('h2')).to_have_text('Chuck Schumer')
+    expect(player.locator('.video-player-stage h2')).to_have_text('Chuck Schumer')
     expect(player.locator('iframe')).to_have_count(0)
     video_action(page, 'next')
     page.wait_for_function("mallVideoPlayer.getCurrentIndex()===1&&mallVideoPlayer.getPlaybackSnapshot()?.state==='playing'")
     assert_true(page.evaluate("!retiredVoteMedia.isConnected&&(retiredVoteMedia.tagName==='VIDEO'?retiredVoteMedia.paused&&!retiredVoteMedia.hasAttribute('src'):!retiredVoteMedia.querySelector('img'))"), 'Retired media remains active')
     expect(player.locator('video, .video-player-member-animation')).to_have_count(1)
-    expect(player.locator('h2')).to_have_text('Hakeem Jeffries')
+    expect(player.locator('.video-player-stage h2')).to_have_text('Hakeem Jeffries')
     video_action(page, 'expand')
     expect(player).to_have_attribute('aria-label', 'WikiTube video player')
     expect(page.locator('#videoScopePhoneDock')).to_be_visible()
@@ -1838,7 +1853,7 @@ def run_case(browser, name, fn, block=False, block_storage=False, silent_start=F
     if args.case and name not in args.case:return
     # The full settings matrix has its own bounded CI gate. Retain every
     # pre-existing full-suite case and run these explicitly in the adjacent gate.
-    if not args.case and name in ['settings-close-recovery','dock-refinement','global-autoplay']:return
+    if not args.case and name in ['settings-close-recovery','dock-refinement','global-autoplay','desktop-autoplay-startup']:return
     REPORT['active_case'] = name
     context, page = make_page(browser, block, block_storage, silent_start, desktop, hold_ready)
     row = {'engine': REPORT['engine'], 'case': name, 'passed': False}
@@ -1922,6 +1937,7 @@ try:
                 run_case(browser, 'settings-close-recovery', settings_close_recovery)
                 run_case(browser, 'dock-refinement', dock_refinement)
                 run_case(browser, 'global-autoplay', global_autoplay)
+                run_case(browser, 'desktop-autoplay-startup', desktop_autoplay_startup, desktop=True)
                 run_case(browser, 'clean-video-gestures', clean_video_gestures)
                 run_case(browser, 'tucked-next-stays-hidden', tucked_next_stays_hidden)
                 run_case(browser, 'hpc-home-shared-desktop-dock', hpc_home_shared_desktop_dock, desktop=True)

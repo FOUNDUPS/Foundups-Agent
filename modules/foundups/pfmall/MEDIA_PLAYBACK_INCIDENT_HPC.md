@@ -19,6 +19,11 @@
   available. Remove the side's settings action, retaining its gesture role.
   Preserve native dialog close/focus ownership; do not clear unrelated inert,
   overflow, backdrops or caches globally.
+- **separate reproduced application defect:** controlled desktop TV return and
+  subsequent Floating selection restored the scoped dock's old desktop-hidden
+  flag. With the side's settings action retired, no settings entry remained.
+  The shared Floating transition now shows the existing browse dock. This is
+  distinct from the reported physical freeze; no claim of its cause is made.
 - **regression:** settings-close-recovery exercises changed/no-change Close and
   repeat Dock + entry; dock-refinement covers resting/focused geometry, type
   swipe vs tap, saved First/Last and separate banner/dog navigation;
