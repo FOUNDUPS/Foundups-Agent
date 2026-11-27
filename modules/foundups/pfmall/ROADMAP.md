@@ -19,6 +19,17 @@ open until measured. No production, DNS, new access or advocacy publication
 follows from this planning update. Preserve the existing private BYOF brief and
 all dated owner/source/provider evidence.
 
+Phone-test comparison uses the full Mall merged by #2459 on 2026-11-26 (core UI
+at main f67), separately from the three-card entry smoke and the private floating
+prototype. The representative Wave 5 fixture uses public posters and labeled
+controlled sample art/media, retaining source identity and guest admission.
+The entry candidate repairs inherited poster theme resets and the public Play
+phone field's reserved dock block in the existing shared stylesheet. These
+bounded fixes do not implement the universal canvas/player swap, dock type
+picker or Podcast. Keep exact baseline/candidate, viewport measurements, retained
+failures and physical-phone status in the existing Wave 5/BYOF record; do not
+promote prototype or emulated-browser evidence to a public/device acceptance.
+
 ## 2026-11-25 — VOTE typed-media integration
 
 **IMPLEMENTED_CANDIDATE / combined release open.** Port the reviewed two-card

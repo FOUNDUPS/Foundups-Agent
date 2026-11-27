@@ -9,6 +9,22 @@ synthetic activation; dedicated HPC and explicit admission keep existing gates.
 The one dated preview family is matched exactly, including near-miss denials.
 No unmerged HPC code, protected endpoint, permission, DNS or production change.
 
+Phone comparison follow-up reuses the merged #2459 Mall (core UI unchanged at
+main f67) and the existing Wave 5 record. The three-card smoke sample obscured
+the header with its fixed notice and excluded posters, media and long scrolling;
+it was not representative Mall usability evidence. The isolated representative
+fixture restores distinct public/controlled imagery, pagination and one labeled
+silent sample clip. Its notice occupies normal flow below the header.
+
+Measured source defects were inherited from main: theme gradient shorthands
+reset poster sizing/position, and Play reserved 96px below the scrolling field
+despite the fixed dock. Theme image longhands preserve cover/center and avatar
+contain. Public Play moves dock clearance into the scroll tail, allowing content
+behind the existing overlay while keeping the final tile reachable. Add only the
+second exact dated phone-preview family; retain admission and guest boundaries.
+Exact dimensions, failed attempts, test revisions and any expiring test release
+belong to the existing Wave 5 receipt; this is not a physical-device qualification.
+
 Focused local results: routing21, member boot35, preferences21, static contracts160,
 and public-entry browser cases at390 ×844 and1366 ×900 in Chromium/WebKit passed.
 The CTA measured196.45 ×57.59px (Chromium),196.45 ×57px (WebKit) after scrolling
