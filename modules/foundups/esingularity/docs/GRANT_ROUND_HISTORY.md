@@ -59,6 +59,12 @@ Dates are ISO calendar dates. Times are JST. A dash means not established in thi
 | P-01-2026-P1 | Fukui large-DC feasibility study / procurement, NOT subsidy | FY2026 / Phase 1 | 2026-10-14 (notice) | Bidder qualification 2026-10-23 17:00 | 2026-11-04 17:00; qualified bidders only | CLOSED BY PUBLISHED DEADLINE 2026-11-04 17:00; result not established | VERIFIED PROGRAM/PROCUREMENT; no YUMORI contract or selection | 2026-11-05 | S13 |
 | P-02-2026-R2 | MLIT FY2026 second national PPP/PFI sounding / PUBLIC-BODY market dialogue (NOT grant) | FY2026 / 2nd online session | 2026-11-13 14:00 JST | City/public-facility manager authorization; MLIT online registration PLUS official case-registration template | 2026-12-04 17:00 JST | OPEN; dialogue scheduled 2027-01-28; case selection later | VERIFIED PROGRAM only; no City submission, YUMORI eligibility/participation, subsidy or award | 2026-11-16 (internal) | S19 |
 | F-17-2026-R1 | MOE digital-infrastructure decarbonization R&D / demonstration; subsidy or commissioned research | FY2026 / May call | 2026-05-11 | Qualifying R&D lead, genuine development + real-equipment demo; no FS/PoC-only proposals | 2026-06-11 15:00 JST (receipt) | CLOSED; four other projects selected 2026-08-28 | VERIFIED PROGRAM only; no YUMORI inquiry/eligibility/application/selection/award established | 2027-01-15 (internal) | S20 |
+| F-18-2025S-R3 | MOE/RCESPA public-facility PV study and renewable zoning | FY2025 supplementary / 3 | 2026-05-19 | Track 1 then required at least ten facilities; earlier terms not fully inventoried | 2026-07-10; time not checked | CLOSED; 2026-08-24 track 1 selection AOI Energy Solution, Sakai City | VERIFIED PROGRAM only; no YUMORI association | 2026-12-01 | S21c |
+| F-18-2025S-R4 | MOE/RCESPA public-facility PV planning and renewable zoning | FY2025 supplementary / 4 | 2026-07-13 | 09-01 and 10-13 17:00 receipt; inquiry 11-17 noon JST | 2026-11-20 17:00 JST receipt | CLOSED by published deadline; 2026-11-25 second-period results, two track 1 selections elsewhere; final-period outcome unverified | VERIFIED PROGRAM only | 2026-12-01 | S21 |
+| F-18-2026-R1 | MOE/RCESPA public-facility PV planning; track 2 onshore wind zoning only | FY2026 / parallel annual call | 2026-07-13 | 09-01 and 10-13 17:00 receipt; inquiry 11-17 noon JST | 2026-11-20 17:00 JST receipt | CLOSED by published deadline; Oct16 first-period result Oga City track 2 only; later results unverified | VERIFIED PROGRAM only | 2026-12-01 | S21b |
+
+F-18: internal preparation by 2027-01-15; City joint applicant, qualified PV study partner, 20-year remaining useful life, structural/grid and retention/closure conditions, departmental agreement, prior-study duplication and progress reporting. Earlier supplementary rounds 1/2 require separate term/date inventory. Future calls unannounced; no financing assumption.
+
 
 The separate F-10 ZEB diagnosis/planning track remains recorded in the canonical registry as closed 2026-10-16 17:00. Its exact opening and separate source must be reverified before adding a fully verified calendar row. Do not confuse it with ZEB construction rounds.
 
@@ -116,6 +122,10 @@ No FY2027 call date or continuation is asserted by this queue.
 - S17: https://www.pref.fukui.lg.jp/doc/chisangi/bosyu/syouene2026.html (official regular-track page updated 2026-11-06, budget-near-limit warning)
 - S18: https://www.pref.fukui.lg.jp/doc/chisangi/bosyu/syouene_genyuwaku2026.html (official special-track page updated 2026-08-07)
 
+- S21: https://rcespa.jp/r08-jisso/r08-jisso-no4 ; https://rcespa.jp/r08-jisso/r08-jisso-no4/r08-jisso-no4-adopt ; https://rcespa.jp/wordpress/wp-content/uploads/R07hosei-4_jisso_kouboyouryou_20260713.pdf .
+- S21b: https://rcespa.jp/r08-jisso/r08-jisso-no5 ; https://rcespa.jp/r08-jisso/r08-jisso-no5/r08-jisso-no5-adopt ; https://rcespa.jp/wordpress/wp-content/uploads/R08_jisso_kouboyouryou_20260817.pdf .
+- S21c: https://rcespa.jp/r08-jisso/r08-jisso-no3/r08-jisso-no3-adopt .
+
 ## Maintenance / regression checks
 
 - Preserve all 19 initial records, two 2026-10-28 catch-ups, F-03 first-round result, F-15 historical coverage, and two 2026-11-06 fifth-round openings and two historic F-16 track catch-ups (27 total) when adding a new year.
@@ -128,6 +138,11 @@ No FY2027 call date or continuation is asserted by this queue.
 - Synchronize the existing FIN `Grants & Subsidies` summary and `Grant Calendar` after registry changes; verify formulas and preserve the AWARDED-only financial gate.
 
 ## Change log
+
+### 2026-11-27 — F-18 November 25 results and historical round coverage
+
+Track closed public-facility solar planning rounds separately. Internal dates are not official deadlines; no YUMORI funding or project-status advancement.
+
 
 ### 2026-11-14 — P-02 newly opened nonfinancial PPP/PFI sounding case registration (MLIT November 13)
 
