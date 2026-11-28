@@ -3182,3 +3182,6 @@ window.mallTileField.resetProjection()     // Reset to default
   deployment or permission change. WSP00/15/22/50/71/91/97.
 - Independent review caught a callback-ordering gap; bind the mount consumer to
   its captured hint so old callbacks cannot retire newer departure state.
+- Broader CI exposed minimal-Window projection consumers without an event API.
+  Guard only optional pageshow cleanup registration; retain browser cleanup and
+  the existing product-state/legacy-navigation VM assertions.

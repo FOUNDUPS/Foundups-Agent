@@ -1575,3 +1575,9 @@ The independent47/48 run failed before departure when WebKit's query field had
 not reached scrollable geometry. Keep the positive-scroll assertion and wait,
 within the existing bound, for scrollable range then observed offset280 before
 leaving. Preserve that failure as a fixture readiness finding, not a return pass.
+
+The first committed head's broader CI found two existing projection VM consumers
+with a deliberately minimal Window, without addEventListener. Make the optional
+pageshow cleanup registration capability-safe; browser retirement stays tested.
+Retain both original VM assertions and record their fresh execution. No fixture,
+CI rule or authentication behavior is weakened.

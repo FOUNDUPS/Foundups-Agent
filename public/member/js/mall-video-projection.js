@@ -294,7 +294,7 @@
     if (scheduledRaw === null) return;
     window.requestAnimationFrame?.(() => window.requestAnimationFrame?.(() => restoreCameraFocus(element, scheduledRaw)));
   }
-  window.addEventListener('pageshow', event => {
+  window.addEventListener?.('pageshow', event => {
     // Native BFCache focus is browser-owned. Clear the optional hint so a later
     // reload cannot replay it; this does not claim BFCache restoration support.
     if (event.persisted) discardCameraFocus();
