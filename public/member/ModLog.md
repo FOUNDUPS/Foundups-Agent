@@ -1,5 +1,28 @@
 # Member Area Module Change Log
 
+## 2026-11-27 — Projection-aware contribution presentation (#2439)
+
+- Reuse one route-derived predicate for public Mall dock denial and HPC's gated
+  collection tile; preserve dedicated/preview HPC, First/Last and member owners.
+- Runtime routing fixture covers real routes and stale/forged dock events;
+  preference fixtures remain unchanged. No provider, playback or auth service change.
+- WSP 15/50/97: reconcile the separate public-homepage guard before integration;
+  Canvas/Podcast and actual editor/server eligibility remain open. No release.
+
+## 2026-11-27 — Continue #2439 shared dock/settings qualification
+
+- Reconciled current main without replacing shared Mall/player/auth owners.
+- Visual readback found the small red dog painted but blending into campaign art.
+  Use an opaque app-owned badge, preserve geometry/hit areas, and verify actual
+  logo-pixel contrast. Retain full-phone/settings CI JSON under distinct names.
+- Candidate: Dock + only settings/touch handling, preserved grouped preferences,
+  global visible Autoplay, Full Video LEFT and independent parked gestures;
+  compact phone dock/typing, First/Last Add Video, dock type picker and inset dog.
+- One-time physical Close freeze remains unconfirmed. Controlled baseline and
+  successor tests, independent review, exact-head CI/main and delivery are separate.
+- Add Video feature/eligibility service and Image/Podcast integration remain open;
+  no speculative auth/provider/permissions or publication. WSP00/15/22/50/71/91/97.
+
 ## 2026-11-25 — Tucked rail touch restoration
 
 The29a hosted phone suite caught immediate Video-menu suppression after restore:
@@ -3145,3 +3168,20 @@ window.mallTileField.resetProjection()     // Reset to default
 ---
 
 *Created: 2026-02-18*
+
+## 2026-11-28 — Optional shared Dock Camera focus
+
+- Keep the existing Camera return/state owner; add an optional expiring one-shot
+  UI hint with strict same-caller validation and consume-before-focus guards.
+- Preserve unrelated storage, current control/frame focus, modal/visibility
+  boundaries, saved preferences and provider/gesture/player ownership.
+- Add focused browser qualification and an additive finite CI gate. Controlled
+  46 browser rows, two source-ordering rows and 6 composed AutoPost checks passed; phone focus/scroll pass,
+  WebKit desktop focus, native BFCache and real-device/media acceptance stay open.
+- No root-owned desktop patch, new return destination, duplicate adapter,
+  deployment or permission change. WSP00/15/22/50/71/91/97.
+- Independent review caught a callback-ordering gap; bind the mount consumer to
+  its captured hint so old callbacks cannot retire newer departure state.
+- Broader CI exposed minimal-Window projection consumers without an event API.
+  Guard only optional pageshow cleanup registration; retain browser cleanup and
+  the existing product-state/legacy-navigation VM assertions.

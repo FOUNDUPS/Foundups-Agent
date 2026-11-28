@@ -29,6 +29,12 @@
     return hostScope(location) === 'mall';
   }
 
+  // Presentation only: a guest HPC projection retains its existing gated Add
+  // entry even on a Mall/preview host. This never establishes editor eligibility.
+  function isPublicBrowseOnly(location) {
+    return isOpenMallHost(location) && !isAdmissionRequest(location) && resolve(location) !== 'hpc';
+  }
+
   function isAdmissionRequest(location) {
     if (!location) return false;
     if (/^\/sso-callback\/?$/.test(location.pathname || '')) return true;
@@ -228,6 +234,72 @@
     return target.href;
   }
 
+  // Optional UI continuity only. This tab-local hint contains no member,
+  // media or caller-supplied state and never establishes admission authority.
+  const cameraFocusKey = 'pfmall_camera_focus_return_v1';
+  function discardCameraFocus() {
+    try {
+      window.sessionStorage.removeItem(cameraFocusKey);
+      return window.sessionStorage.getItem(cameraFocusKey) === null;
+    } catch (error) { return false; }
+  }
+
+  function rememberCameraFocus() {
+    if (!discardCameraFocus()) return;
+    const returnTo = new URL(cameraDestination()).searchParams.get('return_to');
+    if (!returnTo || returnTo !== window.location.href) return;
+    try {
+      window.sessionStorage.setItem(cameraFocusKey, JSON.stringify({
+        version: 1, createdAt: Date.now(), returnTo
+      }));
+    } catch (error) { /* Optional storage never blocks capture navigation. */ }
+  }
+
+  function restoreCameraFocus(element, scheduledRaw) {
+    try {
+      const raw = window.sessionStorage.getItem(cameraFocusKey);
+      // Old mount frames must never consume a newer Camera departure's hint.
+      if (raw === null || raw !== scheduledRaw) return;
+      if (raw.length > 2048 || new TextEncoder().encode(raw).length > 2048) { discardCameraFocus(); return; }
+      const hint = JSON.parse(raw);
+      const returnTo = new URL(cameraDestination()).searchParams.get('return_to');
+      const now = Date.now();
+      const valid = hint && !Array.isArray(hint) && Object.keys(hint).length === 3 &&
+        Object.keys(hint).every(key => ['version', 'createdAt', 'returnTo'].includes(key)) &&
+        hint.version === 1 && Number.isSafeInteger(hint.createdAt) && hint.createdAt >= 0 &&
+        now >= hint.createdAt && now - hint.createdAt < 15 * 60 * 1000 &&
+        returnTo && hint.returnTo === returnTo && returnTo === window.location.href;
+      // Consume even a declined focus hint. Failed removal must not permit replay.
+      if (!discardCameraFocus() || !valid || document.visibilityState === 'hidden') return;
+      const active = document.activeElement;
+      if (active && active !== document.body && active !== document.documentElement) return;
+      const camera = element?.querySelector('.mall-search-camera');
+      if (!element?.isConnected || !camera || camera.disabled || camera.closest('[inert],[hidden]')) return;
+      const rect = camera.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1 || rect.bottom <= 0 || rect.top >= window.innerHeight ||
+          rect.right <= 0 || rect.left >= window.innerWidth || getComputedStyle(camera).visibility === 'hidden') return;
+      const overlay = [...document.querySelectorAll('dialog[open], [aria-modal="true"]')]
+        .some(node => !node.contains(camera) && node.getClientRects().length > 0 &&
+          getComputedStyle(node).visibility !== 'hidden');
+      if (overlay) return;
+      camera.focus({ preventScroll: true });
+    } catch (error) { discardCameraFocus(); }
+  }
+
+  function scheduleCameraFocus(element) {
+    // Call only after attachment and the existing state/presentation scheduling.
+    let scheduledRaw;
+    try { scheduledRaw = window.sessionStorage.getItem(cameraFocusKey); }
+    catch (error) { return; }
+    if (scheduledRaw === null) return;
+    window.requestAnimationFrame?.(() => window.requestAnimationFrame?.(() => restoreCameraFocus(element, scheduledRaw)));
+  }
+  window.addEventListener?.('pageshow', event => {
+    // Native BFCache focus is browser-owned. Clear the optional hint so a later
+    // reload cannot replay it; this does not claim BFCache restoration support.
+    if (event.persisted) discardCameraFocus();
+  });
+
   function discoveryPath(foundupId, pocUrl) {
     for (const [host, scope] of dedicatedHosts) {
       if (!publicScopes.has(scope) || foundupId !== scope) continue;
@@ -368,17 +440,38 @@
   }
 
   function bindOptions(trigger, open) {
-    trigger.addEventListener('click', open);
-    if (!window.gestureZone) return;
-    window.gestureZone(trigger, {
+    let start = null, echoUntil = 0;
+    trigger.addEventListener('click', event => {
+      if ((event.pointerType === 'touch' || event.sourceCapabilities?.firesTouchEvents === true) &&
+          performance.now() < echoUntil) { event.preventDefault(); return; }
+      open();
+    });
+    trigger.addEventListener('touchstart', event => {
+      start = event.touches.length === 1 ? { x: event.touches[0].clientX, y: event.touches[0].clientY, at: performance.now() } : null;
+      event.stopPropagation();
+    }, { passive: true });
+    trigger.addEventListener('touchmove', event => {
+      if (event.touches.length !== 1 || (start && Math.hypot(event.touches[0].clientX - start.x, event.touches[0].clientY - start.y) >= 15)) start = null;
+    }, { passive: true });
+    trigger.addEventListener('touchcancel', () => { start = null; }, { passive: true });
+    trigger.addEventListener('touchend', event => {
+      const tap = start; start = null;
+      event.stopPropagation();
+      if (!tap || event.touches.length || event.changedTouches.length !== 1 || performance.now() - tap.at > 600 ||
+          Math.hypot(event.changedTouches[0].clientX - tap.x, event.changedTouches[0].clientY - tap.y) >= 15) return;
+      // A trusted touch may have no compatibility click. Consume only this tap,
+      // with a trigger-local echo fence; keyboard and other controls stay live.
+      event.preventDefault();
+      echoUntil = performance.now() + 400;
+      open();
+    }, { passive: false });
+    window.gestureZone?.(trigger, {
       onSwipe(direction) {
-        if (direction !== 'up') return;
-        open();
+        // Preserve ordinary Mall/other projections. HPC's dock capture owns
+        // its distinct Tile types swipe and never opens both dialogs.
+        if (direction === 'up' && document.documentElement.dataset.mallVideoScope !== 'hpc') open();
       }
     });
-    // Keep the parent Red Dog mode sheet out of the same swipe.
-    trigger.addEventListener('touchstart', (event) => event.stopPropagation(), { passive: true });
-    trigger.addEventListener('touchend', (event) => event.stopPropagation(), { passive: true });
   }
 
   function bindDictationHold(trigger, dictation) {
@@ -462,18 +555,27 @@
         </a>
         <fieldset class="mall-video-options">
           <legend>Video</legend>
-          <details data-video-settings><summary>Gesture and autoplay defaults</summary>
+          <details data-video-settings><summary>Interface, Gestures and Playback</summary>
+          <fieldset><legend>Interface</legend>
           <label>Tap a video tile <select data-video-option="tileTapDestination"><option value="floating">Floating</option><option value="wikitube">WikiTube</option><option value="full-video">Fullscreen in app</option></select></label>
-          <label><input type="checkbox" data-video-option="autoplayNext"> Autoplay next clip while visible</label>
+          <label>Add Video tile <select data-video-option="addVideoPosition"><option value="last">Last</option><option value="first">First</option></select></label>
+          <button type="button" class="mall-search-option" data-tile-types>Tile types</button>
+          <label>Collapse Full Video to <select data-video-option="collapseDestination"><option value="mall">Mall</option><option value="wikitube">WikiTube</option></select></label>
+          <label><input type="checkbox" data-video-option="revealSelectedPlayer"> Show parked player when I select a clip</label>
+          </fieldset>
+          <fieldset><legend>Gestures</legend>
           <label>Pinch out <select data-video-option="pinchOutDestination"><option value="wikitube">WikiTube</option><option value="full-video">Fullscreen in app</option></select></label>
           <label>Pinch in return <select data-video-option="pinchInDestination"><option value="" disabled>Keep current return</option><option value="wikitube">WikiTube</option><option value="mall">Mall tiles</option></select></label>
           <label>Swipe up return <select data-video-option="swipeUpDestination"><option value="" disabled>Keep current gesture</option><option value="wikitube">WikiTube</option><option value="mall">Mall tiles</option></select></label>
-          <label>Full Video swipe right <select data-video-option="fullVideoSwipeRight"><option value="next">Next video</option><option value="previous">Previous video</option><option value="none">No action</option></select></label>
+          <label>Full Video swipe left <select data-video-option="fullVideoSwipeRight"><option value="next">Next video</option><option value="previous">Previous video</option><option value="none">No action</option></select></label>
           <label>Tucked tab swipe right <select data-video-option="tuckedSwipeRight"><option value="next-hidden">Next video, stay hidden</option><option value="next-reveal">Next video and reveal</option><option value="restore">Restore current video</option><option value="none">No action</option></select></label>
           <small>Use the frame edges for app gestures. Gestures inside YouTube belong to YouTube.</small>
-          <label>Collapse Full Video to <select data-video-option="collapseDestination"><option value="mall">Mall</option><option value="wikitube">WikiTube</option></select></label>
-          <label><input type="checkbox" data-video-option="revealSelectedPlayer"> Show parked player when I select a clip</label>
+          </fieldset>
+          <fieldset><legend>Playback</legend>
+          <label><input type="checkbox" data-video-option="autoplayNext"> Autoplay</label>
+          <small>Automatically continue the visible video queue in any presentation. Deliberate Play and Next still work when off.</small>
           <small>A fully hidden player stays paused. Browser/provider playback rules still apply.</small>
+          </fieldset>
           </details>
           <a data-player-source target="_blank" rel="noopener noreferrer" hidden></a>
           <details data-video-commands><summary>Playback actions</summary>
@@ -528,7 +630,11 @@
     dialog.prepend(dialog.querySelector('[data-action="browse-ai"]'),
       dialog.querySelector('[data-browse-ai-pilot]'), dialog.querySelector('.mall-video-options'));
     const add = form.querySelector('.mall-search-add');
+    const publicBrowseOnly = isPublicBrowseOnly(window.location);
+    add.hidden = publicBrowseOnly;
+    add.disabled = publicBrowseOnly;
     add.addEventListener('click', () => {
+      if (isPublicBrowseOnly(window.location)) return;
       const scope = document.documentElement.dataset.mallVideoScope;
       const intent = { action: scope === 'hpc' ? 'add-video' : 'add-foundup' };
       if (scope === 'hpc') {
@@ -551,6 +657,7 @@
       event.preventDefault();
       dictation.cancel(); dialog.close();
       window.mallStateRestore?.save();
+      rememberCameraFocus();
       window.location.assign(cameraDestination());
     };
     camera.addEventListener('click', openCamera);
@@ -561,7 +668,7 @@
       submitButton.hidden = !input.value.trim();
       form.removeAttribute('data-expanded');
       input.style.height = '';
-      if (input.scrollHeight > input.clientHeight) {
+      if (input.value && input.scrollHeight > input.clientHeight + 1) {
         form.setAttribute('data-expanded', '');
         input.style.height = input.scrollHeight + 'px';
       }
@@ -667,6 +774,55 @@
     window.visualViewport?.addEventListener('resize', placeOptions);
     window.visualViewport?.addEventListener('scroll', placeOptions);
     bindOptions(options, showOptions);
+    const typePicker = document.createElement('dialog');
+    typePicker.className = 'mall-member-search-options mall-tile-type-picker';
+    typePicker.setAttribute('aria-label', 'Tile types');
+    typePicker.innerHTML = '<h2>Tile types</h2><button type="button" data-type-video>Video</button>' +
+      '<button type="button" disabled>Image</button><button type="button" disabled>Podcast</button>' +
+      '<p>Image and podcast browsing is not connected to this video collection yet.</p>' +
+      '<form method="dialog"><button>Close</button></form>';
+    element.append(typePicker);
+    let typeReturnFocus = null, dockSwipe = null, dockSwipeEchoUntil = 0;
+    function showTileTypes() {
+      if (typePicker.open) return;
+      typeReturnFocus = document.activeElement;
+      optionsReturnFocus = null;
+      dialog.close();
+      typePicker.showModal();
+    }
+    dialog.querySelector('[data-tile-types]').addEventListener('click', showTileTypes);
+    typePicker.querySelector('[data-type-video]').addEventListener('click', () => typePicker.close());
+    typePicker.addEventListener('close', () => {
+      const target = typeReturnFocus?.isConnected && !typeReturnFocus.closest('dialog:not([open]),[inert]') ? typeReturnFocus : input;
+      typeReturnFocus = null;
+      target.focus({ preventScroll: true });
+    });
+    typePicker.addEventListener('keydown', event => { if (event.key === 'Escape') event.stopPropagation(); });
+    // Only a deliberate gesture STARTING on the resting dock is consumed.
+    // Focused typing, camera/dog/actions, provider input and page swipes retain
+    // their existing owners. No touch layer is placed over a media frame.
+    form.addEventListener('touchstart', event => {
+      dockSwipe = document.documentElement.dataset.mallVideoScope === 'hpc' && event.touches.length === 1 && document.activeElement !== input &&
+        !event.target.closest('button:not(.mall-search-plus),a') ?
+        { x: event.touches[0].clientX, y: event.touches[0].clientY, at: performance.now(), consumed: false } : null;
+    }, { capture: true, passive: true });
+    form.addEventListener('touchmove', event => {
+      if (!dockSwipe || event.touches.length !== 1) { dockSwipe = null; return; }
+      const dx = event.touches[0].clientX - dockSwipe.x, dy = event.touches[0].clientY - dockSwipe.y;
+      if (performance.now() - dockSwipe.at > 650 || Math.abs(dx) > 24 || dy > 15) { dockSwipe = null; return; }
+      if (dy < -60 && -dy > Math.abs(dx) * 1.6) { dockSwipe.consumed = true; event.preventDefault(); }
+    }, { capture: true, passive: false });
+    form.addEventListener('touchend', event => {
+      const swipe = dockSwipe; dockSwipe = null;
+      if (!swipe?.consumed || event.touches.length) return;
+      event.preventDefault(); event.stopImmediatePropagation();
+      dockSwipeEchoUntil = performance.now() + 400;
+      showTileTypes();
+    }, { capture: true, passive: false });
+    form.addEventListener('touchcancel', () => { dockSwipe = null; }, { passive: true });
+    form.addEventListener('click', event => {
+      if (event.detail && performance.now() < dockSwipeEchoUntil) { event.preventDefault(); event.stopImmediatePropagation(); }
+    }, true);
     for (const input of dialog.querySelectorAll('[data-video-option]')) {
       input.addEventListener('change', () => {
         const value = input.type === 'checkbox' ? input.checked : input.value;
@@ -735,8 +891,10 @@
         // AutoPost is a working existing action, not a model placeholder.
         autoPost.hidden = false;
         const hpc = document.documentElement.dataset.mallVideoScope === 'hpc';
+        dialog.querySelector('[data-video-option="addVideoPosition"]').closest('label').hidden = !hpc;
+        dialog.querySelector('[data-tile-types]').hidden = !hpc;
         const scopedActions = scoped && (hpc || document.documentElement.dataset.mallVideoScope === 'voteballots');
-        add.hidden = scopedActions;
+        add.hidden = publicBrowseOnly || scopedActions;
         if (scopedActions) {
           options.setAttribute('aria-label', 'Available actions');
           options.title = 'Available actions';
@@ -759,7 +917,8 @@
         input.setAttribute('aria-label', nextLabel);
         input.placeholder = nextLabel;
         input.value = value;
-        scopeOptions.forEach(({ option }) => { option.hidden = true; });
+        // Scoped Home/information remain available from the sole Dock + entry
+        // while its existing dock is loaned to the player.
         fitInput();
         return () => {
           cancelHold?.(); dialog.close(); dictation.cancel();
@@ -774,7 +933,7 @@
           fitInput();
         };
       },
-      hide() { cancelHold?.(); dialog.close(); dictation.cancel(); element.hidden = true; }
+      hide() { cancelHold?.(); dialog.close(); typePicker.close(); dictation.cancel(); element.hidden = true; }
     };
   }
 
@@ -809,6 +968,7 @@
       anchor.style.setProperty('--member-dock-keyboard', keyboard + 'px');
     });
     dock.input.addEventListener('blur', () => anchor.style.removeProperty('--member-dock-keyboard'));
+    scheduleCameraFocus(dock.element);
   }
 
   function createPhoneDock(actions, scope, disclosure, onHome, searchLabel = 'Search HPC Mall') {
@@ -851,6 +1011,7 @@
     home.addEventListener('click', () => { dialog.close(); search(''); onHome?.(); });
     about.addEventListener('click', () => { dialog.close(); disclosure.showModal(); });
     return {
+      restoreCameraFocus() { scheduleCameraFocus(element); },
       show(visible) {
         if (!dock.isDefaultContext()) return;
         if (!visible) return dock.hide();
@@ -1027,23 +1188,22 @@
         image.height = 353;
         image.classList.replace('mall-brand-logo-sm', 'mall-hpc-banner-image');
         home.classList.add('mall-hpc-banner-link');
-        home.href = window.location.pathname + window.location.search;
-        home.setAttribute('aria-label', 'Home: HPC video tiles');
-        home.title = 'HPC video tiles';
-        home.addEventListener('click', event => {
-          if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-          event.preventDefault();
-          showScopedGrid();
-        });
+        home.href = 'https://hasan4speaker.com/';
+        home.target = '_blank';
+        home.rel = 'noopener noreferrer';
+        home.setAttribute('aria-label', 'Hasan for Speaker campaign');
+        home.title = 'Hasan for Speaker campaign';
         const mallReturn = document.createElement('a');
         mallReturn.className = 'mall-hpc-mall-return';
         mallReturn.href = isOpenMallHost(window.location) ? '/member/' : OPEN_MALL_ORIGIN + '/';
         mallReturn.setAttribute('aria-label', 'Return to Play FoundUps Mall');
-        mallReturn.innerHTML = '<img src="/logo-dog.png" alt="" width="24" height="24"><span>Play Mall</span>';
+        mallReturn.innerHTML = '<img src="/logo-dog.png" alt="" width="30" height="30">';
         mallReturn.addEventListener('click', () => window.mallStateRestore?.save());
-        banner.append(mallReturn);
+        const bannerArt = document.createElement('div');
+        bannerArt.className = 'mall-hpc-banner-art';
         const brandCluster = home.closest('.mall-brand-cluster');
-        banner.appendChild(home);
+        bannerArt.append(home, mallReturn);
+        banner.append(bannerArt);
         // The ordinary Mall keeps its logo and LinkedIn cluster. HPC uses the
         // moved banner link, so retire the now-hidden sibling badge and wrapper.
         brandCluster?.remove();
@@ -1131,6 +1291,7 @@
       desktop.addEventListener('change', applyPresentation);
       // The shared state owner restores the tab's browse position before startup.
       requestAnimationFrame(applyPresentation);
+      dock.restoreCameraFocus();
     } catch (error) {
       console.warn('[Mall] Public video projection unavailable:', error);
       field.textContent = 'This video collection is unavailable. Reload the page to try again.';
@@ -1141,6 +1302,7 @@
     mallBuild,
     hostScope,
     isOpenMallHost,
+    isPublicBrowseOnly,
     isAdmissionRequest,
     shouldLoadMemberAuth,
     publicEntryPath,

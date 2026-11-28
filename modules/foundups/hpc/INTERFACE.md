@@ -1,5 +1,60 @@
 # HPC interface
 
+## Shared AutoPost consumer qualification — 2026-11-28
+
+HPC's existing Dock Camera saves the current Mall state and opens canonical
+AutoPost with a bounded public `return_to` when the actual caller is admitted.
+The external [AutoPost draft #15](https://github.com/FOUNDUPS/autopost/pull/15)
+extends its existing shell footer into a compact local-capture Search Dock.
+Its Camera returns to that admitted caller; its separate shutter captures.
+Plus opens existing Options with Close/Escape and caller-focus recovery.
+Search filters local capture metadata without exporting query or caller state.
+Capture and pending-save departure locks remain.
+
+Composed controlled Chromium/WebKit checks passed at 414×896, 402×874 and
+desktop with synthetic captures and permission refusal. Phone browse query and
+positive scroll and logical Dock Camera focus restored on both phone sizes.
+The shared projection consumes an optional one-shot tab-local UI hint after its
+existing state/layout scheduling; only the hint captured at scheduling may be
+consumed, so a later departure's hint survives old callbacks. It never overrides
+an already focused control or provider frame. Chromium desktop focused Camera, while WebKit desktop recorded
+BODY, so desktop focus restoration remains unqualified. Original tile/player
+focus, active-video continuity, native BFCache, physical Safari/Home Screen,
+genuine capture and provider playback remain open.
+The strict return allowlist is unchanged: arbitrary preview and Vote origins
+are not silently admitted. This is draft evidence, not deployed behavior.
+
+Universal About/Canvas geometry/full-surface gestures and constituent-module
+navigation remain **SPECIFIED_NOT_IMPLEMENTED**. Native member cards and the
+separate About plane do not establish them. The graph/source API is gated;
+public discovery has no cleared composition adapter. Owning-module and related
+Vote/AutoPost references are not constituent edges. Do not publish the saved
+graph or protected index to fill that gap.
+
+Separate public Play draft #2483 owns desktop-default, bounded WikiTube geometry
+and selected-queue reveal changes. They are not imported here. Continue through
+shared player/preferences APIs; preserve saved choices, provider controls and
+the external gesture target. No duplicate stage or YouTube overlay is added.
+
+HPC's gated Add Video collection tile remains available when the resolved HPC
+projection runs on an admitted Mall/preview host, as well as on its dedicated
+host. The shared `isPublicBrowseOnly` predicate controls presentation only;
+explicit admission, current server membership/editor eligibility and actual
+submission remain separate and unchanged. First/Last placement is preserved.
+
+## Current v26 acceptance delta — 2026-11-27
+
+Follow the shared navigation contract's v26 continuation: Dock + only settings,
+Full Video LEFT next; Floating RIGHT hide and tucked actions unchanged. The dog
+inside the banner returns to the Mall, the artwork opens the campaign, and Home
+in Dock + restores HPC tiles. Preserve source attribution/disclosure and the
+manual civic-resource link. Autoplay never permits hidden YouTube playback.
+
+The Tile types picker connects Video only; Image/Podcast remain disabled pending
+real collection integration. Add Video remains gated by the existing shared
+admission boundary; its unavailable review is not an operational editor or
+proof of current server-side membership/editor eligibility.
+
 ## 2026-11-25 — Home, bottom dock and tucked selection
 
 The [shared interaction contract](../../../public/member/INTERFACE.md#2026-11-25--scoped-home-shared-theater-dock-and-hidden-selection)

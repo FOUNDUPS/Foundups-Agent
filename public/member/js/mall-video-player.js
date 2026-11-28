@@ -265,10 +265,10 @@
 
   function updateFrameGripLabel() {
     if (!gestureGrip) return;
-    var label = floating ? 'Video controls; drag to move, swipe right to hide' : 'Video controls; pinch to change view';
+    var label = floating ? 'Video gestures; drag to move, swipe right to hide' : 'Video gestures; pinch to change view';
     if (container?.classList.contains('video-player-full-video')) {
       var action = videoOptions().fullVideoSwipeRight || 'next';
-      if (action !== 'none') label = 'Video controls; swipe right for ' + (action === 'previous' ? 'previous' : 'next') + ' video';
+      if (action !== 'none') label = 'Video gestures; swipe left for ' + (action === 'previous' ? 'previous' : 'next') + ' video';
     }
     gestureGrip.setAttribute('aria-label', label);
     gestureGrip.title = label;
@@ -626,7 +626,7 @@
     topBar.before(mediaPanel);
     gestureGrip = document.createElement('div');
     gestureGrip.className = 'video-player-gesture-grip';
-    gestureGrip.setAttribute('role', 'button');
+    gestureGrip.setAttribute('role', 'group');
     gestureGrip.tabIndex = 0;
     gestureGrip.setAttribute('aria-label', 'Video controls; drag to move, swipe right to hide');
     gestureGrip.title = 'Video controls · drag to move · swipe right to hide';
@@ -643,13 +643,8 @@
     // the viewport. The tucked restore rail remains at the right screen edge.
     stageFrame.append(gestureGrip, stage, dragSides[0]);
     mediaPanel.append(topBar, stageFrame, statusEl, playBtn);
-    gestureGrip.addEventListener('click', function () {
-      if (!suppressNextClick && performance.now() >= gestureClickBlockedUntil) { gestureGrip.focus({ preventScroll: true }); openVideoControls(); }
-    });
     gestureGrip.addEventListener('keydown', function (event) {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault(); event.stopPropagation(); openVideoControls();
-      } else if (floating && /^Arrow(Left|Right|Up|Down)$/.test(event.key)) {
+      if (floating && /^Arrow(Left|Right|Up|Down)$/.test(event.key)) {
         event.preventDefault(); event.stopPropagation();
         var rect = container.getBoundingClientRect();
         floatingPosition = { x: rect.left + (event.key === 'ArrowRight' ? 12 : event.key === 'ArrowLeft' ? -12 : 0),
@@ -919,6 +914,10 @@
     container.setAttribute('aria-label', 'Floating video player');
     queueSearchForm.hidden = true;
     memberQueueDock?.hide();
+    // Returning desktop TV to Floating restores the browse dock too. Its old
+    // desktop-hidden flag must not remove the sole settings/accessible entry.
+    var browseDock = window.mallVideoProjection?.getScopedPhoneDock?.(currentFoundUpId, { includeDesktop: true });
+    if (browseDock) { browseDock.element.hidden = false; browseDock.fitInput?.(); }
     clearTimeout(chromeTimer);
     syncTopBarButtons();
     syncFloatingGeometry();
@@ -1751,7 +1750,7 @@
       report(errorState, baseMessage, code);
       return;
     }
-    if ((!wikitube && !container.classList.contains('video-player-full-video')) || !videoOptions().autoplayNext) {
+    if (!videoOptions().autoplayNext) {
       report(errorState, baseMessage, code);
       return;
     }
@@ -1771,7 +1770,7 @@
       var expectedGen = renderGeneration;
       autoSkipTimer = setTimeout(function () {
         autoSkipTimer = null;
-        if (!isOpen || (!wikitube && !container.classList.contains('video-player-full-video')) || renderGeneration !== expectedGen || !videoOptions().autoplayNext) return;
+        if (!isOpen || renderGeneration !== expectedGen || !videoOptions().autoplayNext) return;
         if (!isPlaybackDisplayed()) { pausePlayback(); return; }
         autoplayRequested = true;
         goToVideo(nextCandidate, { fromAutoAdvance: true, preserveFailures: true });
@@ -2448,7 +2447,10 @@
   }
 
   function isInteractiveInputTarget(target) {
-    return !!target?.closest?.('input, textarea, select, button, a, iframe, video, dialog[open], .video-player-stage');
+    if (target?.closest?.('input, textarea, select, button, a, iframe, video, dialog[open]')) return true;
+    // Native app-owned media can share the app gesture surface. YouTube remains
+    // an untouched cross-origin iframe; no overlay or parent touch forwarding.
+    return !!target?.closest?.('.video-player-stage') && !isMemberCardVideo(currentQueue[currentIndex]);
   }
 
   function isHorizontalScrollTarget(target) {
@@ -2639,8 +2641,10 @@
     // WikiTube keeps its existing save/dismiss grammar; provider touches never
     // reach this handler. A deliberate swipe is independent of natural autoplay.
     if (container.classList.contains('video-player-full-video') &&
-        dir === 'right' && absDx >= Math.max(72, Math.min(140, container.clientWidth * .2)) &&
+        dir === 'left' && absDx >= Math.max(72, Math.min(140, container.clientWidth * .2)) &&
         absDx > absDy * 1.4 && !isHorizontalScrollTarget(target)) {
+      // Preserve the stored v1 choice under its historical key. Direction is
+      // LEFT in the current interaction contract; parked/right is independent.
       var action = videoOptions().fullVideoSwipeRight || 'next';
       if (action === 'none') return;
       gestureClickBlockedUntil = performance.now() + 400;

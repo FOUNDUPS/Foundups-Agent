@@ -758,6 +758,7 @@
    * @param {Array} catalog - Array of FoundUp objects (with video data)
    */
   function initialize(catalog, options) {
+    bindVideoOptionPlacement();
     // Search consumers replace their result set without reinstalling page listeners.
     if (tileField) {
       updateCatalog(catalog, options);
@@ -2257,7 +2258,8 @@
       error.textContent = fieldError;
       tail.appendChild(error);
     }
-    if (fixedVideoField && mallCatalog[0]?.foundup_id === 'hpc') {
+    if (fixedVideoField && mallCatalog[0]?.foundup_id === 'hpc' &&
+        !window.mallVideoProjection?.isPublicBrowseOnly?.(window.location)) {
       var addVideo = document.createElement('button');
       addVideo.type = 'button';
       addVideo.className = 'mall-grid-add-video';
@@ -2266,7 +2268,8 @@
       addVideo.addEventListener('click', function () {
         window.mallVideoProjection?.showContributionReview?.({ action: 'add-video', foundupId: 'hpc' }, false, addVideo);
       });
-      tileField.appendChild(addVideo);
+      if (window.mallStateRestore?.getVideoOptions?.().addVideoPosition === 'first') tileField.prepend(addVideo);
+      else tileField.appendChild(addVideo);
     }
     tileField.appendChild(tail);
   }
@@ -2870,7 +2873,7 @@
     var tileActivation = options?.tileActivation === true;
     if (tileActivation) scopedPlaybackDismissed = false;
     var theater = !tileActivation && scopedTheaterRequested && !immersive;
-    var autoplay = theater || canAutoplayFromTile(tile);
+    var autoplay = theater ? window.mallStateRestore?.getVideoOptions?.().autoplayNext !== false : canAutoplayFromTile(tile);
 
     var samePlayer = player.isOpen() && player.getFoundUpId() === lane.foundup_id;
     if (samePlayer && player.isMallHidden?.() && player.getCurrentIndex() === index) {
@@ -4255,6 +4258,19 @@
   }
 
   // Expose public API
+  var videoOptionsSubscription = null;
+  function bindVideoOptionPlacement() {
+    if (videoOptionsSubscription) return;
+    videoOptionsSubscription = window.mallStateRestore?.subscribeVideoOptions?.(function(options) {
+    var add = tileField?.querySelector('.mall-grid-add-video');
+    if (!fixedVideoField || !add) return;
+    var position = captureFixedPosition();
+    if (options.addVideoPosition === 'first') tileField.prepend(add);
+    else tileField.insertBefore(add, tileField.querySelector('.mall-video-grid-tail'));
+    restoreVideoGridState(position);
+    });
+  }
+
   window.mallTileField = {
     // Shared responsive browse and local discovery
     setLayoutMode: setLayoutMode,

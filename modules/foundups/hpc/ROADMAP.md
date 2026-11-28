@@ -1,5 +1,71 @@
 # HPC roadmap
 
+## Shared-stage and AutoPost continuation — 2026-11-28
+
+**BOUNDED_SOURCE_LAYER / draft acceptance.** Extend existing AutoPost #15,
+paired with this HPC lane, rather than another capture/Dock/auth system. Its
+local-capture Search Dock and Camera-as-caller-return are implemented and
+controlled-tested; current hosted previews and production are separate.
+Dependencies: canonical capture locks, strict return validator, local post
+repository and the existing Mall state owner. Phone browse query and positive
+scroll round-trip passed in Chromium/WebKit emulation. The optional one-shot
+Dock Camera focus layer passed 46 browser rows, two source-ordering rows and the composed 6-row return
+fixture; all four phone rows restore query/scroll/Camera focus. WebKit desktop
+returned to BODY, so original desktop/tile/player focus and active-media
+continuity remain open, together with native BFCache, physical iPhone/Home
+Screen and real capture/playback. The shared UI hint is not a caller/admission
+adapter and does not expand the existing strict URL allowlist.
+
+The next universal Canvas layer remains **SPECIFIED_NOT_IMPLEMENTED**: reuse
+the shared stage/gesture/state owners, same-size About/Video swap, permitted
+scope/queue and caller/query/selection/scroll recovery. Do not infer this from
+the separate About plane, card flips or native-media renderer. Coordinate with
+the separate Play #2483 desktop-default/player-geometry/rail work before touching
+those shared files; this continuation imports none of that draft.
+
+Constituent drill-down has a concrete prerequisite: a source-pinned, cleared
+public composition subset through the existing public catalog projector and
+graph navigation helpers. The graph/source endpoint is admission-gated and
+exports reject public destinations. Registry ownership and related civic links
+are insufficient membership evidence. Keep that adapter gap explicit; do not
+mount a saved private graph or expand permissions. Podcast and editor gates
+remain unchanged. No merge, preview publication or production follows.
+
+## H1J · Contribution presentation seam — 2026-11-27
+
+FITS_POC / IMPLEMENTED_CANDIDATE. Keep HPC's existing gated Add Video entry
+across dedicated and admitted projection hosts while public Mall roots remain
+read-only. Reuse the shared projection/field/admission owners; retain First/Last.
+Dependencies: reconcile the separate public-homepage lane's broad host-only
+guard during integration. Acceptance: route/event fixtures, browser regression,
+independent review and exact-head CI. This does not deliver an editor, a server
+eligibility contract, Canvas/Podcast, physical playback, merge or deployment.
+
+## H1I · v26 settings and compact dock continuation — 2026-11-27
+
+**FITS_POC / IMPLEMENTED_CANDIDATE; acceptance open.** Existing PR #2439 owns
+this layer: reliable Dock + only options, Interface/Gestures/Playback, global
+Autoplay, Full Video LEFT next, existing separate park gestures, preserved
+preferences, configurable First/Last Add Video, dock-origin tile-type picker,
+compact phone WikiTube dock and in-banner dog-only Mall return. No new player,
+authentication or shell. Campaign artwork and scoped Home are distinct actions.
+Image/Podcast browsing is SPECIFIED_NOT_IMPLEMENTED and disabled in the picker.
+
+Dependencies: shared field/player/state/dock owners. Acceptance: unchanged full
+phone suite plus separate settings matrix, real-provider boundary/time evidence,
+independent review, exact-head protected checks and main CI. The one-time
+physical Close freeze is USER_REPORTED, not confirmed repeatable. Record browser
+emulation separately from physical iPhone11/12/16Pro. Production and new preview
+publication are not authorized by this continuation's merge permission.
+
+**Add Video feature BLOCKED:** shared Clerk gateway can reuse an existing session,
+but the current contribution resume still leads to a review placeholder. No
+verified video submission feature or server member + HPC-editor eligibility
+contract was found. Google/LinkedIn handlers exist; actual configured provider
+availability is unverified. Reuse the owning shared intake/auth boundaries in a
+future qualified slice; do not repurpose DRAFT_ONLY FoundUp genesis proposals,
+grant editor permissions, or create another sign-in path. H1/Prototype is not closed.
+
 ## H3 · Automatic collection refresh — 2026-11-25
 
 **CHANGES_POC_ACCEPTANCE:** regular videos join reviewed Shorts in the existing WikiTube queue. Implemented and locally validated: approved Move2Japan uploads, actual-field hashtag matching, public/embedding filters, stable queue IDs/editorial labels, duplicate-free reruns, preserved review holds, new-source review proposals, six-hour product workflow and reversible collection-only publisher. Initial official scan: 4,345 uploads, 73 metadata matches beyond the original eight; restoring nine unique prior content/diagnostic holds yields 67 publishable additions and 75 eligible videos. Repeat run: zero additions. Native read-only release planning preserves all 178 live files except the two admitted catalog replacements. Source merge, hosted recurrence and live readback are separate gates recorded in ModLog. Preserve #2439's player/navigation ownership and #2453's Vote cards; this slice changes neither UI.

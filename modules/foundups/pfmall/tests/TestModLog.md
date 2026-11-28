@@ -1,5 +1,16 @@
 # p.fMALL Test ModLog
 
+## 2026-11-27 — Continue #2439 shared dock/settings qualification
+
+- Reconciled current main without replacing shared Mall/player/auth owners.
+- Candidate: Dock + only settings/touch handling, preserved grouped preferences,
+  global visible Autoplay, Full Video LEFT and independent parked gestures;
+  compact phone dock/typing, First/Last Add Video, dock type picker and inset dog.
+- One-time physical Close freeze remains unconfirmed. Controlled baseline and
+  successor tests, independent review, exact-head CI/main and delivery are separate.
+- Add Video feature/eligibility service and Image/Podcast integration remain open;
+  no speculative auth/provider/permissions or publication. WSP00/15/22/50/71/91/97.
+
 ## 2026-11-26 — Fractal Tile Graph backend & API test port onto post-HPC main
 
 - Ported `test_fractal_tile_graph.py`, `test_tile_graph_patch_api.py`, `test_member_catalog_export.py` additions, and `test_http_api.py` routes onto post-`#2459` `main` while aligning `schumerout` child count dynamically with `modules/foundups/hpc/mall_projection.json` and post-census tracked paths cleanly.

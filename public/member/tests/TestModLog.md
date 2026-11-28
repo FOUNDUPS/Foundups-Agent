@@ -1,3 +1,29 @@
+## 2026-11-27 — Projection-aware Add entry continuation (#2439)
+
+- Preserve all existing fixture paths; public root Add now asserts denial while
+  both HPC selected-video review cases retain their explicit admission checks.
+- Add the root/HPC/Vote/invalid/admission/host matrix and stale or forged dock
+  event checks. Actual-source routing21 and preferences22 pass locally.
+- Independent browser review and exact-head hosted CI remain separate gates;
+  existing physical/provider holds are unchanged. No preview or production write.
+
+## 2026-11-27 — Continue #2439 shared dock/settings qualification
+
+- Independent review caught the ordinary/VOTE + upward-swipe regression;
+  restore the original shared callback outside HPC and add cross-projection cases.
+  The new settings matrix has a finite240s budget; original gates are unchanged.
+- Reconciled current main without replacing shared Mall/player/auth owners.
+- Visual readback found the small red dog painted but blending into campaign art.
+  Use an opaque app-owned badge, preserve geometry/hit areas, and verify actual
+  logo-pixel contrast. Retain full-phone/settings CI JSON under distinct names.
+- Candidate: Dock + only settings/touch handling, preserved grouped preferences,
+  global visible Autoplay, Full Video LEFT and independent parked gestures;
+  compact phone dock/typing, First/Last Add Video, dock type picker and inset dog.
+- One-time physical Close freeze remains unconfirmed. Controlled baseline and
+  successor tests, independent review, exact-head CI/main and delivery are separate.
+- Add Video feature/eligibility service and Image/Podcast integration remain open;
+  no speculative auth/provider/permissions or publication. WSP00/15/22/50/71/91/97.
+
 ## 2026-11-25 — Tucked tap without compatibility click
 
 The29a full hosted run caught both floating-frame-controls and the hidden-policy
@@ -1519,3 +1545,39 @@ Validates entry-page Red Dog alignment with Mall Red Dog:
 | test_reddog_context_briefing_phase4.py | 48 | C | Context briefing |
 | (other member tests) | ~446 | B/mixed | Mall shell, tiles, etc. |
 | **Total** | **994** | | |
+
+## 2026-11-28 — Bounded Camera return focus
+
+Add `mall_camera_return_browser.py` through the existing scoped shell/provider
+fixture and an additive finite HPC qualification gate. 46 browser and two
+source-ordering rows passed locally (48/48),
+source-stable; routing 21/preferences 22 passed unchanged. The composed compiled
+AutoPost 6 rows passed: four phone query/scroll/Camera-focus returns, desktop
+theater return with WebKit BODY focus left unqualified.
+
+Retain failed harness attempts: startup normalized an unknown query; later a
+pagehide-console observation was absent; finally evaluating the old page while
+holding navigation hit its 180s bound. The corrected own-key pre-navigation
+binding keeps the stale-hint/no-unadmitted-return assertions. These are harness
+findings, not repeatable application freezes. No original case, provider control,
+auth boundary or release gate is removed. Physical/native BFCache/media and
+general caller/active-player restoration require separate evidence. WSP22/97.
+
+Independent review's pure source-order sequence exposed a delayed mount callback
+consuming a new departure hint. Preserve that finding and the failing two-engine
+regression; schedule only an existing raw hint and require equality before
+retirement. Both source-ordering rows pass after correction. The negative
+focus-frame profile is top-document-only so its child cannot reseed the tested
+hint; no stale-hint or focus assertion was removed. This is not real-navigation
+or physical-freeze proof.
+
+The independent47/48 run failed before departure when WebKit's query field had
+not reached scrollable geometry. Keep the positive-scroll assertion and wait,
+within the existing bound, for scrollable range then observed offset280 before
+leaving. Preserve that failure as a fixture readiness finding, not a return pass.
+
+The first committed head's broader CI found two existing projection VM consumers
+with a deliberately minimal Window, without addEventListener. Make the optional
+pageshow cleanup registration capability-safe; browser retirement stays tested.
+Retain both original VM assertions and record their fresh execution. No fixture,
+CI rule or authentication behavior is weakened.

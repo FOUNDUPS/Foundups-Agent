@@ -1,5 +1,43 @@
 # Member Mall tests
 
+`node public/member/tests/mall_projection_routing_vm.mjs` executes the shared
+contribution presentation predicate and actual dock handler. It covers public
+Mall roots, HPC dedicated/admitted preview routes, admission/member owners and
+forged DOM scope, preserving the existing no-submission/eligibility boundary.
+These controlled VM checks establish no real membership, browser layout or
+physical-phone playback result.
+
+## v26 settings continuation — 2026-11-27
+
+Keep the original72-row defensive phone suite intact. The additional settings
+matrix runs in its own240-second CI gate, through the same existing --case API:
+
+    python -B public/member/tests/mall_phone_ui_browser.py --case settings-close-recovery --case dock-refinement --case global-autoplay --case desktop-autoplay-startup --case non-hpc-plus-swipe
+
+non-hpc-plus-swipe preserves the existing ordinary Mall/VOTE + upward gesture
+and separate tap; HPC opens only the type picker. The additional matrix budget
+is bounded240s; all original gate deadlines and case assertions remain intact.
+
+CI retains the full-phone and settings JSON reports under distinct filenames.
+
+settings-close-recovery covers320/414/390/402 widths, changed/no-change Close,
+Dock + reopen, side tap exclusion, native modal/inert/scroll/pointer state,
+post-Close taps, scrolling, focus and reload persistence. Keyboard selection is
+used only to isolate initial modal setup; post-Close navigation uses taps.
+WebKit DOM scrolling is labeled separately from Chromium hit-tested touch.
+The old side-entry baseline is preserved as incident evidence, not a surviving
+settings route. A one-time physical freeze is not asserted repeatable.
+
+dock-refinement checks resting/focused/expanded dock and iframe non-overlap,
+44px targets, an opaque badge with sampled logo contrast, dock swipe vs tap, First/Last persistence, independent dog/campaign
+hit areas and navigation. Image/Podcast are asserted disabled, not faked.
+global-autoplay tests visible automatic continuation in three presentations,
+intentional Next when off and hidden pause. desktop-autoplay-startup also checks
+stored off/on startup and deliberate Play when off. All provider events here are fixtures.
+clean-video-gestures uses the reachable app sidebar for Full Video LEFT and
+pinch. It does not prove gestures originating inside a YouTube iframe or on a
+physical iPhone. Real provider time and physical tests require separate receipts.
+
 ## VOTE typed media qualification — 2026-11-25
 
 The existing `mall_phone_ui_browser.py` adds `vote-native-cards`,
@@ -260,3 +298,33 @@ Hosting/readback and unsigned asset-parity receipts. Compare served runtime,
 metadata, worker and release receipt separately before investigating phone cache.
 The frozen v26 discrepancy and exact historical provenance are recorded in the
 TestModLog; no physical-iPhone result is inferred from those HTTP observations.
+
+## Camera focus return qualification — 2026-11-28
+
+Run through the approved bounded environment:
+
+    python -B public/member/tests/mall_camera_return_browser.py
+
+The existing scoped fixture, actual Mall shell/projection and a link-only
+controlled AutoPost receiver cover 23 browser cases per engine (46 rows).
+Cases include 414/402 positive query/scroll/Camera return, public Play, storage
+write denial, stale unsupported outbound state, one-shot reload, malformed,
+expired/future/mismatched/oversized hints, unrelated storage, read/remove failure,
+typing/frame focus, modal/hidden/inert/disabled/offscreen targets. All network is
+intercepted; source hashes must remain stable and page exceptions fail the row.
+The own-key removal binding observes the producer before navigation; no pending
+document evaluation or delayed response is used to prove retirement.
+
+Two additional source-extracted callback-ordering rows run in Chromium/WebKit
+JavaScript with controlled storage/frames, not real navigation. They cover an
+empty mount followed by departure, replacement of a pending return by a newer
+departure, and the matching one-shot return. The default report totals 48 rows;
+`--case source-ordering` runs only those two. This regression failed before the
+snapshot/equality fix and passed after. Existing browser assertions stay intact.
+
+The existing HPC workflow adds this gate and its source hash without removing
+or weakening earlier gates. A separate composed check uses the compiled AutoPost
+camera-only build: four phone rows restore query/scroll/Camera focus; two desktop
+rows retain theater return, with WebKit BODY focus explicitly unqualified.
+Neither the link receiver nor synthetic persisted-pageshow covers native BFCache,
+real capture, physical iPhone, provider playback or an arbitrary/private caller.

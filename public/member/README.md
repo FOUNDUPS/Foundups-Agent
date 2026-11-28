@@ -1,5 +1,19 @@
 # FoundUPS Member Mall
 
+The [projection-aware contribution contract](INTERFACE.md#projection-aware-contribution-entry--2026-11-27-candidate)
+keeps public Mall browsing read-only while preserving HPC's existing gated
+Add Video entry on its dedicated and approved projection routes. It does not
+implement an editor, verify membership or grant submission access.
+
+## v26 continuation qualification — 2026-11-27
+
+The shared dock now groups Interface, Gestures and Playback settings. Dock + is
+the options entry; the video-side grip only moves/gestures. Full Video LEFT is
+Next by default. The compact phone WikiTube dock floats over its app queue;
+focused typing reserves space outside the provider. HPC banner artwork and its
+inset dog have independent destinations. See INTERFACE and the canonical shared
+navigation contract for current behavior; older dated observations remain history.
+
 ## Optional VOTE collection — 2026-11-25 candidate
 
 `https://play.foundups.com/member/?foundup=voteballots` selects the VOTE-owned
@@ -289,3 +303,13 @@ Catalog queries discover matching channels. Opening a matching channel retains i
 See [EDUIT episode Mall architecture](../../modules/foundups/eduit/docs/EPISODE_MALL_ARCHITECTURE.md) for the specified shared-shell
 video/game tile, gestures, locale cues, parent area and next-session handoff.
 This is a design dependency, not evidence of an active EDUIT adapter.
+
+## Camera caller return — 2026-11-28
+
+The shared Dock Camera saves browse state and delegates to canonical AutoPost.
+Its strict admitted caller URL remains the return boundary. An optional tab-local
+hint can restore logical Camera focus once, without scrolling or taking focus
+from another control/frame. This is not original tile/media restoration or a
+general FoundUp return adapter. See the [interface](INTERFACE.md#optional-camera-focus-return--2026-11-28)
+and [focused qualification](tests/README.md#camera-focus-return-qualification--2026-11-28).
+Current source and the existing frozen phone preview are separate builds.

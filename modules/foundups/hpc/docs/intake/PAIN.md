@@ -1,5 +1,18 @@
 # HPC pain
 
+## 2026-11-27 — One-time settings freeze and thumb-entry drift
+
+USER_REPORTED: settings changed through the video-side bar, Close froze the Mall
+once, restart recovered it; exact phone/mode remain unknown. Reproduction is
+unconfirmed. Controlled Chromium separately reproduced a Dock + tap with trusted
+touchend but no compatibility click. Keep these findings distinct. Both physical
+phones reported the old separate Mall-label row; iPhone11's dock was oversized,
+iPhone16Pro's retest was better, and iPhone12 remains physically unverified.
+
+Track shared repairs/evidence in MEDIA_PLAYBACK_INCIDENT_HPC. The contribution
+review is still not a real Add Video editor; existing Clerk session reuse alone
+does not establish server-side member/editor eligibility or publishing rights.
+
 ## 2026-11-25 — Home/dock drift and revised hidden Next
 
 REPRODUCED in Windows Chrome at live `/member/hpc-v25/`: header identity opens

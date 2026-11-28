@@ -1,3 +1,28 @@
+## 2026-11-27 — Projection-aware contribution seam (#2439)
+
+- Shared dock/field use one route-derived browse-only predicate. Preserve gated
+  HPC Add Video on admitted projection aliases; no server or provider grant.
+- Route/event and preference VM checks pass; independent/hosted qualification
+  remains separate. Public-homepage/theme/scroll work stays with its existing lane.
+- WSP 15/50/97: one integration layer; Canvas/Podcast and device acceptance open.
+
+## 2026-11-27 — Continue #2439 shared dock/settings qualification
+
+- Independent review caught the ordinary/VOTE + upward-swipe regression;
+  restore the original shared callback outside HPC and add cross-projection cases.
+  The new settings matrix has a finite240s budget; original gates are unchanged.
+- Reconciled current main without replacing shared Mall/player/auth owners.
+- Visual readback found the small red dog painted but blending into campaign art.
+  Use an opaque app-owned badge, preserve geometry/hit areas, and verify actual
+  logo-pixel contrast. Retain full-phone/settings CI JSON under distinct names.
+- Candidate: Dock + only settings/touch handling, preserved grouped preferences,
+  global visible Autoplay, Full Video LEFT and independent parked gestures;
+  compact phone dock/typing, First/Last Add Video, dock type picker and inset dog.
+- One-time physical Close freeze remains unconfirmed. Controlled baseline and
+  successor tests, independent review, exact-head CI/main and delivery are separate.
+- Add Video feature/eligibility service and Image/Podcast integration remain open;
+  no speculative auth/provider/permissions or publication. WSP00/15/22/50/71/91/97.
+
 ## 2026-11-26 — Port Fractal Tile Graph backend, patch API, schemas, projections, client & paper onto post-HPC main
 
 - Ported `fractal_tile_graph.py`, `tile_graph_context.py`, `tile_graph_store.py`, `http_api.py` (`GET /pfmall/tile-graph`, `POST /pfmall/tile-graph/patches`), `member_catalog_export.py` (`export_fractal_tile_graph`), schemas, public projections, `sprint1_registry_benchmark_manifest.json`, `public/member/js/mall-tile-graph-client.js`, `public/member/js/pfmall-control-dispatcher.js`, and [PFMALL_Fractal_Tile_Elements_Architecture.md](../../../WSP_knowledge/docs/Papers/PFMALL_Fractal_Tile_Elements_Architecture.md) onto post-`#2459` `main`, keeping `#2459`'s `public/member` UI owners intact (`?fractal=1` UI shell reconciliation stays separate).

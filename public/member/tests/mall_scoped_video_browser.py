@@ -145,7 +145,8 @@ provider = """(() => {
 def route_local(route):
     u = urlsplit(route.request.url)
     if u.hostname in {"hpc.foundups.com", "foundups.com", "play.foundups.com",
-                      "foundupscom--play-v26-iphone-jxbn78ue.web.app"}:
+                      "foundupscom--play-v26-iphone-jxbn78ue.web.app",
+                      "foundupscom--play-v26-home2-78o69r5x.web.app"}:
         if u.path == "/member/mall-public-video-catalog.json":
             route.fulfill(status=200, json=catalog)
             return
@@ -1268,10 +1269,7 @@ def verify_desktop(browser_type):
 
 def player_menu_action(page, action):
     """Use the current shared single-pointer alternative, keeping native input free."""
-    if page.evaluate('window.mallVideoPlayer.isFloating()'):
-        page.locator('#videoPlayerFullscreen .video-player-gesture-grip').click()
-    else:
-        page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
+    page.locator('.mall-member-search-dock:visible .mall-search-plus').click()
     dialog = page.locator('.mall-member-search-options[open]')
     commands = dialog.locator('[data-video-commands]')
     if not commands.evaluate('el=>el.open'):

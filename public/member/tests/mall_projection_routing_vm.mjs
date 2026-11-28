@@ -191,7 +191,13 @@ function runtime(href, { remember = true, actualState = false, autoNodes = false
 }
 
 let checks = 0;
-async function check(name, callback) { await callback(); checks++; console.log('PASS ' + name); }
+async function check(name, callback) {
+  try { await callback(); } catch (error) {
+    console.log('FAIL ' + name + ': ' + error.name + ': ' + error.message);
+    throw error;
+  }
+  checks++; console.log('PASS ' + name);
+}
 
 function forbidHtmlWrites(node) {
   let writes = 0;
@@ -393,23 +399,71 @@ await check('same-host contribution review saves typed context only after explic
   }
 });
 
-await check('actual dock Add action distinguishes Mall creation from HPC selected-video context', () => {
+await check('actual dock Add action keeps public Mall read-only and HPC selected-video entry gated', () => {
   for (const [scope, videoId] of [[undefined, 'abcDEF_12-3'], ['hpc', 'abcDEF_12-3'], ['hpc', 'invalid']]) {
-    const h = runtime(preview + '/member/', { actualState: true });
+    const h = runtime(preview + '/member/' + (scope === 'hpc' ? '?foundup=hpc' : ''), { actualState: true });
     h.document.documentElement.dataset.mallVideoScope = scope;
     h.win.mallVideoPlayer = { getCurrentVideoId: () => videoId };
     const add = h.caller();
-    h.run('var add = document.activeElement; var showContributionReview = window.mallVideoProjection.showContributionReview;\n' + dockAddHandler,
+    h.run('var add = document.activeElement; var showContributionReview = window.mallVideoProjection.showContributionReview; ' +
+      'var isPublicBrowseOnly = window.mallVideoProjection.isPublicBrowseOnly;\n' + dockAddHandler,
       'mall-video-projection.js#actual-dock-add-handler');
     add.dispatch('click');
     const dialog = h.dialog();
     assert.equal(h.win.mallStateRestore.peekAdmissionIntent(), null, 'Add opens review without persisting or submitting');
+    if (scope !== 'hpc') {
+      assert.equal(dialog, undefined, 'public Mall has no contribution entry');
+      assert.deepEqual(h.calls.assign, []); assert.deepEqual(h.calls.fetches, []);
+      continue;
+    }
     dialog.children.find(node => node.textContent === 'Sign in and check membership').dispatch('click');
     const saved = h.win.mallStateRestore.peekAdmissionIntent();
     assert.equal(saved.action, scope === 'hpc' ? 'add-video' : 'add-foundup');
     assert.equal(saved.foundupId, scope === 'hpc' ? 'hpc' : undefined);
     assert.equal(saved.videoId, scope === 'hpc' && videoId !== 'invalid' ? videoId : undefined);
     assert.deepEqual(h.calls.fetches, []);
+  }
+});
+
+await check('public browse presentation distinguishes root Mall from its HPC projection without granting authority', () => {
+  for (const origin of ['https://play.foundups.com', preview,
+    'https://foundupscom--play-v24-phone-review.web.app']) {
+    for (const query of ['', '?foundup=voteballots', '?foundup=move2japan', '?foundup=hpc&foundup=hpc']) {
+      const h = runtime(origin + '/member/' + query);
+      assert.equal(h.api.isPublicBrowseOnly(h.win.location), true, origin + query);
+      assert.deepEqual(h.calls.fetches, []);
+      assert.deepEqual(h.calls.intents, []);
+    }
+    const hpc = runtime(origin + '/member/?foundup=hpc');
+    assert.equal(hpc.api.isPublicBrowseOnly(hpc.win.location), false);
+    assert.equal(hpc.api.resolve(hpc.win.location), 'hpc');
+    assert.equal(hpc.api.shouldLoadMemberAuth(hpc.win.location), false);
+    for (const query of ['?admission=resume', '?foundup=hpc&signin=required']) {
+      const admittedEntry = runtime(origin + '/member/' + query);
+      assert.equal(admittedEntry.api.isPublicBrowseOnly(admittedEntry.win.location), false);
+      assert.equal(admittedEntry.api.shouldLoadMemberAuth(admittedEntry.win.location), true);
+    }
+  }
+  for (const origin of ['https://hpc.foundups.com', 'https://foundups.com', 'https://unrelated.example']) {
+    const h = runtime(origin + '/member/');
+    assert.equal(h.api.isPublicBrowseOnly(h.win.location), false, 'other owners retain their existing admission path');
+    assert.equal(h.api.shouldLoadMemberAuth(h.win.location), origin !== 'https://hpc.foundups.com');
+  }
+});
+
+await check('public Mall cannot open contribution review through a stale or forged dock Add event', () => {
+  for (const origin of ['https://play.foundups.com', preview]) {
+    const h = runtime(origin + '/member/', { actualState: true });
+    h.document.documentElement.dataset.mallVideoScope = 'hpc';
+    const add = h.caller();
+    h.run('var add = document.activeElement; var showContributionReview = window.mallVideoProjection.showContributionReview; ' +
+      'var isPublicBrowseOnly = window.mallVideoProjection.isPublicBrowseOnly;\n' + dockAddHandler,
+      'mall-video-projection.js#public-dock-add-guard');
+    add.dispatch('click');
+    assert.equal(h.dialog(), undefined);
+    assert.equal(h.win.mallStateRestore.peekAdmissionIntent(), null);
+    assert.deepEqual(h.calls.fetches, []);
+    assert.deepEqual(h.calls.assign, []);
   }
 });
 

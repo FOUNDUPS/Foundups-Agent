@@ -13,7 +13,7 @@ const TTL = 15 * 60 * 1000;
 const copy = value => JSON.parse(JSON.stringify(value));
 const legacyDefaults = { autoplayNext: true, frameDestination: 'wikitube', collapseDestination: 'mall', revealSelectedPlayer: true };
 const defaults = { ...legacyDefaults, tileTapDestination: 'floating', pinchOutDestination: 'wikitube',
-  fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-hidden' };
+  fullVideoSwipeRight: 'next', tuckedSwipeRight: 'next-hidden', addVideoPosition: 'last' };
 let checks = 0;
 function check(name, fn) { fn(); checks++; console.log('PASS ' + name); }
 
@@ -277,7 +277,7 @@ check('pinch and swipe choices persist independently of frame, tile and collapse
   assert.equal(h.local.get(OPTIONS), before);
 });
 
-check('Full Video and tucked right swipes persist every supported choice independently', () => {
+check('Full Video left (legacy storage key) and tucked right choices persist independently', () => {
   for (const fullVideoSwipeRight of ['next', 'previous', 'none']) {
     for (const tuckedSwipeRight of ['next-hidden', 'next-reveal', 'restore', 'none']) {
       const h = runtime();
@@ -289,6 +289,20 @@ check('Full Video and tucked right swipes persist every supported choice indepen
       assert.equal('swipeUpDestination' in expected, false);
     }
   }
+});
+
+check('Add Video placement preserves old preferences and rejects unrecognized values', () => {
+  const old = { ...defaults, autoplayNext: false, fullVideoSwipeRight: 'previous' };
+  delete old.addVideoPosition;
+  const local = new Map([[OPTIONS, JSON.stringify({ version: 1, options: old })]]);
+  const h = runtime({ local });
+  assert.deepEqual(copy(h.api.getVideoOptions()), { ...old, addVideoPosition: 'last' });
+  assert.deepEqual(h.writes, [], 'reading old preferences must not rewrite storage');
+  assert.equal(h.api.setVideoOptions({ addVideoPosition: 'first' }), true);
+  assert.deepEqual(copy(runtime({ local }).api.getVideoOptions()), { ...old, addVideoPosition: 'first' });
+  const saved = local.get(OPTIONS);
+  assert.equal(h.api.setVideoOptions({ addVideoPosition: 'middle' }), false);
+  assert.equal(local.get(OPTIONS), saved);
 });
 
 check('malformed stored swipe choices and storage events cannot replace validated preferences', () => {
