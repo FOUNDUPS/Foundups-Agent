@@ -13,8 +13,14 @@ Capture and pending-save departure locks remain.
 
 Composed controlled Chromium/WebKit checks passed at 414×896, 402×874 and
 desktop with synthetic captures and permission refusal. Phone browse query and
-positive scroll restored. Original keyboard focus, active-video continuity,
-physical Safari/Home Screen, genuine capture and provider playback remain open.
+positive scroll and logical Dock Camera focus restored on both phone sizes.
+The shared projection consumes an optional one-shot tab-local UI hint after its
+existing state/layout scheduling; only the hint captured at scheduling may be
+consumed, so a later departure's hint survives old callbacks. It never overrides
+an already focused control or provider frame. Chromium desktop focused Camera, while WebKit desktop recorded
+BODY, so desktop focus restoration remains unqualified. Original tile/player
+focus, active-video continuity, native BFCache, physical Safari/Home Screen,
+genuine capture and provider playback remain open.
 The strict return allowlist is unchanged: arbitrary preview and Vote origins
 are not silently admitted. This is draft evidence, not deployed behavior.
 

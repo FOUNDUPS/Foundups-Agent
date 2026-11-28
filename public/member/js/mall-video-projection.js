@@ -234,6 +234,72 @@
     return target.href;
   }
 
+  // Optional UI continuity only. This tab-local hint contains no member,
+  // media or caller-supplied state and never establishes admission authority.
+  const cameraFocusKey = 'pfmall_camera_focus_return_v1';
+  function discardCameraFocus() {
+    try {
+      window.sessionStorage.removeItem(cameraFocusKey);
+      return window.sessionStorage.getItem(cameraFocusKey) === null;
+    } catch (error) { return false; }
+  }
+
+  function rememberCameraFocus() {
+    if (!discardCameraFocus()) return;
+    const returnTo = new URL(cameraDestination()).searchParams.get('return_to');
+    if (!returnTo || returnTo !== window.location.href) return;
+    try {
+      window.sessionStorage.setItem(cameraFocusKey, JSON.stringify({
+        version: 1, createdAt: Date.now(), returnTo
+      }));
+    } catch (error) { /* Optional storage never blocks capture navigation. */ }
+  }
+
+  function restoreCameraFocus(element, scheduledRaw) {
+    try {
+      const raw = window.sessionStorage.getItem(cameraFocusKey);
+      // Old mount frames must never consume a newer Camera departure's hint.
+      if (raw === null || raw !== scheduledRaw) return;
+      if (raw.length > 2048 || new TextEncoder().encode(raw).length > 2048) { discardCameraFocus(); return; }
+      const hint = JSON.parse(raw);
+      const returnTo = new URL(cameraDestination()).searchParams.get('return_to');
+      const now = Date.now();
+      const valid = hint && !Array.isArray(hint) && Object.keys(hint).length === 3 &&
+        Object.keys(hint).every(key => ['version', 'createdAt', 'returnTo'].includes(key)) &&
+        hint.version === 1 && Number.isSafeInteger(hint.createdAt) && hint.createdAt >= 0 &&
+        now >= hint.createdAt && now - hint.createdAt < 15 * 60 * 1000 &&
+        returnTo && hint.returnTo === returnTo && returnTo === window.location.href;
+      // Consume even a declined focus hint. Failed removal must not permit replay.
+      if (!discardCameraFocus() || !valid || document.visibilityState === 'hidden') return;
+      const active = document.activeElement;
+      if (active && active !== document.body && active !== document.documentElement) return;
+      const camera = element?.querySelector('.mall-search-camera');
+      if (!element?.isConnected || !camera || camera.disabled || camera.closest('[inert],[hidden]')) return;
+      const rect = camera.getBoundingClientRect();
+      if (rect.width < 1 || rect.height < 1 || rect.bottom <= 0 || rect.top >= window.innerHeight ||
+          rect.right <= 0 || rect.left >= window.innerWidth || getComputedStyle(camera).visibility === 'hidden') return;
+      const overlay = [...document.querySelectorAll('dialog[open], [aria-modal="true"]')]
+        .some(node => !node.contains(camera) && node.getClientRects().length > 0 &&
+          getComputedStyle(node).visibility !== 'hidden');
+      if (overlay) return;
+      camera.focus({ preventScroll: true });
+    } catch (error) { discardCameraFocus(); }
+  }
+
+  function scheduleCameraFocus(element) {
+    // Call only after attachment and the existing state/presentation scheduling.
+    let scheduledRaw;
+    try { scheduledRaw = window.sessionStorage.getItem(cameraFocusKey); }
+    catch (error) { return; }
+    if (scheduledRaw === null) return;
+    window.requestAnimationFrame?.(() => window.requestAnimationFrame?.(() => restoreCameraFocus(element, scheduledRaw)));
+  }
+  window.addEventListener('pageshow', event => {
+    // Native BFCache focus is browser-owned. Clear the optional hint so a later
+    // reload cannot replay it; this does not claim BFCache restoration support.
+    if (event.persisted) discardCameraFocus();
+  });
+
   function discoveryPath(foundupId, pocUrl) {
     for (const [host, scope] of dedicatedHosts) {
       if (!publicScopes.has(scope) || foundupId !== scope) continue;
@@ -591,6 +657,7 @@
       event.preventDefault();
       dictation.cancel(); dialog.close();
       window.mallStateRestore?.save();
+      rememberCameraFocus();
       window.location.assign(cameraDestination());
     };
     camera.addEventListener('click', openCamera);
@@ -901,6 +968,7 @@
       anchor.style.setProperty('--member-dock-keyboard', keyboard + 'px');
     });
     dock.input.addEventListener('blur', () => anchor.style.removeProperty('--member-dock-keyboard'));
+    scheduleCameraFocus(dock.element);
   }
 
   function createPhoneDock(actions, scope, disclosure, onHome, searchLabel = 'Search HPC Mall') {
@@ -943,6 +1011,7 @@
     home.addEventListener('click', () => { dialog.close(); search(''); onHome?.(); });
     about.addEventListener('click', () => { dialog.close(); disclosure.showModal(); });
     return {
+      restoreCameraFocus() { scheduleCameraFocus(element); },
       show(visible) {
         if (!dock.isDefaultContext()) return;
         if (!visible) return dock.hide();
@@ -1222,6 +1291,7 @@
       desktop.addEventListener('change', applyPresentation);
       // The shared state owner restores the tab's browse position before startup.
       requestAnimationFrame(applyPresentation);
+      dock.restoreCameraFocus();
     } catch (error) {
       console.warn('[Mall] Public video projection unavailable:', error);
       field.textContent = 'This video collection is unavailable. Reload the page to try again.';

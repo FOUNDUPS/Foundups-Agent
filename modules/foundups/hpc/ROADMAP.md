@@ -8,8 +8,13 @@ local-capture Search Dock and Camera-as-caller-return are implemented and
 controlled-tested; current hosted previews and production are separate.
 Dependencies: canonical capture locks, strict return validator, local post
 repository and the existing Mall state owner. Phone browse query and positive
-scroll round-trip passed in Chromium/WebKit emulation. Focus/active-media
-continuity, physical iPhone/Home Screen and real capture/playback remain open.
+scroll round-trip passed in Chromium/WebKit emulation. The optional one-shot
+Dock Camera focus layer passed 46 browser rows, two source-ordering rows and the composed 6-row return
+fixture; all four phone rows restore query/scroll/Camera focus. WebKit desktop
+returned to BODY, so original desktop/tile/player focus and active-media
+continuity remain open, together with native BFCache, physical iPhone/Home
+Screen and real capture/playback. The shared UI hint is not a caller/admission
+adapter and does not expand the existing strict URL allowlist.
 
 The next universal Canvas layer remains **SPECIFIED_NOT_IMPLEMENTED**: reuse
 the shared stage/gesture/state owners, same-size About/Video swap, permitted

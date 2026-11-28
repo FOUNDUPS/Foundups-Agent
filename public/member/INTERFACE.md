@@ -1009,3 +1009,32 @@ queue selection. `save()`, `share()` and `enterFoundUp()` delegate to existing
 control owners. `canEnterFoundUp()` is a UI hint, not an authorization grant.
 The local-activity module exposes an in-memory Window-bound monitor and view;
 its feed is observed browser events, not a server/agent execution receipt.
+
+## Optional Camera focus return — 2026-11-28
+
+`mall-video-projection.js` owns optional logical Dock Camera focus continuity
+for the existing AutoPost round trip. `cameraDestination()` and the external
+return validator remain authoritative and unchanged; no new host, path, query,
+identity or member permission is admitted.
+
+The producer clears its own `pfmall_camera_focus_return_v1` tab-session key and,
+only for the actual admitted current URL, stores exactly `version`, `createdAt`
+and `returnTo`. Version 1, a 15-minute lifetime, nonfuture integer time, a 2048-byte
+bound and exact current admitted URL equality are required on consumption.
+Malformed/stale hints are retired where optional storage permits; unreadable or
+unremovable storage never yields focus. Navigation still works when storage fails.
+
+Scheduling snapshots an already present hint. A missing or changed value cannot
+be consumed by those callbacks, preserving a newer departure's hint. After the
+existing state/layout scheduling and Dock attachment, consume before acting.
+Focus the visible connected Camera with `preventScroll` only when no
+other control/frame owns focus and no modal, hidden document, disabled/inert or
+offscreen target blocks it. There is no retry loop, media state serialization,
+autoplay command or new public focus API. Persisted `pageshow` only retires the
+hint and leaves native BFCache focus to the browser; it is not a BFCache pass.
+
+Controlled phone 414/402 returns restore query, positive scroll and Camera focus.
+Desktop composition remains intact, but WebKit desktop recorded BODY; original
+desktop/tile/player focus, active media, physical Safari/PWA and general caller
+restoration are not qualified. Shared Canvas/constituent discovery remain under
+their existing unimplemented contracts, independent of this UI hint.

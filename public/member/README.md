@@ -303,3 +303,13 @@ Catalog queries discover matching channels. Opening a matching channel retains i
 See [EDUIT episode Mall architecture](../../modules/foundups/eduit/docs/EPISODE_MALL_ARCHITECTURE.md) for the specified shared-shell
 video/game tile, gestures, locale cues, parent area and next-session handoff.
 This is a design dependency, not evidence of an active EDUIT adapter.
+
+## Camera caller return — 2026-11-28
+
+The shared Dock Camera saves browse state and delegates to canonical AutoPost.
+Its strict admitted caller URL remains the return boundary. An optional tab-local
+hint can restore logical Camera focus once, without scrolling or taking focus
+from another control/frame. This is not original tile/media restoration or a
+general FoundUp return adapter. See the [interface](INTERFACE.md#optional-camera-focus-return--2026-11-28)
+and [focused qualification](tests/README.md#camera-focus-return-qualification--2026-11-28).
+Current source and the existing frozen phone preview are separate builds.

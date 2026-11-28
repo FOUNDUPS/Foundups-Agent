@@ -1,3 +1,23 @@
+## 2026-11-28 — Optional Camera focus return (#2439)
+
+- Extend the shared projection's existing Camera/Dock owner with a bounded,
+  one-shot tab-local focus hint. Keep URL admission, capture guards, player,
+  preferences and ordinary return-state ownership unchanged.
+- Controlled Chromium/WebKit 46 browser rows, two source-ordering rows and compiled-AutoPost 6
+  rows pass. Four phone rows restore query, positive scroll and Camera focus;
+  WebKit desktop BODY is recorded, not accepted as desktop focus restoration.
+- Preserve earlier harness failures, including the held-navigation timeout;
+  observe own-key removal before navigation instead of evaluating a departing
+  document. No product failure or physical-freeze reproduction is inferred.
+- Independent source review found old mount frames could consume a later Camera
+  hint. Capture the scheduled raw value and require equality before retirement.
+  The source-ordering regression failed before this correction and passed after;
+  it is not a real navigation/PWA reproduction.
+- Original tile/player/media restoration, native BFCache, arbitrary callers,
+  physical devices and public composition/Canvas remain separate open gates.
+- WSP00/15/22/50/71/91/97: independent source review and exact-head CI required;
+  unmerged draft only, with no preview, production, DNS/auth or permission change.
+
 ## 2026-11-28 — Shared-stage / AutoPost owner continuation (#2439)
 
 - Kept shared player/state/CSS and saved preferences unchanged while the separate

@@ -3168,3 +3168,17 @@ window.mallTileField.resetProjection()     // Reset to default
 ---
 
 *Created: 2026-02-18*
+
+## 2026-11-28 — Optional shared Dock Camera focus
+
+- Keep the existing Camera return/state owner; add an optional expiring one-shot
+  UI hint with strict same-caller validation and consume-before-focus guards.
+- Preserve unrelated storage, current control/frame focus, modal/visibility
+  boundaries, saved preferences and provider/gesture/player ownership.
+- Add focused browser qualification and an additive finite CI gate. Controlled
+  46 browser rows, two source-ordering rows and 6 composed AutoPost checks passed; phone focus/scroll pass,
+  WebKit desktop focus, native BFCache and real-device/media acceptance stay open.
+- No root-owned desktop patch, new return destination, duplicate adapter,
+  deployment or permission change. WSP00/15/22/50/71/91/97.
+- Independent review caught a callback-ordering gap; bind the mount consumer to
+  its captured hint so old callbacks cannot retire newer departure state.

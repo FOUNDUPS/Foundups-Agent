@@ -1545,3 +1545,33 @@ Validates entry-page Red Dog alignment with Mall Red Dog:
 | test_reddog_context_briefing_phase4.py | 48 | C | Context briefing |
 | (other member tests) | ~446 | B/mixed | Mall shell, tiles, etc. |
 | **Total** | **994** | | |
+
+## 2026-11-28 — Bounded Camera return focus
+
+Add `mall_camera_return_browser.py` through the existing scoped shell/provider
+fixture and an additive finite HPC qualification gate. 46 browser and two
+source-ordering rows passed locally (48/48),
+source-stable; routing 21/preferences 22 passed unchanged. The composed compiled
+AutoPost 6 rows passed: four phone query/scroll/Camera-focus returns, desktop
+theater return with WebKit BODY focus left unqualified.
+
+Retain failed harness attempts: startup normalized an unknown query; later a
+pagehide-console observation was absent; finally evaluating the old page while
+holding navigation hit its 180s bound. The corrected own-key pre-navigation
+binding keeps the stale-hint/no-unadmitted-return assertions. These are harness
+findings, not repeatable application freezes. No original case, provider control,
+auth boundary or release gate is removed. Physical/native BFCache/media and
+general caller/active-player restoration require separate evidence. WSP22/97.
+
+Independent review's pure source-order sequence exposed a delayed mount callback
+consuming a new departure hint. Preserve that finding and the failing two-engine
+regression; schedule only an existing raw hint and require equality before
+retirement. Both source-ordering rows pass after correction. The negative
+focus-frame profile is top-document-only so its child cannot reseed the tested
+hint; no stale-hint or focus assertion was removed. This is not real-navigation
+or physical-freeze proof.
+
+The independent47/48 run failed before departure when WebKit's query field had
+not reached scrollable geometry. Keep the positive-scroll assertion and wait,
+within the existing bound, for scrollable range then observed offset280 before
+leaving. Preserve that failure as a fixture readiness finding, not a return pass.

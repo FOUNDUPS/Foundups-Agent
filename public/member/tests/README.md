@@ -298,3 +298,33 @@ Hosting/readback and unsigned asset-parity receipts. Compare served runtime,
 metadata, worker and release receipt separately before investigating phone cache.
 The frozen v26 discrepancy and exact historical provenance are recorded in the
 TestModLog; no physical-iPhone result is inferred from those HTTP observations.
+
+## Camera focus return qualification — 2026-11-28
+
+Run through the approved bounded environment:
+
+    python -B public/member/tests/mall_camera_return_browser.py
+
+The existing scoped fixture, actual Mall shell/projection and a link-only
+controlled AutoPost receiver cover 23 browser cases per engine (46 rows).
+Cases include 414/402 positive query/scroll/Camera return, public Play, storage
+write denial, stale unsupported outbound state, one-shot reload, malformed,
+expired/future/mismatched/oversized hints, unrelated storage, read/remove failure,
+typing/frame focus, modal/hidden/inert/disabled/offscreen targets. All network is
+intercepted; source hashes must remain stable and page exceptions fail the row.
+The own-key removal binding observes the producer before navigation; no pending
+document evaluation or delayed response is used to prove retirement.
+
+Two additional source-extracted callback-ordering rows run in Chromium/WebKit
+JavaScript with controlled storage/frames, not real navigation. They cover an
+empty mount followed by departure, replacement of a pending return by a newer
+departure, and the matching one-shot return. The default report totals 48 rows;
+`--case source-ordering` runs only those two. This regression failed before the
+snapshot/equality fix and passed after. Existing browser assertions stay intact.
+
+The existing HPC workflow adds this gate and its source hash without removing
+or weakening earlier gates. A separate composed check uses the compiled AutoPost
+camera-only build: four phone rows restore query/scroll/Camera focus; two desktop
+rows retain theater return, with WebKit BODY focus explicitly unqualified.
+Neither the link receiver nor synthetic persisted-pageshow covers native BFCache,
+real capture, physical iPhone, provider playback or an arbitrary/private caller.
